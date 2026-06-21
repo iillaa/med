@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT Médecine Générale - Formation & Réfresher</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand" id="brand-logo" style="cursor: pointer;">
+          <i class="fa-solid fa-user-md-pulse brand-icon"></i>
+          <div>
+            <h1>Dr. CAT</h1>
+            <p>Réfresher Médical</p>
+          </div>
+        </div>
+        <button class="toggle-sidebar-btn" id="close-sidebar-btn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" placeholder="Rechercher une CAT...">
+      </div>
+
+      <div class="filter-section" style="margin-bottom: 12px;">
+        <label for="category-filter"><i class="fa-solid fa-filter"></i> Catégorie</label>
+        <select id="category-filter">
+          <option value="all">Toutes les spécialités</option>
+        </select>
+      </div>
+
+      <!-- Quick Status Filters -->
+      <div class="quick-status-filters">
+        <button class="status-pill active" data-filter="all">Tous</button>
+        <button class="status-pill" data-filter="todo">À faire</button>
+        <button class="status-pill" data-filter="doing">En cours</button>
+        <button class="status-pill" data-filter="done">Maîtrisé</button>
+        <button class="status-pill" data-filter="redflags" style="border-color: rgba(239, 68, 68, 0.3); color: var(--color-danger);"><i class="fa-solid fa-triangle-exclamation"></i> Red Flags</button>
+      </div>
+
+      <div style="padding: 0 20px 10px;">
+        <button class="action-btn" id="add-cat-btn" style="width: 100%; display: flex; justify-content: center; gap: 8px; font-weight: 700;">
+          <i class="fa-solid fa-plus"></i> Ajouter une CAT
+        </button>
+      </div>
+
+      <!-- Stats Widget -->
+      <div class="stats-widget">
+        <div class="stats-header">
+          <span>Progression globale</span>
+          <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="stats-counters">
+          <span class="stat-counter todo"><i class="fa-regular fa-circle"></i> <span id="count-todo">0</span></span>
+          <span class="stat-counter doing"><i class="fa-solid fa-spinner fa-spin-hover"></i> <span id="count-doing">0</span></span>
+          <span class="stat-counter done"><i class="fa-solid fa-circle-check"></i> <span id="count-done">0</span></span>
+        </div>
+      </div>
+
+      <!-- Scrollable CAT List -->
+      <div class="cat-list-wrapper">
+        <ul class="cat-list" id="cat-list">
+          <!-- Dynamically populated -->
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Mobile header -->
+      <header class="mobile-header">
+        <button class="menu-btn" id="open-sidebar-btn">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="mobile-brand" id="mobile-brand-logo" style="cursor: pointer;">
+          <i class="fa-solid fa-user-md-pulse"></i>
+          <span>Dr. CAT</span>
+        </div>
+        <div class="mobile-status-placeholder"></div>
+      </header>
+
+      <!-- Welcome/Dashboard screen -->
+      <section class="welcome-screen" id="welcome-screen">
+        <div class="dashboard-container">
+          <header class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h2>Tableau de Bord 🩺</h2>
+              <p>Suivi de votre apprentissage des 55 conduites à tenir</p>
+            </div>
+            <button class="cancel-btn" id="reset-progress-btn" style="border-color: rgba(239, 68, 68, 0.4); color: var(--color-danger); font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-trash-can"></i> Réinitialiser la progression
+            </button>
+          </header>
+          
+          <!-- Quick Stats Grid -->
+          <div class="dashboard-grid">
+            <div class="dash-card mastery-card">
+              <div class="dash-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div class="dash-card-info">
+                <span class="dash-card-label">Taux de Maîtrise</span>
+                <span class="dash-card-val" id="dash-mastery-rate">0%</span>
+              </div>
+            </div>
+            
+            <div class="dash-card done-card">
+              <div class="dash-card-icon"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="dash-card-info">
+                <span class="dash-card-label">Maîtrisés</span>
+                <span class="dash-card-val" id="dash-count-done">0 / 55</span>
+              </div>
+            </div>
+
+            <div class="dash-card doing-card">
+              <div class="dash-card-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+              <div class="dash-card-info">
+                <span class="dash-card-label">En cours</span>
+                <span class="dash-card-val" id="dash-count-doing">0 / 55</span>
+              </div>
+            </div>
+
+            <div class="dash-card todo-card">
+              <div class="dash-card-icon"><i class="fa-regular fa-circle"></i></div>
+              <div class="dash-card-info">
+                <span class="dash-card-label">À faire</span>
+                <span class="dash-card-val" id="dash-count-todo">0 / 55</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-content-split">
+            <!-- Resume block -->
+            <div class="dashboard-block resume-block">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Reprendre la révision</h3>
+              <p class="block-desc">Vos derniers cours en cours de lecture :</p>
+              <ul class="resume-list" id="dash-resume-list">
+                <li class="empty-state">Aucun cours en cours. Sélectionnez un cours dans la barre latérale pour commencer !</li>
+              </ul>
+            </div>
+
+            <!-- Categories progress block -->
+            <div class="dashboard-block categories-block">
+              <h3><i class="fa-solid fa-chart-pie"></i> Progrès par spécialité</h3>
+              <div class="categories-list" id="dash-categories-progress">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active CAT workspace -->
+      <section class="workspace" id="workspace" style="display: none;">
+        <!-- Workspace Header -->
+        <header class="workspace-header">
+          <div class="title-area">
+            <div class="title-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span class="cat-badge" id="workspace-cat-category" style="margin-bottom: 0;">Gastro-entérologie</span>
+              <button id="delete-cat-btn" style="display: none; background: none; border: none; color: var(--color-danger); font-size: 12.5px; font-weight: 600; cursor: pointer; align-items: center; gap: 6px; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--color-danger)'">
+                <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
+              </button>
+            </div>
+            <h2 id="workspace-cat-title">CAT devant intoxication alimentaire</h2>
+          </div>
+          
+          <div class="status-selector-area">
+            <span class="status-label">Statut :</span>
+            <div class="status-btn-group">
+              <button class="status-btn btn-todo" data-status="todo" title="À réviser">
+                <i class="fa-regular fa-circle"></i> <span>À faire</span>
+              </button>
+              <button class="status-btn btn-doing" data-status="doing" title="En cours de révision">
+                <i class="fa-solid fa-spinner"></i> <span>En cours</span>
+              </button>
+              <button class="status-btn btn-done" data-status="done" title="Maîtrisé">
+                <i class="fa-solid fa-circle-check"></i> <span>Maîtrisé</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Red Flags Banner -->
+        <div class="red-flags-banner" id="red-flags-banner">
+          <div class="red-flags-title">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>SIGNES DE GRAVITÉ / RED FLAGS</span>
+          </div>
+          <p id="workspace-red-flags">Contenu des red flags...</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs-nav">
+          <button class="tab-btn active" data-tab="tab-summary">
+            <i class="fa-solid fa-file-invoice-document"></i> Fiche de Synthèse
+          </button>
+          <button class="tab-btn" data-tab="tab-notes">
+            <i class="fa-solid fa-clipboard-question"></i> Notes Personnelles
+          </button>
+          <button class="tab-btn" data-tab="tab-prescription">
+            <i class="fa-solid fa-prescription-bottle-medical"></i> Ordonnance Type
+          </button>
+          <button class="tab-btn" data-tab="tab-pdfs">
+            <i class="fa-solid fa-folder-open"></i> PDFs de Référence
+          </button>
+        </nav>
+
+        <!-- Tabs Content -->
+        <div class="tab-content-container">
+          <!-- Summary Tab -->
+          <div class="tab-pane active" id="tab-summary">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-shield-halved"></i> Conduite Pratique Recommandée</h3>
+              <button class="action-btn edit-summary-btn" id="edit-summary-btn">
+                <i class="fa-solid fa-pen"></i> Modifier la fiche
+              </button>
+            </div>
+            
+            <div class="summary-view" id="summary-view">
+              <!-- Rendered summary -->
+            </div>
+            
+            <div class="summary-editor-wrapper" id="summary-editor-wrapper" style="display: none;">
+              <textarea id="summary-editor" rows="18" placeholder="Rédiger votre propre synthèse..."></textarea>
+              <div class="editor-actions">
+                <button class="cancel-btn" id="cancel-summary-edit-btn">Annuler</button>
+                <button class="save-btn" id="save-summary-btn">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes Tab -->
+          <div class="tab-pane" id="tab-notes">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations & Protocoles Locaux</h3>
+            </div>
+            <p class="tab-instruction">Prenez vos notes personnelles, observations cliniques ou ajustements ici. Elles sont sauvegardées localement.</p>
+            <textarea class="notes-textarea" id="notes-input" placeholder="Saisir vos notes ici..."></textarea>
+            <div class="pane-footer">
+              <span class="save-indicator" id="save-indicator"><i class="fa-solid fa-cloud-arrow-up"></i> Changements enregistrés</span>
+              <button class="save-btn" id="save-notes-btn">Sauvegarder les notes</button>
+            </div>
+          </div>
+
+          <!-- Prescription Tab -->
+          <div class="tab-pane" id="tab-prescription">
+            <div class="pane-header" style="margin-bottom: 12px;">
+              <h3><i class="fa-solid fa-file-prescription"></i> Exemple d'Ordonnance Type</h3>
+              <div style="display: flex; gap: 8px;">
+                <button class="action-btn" id="edit-prescription-btn">
+                  <i class="fa-solid fa-pen"></i> Modifier l'ordonnance
+                </button>
+                <button class="action-btn copy-prescription-btn" id="copy-prescription-btn" title="Copier dans le presse-papier">
+                  <i class="fa-regular fa-copy"></i> Copier
+                </button>
+              </div>
+            </div>
+            <!-- Prescription Variants Selector -->
+            <div class="prescription-variants-selector" id="prescription-variants-selector" style="display: none; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; padding: 0 4px;">
+              <!-- Variant pills will be injected dynamically -->
+            </div>
+            <div class="prescription-container">
+              <div class="prescription-header">
+                <div class="clinic-info">
+                  <strong>Cabinet Médical de Médecine Générale</strong>
+                  <span>Alger, Algérie</span>
+                </div>
+                <div class="date-placeholder">Le: <span id="current-date">--/--/----</span></div>
+              </div>
+              <div class="prescription-body">
+                <div class="patient-line">Nom, Prénom : .................................................... Âge : ............</div>
+                <div class="prescription-content" id="workspace-prescription">
+                  <!-- Prescription text -->
+                </div>
+                <textarea id="prescription-editor" class="notes-textarea" style="display: none; background: #fff; color: #000; border-color: #cbd5e1; font-family: monospace; font-size: 14.5px; font-weight: bold; margin-top: 10px; resize: none;"></textarea>
+                <div id="prescription-editor-actions" style="display: none; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                  <button class="cancel-btn" id="cancel-prescription-edit-btn" style="border-color: #cbd5e1; color: #475569;">Annuler</button>
+                  <button class="save-btn" id="save-prescription-btn">Enregistrer</button>
+                </div>
+              </div>
+              <div class="prescription-footer">
+                <span>Signature et Cachet</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PDFs Tab -->
+          <div class="tab-pane" id="tab-pdfs">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-file-pdf"></i> Documents Médicaux de Référence</h3>
+            </div>
+            <p class="tab-instruction">Voici les cours et documents PDF de votre dossier de référence correspondant à cette spécialité :</p>
+            <div class="pdf-list" id="pdf-list">
+              <!-- Dynamically populated links to PDFs -->
+            </div>
+            
+            <div class="all-pdfs-accordion">
+              <div class="accordion-header" id="all-pdfs-header">
+                <span><i class="fa-solid fa-search"></i> Parcourir tous les PDFs disponibles</span>
+                <i class="fa-solid fa-chevron-down accordion-icon"></i>
+              </div>
+              <div class="accordion-content" id="all-pdfs-content" style="display: none;">
+                <input type="text" id="pdf-search" placeholder="Filtrer parmi les 78 fichiers PDF...">
+                <ul class="all-pdfs-list" id="all-pdfs-list">
+                  <!-- List of all 78 PDFs -->
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add CAT Modal -->
+  <div class="modal-overlay" id="add-cat-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-plus-circle"></i> Ajouter une nouvelle CAT</h3>
+        <button class="close-modal-btn" id="close-add-cat-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="add-cat-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="new-cat-title">Titre de la CAT *</label>
+            <input type="text" id="new-cat-title" required placeholder="Ex: CAT devant colique néphrétique...">
+          </div>
+          <div class="form-group">
+            <label for="new-cat-category">Spécialité / Catégorie *</label>
+            <input type="text" id="new-cat-category" required placeholder="Ex: Gastro-entérologie, Pédiatrie..." list="categories-list-datalist">
+            <datalist id="categories-list-datalist">
+              <!-- Dynamically populated -->
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-red-flags">Signes de Gravité / Red Flags (séparés par des virgules ou retours à la ligne)</label>
+            <textarea id="new-cat-red-flags" rows="3" placeholder="Ex: Fièvre élevée, perte de poids..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-summary">Fiche de Synthèse / Conduite à tenir</label>
+            <textarea id="new-cat-summary" rows="6" placeholder="**1. Évaluation :** ...&#10;**2. Traitement :** ..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-ordonnance">Ordonnance Type</label>
+            <textarea id="new-cat-ordonnance" rows="5" placeholder="1. Amoxicilline 1g...&#10;2. Paracétamol 1g..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-pdf-keywords">Mots-clés pour l'association des PDFs (ex: Gastro, Pediatrie...)</label>
+            <input type="text" id="new-cat-pdf-keywords" placeholder="Mots clés séparés par des virgules">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="cancel-btn" id="cancel-add-cat-btn">Annuler</button>
+            <button type="submit" class="save-btn" id="save-new-cat-btn">Ajouter la fiche</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
