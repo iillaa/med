@@ -150,7 +150,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 12px;
+      padding: 12px 12px 160px 12px; /* Generous bottom padding to allow scrolling past the page */
       background-color: #070a10;
       position: relative;
       -webkit-overflow-scrolling: touch;
@@ -341,12 +341,21 @@
       try {
         const page = await pdfDoc.getPage(num);
 
-        // 1. Calculate dynamic scale for Fit-to-Width mode
+        // 1. Calculate dynamic scale for Fit-to-Width / Fit-to-Page modes
         if (currentFitMode === 'width') {
           const unscaledViewport = page.getViewport({ scale: 1.0 });
           const containerWidth = container.clientWidth;
           const padding = window.innerWidth <= 768 ? 16 : 24;
           currentScale = (containerWidth - padding) / unscaledViewport.width;
+        } else if (currentFitMode === 'page') {
+          const unscaledViewport = page.getViewport({ scale: 1.0 });
+          const containerWidth = container.clientWidth;
+          const containerHeight = container.clientHeight;
+          const paddingX = window.innerWidth <= 768 ? 16 : 24;
+          const paddingY = window.innerWidth <= 768 ? 16 : 24;
+          const scaleX = (containerWidth - paddingX) / unscaledViewport.width;
+          const scaleY = (containerHeight - paddingY) / unscaledViewport.height;
+          currentScale = Math.min(scaleX, scaleY);
         }
 
         // 2. High-DPI (Retina) scaling
@@ -424,9 +433,11 @@
 
     // Zoom Out
     zoomOutBtn.addEventListener('click', () => {
-      // If we are currently in fit-to-width, switch to absolute scaling using the computed scale as base
-      if (currentFitMode === 'width') {
+      // If we are currently in fit-to-width or fit-to-page, switch to absolute scaling
+      if (currentFitMode === 'width' || currentFitMode === 'page') {
         currentFitMode = 'value';
+        zoomFitBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+        zoomFitBtn.title = "Ajuster à la largeur";
       }
       if (currentScale <= 0.4) return;
       currentScale -= 0.15;
@@ -435,16 +446,26 @@
 
     // Zoom In
     zoomInBtn.addEventListener('click', () => {
-      if (currentFitMode === 'width') {
+      if (currentFitMode === 'width' || currentFitMode === 'page') {
         currentFitMode = 'value';
+        zoomFitBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+        zoomFitBtn.title = "Ajuster à la largeur";
       }
       currentScale += 0.15;
       queueRenderPage(currentPageNum);
     });
 
-    // Fit to Width
+    // Fit to Width / Page Toggle
     zoomFitBtn.addEventListener('click', () => {
-      currentFitMode = 'width';
+      if (currentFitMode === 'width') {
+        currentFitMode = 'page';
+        zoomFitBtn.innerHTML = '<i class="fa-solid fa-arrows-to-eye"></i>';
+        zoomFitBtn.title = "Ajuster à la page entière";
+      } else {
+        currentFitMode = 'width';
+        zoomFitBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+        zoomFitBtn.title = "Ajuster à la largeur";
+      }
       queueRenderPage(currentPageNum);
     });
 
