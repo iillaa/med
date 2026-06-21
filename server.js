@@ -1,6 +1,9 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { indexPdfs, getIndexStatus } = require('./index_pdfs');
+
+const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 
 const app = express();
 const PORT = 3000;
@@ -200,10 +203,92 @@ app.get('/api/pdfs', (req, res) => {
   }
 });
 
+// PDF content search API
+app.get('/api/search-pdfs', (req, res) => {
+  try {
+    const query = req.query.q;
+    if (!query || query.trim() === '') {
+      return res.json({ results: [] });
+    }
+
+    const cleanQuery = query.trim().toLowerCase();
+    
+    if (!fs.existsSync(INDEX_FILE)) {
+      return res.status(503).json({ error: "PDF index not yet built. Please wait a few moments." });
+    }
+
+    const index = JSON.parse(fs.readFileSync(INDEX_FILE, 'utf-8'));
+    const results = [];
+
+    // Search across all PDFs and pages
+    for (const doc of index) {
+      if (!doc.pages) continue;
+      for (const p of doc.pages) {
+        if (!p.text) continue;
+        const textLower = p.text.toLowerCase();
+        
+        let indexMatch = textLower.indexOf(cleanQuery);
+        if (indexMatch !== -1) {
+          // Find context snippet around the match
+          const start = Math.max(0, indexMatch - 60);
+          const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
+          let snippet = p.text.substring(start, end);
+          
+          if (start > 0) snippet = '...' + snippet;
+          if (end < p.text.length) snippet = snippet + '...';
+          
+          results.push({
+            pdf: doc.pdf,
+            page: p.page,
+            snippet: snippet
+          });
+
+          // Cap results at 100 to prevent performance bottlenecks
+          if (results.length >= 100) {
+            break;
+          }
+        }
+      }
+      if (results.length >= 100) {
+        break;
+      }
+    }
+
+    res.json({ results });
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).json({ error: "Failed to search PDFs" });
+  }
+});
+
+// PDF index status API
+app.get('/api/search-status', (req, res) => {
+  try {
+    res.json(getIndexStatus());
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to get indexing status" });
+  }
+});
+
+// Trigger PDF re-indexing API
+app.post('/api/reindex', (req, res) => {
+  try {
+    indexPdfs(true).catch(err => console.error("Error in forced indexing:", err));
+    res.json({ success: true, message: "Reindexing started in background" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to trigger reindexing" });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`=================================================`);
   console.log(`Medical CAT Learning App is running!`);
   console.log(`Local Access: http://localhost:${PORT}`);
   console.log(`Network Access: http://<your-device-ip>:${PORT}`);
   console.log(`=================================================`);
+
+  // Start indexing PDFs in the background on startup
+  indexPdfs().catch(err => console.error("Startup indexing error:", err));
 });

@@ -217,6 +217,9 @@
           <button class="tab-btn" data-tab="tab-pdfs">
             <i class="fa-solid fa-folder-open"></i> PDFs de Référence
           </button>
+          <button class="tab-btn" data-tab="tab-search-pdf">
+            <i class="fa-solid fa-magnifying-glass"></i> Recherche PDF
+          </button>
         </nav>
 
         <!-- Tabs Content -->
@@ -319,6 +322,35 @@
                   <!-- List of all 78 PDFs -->
                 </ul>
               </div>
+          </div>
+
+          <!-- PDF Search Tab -->
+          <div class="tab-pane" id="tab-search-pdf">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-magnifying-glass"></i> Recherche Globale dans le texte des PDFs</h3>
+            </div>
+            <p class="tab-instruction">Saisissez un mot-clé (médicament, posologie, symptôme) pour fouiller dans le texte complet de vos 78 livres et guides de référence.</p>
+            
+            <div class="pdf-search-box">
+              <div class="search-input-wrapper">
+                <input type="text" id="pdf-content-search-input" placeholder="Rechercher un mot (ex: Amoxicilline, Asthme, Céphalée)...">
+                <button id="pdf-content-search-btn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Rechercher</button>
+              </div>
+              
+              <div class="index-status-indicator" id="pdf-index-status">
+                <span class="status-text"><i class="fa-solid fa-circle-notch fa-spin"></i> Chargement du statut d'indexation...</span>
+                <button id="pdf-reindex-btn" class="btn-text" title="Forcer la ré-indexation de tous les PDFs"><i class="fa-solid fa-rotate"></i> Ré-indexer</button>
+              </div>
+            </div>
+
+            <div class="pdf-search-loading" id="pdf-search-loading" style="display: none;">
+              <div class="spinner"></div>
+              <span>Recherche en cours dans vos documents (cela peut prendre quelques secondes)...</span>
+            </div>
+
+            <div class="pdf-search-results" id="pdf-search-results-container">
+              <!-- Search results dynamically populated -->
+              <p class="text-muted text-center" style="margin-top: 30px;">Entrez un terme de recherche ci-dessus pour commencer.</p>
             </div>
           </div>
         </div>

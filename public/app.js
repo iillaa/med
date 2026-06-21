@@ -49,6 +49,14 @@ const allPdfsAccordion = allPdfsHeader.parentElement;
 const pdfSearch = document.getElementById('pdf-search');
 const allPdfsList = document.getElementById('all-pdfs-list');
 
+// PDF Content Search DOM Elements
+const pdfContentSearchInput = document.getElementById('pdf-content-search-input');
+const pdfContentSearchBtn = document.getElementById('pdf-content-search-btn');
+const pdfIndexStatus = document.getElementById('pdf-index-status');
+const pdfReindexBtn = document.getElementById('pdf-reindex-btn');
+const pdfSearchLoading = document.getElementById('pdf-search-loading');
+const pdfSearchResultsContainer = document.getElementById('pdf-search-results-container');
+
 // Initial setup
 document.addEventListener('DOMContentLoaded', () => {
   // Set current date on prescription sheet
@@ -57,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load Data
   initApp();
+
+  // Fetch initial PDF indexing status
+  updatePdfIndexStatus();
 
   // Event Listeners
   searchInput.addEventListener('input', filterCats);
@@ -355,6 +366,21 @@ document.addEventListener('DOMContentLoaded', () => {
       alert("Erreur lors de l'enregistrement de la nouvelle CAT.");
     }
   });
+
+  // PDF Content Search Event Listeners
+  if (pdfContentSearchBtn) {
+    pdfContentSearchBtn.addEventListener('click', performPdfSearch);
+  }
+  if (pdfContentSearchInput) {
+    pdfContentSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        performPdfSearch();
+      }
+    });
+  }
+  if (pdfReindexBtn) {
+    pdfReindexBtn.addEventListener('click', triggerPdfReindex);
+  }
 });
 
 // App Initialization
@@ -1006,5 +1032,110 @@ function renderDashboard() {
       `;
       categoriesDiv.appendChild(item);
     });
+  }
+}
+
+// PDF Content Search Handlers
+async function updatePdfIndexStatus() {
+  if (!pdfIndexStatus) return;
+  try {
+    const res = await fetch('/api/search-status');
+    const status = await res.json();
+    
+    let html = '';
+    if (status.isIndexing) {
+      html = `<span class="status-text text-warning"><i class="fa-solid fa-circle-notch fa-spin"></i> Indexation en cours... (${status.indexedFiles}/${status.totalFiles} fichiers)</span>`;
+      // Poll every 2 seconds while indexing is active
+      setTimeout(updatePdfIndexStatus, 2000);
+    } else {
+      html = `<span class="status-text text-success"><i class="fa-solid fa-circle-check"></i> Indexation terminée (${status.indexedFiles}/${status.totalFiles} fichiers indexés)</span>`;
+    }
+    
+    const statusTextEl = pdfIndexStatus.querySelector('.status-text');
+    if (statusTextEl) {
+      statusTextEl.innerHTML = html;
+    }
+  } catch (err) {
+    console.error("Failed to fetch index status:", err);
+  }
+}
+
+async function performPdfSearch() {
+  if (!pdfContentSearchInput || !pdfSearchLoading || !pdfSearchResultsContainer) return;
+  const query = pdfContentSearchInput.value.trim();
+  if (!query) return;
+
+  pdfSearchLoading.style.display = 'flex';
+  pdfSearchResultsContainer.innerHTML = '';
+
+  try {
+    const response = await fetch(`/api/search-pdfs?q=${encodeURIComponent(query)}`);
+    if (response.status === 503) {
+      const errData = await response.json();
+      pdfSearchResultsContainer.innerHTML = `<p class="text-warning text-center" style="margin-top: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> ${errData.error}</p>`;
+      return;
+    }
+
+    const data = await response.json();
+    const results = data.results;
+
+    if (!results || results.length === 0) {
+      pdfSearchResultsContainer.innerHTML = `<p class="text-muted text-center" style="margin-top: 30px;">Aucun résultat trouvé pour "${query}". Vérifiez l'orthographe.</p>`;
+      return;
+    }
+
+    let resultsHtml = '';
+    results.forEach(res => {
+      // Highlight query in snippet
+      const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      const highlightedSnippet = res.snippet.replace(regex, '<mark>$1</mark>');
+
+      // Clean the PDF filename of weird icons for display
+      const displayTitle = res.pdf.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
+                                  .replace(/^\d+锔忊儯/i, '')
+                                  .replace(/馃[A-Z0-9]/g, '')
+                                  .replace(/_/g, ' ')
+                                  .replace(/\.pdf$/i, '');
+
+      resultsHtml += `
+        <div class="pdf-search-result-card" data-pdf="${encodeURIComponent(res.pdf)}" data-page="${res.page}">
+          <div class="pdf-search-result-header">
+            <span class="pdf-search-result-title"><i class="fa-solid fa-file-pdf"></i> ${displayTitle}</span>
+            <span class="pdf-search-result-page">Page ${res.page}</span>
+          </div>
+          <div class="pdf-search-result-snippet">${highlightedSnippet}</div>
+        </div>
+      `;
+    });
+
+    pdfSearchResultsContainer.innerHTML = resultsHtml;
+
+    // Attach click listeners to cards
+    document.querySelectorAll('.pdf-search-result-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const pdfFile = decodeURIComponent(card.getAttribute('data-pdf'));
+        const page = card.getAttribute('data-page');
+        window.open(`/pdfs/${encodeURIComponent(pdfFile)}#page=${page}`, '_blank');
+      });
+    });
+
+  } catch (err) {
+    console.error("PDF search error:", err);
+    pdfSearchResultsContainer.innerHTML = '<p class="text-danger text-center" style="margin-top: 20px;">Une erreur est survenue lors de la recherche.</p>';
+  } finally {
+    pdfSearchLoading.style.display = 'none';
+  }
+}
+
+async function triggerPdfReindex() {
+  try {
+    const res = await fetch('/api/reindex', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      updatePdfIndexStatus();
+    }
+  } catch (err) {
+    console.error("Failed to trigger re-index:", err);
   }
 }
