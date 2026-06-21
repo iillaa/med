@@ -68,6 +68,20 @@ body {
   transition: var(--transition-smooth);
 }
 
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-out;
+}
+
 .sidebar-header {
   padding: 20px;
   border-bottom: 1px solid var(--border-color);
@@ -584,7 +598,8 @@ body {
 .tab-pane {
   display: none;
   animation: fadeIn 0.3s ease;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
 }
 
 .tab-pane.active {
@@ -592,12 +607,6 @@ body {
   flex-direction: column;
 }
 
-#tab-notes,
-#tab-prescription,
-#tab-pdfs {
-  height: auto;
-  min-height: 100%;
-}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
@@ -660,8 +669,7 @@ body {
   font-size: 14.5px;
   line-height: 1.6;
   color: #e2e8f0;
-  overflow-y: auto;
-  max-height: 500px;
+  margin-bottom: 15px;
 }
 
 .summary-view h4, .summary-view strong {
@@ -1277,10 +1285,16 @@ body {
     top: 0;
     bottom: 0;
     box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    transition: left 0.22s cubic-bezier(0.1, 0.9, 0.2, 1);
   }
   
   .sidebar.open {
     left: 0;
+  }
+
+  .sidebar.open + .sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
   }
   
   .toggle-sidebar-btn {
@@ -1308,7 +1322,7 @@ body {
   }
   
   .tab-content-container {
-    padding: 16px 16px 30px;
+    padding: 16px 16px 40px;
   }
   
   .prescription-container {
@@ -1331,7 +1345,7 @@ body {
   }
 
   .main-content {
-    height: calc(100dvh - 49px); /* 49px is the height of mobile header */
+    height: 100%;
   }
 }
 

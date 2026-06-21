@@ -17,3 +17,8 @@ pdf_index.json
 
 # Local ngrok binary
 ngrok
+
+# Logs
+*.log
+nohup.out
+

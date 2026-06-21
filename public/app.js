@@ -197,6 +197,55 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebar.classList.remove('open');
   });
 
+  // Swipe Gestures for Mobile Sidebar (Open/Close)
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchEndX = 0;
+  let touchEndY = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    handleSwipeGesture();
+  }, { passive: true });
+
+  function handleSwipeGesture() {
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+    
+    // Check if swipe is mostly horizontal and exceeds 40px (snappy mobile response)
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      const isSidebarOpen = sidebar.classList.contains('open');
+      
+      if (diffX > 0) {
+        // Swipe Right: Open sidebar (only if started from the left edge < 60px to avoid conflicts)
+        if (!isSidebarOpen && touchStartX < 60) {
+          sidebar.classList.add('open');
+        }
+      } else {
+        // Swipe Left: Close sidebar
+        if (isSidebarOpen) {
+          sidebar.classList.remove('open');
+        }
+      }
+    }
+  }
+
+  // Tap on overlay to close the sidebar and block touches from reaching background content
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
+  }
+
+
+
   // Accordion toggle
   allPdfsHeader.addEventListener('click', () => {
     const isOpen = allPdfsAccordion.classList.contains('open');
