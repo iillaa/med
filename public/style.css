@@ -1502,7 +1502,7 @@ body {
 
 #pdf-content-search-input {
   flex-grow: 1;
-  background: var(--bg-body);
+  background-color: var(--bg-input);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   padding: 10px 14px;
