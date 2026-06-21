@@ -44,8 +44,11 @@ if (!fs.existsSync(DATA_FILE)) {
   safeWriteJsonSync(DATA_FILE, {});
 }
 
-// Serve PDFs statically
-app.use('/pdfs', express.static(PDF_DIR));
+// Serve PDFs statically with aggressive 7-day caching to save mobile data
+app.use('/pdfs', express.static(PDF_DIR, {
+  maxAge: '7d',
+  immutable: true
+}));
 
 // Endpoint to get all CATs (merged with user progress)
 app.get('/api/cats', (req, res) => {
