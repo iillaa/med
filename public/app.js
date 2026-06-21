@@ -776,7 +776,6 @@ function createPdfCardElement(file, isGlobal = false) {
   card.target = '_blank';
   card.className = 'pdf-card';
   
-  const isDocx = file.toLowerCase().endsWith('.docx');
   const iconClass = isDocx 
     ? 'fa-regular fa-file-word text-primary' 
     : (isGlobal ? 'fa-solid fa-book-open-reader' : 'fa-solid fa-file-pdf');
