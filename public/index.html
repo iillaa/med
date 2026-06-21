@@ -143,6 +143,15 @@
                 <span class="dash-card-label">À faire</span>
                 <span class="dash-card-val" id="dash-count-todo">0 / 55</span>
               </div>
+          </div>
+
+          <!-- Admin Moderation Panel (Visible only to Admin) -->
+          <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px;">
+            <h3 style="color: var(--color-primary);"><i class="fa-solid fa-user-shield"></i> Propositions de modifications en attente</h3>
+            <p class="block-desc">Validez ou rejetez les suggestions soumises par vos collègues :</p>
+            <div class="suggestions-list" id="suggestions-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+              <!-- Dynamically populated -->
+              <p class="text-muted text-center" style="padding: 10px 0;">Aucune proposition en attente.</p>
             </div>
           </div>
 

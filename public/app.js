@@ -4,6 +4,18 @@ let activeCat = null;
 let activeStatusFilter = 'all';
 let activePrescriptionVariantIndex = 0;
 let prescriptionVariants = [];
+let isAdmin = false;
+
+// Local Storage helpers for personal progress/notes
+function getLocalProgress() {
+  const data = localStorage.getItem('dr_cat_user_progress');
+  return data ? JSON.parse(data) : {};
+}
+
+function saveLocalProgress(progress) {
+  localStorage.setItem('dr_cat_user_progress', JSON.stringify(progress));
+}
+
 
 // DOM Elements
 const sidebar = document.getElementById('sidebar');
@@ -117,13 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Update Local Object
       activeCat.status = status;
       
-      // Save
-      saveCatData(activeCat.id, {
-        status: activeCat.status,
-        notes: activeCat.notes,
-        customSummary: activeCat.customSummary,
-        customOrdonnance: activeCat.customOrdonnance
-      });
+      // Save locally in localStorage
+      const progress = getLocalProgress();
+      if (!progress[activeCat.id]) progress[activeCat.id] = {};
+      progress[activeCat.id].status = status;
+      progress[activeCat.id].notes = activeCat.notes || '';
+      saveLocalProgress(progress);
 
       // Update sidebar list item indicator & Stats
       updateSidebarItemUI(activeCat);
@@ -135,12 +146,18 @@ document.addEventListener('DOMContentLoaded', () => {
   saveNotesBtn.addEventListener('click', () => {
     if (!activeCat) return;
     activeCat.notes = notesInput.value;
-    saveCatData(activeCat.id, {
-      status: activeCat.status,
-      notes: activeCat.notes,
-      customSummary: activeCat.customSummary,
-      customOrdonnance: activeCat.customOrdonnance
-    }, true);
+    
+    // Save locally in localStorage
+    const progress = getLocalProgress();
+    if (!progress[activeCat.id]) progress[activeCat.id] = {};
+    progress[activeCat.id].status = activeCat.status || 'todo';
+    progress[activeCat.id].notes = activeCat.notes;
+    saveLocalProgress(progress);
+
+    saveIndicator.classList.add('show');
+    setTimeout(() => {
+      saveIndicator.classList.remove('show');
+    }, 2500);
   });
 
   // Edit Summary buttons
@@ -155,21 +172,58 @@ document.addEventListener('DOMContentLoaded', () => {
     summaryEditorWrapper.style.display = 'none';
   });
 
-  saveSummaryBtn.addEventListener('click', () => {
+  saveSummaryBtn.addEventListener('click', async () => {
     if (!activeCat) return;
-    activeCat.customSummary = summaryEditor.value;
-    
-    saveCatData(activeCat.id, {
-      status: activeCat.status,
-      notes: activeCat.notes,
-      customSummary: activeCat.customSummary,
-      customOrdonnance: activeCat.customOrdonnance
-    });
+    const newSummary = summaryEditor.value;
 
-    renderSummary(activeCat.customSummary || activeCat.summary);
+    if (isAdmin) {
+      // Admin: save directly to server database
+      try {
+        const res = await fetch(`/api/cats/${activeCat.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ summary: newSummary })
+        });
+        const result = await res.json();
+        if (result.success) {
+          activeCat.summary = newSummary;
+          renderSummary(newSummary);
+          alert("Synthèse mise à jour avec succès !");
+        } else {
+          alert("Erreur: " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de la sauvegarde.");
+      }
+    } else {
+      // Guest: submit suggestion
+      try {
+        const res = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'edit',
+            catId: activeCat.id,
+            data: { summary: newSummary }
+          })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert("Votre proposition de modification a été envoyée à l'administrateur pour validation.");
+        } else {
+          alert("Erreur: " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'envoi de la proposition.");
+      }
+    }
+
     summaryView.style.display = 'block';
     summaryEditorWrapper.style.display = 'none';
   });
+
 
   // Copy prescription
   copyPrescriptionBtn.addEventListener('click', () => {
@@ -290,39 +344,67 @@ document.addEventListener('DOMContentLoaded', () => {
     prescriptionEditorActions.style.display = 'none';
   });
 
-  savePrescriptionBtn.addEventListener('click', () => {
+  savePrescriptionBtn.addEventListener('click', async () => {
     if (!activeCat) return;
-    activeCat.customOrdonnance = prescriptionEditor.value;
-    
-    saveCatData(activeCat.id, {
-      status: activeCat.status,
-      notes: activeCat.notes,
-      customSummary: activeCat.customSummary,
-      customOrdonnance: activeCat.customOrdonnance
-    });
+    const newOrdonnance = prescriptionEditor.value;
 
-    renderPrescription(activeCat.customOrdonnance || activeCat.ordonnance);
+    if (isAdmin) {
+      // Admin: save directly to server database
+      try {
+        const res = await fetch(`/api/cats/${activeCat.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ordonnance: newOrdonnance })
+        });
+        const result = await res.json();
+        if (result.success) {
+          activeCat.ordonnance = newOrdonnance;
+          renderPrescription(newOrdonnance);
+          alert("Ordonnance type mise à jour avec succès !");
+        } else {
+          alert("Erreur: " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de la sauvegarde.");
+      }
+    } else {
+      // Guest: propose suggestion
+      try {
+        const res = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'edit',
+            catId: activeCat.id,
+            data: { ordonnance: newOrdonnance }
+          })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert("Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation.");
+        } else {
+          alert("Erreur: " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'envoi de la proposition.");
+      }
+    }
+
     workspacePrescription.style.display = 'block';
     prescriptionEditor.style.display = 'none';
     prescriptionEditorActions.style.display = 'none';
   });
 
-  // Reset progress
+  // Reset progress (local only)
   const resetProgressBtn = document.getElementById('reset-progress-btn');
   resetProgressBtn.addEventListener('click', async () => {
-    if (confirm("Voulez-vous vraiment réinitialiser toute votre progression et vos notes ? Cette action est irréversible.")) {
-      try {
-        const res = await fetch('/api/reset', { method: 'POST' });
-        const result = await res.json();
-        if (result.success) {
-          alert("Progression réinitialisée avec succès !");
-          await initApp();
-          showDashboard();
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Erreur lors de la réinitialisation.");
-      }
+    if (confirm("Voulez-vous vraiment réinitialiser toute votre progression et vos notes ? Cette action est irréversible et n'affectera que ce navigateur.")) {
+      localStorage.removeItem('dr_cat_user_progress');
+      alert("Progression réinitialisée avec succès !");
+      await initApp();
+      showDashboard();
     }
   });
 
@@ -335,20 +417,24 @@ document.addEventListener('DOMContentLoaded', () => {
         alert("Impossible de supprimer les fiches de base (IDs 1-55).");
         return;
       }
+      if (!isAdmin) {
+        alert("Action refusée. Seul l'administrateur peut supprimer des fiches.");
+        return;
+      }
       if (confirm(`Voulez-vous vraiment supprimer la fiche "${activeCat.title}" ? Cette action est irréversible.`)) {
         try {
           const res = await fetch(`/api/cats/${activeCat.id}`, { method: 'DELETE' });
           const result = await res.json();
           if (result.success) {
-            alert("Fiche CAT supprimée avec succès !");
+            alert("Fiche supprimée avec succès !");
             await initApp();
             showDashboard();
           } else {
-            alert("Erreur : " + result.error);
+            alert("Erreur: " + result.error);
           }
         } catch (err) {
           console.error(err);
-          alert("Erreur lors de la suppression de la fiche.");
+          alert("Erreur lors de la suppression.");
         }
       }
     });
@@ -391,30 +477,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const rawKeywords = document.getElementById('new-cat-pdf-keywords').value;
     const pdf_keywords = rawKeywords ? rawKeywords.split(',').map(kw => kw.trim()).filter(kw => kw) : [];
 
-    try {
-      const res = await fetch('/api/cats', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ title, category, red_flags, summary, ordonnance, pdf_keywords })
-      });
-      
-      const result = await res.json();
-      if (result.success) {
-        closeModal();
-        alert(`La fiche CAT "${title}" a été ajoutée avec succès !`);
-        await initApp();
-        const newCat = allCats.find(c => c.id === result.cat.id);
-        if (newCat) selectCat(newCat);
-      } else {
-        alert("Erreur : " + result.error);
+    if (isAdmin) {
+      try {
+        const res = await fetch('/api/cats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ title, category, red_flags, summary, ordonnance, pdf_keywords })
+        });
+        
+        const result = await res.json();
+        if (result.success) {
+          closeModal();
+          alert(`La fiche CAT "${title}" a été ajoutée avec succès !`);
+          await initApp();
+          const newCat = allCats.find(c => c.id === result.cat.id);
+          if (newCat) selectCat(newCat);
+        } else {
+          alert("Erreur : " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'enregistrement de la nouvelle CAT.");
       }
-    } catch (err) {
-      console.error(err);
-      alert("Erreur lors de l'enregistrement de la nouvelle CAT.");
+    } else {
+      try {
+        const res = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'add',
+            data: { title, category, red_flags, summary, ordonnance, pdf_keywords }
+          })
+        });
+        
+        const result = await res.json();
+        if (result.success) {
+          closeModal();
+          alert(`Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`);
+        } else {
+          alert("Erreur : " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'envoi de la proposition.");
+      }
     }
   });
+
 
   // PDF Content Search Event Listeners
   if (pdfContentSearchBtn) {
@@ -435,6 +548,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // App Initialization
 async function initApp() {
   try {
+    // 1. Check if user is Admin
+    await checkAdminStatus();
+
     const [catsRes, pdfsRes] = await Promise.all([
       fetch('/api/cats'),
       fetch('/api/pdfs')
@@ -443,15 +559,32 @@ async function initApp() {
     allCats = await catsRes.json();
     allPdfs = await pdfsRes.json();
 
+    // 2. Merge server CATs with user progress from browser's localStorage
+    const localProgress = getLocalProgress();
+    allCats = allCats.map(cat => {
+      const localEntry = localProgress[cat.id] || {};
+      return {
+        ...cat,
+        status: localEntry.status || 'todo',
+        notes: localEntry.notes || ''
+      };
+    });
+
     populateCategoryFilter();
     renderCatList(allCats);
     calculateStats();
     renderDashboard(); // Render initial dashboard
+
+    // 3. If Admin, load moderation queue
+    if (isAdmin) {
+      await loadPendingSuggestions();
+    }
   } catch (err) {
     console.error('Error initializing app:', err);
     alert('Erreur lors du chargement des données. Assurez-vous que le serveur Node tourne.');
   }
 }
+
 
 // Populate Category dropdown dynamically
 function populateCategoryFilter() {
@@ -1189,3 +1322,126 @@ async function triggerPdfReindex() {
     console.error("Failed to trigger re-index:", err);
   }
 }
+
+// Admin panel and suggestion management functions
+async function checkAdminStatus() {
+  try {
+    const res = await fetch('/api/is-admin');
+    const data = await res.json();
+    isAdmin = !!data.isAdmin;
+    console.log("Admin mode:", isAdmin);
+    
+    // Toggle Admin Panel visibility in dashboard
+    const adminPanel = document.getElementById('admin-moderation-panel');
+    if (adminPanel) {
+      adminPanel.style.display = isAdmin ? 'block' : 'none';
+    }
+  } catch (err) {
+    console.error("Failed to check admin status:", err);
+    isAdmin = false;
+  }
+}
+
+async function loadPendingSuggestions() {
+  if (!isAdmin) return;
+  const listContainer = document.getElementById('suggestions-list');
+  if (!listContainer) return;
+
+  try {
+    const res = await fetch('/api/suggestions');
+    const list = await res.json();
+
+    if (list.length === 0) {
+      listContainer.innerHTML = '<p class="text-muted text-center" style="padding: 10px 0;">Aucune proposition en attente.</p>';
+      return;
+    }
+
+    let html = '';
+    list.forEach(sug => {
+      const formattedDate = new Date(sug.timestamp).toLocaleString('fr-FR');
+      const badgeClass = sug.type === 'add' ? 'add' : 'edit';
+      const badgeText = sug.type === 'add' ? 'Ajout de fiche' : `Modif de fiche (ID: ${sug.catId})`;
+      
+      let diffHtml = '';
+      if (sug.type === 'add') {
+        diffHtml = `<strong>Titre :</strong> ${sug.data.title}<br>
+                    <strong>Spécialité :</strong> ${sug.data.category}<br>
+                    <strong>Red Flags :</strong> ${sug.data.red_flags || 'Aucun'}<br>
+                    <strong>Synthèse (extrait) :</strong> ${sug.data.summary ? sug.data.summary.substring(0, 150) + '...' : 'Aucune'}<br>
+                    <strong>Ordonnance :</strong> ${sug.data.ordonnance ? sug.data.ordonnance.substring(0, 100) + '...' : 'Aucune'}`;
+      } else if (sug.type === 'edit') {
+        const parentCat = allCats.find(c => c.id === parseInt(sug.catId));
+        const originalTitle = parentCat ? parentCat.title : `Fiche ${sug.catId}`;
+        
+        diffHtml = `<strong>Fiche ciblée :</strong> ${originalTitle}<br>`;
+        if (sug.data.summary) {
+          diffHtml += `<strong>Proposition Synthèse (extrait) :</strong><div class="suggestion-diff-container">${sug.data.summary}</div>`;
+        }
+        if (sug.data.ordonnance) {
+          diffHtml += `<strong>Proposition Ordonnance :</strong><div class="suggestion-diff-container">${sug.data.ordonnance}</div>`;
+        }
+      }
+
+      html += `
+        <div class="suggestion-card" data-sug-id="${sug.id}">
+          <div class="suggestion-header">
+            <span class="suggestion-badge ${badgeClass}">${badgeText}</span>
+            <span class="suggestion-time">${formattedDate}</span>
+          </div>
+          <div class="suggestion-body">
+            <div style="font-size: 13px; line-height: 1.5;">${diffHtml}</div>
+          </div>
+          <div class="suggestion-actions">
+            <button class="suggestion-btn btn-reject" onclick="handleRejectSuggestion('${sug.id}')">
+              <i class="fa-solid fa-xmark"></i> Rejeter
+            </button>
+            <button class="suggestion-btn btn-approve" onclick="handleApproveSuggestion('${sug.id}')">
+              <i class="fa-solid fa-check"></i> Accepter
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    listContainer.innerHTML = html;
+  } catch (err) {
+    console.error("Failed to load suggestions:", err);
+    listContainer.innerHTML = '<p class="text-danger text-center" style="padding: 10px 0;">Erreur lors du chargement des propositions.</p>';
+  }
+}
+
+// Global functions for inline onclick handlers
+window.handleApproveSuggestion = async function(id) {
+  if (!confirm("Voulez-vous vraiment accepter cette suggestion et l'intégrer à la base de données ?")) return;
+  try {
+    const res = await fetch(`/api/suggestions/${id}/approve`, { method: 'POST' });
+    const result = await res.json();
+    if (result.success) {
+      alert("Proposition approuvée !");
+      await initApp();
+    } else {
+      alert("Erreur: " + result.error);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors de la validation.");
+  }
+};
+
+window.handleRejectSuggestion = async function(id) {
+  if (!confirm("Voulez-vous vraiment rejeter et supprimer cette proposition ?")) return;
+  try {
+    const res = await fetch(`/api/suggestions/${id}/reject`, { method: 'POST' });
+    const result = await res.json();
+    if (result.success) {
+      alert("Proposition rejetée.");
+      await initApp();
+    } else {
+      alert("Erreur: " + result.error);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors du rejet.");
+  }
+};
+

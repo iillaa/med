@@ -22,3 +22,7 @@ ngrok
 *.log
 nohup.out
 
+# Suggestions database
+suggestions.json*
+
+
