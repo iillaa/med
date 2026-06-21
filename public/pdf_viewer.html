@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecteur PDF Clinique</title>
+  
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Outfit Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-app: #090d16;
+      --bg-header: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --color-primary: #06b6d4;
+      --color-primary-hover: #0891b2;
+      --transition-smooth: all 0.2s ease-in-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Viewer Header */
+    .viewer-header {
+      background-color: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 50%;
+    }
+
+    .back-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition-smooth);
+    }
+
+    .back-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--color-primary);
+      background-color: rgba(6, 182, 212, 0.1);
+    }
+
+    .doc-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-primary);
+    }
+
+    /* Page Navigation and Zoom controls in center */
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-app);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2px 4px;
+    }
+
+    .control-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .control-btn:hover {
+      color: var(--color-primary);
+      background-color: rgba(6, 182, 212, 0.1);
+    }
+
+    .control-btn:disabled {
+      color: #334155;
+      cursor: not-allowed;
+      background: none;
+    }
+
+    .page-indicator {
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 0 8px;
+      min-width: 90px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    /* Viewer Container */
+    .viewer-container {
+      flex-grow: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      background-color: #0b0f19;
+      position: relative;
+    }
+
+    canvas {
+      box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.7);
+      background-color: #fff;
+      max-width: 100%;
+      border-radius: 4px;
+    }
+
+    /* Loading Spinner */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(9, 13, 22, 0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(6, 182, 212, 0.1);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Mobile Adaptations */
+    @media (max-width: 768px) {
+      .viewer-header {
+        flex-direction: column;
+        height: auto;
+        padding: 12px;
+        gap: 10px;
+      }
+      .header-left {
+        max-width: 100%;
+        width: 100%;
+      }
+      .header-center {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .control-group {
+        flex-grow: 1;
+        justify-content: center;
+      }
+      .viewer-container {
+        padding: 10px;
+      }
+    }
+  </style>
+
+  <!-- Load PDF.js from Cloudflare CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="viewer-header">
+    <div class="header-left">
+      <a href="/" class="back-btn" title="Retour à l'application"><i class="fa-solid fa-arrow-left"></i></a>
+      <span class="doc-title" id="doc-title">Chargement du document...</span>
+    </div>
+    
+    <div class="header-center">
+      <!-- Navigation -->
+      <div class="control-group">
+        <button class="control-btn" id="prev-page-btn" disabled><i class="fa-solid fa-chevron-left"></i></button>
+        <span class="page-indicator" id="page-indicator">Page 0 / 0</span>
+        <button class="control-btn" id="next-page-btn" disabled><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+
+      <!-- Zoom -->
+      <div class="control-group">
+        <button class="control-btn" id="zoom-out-btn" title="Zoom arrière"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+        <button class="control-btn" id="zoom-fit-btn" title="Ajuster à la largeur"><i class="fa-solid fa-expand"></i></button>
+        <button class="control-btn" id="zoom-in-btn" title="Zoom avant"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container for Canvas -->
+  <main class="viewer-container">
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loading-text">Chargement du PDF...</div>
+    </div>
+    <canvas id="pdf-canvas"></canvas>
+  </main>
+
+  <script>
+    // Set PDF.js worker source
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const pdfFileName = urlParams.get('file');
+    let currentPageNum = parseInt(urlParams.get('page')) || 1;
+
+    if (!pdfFileName) {
+      document.getElementById('loading-text').textContent = "Erreur : Aucun document spécifié.";
+      document.getElementById('loading-overlay').querySelector('.spinner').style.display = 'none';
+      throw new Error("No PDF file specified in query string");
+    }
+
+    // Clean display title
+    const displayTitle = pdfFileName.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
+                                    .replace(/^\d+锔忊儯/i, '')
+                                    .replace(/馃[A-Z0-9]/g, '')
+                                    .replace(/_/g, ' ')
+                                    .replace(/\.pdf$/i, '');
+    document.getElementById('doc-title').textContent = displayTitle;
+
+    const pdfUrl = `/pdfs/${encodeURIComponent(pdfFileName)}`;
+    
+    let pdfDoc = null;
+    let pageRendering = false;
+    let pageNumPending = null;
+    let currentScale = 1.0;
+    let currentFitMode = 'width'; // 'width' or 'number' (actual scale)
+    const canvas = document.getElementById('pdf-canvas');
+    const ctx = canvas.getContext('2d');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingText = document.getElementById('loading-text');
+
+    const prevBtn = document.getElementById('prev-page-btn');
+    const nextBtn = document.getElementById('next-page-btn');
+    const pageIndicator = document.getElementById('page-indicator');
+
+    const zoomInBtn = document.getElementById('zoom-in-btn');
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    const zoomFitBtn = document.getElementById('zoom-fit-btn');
+
+    let renderTask = null;
+
+    /**
+     * Render the specified page on canvas
+     */
+    async function renderPage(num) {
+      pageRendering = true;
+      loadingOverlay.style.display = 'flex';
+      loadingText.textContent = `Rendu de la page ${num}...`;
+
+      // Cancel running render task if any
+      if (renderTask) {
+        try {
+          renderTask.cancel();
+        } catch (_) {}
+      }
+
+      try {
+        const page = await pdfDoc.getPage(num);
+
+        // Adjust scale dynamically if fit mode is active
+        if (currentFitMode === 'width') {
+          const unscaledViewport = page.getViewport({ scale: 1.0 });
+          const containerWidth = document.querySelector('.viewer-container').clientWidth;
+          // Calculate scale to fit container width, leaving some padding
+          const padding = window.innerWidth <= 768 ? 20 : 40;
+          currentScale = (containerWidth - padding) / unscaledViewport.width;
+        }
+
+        const viewport = page.getViewport({ scale: currentScale });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // Render PDF page into canvas context
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        
+        renderTask = page.render(renderContext);
+        await renderTask.promise;
+        
+        pageRendering = false;
+        loadingOverlay.style.display = 'none';
+
+        // Update indicators
+        pageIndicator.textContent = `Page ${num} / ${pdfDoc.numPages}`;
+        prevBtn.disabled = num <= 1;
+        nextBtn.disabled = num >= pdfDoc.numPages;
+
+        // Update URL query parameters silently
+        const url = new URL(window.location);
+        url.searchParams.set('page', num);
+        window.history.replaceState({}, '', url);
+
+        if (pageNumPending !== null) {
+          // New page rendering is pending
+          renderPage(pageNumPending);
+          pageNumPending = null;
+        }
+      } catch (err) {
+        if (err.name === 'RenderingCancelledException') {
+          // Normal case when rendering is aborted to start next render
+          return;
+        }
+        console.error("Rendering error:", err);
+        loadingText.textContent = "Erreur lors du rendu de la page.";
+        loadingOverlay.style.display = 'flex';
+      }
+    }
+
+    /**
+     * Safely queue page rendering
+     */
+    function queueRenderPage(num) {
+      if (pageRendering) {
+        pageNumPending = num;
+      } else {
+        renderPage(num);
+      }
+    }
+
+    /**
+     * Show previous page
+     */
+    function onPrevPage() {
+      if (currentPageNum <= 1) return;
+      currentPageNum--;
+      queueRenderPage(currentPageNum);
+    }
+
+    /**
+     * Show next page
+     */
+    function onNextPage() {
+      if (currentPageNum >= pdfDoc.numPages) return;
+      currentPageNum++;
+      queueRenderPage(currentPageNum);
+    }
+
+    // Button event listeners
+    prevBtn.addEventListener('click', onPrevPage);
+    nextBtn.addEventListener('click', onNextPage);
+
+    // Zoom Buttons
+    zoomInBtn.addEventListener('click', () => {
+      currentFitMode = 'value';
+      currentScale += 0.25;
+      queueRenderPage(currentPageNum);
+    });
+
+    zoomOutBtn.addEventListener('click', () => {
+      if (currentScale <= 0.5) return;
+      currentFitMode = 'value';
+      currentScale -= 0.25;
+      queueRenderPage(currentPageNum);
+    });
+
+    zoomFitBtn.addEventListener('click', () => {
+      currentFitMode = 'width';
+      queueRenderPage(currentPageNum);
+    });
+
+    // Keyboard support
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        onPrevPage();
+      } else if (e.key === 'ArrowRight') {
+        onNextPage();
+      }
+    });
+
+    // Handle window resizing
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (currentFitMode === 'width') {
+          queueRenderPage(currentPageNum);
+        }
+      }, 200);
+    });
+
+    // Load Document
+    (async function() {
+      try {
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        pdfDoc = await loadingTask.promise;
+        
+        // Render initial page
+        renderPage(currentPageNum);
+      } catch (err) {
+        console.error("PDF loading error:", err);
+        loadingText.textContent = "Erreur de chargement du document PDF. Veuillez vérifier l'existence du fichier.";
+        document.getElementById('loading-overlay').querySelector('.spinner').style.display = 'none';
+      }
+    })();
+  </script>
+</body>
+</html>

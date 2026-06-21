@@ -771,7 +771,8 @@ function loadRelatedPdfs(cat) {
 function createPdfCardElement(file, isGlobal = false) {
   const cleanName = getCleanPdfName(file);
   const card = document.createElement('a');
-  card.href = `/pdfs/${encodeURIComponent(file)}`;
+  const isDocx = file.toLowerCase().endsWith('.docx');
+  card.href = isDocx ? `/pdfs/${encodeURIComponent(file)}` : `/pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
   card.target = '_blank';
   card.className = 'pdf-card';
   
@@ -906,9 +907,10 @@ function renderAllPdfsList() {
     
     const isDocx = file.toLowerCase().endsWith('.docx');
     const iconClass = isDocx ? 'fa-regular fa-file-word' : 'fa-solid fa-file-pdf';
+    const href = isDocx ? `/pdfs/${encodeURIComponent(file)}` : `/pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
     
     li.innerHTML = `
-      <a href="/pdfs/${encodeURIComponent(file)}" target="_blank" class="all-pdfs-list-item">
+      <a href="${href}" target="_blank" class="all-pdfs-list-item">
         <i class="${iconClass}"></i>
         <span>${cleanName} (${file.toLowerCase().endsWith('.docx') ? 'Word' : 'PDF'})</span>
       </a>
@@ -1116,7 +1118,7 @@ async function performPdfSearch() {
       card.addEventListener('click', () => {
         const pdfFile = decodeURIComponent(card.getAttribute('data-pdf'));
         const page = card.getAttribute('data-page');
-        window.open(`/pdfs/${encodeURIComponent(pdfFile)}#page=${page}`, '_blank');
+        window.open(`/pdf_viewer.html?file=${encodeURIComponent(pdfFile)}&page=${page}`, '_blank');
       });
     });
 
