@@ -59,6 +59,28 @@ async function safeWriteJsonAsync(filePath, data) {
   }
 }
 
+// Asynchronous atomic file writes and backups for plain text files (like CSS)
+async function safeWriteTextAsync(filePath, textContent) {
+  const tempPath = filePath + '.tmp';
+  const backupPath = filePath + '.bak';
+  try {
+    const exists = await fs.promises.access(filePath).then(() => true).catch(() => false);
+    if (exists) {
+      await fs.promises.copyFile(filePath, backupPath);
+    }
+    await fs.promises.writeFile(tempPath, textContent, 'utf-8');
+    await fs.promises.rename(tempPath, filePath);
+  } catch (err) {
+    console.error(`[Data Integrity Error] Failed to write text atomically to ${filePath}:`, err);
+    const tempExists = await fs.promises.access(tempPath).then(() => true).catch(() => false);
+    if (tempExists) {
+      try { await fs.promises.unlink(tempPath); } catch (_) {}
+    }
+    throw err;
+  }
+}
+
+
 // Initialize admin password on startup
 async function initAdminPassword() {
   try {
@@ -555,13 +577,14 @@ ${endMarker}`;
       if (startIndex !== -1) {
         const endIndex = cssContent.indexOf(endMarker) + endMarker.length;
         cssContent = cssContent.substring(0, startIndex) + newDevStyles.trim() + cssContent.substring(endIndex);
-      } else {
+     } else {
         cssContent += '\n\n' + newDevStyles.trim();
       }
 
-      await fs.promises.writeFile(cssPath, cssContent, 'utf-8');
+      await safeWriteTextAsync(cssPath, cssContent);
       res.json({ success: true, message: "CSS updated successfully!" });
     });
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update CSS file" });
