@@ -135,10 +135,23 @@ onIndexUpdated(async () => {
   }
 });
 
-// Helper to check if the connection is from localhost (loopback interface)
+// Helper to check if the connection matches any local interface on the hosting device
 function isLocalhostConnection(req) {
   const ip = req.socket.remoteAddress || '';
-  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+  const cleanIp = ip.replace(/^::ffff:/, '');
+  if (cleanIp === '127.0.0.1' || cleanIp === '::1') return true;
+
+  // Dynamically obtain host interfaces to match local device network connections
+  const os = require('os');
+  const interfaces = os.networkInterfaces();
+  const localAddresses = [];
+  
+  for (const name of Object.keys(interfaces)) {
+    for (const netInterface of interfaces[name]) {
+      localAddresses.push(netInterface.address);
+    }
+  }
+  return localAddresses.includes(cleanIp);
 }
 
 // Helper to check if request is authenticated as admin using token
