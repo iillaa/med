@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Wire up Admin Login Button Event Listener
-  const adminLoginBtn = document.getElementById('admin-login-btn');
+  let adminLoginBtn = document.getElementById('admin-login-btn');
   if (adminLoginBtn) {
     adminLoginBtn.addEventListener('click', async () => {
       if (state.isAdmin) {
@@ -156,7 +156,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --- Localhost-only Admin Button Visibility ---
   // Check with the server if this connection is from the local machine.
   // The server reads the actual TCP socket IP, not the HTTP Host header.
-  const adminLoginBtn = document.getElementById('admin-login-btn');
   if (adminLoginBtn) {
     // Hide by default until confirmed local
     adminLoginBtn.style.display = 'none';
