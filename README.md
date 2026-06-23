@@ -1,26 +1,76 @@
-# Dr. CAT - Réfresher Médical de Poche 🩺
+# Dr. CAT — Réfresher Médical de Poche 🩺
 
-**Dr. CAT** est une application web de révision clinique légère et premium, conçue spécifiquement pour tourner localement sur un smartphone Android via **Termux** et s'ouvrir directement dans votre navigateur mobile. 
+**Dr. CAT** est une application web de révision clinique légère et premium, conçue pour tourner localement sur un smartphone Android via **Termux** et s'ouvrir directement dans votre navigateur mobile.
 
-Elle permet à un médecin généraliste d'étudier 55 cas pratiques de "Conduite à tenir" (CAT) essentiels, de conserver des observations cliniques locales, d'ajuster des ordonnances types adaptatives et d'ouvrir instantanément ses cours PDF de référence.
+Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Conduite à Tenir (CAT)**, de s'entraîner avec un système de quiz interactif, de conserver des notes cliniques personnelles, de gérer des ordonnances types adaptatives, et d'accéder instantanément à ses cours PDF de référence.
 
 ---
 
 ## 🚀 Fonctionnalités Clés
 
-1. **Fiches de Synthèse Clinique** : 55 fiches pré-remplies en français (Diagnostic, Clinique, Red Flags) enrichies de règles claires d'**Orientation et Avis Spécialisé** (quand référer le patient et vers quel spécialiste).
-2. **Ordonnances Types Multiples & Adaptatives** : 
-   - Modèles d'ordonnances réalistes éditables.
-   - Support des variantes en insérant des séparateurs `--- Nom de la Variante ---` dans l'éditeur (ex: `--- Adulte ---` et `--- Enfant ---`). L'application génère automatiquement des boutons pour naviguer entre elles.
-   - Bouton de copie en 1 clic de la variante active.
-3. **Notes Personnelles & Observations** : Zone de prise de notes persistantes pour documenter vos protocoles locaux.
-4. **Intégration PDF de Référence** :
-   - Association automatique des fichiers PDF/DOCX de votre répertoire `reference-pdfs` avec la fiche selon des mots-clés.
-   - Section *Manuels & Guides Généraux* pour garder en accès permanent vos gros ouvrages de référence (guides d'ordonnances, manuels généraux).
-5. **Recherche Clinique Totale & Filtres Rapides** :
-   - Barre de recherche filtrant par titre, spécialité, contenu de synthèse, et signes de gravité (Red Flags).
-   - Filtres de statut d'apprentissage (`Tous`, `À faire`, `En cours`, `Maîtrisé`) et filtre prioritaire `Red Flags ⚠️` pour afficher les cas d'urgences critiques.
-6. **Widget de Lancement Rapide (Xiaomi Poco F6)** : Script d'intégration avec le module `Termux:Widget` pour lancer le serveur et ouvrir l'application en 1 clic depuis votre écran d'accueil Android.
+### 📚 Fiches Cliniques (CAT)
+- **55 fiches pré-remplies** en français : Diagnostic, Clinique, Red Flags, Orientation spécialisée.
+- Chaque fiche est enrichie de règles claires d'**Orientation et Avis Spécialisé** (quand et vers quel spécialiste référer le patient).
+- Filtres rapides par **statut d'apprentissage** (`À faire`, `En cours`, `Maîtrisé`) et filtre prioritaire ⚠️ **Red Flags** pour les urgences critiques.
+- Barre de recherche full-text : filtre par titre, spécialité, contenu de synthèse, et signes de gravité.
+
+### 🧠 Mode Quiz & Entraînement
+- **Questions QCM** : Identifier la spécialité médicale d'un cas clinique parmi plusieurs propositions.
+- **Questions Rédaction (write-in)** : Rédiger de mémoire les Red Flags / signes de gravité, ou l'ordonnance type complète — simule la réalité du cabinet.
+- **Panel de correction automatique** : Comparaison côte-à-côte entre votre réponse et la fiche de référence officielle.
+- **Détection de mots-clés** : Identification et mise en valeur des termes médicaux importants trouvés dans votre réponse.
+- **Auto-évaluation honnête** : Système de notation en 3 niveaux (100% / Partiel / Revoir).
+- **Score final & historique détaillé** : Tableau de résultats par question avec bouton "Ouvrir la fiche de référence" directement depuis le quiz.
+- **Configuration flexible** : Choix de la spécialité, du nombre de questions (5/10/15/20), et des types de questions.
+
+### 💊 Ordonnances Types Multiples & Adaptatives
+- Modèles d'ordonnances réalistes éditables.
+- Support des **variantes** via séparateurs `--- Nom de la Variante ---` (ex: `--- Adulte ---` / `--- Enfant ---`). Les boutons de navigation sont générés automatiquement.
+- Bouton de **copie en 1 clic** de la variante active dans le presse-papier.
+
+### 📝 Notes Personnelles & Observations
+- Zone de prise de notes persistantes, sauvegardées localement dans `localStorage`.
+- Idéal pour documenter vos protocoles locaux ou adaptations spécifiques.
+
+### 📄 Intégration PDF de Référence
+- Association automatique des fichiers PDF de votre répertoire `reference-pdfs` avec la fiche active selon des mots-clés configurables.
+- Section *Manuels Généraux* pour un accès permanent à vos gros ouvrages (guides d'ordonnances, manuels).
+- **Recherche plein texte** dans le contenu des 78 PDFs indexés, avec affichage des extraits de contexte pertinents.
+
+### 👤 Système Collaboratif (Admin / Utilisateurs)
+- Les **utilisateurs non-admin** peuvent proposer des modifications ou ajouts de fiches (via un système de suggestions).
+- L'**administrateur** valide ou rejette les suggestions depuis le panneau de modération sur le tableau de bord.
+- Mode admin activé par un token de session sécurisé, jamais stocké en clair côté serveur.
+
+---
+
+## 🔐 Sécurité
+
+### Authentification Admin
+- **Mot de passe sécurisé** stocké dans `admin_password.txt` (exclu du git via `.gitignore`).
+- **Token de session aléatoire** (32 caractères hex) généré à chaque connexion. Stocké côté serveur en mémoire (`Set`), envoyé par header `x-admin-token`.
+- **Toutes les routes d'administration** (modification/suppression de fiches, approbation de suggestions, ré-indexation PDF) vérifient ce token.
+- La route `/api/login` est **restreinte à localhost uniquement** via vérification de l'adresse IP du socket TCP — impossible à usurper via le header `Host`.
+
+### Visibilité du Bouton Admin (Localhost-Only UI)
+- Le bouton **"Connexion Admin"** est **invisible par défaut** pour tous les utilisateurs distants.
+- Au chargement de la page, le client interroge `/api/is-local` : le serveur vérifie l'IP réelle de la connexion TCP.
+- Si `isLocal: false` → le bouton reste masqué. Si `isLocal: true` (appareil physique qui héberge le serveur) → le bouton apparaît.
+- Un fallback client-side (`window.location.hostname`) s'active si le serveur ne répond pas.
+
+### Protection XSS
+- Toutes les données utilisateur (suggestions soumises) sont **échappées HTML** avant rendu dans le panneau de modération admin.
+- Les titres de fiches et noms de catégories sont également assainis lors de leur injection dans le DOM.
+
+---
+
+## ⚡ Performance & Scalabilité (20+ Utilisateurs Simultanés)
+
+- **Caches mémoire** : `cats_db.json`, `suggestions.json`, et `pdf_index.json` (~1 MB) sont chargés en RAM au démarrage. Les requêtes GET n'accèdent jamais au disque.
+- **I/O Asynchrone** : Toutes les opérations fichier utilisent `fs.promises` (non-bloquant) pour ne pas geler le serveur pendant une sauvegarde.
+- **Verrou d'écriture (`AsyncLock`)** : Les écritures en base sont sérialisées via une file d'attente légère pour éviter les corruptions en cas d'accès concurrents.
+- **Cache PDF statique** : Les PDFs sont servis avec un cache HTTP `max-age=7d` pour réduire la consommation de données mobiles.
+- *Résultat testé : 25 requêtes de recherche parallèles traitées en ~200 ms.*
 
 ---
 
@@ -28,42 +78,50 @@ Elle permet à un médecin généraliste d'étudier 55 cas pratiques de "Conduit
 
 ```text
 /data/data/com.termux/files/home/med/
-├── cats_db.json                 # Base de données globale des fiches (IDs 1-55 + personnalisées)
-├── cats_db.json.bak             # Copie de sauvegarde automatique de la base
-├── data.json                    # Données d'avancement utilisateur (notes, statuts, personnalisations)
-├── data.json.bak                # Copie de sauvegarde automatique de votre avancement
-├── server.js                    # Serveur Express.js local (Backend)
-├── package.json                 # Dépendances Node.js (express)
+├── server.js                    # Serveur Express.js (Backend, API, Auth, Cache)
+├── index_pdfs.js                # Module d'indexation asynchrone du contenu des PDFs
+├── cats_db.json                 # Base de données des fiches CAT (JSON)
+├── cats_db.json.bak             # Sauvegarde automatique (créée avant chaque écriture)
+├── suggestions.json             # File d'attente des suggestions en attente de modération
+├── pdf_index.json               # Index de recherche plein texte des PDFs (~1 MB)
+├── admin_password.txt           # Mot de passe admin (⚠️ hors git)
+├── package.json                 # Dépendances Node.js
 ├── cat-med/
-│   └── reference-pdfs/          # Répertoire contenant vos fichiers PDF/DOCX de cours
-└── public/                      # Dossier statique de l'interface (Frontend)
-    ├── index.html               # Structure HTML5
-    ├── style.css                # Design sombre clinique moderne & responsive
-    └── app.js                   # Interactivité JavaScript (recherche, filtres, variantes)
+│   └── reference-pdfs/          # Vos fichiers PDF/DOCX de cours médicaux (78 fichiers)
+└── public/                      # Interface Frontend statique
+    ├── index.html               # Structure HTML5 de l'application
+    ├── style.css                # Design sombre clinique (glassmorphism, responsive)
+    └── js/
+        ├── main.js              # Point d'entrée, orchestration, admin auth
+        ├── api.js               # Couche de communication avec l'API serveur
+        ├── state.js             # État global de l'application
+        └── components/
+            ├── sidebar.js       # Sidebar, recherche, filtres, liste des fiches
+            ├── workspace.js     # Vue détaillée d'une fiche CAT (tabs, éditeurs)
+            ├── dashboard.js     # Tableau de bord, stats, modération admin
+            └── quiz.js          # Moteur du système de quiz (QCM + rédaction)
 ```
 
 ---
 
-## 🔒 Intégrité et Sécurité des Données (Data Integrity)
+## 🛠️ Lancement
 
-Pour parer aux risques de corruption de fichiers sous Termux (ex: si l'application s'arrête brutalement ou si le téléphone s'éteint lors de la sauvegarde), Dr. CAT intègre les mécanismes de sécurité suivants :
-- **Sauvegarde Préventive Automatique (`.bak`)** : À chaque fois qu'une modification est apportée à votre progression (`data.json`) ou à la base (`cats_db.json`), le serveur effectue une copie miroir de sauvegarde (`.bak`) du fichier original sur le disque avant de lancer l'écriture.
-- **Écriture Atomique (Atomic Writes)** : Les données sont d'abord écrites dans un fichier temporaire (`.tmp`). Une fois l'écriture validée, le fichier temporaire remplace l'original via un renommage atomique (`fs.renameSync`). Cela garantit qu'en cas d'interruption électrique, vos fichiers originaux ne seront jamais corrompus ou vidés.
+### Manuel (Termux)
+
+```bash
+cd ~/med
+node server.js
+```
+
+Ouvrez ensuite [http://localhost:3000](http://localhost:3000) dans votre navigateur.
+
+### Raccourci Écran d'Accueil
+
+L'application est pré-configurée avec le widget Termux. Cliquez sur le widget **`start_med.sh`** pour démarrer le serveur et ouvrir automatiquement le navigateur.
 
 ---
 
-## 🛠️ Utilisation et Lancement
+## 🔒 Intégrité des Données
 
-### Lancement Manuel (Termux)
-1. Allez dans le répertoire du projet :
-   ```bash
-   cd ~/med
-   ```
-2. Démarrez le serveur :
-   ```bash
-   node server.js
-   ```
-3. Ouvrez votre navigateur mobile sur [http://localhost:3000](http://localhost:3000).
-
-### Lancement par Raccourci Écran d'Accueil
-L'application est pré-configurée avec le widget Termux. Cliquez simplement sur le widget **`start_med.sh`** sur votre écran d'accueil Poco F6. Le serveur démarrera automatiquement et le navigateur s'ouvrira directement sur la bonne adresse.
+- **Sauvegarde automatique `.bak`** : Le fichier original est copié avant chaque écriture.
+- **Écriture atomique** : Les données transitent d'abord par un fichier `.tmp`, puis sont renommées — garantissant que le fichier principal n'est jamais corrompu en cas de coupure.

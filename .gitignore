@@ -25,4 +25,5 @@ nohup.out
 # Suggestions database
 suggestions.json*
 
-
+# Admin Password
+admin_password.txt*

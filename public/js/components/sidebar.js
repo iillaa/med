@@ -1,0 +1,159 @@
+import { state } from '../state.js';
+import { setupSwipeGestures } from '../utils.js';
+
+// DOM Elements
+let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
+
+export function getStatusLabel(status) {
+  switch(status) {
+    case 'done': return 'Maîtrisé';
+    case 'doing': return 'En cours';
+    default: return 'À faire';
+  }
+}
+
+export function initSidebar(onSelectCat, onFilterTriggered) {
+  catList = document.getElementById('cat-list');
+  searchInput = document.getElementById('search-input');
+  categoryFilter = document.getElementById('category-filter');
+  sidebar = document.getElementById('sidebar');
+  sidebarOverlay = document.getElementById('sidebar-overlay');
+
+  const openSidebarBtn = document.getElementById('open-sidebar-btn');
+  const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
+  // Search and Category input listeners
+  if (searchInput) searchInput.addEventListener('input', () => filterCats(onFilterTriggered));
+  if (categoryFilter) categoryFilter.addEventListener('change', () => filterCats(onFilterTriggered));
+
+  // Quick status filter pills
+  const statusPills = document.querySelectorAll('.status-pill');
+  statusPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      statusPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      state.activeStatusFilter = pill.getAttribute('data-filter');
+      filterCats(onFilterTriggered);
+    });
+  });
+
+  // Mobile drawer controls
+  if (openSidebarBtn) {
+    openSidebarBtn.addEventListener('click', () => {
+      sidebar.classList.add('open');
+    });
+  }
+  if (closeSidebarBtn) {
+    closeSidebarBtn.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
+  }
+
+  // Swipe Gestures
+  if (sidebar) {
+    setupSwipeGestures(sidebar);
+  }
+
+  // Click overlay to close
+  if (sidebarOverlay && sidebar) {
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
+  }
+}
+
+// Populate Category dropdown dynamically
+export function populateCategoryFilter(cats) {
+  if (!categoryFilter) categoryFilter = document.getElementById('category-filter');
+  if (!categoryFilter) return;
+
+  const categories = new Set(cats.map(c => c.category));
+  categoryFilter.innerHTML = '<option value="all">Toutes les spécialités</option>';
+  categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    categoryFilter.appendChild(opt);
+  });
+}
+
+// Render CATs list
+export function renderCatList(cats, onSelectCat) {
+  if (!catList) catList = document.getElementById('cat-list');
+  if (!catList) return;
+
+  catList.innerHTML = '';
+  cats.forEach(cat => {
+    const li = document.createElement('li');
+    li.className = `cat-item ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;
+    li.setAttribute('data-id', cat.id);
+    
+    li.innerHTML = `
+      <div class="cat-indicator ${cat.status}"></div>
+      <div class="cat-item-content">
+        <span class="cat-item-title">${cat.id}. ${cat.title}</span>
+        <div class="cat-item-meta">
+          <span>${cat.category}</span>
+          <span>${getStatusLabel(cat.status)}</span>
+        </div>
+      </div>
+    `;
+
+    li.addEventListener('click', () => {
+      onSelectCat(cat);
+      // Close sidebar on mobile after selection
+      if (window.innerWidth <= 850 && sidebar) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    catList.appendChild(li);
+  });
+}
+
+// Update the list item state dot & label on the fly
+export function updateSidebarItemUI(cat) {
+  const item = document.querySelector(`.cat-item[data-id="${cat.id}"]`);
+  if (!item) return;
+
+  const indicator = item.querySelector('.cat-indicator');
+  const metaStatus = item.querySelector('.cat-item-meta span:last-child');
+
+  if (indicator) indicator.className = `cat-indicator ${cat.status}`;
+  if (metaStatus) metaStatus.textContent = getStatusLabel(cat.status);
+}
+
+// Filter CAT list based on search, category, and quick status filter selections
+export function filterCats(onFilterTriggered) {
+  const query = searchInput.value.toLowerCase().trim();
+  const selectedCat = categoryFilter.value;
+
+  const filtered = state.allCats.filter(cat => {
+    // 1. Search text match (Expanded to search in Title, Summary, Red Flags, Category, and ID)
+    const matchesQuery = cat.title.toLowerCase().includes(query) || 
+                         cat.summary.toLowerCase().includes(query) || 
+                         (cat.red_flags && cat.red_flags.toLowerCase().includes(query)) ||
+                         cat.category.toLowerCase().includes(query) ||
+                         cat.id.toString() === query;
+
+    // 2. Category filter match
+    const matchesCategory = selectedCat === 'all' || cat.category === selectedCat;
+
+    // 3. Quick status / Red flags filter match
+    let matchesStatus = true;
+    if (state.activeStatusFilter === 'todo') matchesStatus = cat.status === 'todo';
+    else if (state.activeStatusFilter === 'doing') matchesStatus = cat.status === 'doing';
+    else if (state.activeStatusFilter === 'done') matchesStatus = cat.status === 'done';
+    else if (state.activeStatusFilter === 'redflags') {
+      matchesStatus = cat.red_flags && cat.red_flags.trim().length > 0 && 
+                      !cat.red_flags.toLowerCase().includes("aucun signe de gravité") && 
+                      !cat.red_flags.toLowerCase().includes("aucun");
+    }
+
+    return matchesQuery && matchesCategory && matchesStatus;
+  });
+
+  if (onFilterTriggered) {
+    onFilterTriggered(filtered);
+  }
+}

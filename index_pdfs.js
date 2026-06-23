@@ -13,6 +13,13 @@ let indexState = {
   currentFile: ''
 };
 
+// Callback when index file is written/updated
+let onIndexUpdatedCallback = null;
+
+function onIndexUpdated(cb) {
+  onIndexUpdatedCallback = cb;
+}
+
 /**
  * Returns the current state of the indexer
  */
@@ -54,7 +61,8 @@ async function indexPdfs(force = false) {
     let index = [];
     if (!force && fs.existsSync(INDEX_FILE)) {
       try {
-        index = JSON.parse(fs.readFileSync(INDEX_FILE, 'utf-8'));
+        const content = await fs.promises.readFile(INDEX_FILE, 'utf-8');
+        index = JSON.parse(content);
       } catch (e) {
         console.warn("Failed to parse existing index, starting fresh:", e);
         index = [];
@@ -67,7 +75,7 @@ async function indexPdfs(force = false) {
       return;
     }
 
-    const files = fs.readdirSync(PDF_DIR);
+    const files = await fs.promises.readdir(PDF_DIR);
     const pdfFiles = files.filter(f => f.toLowerCase().endsWith('.pdf'));
     
     indexState.totalFiles = pdfFiles.length;
@@ -78,7 +86,7 @@ async function indexPdfs(force = false) {
 
     for (const file of pdfFiles) {
       const filePath = path.join(PDF_DIR, file);
-      const stats = fs.statSync(filePath);
+      const stats = await fs.promises.stat(filePath);
       const mtime = stats.mtimeMs;
       const size = stats.size;
 
@@ -94,7 +102,7 @@ async function indexPdfs(force = false) {
 
       console.log(`Parsing new/modified PDF: "${file}" (${(size / 1024 / 1024).toFixed(2)} MB)...`);
       try {
-        const dataBuffer = fs.readFileSync(filePath);
+        const dataBuffer = await fs.promises.readFile(filePath);
         const parser = new PDFParse({ data: dataBuffer });
         const res = await parser.getText();
         
@@ -131,9 +139,12 @@ async function indexPdfs(force = false) {
 
     if (updated || newIndex.length !== index.length || force) {
       const tempPath = INDEX_FILE + '.tmp';
-      fs.writeFileSync(tempPath, JSON.stringify(newIndex, null, 2), 'utf-8');
-      fs.renameSync(tempPath, INDEX_FILE);
+      await fs.promises.writeFile(tempPath, JSON.stringify(newIndex, null, 2), 'utf-8');
+      await fs.promises.rename(tempPath, INDEX_FILE);
       console.log(`PDF index updated successfully. Total indexed: ${newIndex.length} files.`);
+      if (onIndexUpdatedCallback) {
+        await onIndexUpdatedCallback();
+      }
     } else {
       console.log("No PDF modifications detected. Index is up to date.");
     }
@@ -147,5 +158,6 @@ async function indexPdfs(force = false) {
 
 module.exports = {
   indexPdfs,
-  getIndexStatus
+  getIndexStatus,
+  onIndexUpdated
 };
