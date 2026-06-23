@@ -175,8 +175,8 @@
 /* Fluid split panel grid (2 columns on desktop/tablet, stretching to fill screen width) */
 .dashboard-content-split {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
   align-items: start;
   width: 100%;
 }
@@ -341,7 +341,7 @@
 }
 
 /* Mobile Dashboard Adjustments */
-@media (max-width: 850px) {
+@media (max-width: 680px) {
   .dashboard-container {
     padding: 16px;
     gap: 16px;
