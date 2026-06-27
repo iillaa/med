@@ -1,4 +1,4 @@
-# Dr. CAT — Réfresher Médical de Poche 🩺
+# Dr. CAT — Rappel Clinique de Poche 🩺
 
 **Dr. CAT** est une application web de révision clinique légère et premium, conçue pour tourner localement sur un smartphone Android via **Termux** et s'ouvrir directement dans votre navigateur mobile.
 
@@ -18,10 +18,12 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - **Questions QCM** : Identifier la spécialité médicale d'un cas clinique parmi plusieurs propositions.
 - **Questions Rédaction (write-in)** : Rédiger de mémoire les Red Flags / signes de gravité, ou l'ordonnance type complète — simule la réalité du cabinet.
 - **Panel de correction automatique** : Comparaison côte-à-côte entre votre réponse et la fiche de référence officielle.
+- **Navigation contextuelle persistante** : Bouton **"Ouvrir la Fiche Référence"** qui permet de quitter le quiz pour aller réviser la fiche associée, et de revenir instantanément au quiz sans perdre vos réponses en cours grâce au bouton **"Retour au Quiz"**.
 - **Détection de mots-clés** : Identification et mise en valeur des termes médicaux importants trouvés dans votre réponse.
 - **Auto-évaluation honnête** : Système de notation en 3 niveaux (100% / Partiel / Revoir).
 - **Score final & historique détaillé** : Tableau de résultats par question avec bouton "Ouvrir la fiche de référence" directement depuis le quiz.
 - **Configuration flexible** : Choix de la spécialité, du nombre de questions (5/10/15/20), et des types de questions.
+
 
 ### 💊 Ordonnances Types Multiples & Adaptatives
 - Modèles d'ordonnances réalistes éditables.
@@ -89,6 +91,7 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 ├── cat-med/
 │   └── reference-pdfs/          # Vos fichiers PDF/DOCX de cours médicaux (78 fichiers)
 └── public/                      # Interface Frontend statique
+    ├── drcat_logo.png           # Logo officiel (stéthoscope & croix médicale en C)
     ├── index.html               # Structure HTML5 de l'application
     ├── style.css                # Design sombre clinique (glassmorphism, responsive)
     └── js/
