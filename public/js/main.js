@@ -38,6 +38,15 @@ let addCatBtn, addCatModal, closeAddCatModalBtn, cancelAddCatBtn, addCatForm;
 
 // Entry Point
 document.addEventListener('DOMContentLoaded', async () => {
+  // PWA Service Worker Registration
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((reg) => console.log('PWA Service Worker registered with scope:', reg.scope))
+        .catch((err) => console.error('PWA Service Worker registration failed:', err));
+    });
+  }
+
   // Theme Toggle Initialization
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const themeToggleIcon = document.getElementById('theme-toggle-icon');

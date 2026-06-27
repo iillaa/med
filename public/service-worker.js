@@ -1,0 +1,74 @@
+const CACHE_NAME = 'dr-cat-v1';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/style.css',
+  '/drcat_logo.png',
+  '/css/dashboard.css',
+  '/css/sidebar.css',
+  '/css/workspace.css',
+  '/css/modal.css',
+  '/css/variables.css',
+  '/js/main.js',
+  '/js/api.js',
+  '/js/state.js',
+  '/js/utils.js',
+  '/js/components/sidebar.js',
+  '/js/components/workspace.js',
+  '/js/components/dashboard.js',
+  '/js/components/quiz.js'
+];
+
+// Install Service Worker and Cache App Shell Assets
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(() => self.skipWaiting())
+  );
+});
+
+// Activate Service Worker and clear old caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Intercept requests and serve from cache if offline
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // Bypass cache for API server calls so suggestion/admin processes query Node.js directly
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Cache-First strategy for static UI assets
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).then((response) => {
+        // Cache newly requested static resources on the fly (except PDFs)
+        if (response.status === 200 && !url.pathname.includes('/pdf/')) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
+      });
+    })
+  );
+});
