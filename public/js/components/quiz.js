@@ -314,7 +314,7 @@ function generateQCMOptions(question) {
     btn.style.padding = '14px 20px';
     btn.style.background = 'var(--bg-card)';
     btn.style.border = '1px solid var(--border-color)';
-    btn.innerHTML = `<span style="font-size:13.5px; font-weight:600; color:#fff;">${opt}</span>`;
+    btn.innerHTML = `<span style="font-size:13.5px; font-weight:600; color:var(--text-primary);">${opt}</span>`;
     
     btn.addEventListener('click', () => {
       // Disable all options

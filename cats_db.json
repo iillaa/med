@@ -752,25 +752,5 @@
       "Certificats_",
       "Certificats"
     ]
-  },
-  {
-    "id": 56,
-    "category": "Pédiatrie",
-    "title": "Ddd",
-    "summary": "1",
-    "red_flags": "Ex",
-    "ordonnance": "2",
-    "pdf_keywords": []
-  },
-  {
-    "id": 57,
-    "category": "G",
-    "title": "G",
-    "summary": "Zz",
-    "red_flags": "gs",
-    "ordonnance": "Zz",
-    "pdf_keywords": [
-      "Zz"
-    ]
   }
 ]

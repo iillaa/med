@@ -80,7 +80,7 @@
 }
 
 .status-btn.active {
-  color: #fff;
+  color: #ffffff !important;
 }
 
 .status-btn.btn-todo.active {
@@ -232,7 +232,6 @@
   margin-bottom: 16px;
 }
 
-/* Medical Summary View (French Markdown Style Rendering) */
 .summary-view {
   background-color: var(--bg-sidebar);
   border: 1px solid var(--border-color);
@@ -240,12 +239,12 @@
   padding: 24px;
   font-size: 14.5px;
   line-height: 1.6;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin-bottom: 15px;
 }
 
 .summary-view h4, .summary-view strong {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .summary-view p {

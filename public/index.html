@@ -449,7 +449,7 @@
             </div>
 
             <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #fff;"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</label>
+              <label style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</label>
               <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
                   <input type="checkbox" id="quiz-type-specialty" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
@@ -475,7 +475,7 @@
         <!-- 2. Active Quiz Session Card View -->
         <div id="quiz-active-view" style="display: none; flex-direction: column; gap: 20px; max-width: 700px; margin: 0 auto; width: 100%;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 10px;">
-            <h3 style="margin: 0; font-size: 16px; color: #fff;"><i class="fa-solid fa-hourglass-half"></i> Quiz en cours</h3>
+            <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);"><i class="fa-solid fa-hourglass-half"></i> Quiz en cours</h3>
             <span id="quiz-progress-text" style="font-weight: 600; color: var(--color-primary); font-size: 14px;">Question 1 / 10</span>
           </div>
 
@@ -492,7 +492,7 @@
               <span id="quiz-q-points" style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Valeur : 1 point</span>
             </div>
             
-            <h2 id="quiz-q-title" style="font-size: 18px; font-weight: 700; line-height: 1.4; color: #fff; margin-bottom: 8px;">Question Title</h2>
+            <h2 id="quiz-q-title" style="font-size: 18px; font-weight: 700; line-height: 1.4; color: var(--text-primary); margin-bottom: 8px;">Question Title</h2>
             
             <!-- A. Multiple Choice (QCM) Container -->
             <div id="quiz-qcm-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%;">
@@ -502,7 +502,7 @@
             <!-- B. Text Write-In Input Container -->
             <div id="quiz-writein-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 100%;">
               <label for="quiz-user-text" style="font-size: 13px; color: var(--text-secondary);">Saisissez votre conduite à tenir ou traitement ci-dessous :</label>
-              <textarea id="quiz-user-text" rows="5" placeholder="Écrivez votre réponse ici. Essayez de mentionner les médicaments clés, les posologies, ou les critères d'urgence précis..." style="width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; color: #fff; font-family: var(--font-sans); font-size: 13.5px; resize: vertical;"></textarea>
+              <textarea id="quiz-user-text" rows="5" placeholder="Écrivez votre réponse ici. Essayez de mentionner les médicaments clés, les posologies, ou les critères d'urgence précis..." style="width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; color: var(--text-primary); font-family: var(--font-sans); font-size: 13.5px; resize: vertical;"></textarea>
               <button class="action-btn" id="quiz-submit-text-btn" style="width: 100%; font-weight: 700; justify-content: center; display: flex; gap: 8px;">
                 <i class="fa-solid fa-circle-check"></i> Valider ma réponse
               </button>
@@ -510,7 +510,7 @@
 
             <!-- C. Feedback Comparison Panel (Hidden until answered) -->
             <div id="quiz-feedback-panel" style="display: none; flex-direction: column; gap: 16px; margin-top: 16px; border-top: 1px dashed var(--border-color); padding-top: 16px;">
-              <div id="quiz-feedback-header" style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: #fff;">
+              <div id="quiz-feedback-header" style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: var(--text-primary);">
                 <i class="fa-solid fa-circle-info"></i> <span id="quiz-feedback-status">Correction</span>
               </div>
 
@@ -522,7 +522,7 @@
                 </div>
                 <div class="dashboard-block" style="background: rgba(16, 185, 129, 0.02); padding: 14px; border: 1px solid rgba(16, 185, 129, 0.15);">
                   <h4 style="font-size: 13px; color: var(--color-success); margin-bottom: 6px; font-weight: 600;"><i class="fa-solid fa-clipboard-check"></i> Réponse attendue (Fiche officielle) :</h4>
-                  <div id="quiz-display-correct-answer" style="font-size: 13px; white-space: pre-wrap; line-height: 1.5; color: #fff;">...</div>
+                  <div id="quiz-display-correct-answer" style="font-size: 13px; white-space: pre-wrap; line-height: 1.5; color: var(--text-primary);">...</div>
                 </div>
               </div>
 
@@ -561,7 +561,7 @@
         <div id="quiz-results-view" style="display: none; flex-direction: column; gap: 24px; max-width: 700px; margin: 0 auto; width: 100%;">
           <div style="text-align: center; padding: 30px 20px; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
             <i class="fa-solid fa-award" style="font-size: 56px; color: var(--color-warning); margin-bottom: 16px;"></i>
-            <h2 style="font-size: 22px; font-weight: 700; color: #fff;">Quiz Terminé ! 🎓</h2>
+            <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">Quiz Terminé ! 🎓</h2>
             <div style="font-size: 40px; font-weight: 800; color: var(--color-primary); margin: 16px 0;" id="quiz-results-score">8.5 / 10</div>
             <p id="quiz-results-feedback" style="color: var(--text-secondary); font-size: 14.5px; max-width: 480px; margin: 0 auto; line-height: 1.5;">Félicitations, vous consolidez vos acquis ! Révisez les points faibles identifiés ci-dessous.</p>
             <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
@@ -572,7 +572,7 @@
 
           <!-- Breakdown History Table -->
           <div class="dashboard-block" style="gap: 12px; padding: 20px;">
-            <h3 style="font-size: 15px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-list-check"></i> Détail de vos réponses</h3>
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-list-check"></i> Détail de vos réponses</h3>
             <div style="overflow-x: auto; width: 100%;">
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;" id="quiz-results-table">
                 <thead>

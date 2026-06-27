@@ -13,7 +13,7 @@
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 4px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .dashboard-header p {
@@ -93,7 +93,7 @@
 .dash-card-val {
   font-size: 20px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 /* Welcome Screen */
@@ -196,7 +196,7 @@
 .dashboard-block h3 {
   font-size: 15px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -475,7 +475,7 @@
 .suggestion-title {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .suggestion-diff-container {
