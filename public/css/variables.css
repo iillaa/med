@@ -70,3 +70,68 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
 }
+
+/* ── Toast Notification ───────────────────────────────── */
+.drcat-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 340px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateX(calc(100% + 24px));
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+  pointer-events: none;
+}
+
+.drcat-toast--visible {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.drcat-toast-icon {
+  color: var(--color-primary);
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.drcat-toast-msg {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.drcat-toast-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: color 0.2s;
+}
+
+.drcat-toast-close:hover {
+  color: var(--text-primary);
+}
+
+.light-theme .drcat-toast {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  border-left-color: var(--color-primary);
+}

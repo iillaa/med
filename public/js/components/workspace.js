@@ -1,6 +1,6 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
-import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML } from '../utils.js';
+import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast } from '../utils.js';
 
 // DOM Elements
 let workspace, welcomeScreen;
@@ -92,6 +92,19 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       saveLocalProgress(progress);
 
       onStatusChange(state.activeCat);
+
+      // Milestone toast: exactly at 20 active+done CATs
+      if (status === 'doing' || status === 'done') {
+        const activeCount = Object.values(getLocalProgress())
+          .filter(p => p.status === 'doing' || p.status === 'done').length;
+        if (activeCount === 20) {
+          showToast(
+            '<strong>Beau travail, 20 fiches en cours ! 🎉</strong><br>Pensez à exporter votre progression via le tableau de bord pour ne rien perdre.',
+            'fa-floppy-disk',
+            8000
+          );
+        }
+      }
     });
   });
 
@@ -111,6 +124,13 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       setTimeout(() => {
         saveIndicator.classList.remove('show');
       }, 2500);
+
+      // Remind user to back up their notes via export
+      showToast(
+        'Notes sauvegardées localement. Exportez régulièrement vos données depuis le <strong>tableau de bord</strong> pour les sécuriser.',
+        'fa-cloud-arrow-up',
+        6000
+      );
     });
   }
 

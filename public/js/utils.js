@@ -1,6 +1,47 @@
 // Global utility methods for Dr. CAT
 
 /**
+ * Show a non-intrusive toast notification in the top-right corner.
+ * @param {string} message - The text to display.
+ * @param {string} [icon='fa-circle-info'] - FontAwesome icon class (without fa-solid prefix).
+ * @param {number} [duration=5000] - Auto-dismiss delay in ms.
+ */
+export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
+  // Remove existing toast of same type if still visible
+  const existing = document.getElementById('drcat-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'drcat-toast';
+  toast.className = 'drcat-toast';
+  toast.innerHTML = `
+    <i class="fa-solid ${icon} drcat-toast-icon"></i>
+    <span class="drcat-toast-msg">${message}</span>
+    <button class="drcat-toast-close" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+  `;
+
+  document.body.appendChild(toast);
+
+  // Animate in
+  requestAnimationFrame(() => toast.classList.add('drcat-toast--visible'));
+
+  // Close button
+  toast.querySelector('.drcat-toast-close').addEventListener('click', () => {
+    toast.classList.remove('drcat-toast--visible');
+    setTimeout(() => toast.remove(), 350);
+  });
+
+  // Auto-dismiss
+  const timer = setTimeout(() => {
+    toast.classList.remove('drcat-toast--visible');
+    setTimeout(() => toast.remove(), 350);
+  }, duration);
+
+  // Pause on hover
+  toast.addEventListener('mouseenter', () => clearTimeout(timer));
+}
+
+/**
  * Remove corrupted characters / emoji codes from PDF display name
  */
 export function getCleanPdfName(filename) {
