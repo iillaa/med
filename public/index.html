@@ -331,12 +331,12 @@
             </div>
             <p class="tab-instruction">Prenez vos notes personnelles, observations cliniques ou ajustements ici. Elles sont sauvegardées localement.</p>
             <textarea class="notes-textarea" id="notes-input" placeholder="Saisir vos notes ici..."></textarea>
-            <div class="pane-footer" style="flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div class="pane-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; width: 100%;">
+              <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px;">
                 <span class="save-indicator" id="save-indicator"><i class="fa-solid fa-cloud-arrow-up"></i> Changements enregistrés</span>
                 <span style="font-size: 11px; color: var(--text-muted); display: block;"><i class="fa-solid fa-circle-info"></i> Notes stockées localement. Utilisez l'export du tableau de bord pour les sauvegarder.</span>
               </div>
-              <button class="save-btn" id="save-notes-btn">Sauvegarder les notes</button>
+              <button class="save-btn" id="save-notes-btn" style="margin-left: auto;">Sauvegarder les notes</button>
             </div>
           </div>
 
