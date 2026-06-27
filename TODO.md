@@ -12,7 +12,6 @@
 
 - `[x]` **Add favicon** — browser tab shows blank icon; logo (`drcat_logo.png`) is ready, just needs a `<link rel="icon">` in the `<head>`
 - `[x]` **Add meta description** — needed for SEO and proper link previews when sharing
-- `[ ]` **Accessibility** — add ARIA labels to interactive elements (CAT list items, sidebar buttons, modal triggers) and ensure keyboard navigation works throughout
 - `[ ]` **Offline support** — clarify/implement behavior when the connection drops; data loading should not silently fail
 
 ---

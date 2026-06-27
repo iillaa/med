@@ -4,6 +4,7 @@ import * as sidebar from './components/sidebar.js';
 import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
+import { showToast } from './utils.js';
 
 // Tracks whether the current physical device is localhost (set once on load)
 let isLocalDevice = false;
@@ -221,6 +222,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Handle Online/Offline Status Events
+  window.addEventListener('online', () => {
+    showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
+  });
+  window.addEventListener('offline', () => {
+    showToast("Connexion perdue. Les modifications locales seront enregistrées sur ce navigateur.", "fa-circle-xmark", 6000);
+  });
+
+  // Handle keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    // 1. Focus search input when pressing 's' (if not already typing in an input/textarea)
+    const isEditing = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+    if (e.key.toLowerCase() === 's' && !isEditing) {
+      e.preventDefault();
+      const searchBox = document.getElementById('search-input');
+      if (searchBox) {
+        searchBox.focus();
+        searchBox.select();
+      }
+    }
+
+    // 2. Close modals with Esc
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('add-cat-modal');
+      if (modal && modal.style.display !== 'none') {
+        modal.style.display = 'none';
+        const form = document.getElementById('add-cat-form');
+        if (form) form.reset();
+      }
+    }
+
+    // 3. Arrow navigation for the CAT list (if not typing in search box)
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !isEditing) {
+      e.preventDefault();
+      const activeItem = document.querySelector('.cat-item.active');
+      const items = Array.from(document.querySelectorAll('.cat-item'));
+      if (items.length === 0) return;
+
+      let nextIndex = 0;
+      if (activeItem) {
+        const currentIndex = items.indexOf(activeItem);
+        if (e.key === 'ArrowDown') {
+          nextIndex = (currentIndex + 1) % items.length;
+        } else {
+          nextIndex = (currentIndex - 1 + items.length) % items.length;
+        }
+      }
+      
+      const targetItem = items[nextIndex];
+      if (targetItem) {
+        targetItem.click();
+        targetItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  });
+
   // Load Initial App State
   await initApp();
 
@@ -281,7 +338,11 @@ async function initApp() {
 
   } catch (err) {
     console.error('Error initializing app:', err);
-    alert('Erreur lors du chargement des données. Assurez-vous que le serveur Node tourne.');
+    showToast(
+      "Erreur de connexion. Impossible de charger les données. Assurez-vous que le serveur Node tourne.",
+      "fa-circle-exclamation",
+      8000
+    );
   }
 }
 

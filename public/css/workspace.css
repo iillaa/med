@@ -804,3 +804,78 @@
   border-radius: 2px;
   border-bottom: 2px solid #fbc02d;
 }
+
+/* Print Stylesheet Overrides */
+@media print {
+  body, html {
+    background: #fff !important;
+    color: #000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sidebar,
+  .mobile-header,
+  .sidebar-overlay,
+  .tabs-nav,
+  .pane-header button,
+  .pane-footer,
+  .title-header-row button,
+  #print-cat-btn,
+  #delete-cat-btn {
+    display: none !important;
+  }
+
+  .app-container {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .main-content {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .workspace {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .workspace-header {
+    border-bottom: 2px solid #000 !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 20px !important;
+  }
+
+  #workspace-cat-title {
+    color: #000 !important;
+    font-size: 24px !important;
+  }
+
+  .red-flags-banner {
+    background: #fff5f5 !important;
+    border: 2px solid #f87171 !important;
+    color: #991b1b !important;
+    padding: 12px !important;
+  }
+
+  .tab-pane {
+    display: block !important; /* Render all panes together in physical print */
+    margin-bottom: 30px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .summary-view, 
+  .prescription-container {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    padding: 12px !important;
+  }
+}

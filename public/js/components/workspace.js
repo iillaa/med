@@ -146,6 +146,14 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     });
   }
 
+  // Print CAT Button
+  const printCatBtn = document.getElementById('print-cat-btn');
+  if (printCatBtn) {
+    printCatBtn.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
   // Summary Edit Actions
   if (editSummaryBtn) {
     editSummaryBtn.addEventListener('click', () => {
