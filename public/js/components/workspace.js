@@ -114,6 +114,18 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     });
   }
 
+  // Back to Quiz button
+  const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
+  if (backToQuizBtn) {
+    backToQuizBtn.addEventListener('click', () => {
+      if (workspace) workspace.style.display = 'none';
+      const quizScreen = document.getElementById('quiz-screen');
+      if (quizScreen) quizScreen.style.display = 'flex';
+      // Deselect sidebar items
+      document.querySelectorAll('.cat-item').forEach(item => item.classList.remove('active'));
+    });
+  }
+
   // Summary Edit Actions
   if (editSummaryBtn) {
     editSummaryBtn.addEventListener('click', () => {
@@ -362,6 +374,16 @@ export function selectCat(cat) {
   if (workspace) workspace.style.display = 'flex';
   const quizScreen = document.getElementById('quiz-screen');
   if (quizScreen) quizScreen.style.display = 'none';
+
+  // Toggle "Retour au Quiz" button if a quiz is in progress
+  const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
+  if (backToQuizBtn) {
+    if (state.quizSession && state.quizSession.questions && state.quizSession.questions.length > 0) {
+      backToQuizBtn.style.display = 'inline-flex';
+    } else {
+      backToQuizBtn.style.display = 'none';
+    }
+  }
 
   // Populate basic info
   if (wsCategory) wsCategory.textContent = cat.category;

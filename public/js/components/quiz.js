@@ -89,7 +89,14 @@ export function initQuiz(onOpenCatCard) {
   // Setup Sidebar Trigger Button
   const sidebarQuizBtn = document.getElementById('start-quiz-nav-btn');
   if (sidebarQuizBtn) {
-    sidebarQuizBtn.addEventListener('click', showQuizSetup);
+    sidebarQuizBtn.addEventListener('click', () => {
+      showQuizSetup();
+      // Close sidebar on mobile
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth <= 850 && sidebar) {
+        sidebar.classList.remove('open');
+      }
+    });
   }
 
   // Hook event listeners
@@ -117,6 +124,8 @@ export function initQuiz(onOpenCatCard) {
     quitBtn.addEventListener('click', () => {
       quizScreen.style.display = 'none';
       if (welcomeScreen) welcomeScreen.style.display = 'flex';
+      // Clear active quiz session
+      state.quizSession.questions = [];
       // Highlight dashboard logo in sidebar
       document.querySelectorAll('.cat-item').forEach(item => item.classList.remove('active'));
     });
@@ -479,10 +488,14 @@ function showResults() {
 
   const session = state.quizSession;
   const percent = Math.round((session.score / session.questions.length) * 100);
+  
+  // Clear active quiz session questions so Back to Quiz button is hidden
+  const questionsCopy = [...session.questions];
+  session.questions = [];
 
   // Set score text
   if (resultsScore) {
-    resultsScore.textContent = `${session.score.toFixed(1)} / ${session.questions.length}`;
+    resultsScore.textContent = `${session.score.toFixed(1)} / ${questionsCopy.length}`;
   }
 
   // Set descriptive feedback based on score

@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CAT Médecine Générale - Formation & Réfresher</title>
+  <title>Dr.CAT — Rappel Clinique</title>
   <!-- Google Fonts: Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=9">
 
 </head>
 <body>
   <div class="app-container">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
+
+      <!-- LEVEL 1: Compact Header Strip -->
       <div class="sidebar-header">
         <div class="brand" id="brand-logo" style="cursor: pointer;">
-          <i class="fa-solid fa-user-md-pulse brand-icon"></i>
+          <img src="drcat_logo.png" alt="Dr.CAT Logo" class="brand-icon" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;">
           <div>
-            <h1>Dr. CAT</h1>
-            <p>Réfresher Médical</p>
+            <h1>Dr.CAT</h1>
+            <p>Rappel Clinique</p>
           </div>
         </div>
         <button class="toggle-sidebar-btn" id="close-sidebar-btn">
@@ -30,54 +32,73 @@
         </button>
       </div>
 
-      <!-- Search & Filters -->
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="search-input" placeholder="Rechercher une CAT...">
-      </div>
+      <!-- LEVEL 2: Collapsible Controls Band -->
+      <div class="sidebar-controls" id="sidebar-controls">
 
-      <div class="filter-section" style="margin-bottom: 12px;">
-        <label for="category-filter"><i class="fa-solid fa-filter"></i> Catégorie</label>
-        <select id="category-filter">
-          <option value="all">Toutes les spécialités</option>
-        </select>
-      </div>
-
-      <!-- Quick Status Filters -->
-      <div class="quick-status-filters">
-        <button class="status-pill active" data-filter="all">Tous</button>
-        <button class="status-pill" data-filter="todo">À faire</button>
-        <button class="status-pill" data-filter="doing">En cours</button>
-        <button class="status-pill" data-filter="done">Maîtrisé</button>
-        <button class="status-pill" data-filter="redflags" style="border-color: rgba(239, 68, 68, 0.3); color: var(--color-danger);"><i class="fa-solid fa-triangle-exclamation"></i> Red Flags</button>
-      </div>
-
-      <div style="padding: 0 20px 10px; display: flex; flex-direction: column; gap: 8px;">
-        <button class="action-btn" id="start-quiz-nav-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 700; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none;">
-          <i class="fa-solid fa-brain"></i> Mode Quiz 🧠
-        </button>
-        <button class="action-btn" id="add-cat-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 700;">
-          <i class="fa-solid fa-plus"></i> Ajouter une CAT
-        </button>
-      </div>
-
-      <!-- Stats Widget -->
-      <div class="stats-widget">
-        <div class="stats-header">
-          <span>Progression globale</span>
-          <span id="progress-percent">0%</span>
+        <!-- Always-visible: Search + Toggle chevron -->
+        <div class="search-row">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="search-input" placeholder="Rechercher une CAT...">
+          </div>
+          <button class="controls-toggle-btn" id="controls-toggle-btn" title="Afficher/Masquer les filtres">
+            <i class="fa-solid fa-chevron-up" id="controls-toggle-icon"></i>
+          </button>
         </div>
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" id="progress-fill"></div>
-        </div>
-        <div class="stats-counters">
-          <span class="stat-counter todo"><i class="fa-regular fa-circle"></i> <span id="count-todo">0</span></span>
-          <span class="stat-counter doing"><i class="fa-solid fa-spinner fa-spin-hover"></i> <span id="count-doing">0</span></span>
-          <span class="stat-counter done"><i class="fa-solid fa-circle-check"></i> <span id="count-done">0</span></span>
+
+        <!-- Collapsible inner panel -->
+        <div class="controls-panel" id="controls-panel">
+          <!-- Category filter -->
+          <select id="category-filter" class="category-select">
+            <option value="all">Toutes les spécialités</option>
+          </select>
+
+          <!-- Status pills -->
+          <div class="quick-status-filters">
+            <button class="status-pill active" data-filter="all">Tous</button>
+            <button class="status-pill" data-filter="todo">À faire</button>
+            <button class="status-pill" data-filter="doing">En cours</button>
+            <button class="status-pill" data-filter="done">Maîtrisé</button>
+          </div>
+
+          <!-- Action buttons row -->
+          <div class="sidebar-action-row">
+            <button class="action-btn sidebar-btn-quiz" id="start-quiz-nav-btn">
+              <i class="fa-solid fa-brain"></i> Quiz 🧠
+            </button>
+            <button class="action-btn sidebar-btn-add" id="add-cat-btn">
+              <i class="fa-solid fa-plus"></i> CAT
+            </button>
+          </div>
+
+          <!-- Slim progress bar -->
+          <div class="slim-progress">
+            <div class="slim-progress-top">
+              <span class="slim-progress-label"><i class="fa-solid fa-chart-line"></i> Progression globale</span>
+              <span id="progress-percent" class="slim-progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="stats-counters">
+              <span class="stat-counter todo">
+                <i class="fa-regular fa-circle"></i>
+                <span id="count-todo">0</span>
+              </span>
+              <span class="stat-counter doing">
+                <i class="fa-solid fa-spinner fa-spin-hover"></i>
+                <span id="count-doing">0</span>
+              </span>
+              <span class="stat-counter done">
+                <i class="fa-solid fa-circle-check"></i>
+                <span id="count-done">0</span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Scrollable CAT List -->
+      <!-- LEVEL 3: Scrollable CAT List (dominant, takes remaining space) -->
       <div class="cat-list-wrapper">
         <ul class="cat-list" id="cat-list">
           <!-- Dynamically populated -->
@@ -96,8 +117,8 @@
           <i class="fa-solid fa-bars"></i>
         </button>
         <div class="mobile-brand" id="mobile-brand-logo" style="cursor: pointer;">
-          <i class="fa-solid fa-user-md-pulse"></i>
-          <span>Dr. CAT</span>
+          <img src="drcat_logo.png" alt="Dr.CAT" style="width:24px;height:24px;border-radius:6px;object-fit:cover;">
+          <span>Dr.CAT</span>
         </div>
         <div class="mobile-status-placeholder"></div>
       </header>
@@ -111,7 +132,7 @@
               <p>Suivi de votre apprentissage des 55 conduites à tenir</p>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-              <button class="action-btn" id="admin-login-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
+              <button class="action-btn" id="admin-login-btn" style="font-size: 12px; padding: 6px 12px; display: none; align-items: center; gap: 6px;">
                 <i class="fa-solid fa-lock"></i> Connexion Admin
               </button>
               <button class="cancel-btn" id="reset-progress-btn" style="border-color: rgba(239, 68, 68, 0.4); color: var(--color-danger); font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
@@ -152,7 +173,8 @@
                 <span class="dash-card-label">À faire</span>
                 <span class="dash-card-val" id="dash-count-todo">0 / 55</span>
               </div>
-          </div>
+            </div><!-- /.dash-card.todo-card -->
+          </div><!-- /.dashboard-grid -->
 
           <!-- Admin Moderation Panel (Visible only to Admin) -->
           <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px;">
@@ -191,7 +213,12 @@
         <header class="workspace-header">
           <div class="title-area">
             <div class="title-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span class="cat-badge" id="workspace-cat-category" style="margin-bottom: 0;">Gastro-entérologie</span>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="cat-badge" id="workspace-cat-category" style="margin-bottom: 0;">Gastro-entérologie</span>
+                <button id="workspace-back-to-quiz-btn" class="action-btn" style="display: none; padding: 4px 10px; font-size: 11px; font-weight: 700; align-items: center; gap: 4px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; border-radius: var(--radius-sm);">
+                  <i class="fa-solid fa-arrow-left-long"></i> Retour au Quiz
+                </button>
+              </div>
               <button id="delete-cat-btn" style="display: none; background: none; border: none; color: var(--color-danger); font-size: 12.5px; font-weight: 600; cursor: pointer; align-items: center; gap: 6px; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--color-danger)'">
                 <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
               </button>

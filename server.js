@@ -157,23 +157,43 @@ onIndexUpdated(async () => {
   }
 });
 
-// Helper to check if the connection matches any local interface on the hosting device
+// Helper to check if the connection comes from the local physical device.
+// IMPORTANT: ngrok tunnels all traffic through 127.0.0.1 locally, so we CANNOT
+// rely solely on req.socket.remoteAddress. We must inspect X-Forwarded-For first:
+//   - If X-Forwarded-For exists and contains a non-local IP → external user (return false)
+//   - If X-Forwarded-For exists and all IPs are loopback → treat as local
+//   - If no X-Forwarded-For at all → trust the raw socket address
 function isLocalhostConnection(req) {
-  const ip = req.socket.remoteAddress || '';
-  const cleanIp = ip.replace(/^::ffff:/, '');
-  if (cleanIp === '127.0.0.1' || cleanIp === '::1') return true;
+  const LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
-  // Dynamically obtain host interfaces to match local device network connections
+  // 1. Check X-Forwarded-For (set by ngrok, nginx, etc.)
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    // The header may contain a comma-separated list; the first entry is the real client IP
+    const clientIp = forwarded.split(',')[0].trim();
+    const cleanClient = clientIp.replace(/^::ffff:/, '');
+    if (!LOCAL_IPS.has(cleanClient) && cleanClient !== 'localhost') {
+      // Real remote IP present in forwarding chain → definitely external
+      return false;
+    }
+    // All forwarded IPs appear to be loopback → treat as local
+    return true;
+  }
+
+  // 2. No forwarding header → trust the raw socket address
+  const rawIp = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+  if (LOCAL_IPS.has(rawIp)) return true;
+
+  // 3. Also match the machine's own LAN interfaces (e.g. direct LAN access without proxy)
   const os = require('os');
   const interfaces = os.networkInterfaces();
   const localAddresses = [];
-  
   for (const name of Object.keys(interfaces)) {
     for (const netInterface of interfaces[name]) {
       localAddresses.push(netInterface.address);
     }
   }
-  return localAddresses.includes(cleanIp);
+  return localAddresses.includes(rawIp);
 }
 
 // Helper to check if request is authenticated as admin using token

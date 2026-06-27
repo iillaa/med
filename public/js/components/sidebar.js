@@ -49,7 +49,27 @@ export function initSidebar(onSelectCat, onFilterTriggered) {
     });
   }
 
-  // Swipe Gestures
+  // Controls panel collapsible toggle
+  const controlsToggleBtn = document.getElementById('controls-toggle-btn');
+  const controlsPanel = document.getElementById('controls-panel');
+  const controlsToggleIcon = document.getElementById('controls-toggle-icon');
+
+  // Restore saved state (default: expanded)
+  const savedCollapsed = localStorage.getItem('sidebar_controls_collapsed') === 'true';
+  if (savedCollapsed && controlsPanel) {
+    controlsPanel.classList.add('collapsed');
+    if (controlsToggleIcon) controlsToggleIcon.classList.add('rotated');
+  }
+
+  if (controlsToggleBtn && controlsPanel) {
+    controlsToggleBtn.addEventListener('click', () => {
+      const isNowCollapsed = controlsPanel.classList.toggle('collapsed');
+      if (controlsToggleIcon) controlsToggleIcon.classList.toggle('rotated', isNowCollapsed);
+      localStorage.setItem('sidebar_controls_collapsed', isNowCollapsed);
+    });
+  }
+
+
   if (sidebar) {
     setupSwipeGestures(sidebar);
   }
