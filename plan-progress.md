@@ -22,10 +22,10 @@ graph TD
 - `[x]` **Layout Adjustments**: Strict 50/50 dashboard split, tablet spacing, and mobile scroll heights.
 - `[x]` **Branding Update**: Logo generated, name updated to *Dr.CAT — Rappel Clinique*.
 - `[x]` **Quiz Flow Fix**: Navigation link to reference sheet with a "Retour au Quiz" return button.
-- `[ ]` **Replace CSS `zoom: 0.9` hack**: Switch to standard CSS media queries for high-density tablets.
-- `[ ]` **Favicon Integration**: Set up the stethoscope logo as the browser favicon.
-- `[ ]` **Light/Dark Mode Toggle**: Allow switching styles; default to dark.
-- `[ ]` **Export/Backup Progress**: Allow downloading progress as JSON locally.
+- `[x]` **Replace CSS `zoom: 0.9` hack**: Switch to standard CSS media queries for high-density tablets.
+- `[x]` **Favicon Integration**: Set up the stethoscope logo as the browser favicon.
+- `[x]` **Light/Dark Mode Toggle**: Allow switching styles; default to dark.
+- `[x]` **Export/Backup Progress**: Allow downloading progress as JSON locally.
 
 ---
 
