@@ -26,6 +26,7 @@ graph TD
 - `[x]` **Favicon Integration**: Set up the stethoscope logo as the browser favicon.
 - `[x]` **Light/Dark Mode Toggle**: Allow switching styles; default to dark.
 - `[x]` **Export/Backup Progress**: Allow downloading progress as JSON locally.
+- `[x]` **PWA support & Persistence Warnings**: Linked manifest, service worker files, and context-aware storage warnings.
 
 ---
 

@@ -20,7 +20,7 @@
 ## 🟡 Medium Priority
 
 - `[x]` **Light mode toggle** — add a sun/moon switch in the sidebar header; use `prefers-color-scheme` as the default, allow manual override saved to localStorage
-- `[ ]` **Progress persistence notice** — make it clear to users that progress is saved locally (localStorage) and will be lost if they clear the browser; add an export/backup button
+- `[x]` **Progress persistence notice** — make it clear to users that progress is saved locally (localStorage) and will be lost if they clear the browser; add an export/backup button
 - `[x]` **Export progress** — allow downloading study progress as JSON (or PDF summary) so doctors can back up or transfer their data
 - `[ ]` **Better empty states** — the dashboard when no study progress exists looks sparse; add illustrated/helpful empty states with a call to action
 
@@ -28,7 +28,7 @@
 
 ## 🟢 Nice to Have
 
-- `[ ]` **PWA support** — add `manifest.json` + service worker so the app can be installed directly on the tablet home screen like a native app (best fit for medical professional workflow)
+- `[x]` **PWA support** — add `manifest.json` + service worker so the app can be installed directly on the tablet home screen like a native app (best fit for medical professional workflow)
 - `[ ]` **Keyboard shortcuts** — e.g. `S` to focus search, `Esc` to close modals, arrow keys to navigate the CAT list
 - `[ ]` **Progress bar entrance animation** — animate the sidebar progress bar and dashboard stats on page load for a polished feel
 - `[ ]` **Print / PDF view** — a clean, printable layout for individual CAT fiches so doctors can print a reference sheet
