@@ -59,12 +59,14 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
+html {
   height: 100dvh;
   overflow: hidden;
 }
 
 body {
+  height: 100dvh;
+  overflow: visible; /* allow position:fixed children (toasts) to escape */
   font-family: var(--font-sans);
   background-color: var(--bg-app);
   color: var(--text-primary);
