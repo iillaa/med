@@ -192,6 +192,20 @@
             </div><!-- /.dash-card.todo-card -->
           </div><!-- /.dashboard-grid -->
 
+          <!-- First-Run Welcome Banner (hidden after first CAT started) -->
+          <div id="first-run-banner" style="display: none; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.07), rgba(16,185,129,0.05)); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 20px; flex-wrap: wrap;">
+            <div style="font-size: 52px; line-height: 1; flex-shrink: 0;">🩺</div>
+            <div style="flex: 1; min-width: 200px;">
+              <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Bienvenue sur Dr.CAT !</h3>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">Sélectionnez une <strong>Conduite à Tenir</strong> dans la liste à gauche pour commencer. Marquez-la <em>En cours</em> pour qu'elle apparaisse ici lors de vos prochaines sessions.</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+              <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> 78 livres de référence indexés</span>
+              <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> Quiz clinique intégré</span>
+              <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> Notes & ordonnances personnalisables</span>
+            </div>
+          </div>
+
           <!-- Admin Moderation Panel (Visible only to Admin) -->
           <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px;">
             <h3 style="color: var(--color-primary);"><i class="fa-solid fa-user-shield"></i> Propositions de modifications en attente</h3>

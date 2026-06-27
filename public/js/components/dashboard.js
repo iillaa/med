@@ -173,7 +173,15 @@ export function renderDashboard(onSelectCat) {
     const inProgressCats = state.allCats.filter(cat => cat.status === 'doing');
     
     if (inProgressCats.length === 0) {
-      resumeList.innerHTML = `<li class="empty-state">Aucun cours en cours de révision. Choisissez-en un à gauche !</li>`;
+      resumeList.innerHTML = `
+        <li class="empty-state-card">
+          <i class="fa-solid fa-book-open-reader empty-state-icon"></i>
+          <div>
+            <strong>Aucune fiche en cours</strong>
+            <p>Sélectionnez une CAT dans la liste à gauche pour commencer votre révision.</p>
+          </div>
+        </li>
+      `;
     } else {
       // Show last 5
       inProgressCats.slice(-5).reverse().forEach(cat => {
@@ -227,7 +235,14 @@ export function renderDashboard(onSelectCat) {
     });
   }
 
-  // 4. Load Admin suggestions panel
+  // 4. First-run welcome banner (shown only when user hasn't started anything)
+  const firstRunBanner = document.getElementById('first-run-banner');
+  if (firstRunBanner) {
+    const hasStarted = state.allCats.some(c => c.status === 'doing' || c.status === 'done');
+    firstRunBanner.style.display = hasStarted ? 'none' : 'flex';
+  }
+
+  // 5. Load Admin suggestions panel
   if (adminPanel) {
     adminPanel.style.display = state.isAdmin ? 'block' : 'none';
   }
