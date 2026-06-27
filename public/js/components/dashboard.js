@@ -71,6 +71,62 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       alert("Erreur lors du rejet.");
     }
   };
+
+  // Export progress handler
+  const exportBtn = document.getElementById('export-progress-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const progressData = localStorage.getItem('dr_cat_user_progress');
+      if (!progressData || progressData === '{}') {
+        alert("Aucune progression enregistrée à exporter.");
+        return;
+      }
+      
+      const blob = new Blob([progressData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `drcat-progression-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Import progress handlers
+  const importBtn = document.getElementById('import-progress-btn');
+  const importFileInput = document.getElementById('import-progress-file');
+  if (importBtn && importFileInput) {
+    importBtn.addEventListener('click', () => {
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+          // Simple validation check: ensure it is a key-value object containing status fields
+          const keys = Object.keys(importedData);
+          if (keys.length > 0 && typeof importedData[keys[0]] === 'object') {
+            localStorage.setItem('dr_cat_user_progress', JSON.stringify(importedData));
+            alert("Progression importée avec succès ! L'application va se recharger.");
+            location.reload();
+          } else {
+            alert("Format de fichier invalide.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Erreur lors de la lecture du fichier d'importation.");
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
 }
 
 export function showDashboard(onSelectCat) {

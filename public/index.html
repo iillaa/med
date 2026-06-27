@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dr.CAT — Rappel Clinique</title>
+  <link rel="icon" type="image/png" href="drcat_logo.png">
+  <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
   <!-- Google Fonts: Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,9 +29,14 @@
             <p>Rappel Clinique</p>
           </div>
         </div>
-        <button class="toggle-sidebar-btn" id="close-sidebar-btn">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="theme-toggle-btn" class="controls-toggle-btn" style="background:none; border:none; color:var(--text-secondary); width:28px; height:28px;" title="Changer le thème">
+            <i class="fa-solid fa-moon" id="theme-toggle-icon"></i>
+          </button>
+          <button class="toggle-sidebar-btn" id="close-sidebar-btn">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </div>
 
       <!-- LEVEL 2: Collapsible Controls Band -->
@@ -131,7 +138,14 @@
               <h2>Tableau de Bord 🩺</h2>
               <p>Suivi de votre apprentissage des 55 conduites à tenir</p>
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <button class="action-btn" id="export-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+                <i class="fa-solid fa-download"></i> Exporter
+              </button>
+              <button class="action-btn" id="import-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+                <i class="fa-solid fa-upload"></i> Importer
+              </button>
+              <input type="file" id="import-progress-file" accept=".json" style="display: none;">
               <button class="action-btn" id="admin-login-btn" style="font-size: 12px; padding: 6px 12px; display: none; align-items: center; gap: 6px;">
                 <i class="fa-solid fa-lock"></i> Connexion Admin
               </button>

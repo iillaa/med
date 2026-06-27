@@ -38,6 +38,37 @@ let addCatBtn, addCatModal, closeAddCatModalBtn, cancelAddCatBtn, addCatForm;
 
 // Entry Point
 document.addEventListener('DOMContentLoaded', async () => {
+  // Theme Toggle Initialization
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const themeToggleIcon = document.getElementById('theme-toggle-icon');
+  
+  const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  if (currentTheme === 'light') {
+    document.body.classList.add('light-theme');
+    if (themeToggleIcon) {
+      themeToggleIcon.classList.remove('fa-moon');
+      themeToggleIcon.classList.add('fa-sun');
+    }
+  }
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      
+      if (themeToggleIcon) {
+        if (isLight) {
+          themeToggleIcon.classList.remove('fa-moon');
+          themeToggleIcon.classList.add('fa-sun');
+        } else {
+          themeToggleIcon.classList.remove('fa-sun');
+          themeToggleIcon.classList.add('fa-moon');
+        }
+      }
+    });
+  }
+
   // Initialize Components
   sidebar.initSidebar(selectCatWrapper, onFilterTriggered);
   workspace.initWorkspace(onStatusChange, onCatDeleted, onProgressReset);

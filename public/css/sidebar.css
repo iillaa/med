@@ -66,6 +66,24 @@
   padding: 4px;
 }
 
+#theme-toggle-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-smooth);
+}
+
+#theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-primary);
+}
+
+.light-theme #theme-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 /* ── LEVEL 2: Controls band ── */
 .sidebar-controls {
   flex-shrink: 0;
