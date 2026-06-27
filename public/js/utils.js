@@ -7,38 +7,100 @@
  * @param {number} [duration=5000] - Auto-dismiss delay in ms.
  */
 export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
-  // Remove existing toast of same type if still visible
+  // Inject toast styles once into <head> — bypasses CSS caching entirely
+  if (!document.getElementById('drcat-toast-styles')) {
+    const style = document.createElement('style');
+    style.id = 'drcat-toast-styles';
+    style.textContent = `
+      #drcat-toast {
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 999999 !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+        max-width: 320px !important;
+        width: max-content !important;
+        padding: 14px 16px !important;
+        background: #1e293b !important;
+        border: 1px solid #334155 !important;
+        border-left: 3px solid #06b6d4 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+        opacity: 0 !important;
+        transform: translateX(30px) !important;
+        transition: opacity 0.3s ease, transform 0.3s ease !important;
+        pointer-events: auto !important;
+        font-family: inherit !important;
+      }
+      #drcat-toast.toast-visible {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+      }
+      .light-theme #drcat-toast {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        border-left-color: #06b6d4 !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+      }
+      #drcat-toast .t-icon {
+        color: #06b6d4;
+        font-size: 15px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      #drcat-toast .t-msg {
+        font-size: 12.5px;
+        color: #94a3b8;
+        line-height: 1.5;
+        flex: 1;
+      }
+      .light-theme #drcat-toast .t-msg { color: #475569; }
+      #drcat-toast .t-close {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 13px;
+        padding: 0;
+        flex-shrink: 0;
+        margin-top: 1px;
+        line-height: 1;
+      }
+      #drcat-toast .t-close:hover { color: #f8fafc; }
+      .light-theme #drcat-toast .t-close:hover { color: #0f172a; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Remove any existing toast
   const existing = document.getElementById('drcat-toast');
   if (existing) existing.remove();
 
   const toast = document.createElement('div');
   toast.id = 'drcat-toast';
-  toast.className = 'drcat-toast';
   toast.innerHTML = `
-    <i class="fa-solid ${icon} drcat-toast-icon"></i>
-    <span class="drcat-toast-msg">${message}</span>
-    <button class="drcat-toast-close" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+    <i class="fa-solid ${icon} t-icon"></i>
+    <span class="t-msg">${message}</span>
+    <button class="t-close" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
   `;
 
   document.body.appendChild(toast);
 
-  // Animate in
-  requestAnimationFrame(() => toast.classList.add('drcat-toast--visible'));
+  // Trigger transition after browser has painted the initial state
+  setTimeout(() => toast.classList.add('toast-visible'), 30);
 
-  // Close button
-  toast.querySelector('.drcat-toast-close').addEventListener('click', () => {
-    toast.classList.remove('drcat-toast--visible');
+  const dismiss = () => {
+    toast.classList.remove('toast-visible');
     setTimeout(() => toast.remove(), 350);
-  });
+  };
 
-  // Auto-dismiss
-  const timer = setTimeout(() => {
-    toast.classList.remove('drcat-toast--visible');
-    setTimeout(() => toast.remove(), 350);
-  }, duration);
+  toast.querySelector('.t-close').addEventListener('click', dismiss);
 
-  // Pause on hover
+  let timer = setTimeout(dismiss, duration);
   toast.addEventListener('mouseenter', () => clearTimeout(timer));
+  toast.addEventListener('mouseleave', () => { timer = setTimeout(dismiss, 2000); });
 }
 
 /**

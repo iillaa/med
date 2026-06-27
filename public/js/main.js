@@ -38,13 +38,27 @@ let addCatBtn, addCatModal, closeAddCatModalBtn, cancelAddCatBtn, addCatForm;
 
 // Entry Point
 document.addEventListener('DOMContentLoaded', async () => {
-  // PWA Service Worker Registration
+  // PWA Service Worker — only register on production, unregister on dev to avoid stale caches
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then((reg) => console.log('PWA Service Worker registered with scope:', reg.scope))
-        .catch((err) => console.error('PWA Service Worker registration failed:', err));
-    });
+    const isDev = location.hostname === 'localhost' ||
+                  location.hostname === '127.0.0.1' ||
+                  location.hostname.endsWith('.ngrok-free.app') ||
+                  location.hostname.endsWith('.ngrok.io');
+
+    if (isDev) {
+      // Development: aggressively unregister all service workers and clear caches
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+      });
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    } else {
+      // Production: register the service worker for offline PWA support
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('PWA SW registered:', reg.scope))
+          .catch(err => console.error('PWA SW failed:', err));
+      });
+    }
   }
 
   // Theme Toggle Initialization
