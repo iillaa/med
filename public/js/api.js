@@ -268,3 +268,7 @@ export async function fetchPdfIndexStatus() {
     return {};
   }
 }
+
+export function hasRemoteServerConfigured() {
+  return typeof REMOTE_SERVER_URL === 'string' && REMOTE_SERVER_URL.trim().length > 0;
+}
