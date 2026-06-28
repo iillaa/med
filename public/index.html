@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 
 </head>
 <body>
@@ -251,7 +251,7 @@
               </div>
               <div style="display: flex; align-items: center; gap: 10px;">
                 <button id="print-cat-btn" class="action-btn print-compact-btn" title="Imprimer la fiche">
-                  <i class="fa-solid fa-print"></i> <span class="print-btn-text">Imprimer</span>
+                  <i class="fa-solid fa-print"></i>
                 </button>
                 <button id="delete-cat-btn" style="display: none; background: none; border: none; color: var(--color-danger); font-size: 12.5px; font-weight: 600; cursor: pointer; align-items: center; gap: 6px; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--color-danger)'">
                   <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
@@ -421,7 +421,7 @@
             <div class="pdf-search-box">
               <div class="search-input-wrapper">
                 <input type="text" id="pdf-content-search-input" placeholder="Rechercher un mot (ex: Amoxicilline, Asthme, Céphalée)...">
-                <button id="pdf-content-search-btn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Rechercher</button>
+                <button id="pdf-content-search-btn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> <span class="desktop-only-inline">Rechercher</span></button>
               </div>
               
               <div class="index-status-indicator" id="pdf-index-status">

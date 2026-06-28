@@ -211,6 +211,14 @@
     display: none !important; /* Hide instructions on mobile */
   }
 
+  #tab-search-pdf .tab-instruction {
+    display: block !important;
+    font-size: 11px !important;
+    color: var(--text-secondary) !important;
+    margin-bottom: 10px !important;
+    line-height: 1.4 !important;
+  }
+
   .summary-view {
     padding: 10px !important;
     font-size: 12.5px !important;
@@ -291,5 +299,31 @@
   
   .main-content {
     height: 100%;
+  }
+
+  .pdf-search-box {
+    padding: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .search-input-wrapper {
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+
+  #pdf-content-search-input {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    height: 36px !important;
+  }
+
+  #pdf-content-search-btn {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 40px !important;
   }
 }
