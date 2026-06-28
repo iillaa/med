@@ -294,8 +294,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 // App Initialization routine
 async function initApp() {
   try {
-    // Check if device has internet connection at startup
-    state.isOnlineAtStartup = navigator.onLine;
+    // Check if device has internet connection at startup (only true if online AND remote server configured)
+    if (api.isOfflineApp) {
+      state.isOnlineAtStartup = navigator.onLine && api.hasRemoteServerConfigured();
+    } else {
+      state.isOnlineAtStartup = true; // Node server mode is always online
+    }
     console.log("[Startup] Device online status:", state.isOnlineAtStartup);
 
     // 1. Check Admin status
@@ -328,15 +332,8 @@ async function initApp() {
       }
     }
 
-    // 2. Fetch CATs, PDFs, and PDF indexing status
-    let [cats, pdfs, pdfIndexStatus] = await Promise.all([
-      api.fetchCats(),
-      api.fetchPdfs(),
-      api.fetchPdfIndexStatus()
-    ]);
-
-    state.allPdfs = pdfs;
-    state.pdfIndexStatus = pdfIndexStatus;
+    // 2. Fetch CATs first to build the interface instantly
+    let cats = await api.fetchCats();
 
     // 3. Merge server CATs with local progress and local offline overrides
     const localProgress = getLocalProgress();
@@ -365,7 +362,7 @@ async function initApp() {
       };
     });
 
-    // 4. Update UI Components
+    // 4. Instantly render UI Components
     sidebar.populateCategoryFilter(state.allCats);
     sidebar.renderCatList(state.allCats, selectCatWrapper);
     calculateStats();
@@ -373,6 +370,24 @@ async function initApp() {
 
     // 5. Restore saved navigation state (if returning from PDF reader)
     workspace.restoreAppState();
+
+    // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
+    Promise.all([
+      api.fetchPdfs(),
+      api.fetchPdfIndexStatus()
+    ]).then(([pdfs, pdfIndexStatus]) => {
+      state.allPdfs = pdfs;
+      state.pdfIndexStatus = pdfIndexStatus;
+      
+      // Update UI components that depend on PDF statuses
+      workspace.updatePdfIndexStatus();
+      if (state.activeCat) {
+        workspace.selectCat(state.activeCat);
+      }
+      console.log("[Background] PDFs and index status loaded successfully.");
+    }).catch(err => {
+      console.error("[Background] Failed to load PDFs and index status:", err);
+    });
 
   } catch (err) {
     console.error('Error initializing app:', err);
