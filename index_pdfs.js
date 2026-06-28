@@ -2,7 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { PDFParse } = require('pdf-parse');
 
-const PDF_DIR = path.join(__dirname, 'cat-med', 'reference-pdfs');
+const LOCAL_PDF_DIR = '/storage/emulated/0/cat-med/CAT de Médecine Générale';
+const PDF_DIR = fs.existsSync(LOCAL_PDF_DIR)
+  ? LOCAL_PDF_DIR
+  : path.join(__dirname, 'cat-med', 'reference-pdfs');
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 
 // Status object to track indexing state in memory
