@@ -305,12 +305,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // App Initialization routine
 async function initApp() {
   try {
-    // Check if device has internet connection at startup (only true if online AND remote server configured)
-    if (api.isOfflineApp) {
-      state.isOnlineAtStartup = navigator.onLine && api.hasRemoteServerConfigured();
-    } else {
-      state.isOnlineAtStartup = true; // Node server mode is always online
-    }
+    // Check if device has internet connection at startup
+    state.isOnlineAtStartup = navigator.onLine;
     console.log("[Startup] Device online status:", state.isOnlineAtStartup);
 
     // 1. Check Admin status

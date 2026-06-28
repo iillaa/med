@@ -2,6 +2,9 @@
 
 This document tracks our long-term objectives across three distinct phases, transitioning from local development to cloud deployment, and finally to a native offline-first Android app.
 
+> [!IMPORTANT]
+> **Priority Strategy**: Core features and operational functionality (navigation stack preservation, file sharing, and print warnings) take absolute precedence. Once all elements are functionally 100% verified, we will initiate Phase 4: Performance optimization and UI/animation polish.
+
 ---
 
 ## 🗺️ Architectural Phases

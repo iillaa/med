@@ -241,7 +241,7 @@
   <!-- Header -->
   <header class="viewer-header">
     <div class="header-left">
-      <a href="/" class="back-btn" title="Retour à l'application"><i class="fa-solid fa-arrow-left"></i></a>
+      <a href="index.html" class="back-btn" title="Retour à l'application"><i class="fa-solid fa-arrow-left"></i></a>
       <span class="doc-title" id="doc-title">Chargement...</span>
     </div>
     
@@ -484,9 +484,11 @@
     const backBtn = document.querySelector('.back-btn');
     if (backBtn) {
       backBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         if (window.history.length > 1) {
-          e.preventDefault();
           window.history.back();
+        } else {
+          window.location.href = 'index.html';
         }
       });
     }

@@ -212,8 +212,12 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         if (notesSec) notesSec.style.display = 'none';
       }
 
-      // Fire print
-      window.print();
+      // Fire print (show informative toast in Capacitor offline app since native print is unsupported)
+      if (api.isOfflineApp) {
+        showToast("L'impression n'est pas prise en charge sur l'application mobile. Utilisez la version web pour imprimer.", "fa-circle-info", 4500);
+      } else {
+        window.print();
+      }
     });
   }
 
@@ -933,17 +937,17 @@ export function saveAppStateBeforeNavigation() {
     pdfSearchResultsHTML: searchResultsContainer ? searchResultsContainer.innerHTML : ''
   };
   
-  sessionStorage.setItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
+  localStorage.setItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
 }
 
 export function restoreAppState() {
-  const saved = sessionStorage.getItem('dr_cat_navigation_state');
+  const saved = localStorage.getItem('dr_cat_navigation_state');
   if (!saved) return;
   
   try {
     const data = JSON.parse(saved);
     // Clear it so it doesn't persist across fresh browser starts
-    sessionStorage.removeItem('dr_cat_navigation_state');
+    localStorage.removeItem('dr_cat_navigation_state');
     
     // 1. Restore active CAT card in workspace
     if (data.activeCatId) {
