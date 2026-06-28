@@ -7,7 +7,7 @@ const { indexPdfs, getIndexStatus, onIndexUpdated } = require('./index_pdfs');
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
 const DB_FILE = path.join(__dirname, 'cats_db.json');
-const PDF_DIR = path.join(__dirname, 'cat-med', 'reference-pdfs');
+const PDF_DIR = path.join(__dirname, '.cat-med', 'reference-pdfs');
 const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
 
 const app = express();
