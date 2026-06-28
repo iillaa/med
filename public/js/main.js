@@ -338,6 +338,9 @@ async function initApp() {
     calculateStats();
     dashboard.renderDashboard(selectCatWrapper);
 
+    // 5. Restore saved navigation state (if returning from PDF reader)
+    workspace.restoreAppState();
+
   } catch (err) {
     console.error('Error initializing app:', err);
     showToast(

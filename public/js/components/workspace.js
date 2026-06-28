@@ -446,6 +446,14 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   if (pdfReindexBtn) {
     pdfReindexBtn.addEventListener('click', triggerPdfReindex);
   }
+
+  // Intercept any PDF viewer links to save state before navigating away
+  document.addEventListener('click', (e) => {
+    const anchor = e.target.closest('a');
+    if (anchor && anchor.getAttribute('href') && anchor.getAttribute('href').includes('pdf_viewer.html')) {
+      saveAppStateBeforeNavigation();
+    }
+  });
 }
 
 export function selectCat(cat) {
@@ -853,9 +861,10 @@ async function performPdfSearch() {
 
     document.querySelectorAll('.pdf-search-result-card').forEach(card => {
       card.addEventListener('click', () => {
+        saveAppStateBeforeNavigation();
         const pdfFile = decodeURIComponent(card.getAttribute('data-pdf'));
         const page = card.getAttribute('data-page');
-        window.open(`/pdf_viewer.html?file=${encodeURIComponent(pdfFile)}&page=${page}`, '_blank');
+        window.location.href = `pdf_viewer.html?file=${encodeURIComponent(pdfFile)}&page=${page}`;
       });
     });
 
@@ -879,5 +888,75 @@ async function triggerPdfReindex() {
       return;
     }
     alert("Erreur lors de la réindexation.");
+  }
+}
+
+export function saveAppStateBeforeNavigation() {
+  const activeTabBtn = document.querySelector('.tab-btn.active');
+  const activeTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : null;
+  
+  const searchInput = document.getElementById('pdf-content-search-input');
+  const searchResultsContainer = document.getElementById('pdf-search-results-container');
+  
+  const stateToSave = {
+    activeCatId: state.activeCat ? state.activeCat.id : null,
+    activeTab: activeTab,
+    pdfSearchQuery: searchInput ? searchInput.value : '',
+    pdfSearchResultsHTML: searchResultsContainer ? searchResultsContainer.innerHTML : ''
+  };
+  
+  sessionStorage.setItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
+}
+
+export function restoreAppState() {
+  const saved = sessionStorage.getItem('dr_cat_navigation_state');
+  if (!saved) return;
+  
+  try {
+    const data = JSON.parse(saved);
+    // Clear it so it doesn't persist across fresh browser starts
+    sessionStorage.removeItem('dr_cat_navigation_state');
+    
+    // 1. Restore active CAT card in workspace
+    if (data.activeCatId) {
+      const catCard = document.querySelector(`.cat-item[data-id="${data.activeCatId}"]`);
+      if (catCard) {
+        catCard.click(); // Programmatically open the CAT card!
+      }
+    }
+    
+    // 2. Restore the active tab
+    if (data.activeTab && data.activeTab !== 'tab-summary') {
+      const tabBtn = document.querySelector(`.tab-btn[data-tab="${data.activeTab}"]`);
+      if (tabBtn) {
+        tabBtn.click(); // Programmatically click the tab button to switch to it!
+      }
+    }
+    
+    // 3. Restore PDF search input and results HTML
+    if (data.pdfSearchQuery) {
+      const searchInput = document.getElementById('pdf-content-search-input');
+      if (searchInput) {
+        searchInput.value = data.pdfSearchQuery;
+      }
+    }
+    if (data.pdfSearchResultsHTML) {
+      const resultsContainer = document.getElementById('pdf-search-results-container');
+      if (resultsContainer) {
+        resultsContainer.innerHTML = data.pdfSearchResultsHTML;
+        
+        // Rebind click handlers for the restored cards
+        resultsContainer.querySelectorAll('.pdf-search-result-card').forEach(card => {
+          card.addEventListener('click', () => {
+            saveAppStateBeforeNavigation();
+            const pdfFile = decodeURIComponent(card.getAttribute('data-pdf'));
+            const page = card.getAttribute('data-page');
+            window.location.href = `pdf_viewer.html?file=${encodeURIComponent(pdfFile)}&page=${page}`;
+          });
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Failed to restore app navigation state:", err);
   }
 }
