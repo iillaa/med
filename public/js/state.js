@@ -2,6 +2,7 @@
 export const state = {
   allCats: [],
   allPdfs: [],
+  pdfIndexStatus: {}, // stores indexing status { 'filename.pdf': { status: 'green|orange|red', pagesWithText: N, totalPages: M } }
   activeCat: null,
   activeStatusFilter: 'all',
   activePrescriptionVariantIndex: 0,

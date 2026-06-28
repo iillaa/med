@@ -311,13 +311,15 @@ async function initApp() {
       }
     }
 
-    // 2. Fetch CATs and PDFs
-    let [cats, pdfs] = await Promise.all([
+    // 2. Fetch CATs, PDFs, and PDF indexing status
+    let [cats, pdfs, pdfIndexStatus] = await Promise.all([
       api.fetchCats(),
-      api.fetchPdfs()
+      api.fetchPdfs(),
+      api.fetchPdfIndexStatus()
     ]);
 
     state.allPdfs = pdfs;
+    state.pdfIndexStatus = pdfIndexStatus;
 
     // 3. Merge server CATs with local progress and local offline overrides
     const localProgress = getLocalProgress();
