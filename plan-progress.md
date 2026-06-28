@@ -43,7 +43,8 @@ graph TD
 ### Phase 3: True Offline Android App (App Fork)
 *Goal: Wrap the frontend into an offline-first Android app package (.apk) that caches files locally and syncs with the Cloud Hub when connected.*
 
-- `[ ]` **Capacitor integration** to wrap the HTML/CSS/JS frontend.
-- `[ ]` **Offline Database**: Configure local data storage on the phone (SQLite or LocalStorage fallback) so the app works with zero network connection.
-- `[ ]` **Local PDF Bundler**: Embed reference PDFs directly into the app assets or download them to local device storage on first startup.
-- `[ ]` **Sync Engine**: Build the synchronization client to push suggestions to the Stage 2 Cloud server and pull approved global updates when online.
+- `[x]` **Capacitor integration** to wrap the HTML/CSS/JS frontend.
+- `[x]` **Offline Database**: Configure local data storage on the phone (LocalStorage fallback overrides & custom creations) so the app works with zero network connection.
+- `[x]` **Local PDF Bundler**: Embed reference PDFs directly into the app assets during build compilation (`build.js`).
+- `[x]` **Sync Engine**: Built client suggestion syncing using `REMOTE_SERVER_URL` and `isOnlineAtStartup` checking.
+- `[x]` **CI/CD Build Action**: Automate compile packaging to `.apk` on every GitHub push.

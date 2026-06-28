@@ -128,3 +128,22 @@ L'application est pré-configurée avec le widget Termux. Cliquez sur le widget 
 
 - **Sauvegarde automatique `.bak`** : Le fichier original est copié avant chaque écriture.
 - **Écriture atomique** : Les données transitent d'abord par un fichier `.tmp`, puis sont renommées — garantissant que le fichier principal n'est jamais corrompu en cas de coupure.
+
+---
+
+## 📱 Standalone Android App (Offline Mobile Mode)
+
+For offline clinical usage without running the Termux server:
+1. Switch to the `android-app` branch.
+2. Build assets: `node build.js && npx cap sync`.
+3. The standalone APK is built automatically on push to the `android-app` branch via GitHub Actions workflows and can be downloaded from the Action Run page.
+
+---
+
+## 📄 Documentation de Référence
+
+Consultez les fichiers suivants pour plus de détails techniques :
+* [Architecture Technique](file:///data/data/com.termux/files/home/med/technical_architecture.md) — Choix techniques, sécurité et gestion des données hors-ligne.
+* [Guide du Développeur](file:///data/data/com.termux/files/home/med/developer_guide.md) — Workflow Git, commandes CLI et configuration.
+* [Plan du Code (Codemap)](file:///data/data/com.termux/files/home/med/codemap.md) — Organisation des fichiers et dossiers.
+* [Leçons Apprises](file:///data/data/com.termux/files/home/med/lessons_learned.md) — Erreurs évitées et astuces techniques de débogage.
