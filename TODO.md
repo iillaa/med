@@ -1,5 +1,8 @@
 # Dr.CAT — Todo & Improvements
 
+> [!IMPORTANT]
+> **Strategic Roadmap Prioritization**: Focus first on stabilizing core app features and functional robustness (printing, navigation state retention, sharing, offline connection checks). High-performance animations and final UI polishing will be prioritized immediately after all features are 100% stable.
+
 ## 🔧 Technical Debt (Fix When Possible)
 
 - `[x]` **Replace `zoom: 0.9` hack on `.dashboard-container`**

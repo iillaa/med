@@ -75,13 +75,41 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
   // Export progress handler
   const exportBtn = document.getElementById('export-progress-btn');
   if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
+    exportBtn.addEventListener('click', async () => {
       const progressData = localStorage.getItem('dr_cat_user_progress');
       if (!progressData || progressData === '{}') {
         alert("Aucune progression enregistrée à exporter.");
         return;
       }
       
+      // If mobile standalone app, trigger native sharing dialog
+      if (api.isOfflineApp && navigator.share) {
+        try {
+          const file = new File([progressData], `drcat-progression.json`, { type: 'application/json' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'Progression Dr.CAT',
+              text: 'Sauvegarde de ma progression clinique Dr.CAT'
+            });
+            return;
+          }
+        } catch (err) {
+          console.error("File sharing failed, trying text sharing:", err);
+        }
+        
+        try {
+          await navigator.share({
+            title: 'Progression Dr.CAT',
+            text: progressData
+          });
+          return;
+        } catch (err) {
+          console.error("Native text sharing failed:", err);
+        }
+      }
+      
+      // Standard browser download fallback
       const blob = new Blob([progressData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
