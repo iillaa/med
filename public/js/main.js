@@ -312,21 +312,37 @@ async function initApp() {
     }
 
     // 2. Fetch CATs and PDFs
-    const [cats, pdfs] = await Promise.all([
+    let [cats, pdfs] = await Promise.all([
       api.fetchCats(),
       api.fetchPdfs()
     ]);
 
     state.allPdfs = pdfs;
 
-    // 3. Merge server CATs with local progress
+    // 3. Merge server CATs with local progress and local offline overrides
     const localProgress = getLocalProgress();
+    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    const customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+
+    // Combine standard CATs with custom ones created offline
+    if (api.isOfflineApp) {
+      // Filter out any locally deleted standard CATs
+      cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
+      // Append custom created CATs
+      cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
+    }
+
     state.allCats = cats.map(cat => {
       const localEntry = localProgress[cat.id] || {};
+      const overrides = localOverrides[cat.id] || {};
       return {
         ...cat,
         status: localEntry.status || 'todo',
-        notes: localEntry.notes || ''
+        notes: localEntry.notes || '',
+        summary: overrides.customSummary || cat.summary,
+        customSummary: overrides.customSummary || cat.summary,
+        ordonnance: overrides.customOrdonnance || cat.ordonnance,
+        customOrdonnance: overrides.customOrdonnance || cat.ordonnance
       };
     });
 

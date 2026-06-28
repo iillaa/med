@@ -1,0 +1,6 @@
+{
+  "appId": "com.drcat.app",
+  "appName": "Dr.CAT",
+  "webDir": "public",
+  "bundledWebRuntime": false
+}

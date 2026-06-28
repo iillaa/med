@@ -673,7 +673,7 @@ function createPdfCardElement(file, isGlobal = false) {
   const cleanName = getCleanPdfName(file);
   const card = document.createElement('a');
   const isDocx = file.toLowerCase().endsWith('.docx');
-  card.href = isDocx ? `/pdfs/${encodeURIComponent(file)}` : `/pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
+  card.href = isDocx ? `pdfs/${encodeURIComponent(file)}` : `pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
   card.target = '_blank';
   card.className = 'pdf-card';
   
@@ -700,7 +700,7 @@ export function renderAllPdfsList(allPdfs) {
     
     const isDocx = file.toLowerCase().endsWith('.docx');
     const iconClass = isDocx ? 'fa-regular fa-file-word' : 'fa-solid fa-file-pdf';
-    const href = isDocx ? `/pdfs/${encodeURIComponent(file)}` : `/pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
+    const href = isDocx ? `pdfs/${encodeURIComponent(file)}` : `pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
     
     li.innerHTML = `
       <a href="${href}" target="_blank" class="all-pdfs-list-item">

@@ -13,8 +13,8 @@ node_modules/
 .DS_Store
 .cat-med/reference-pdfs
 
-# Generated PDF index cache
-pdf_index.json
+# Generated PDF index cache (Tracked for offline search build packaging)
+# pdf_index.json
 
 # Local ngrok binary
 ngrok
