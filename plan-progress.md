@@ -51,3 +51,11 @@ graph TD
 - `[x]` **Local PDF Bundler**: Embed reference PDFs directly into the app assets during build compilation (`build.js`).
 - `[x]` **Sync Engine**: Built client suggestion syncing using `REMOTE_SERVER_URL` and `isOnlineAtStartup` checking.
 - `[x]` **CI/CD Build Action**: Automate compile packaging to `.apk` on every GitHub push.
+
+---
+
+### Phase 4: Diagnostics, Performance & Polish (Upcoming)
+*Goal: Provide logging tools, diagnose network/sync status on native devices, and improve animation smoothness.*
+
+- `[ ]` **Diagnostics Panel**: Add a settings panel in the app to configure `REMOTE_SERVER_URL` at runtime, test backend ping connectivity, see logs, and verify indexed PDF file counts.
+- `[ ]` **UI Transitions Smoothness**: Implement hardware-accelerated layouts, prune DOM elements, and add micro-animations.

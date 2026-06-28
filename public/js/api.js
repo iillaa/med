@@ -23,8 +23,9 @@ console.log("[API] Offline Standalone Mode:", isOfflineApp);
 let offlinePdfIndexCache = null;
 
 function getApiUrl(endpoint) {
-  if (isOfflineApp && REMOTE_SERVER_URL) {
-    return `${REMOTE_SERVER_URL}${endpoint}`;
+  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+  if (isOfflineApp && configuredUrl) {
+    return `${configuredUrl}${endpoint}`;
   }
   return endpoint;
 }
@@ -271,4 +272,37 @@ export async function fetchPdfIndexStatus() {
 
 export function hasRemoteServerConfigured() {
   return typeof REMOTE_SERVER_URL === 'string' && REMOTE_SERVER_URL.trim().length > 0;
+}
+
+export async function checkRealConnection() {
+  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+  
+  if (configuredUrl) {
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 2000); // 2s timeout
+      const res = await fetch(`${configuredUrl}/api/search-status`, {
+        signal: controller.signal
+      });
+      clearTimeout(id);
+      return res.ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // WAN connectivity HEAD request ping (avoiding CORS body parsing restrictions)
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 2000);
+    await fetch('https://httpbin.org/status/200', {
+      method: 'HEAD',
+      mode: 'no-cors',
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
