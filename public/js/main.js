@@ -159,6 +159,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert("Erreur lors de l'enregistrement de la nouvelle CAT.");
         }
       } else {
+        // Confirmation dialog for suggestions
+        const confirmSubmit = confirm(
+          "Attention : Cette nouvelle fiche ne sera pas ajoutée directement. Elle sera envoyée à l'administrateur du site pour relecture et validation avant d'être intégrée.\n\nSouhaitez-vous envoyer cette proposition ?"
+        );
+        if (!confirmSubmit) return;
+
         try {
           const result = await api.submitSuggestion({
             type: 'add',
@@ -292,22 +298,28 @@ async function initApp() {
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
 
-    // Update admin login button styling (only if we are on a local connection)
+    // Update admin login button and add CAT button visibility
     const adminLoginBtn = document.getElementById('admin-login-btn');
-    if (adminLoginBtn && isLocalDevice) {
-      adminLoginBtn.style.display = 'flex';
-      if (state.isAdmin) {
-        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
-        adminLoginBtn.classList.remove('action-btn');
-        adminLoginBtn.classList.add('cancel-btn');
-        adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        adminLoginBtn.style.color = 'var(--color-success)';
-      } else {
-        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
-        adminLoginBtn.classList.remove('cancel-btn');
-        adminLoginBtn.classList.add('action-btn');
-        adminLoginBtn.style.borderColor = '';
-        adminLoginBtn.style.color = '';
+    if (api.isOfflineApp) {
+      if (adminLoginBtn) adminLoginBtn.style.display = 'none';
+      if (addCatBtn) addCatBtn.style.display = 'none';
+    } else {
+      if (addCatBtn) addCatBtn.style.display = 'flex';
+      if (adminLoginBtn && isLocalDevice) {
+        adminLoginBtn.style.display = 'flex';
+        if (state.isAdmin) {
+          adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
+          adminLoginBtn.classList.remove('action-btn');
+          adminLoginBtn.classList.add('cancel-btn');
+          adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          adminLoginBtn.style.color = 'var(--color-success)';
+        } else {
+          adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
+          adminLoginBtn.classList.remove('cancel-btn');
+          adminLoginBtn.classList.add('action-btn');
+          adminLoginBtn.style.borderColor = '';
+          adminLoginBtn.style.color = '';
+        }
       }
     }
 

@@ -256,6 +256,12 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           alert("Erreur lors de la sauvegarde.");
         }
       } else {
+        // Confirmation dialog for suggestions
+        const confirmSave = confirm(
+          "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
+        );
+        if (!confirmSave) return;
+
         try {
           const result = await api.submitSuggestion({
             type: 'edit',
@@ -344,6 +350,12 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           alert("Erreur lors de la sauvegarde.");
         }
       } else {
+        // Confirmation dialog for suggestions
+        const confirmSave = confirm(
+          "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
+        );
+        if (!confirmSave) return;
+
         try {
           const result = await api.submitSuggestion({
             type: 'edit',
@@ -447,6 +459,11 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     pdfReindexBtn.addEventListener('click', triggerPdfReindex);
   }
 
+  // Hide reindexing indicator inside standalone app mode
+  if (api.isOfflineApp && pdfIndexStatus) {
+    pdfIndexStatus.style.display = 'none';
+  }
+
   // Intercept any PDF viewer links to save state before navigating away
   document.addEventListener('click', (e) => {
     const anchor = e.target.closest('a');
@@ -539,13 +556,24 @@ export function selectCat(cat) {
   if (summaryView) summaryView.style.display = 'block';
   if (summaryEditorWrapper) summaryEditorWrapper.style.display = 'none';
 
-  // Show delete button only for custom CATs (id > 55)
+  // Show delete and edit buttons only if online (offline mode disables modifications)
   const deleteBtn = document.getElementById('delete-cat-btn');
-  if (deleteBtn) {
-    if (cat.id > 55 && state.isAdmin) {
-      deleteBtn.style.display = 'inline-flex';
-    } else {
-      deleteBtn.style.display = 'none';
+  const editSummaryBtnEl = document.getElementById('edit-summary-btn');
+  const editPrescriptionBtnEl = document.getElementById('edit-prescription-btn');
+
+  if (api.isOfflineApp) {
+    if (deleteBtn) deleteBtn.style.display = 'none';
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'none';
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'none';
+  } else {
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'inline-flex';
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'inline-flex';
+    if (deleteBtn) {
+      if (cat.id > 55 && state.isAdmin) {
+        deleteBtn.style.display = 'inline-flex';
+      } else {
+        deleteBtn.style.display = 'none';
+      }
     }
   }
 }
