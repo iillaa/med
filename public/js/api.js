@@ -5,6 +5,9 @@ export const isOfflineApp =
   window.location.protocol === 'file:' || 
   window.location.protocol.startsWith('capacitor') ||
   window.location.hostname === '' ||
+  (window.location.hostname === 'localhost' && window.location.port !== '3000' && window.location.port !== '8080') ||
+  !!window.Capacitor ||
+  navigator.userAgent.toLowerCase().includes('capacitor') ||
   localStorage.getItem('dr_cat_force_offline') === 'true';
 
 console.log("[API] Offline Standalone Mode:", isOfflineApp);
@@ -23,12 +26,9 @@ function getHeaders(extraHeaders = {}) {
 
 export async function loginAdmin(password) {
   if (isOfflineApp) {
-    // Standalone app local admin bypass (useful for testing or local edits)
-    if (password === 'admin') {
-      localStorage.setItem('dr_cat_admin_token', 'local-token');
-      return { success: true, token: 'local-token' };
-    }
-    return { error: "Mot de passe incorrect en mode hors-ligne. Utilisez 'admin'." };
+    // Standalone app local admin bypass: accept any password for friction-free local customizations
+    localStorage.setItem('dr_cat_admin_token', 'local-token');
+    return { success: true, token: 'local-token' };
   }
 
   const res = await fetch('/api/login', {
