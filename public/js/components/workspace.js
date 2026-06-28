@@ -567,8 +567,9 @@ export function selectCat(cat) {
 
   if (api.isOfflineApp) {
     if (deleteBtn) deleteBtn.style.display = 'none';
-    if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'none';
-    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'none';
+    const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = displayStyle;
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = displayStyle;
   } else {
     if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'inline-flex';
     if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'inline-flex';
