@@ -538,6 +538,31 @@ app.get('/api/search-pdfs', (req, res) => {
   }
 });
 
+// PDF individual index status details API
+app.get('/api/pdf-index-status', (req, res) => {
+  try {
+    const statusMap = {};
+    for (const doc of pdfIndex) {
+      const totalPages = doc.pages ? doc.pages.length : 0;
+      const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
+      
+      let status = 'red';
+      if (pagesWithText > 0) {
+        status = (pagesWithText === totalPages) ? 'green' : 'orange';
+      }
+      statusMap[doc.pdf] = {
+        status,
+        pagesWithText,
+        totalPages
+      };
+    }
+    res.json(statusMap);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to get PDF index status summary" });
+  }
+});
+
 // PDF index status API
 app.get('/api/search-status', (req, res) => {
   try {
