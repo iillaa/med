@@ -163,3 +163,43 @@ export async function triggerReindexing() {
   if (!res.ok) throw new Error("Failed to trigger reindexing");
   return res.json();
 }
+
+export async function fetchPdfIndexStatus() {
+  if (isOfflineApp) {
+    try {
+      const indexRes = await fetch('data/pdf_index.json');
+      if (!indexRes.ok) throw new Error("Failed to load PDF index for status calculation");
+      const index = await indexRes.json();
+      
+      const statusMap = {};
+      for (const doc of index) {
+        const totalPages = doc.pages ? doc.pages.length : 0;
+        const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
+        
+        let status = 'red';
+        if (pagesWithText > 0) {
+          status = (pagesWithText === totalPages) ? 'green' : 'orange';
+        }
+        statusMap[doc.pdf] = {
+          status,
+          pagesWithText,
+          totalPages
+        };
+      }
+      return statusMap;
+    } catch (err) {
+      console.error("Failed to calculate offline PDF status map:", err);
+      return {};
+    }
+  }
+
+  // Server mode: fetch pre-calculated status from API
+  try {
+    const res = await fetch('/api/pdf-index-status', { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to fetch PDF index status from server");
+    return res.json();
+  } catch (err) {
+    console.error("Error fetching PDF status map from server:", err);
+    return {};
+  }
+}
