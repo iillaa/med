@@ -24,6 +24,20 @@
   min-width: 250px;
 }
 
+.title-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+@media (min-width: 851px) {
+  .title-header-row {
+    justify-content: flex-start !important;
+    gap: 16px;
+  }
+}
+
 .cat-badge {
   display: inline-block;
   padding: 3px 8px;

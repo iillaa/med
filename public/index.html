@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=15">
 
 </head>
 <body>
@@ -242,7 +242,7 @@
         <!-- Workspace Header -->
         <header class="workspace-header">
           <div class="title-area">
-            <div class="title-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="title-header-row">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span class="cat-badge" id="workspace-cat-category" style="margin-bottom: 0;">Gastro-entérologie</span>
                 <button id="workspace-back-to-quiz-btn" class="action-btn" style="display: none; padding: 4px 10px; font-size: 11px; font-weight: 700; align-items: center; gap: 4px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; border-radius: var(--radius-sm);">
@@ -310,9 +310,9 @@
           <!-- Summary Tab -->
           <div class="tab-pane active" id="tab-summary">
             <div class="pane-header">
-              <h3><i class="fa-solid fa-shield-halved"></i> Conduite Pratique Recommandée</h3>
+              <h3><i class="fa-solid fa-shield-halved"></i> Conduite Pratique<span class="desktop-only-inline"> Recommandée</span></h3>
               <button class="action-btn edit-summary-btn" id="edit-summary-btn">
-                <i class="fa-solid fa-pen"></i> Modifier la fiche
+                <i class="fa-solid fa-pen"></i> Modifier<span class="desktop-only-inline"> la fiche</span>
               </button>
             </div>
             
@@ -332,7 +332,7 @@
           <!-- Notes Tab -->
           <div class="tab-pane" id="tab-notes">
             <div class="pane-header">
-              <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations & Protocoles Locaux</h3>
+              <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations<span class="desktop-only-inline"> & Protocoles Locaux</span></h3>
             </div>
             <p class="tab-instruction">Prenez vos notes personnelles, observations cliniques ou ajustements ici. Elles sont sauvegardées localement.</p>
             <textarea class="notes-textarea" id="notes-input" placeholder="Saisir vos notes ici..."></textarea>
@@ -348,10 +348,10 @@
           <!-- Prescription Tab -->
           <div class="tab-pane" id="tab-prescription">
             <div class="pane-header" style="margin-bottom: 12px;">
-              <h3><i class="fa-solid fa-file-prescription"></i> Exemple d'Ordonnance Type</h3>
+              <h3><i class="fa-solid fa-file-prescription"></i> <span class="desktop-only-inline">Exemple d'</span>Ordonnance Type</h3>
               <div style="display: flex; gap: 8px;">
                 <button class="action-btn" id="edit-prescription-btn">
-                  <i class="fa-solid fa-pen"></i> Modifier l'ordonnance
+                  <i class="fa-solid fa-pen"></i> Modifier<span class="desktop-only-inline"> l'ordonnance</span>
                 </button>
                 <button class="action-btn copy-prescription-btn" id="copy-prescription-btn" title="Copier dans le presse-papier">
                   <i class="fa-regular fa-copy"></i> Copier
@@ -390,7 +390,7 @@
           <!-- PDFs Tab -->
           <div class="tab-pane" id="tab-pdfs">
             <div class="pane-header">
-              <h3><i class="fa-solid fa-file-pdf"></i> Documents Médicaux de Référence</h3>
+              <h3><i class="fa-solid fa-file-pdf"></i> Documents<span class="desktop-only-inline"> Médicaux</span> de Référence</h3>
             </div>
             <p class="tab-instruction">Voici les cours et documents PDF de votre dossier de référence correspondant à cette spécialité :</p>
             <div class="pdf-list" id="pdf-list">
@@ -414,7 +414,7 @@
           <!-- PDF Search Tab -->
           <div class="tab-pane" id="tab-search-pdf">
             <div class="pane-header">
-              <h3><i class="fa-solid fa-magnifying-glass"></i> Recherche Globale dans le texte des PDFs</h3>
+              <h3><i class="fa-solid fa-magnifying-glass"></i> Recherche Globale<span class="desktop-only-inline"> dans le texte des PDFs</span></h3>
             </div>
             <p class="tab-instruction">Saisissez un mot-clé (médicament, posologie, symptôme) pour fouiller dans le texte complet de vos 78 livres et guides de référence.</p>
             

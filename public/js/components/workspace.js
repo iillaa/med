@@ -54,6 +54,16 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     currentDateSpan.textContent = now.toLocaleDateString('fr-FR');
   }
 
+  // Collapsible Red Flags banner click handler on mobile
+  const redFlagsBanner = document.getElementById('red-flags-banner');
+  if (redFlagsBanner) {
+    redFlagsBanner.addEventListener('click', () => {
+      if (window.innerWidth <= 850) {
+        redFlagsBanner.classList.toggle('expanded');
+      }
+    });
+  }
+
   // Tabs navigation
   const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(btn => {
@@ -470,6 +480,17 @@ export function selectCat(cat) {
   if (wsCategory) wsCategory.textContent = cat.category;
   if (wsTitle) wsTitle.textContent = `${cat.id}. ${cat.title}`;
   if (wsRedFlags) wsRedFlags.textContent = cat.red_flags;
+  
+  // Toggle & Reset Red Flags Banner visibility and expanded status
+  const redFlagsBannerEl = document.getElementById('red-flags-banner');
+  if (redFlagsBannerEl) {
+    redFlagsBannerEl.classList.remove('expanded');
+    if (cat.red_flags && cat.red_flags.trim().length > 0) {
+      redFlagsBannerEl.style.display = 'block';
+    } else {
+      redFlagsBannerEl.style.display = 'none';
+    }
+  }
   
   // Set Status Buttons Active State
   document.querySelectorAll('.status-btn').forEach(btn => {

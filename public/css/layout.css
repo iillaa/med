@@ -1,4 +1,7 @@
 /* App Container Layout */
+.desktop-only-inline {
+  display: inline;
+}
 .app-container {
   display: flex;
   height: 100dvh;
@@ -61,6 +64,10 @@
 
 /* Responsive styles */
 @media (max-width: 850px) {
+  .desktop-only-inline {
+    display: none !important;
+  }
+
   .sidebar {
     position: absolute;
     left: -350px;
@@ -85,39 +92,201 @@
   
   .mobile-header {
     display: flex;
+    padding: 6px 12px;
   }
   
   .workspace-header {
-    padding: 16px;
+    padding: 6px 12px;
+    gap: 4px;
   }
   
   #workspace-cat-title {
-    font-size: 18px;
+    font-size: 14.5px;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .status-selector-area {
+    gap: 4px;
+    margin-top: 0;
+  }
+
+  .status-label {
+    display: none; /* Hide 'Statut:' label on mobile to save vertical space */
+  }
+
+  .status-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
   }
 
   .print-compact-btn {
-    padding: 5px 8px !important;
-    font-size: 11px !important;
+    padding: 3px 6px !important;
+    font-size: 10px !important;
   }
 
   .print-compact-btn .print-btn-text {
     display: none; /* Hide word text, show icon only on mobile */
   }
   
+  /* Collapsible red flags banner on mobile */
   .red-flags-banner {
-    margin: 12px 16px 0;
+    margin: 6px 12px 0;
+    padding: 6px 12px 6px 12px !important;
+    cursor: pointer;
+    position: relative;
+    max-height: 28px;
+    overflow: hidden;
+    transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .red-flags-banner.expanded {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .red-flags-banner::after {
+    content: "\f078"; /* fontawesome chevron-down */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 12px;
+    top: 6px;
+    font-size: 11px;
+    color: var(--color-danger);
+    transition: transform 0.2s ease;
+  }
+
+  .red-flags-banner.expanded::after {
+    transform: rotate(180deg);
+  }
+
+  .red-flags-title {
+    font-size: 9.5px !important;
+    margin-bottom: 0px !important;
+    line-height: 1.2;
+    padding-right: 18px; /* space for arrow */
+  }
+
+  #workspace-red-flags {
+    font-size: 11.5px !important;
+    line-height: 1.4 !important;
+    margin-top: 6px;
   }
   
   .tabs-nav {
-    margin: 12px 16px 0;
+    margin: 4px 12px 0;
+    gap: 4px !important;
+  }
+
+  .tab-btn {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
   }
   
   .tab-content-container {
-    padding: 16px 16px 40px;
+    padding: 8px 12px 16px;
+  }
+
+  .pane-header {
+    margin-bottom: 6px !important;
+  }
+
+  .pane-header h3 {
+    font-size: 12.5px !important;
+  }
+
+  .pane-header h3 i {
+    font-size: 11px !important;
+  }
+
+  .pane-header .action-btn,
+  .tab-pane .action-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .tab-instruction {
+    display: none !important; /* Hide instructions on mobile */
+  }
+
+  .summary-view {
+    padding: 10px !important;
+    font-size: 12.5px !important;
+    line-height: 1.45 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .summary-view p {
+    margin-bottom: 8px !important;
+  }
+
+  .summary-view ul {
+    padding-left: 16px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .summary-view li {
+    margin-bottom: 4px !important;
+  }
+
+  .summary-view table {
+    margin: 8px 0 !important;
+  }
+
+  .notes-textarea {
+    min-height: 200px !important;
+    padding: 10px !important;
+    font-size: 13px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .pane-footer {
+    margin-top: 6px !important;
   }
   
   .prescription-container {
-    padding: 16px;
+    padding: 12px 14px !important;
+    min-height: auto !important;
+    gap: 8px !important;
+    border-top-width: 4px !important;
+  }
+
+  .prescription-header {
+    padding-bottom: 6px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .clinic-info strong {
+    font-size: 12px !important;
+  }
+
+  .clinic-info span {
+    font-size: 10px !important;
+  }
+
+  .date-placeholder {
+    font-size: 11px !important;
+  }
+
+  .prescription-body {
+    gap: 10px !important;
+  }
+
+  .patient-line {
+    font-size: 11px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .prescription-content {
+    font-size: 12.5px !important;
+    line-height: 1.4 !important;
+  }
+
+  .prescription-footer {
+    padding-top: 8px !important;
+    font-size: 10px !important;
   }
   
   .main-content {
