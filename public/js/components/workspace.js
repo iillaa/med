@@ -673,8 +673,10 @@ function createPdfCardElement(file, isGlobal = false) {
   const cleanName = getCleanPdfName(file);
   const card = document.createElement('a');
   const isDocx = file.toLowerCase().endsWith('.docx');
-  card.href = isDocx ? `/pdfs/${encodeURIComponent(file)}` : `/pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
-  card.target = '_blank';
+  card.href = isDocx ? `pdfs/${encodeURIComponent(file)}` : `pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
+  if (isDocx) {
+    card.target = '_blank';
+  }
   card.className = 'pdf-card';
   
   const iconClass = isDocx 
@@ -725,7 +727,7 @@ export function renderAllPdfsList(allPdfs) {
     
     const isDocx = file.toLowerCase().endsWith('.docx');
     const iconClass = isDocx ? 'fa-regular fa-file-word' : 'fa-solid fa-file-pdf';
-    const href = isDocx ? `/pdfs/${encodeURIComponent(file)}` : `/pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
+    const href = isDocx ? `pdfs/${encodeURIComponent(file)}` : `pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
     
     const statusInfo = (state.pdfIndexStatus && state.pdfIndexStatus[file]) || { status: 'red', pagesWithText: 0, totalPages: 0 };
     const dotColor = isDocx ? '#ef4444' : (statusInfo.status === 'green' ? '#10b981' : (statusInfo.status === 'orange' ? '#f59e0b' : '#ef4444'));
@@ -738,7 +740,7 @@ export function renderAllPdfsList(allPdfs) {
           : `Non indexable (0/${statusInfo.totalPages} pages, PDF scanné sans texte)`));
 
     li.innerHTML = `
-      <a href="${href}" target="_blank" class="all-pdfs-list-item" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+      <a href="${href}" ${isDocx ? 'target="_blank"' : ''} class="all-pdfs-list-item" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
         <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex-grow: 1;">
           <i class="${iconClass}"></i>
           <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName} (${file.toLowerCase().endsWith('.docx') ? 'Word' : 'PDF'})</span>
