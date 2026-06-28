@@ -85,7 +85,7 @@
   color: var(--text-secondary);
 }
 
-.form-group input, .form-group textarea {
+.form-group input, .form-group textarea, .form-group select {
   width: 100%;
   padding: 10px 12px;
   background-color: var(--bg-input);
@@ -98,7 +98,7 @@
   transition: var(--transition-smooth);
 }
 
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
   border-color: var(--color-primary);
 }
 
