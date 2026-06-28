@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="drcat_logo.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -634,10 +634,12 @@
           </div>
           <div class="form-group">
             <label for="new-cat-category">Spécialité / Catégorie *</label>
-            <input type="text" id="new-cat-category" required placeholder="Ex: Gastro-entérologie, Pédiatrie..." list="categories-list-datalist">
-            <datalist id="categories-list-datalist">
-              <!-- Dynamically populated -->
-            </datalist>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <select id="new-cat-category-select" style="width: 100%; padding: 10px 12px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-sans); outline: none;">
+                <!-- Populated dynamically -->
+              </select>
+              <input type="text" id="new-cat-category" required placeholder="Ou saisissez une nouvelle spécialité...">
+            </div>
           </div>
           <div class="form-group">
             <label for="new-cat-red-flags">Signes de Gravité / Red Flags (séparés par des virgules ou retours à la ligne)</label>

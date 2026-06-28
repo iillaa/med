@@ -109,10 +109,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Wire up Modal Event Listeners
   if (addCatBtn) {
     addCatBtn.addEventListener('click', () => {
-      const datalist = document.getElementById('categories-list-datalist');
-      if (datalist) {
-        const categories = [...new Set(state.allCats.map(c => c.category))];
-        datalist.innerHTML = categories.map(cat => `<option value="${cat}"></option>`).join('');
+      const selectEl = document.getElementById('new-cat-category-select');
+      const inputEl = document.getElementById('new-cat-category');
+      
+      if (selectEl) {
+        const categories = [...new Set(state.allCats.map(c => c.category))].filter(Boolean).sort();
+        selectEl.innerHTML = `
+          <option value="">-- Sélectionner une spécialité existante --</option>
+          ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+        `;
+        
+        selectEl.onchange = () => {
+          if (selectEl.value && inputEl) {
+            inputEl.value = selectEl.value;
+          }
+        };
       }
       if (addCatModal) addCatModal.style.display = 'flex';
     });
