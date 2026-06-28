@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - android-app
+      - light-android
   workflow_dispatch:
 
 jobs:
