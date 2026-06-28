@@ -480,6 +480,17 @@
       }
     });
 
+    // Back button history navigation
+    const backBtn = document.querySelector('.back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', (e) => {
+        if (window.history.length > 1) {
+          e.preventDefault();
+          window.history.back();
+        }
+      });
+    }
+
     // Sync fullscreen button icon
     document.addEventListener('fullscreenchange', () => {
       const icon = fullscreenBtn.querySelector('i');
