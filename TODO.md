@@ -12,7 +12,7 @@
 
 - `[x]` **Add favicon** — browser tab shows blank icon; logo (`drcat_logo.png`) is ready, just needs a `<link rel="icon">` in the `<head>`
 - `[x]` **Add meta description** — needed for SEO and proper link previews when sharing
-- `[ ]` **Offline support** — clarify/implement behavior when the connection drops; data loading should not silently fail
+- `[x]` **Offline support** — clarify/implement behavior when the connection drops; data loading should not silently fail
 
 ---
 
@@ -28,6 +28,6 @@
 ## 🟢 Nice to Have
 
 - `[x]` **PWA support** — add `manifest.json` + service worker so the app can be installed directly on the tablet home screen like a native app (best fit for medical professional workflow)
-- `[ ]` **Keyboard shortcuts** — e.g. `S` to focus search, `Esc` to close modals, arrow keys to navigate the CAT list
-- `[ ]` **Progress bar entrance animation** — animate the sidebar progress bar and dashboard stats on page load for a polished feel
-- `[ ]` **Print / PDF view** — a clean, printable layout for individual CAT fiches so doctors can print a reference sheet
+- `[x]` **Keyboard shortcuts** — e.g. `S` to focus search, `Esc` to close modals, arrow keys to navigate the CAT list
+- `[/]` **Progress bar entrance animation** — animate the sidebar progress bar and dashboard stats on page load for a polished feel
+- `[/]` **Print / PDF view** — a clean, printable layout for individual CAT fiches so doctors can print a reference sheet

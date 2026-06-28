@@ -805,77 +805,202 @@
   border-bottom: 2px solid #fbc02d;
 }
 
+/* Hide print template block on screen by default */
+#print-template-container {
+  display: none;
+}
+
 /* Print Stylesheet Overrides */
 @media print {
-  body, html {
-    background: #fff !important;
-    color: #000 !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  .sidebar,
+  /* Hide the entire interactive web app wrapper */
+  .app-container, 
+  #add-cat-modal, 
   .mobile-header,
-  .sidebar-overlay,
-  .tabs-nav,
-  .pane-header button,
-  .pane-footer,
-  .title-header-row button,
-  #print-cat-btn,
-  #delete-cat-btn {
+  .sidebar, 
+  .main-content, 
+  .workspace {
     display: none !important;
   }
 
-  .app-container {
+  /* Reveal and format print container */
+  #print-template-container {
     display: block !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  .main-content {
-    display: block !important;
-    height: auto !important;
-    overflow: visible !important;
+    background: #ffffff !important;
+    color: #1e293b !important;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-size: 13.5px !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
     padding: 0 !important;
   }
 
-  .workspace {
-    display: block !important;
-    height: auto !important;
-    overflow: visible !important;
-    padding: 0 !important;
+  .print-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 12px !important;
   }
 
-  .workspace-header {
-    border-bottom: 2px solid #000 !important;
-    padding-bottom: 12px !important;
-    margin-bottom: 20px !important;
+  .print-logo {
+    height: 52px !important;
+    width: auto !important;
+    object-fit: contain !important;
   }
 
-  #workspace-cat-title {
-    color: #000 !important;
-    font-size: 24px !important;
+  .print-app-details {
+    flex-grow: 1 !important;
+    margin-left: 16px !important;
   }
 
-  .red-flags-banner {
-    background: #fff5f5 !important;
-    border: 2px solid #f87171 !important;
-    color: #991b1b !important;
-    padding: 12px !important;
+  .print-app-details h1 {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #0891b2 !important;
+    margin: 0 0 2px 0 !important;
   }
 
-  .tab-pane {
-    display: block !important; /* Render all panes together in physical print */
-    margin-bottom: 30px !important;
+  .print-app-details p {
+    font-size: 11px !important;
+    color: #64748b !important;
+    margin: 0 !important;
+  }
+
+  .print-date-stamp {
+    font-size: 11px !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+  }
+
+  .print-divider {
+    height: 2px !important;
+    background: #0891b2 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .print-cat-badge-wrap {
+    margin-bottom: 8px !important;
+  }
+
+  .print-category {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: #0891b2 !important;
+    background: rgba(8, 145, 178, 0.08) !important;
+    padding: 3px 8px !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(8, 145, 178, 0.2) !important;
+  }
+
+  .print-cat-title {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 20px 0 !important;
+  }
+
+  .print-section {
+    margin-bottom: 24px !important;
     page-break-inside: avoid !important;
   }
 
-  .summary-view, 
-  .prescription-container {
-    background: #fff !important;
-    color: #000 !important;
-    border: 1px solid #ccc !important;
-    box-shadow: none !important;
-    padding: 12px !important;
+  .print-section h3 {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 6px !important;
+    margin: 0 0 10px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .print-section h3 i {
+    color: #0891b2 !important;
+  }
+
+  /* Red flags special styling */
+  .print-red-flags {
+    background: #fff5f5 !important;
+    border: 1px solid #fee2e2 !important;
+    border-left: 4px solid #ef4444 !important;
+    border-radius: 6px !important;
+    padding: 14px 16px !important;
+  }
+
+  .print-red-flags h3 {
+    color: #991b1b !important;
+    border-bottom-color: #fee2e2 !important;
+  }
+
+  .print-red-flags h3 i {
+    color: #ef4444 !important;
+  }
+
+  .print-red-flags p {
+    color: #991b1b !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+  }
+
+  .print-section .summary-view {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 13px !important;
+  }
+
+  .print-section .summary-view h4, 
+  .print-section .summary-view strong {
+    color: #0f172a !important;
+  }
+
+  .print-footer {
+    border-top: 1px solid #e2e8f0 !important;
+    padding-top: 14px !important;
+    margin-top: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-quote {
+    font-size: 10px !important;
+    font-style: italic !important;
+    color: #64748b !important;
+    max-width: 70% !important;
+  }
+
+  .print-page-info {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    color: #94a3b8 !important;
+  }
+}
+
+/* Micro-animations: Slide-up on dashboard container cards */
+.dashboard-grid .dash-card, 
+.dashboard-block {
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-grid .dash-card:nth-child(1) { animation-delay: 0.05s; }
+.dashboard-grid .dash-card:nth-child(2) { animation-delay: 0.1s; }
+.dashboard-grid .dash-card:nth-child(3) { animation-delay: 0.15s; }
+.dashboard-grid .dash-card:nth-child(4) { animation-delay: 0.2s; }
+.dashboard-content-split .resume-block { animation-delay: 0.25s; }
+.dashboard-content-split .categories-block { animation-delay: 0.3s; }
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

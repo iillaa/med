@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 
 </head>
 <body>
@@ -249,20 +249,14 @@
                   <i class="fa-solid fa-arrow-left-long"></i> Retour au Quiz
                 </button>
               </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <button id="print-cat-btn" style="background: none; border: none; color: var(--text-secondary); font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">
-                  <i class="fa-solid fa-print"></i> Imprimer
-                </button>
-                <button id="delete-cat-btn" style="display: none; background: none; border: none; color: var(--color-danger); font-size: 12.5px; font-weight: 600; cursor: pointer; align-items: center; gap: 6px; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--color-danger)'">
-                  <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
-                </button>
-              </div>
+              <button id="delete-cat-btn" style="display: none; background: none; border: none; color: var(--color-danger); font-size: 12.5px; font-weight: 600; cursor: pointer; align-items: center; gap: 6px; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--color-danger)'">
+                <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
+              </button>
             </div>
             <h2 id="workspace-cat-title">CAT devant intoxication alimentaire</h2>
           </div>
           
-          <div class="status-selector-area">
-            <span class="status-label">Statut :</span>
+          <div class="status-selector-area" style="display: flex; align-items: center; gap: 16px;">
             <div class="status-btn-group">
               <button class="status-btn btn-todo" data-status="todo" title="À réviser">
                 <i class="fa-regular fa-circle"></i> <span>À faire</span>
@@ -274,6 +268,9 @@
                 <i class="fa-solid fa-circle-check"></i> <span>Maîtrisé</span>
               </button>
             </div>
+            <button id="print-cat-btn" class="action-btn" style="height: 38px; display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 0 16px; font-size: 13px;">
+              <i class="fa-solid fa-print"></i> Imprimer
+            </button>
           </div>
         </header>
 
@@ -661,6 +658,58 @@
           </div>
         </form>
       </div>
+    </div>
+  </div>
+
+  <!-- Beautiful Printed PDF Template Block (Only visible when printing) -->
+  <div id="print-template-container">
+    <div class="print-header">
+      <img src="drcat_logo.png" alt="Dr.CAT Logo" class="print-logo">
+      <div class="print-app-details">
+        <h1>Dr.CAT — Rappel Clinique</h1>
+        <p>Aide à la Décision Médicale Clinique & Protocoles Thérapeutiques</p>
+      </div>
+      <div class="print-date-stamp" id="print-date-stamp">Le: --/--/----</div>
+    </div>
+    
+    <div class="print-divider"></div>
+    
+    <div class="print-cat-badge-wrap">
+      <span class="print-category" id="print-val-category">Spécialité</span>
+    </div>
+    
+    <h2 class="print-cat-title" id="print-val-title">Titre de la Conduite à Tenir</h2>
+    
+    <div class="print-section print-red-flags" id="print-section-redflags">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> Signes de Gravité / Red Flags</h3>
+      <p id="print-val-redflags">Aucun signe de gravité spécifié.</p>
+    </div>
+    
+    <div class="print-section">
+      <h3><i class="fa-solid fa-file-invoice-document"></i> Fiche de Synthèse Clinique</h3>
+      <div class="summary-view" id="print-val-summary">...</div>
+    </div>
+    
+    <div class="print-section" id="print-section-prescription">
+      <h3><i class="fa-solid fa-prescription-bottle-medical"></i> Ordonnance Type / Traitement de Référence</h3>
+      <div class="prescription-container" style="background: #fff; color: #000; box-shadow: none; border: 1px solid #ddd; padding: 20px; border-radius: var(--radius-md);">
+        <div class="prescription-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-size: 11px;">
+          <strong>Ordonnance type recommandée</strong>
+        </div>
+        <div class="prescription-body" id="print-val-prescription" style="white-space: pre-wrap; font-family: var(--font-sans); font-size: 13px; line-height: 1.6;">
+          ...
+        </div>
+      </div>
+    </div>
+    
+    <div class="print-section" id="print-section-notes">
+      <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations & Protocoles Locaux</h3>
+      <div class="summary-view" id="print-val-notes" style="font-style: italic; white-space: pre-wrap;">Aucune note personnelle enregistrée.</div>
+    </div>
+    
+    <div class="print-footer">
+      <div class="print-quote">"Primum non nocere. L'art de la médecine consiste à divertir le patient pendant que la nature guérit la maladie."</div>
+      <div class="print-page-info">Généré via Dr.CAT Rappel Clinique</div>
     </div>
   </div>
 

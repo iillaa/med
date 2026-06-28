@@ -150,6 +150,59 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   const printCatBtn = document.getElementById('print-cat-btn');
   if (printCatBtn) {
     printCatBtn.addEventListener('click', () => {
+      if (!state.activeCat) return;
+
+      // Set Date
+      const dateEl = document.getElementById('print-date-stamp');
+      if (dateEl) {
+        dateEl.textContent = 'Le : ' + new Date().toLocaleDateString('fr-FR');
+      }
+
+      // Populate Texts
+      const catVal = document.getElementById('print-val-category');
+      const titleVal = document.getElementById('print-val-title');
+      const redFlagsVal = document.getElementById('print-val-redflags');
+      const summaryVal = document.getElementById('print-val-summary');
+      const prescriptionVal = document.getElementById('print-val-prescription');
+      const notesVal = document.getElementById('print-val-notes');
+
+      if (catVal) catVal.textContent = state.activeCat.category;
+      if (titleVal) titleVal.textContent = `${state.activeCat.id}. ${state.activeCat.title}`;
+      
+      // Handle Red Flags
+      const rfSec = document.getElementById('print-section-redflags');
+      if (state.activeCat.red_flags && state.activeCat.red_flags.trim().length > 0) {
+        if (redFlagsVal) redFlagsVal.textContent = state.activeCat.red_flags;
+        if (rfSec) rfSec.style.display = 'block';
+      } else {
+        if (rfSec) rfSec.style.display = 'none';
+      }
+
+      // Handle Summary
+      if (summaryVal) {
+        const rawText = state.activeCat.customSummary || state.activeCat.summary;
+        summaryVal.innerHTML = parseSummaryMarkdown(rawText);
+      }
+
+      // Handle Prescription
+      const presSec = document.getElementById('print-section-prescription');
+      if (state.activeCat.ordonnance && state.activeCat.ordonnance.trim().length > 0) {
+        if (prescriptionVal) prescriptionVal.textContent = state.activeCat.ordonnance;
+        if (presSec) presSec.style.display = 'block';
+      } else {
+        if (presSec) presSec.style.display = 'none';
+      }
+
+      // Handle Notes
+      const notesSec = document.getElementById('print-section-notes');
+      if (state.activeCat.notes && state.activeCat.notes.trim().length > 0) {
+        if (notesVal) notesVal.textContent = state.activeCat.notes;
+        if (notesSec) notesSec.style.display = 'block';
+      } else {
+        if (notesSec) notesSec.style.display = 'none';
+      }
+
+      // Fire print
       window.print();
     });
   }
