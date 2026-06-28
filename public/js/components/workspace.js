@@ -702,6 +702,17 @@ function createPdfCardElement(file, isGlobal = false) {
       <span>${isDocx ? 'Document Word' : (isGlobal ? 'Ouvrir le manuel général' : 'Ouvrir le cours PDF')}</span>
     </div>
   `;
+
+  // Bind click event to the status dot to show toast without opening file
+  const dot = card.querySelector('.pdf-status-dot');
+  if (dot) {
+    dot.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      showToast(dotTitle, "fa-circle-info", 4000);
+    });
+  }
+
   return card;
 }
 
@@ -735,6 +746,17 @@ export function renderAllPdfsList(allPdfs) {
         <span class="pdf-status-dot" style="width: 8px; height: 8px; background-color: ${dotColor}; border-radius: 50%; flex-shrink: 0; margin-left: 8px;" title="${dotTitle}"></span>
       </a>
     `;
+
+    // Bind click event to the status dot to show toast without opening file
+    const dot = li.querySelector('.pdf-status-dot');
+    if (dot) {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showToast(dotTitle, "fa-circle-info", 4000);
+      });
+    }
+
     allPdfsList.appendChild(li);
   });
 }
