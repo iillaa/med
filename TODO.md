@@ -29,5 +29,5 @@
 
 - `[x]` **PWA support** — add `manifest.json` + service worker so the app can be installed directly on the tablet home screen like a native app (best fit for medical professional workflow)
 - `[x]` **Keyboard shortcuts** — e.g. `S` to focus search, `Esc` to close modals, arrow keys to navigate the CAT list
-- `[/]` **Progress bar entrance animation** — animate the sidebar progress bar and dashboard stats on page load for a polished feel
-- `[/]` **Print / PDF view** — a clean, printable layout for individual CAT fiches so doctors can print a reference sheet
+- `[x]` **Progress bar entrance animation** — animate the sidebar progress bar and dashboard stats on page load for a polished feel
+- `[x]` **Print / PDF view** — a clean, printable layout for individual CAT fiches so doctors can print a reference sheet
