@@ -547,8 +547,13 @@ app.get('/api/pdf-index-status', (req, res) => {
       const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
       
       let status = 'red';
-      if (pagesWithText > 0) {
-        status = (pagesWithText === totalPages) ? 'green' : 'orange';
+      if (totalPages > 0) {
+        const ratio = pagesWithText / totalPages;
+        if (ratio >= 0.90) {
+          status = 'green';
+        } else if (ratio >= 0.05) {
+          status = 'orange';
+        }
       }
       statusMap[doc.pdf] = {
         status,
