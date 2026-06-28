@@ -173,20 +173,14 @@
   font-weight: 500;
 }
 
-/* Split panel: strict 50/50, full width, matched height */
+/* Split panel: auto-stacks when not enough room for two ≥380px columns */
 .dashboard-content-split {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   gap: 20px;
   align-items: stretch;
   width: 100%;
   box-sizing: border-box;
-}
-
-@media (max-width: 960px) {
-  .dashboard-content-split {
-    grid-template-columns: 1fr;
-  }
 }
 
 .dashboard-block {
@@ -302,10 +296,10 @@
   flex-shrink: 0;
 }
 
-/* Categories Progress block — strict 2-column inner grid */
+/* Categories Progress block — auto-stacks columns when space is tight */
 .categories-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
   gap: 10px;
   padding-right: 4px;
   max-height: 480px;
