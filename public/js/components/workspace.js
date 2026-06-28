@@ -477,7 +477,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   });
 }
 
-export function selectCat(cat) {
+export function selectCat(cat, preserveTab = false) {
   state.activeCat = cat;
   state.activePrescriptionVariantIndex = 0;
 
@@ -548,13 +548,15 @@ export function selectCat(cat) {
   // Load related PDFs
   loadRelatedPdfs(cat);
 
-  // Reset active tab to first tab (Summary)
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  const firstTabBtn = document.querySelector('.tab-btn[data-tab="tab-summary"]');
-  const firstTabPane = document.getElementById('tab-summary');
-  if (firstTabBtn) firstTabBtn.classList.add('active');
-  if (firstTabPane) firstTabPane.classList.add('active');
+  // Reset active tab to first tab (Summary) only if not preserving it
+  if (!preserveTab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    const firstTabBtn = document.querySelector('.tab-btn[data-tab="tab-summary"]');
+    const firstTabPane = document.getElementById('tab-summary');
+    if (firstTabBtn) firstTabBtn.classList.add('active');
+    if (firstTabPane) firstTabPane.classList.add('active');
+  }
 
   // Cancel any ongoing edit view
   if (summaryView) summaryView.style.display = 'block';
