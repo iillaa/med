@@ -1,6 +1,13 @@
 // Server communication routines for Dr. CAT
 // Support for both online (server-backed) mode and offline standalone (Capacitor/static) mode
 
+import { state } from './state.js';
+
+// If you deploy your server on a hosted address (e.g. Stage 2 of the roadmap),
+// write the full URL here (e.g. 'https://med.iillaa.com'). This allows the standalone
+// app to send its edits/suggestions when the device is online at startup.
+const REMOTE_SERVER_URL = '';
+
 export const isOfflineApp = 
   window.location.protocol === 'file:' || 
   window.location.protocol.startsWith('capacitor') ||
@@ -14,6 +21,13 @@ console.log("[API] Offline Standalone Mode:", isOfflineApp);
 
 // Module cache for client-side search in offline mode
 let offlinePdfIndexCache = null;
+
+function getApiUrl(endpoint) {
+  if (isOfflineApp && REMOTE_SERVER_URL) {
+    return `${REMOTE_SERVER_URL}${endpoint}`;
+  }
+  return endpoint;
+}
 
 function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
@@ -162,7 +176,7 @@ export async function deleteCatFromServer(id) {
 }
 
 export async function createCatOnServer(catData) {
-  if (isOfflineApp) {
+  if (isOfflineApp && !state.isOnlineAtStartup) {
     // Generate new local CAT and save to local storage overrides
     const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
     const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
@@ -180,7 +194,7 @@ export async function createCatOnServer(catData) {
     return { success: true, cat: newCat };
   }
 
-  const res = await fetch('/api/cats', {
+  const res = await fetch(getApiUrl('/api/cats'), {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(catData)
@@ -191,7 +205,7 @@ export async function createCatOnServer(catData) {
 }
 
 export async function submitSuggestion(suggestionData) {
-  if (isOfflineApp) {
+  if (isOfflineApp && !state.isOnlineAtStartup) {
     // Offline suggestion is directly merged into local overrides as a shortcut
     return saveCatDataToServer(suggestionData.catId, {
       summary: suggestionData.summary,
@@ -199,7 +213,7 @@ export async function submitSuggestion(suggestionData) {
     });
   }
 
-  const res = await fetch('/api/suggestions', {
+  const res = await fetch(getApiUrl('/api/suggestions'), {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(suggestionData)

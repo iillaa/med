@@ -3,6 +3,7 @@ export const state = {
   allCats: [],
   allPdfs: [],
   pdfIndexStatus: {}, // stores indexing status { 'filename.pdf': { status: 'green|orange|red', pagesWithText: N, totalPages: M } }
+  isOnlineAtStartup: false, // Tracks internet connection availability at app first load
   activeCat: null,
   activeStatusFilter: 'all',
   activePrescriptionVariantIndex: 0,

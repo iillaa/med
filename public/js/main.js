@@ -294,6 +294,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 // App Initialization routine
 async function initApp() {
   try {
+    // Check if device has internet connection at startup
+    state.isOnlineAtStartup = navigator.onLine;
+    console.log("[Startup] Device online status:", state.isOnlineAtStartup);
+
     // 1. Check Admin status
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
@@ -302,7 +306,8 @@ async function initApp() {
     const adminLoginBtn = document.getElementById('admin-login-btn');
     if (api.isOfflineApp) {
       if (adminLoginBtn) adminLoginBtn.style.display = 'none';
-      if (addCatBtn) addCatBtn.style.display = 'none';
+      // If standalone app has internet connection at startup, allow proposing new CATs
+      if (addCatBtn) addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
     } else {
       if (addCatBtn) addCatBtn.style.display = 'flex';
       if (adminLoginBtn && isLocalDevice) {
