@@ -318,7 +318,7 @@ export async function loadPendingSuggestions() {
       }
 
       html += `
-        <div class="suggestion-card" data-sug-id="${sug.id}">
+        <div class="suggestion-card" data-sug-id="${escapeHTML(sug.id)}">
           <div class="suggestion-header">
             <span class="suggestion-badge ${badgeClass}">${badgeText}</span>
             <span class="suggestion-time">${formattedDate}</span>
@@ -327,10 +327,10 @@ export async function loadPendingSuggestions() {
             <div style="font-size: 13px; line-height: 1.5;">${diffHtml}</div>
           </div>
           <div class="suggestion-actions">
-            <button class="suggestion-btn btn-reject" onclick="handleRejectSuggestion('${sug.id}')">
+            <button class="suggestion-btn btn-reject" data-action="reject">
               <i class="fa-solid fa-xmark"></i> Rejeter
             </button>
-            <button class="suggestion-btn btn-approve" onclick="handleApproveSuggestion('${sug.id}')">
+            <button class="suggestion-btn btn-approve" data-action="approve">
               <i class="fa-solid fa-check"></i> Accepter
             </button>
           </div>
@@ -339,6 +339,28 @@ export async function loadPendingSuggestions() {
     });
 
     suggestionsList.innerHTML = html;
+
+    // Event delegation for approve/reject buttons to avoid inline onclick handlers
+    suggestionsList.querySelectorAll('[data-action="approve"]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const card = e.target.closest('.suggestion-card');
+        if (!card) return;
+        const id = card.getAttribute('data-sug-id');
+        if (id && window.handleApproveSuggestion) {
+          await window.handleApproveSuggestion(id);
+        }
+      });
+    });
+    suggestionsList.querySelectorAll('[data-action="reject"]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const card = e.target.closest('.suggestion-card');
+        if (!card) return;
+        const id = card.getAttribute('data-sug-id');
+        if (id && window.handleRejectSuggestion) {
+          await window.handleRejectSuggestion(id);
+        }
+      });
+    });
   } catch (err) {
     console.error("Failed to load suggestions:", err);
     suggestionsList.innerHTML = '<p class="text-danger text-center" style="padding: 10px 0;">Erreur lors du chargement des propositions.</p>';

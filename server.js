@@ -100,7 +100,7 @@ async function initAdminPassword() {
     if (exists) {
       adminPassword = (await fs.promises.readFile(PASSWORD_FILE, 'utf-8')).trim();
     } else {
-      adminPassword = crypto.randomBytes(6).toString('hex'); // Secure 12-character hex password
+      adminPassword = crypto.randomBytes(16).toString('hex'); // 32-character hex password (~128 bits)
       await fs.promises.writeFile(PASSWORD_FILE, adminPassword, 'utf-8');
       console.log(`\n=================================================`);
       console.log(`[SECURITY] Generated Admin Password: ${adminPassword}`);
@@ -269,10 +269,10 @@ app.post('/api/cats/:id', async (req, res) => {
     const catId = parseInt(req.params.id);
     const { summary, ordonnance, category, title, red_flags } = req.body;
 
-    await dbLock.acquire(async () => {
+    const result = await dbLock.acquire(async () => {
       const cat = catsCache.find(c => c.id === catId);
       if (!cat) {
-        return res.status(404).json({ error: 'CAT fiche introuvable.' });
+        return { notFound: true };
       }
 
       if (summary !== undefined) cat.summary = summary;
@@ -282,8 +282,13 @@ app.post('/api/cats/:id', async (req, res) => {
       if (red_flags !== undefined) cat.red_flags = red_flags;
 
       await safeWriteJsonAsync(DB_FILE, catsCache);
-      res.json({ success: true, message: `CAT ${catId} mise à jour directement.` });
+      return { success: true, message: `CAT ${catId} mise à jour directement.` };
     });
+
+    if (result.notFound) {
+      return res.status(404).json({ error: 'CAT fiche introuvable.' });
+    }
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to save CAT data' });
@@ -301,7 +306,7 @@ app.post('/api/cats', async (req, res) => {
       return res.status(400).json({ error: 'Title and Category are required' });
     }
 
-    await dbLock.acquire(async () => {
+    const result = await dbLock.acquire(async () => {
       const nextId = catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
       const newCat = {
         id: nextId,
@@ -315,8 +320,10 @@ app.post('/api/cats', async (req, res) => {
 
       catsCache.push(newCat);
       await safeWriteJsonAsync(DB_FILE, catsCache);
-      res.json({ success: true, cat: newCat });
+      return { success: true, cat: newCat };
     });
+
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create new CAT' });
@@ -338,17 +345,22 @@ app.delete('/api/cats/:id', async (req, res) => {
       return res.status(400).json({ error: 'Cannot delete core CAT fiches (IDs 1-55)' });
     }
 
-    await dbLock.acquire(async () => {
+    const result = await dbLock.acquire(async () => {
       const initialLength = catsCache.length;
       catsCache = catsCache.filter(cat => cat.id !== catId);
 
       if (catsCache.length === initialLength) {
-        return res.status(404).json({ error: 'CAT fiche not found' });
+        return { notFound: true };
       }
 
       await safeWriteJsonAsync(DB_FILE, catsCache);
-      res.json({ success: true, message: `CAT ${catId} successfully deleted` });
+      return { success: true, message: `CAT ${catId} successfully deleted` };
     });
+
+    if (result.notFound) {
+      return res.status(404).json({ error: 'CAT fiche not found' });
+    }
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete CAT' });
@@ -371,7 +383,7 @@ app.post('/api/suggestions', async (req, res) => {
       return res.status(400).json({ error: 'Type (add/edit) et Data sont requis.' });
     }
 
-    await dbLock.acquire(async () => {
+    const result = await dbLock.acquire(async () => {
       const suggestionId = 'sug_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       const newSug = {
         id: suggestionId,
@@ -383,8 +395,10 @@ app.post('/api/suggestions', async (req, res) => {
 
       suggestionsCache.push(newSug);
       await safeWriteJsonAsync(SUGGESTIONS_FILE, suggestionsCache);
-      res.json({ success: true, message: 'Proposition envoyée à l\'administrateur pour validation.', suggestion: newSug });
+      return { success: true, message: 'Proposition envoyée à l\'administrateur pour validation.', suggestion: newSug };
     });
+
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to save suggestion' });
@@ -399,10 +413,10 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
   try {
     const sugId = req.params.id;
 
-    await dbLock.acquire(async () => {
+    const result = await dbLock.acquire(async () => {
       const index = suggestionsCache.findIndex(s => s.id === sugId);
       if (index === -1) {
-        return res.status(404).json({ error: 'Proposition introuvable.' });
+        return { notFound: true };
       }
 
       const sug = suggestionsCache[index];
@@ -430,7 +444,7 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
           if (sug.data.red_flags !== undefined) cat.red_flags = sug.data.red_flags;
           await safeWriteJsonAsync(DB_FILE, catsCache);
         } else {
-          return res.status(404).json({ error: 'Fiche CAT d\'origine introuvable.' });
+          return { notFound: true, message: 'Fiche CAT d\'origine introuvable.' };
         }
       }
 
@@ -438,8 +452,13 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
       suggestionsCache.splice(index, 1);
       await safeWriteJsonAsync(SUGGESTIONS_FILE, suggestionsCache);
       
-      res.json({ success: true, message: 'Proposition approuvée et intégrée à l\'application.' });
+      return { success: true, message: 'Proposition approuvée et intégrée à l\'application.' };
     });
+
+    if (result.notFound) {
+      return res.status(404).json({ error: result.message || 'Proposition introuvable.' });
+    }
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to approve suggestion' });
@@ -454,16 +473,21 @@ app.post('/api/suggestions/:id/reject', async (req, res) => {
   try {
     const sugId = req.params.id;
 
-    await dbLock.acquire(async () => {
+    const result = await dbLock.acquire(async () => {
       const index = suggestionsCache.findIndex(s => s.id === sugId);
       if (index === -1) {
-        return res.status(404).json({ error: 'Proposition introuvable.' });
+        return { notFound: true };
       }
 
       suggestionsCache.splice(index, 1);
       await safeWriteJsonAsync(SUGGESTIONS_FILE, suggestionsCache);
-      res.json({ success: true, message: 'Proposition rejetée et supprimée.' });
+      return { success: true, message: 'Proposition rejetée et supprimée.' };
     });
+
+    if (result.notFound) {
+      return res.status(404).json({ error: 'Proposition introuvable.' });
+    }
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to reject suggestion' });
