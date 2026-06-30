@@ -21,7 +21,7 @@ const cats = [
 - Antibiotiques : Généralement contre-indiqués (sauf cas sévères avec fièvre élevée, syndrome dysentérique : Ciprofloxacine 500mg 2x/j pendant 3-5 jours).`,
     red_flags: "Fièvre > 38.5°C, syndrome dysentérique (sang/glaires dans les selles), déshydratation clinique (perte de poids > 5%), terrain à risque (nourrisson, sujet âgé, immunodéprimé).",
     ordonnance: "1. SRO (Solutés de Réhydratation Orale) : 1 sachet dans 1L d'eau minérale, à boire par petites gorgées.\n2. Tiorfan (Racécadotril) 100mg : 1 gélule 3 fois par jour, max 7 jours.\n3. Spasfon (Phloroglucinol) 80mg : 2 comprimés en cas de douleur abdominale, max 3 fois par jour.",
-    pdf_keywords: ["Gastrologie", "M茅dicaments en Gastrologie", "Urgences"]
+    pdf_keywords: ["Gastrologie", "Médicaments en Gastrologie", "Urgences"]
   },
   {
     id: 2,
@@ -41,7 +41,7 @@ const cats = [
 - Probiotiques pour restaurer la flore.`,
     red_flags: "Diarrhée fébrile, rectorragies ou méléna, déshydratation, immunodépression, retour de voyage tropical, persistance au-delà de 5 jours.",
     ordonnance: "1. Diosmectite (Smecta) : 1 sachet 3 fois par jour au moment des repas pendant 3 à 5 jours.\n2. Racécadotril 100mg : 1 gélule 3 fois par jour.\n3. Paracétamol 1g : 1 comprimé en cas de fièvre, max 4 par jour.",
-    pdf_keywords: ["Gastrologie", "M茅dicaments en Gastrologie", "Urgences"]
+    pdf_keywords: ["Gastrologie", "Médicaments en Gastrologie", "Urgences"]
   },
   {
     id: 3,
@@ -56,7 +56,7 @@ const cats = [
 - Traitement de première intention : Règles hygiéno-diététiques + IPP (Inhibiteurs de la Pompe à Protons) à demi-dose ou pleine dose selon la sévérité et la présence de signes d'œsophagite.`,
     red_flags: "Pour les vomissements : Céphalées violentes, raideur de nuque (méningite), douleur abdominale aiguë, arrêt des matières et des gaz (occlusion). Pour le RGO : Dysphagie (difficulté à avaler), odynophagie, perte de poids inexpliquée, anémie.",
     ordonnance: "**Pour le RGO atypique ou sévère :**\n1. Oméprazole 20mg : 1 gélule le matin à jeun pendant 4 semaines.\n2. Gaviscon (Alginate de sodium / Bicarbonate de sodium) : 1 sachet après les 3 repas principaux et au coucher si nécessaire.\n\n**Pour les vomissements :**\n1. Vogalène (Métopimazine) 15mg : 1 gélule en cas de nausée ou vomissement (max 3/j).",
-    pdf_keywords: ["Gastrologie", "M茅dicaments en Gastrologie", "Urgences"]
+    pdf_keywords: ["Gastrologie", "Médicaments en Gastrologie", "Urgences"]
   },
   {
     id: 4,
@@ -72,7 +72,7 @@ const cats = [
 - Laxatifs stimulants (Séné, Bisacodyl) à réserver au court terme pour éviter la maladie des laxatifs.`,
     red_flags: "Apparition récente chez un patient de > 50 ans, sang dans les selles (rectorragies), perte de poids, altération de l'état général, douleurs abdominales intenses ou arrêt des gaz (occlusion).",
     ordonnance: "1. Macrogol 4000 (Forlax) 10g : 1 à 2 sachets par jour, de préférence le matin dans un verre d'eau.\n2. Lactulose sirop : 1 à 2 cuillères à soupe par jour en cas de selles dures.\n3. Suppositoire de Glycérine : 1 suppositoire à la demande en cas de constipation terminale (dyschésie).",
-    pdf_keywords: ["Gastrologie", "M茅dicaments en Gastrologie"]
+    pdf_keywords: ["Gastrologie", "Médicaments en Gastrologie"]
   },
   {
     id: 5,
@@ -89,7 +89,7 @@ const cats = [
 - Échographie abdominale à réaliser rapidement pour confirmer la lithiase vésiculaire.`,
     red_flags: "Présence de fièvre ou frissons (suggérant une cholécystite ou angiocholite), ictère (jaunisse) ou urines foncées (migration dans la voie biliaire principale).",
     ordonnance: "1. Profénid (Kétoprofène) 100mg : 1 comprimé 2 fois par jour pendant les repas (max 5 jours) + IPP protecteur si antécédents d'ulcère.\n2. Spasfon (Phloroglucinol) 80mg : 2 comprimés à renouveler en cas de spasme douloureux.\n3. Paracétamol 1g : 1 comprimé toutes les 6 heures si douleur résiduelle.",
-    pdf_keywords: ["Gastrologie", "M茅dicaments en Gastrologie", "Urgences"]
+    pdf_keywords: ["Gastrologie", "Médicaments en Gastrologie", "Urgences"]
   },
   {
     id: 6,
@@ -111,7 +111,7 @@ const cats = [
 - Cholécystite : Hospitalisation en chirurgie, antibiothérapie IV, mise à jeun, chirurgie dans les 24-72h.`,
     red_flags: "Signes de sepsis (tachycardie, hypotension), ictère associé (suspicion d'angiocholite sous-jacente - urgence extrême).",
     ordonnance: "**En cas de suspicion de Cholécystite :** Référencer immédiatement aux urgences chirurgicales avec :\n1. Lettre d'orientation détaillée.\n2. Échographie abdominale si disponible.\n3. NFS, CRP, Bilan hépatique (ASAT/ALAT, Bilirubine totale/libre, PAL, GGT).",
-    pdf_keywords: ["Gastrologie", "Urgences", "M茅dicaments des urgences"]
+    pdf_keywords: ["Gastrologie", "Urgences", "Médicaments des urgences"]
   },
   {
     id: 7,
@@ -161,7 +161,7 @@ const cats = [
 - Dompéridone (Motilium) 10mg, Métoclopramide (Primpéran) 10mg, Métopimazine (Vogalène) 15mg. Attention au risque d'allongement de l'intervalle QT (surtout Dompéridone).`,
     red_flags: "Surdosage en antispasmodiques ou effets indésirables des IPP au long cours (carence Vit B12, ostéoporose, infections digestives à C. difficile).",
     ordonnance: "**Prescription type pour colopathie fonctionnelle douloureuse :**\n1. Duspatalin (Mébéverine) 200mg : 1 gélule matin et soir au moment des repas pendant 15 jours.\n2. Debridat (Trimébutine) 200mg : 1 comprimé 3 fois par jour en cas de spasme ou ballonnements.",
-    pdf_keywords: ["M茅dicaments en Gastrologie", "M茅dicaments", "Gastrologie"]
+    pdf_keywords: ["Médicaments en Gastrologie", "Médicaments", "Gastrologie"]
   },
   {
     id: 9,
@@ -187,7 +187,7 @@ const cats = [
 - Veinotoniques (Daflon) autorisés. Laxatifs osmotiques (Macrogol) indispensables pour ramollir les selles.`,
     red_flags: "Saignement abondant provoquant une anémie, thrombose hémorroïdaire interne irréductible et hyperalgique (étranglement hémorroïdaire - urgence).",
     ordonnance: "**Pour crise hémorroïdaire simple (Adulte) :**\n1. Daflon 500mg : 2 cp midi et soir pendant 4 jours, puis 1 cp midi et soir pendant 3 jours.\n2. Titanoréine à la Lidocaïne crème : 1 application locale après la toilette et après chaque selle, max 3x/j pendant 5 jours.\n3. Macrogol 10g : 1 sachet le matin dans un verre d'eau.",
-    pdf_keywords: ["Gastrologie", "Gyn茅cologie", "M茅dicaments et Gross猫sse"]
+    pdf_keywords: ["Gastrologie", "Gynécologie", "Médicaments et Grossesse"]
   },
   {
     id: 10,
@@ -209,7 +209,7 @@ const cats = [
 - Antiémétique : L'Ondansétron (Zophren) en dose unique orale peut être proposé en cas de vomissements gênant la réhydratation (hors AMM en France pour la GEA mais largement utilisé). Éviter le Métoclopramide ou Dompéridone (risques neurologiques).`,
     red_flags: "Léthargie, somnolence, pli cutané persistant, absence d'urines depuis > 6 heures, perte de poids > 10%, vomissements bilieux ou fécaloïdes, fièvre élevée mal tolérée.",
     ordonnance: "1. Adiaril (SRO) : 1 sachet à diluer dans 200 ml d'eau peu minéralisée. Proposer à volonté les premières heures par petites gorgées fréquemment répétées.\n2. Tiorfan Nourrisson (10mg) ou Enfant (30mg) selon le poids : 1 sachet 3 fois par jour à mélanger à l'alimentation ou l'eau.\n3. Paracétamol sirop (pédiatrique) : 1 dose-poids toutes les 6 heures en cas de fièvre > 38.5°C.",
-    pdf_keywords: ["P茅diatrie", "M茅dicaments en P茅diatrie", "Urgences"]
+    pdf_keywords: ["Pédiatrie", "Médicaments en Pédiatrie", "Urgences"]
   },
   {
     id: 11,
@@ -227,7 +227,7 @@ const cats = [
 - Proposer la vaccination des sujets contact de l'entourage dans les 14 jours.`,
     red_flags: "Signes d'hépatite fulminante (extrêmement rare mais grave) : Somnolence, troubles du comportement (encéphalopathie hépatique), effondrement du taux de prothrombine (TP < 50%).",
     ordonnance: "1. Repos à domicile.\n2. Mesures d'hygiène stricte des mains pour l'entourage.\n3. Éviter tout médicament inutile.\n4. Paracétamol : Uniquement en cas de fièvre mal tolérée à dose minimale (10 mg/kg par prise, max 4x/j, à espacer).",
-    pdf_keywords: ["P茅diatrie", "Infectieux", "Bilans"]
+    pdf_keywords: ["Pédiatrie", "Infectieux", "Bilans"]
   },
   {
     id: 12,
@@ -250,7 +250,7 @@ const cats = [
 - Molécules : Bêtabloquants (Propranolol), Amitriptyline (Laroxyl) à faible dose, Topiramate.`,
     red_flags: "Céphalée brutale en \"coup de tonnerre\" (suspicion d'hémorragie sous-arachnoïdienne - urgence vitale), céphalée progressive d'apparition récente après 50 ans, fièvre ou raideur de nuque associée, anomalie à l'examen neurologique.",
     ordonnance: "**Traitement de crise :**\n1. Kétoprofène (Bi-Profénid) 150mg : 1 comprimé à prendre dès le début de la crise migraineuse. À renouveler après 2 heures si nécessaire (max 2/j).\n2. Zolmitriptan 2.5mg : 1 comprimé en cas d'échec de l'AINS après 2 heures (ne pas dépasser 2 cp/24h).\n3. Vogalène 15mg : 1 gélule si nausées associées.",
-    pdf_keywords: ["Neurologie", "M茅dicaments"]
+    pdf_keywords: ["Neurologie", "Médicaments"]
   },
   {
     id: 13,
@@ -268,7 +268,7 @@ const cats = [
 - Imagerie (Radiographie, IRM) non indiquée en première intention si sciatique commune < 4-6 semaines sans signe de gravité.`,
     red_flags: "Sciatique paralysante (déficit moteur < 3/5), syndrome de la queue de cheval (troubles sphinctériens : rétention urinaire, incontinence, anesthésie en selle - URGENCE CHIRURGICALE), suspicion de cause tumorale ou infectieuse (fièvre, perte de poids, douleur inflammatoire continue).",
     ordonnance: "1. Bi-Profénid (Kétoprofène) 150mg : 1 comprimé matin et soir pendant le repas pendant 7 jours.\n2. Esoméprazole 20mg : 1 gélule par jour (si terrain à risque digestif pour l'AINS).\n3. Tramadol / Paracétamol (Ixprim) : 1 à 2 comprimés toutes les 6 à 8 heures en cas de douleur modérée à intense.",
-    pdf_keywords: ["Rhumatologie", "M茅dicaments", "Urgences"]
+    pdf_keywords: ["Rhumatologie", "Médicaments", "Urgences"]
   },
   {
     id: 14,
@@ -290,7 +290,7 @@ const cats = [
 - Durée : 3 à 6 mois pour corriger l'anémie et reconstituer les réserves (contrôle de la ferritine 3 mois après normalisation de l'hémoglobine).`,
     red_flags: "Mauvaise tolérance clinique (dyspnée d'effort ou de repos, angor, tachycardie importante), anémie sévère (Hb < 7-8 g/dL chez le sujet âgé ou coronarien - nécessite une transfusion).",
     ordonnance: "**Pour l'adulte :**\n1. Tardyferon 80mg (Fer) : 1 à 2 comprimés par jour à prendre avec un grand verre d'eau le matin avant le repas pendant 3 mois.\n\n**Pour l'enfant :**\n1. Inofer sirop ou Fumafer poudre : Dose correspondant à 3 mg/kg/j de fer métal en 2 prises par jour.",
-    pdf_keywords: ["H茅matologie", "Trt An茅mie_", "Bilans", "P茅diatrie"]
+    pdf_keywords: ["Hématologie", "Trt Anémie_", "Bilans", "Pédiatrie"]
   },
   {
     id: 15,
@@ -315,7 +315,7 @@ const cats = [
 - Carence en B9 : Acide folique (Foldine) 5mg/jour par voie orale pendant 1 à 2 mois.`,
     red_flags: "Signes neurologiques de la carence en Vit B12 (syndrome cordonal postérieur : paresthésies, troubles de la sensibilité profonde, ataxie - urgence thérapeutique pour éviter des séquelles irréversibles).",
     ordonnance: "**Devant une carence avérée en B12 (Maladie de Biermer) :**\n1. Vitamine B12 (Hydroxocobalamine) 1000 µg / 2ml injectable : 1 ampoule en IM tous les deux jours pendant 10 jours (phase d'attaque), puis 1 ampoule par mois à vie (phase d'entretien).\n\n**Devant une carence en B9 :**\n1. Acide Folique (Foldine) 5mg : 1 comprimé par jour pendant 2 mois.",
-    pdf_keywords: ["H茅matologie", "Trt An茅mie_", "Bilans"]
+    pdf_keywords: ["Hématologie", "Trt Anémie_", "Bilans"]
   },
   {
     id: 16,
@@ -340,7 +340,7 @@ const cats = [
   - En cas d'allergie vraie aux pénicillines (sans contre-indication aux céphalosporines) : Céfuroxime-axétil pendant 4 jours. Si allergie aux bêta-lactamines : Macrolides (Azithromycine 3 jours ou Clarithromycine 5 jours).`,
     red_flags: "Difficulté à avaler la salive (sialorrhée), modification de la voix (\"voix de patate chaude\"), trismus (difficulté à ouvrir la bouche), dyspnée (suspicion de phlegmon amygdalien ou d'épiglottite - urgence chirurgicale).",
     ordonnance: "**Si TROD SGA Positif (Adulte) :**\n1. Amoxicilline 1g : 1 comprimé matin et soir pendant le repas pendant 6 jours.\n2. Paracétamol 1g : 1 comprimé toutes les 6 heures en cas de douleur ou fièvre (max 4 cp/j).\n\n**Si TROD SGA Négatif ou non indiqué :**\n1. Paracétamol 1g : 1 cp en cas de besoin.",
-    pdf_keywords: ["ORL", "馃憛CAT ORL", "Infectieux", "M茅dicaments en P茅diatrie"]
+    pdf_keywords: ["ORL", "CAT ORL", "Infectieux", "Médicaments en Pédiatrie"]
   },
   {
     id: 17,
@@ -359,7 +359,7 @@ const cats = [
 - Devant toute angine traînante ou atypique : Prescrire une NFS (Numération Formule Sanguine) en urgence.`,
     red_flags: "Agranulocytose (NFS montrant des PNN < 500/mm³) - Risque de sepsis grave, isolement protecteur et antibiothérapie IV urgente en milieu hospitalier.",
     ordonnance: "**Bilan d'orientation en urgence :**\n1. NFS (Numération Formule Sanguine) avec formule complète.\n2. CRP (Protéine C-Réactive).\n3. Sérologie MNI (ou test d'Eppstein-Barr) si suspicion clinique.",
-    pdf_keywords: ["ORL", "H茅matologie", "Bilans"]
+    pdf_keywords: ["ORL", "Hématologie", "Bilans"]
   },
   {
     id: 18,
@@ -377,7 +377,7 @@ const cats = [
 - Rechercher des facteurs favorisants : Tabagisme, alcoolisme, reflux gastro-œsophagien (RGO), exposition professionnelle à des irritants, respiration buccale par obstruction nasale.`,
     red_flags: "Dyspnée inspiratoire, impossibilité d'avaler la salive, altération rapide de l'état général, persistance des symptômes au-delà de 10 jours sans amélioration.",
     ordonnance: "1. Paracétamol 1g : 1 comprimé à renouveler si nécessaire toutes les 6 heures (max 4/jour) en cas de douleur de gorge.\n2. Lavage nasal au sérum physiologique ou spray d'eau de mer micro-diffusé : 3 à 4 fois par jour en cas de congestion nasale.\n3. Collutoire ou pastilles adoucissantes (sans antibiotique ni anesthésique local puissant de longue durée).",
-    pdf_keywords: ["ORL", "馃憛CAT ORL", "Infectieux"]
+    pdf_keywords: ["ORL", "CAT ORL", "Infectieux"]
   },
   {
     id: 19,
@@ -396,7 +396,7 @@ const cats = [
 - +/- Antiviraux (Valacyclovir) uniquement en cas d'atteinte sévère ou suspicion de zona.`,
     red_flags: "Atteinte bilatérale, présence d'autres signes neurologiques (déficit moteur d'un membre, hypoesthésie, atteinte d'autres nerfs crâniens), apparition progressive sur plusieurs semaines (suggère une tumeur nerveuse).",
     ordonnance: "1. Prednisolone (Solupred) 20mg : X comprimés (soit 1 mg/kg) en 1 prise le matin pendant le petit-déjeuner pendant 10 jours.\n2. Dacudoses ou larmes artificielles : 1 goutte dans l'œil atteint 4 à 6 fois par jour.\n3. Vitamine A ophtalmique pommade : 1 application dans l'œil atteint le soir au coucher.\n4. Pansement occlusif (type Opticlude) pour fermer l'œil la nuit.",
-    pdf_keywords: ["Neurologie", "M茅dicaments", "Ophtalmologie"]
+    pdf_keywords: ["Neurologie", "Médicaments", "Ophtalmologie"]
   },
   {
     id: 20,
@@ -412,7 +412,7 @@ const cats = [
 - Extraction par irrigation d'eau tiède (à 37°C pour éviter les vertiges) à l'aide d'une seringue d'oreille ou d'un poire, en dirigeant le jet vers la paroi postéro-supérieure du conduit auditif (jamais directement vers le tympan).`,
     red_flags: "Douleur intense lors de l'irrigation, vertiges rotatoires immédiats, saignement ou issue de pus (interrompre immédiatement le geste, suspicion de perforation tympanique provoquée ou préexistante).",
     ordonnance: "1. Cérulyse (xylène) solution auriculaire : Instiller 10 à 15 gouttes dans l'oreille atteinte, 2 fois par jour pendant les 3 jours précédant l'extraction au cabinet médical. Garder la tête penchée pendant 10 minutes.",
-    pdf_keywords: ["ORL", "馃憛CAT ORL"]
+    pdf_keywords: ["ORL", "CAT ORL"]
   },
   {
     id: 21,
@@ -431,7 +431,7 @@ const cats = [
 - Si HTA associée : Contrôler la tension artérielle (le saignement maintient l'HTA, mais l'HTA aggrave le saignement). Traiter la douleur et l'anxiété.`,
     red_flags: "Saignement bilatéral ou postérieur incoercible, signes de choc hypovolémique (tachycardie, hypotension), patient sous anticoagulants avec INR instable, épistaxis récidivante unilatérale chez le sujet jeune (rechercher un fibrome nasopharyngien) ou sujet âgé (tumeur sinusienne).",
     ordonnance: "**Pour la trousse d'urgence ou soins locaux à domicile :**\n1. Coalgan mèches hémostatiques : 1 boîte. Introduire une mèche dans la fosse nasale en cas de reprise du saignement, laisser en place 24 heures.\n2. HEC pommade nasale : 1 application 2 fois par jour dans les narines pendant 5 jours après l'arrêt du saignement pour favoriser la cicatrisation.",
-    pdf_keywords: ["ORL", "馃憛CAT ORL", "Urgences"]
+    pdf_keywords: ["ORL", "CAT ORL", "Urgences"]
   },
   {
     id: 22,
@@ -453,7 +453,7 @@ const cats = [
 - Si syndrome otite-conjonctivite (suggérant H. influenzae sécréteur de bêta-lactamase) : **Amoxicilline + Acide clavulanique** (Augmentin) à dose de 80 mg/kg/j d'amoxicilline.`,
     red_flags: "Rétro-auriculaire inflammatoire et décollant le pavillon de l'oreille (mastoïdite - urgence chirurgicale absolue), raideur de nuque, léthargie, paralysie faciale.",
     ordonnance: "**Pour un enfant de 18 mois (12 kg) avec OMA purulente :**\n1. Amoxicilline sirop 500mg/5ml : 1 dose-poids (12kg) 3 fois par jour pendant 8 jours.\n2. Paracétamol sirop : 1 dose-poids toutes les 6 heures en cas de douleur ou de fièvre.\n\n*Pas de gouttes auriculaires si tympan perforé ou non vu !*",
-    pdf_keywords: ["ORL", "P茅diatrie", "M茅dicaments en P茅diatrie"]
+    pdf_keywords: ["ORL", "Pédiatrie", "Médicaments en Pédiatrie"]
   },
   {
     id: 23,
@@ -472,7 +472,7 @@ const cats = [
 - Si détresse respiratoire modérée à sévère : Nébulisation d'Adrénaline (0.5 mg/kg, max 5 mg) + Dexaméthasone IV ou IM + oxygénothérapie + transfert par SAMU.`,
     red_flags: "Suspicion d'épiglottite (fièvre très élevée, enfant assis penché en avant, bave car incapable d'avaler sa salive, absence de toux aboyante - URGENCE EXTRÊME, ne pas coucher l'enfant, appeler le SAMU).",
     ordonnance: "1. Célestène (Bétaméthasone) 0.05% solution buvable en gouttes : Donner une dose unique de 10 gouttes par kg de poids corporel le matin (soit 0.2 mg/kg).\n2. Paracétamol pédiatrique : 1 dose-poids toutes les 6 heures en cas de fièvre.",
-    pdf_keywords: ["ORL", "P茅diatrie", "M茅dicaments en P茅diatrie", "Urgences"]
+    pdf_keywords: ["ORL", "Pédiatrie", "Médicaments en Pédiatrie", "Urgences"]
   },
   {
     id: 24,
@@ -488,7 +488,7 @@ const cats = [
 - Pas d'antibiotiques en première intention !`,
     red_flags: "Dyspnée, polypnée (fréquence respiratoire > 20/min chez l'adulte), désaturation (SpO2 < 95%), confusion mentale, persistance ou reprise de la fièvre après une rémission transitoire (suggérant une surinfection bactérienne).",
     ordonnance: "1. Paracétamol 1g : 1 comprimé toutes les 6 à 8 heures en cas de fièvre ou de douleurs musculaires (max 4g/j).\n2. Lavage de nez au sérum salé si nez bouché.\n3. Si toux sèche irritante : Dextrométhorphane sirop (uniquement chez l'adulte, max 5 jours).",
-    pdf_keywords: ["Pneumologie", "Infectieux", "M茅dicaments"]
+    pdf_keywords: ["Pneumologie", "Infectieux", "Médicaments"]
   },
   {
     id: 25,
@@ -547,7 +547,7 @@ const cats = [
 - **Médicaments** : Les bronchodilatateurs (Salbutamol), corticoïdes oraux, et la kinésithérapie respiratoire ne sont plus recommandés en première intention dans le premier épisode simple.`,
     red_flags: "Âge < 6 semaines (risque majeur d'apnée), prématurité < 36 SA de moins de 3 mois, cardiopathie ou pathologie neuromusculaire sous-jacente, prise alimentaire < 50%, épuisement respiratoire, SpO2 < 92%.",
     ordonnance: "1. Sérum physiologique en dosettes : 1 boîte. Réaliser une désobstruction rhinopharyngée (DRP) minutieuse avant chaque repas et au coucher (6 à 8 fois par jour).\n2. Paracétamol sirop pédiatrique : 1 dose-poids toutes les 6 heures en cas de fièvre > 38.5°C et d'inconfort.\n3. Fiche de surveillance parentale expliquant les signes d'alerte pour consulter aux urgences.",
-    pdf_keywords: ["P茅diatrie", "M茅dicaments en P茅diatrie", "Pneumologie"]
+    pdf_keywords: ["Pédiatrie", "Médicaments en Pédiatrie", "Pneumologie"]
   },
   {
     id: 28,
@@ -568,7 +568,7 @@ const cats = [
 - Corticoïde IV (Méthylprednisolone).`,
     red_flags: "Incapacité de parler, cyanose, silence auscultatoire, DEP imprenable, agitation/troubles de conscience (nécessite transfert en réanimation).",
     ordonnance: "**Pour l'adulte en crise modérée :**\n1. Ventoline (Salbutamol) 100 µg/dose inhalateur : 2 à 4 bouffées en cas de crise ou de gêne respiratoire, à renouveler si besoin (max 10-15 bouffées/jour).\n2. Solupred (Prednisolone) 20mg : 3 comprimés (soit 60mg) en 1 prise le matin pendant 5 jours.\n3. Référer pour consultation de pneumologie pour équilibrer le traitement de fond.",
-    pdf_keywords: ["Pneumologie", "M茅dicaments des urgences_", "P茅diatrie"]
+    pdf_keywords: ["Pneumologie", "Médicaments des urgences_", "Pédiatrie"]
   },
   {
     id: 29,
@@ -636,7 +636,7 @@ const cats = [
 - **Corticothérapie par voie générale** (risque majeur de rebond sévère à l'arrêt sous forme de psoriasis pustuleux généralisé, potentiellement mortel).`,
     red_flags: "Psoriasis érythrodermique (atteignant > 90% de la surface corporelle), psoriasis pustuleux généralisé, arthrite psoriasique associée (douleurs articulaires inflammatoires nécessitant un traitement de fond par Méthotrexate).",
     ordonnance: "1. Dermoval (Clobétasol) crème : 1 application par jour le soir sur les plaques de psoriasis cutané pendant 15 jours, puis espacer à 1 application 2 à 3 fois par semaine.\n2. Xamiol (Calcipotriol + Bétaméthasone) gel : 1 application par jour sur le cuir chevelu sec le soir, laisser poser la nuit et laver le matin.\n3. Dexeryl crème (émollient) : Applications généreuses 2 fois par jour.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie", "M茅dicaments"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie", "Médicaments"]
   },
   {
     id: 32,
@@ -659,7 +659,7 @@ const cats = [
 - Antibiothérapie orale (Pristinamycine ou Amoxicilline + Acide clavulanique) si lésions étendues.`,
     red_flags: "Érythrodermie, surinfection herpétique sur dermatite atopique (Syndrome de Kaposi-Juliusberg : apparition brutale de vésicules ombiliquées douloureuses, fièvre - URGENCE pédiatrique nécessitant Aciclovir IV).",
     ordonnance: "**Pour eczéma aigu non surinfecté :**\n1. Diprosone (Bétaméthasone) crème : 1 application par jour sur les plaques enflammées pendant 7 à 10 jours.\n2. Cétirizine 10mg : 1 comprimé le soir en cas de prurit intense.\n3. Dexeryl crème : 2 applications par jour sur tout le corps (hors plaques rouges).\n\n**Si surinfecté (étendu) :**\n1. Augmentin 1g : 1 cp 3x/j pendant 7 jours.\n2. Chlorhexidine solution aqueuse : Désinfection douce 2x/j.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie", "M茅dicaments en P茅diatrie"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie", "Médicaments en Pédiatrie"]
   },
   {
     id: 33,
@@ -681,7 +681,7 @@ const cats = [
   - Doit être débuté dans les 72 heures suivant le début de l'éruption.`,
     red_flags: "Zona ophtalmique (atteinte de l'aile du nez - signe de Hutchinson : témoigne de l'atteinte du nerf naso-ciliaire), zona chez un patient immunodéprimé (risque de zona généralisé).",
     ordonnance: "**Pour un patient de 65 ans avec zona intercostal (débuté depuis 48h) :**\n1. Zelitrex (Valacyclovir) 1000mg : 1 comprimé 3 fois par jour pendant 7 jours.\n2. Chlorhexidine aqueuse solution : 1 application douce sur les lésions 2 fois par jour.\n3. Lyrica (Prégabaline) 75mg : 1 gélule le soir au coucher (à adapter selon tolérance et fonction rénale pour les douleurs neuropathiques).",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie", "M茅dicaments"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie", "Médicaments"]
   },
   {
     id: 34,
@@ -704,7 +704,7 @@ const cats = [
 - Protection solaire obligatoire (les cyclines et rétinoïdes sont photosensibilisants).`,
     red_flags: "Acné nodulaire sévère ou échec des cyclines bien conduits -> Référer au dermatologue pour mise sous Isotrétinoïne (Roaccutane) - attention aux règles de prescription strictes chez la femme en âge de procréer (contraception obligatoire, tests de grossesse réguliers).",
     ordonnance: "**Prescription pour Acné modérée :**\n1. Doxycycline 100mg : 1 comprimé par jour au milieu du dîner (à prendre avec un grand verre d'eau, rester assis/debout pendant 30 min après la prise pour éviter les ulcérations œsophagiennes) pendant 3 mois.\n2. Epiduo (Adapalène/Peroxyde de Benzoyle) gel : 1 application fine sur les zones acnéiques le soir après nettoyage, en évitant le contour des yeux et des lèvres. Commencer 1 soir sur 2 si irritation.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie"]
   },
   {
     id: 35,
@@ -723,7 +723,7 @@ const cats = [
 - **Les corticoïdes par voie générale sont à éviter** dans l'urticaire aiguë simple car ils favorisent la récidive et la chronicisation à l'arrêt.`,
     red_flags: "Angio-œdème associé (gonflement du visage, des lèvres ou de la langue) avec dysphonie, dyspnée ou hypotension (Anaphylaxie / Choc anaphylactique -> Urgence vitale, Adrénaline IM 0.3 à 0.5 mg à répéter, transfert SAMU).",
     ordonnance: "1. Desloratadine (Aerius) 5mg : 1 comprimé par jour pendant 10 jours (à prendre le soir).\n2. En cas de poussée plus intense : Possibilité de passer à 2 comprimés par jour sur avis médical.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie", "M茅dicaments des urgences_"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie", "Médicaments des urgences_"]
   },
   {
     id: 36,
@@ -746,7 +746,7 @@ const cats = [
 - Recherche de portage sain (narines, anus, conduits auditifs) chez le patient et son entourage. Décontamination par douches à la Chlorhexidine corps et cheveux + acide fusidique dans les narines pendant 7 jours. Diagnostic du diabète à éliminer.`,
     red_flags: "Furoncle de la face avec fièvre, frissons, céphalées et œdème palpébral (suspicion de staphylococcie maligne de la face avec thrombophlébite du sinus caverneux - URGENCE vitale, nécessite hospitalisation pour antibiothérapie IV).",
     ordonnance: "**Pour furoncle simple de la face ou multiple (Adulte) :**\n1. Pyostacine (Pristinamycine) 500mg : 2 comprimés 3 fois par jour au cours des repas pendant 5 jours.\n2. Biseptine (Chlorhexidine) solution : 1 application 2 fois par jour après lavage de la zone touchée.\n3. Paracétamol 1g : 1 cp toutes les 6 heures si douleur importante.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie", "Infectieux"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie", "Infectieux"]
   },
   {
     id: 37,
@@ -767,7 +767,7 @@ const cats = [
 - Traitement : Antifongique local en poudre ou crème pendant 2 à 3 semaines. Mesures de séchage minutieux des plis.`,
     red_flags: "Kérion (teigne très inflammatoire purulente) pouvant laisser des cicatrices alopéciques définitives si le traitement systémique est trop tardif.",
     ordonnance: "**Pour herpès circiné simple (Adulte) :**\n1. Kétoconazole (Fungster) 2% crème : 1 application par jour sur les lésions et 2 cm au-delà, pendant 3 semaines.\n\n**Pour Teigne de l'enfant (20 kg) :**\n1. Griséfuline 250mg : 1 comprimé (soit ~10-15 mg/kg/j) par jour à écraser dans une cuillère de yaourt ou de beurre au cours d'un repas pendant 6 semaines.\n2. Kétoconazole shampoing : 2 applications par semaine sur le cuir chevelu.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie", "M茅dicaments en P茅diatrie"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie", "Médicaments en Pédiatrie"]
   },
   {
     id: 38,
@@ -789,7 +789,7 @@ const cats = [
 - Choix : Cloxacilline/Oxacilline (ou Amoxicilline-Acide clavulanique chez l'enfant), ou Céfadroxil, ou Pristinamycine (adulte).`,
     red_flags: "Apparition de bulles volumineuses (impétigo bulleux du nouveau-né lié à une toxine staphylococcique - risque de syndrome de la peau ébouillantée - hospitalisation en pédiatrie), fièvre élevée, syndrome néphrotique post-streptococcique (surveiller les urines à 3 semaines).",
     ordonnance: "**Pour Impétigo localisé de l'enfant :**\n1. Fucidine (Acide fusidique) 2% crème : 1 application sur les lésions après nettoyage doux à l'eau et au savon, 3 fois par jour pendant 5 jours.\n\n**Pour Impétigo étendu de l'enfant (15 kg) :**\n1. Augmentin sirop (Enfant) : 1 dose-poids (15kg) 3 fois par jour pendant 5 jours.\n2. Fucidine crème : En application locale sur les lésions croûteuses.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie", "M茅dicaments en P茅diatrie"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie", "Médicaments en Pédiatrie"]
   },
   {
     id: 39,
@@ -808,7 +808,7 @@ const cats = [
 - Traiter l'entourage si présence de lentes/poux.`,
     red_flags: "Gale hyperkératosique (norvégienne) chez le sujet âgé ou immunodéprimé : extrêmement contagieuse, nécessite une hospitalisation en chambre d'isolement pour traitement lourd combiné oral + local répété.",
     ordonnance: "**Pour le traitement de la Gale (Adulte de 70 kg) :**\n1. Stromectol (Ivermectine) 3mg : 5 comprimés en 1 prise unique à jeun avec un grand verre d'eau (2 heures avant ou après un repas).\n2. À renouveler exactement 10 jours plus tard : 5 comprimés en 1 prise unique.\n3. Spregal ou A-Par aérosol : Pour désinfection de la literie et des vêtements ne passant pas à la machine.",
-    pdf_keywords: ["Dermatologie", "馃挋CAT Dermatologie"]
+    pdf_keywords: ["Dermatologie", "CAT Dermatologie"]
   },
   {
     id: 40,
@@ -824,7 +824,7 @@ const cats = [
 - Formes multiples ou complexes (visage, péri-orificiel) : Glucantime par voie intramusculaire (20 mg/kg/jour pendant 15 à 20 jours). **Bilan rénal, hépatique et ECG préalable obligatoire** (risque de toxicité cardiaque - stibiothérapie et rénale).`,
     red_flags: "Toxicité du Glucantime IM (allongement du QT à l'ECG, cytolyse hépatique, pancréatite biologique) imposant l'arrêt immédiat du traitement.",
     ordonnance: "**Pour Leishmaniose cutanée simple (Infiltration locale) :**\n1. Glucantime ampoules injectables : Infiltration intra-lésionnelle au cabinet médical une fois par semaine pendant 5 à 6 semaines.\n2. Soins locaux : Nettoyage antiseptique et pansement stérile après chaque séance.",
-    pdf_keywords: ["Dermatologie", "馃挋Dermatologie_", "Infectieux", "Bilans"]
+    pdf_keywords: ["Dermatologie", "Dermatologie_", "Infectieux", "Bilans"]
   },
   {
     id: 41,
@@ -866,7 +866,7 @@ const cats = [
 - Antibiothérapie IV (Ceftriaxone) puis relais per os guidé par l'antibiogramme pour une durée totale de 10 à 14 jours. ECBU de contrôle régulier.`,
     red_flags: "Fièvre, contractions utérines associées, vomissements rendant impossible le traitement oral, intolérance aux bêta-lactamines.",
     ordonnance: "**Pour Cystite gravidique (en attente des résultats d'ECBU prélevé) :**\n1. Monuril (Fosfomycine) 3g : 1 sachet en dose unique.\n2. Boire abondamment (eau de source) > 2L/jour.\n3. Reprendre contact dès réception de l'antibiogramme (sous 48h) pour confirmer l'efficacité.",
-    pdf_keywords: ["Gynecologie_", "Urologie_", "M茅dicaments et Gross猫sse"]
+    pdf_keywords: ["Gynecologie_", "Urologie_", "Médicaments et Grossesse"]
   },
   {
     id: 43,
@@ -888,7 +888,7 @@ const cats = [
 - **Explorations systématiques après un 1er épisode fébrile chez le nourrisson** : Échographie rénale et des voies urinaires (pour rechercher une malformation comme un reflux vésico-urétéral).`,
     red_flags: "Fièvre élevée mal tolérée chez le nourrisson de < 3 mois (risque de sepsis urinaire), vomissements rendant impossible la prise des antibiotiques oraux, uropathie malformative connue.",
     ordonnance: "**Pour pyélonéphrite aiguë de l'enfant de 3 ans (15 kg) en ambulatoire :**\n1. Oroken (Céfixime) 40mg/5ml : 1 dose-poids (15kg) 2 fois par jour pendant 10 jours.\n2. Paracétamol sirop : 1 dose-poids toutes les 6 heures en cas de fièvre.\n3. Échographie rénale à réaliser à distance (sous 15 jours).",
-    pdf_keywords: ["P茅diatrie", "M茅dicaments en P茅diatrie", "Urologie_"]
+    pdf_keywords: ["Pédiatrie", "Médicaments en Pédiatrie", "Urologie_"]
   },
   {
     id: 44,
@@ -909,7 +909,7 @@ const cats = [
 - Couple Radiographie (ASP) + Échographie rénale et voies urinaires sous 24-48h, ou idéalement un Scanner (Uro-TDM) sans injection.`,
     red_flags: "Colique néphrétique fébrile (Pyélonéphrite obstructive - URGENCE médico-chirurgicale absolue : risque de choc septique rapide, nécessite drainage chirurgical), rein unique, anurie (absence d'urines depuis > 12h), douleur rebelle aux AINS et morphiniques.",
     ordonnance: "1. Profénid (Kétoprofène) 100mg : 1 comprimé matin, midi et soir au cours des repas pendant 5 jours (sauf contre-indication rénale ou ulcéreuse).\n2. Esoméprazole 20mg : 1 gélule par jour (protecteur gastrique).\n3. Tramadol 50mg : 1 gélule toutes les 6 à 8 heures si la douleur persiste sous AINS.\n4. Tamiser les urines à chaque miction.",
-    pdf_keywords: ["Urologie_", "Urgences", "M茅dicaments des urgences_"]
+    pdf_keywords: ["Urologie_", "Urgences", "Médicaments des urgences_"]
   },
   {
     id: 45,
@@ -930,7 +930,7 @@ const cats = [
 - Chercher un foyer infectieux : OMA, rhinopharyngite, angine, infection urinaire (faire une BU), éruption cutanée.`,
     red_flags: "Purpura (toute lésion purpurique ne s'effaçant pas à la vitropression associée à la fièvre impose l'injection immédiate de Ceftriaxone IM/IV et l'appel du SAMU pour suspicion de purpura fulminans), troubles de la conscience, hypotonie, geignement, dyspnée sévère.",
     ordonnance: "1. Paracétamol pédiatrique (sirop dose-poids) : 1 dose-poids toutes les 6 heures en cas de fièvre entraînant un inconfort, max 4 doses par jour.\n2. Seringue pour réhydrater régulièrement avec de l'eau ou SRO si troubles digestifs associés.",
-    pdf_keywords: ["P茅diatrie", "M茅dicaments en P茅diatrie", "Urgences"]
+    pdf_keywords: ["Pédiatrie", "Médicaments en Pédiatrie", "Urgences"]
   },
   {
     id: 46,
@@ -952,7 +952,7 @@ const cats = [
 - **AINS formellement contre-indiqués** à partir du 6ème mois (24 SA).`,
     red_flags: "Diminution des mouvements fœtaux, contractions utérines douloureuses, liquide amniotique teinté ou malodorant, signes de sepsis maternel.",
     ordonnance: "**En ambulatoire, devant suspicion de listériose (après hémocultures réalisées) :**\n1. Amoxicilline 1g : 1 comprimé 3 fois par jour pendant 10 jours.\n2. Paracétamol 1g : 1 comprimé en cas de fièvre, à renouveler toutes les 6 heures si besoin (max 4/jour).",
-    pdf_keywords: ["M茅dicaments et Gross猫sse", "Gyn茅cologie_", "Bilans"]
+    pdf_keywords: ["Médicaments et Grossesse", "Gynécologie_", "Bilans"]
   },
   {
     id: 47,
@@ -972,7 +972,7 @@ const cats = [
 - Traitement : Antibiothérapie probabiliste large associant Ceftriaxone (IM unique) + Doxycycline (per os 14 jours) + Métronidazole (per os 14 jours).`,
     red_flags: "Douleur pelvienne aiguë fébrile avec défense (suspicion de péritonite ou d'abcès du Douglas/tubo-ovarien - nécessite hospitalisation urgente en gynécologie pour traitement IV et drainage éventuel).",
     ordonnance: "**Pour Mycose vaginale simple :**\n1. Econazole LP 150mg ovule : 1 ovule à introduire profondément dans le vagin le soir au coucher en dose unique (à renouveler après 3 jours si prurit persistant).\n2. Econazole 1% crème : 1 application vulvaire 2 fois par jour pendant 7 jours.\n\n**Pour Vaginose bactérienne :**\n1. Flagyl (Métronidazole) 500mg : 1 comprimé matin et soir pendant 7 jours.",
-    pdf_keywords: ["Gyn茅cologie_", "Infectieux", "M茅dicaments et Gross猫sse"]
+    pdf_keywords: ["Gynécologie_", "Infectieux", "Médicaments et Grossesse"]
   },
   {
     id: 48,
@@ -991,7 +991,7 @@ const cats = [
 - Associer des conseils hygiéno-diététiques : Exposition solaire modérée (visage et bras 15 min/jour), alimentation riche en vitamine D (poissons gras, produits laitiers enrichis).`,
     red_flags: "Signes d'hypocalcémie associée (paresthésies péri-buccales, crampes musculaires, spasmes carpo-pédaux - signe de Trousseau) nécessitant un dosage du calcium et magnésium sérique.",
     ordonnance: "**Pour adulte avec carence sévère avérée (< 15 ng/mL) :**\n1. Uvedose (Cholécalciférol) 100 000 UI solution buvable en ampoule : 1 ampoule par voie orale à prendre avec un repas gras, toutes les 2 semaines, au total 4 ampoules (pendant 2 mois).\n2. Puis relais d'entretien : 1 ampoule de 100 000 UI tous les 3 mois.",
-    pdf_keywords: ["Endocrinologie_", "M茅dicaments en P茅diatrie", "Bilans"]
+    pdf_keywords: ["Endocrinologie_", "Médicaments en Pédiatrie", "Bilans"]
   },
   {
     id: 49,
@@ -1017,7 +1017,7 @@ const cats = [
 - Si coliques : Massage abdominal, portage, réduction des stimulations. Essai de probiotiques (L. reuteri) ou de siméticone.`,
     red_flags: "Pleurs incessants avec cris aigus ('cri méningé'), hypotonie, accès de pâleur lors des crises de pleurs (invagination intestinale aiguë), fièvre associée, vomissements bilieux, refus alimentaire complet.",
     ordonnance: "**Conseils et traitement de soutien pour coliques du nourrisson :**\n1. Biogaia (Lactobacillus reuteri) gouttes : 5 gouttes par jour directement dans la bouche ou dans un biberon de lait tiède pendant 21 jours.\n2. Calmosine boisson apaisante (phytothérapie) : 1 cuillère à café avant chaque tétée ou biberon (max 6/jour).\n3. Fiche d'information sur la gestion des pleurs du nourrisson et la prévention du secouement.",
-    pdf_keywords: ["P茅diatrie", "M茅dicaments en P茅diatrie", "Urgences"]
+    pdf_keywords: ["Pédiatrie", "Médicaments en Pédiatrie", "Urgences"]
   },
   {
     id: 50,
@@ -1037,7 +1037,7 @@ const cats = [
   - *Uvéite antérieure* : Douleur sourde profonde, cercle péri-kératique, pupille en myosis.`,
     red_flags: "Baisse de l'acuité visuelle, douleur oculaire profonde, pupille asymétrique (myosis ou mydriase fixe), cornée trouble, traumatisme oculaire récent.",
     ordonnance: "**Pour Conjonctivite bactérienne simple :**\n1. Désinfection oculaire : Dacudoses (sérum physiologique) : Laver l'œil 4 à 6 fois par jour avec une compresse stérile différente pour chaque œil.\n2. Fucithalmic (Acide fusidique) collyre : 1 goutte dans l'œil atteint matin et soir pendant 5 jours.\n*Ne jamais prescrire de collyre corticoïde ou anesthésique local sans avis ophtalmologique (risque de perforation cornéenne en cas d'herpès ou ulcère).*",
-    pdf_keywords: ["Ophtalmologie_", "馃毃CAT Urgences", "Urgences"]
+    pdf_keywords: ["Ophtalmologie_", "CAT Urgences", "Urgences"]
   },
   {
     id: 51,
@@ -1054,7 +1054,7 @@ const cats = [
 - Si diabète inaugural simple sans acidocétose : Hospitalisation programmée en pédiatrie pour initiation du traitement par insuline sous-cutanée et éducation thérapeutique de l'enfant et de sa famille.`,
     red_flags: "Troubles de la conscience, respiration rapide et profonde (Kussmaul), vomissements répétés, déshydratation sévère chez un enfant suspect de diabète inaugural.",
     ordonnance: "**Bilan d'urgence et lettre d'orientation :**\n1. Lettre d'orientation détaillée décrivant les signes cliniques (perte de poids, polyurie) et les résultats de la bandelette urinaire.\n2. Bandelette urinaire réalisée au cabinet (noter les croix de glucose et de cétones).\n3. Glycémie capillaire.",
-    pdf_keywords: ["P茅diatrie", "Endocrinologie_", "Urgences", "M茅dicaments en P茅diatrie"]
+    pdf_keywords: ["Pédiatrie", "Endocrinologie_", "Urgences", "Médicaments en Pédiatrie"]
   },
   {
     id: 52,
