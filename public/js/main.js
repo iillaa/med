@@ -109,10 +109,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Wire up Modal Event Listeners
   if (addCatBtn) {
     addCatBtn.addEventListener('click', () => {
-      const datalist = document.getElementById('categories-list-datalist');
-      if (datalist) {
-        const categories = [...new Set(state.allCats.map(c => c.category))];
-        datalist.innerHTML = categories.map(cat => `<option value="${cat}"></option>`).join('');
+      const selectEl = document.getElementById('new-cat-category-select');
+      const inputEl = document.getElementById('new-cat-category');
+      
+      if (selectEl) {
+        const categories = [...new Set(state.allCats.map(c => c.category))].filter(Boolean).sort();
+        selectEl.innerHTML = `
+          <option value="">-- Sélectionner une spécialité existante --</option>
+          ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+        `;
+        
+        selectEl.onchange = () => {
+          if (selectEl.value && inputEl) {
+            inputEl.value = selectEl.value;
+          }
+        };
       }
       if (addCatModal) addCatModal.style.display = 'flex';
     });
@@ -294,43 +305,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 // App Initialization routine
 async function initApp() {
   try {
-    // Check if device has internet connection at startup (only true if online AND remote server configured)
-    if (api.isOfflineApp) {
-      state.isOnlineAtStartup = navigator.onLine && api.hasRemoteServerConfigured();
-    } else {
-      state.isOnlineAtStartup = true; // Node server mode is always online
+    // Perform robust connection ping test at boot
+    state.isOnlineAtStartup = await api.checkRealConnection();
+    console.log("[Startup] Real connection check status:", state.isOnlineAtStartup);
+
+    // Start background network check interval to alert transitions
+    let lastState = state.isOnlineAtStartup;
+    async function checkNetworkPeriodically() {
+      const isOnline = await api.checkRealConnection();
+      if (lastState !== isOnline) {
+        if (isOnline) {
+          showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
+        } else {
+          showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000);
+        }
+        state.isOnlineAtStartup = isOnline;
+        updateEditButtonsVisibility();
+      }
+      lastState = isOnline;
+      setTimeout(checkNetworkPeriodically, 8000);
     }
-    console.log("[Startup] Device online status:", state.isOnlineAtStartup);
+    setTimeout(checkNetworkPeriodically, 8000);
 
     // 1. Check Admin status
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
 
-    // Update admin login button and add CAT button visibility
+    // Initial button visibility update
     const adminLoginBtn = document.getElementById('admin-login-btn');
-    if (api.isOfflineApp) {
-      if (adminLoginBtn) adminLoginBtn.style.display = 'none';
-      // If standalone app has internet connection at startup, allow proposing new CATs
-      if (addCatBtn) addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
-    } else {
-      if (addCatBtn) addCatBtn.style.display = 'flex';
-      if (adminLoginBtn && isLocalDevice) {
-        adminLoginBtn.style.display = 'flex';
-        if (state.isAdmin) {
-          adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
-          adminLoginBtn.classList.remove('action-btn');
-          adminLoginBtn.classList.add('cancel-btn');
-          adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-          adminLoginBtn.style.color = 'var(--color-success)';
-        } else {
-          adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
-          adminLoginBtn.classList.remove('cancel-btn');
-          adminLoginBtn.classList.add('action-btn');
-          adminLoginBtn.style.borderColor = '';
-          adminLoginBtn.style.color = '';
-        }
-      }
-    }
+    updateEditButtonsVisibility();
 
     // 2. Fetch CATs first to build the interface instantly
     let cats = await api.fetchCats();
@@ -382,7 +385,7 @@ async function initApp() {
       // Update UI components that depend on PDF statuses
       workspace.updatePdfIndexStatus();
       if (state.activeCat) {
-        workspace.selectCat(state.activeCat);
+        workspace.selectCat(state.activeCat, true);
       }
       console.log("[Background] PDFs and index status loaded successfully.");
     }).catch(err => {
@@ -460,4 +463,43 @@ export function calculateStats() {
 
   // If dashboard is active, refresh stats displays inside dashboard
   dashboard.renderDashboard(selectCatWrapper);
+}
+
+export function updateEditButtonsVisibility() {
+  const addCatBtn = document.getElementById('add-cat-btn');
+  const adminLoginBtn = document.getElementById('admin-login-btn');
+  
+  if (api.isOfflineApp) {
+    if (adminLoginBtn) adminLoginBtn.style.display = 'none';
+    if (addCatBtn) addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
+  } else {
+    if (addCatBtn) addCatBtn.style.display = 'flex';
+    if (adminLoginBtn && isLocalDevice) {
+      adminLoginBtn.style.display = 'flex';
+      if (state.isAdmin) {
+        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
+        adminLoginBtn.classList.remove('action-btn');
+        adminLoginBtn.classList.add('cancel-btn');
+        adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        adminLoginBtn.style.color = 'var(--color-success)';
+      } else {
+        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
+        adminLoginBtn.classList.remove('cancel-btn');
+        adminLoginBtn.classList.add('action-btn');
+        adminLoginBtn.style.borderColor = '';
+        adminLoginBtn.style.color = '';
+      }
+    }
+  }
+  
+  const deleteBtn = document.getElementById('delete-cat-btn');
+  const editSummaryBtnEl = document.getElementById('edit-summary-btn');
+  const editPrescriptionBtnEl = document.getElementById('edit-prescription-btn');
+  
+  if (api.isOfflineApp) {
+    if (deleteBtn) deleteBtn.style.display = 'none';
+    const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = displayStyle;
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = displayStyle;
+  }
 }

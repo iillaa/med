@@ -212,8 +212,12 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         if (notesSec) notesSec.style.display = 'none';
       }
 
-      // Fire print
-      window.print();
+      // Fire print (show informative toast in Capacitor offline app since native print is unsupported)
+      if (api.isOfflineApp) {
+        showToast("L'impression n'est pas prise en charge sur l'application mobile. Utilisez la version web pour imprimer.", "fa-circle-info", 4500);
+      } else {
+        window.print();
+      }
     });
   }
 
@@ -473,7 +477,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   });
 }
 
-export function selectCat(cat) {
+export function selectCat(cat, preserveTab = false) {
   state.activeCat = cat;
   state.activePrescriptionVariantIndex = 0;
 
@@ -544,13 +548,15 @@ export function selectCat(cat) {
   // Load related PDFs
   loadRelatedPdfs(cat);
 
-  // Reset active tab to first tab (Summary)
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  const firstTabBtn = document.querySelector('.tab-btn[data-tab="tab-summary"]');
-  const firstTabPane = document.getElementById('tab-summary');
-  if (firstTabBtn) firstTabBtn.classList.add('active');
-  if (firstTabPane) firstTabPane.classList.add('active');
+  // Reset active tab to first tab (Summary) only if not preserving it
+  if (!preserveTab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    const firstTabBtn = document.querySelector('.tab-btn[data-tab="tab-summary"]');
+    const firstTabPane = document.getElementById('tab-summary');
+    if (firstTabBtn) firstTabBtn.classList.add('active');
+    if (firstTabPane) firstTabPane.classList.add('active');
+  }
 
   // Cancel any ongoing edit view
   if (summaryView) summaryView.style.display = 'block';
@@ -563,8 +569,9 @@ export function selectCat(cat) {
 
   if (api.isOfflineApp) {
     if (deleteBtn) deleteBtn.style.display = 'none';
-    if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'none';
-    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'none';
+    const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = displayStyle;
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = displayStyle;
   } else {
     if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'inline-flex';
     if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'inline-flex';
@@ -933,17 +940,17 @@ export function saveAppStateBeforeNavigation() {
     pdfSearchResultsHTML: searchResultsContainer ? searchResultsContainer.innerHTML : ''
   };
   
-  sessionStorage.setItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
+  localStorage.setItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
 }
 
 export function restoreAppState() {
-  const saved = sessionStorage.getItem('dr_cat_navigation_state');
+  const saved = localStorage.getItem('dr_cat_navigation_state');
   if (!saved) return;
   
   try {
     const data = JSON.parse(saved);
     // Clear it so it doesn't persist across fresh browser starts
-    sessionStorage.removeItem('dr_cat_navigation_state');
+    localStorage.removeItem('dr_cat_navigation_state');
     
     // 1. Restore active CAT card in workspace
     if (data.activeCatId) {

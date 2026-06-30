@@ -1,5 +1,8 @@
 # Dr.CAT — Todo & Improvements
 
+> [!IMPORTANT]
+> **Strategic Roadmap Prioritization**: Focus first on stabilizing core app features and functional robustness (printing, navigation state retention, sharing, offline connection checks). High-performance animations and final UI polishing will be prioritized immediately after all features are 100% stable.
+
 ## 🔧 Technical Debt (Fix When Possible)
 
 - `[x]` **Replace `zoom: 0.9` hack on `.dashboard-container`**
@@ -13,6 +16,7 @@
 - `[x]` **Add favicon** — browser tab shows blank icon; logo (`drcat_logo.png`) is ready, just needs a `<link rel="icon">` in the `<head>`
 - `[x]` **Add meta description** — needed for SEO and proper link previews when sharing
 - `[x]` **Offline support** — clarify/implement behavior when the connection drops; data loading should not silently fail
+- `[ ]` **Diagnostic & Logging Tools Panel** — (Prioritized before UI polish & performance) Add a diagnostics drawer/modal to test local server pings, change `REMOTE_SERVER_URL` at runtime, view offline override states, check loaded PDF index status, and trace console warnings.
 
 ---
 

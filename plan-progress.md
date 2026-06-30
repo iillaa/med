@@ -2,6 +2,9 @@
 
 This document tracks our long-term objectives across three distinct phases, transitioning from local development to cloud deployment, and finally to a native offline-first Android app.
 
+> [!IMPORTANT]
+> **Priority Strategy**: Core features and operational functionality (navigation stack preservation, file sharing, and print warnings) take absolute precedence. Once all elements are functionally 100% verified, we will initiate Phase 4: Performance optimization and UI/animation polish.
+
 ---
 
 ## 🗺️ Architectural Phases
@@ -48,3 +51,11 @@ graph TD
 - `[x]` **Local PDF Bundler**: Embed reference PDFs directly into the app assets during build compilation (`build.js`).
 - `[x]` **Sync Engine**: Built client suggestion syncing using `REMOTE_SERVER_URL` and `isOnlineAtStartup` checking.
 - `[x]` **CI/CD Build Action**: Automate compile packaging to `.apk` on every GitHub push.
+
+---
+
+### Phase 4: Diagnostics, Performance & Polish (Upcoming)
+*Goal: Provide logging tools, diagnose network/sync status on native devices, and improve animation smoothness.*
+
+- `[ ]` **Diagnostics Panel**: Add a settings panel in the app to configure `REMOTE_SERVER_URL` at runtime, test backend ping connectivity, see logs, and verify indexed PDF file counts.
+- `[ ]` **UI Transitions Smoothness**: Implement hardware-accelerated layouts, prune DOM elements, and add micro-animations.
