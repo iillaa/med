@@ -331,3 +331,89 @@ export async function checkRealConnection() {
     return false;
   }
 }
+
+export async function pingEndpoint(url, timeoutMs = 2500) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    // Determine headers and mode depending on URL type
+    const isCorsSafePing = url.includes('httpbin.org') || url.includes('localhost') || url.includes('127.0.0.1');
+    const fetchOpts = {
+      method: 'GET',
+      signal: controller.signal,
+      headers: isCorsSafePing ? getHeaders() : {}
+    };
+    
+    // For general external domains we want to avoid getting blocked by CORS if they don't support custom headers
+    if (!isCorsSafePing) {
+      fetchOpts.mode = 'cors';
+    }
+
+    const res = await fetch(url, fetchOpts);
+    clearTimeout(timeoutId);
+    return {
+      ok: res.ok,
+      status: res.status,
+      statusText: res.statusText
+    };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    let message = err.message || 'Unknown network error';
+    if (err.name === 'AbortError') {
+      message = `Request timed out after ${timeoutMs}ms`;
+    }
+    return {
+      ok: false,
+      status: 0,
+      statusText: 'Error',
+      error: err,
+      message
+    };
+  }
+}
+
+export async function fetchDiagnosticsSystem() {
+  const res = await fetch(getApiUrl('/api/diagnostics/system'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch system diagnostics");
+  return res.json();
+}
+
+export async function fetchDiagnosticsDbStats() {
+  const res = await fetch(getApiUrl('/api/diagnostics/db-stats'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch DB stats");
+  return res.json();
+}
+
+export async function fetchDiagnosticsIndexDetail() {
+  const res = await fetch(getApiUrl('/api/diagnostics/index-detail'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch index details");
+  return res.json();
+}
+
+export async function fetchDiagnosticsRemoteUrl() {
+  const res = await fetch(getApiUrl('/api/diagnostics/remote-server-url'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch remote server URL");
+  return res.json();
+}
+
+export async function updateDiagnosticsRemoteUrl(url) {
+  const res = await fetch(getApiUrl('/api/diagnostics/remote-server-url'), {
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ url })
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to update remote server URL");
+  }
+  return res.json();
+}
+
+export async function fetchNgrokTunnels() {
+  const res = await fetch(getApiUrl('/api/diagnostics/ngrok-tunnels'), { headers: getHeaders() });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to fetch ngrok tunnels");
+  }
+  return res.json();
+}

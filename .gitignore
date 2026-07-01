@@ -31,3 +31,6 @@ suggestions.json*
 
 # Admin Password
 admin_password.txt*
+
+# Remote server URL config
+remote_server_config.json
