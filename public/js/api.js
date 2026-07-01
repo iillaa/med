@@ -58,9 +58,13 @@ function getApiUrl(endpoint) {
 
 function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
+  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+  // Add ngrok bypass header when communicating with ngrok URLs to skip the browser challenge page
+  const isNgrokUrl = configuredUrl && configuredUrl.includes('ngrok');
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'x-admin-token': token } : {}),
+    ...(isNgrokUrl ? { 'ngrok-skip-browser-warning': 'true' } : {}),
     ...extraHeaders
   };
 }
@@ -433,21 +437,23 @@ export async function checkRealConnection() {
   if (configuredUrl) {
     try {
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 2000); // 2s timeout
+      const id = setTimeout(() => controller.abort(), 3000);
       const res = await fetch(`${configuredUrl}/api/search-status`, {
-        signal: controller.signal
+        signal: controller.signal,
+        headers: { 'ngrok-skip-browser-warning': 'true' }
       });
       clearTimeout(id);
-      return res.ok;
+      if (res.ok) return true;
+      // If we got a response but not ok (e.g. ngrok HTML challenge page) fall through to WAN check
     } catch (_) {
-      return false;
+      // Connection failed, fall through to WAN check
     }
   }
 
-  // WAN connectivity HEAD request ping (avoiding CORS body parsing restrictions)
+  // WAN connectivity fallback ping
   try {
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 2000);
+    const id = setTimeout(() => controller.abort(), 3000);
     await fetch('https://httpbin.org/status/200', {
       method: 'HEAD',
       mode: 'no-cors',
@@ -466,10 +472,14 @@ export async function pingEndpoint(url, timeoutMs = 2500) {
   try {
     // Determine headers and mode depending on URL type
     const isCorsSafePing = url.includes('httpbin.org') || url.includes('localhost') || url.includes('127.0.0.1');
+    const isNgrok = url.includes('ngrok');
     const fetchOpts = {
       method: 'GET',
       signal: controller.signal,
-      headers: isCorsSafePing ? getHeaders() : {}
+      headers: {
+        ...(isCorsSafePing ? getHeaders() : {}),
+        ...(isNgrok ? { 'ngrok-skip-browser-warning': 'true' } : {})
+      }
     };
     
     // For general external domains we want to avoid getting blocked by CORS if they don't support custom headers
