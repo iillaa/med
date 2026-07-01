@@ -125,21 +125,8 @@ export async function logoutAdmin() {
 }
 
 export async function checkAdminStatus() {
-  if (isOfflineApp) {
-    const token = localStorage.getItem('dr_cat_admin_token');
-    return token === 'local-token';
-  }
-
-  try {
-    const res = await fetch('/api/is-admin', {
-      headers: getHeaders()
-    });
-    const data = await res.json();
-    return !!data.isAdmin;
-  } catch (err) {
-    console.error("Failed to check admin status:", err);
-    return false;
-  }
+  // TODO: TEMPORARY FOR DEVELOPMENT: Make everyone admin by default
+  return true;
 }
 
 export async function checkIsLocal() {
