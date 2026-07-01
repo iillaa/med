@@ -6,8 +6,7 @@
   "server": {
     "cleartext": true,
     "allowNavigation": [
-      "*.ngrok-free.dev",
-      "rendition-duchess-dry.ngrok-free.dev"
+      "*"
     ]
   }
 }
