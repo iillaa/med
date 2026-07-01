@@ -21,7 +21,9 @@ window.fetch = async function(...args) {
     const duration = performance.now() - start;
     if (window.perf && window.perf.recordApiCall) {
       const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
-      window.perf.recordApiCall(urlStr, 0, duration);
+      if (!urlStr.includes('/api/performance/server-metrics') && !urlStr.includes('/api/search-status')) {
+        window.perf.recordApiCall(urlStr, 0, duration);
+      }
     }
     throw err;
   }
