@@ -1,0 +1,13 @@
+{
+  "appId": "com.drcat.app",
+  "appName": "Dr.CAT",
+  "webDir": "public",
+  "bundledWebRuntime": false,
+  "server": {
+    "cleartext": true,
+    "allowNavigation": [
+      "*.ngrok-free.dev",
+      "rendition-duchess-dry.ngrok-free.dev"
+    ]
+  }
+}
