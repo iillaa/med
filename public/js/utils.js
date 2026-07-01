@@ -292,3 +292,114 @@ export function setupSwipeGestures(sidebarElement) {
     }
   }, { passive: true });
 }
+
+// In-memory buffer for diagnostics console logs
+let diagnosticsLogBuffer = [];
+let originalConsoleWarn = null;
+let originalConsoleError = null;
+let originalConsoleInfo = null;
+
+export function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+export async function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {}
+  }
+  
+  try {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.width = "2em";
+    textArea.style.height = "2em";
+    textArea.style.padding = "0";
+    textArea.style.border = "none";
+    textArea.style.outline = "none";
+    textArea.style.boxShadow = "none";
+    textArea.style.background = "transparent";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return successful;
+  } catch (err) {
+    console.error("Fallback clipboard copy failed:", err);
+    return false;
+  }
+}
+
+export function captureConsoleWarnings(enable) {
+  if (enable) {
+    if (originalConsoleWarn) return; // Already capturing
+    
+    originalConsoleWarn = console.warn;
+    originalConsoleError = console.error;
+    originalConsoleInfo = console.info;
+    
+    const pushLog = (severity, args) => {
+      const msg = args.map(arg => {
+        if (arg instanceof Error) return arg.message + '\n' + arg.stack;
+        if (typeof arg === 'object') {
+          try { return JSON.stringify(arg); } catch (_) { return String(arg); }
+        }
+        return String(arg);
+      }).join(' ');
+      
+      const time = new Date().toLocaleTimeString('fr-FR', { hour12: false });
+      diagnosticsLogBuffer.push({ time, severity, message: msg });
+      
+      if (diagnosticsLogBuffer.length > 50) {
+        diagnosticsLogBuffer.shift();
+      }
+      
+      window.dispatchEvent(new CustomEvent('drcat-log-added'));
+    };
+
+    console.warn = function(...args) {
+      pushLog('WARN', args);
+      originalConsoleWarn.apply(console, args);
+    };
+    
+    console.error = function(...args) {
+      pushLog('ERROR', args);
+      originalConsoleError.apply(console, args);
+    };
+    
+    console.info = function(...args) {
+      pushLog('INFO', args);
+      originalConsoleInfo.apply(console, args);
+    };
+  } else {
+    if (!originalConsoleWarn) return; // Not capturing
+    
+    console.warn = originalConsoleWarn;
+    console.error = originalConsoleError;
+    console.info = originalConsoleInfo;
+    
+    originalConsoleWarn = null;
+    originalConsoleError = null;
+    originalConsoleInfo = null;
+  }
+}
+
+export function getDiagnosticsLogs() {
+  return [...diagnosticsLogBuffer];
+}
+
+export function clearDiagnosticsLogs() {
+  diagnosticsLogBuffer = [];
+  window.dispatchEvent(new CustomEvent('drcat-log-added'));
+}

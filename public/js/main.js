@@ -4,6 +4,7 @@ import * as sidebar from './components/sidebar.js';
 import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
+import * as diagnostics from './components/diagnostics.js';
 import { showToast } from './utils.js';
 
 // Tracks whether the current physical device is localhost (set once on load)
@@ -98,6 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   workspace.initWorkspace(onStatusChange, onCatDeleted, onProgressReset);
   dashboard.initDashboard(selectCatWrapper, onSuggestionHandled);
   quiz.initQuiz(selectCatWrapper);
+  diagnostics.initDiagnostics();
 
   // Modal DOM Elements
   addCatBtn = document.getElementById('add-cat-btn');

@@ -208,12 +208,111 @@
 
           <!-- Admin Moderation Panel (Visible only to Admin) -->
           <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px;">
-            <h3 style="color: var(--color-primary);"><i class="fa-solid fa-user-shield"></i> Propositions de modifications en attente</h3>
+            <h3 style="color: var(--color-primary); display: flex; justify-content: space-between; align-items: center; width: 100%;"><span style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-user-shield"></i> Propositions de modifications en attente</span> <button class="action-btn" id="toggle-diagnostics-btn" style="padding: 4px 10px; font-size: 11.5px; border-color: rgba(6, 182, 212, 0.4);"><i class="fa-solid fa-stethoscope"></i> Diagnostic</button></h3>
             <p class="block-desc">Validez ou rejetez les suggestions soumises par vos collègues :</p>
             <div class="suggestions-list" id="suggestions-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
               <!-- Dynamically populated -->
               <p class="text-muted text-center" style="padding: 10px 0;">Aucune proposition en attente.</p>
             </div>
+          </div>
+
+          <!-- Admin Diagnostics Panel (Collapsed by default, visible to admin) -->
+          <div class="dashboard-block admin-diagnostics-panel" id="admin-diagnostics-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px;">
+            <h3 style="color: var(--color-primary); display: flex; justify-content: space-between; align-items: center;"><span style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-stethoscope"></i> Outils de Diagnostic</span> <button class="close-btn" id="close-diagnostics-btn" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-chevron-up"></i></button></h3>
+            <p class="block-desc">Informations système, logs de la console et tests de connectivité en temps réel.</p>
+            
+            <div class="diag-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px;">
+              
+              <!-- Section 1: Connexion & Connectivity Test -->
+              <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wifi"></i> Statut & Connectivité</h4>
+                <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                  <div>Navigator.onLine : <span id="diag-navigator-online" class="badge">--</span></div>
+                  <div>Mode détecté : <span id="diag-app-mode" class="badge">--</span></div>
+                  <div>URL distant : <span id="diag-remote-url" style="word-break: break-all;">--</span></div>
+                  <div>Token admin : <span id="diag-admin-token" class="badge">--</span></div>
+                </div>
+                <button class="action-btn" id="run-conn-test-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-bolt"></i> Tester la connexion</button>
+                
+                <div id="conn-test-results" style="margin-top: 12px; display: none; font-size: 12px; flex-direction: column; gap: 6px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                  <div style="font-weight: 600; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">Résultats des tests :</div>
+                  <div id="test-step-local">1. Local (localhost:3000) : <span class="status">--</span></div>
+                  <div id="test-step-remote">2. Distant (ngrok URL) : <span class="status">--</span></div>
+                  <div id="test-step-wan">3. WAN (internet ping) : <span class="status">--</span></div>
+                  <div id="diag-auto-analysis" style="margin-top: 6px; font-weight: 500; font-size: 11px; padding: 4px; border-radius: 4px; line-height: 1.4;"></div>
+                </div>
+              </div>
+              
+              <!-- Section 2: Ngrok Tunnel -->
+              <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cloud-arrow-down"></i> Serveur Ngrok (Host)</h4>
+                <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                  <div>Tunnel actif : <span id="diag-ngrok-active" class="badge">--</span></div>
+                  <div>URL publique : <span id="diag-ngrok-url" style="word-break: break-all;">--</span></div>
+                  <div>Connexions : <span id="diag-ngrok-conns">--</span></div>
+                </div>
+                <button class="action-btn" id="check-ngrok-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-arrows-rotate"></i> Vérifier le tunnel</button>
+              </div>
+
+              <!-- Section 3: Server & OS Info -->
+              <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Serveur Local</h4>
+                <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                  <div>Node : <span id="diag-node-version">--</span></div>
+                  <div>OS : <span id="diag-server-os">--</span></div>
+                  <div>Uptime : <span id="diag-server-uptime">--</span></div>
+                  <div>Mémoire : <span id="diag-server-mem">--</span></div>
+                  <div>Indexation : <span id="diag-indexing-active" class="badge">--</span></div>
+                </div>
+              </div>
+
+              <!-- Section 4: Database & PDF Index Stats -->
+              <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-database"></i> Bases & Fichiers</h4>
+                <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                  <div>CATs : <span id="diag-db-cats">--</span></div>
+                  <div>Suggestions : <span id="diag-db-sugs">--</span></div>
+                  <div>cats_db.json : <span id="diag-db-size-cats">--</span></div>
+                  <div>suggestions.json : <span id="diag-db-size-sugs">--</span></div>
+                  <div>pdf_index.json : <span id="diag-db-size-index">--</span></div>
+                </div>
+              </div>
+
+              <!-- Section 5: Config URL (Change URL at runtime) -->
+              <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wrench"></i> Config Serveur Distant</h4>
+                <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">Spécifiez l'adresse de votre serveur LAN ou tunnel ngrok :</div>
+                <input type="text" id="diag-remote-url-input" placeholder="https://xxxx.ngrok-free.app" style="width: 100%; padding: 6px 10px; font-size: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); margin-bottom: 8px;">
+                <button class="action-btn" id="save-remote-url-btn" style="width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder & Tester</button>
+              </div>
+
+              <!-- Section 6: Index PDF Status details -->
+              <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-file-pdf"></i> Statut Index PDF</h4>
+                <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                  <div>Total PDFs : <span id="diag-pdf-docs">--</span></div>
+                  <div>Total Pages : <span id="diag-pdf-pages">--</span></div>
+                  <div>Indexé le : <span id="diag-pdf-time">--</span></div>
+                  <div>Santé de l'index : <span id="diag-pdf-health" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">--</span></div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Section 7: Console Logs Window -->
+            <div class="diag-logs-section" style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="font-size: 13.5px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-terminal"></i> Journal de la Console</h4>
+                <div style="display: flex; gap: 8px;">
+                  <button class="action-btn" id="copy-logs-btn" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-copy"></i> Copier</button>
+                  <button class="cancel-btn" id="clear-logs-btn" style="padding: 4px 10px; font-size: 11px; background: transparent; border-color: rgba(239, 68, 68, 0.3); color: #ef4444;"><i class="fa-solid fa-trash-can"></i> Vider</button>
+                </div>
+              </div>
+              <div id="diag-logs-terminal" style="height: 150px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11.5px; overflow-y: auto; color: #a3e635; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">
+                Aucune entrée de journal disponible. Ouvrez l'outil de diagnostic pour commencer la capture.
+              </div>
+            </div>
+
           </div>
 
           <div class="dashboard-content-split">

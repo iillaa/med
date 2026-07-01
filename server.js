@@ -12,6 +12,7 @@ const PDF_DIR = fs.existsSync(LOCAL_PDF_DIR)
   ? LOCAL_PDF_DIR
   : path.join(__dirname, 'cat-med', 'reference-pdfs');
 const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
+const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 
 const app = express();
 const PORT = 3000;
@@ -33,6 +34,7 @@ let catsCache = [];
 let suggestionsCache = [];
 let pdfIndex = [];
 let adminPassword = '';
+let remoteServerUrl = '';
 const activeTokens = new Set();
 
 // A lightweight asynchronous queue lock to serialize write operations on json databases
@@ -152,6 +154,18 @@ async function initializeData() {
     }
   } catch (err) {
     console.error("Error loading pdf_index.json cache:", err);
+  }
+
+  // Load remote_server_config.json
+  try {
+    const exists = await fs.promises.access(CONFIG_FILE).then(() => true).catch(() => false);
+    if (exists) {
+      const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
+      const parsed = JSON.parse(content);
+      remoteServerUrl = parsed.url || '';
+    }
+  } catch (err) {
+    console.error("Error loading remote_server_config.json:", err);
   }
 }
 
@@ -674,6 +688,192 @@ ${endMarker}`;
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update CSS file" });
+  }
+});
+
+// System diagnostics API endpoints (Admin only)
+app.get('/api/diagnostics/system', (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
+  }
+  try {
+    const memory = process.memoryUsage();
+    res.json({
+      nodeVersion: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      uptimeSeconds: Math.floor(process.uptime()),
+      memoryUsage: {
+        rss: memory.rss,
+        heapTotal: memory.heapTotal,
+        heapUsed: memory.heapUsed,
+        external: memory.external
+      },
+      indexingActive: getIndexStatus().isIndexing,
+      indexPath: INDEX_FILE
+    });
+  } catch (err) {
+    console.error("System diagnostics error:", err);
+    res.status(500).json({ error: "Failed to get system diagnostics" });
+  }
+});
+
+app.get('/api/diagnostics/db-stats', async (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
+  }
+  try {
+    const getFileSize = async (filePath) => {
+      try {
+        const stats = await fs.promises.stat(filePath);
+        return stats.size;
+      } catch (_) {
+        return 0;
+      }
+    };
+
+    const catsDbSize = await getFileSize(DB_FILE);
+    const suggestionsSize = await getFileSize(SUGGESTIONS_FILE);
+    const indexSize = await getFileSize(INDEX_FILE);
+
+    const coreCats = catsCache.filter(c => c.id <= 55).length;
+    const customCats = catsCache.filter(c => c.id > 55).length;
+
+    res.json({
+      totalCats: catsCache.length,
+      coreCats,
+      customCats,
+      totalSuggestions: suggestionsCache.length,
+      catsDbSize,
+      suggestionsSize,
+      indexSize
+    });
+  } catch (err) {
+    console.error("DB stats diagnostics error:", err);
+    res.status(500).json({ error: "Failed to get DB stats" });
+  }
+});
+
+app.get('/api/diagnostics/index-detail', async (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
+  }
+  try {
+    const totalDocs = pdfIndex.length;
+    let totalPages = 0;
+    const docs = [];
+
+    for (const doc of pdfIndex) {
+      const docPages = doc.pages ? doc.pages.length : 0;
+      totalPages += docPages;
+      const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
+
+      let status = 'red';
+      if (docPages > 0) {
+        const ratio = pagesWithText / docPages;
+        if (ratio >= 0.90) {
+          status = 'green';
+        } else if (ratio >= 0.05) {
+          status = 'orange';
+        }
+      }
+
+      docs.push({
+        pdf: doc.pdf,
+        status,
+        pagesWithText,
+        totalPages: docPages
+      });
+    }
+
+    // Read index file timestamp
+    let indexedAt = null;
+    try {
+      const stats = await fs.promises.stat(INDEX_FILE);
+      indexedAt = stats.mtime.toISOString();
+    } catch (_) {}
+
+    res.json({
+      totalDocs,
+      totalPages,
+      indexedAt,
+      docs
+    });
+  } catch (err) {
+    console.error("Index detail diagnostics error:", err);
+    res.status(500).json({ error: "Failed to get index details" });
+  }
+});
+
+app.get('/api/diagnostics/remote-server-url', (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
+  }
+  res.json({ url: remoteServerUrl });
+});
+
+app.post('/api/diagnostics/remote-server-url', async (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
+  }
+  try {
+    const { url } = req.body;
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+      return res.status(400).json({ error: "URL must start with http:// or https://" });
+    }
+
+    remoteServerUrl = url || '';
+    
+    await safeWriteJsonAsync(CONFIG_FILE, { url: remoteServerUrl });
+
+    res.json({ success: true, url: remoteServerUrl });
+  } catch (err) {
+    console.error("Update remote URL error:", err);
+    res.status(500).json({ error: "Failed to update remote server URL" });
+  }
+});
+
+app.get('/api/diagnostics/ngrok-tunnels', async (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
+  }
+  try {
+    const http = require('http');
+    const getTunnels = () => {
+      return new Promise((resolve, reject) => {
+        const reqOpts = {
+          hostname: '127.0.0.1',
+          port: 4040,
+          path: '/api/tunnels',
+          method: 'GET',
+          timeout: 2000
+        };
+
+        const pingReq = http.request(reqOpts, (pingRes) => {
+          let rawData = '';
+          pingRes.on('data', chunk => rawData += chunk);
+          pingRes.on('end', () => {
+            try {
+              resolve(JSON.parse(rawData));
+            } catch (err) {
+              reject(err);
+            }
+          });
+        });
+
+        pingReq.on('error', (err) => reject(err));
+        pingReq.on('timeout', () => {
+          pingReq.destroy();
+          reject(new Error("Timeout"));
+        });
+        pingReq.end();
+      });
+    };
+
+    const tunnelsData = await getTunnels();
+    res.json(tunnelsData);
+  } catch (err) {
+    res.status(502).json({ error: "ngrok not running on localhost:4040" });
   }
 });
 
