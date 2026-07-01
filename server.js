@@ -67,11 +67,21 @@ const activeTokens = new Set();
 class AsyncLock {
   constructor() {
     this.promise = Promise.resolve();
+    this.queueDepth = 0;
   }
   acquire(fn) {
+    this.queueDepth++;
     const next = this.promise.then(() => fn());
     this.promise = next.catch(() => {});
+    const originalThen = next.then.bind(next);
+    next.then = (onFulfilled, onRejected) => {
+      this.queueDepth = Math.max(0, this.queueDepth - 1);
+      return originalThen(onFulfilled, onRejected);
+    };
     return next;
+  }
+  getQueueDepth() {
+    return this.queueDepth;
   }
 }
 const dbLock = new AsyncLock();
@@ -79,7 +89,7 @@ const dbLock = new AsyncLock();
 // Server-side performance recording structures
 const endpointTimings = new Map();
 const pdfParseTimes = [];
-let writeDurations = [];
+const writePhaseDurations = { backup: [], write: [], rename: [] };
 let cacheHits = 0;
 let cacheMisses = 0;
 
@@ -104,10 +114,18 @@ global.perfServer = {
       pdfParseTimes.shift();
     }
   },
-  recordWrite(duration) {
-    writeDurations.push(duration);
-    if (writeDurations.length > 100) {
-      writeDurations.shift();
+  recordWrite(phases) {
+    if (phases.backup !== undefined) {
+      writePhaseDurations.backup.push(phases.backup);
+      if (writePhaseDurations.backup.length > 100) writePhaseDurations.backup.shift();
+    }
+    if (phases.write !== undefined) {
+      writePhaseDurations.write.push(phases.write);
+      if (writePhaseDurations.write.length > 100) writePhaseDurations.write.shift();
+    }
+    if (phases.rename !== undefined) {
+      writePhaseDurations.rename.push(phases.rename);
+      if (writePhaseDurations.rename.length > 100) writePhaseDurations.rename.shift();
     }
   },
   recordCacheHit() {
@@ -122,17 +140,22 @@ global.perfServer = {
 async function safeWriteJsonAsync(filePath, data) {
   const tempPath = filePath + '.tmp';
   const backupPath = filePath + '.bak';
-  const start = Date.now();
+  const phases = {};
   try {
     const jsonString = JSON.stringify(data, null, 2);
     const exists = await fs.promises.access(filePath).then(() => true).catch(() => false);
     if (exists) {
+      const copyStart = Date.now();
       await fs.promises.copyFile(filePath, backupPath);
+      phases.backup = Date.now() - copyStart;
     }
+    const writeStart = Date.now();
     await fs.promises.writeFile(tempPath, jsonString, 'utf-8');
+    phases.write = Date.now() - writeStart;
+    const renameStart = Date.now();
     await fs.promises.rename(tempPath, filePath);
-    const duration = Date.now() - start;
-    global.perfServer.recordWrite(duration);
+    phases.rename = Date.now() - renameStart;
+    global.perfServer.recordWrite(phases);
   } catch (err) {
     console.error(`[Data Integrity Error] Failed to write atomically to ${filePath}:`, err);
     const tempExists = await fs.promises.access(tempPath).then(() => true).catch(() => false);
@@ -147,13 +170,21 @@ async function safeWriteJsonAsync(filePath, data) {
 async function safeWriteTextAsync(filePath, textContent) {
   const tempPath = filePath + '.tmp';
   const backupPath = filePath + '.bak';
+  const phases = {};
   try {
     const exists = await fs.promises.access(filePath).then(() => true).catch(() => false);
     if (exists) {
+      const copyStart = Date.now();
       await fs.promises.copyFile(filePath, backupPath);
+      phases.backup = Date.now() - copyStart;
     }
+    const writeStart = Date.now();
     await fs.promises.writeFile(tempPath, textContent, 'utf-8');
+    phases.write = Date.now() - writeStart;
+    const renameStart = Date.now();
     await fs.promises.rename(tempPath, filePath);
+    phases.rename = Date.now() - renameStart;
+    global.perfServer.recordWrite(phases);
   } catch (err) {
     console.error(`[Data Integrity Error] Failed to write text atomically to ${filePath}:`, err);
     const tempExists = await fs.promises.access(tempPath).then(() => true).catch(() => false);
@@ -1000,14 +1031,23 @@ app.get('/api/performance/server-metrics', (req, res) => {
       slowestPdf = `${sortedByDuration[0].file}: ${sortedByDuration[0].duration}ms`;
     }
 
-    // Calculate DB write durations statistics
-    let avgWriteMs = 0;
-    let maxWriteMs = 0;
-    if (writeDurations.length > 0) {
-      const sumWrite = writeDurations.reduce((sum, d) => sum + d, 0);
-      avgWriteMs = Math.round(sumWrite / writeDurations.length);
-      maxWriteMs = Math.max(...writeDurations);
-    }
+    // Calculate DB write durations statistics (phase-separated)
+    const writeStats = {
+      backup: { avgMs: 0, maxMs: 0 },
+      write: { avgMs: 0, maxMs: 0 },
+      rename: { avgMs: 0, maxMs: 0 }
+    };
+    const phases = ['backup', 'write', 'rename'];
+    phases.forEach(phase => {
+      const samples = writePhaseDurations[phase];
+      if (samples.length > 0) {
+        const sum = samples.reduce((a, b) => a + b, 0);
+        writeStats[phase] = {
+          avgMs: Math.round(sum / samples.length),
+          maxMs: Math.max(...samples)
+        };
+      }
+    });
 
     // Cache hit rates
     const totalIndexerHits = cacheHits + cacheMisses;
@@ -1026,10 +1066,11 @@ app.get('/api/performance/server-metrics', (req, res) => {
         slowest: slowestPdf
       },
       writeDurations: {
-        avgMs: avgWriteMs,
-        maxMs: maxWriteMs
+        backup: writeStats.backup,
+        write: writeStats.write,
+        rename: writeStats.rename
       },
-      lockQueueDepth: 0,
+      lockQueueDepth: dbLock.getQueueDepth(),
       cacheHitRate
     });
   } catch (err) {
