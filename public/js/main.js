@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               alert("Connexion réussie !");
               location.reload();
             } else {
-              alert("Mot de passe incorrect.");
+              alert(res.error || "Mot de passe incorrect.");
             }
           } catch (err) {
             console.error("Login error:", err);
@@ -233,13 +233,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check with the server if this connection is from the local machine.
   // The server reads the actual TCP socket IP, not the HTTP Host header.
   if (adminLoginBtn) {
-    // Hide by default until confirmed local
-    adminLoginBtn.style.display = 'none';
-    isLocalDevice = await api.checkIsLocal();
-    if (isLocalDevice) {
+    if (api.isOfflineApp) {
       adminLoginBtn.style.display = 'flex';
     } else {
-      console.log('[Security] Admin button hidden: not a local connection.');
+      // Hide by default until confirmed local
+      adminLoginBtn.style.display = 'none';
+      isLocalDevice = await api.checkIsLocal();
+      if (isLocalDevice) {
+        adminLoginBtn.style.display = 'flex';
+      } else {
+        console.log('[Security] Admin button hidden: not a local connection.');
+      }
     }
   }
 
@@ -459,7 +463,22 @@ export function updateEditButtonsVisibility() {
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
   if (api.isOfflineApp) {
-    if (adminLoginBtn) adminLoginBtn.style.display = 'none';
+    if (adminLoginBtn) {
+      adminLoginBtn.style.display = 'flex';
+      if (state.isAdmin) {
+        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
+        adminLoginBtn.classList.remove('action-btn');
+        adminLoginBtn.classList.add('cancel-btn');
+        adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        adminLoginBtn.style.color = 'var(--color-success)';
+      } else {
+        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
+        adminLoginBtn.classList.remove('cancel-btn');
+        adminLoginBtn.classList.add('action-btn');
+        adminLoginBtn.style.borderColor = '';
+        adminLoginBtn.style.color = '';
+      }
+    }
     if (addCatBtn) addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
   } else {
     if (addCatBtn) addCatBtn.style.display = 'flex';
