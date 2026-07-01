@@ -298,6 +298,7 @@ let diagnosticsLogBuffer = [];
 let originalConsoleWarn = null;
 let originalConsoleError = null;
 let originalConsoleInfo = null;
+let originalConsoleLog = null;
 
 export function formatBytes(bytes, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -348,6 +349,7 @@ export function captureConsoleWarnings(enable) {
     originalConsoleWarn = console.warn;
     originalConsoleError = console.error;
     originalConsoleInfo = console.info;
+    originalConsoleLog = console.log;
     
     const pushLog = (severity, args) => {
       const msg = args.map(arg => {
@@ -382,16 +384,23 @@ export function captureConsoleWarnings(enable) {
       pushLog('INFO', args);
       originalConsoleInfo.apply(console, args);
     };
+
+    console.log = function(...args) {
+      pushLog('LOG', args);
+      originalConsoleLog.apply(console, args);
+    };
   } else {
     if (!originalConsoleWarn) return; // Not capturing
     
     console.warn = originalConsoleWarn;
     console.error = originalConsoleError;
     console.info = originalConsoleInfo;
+    console.log = originalConsoleLog;
     
     originalConsoleWarn = null;
     originalConsoleError = null;
     originalConsoleInfo = null;
+    originalConsoleLog = null;
   }
 }
 
