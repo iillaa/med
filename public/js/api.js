@@ -210,43 +210,49 @@ export async function fetchPdfs() {
 }
 
 export async function saveCatDataToServer(id, data) {
-  if (isOfflineApp) {
-    // Save to local overrides (persisted to localStorage)
-    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    if (!localOverrides[id]) localOverrides[id] = {};
-    if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
-    if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
-    localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
-    return { success: true, message: "Modifications enregistrées localement." };
+  // If a remote server is configured, try to save directly to the server.
+  if (hasRemoteServer()) {
+    try {
+      const res = await fetch(getApiUrl(`/api/cats/${id}`), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      });
+      if (res.ok) return res.json();
+    } catch (err) {
+      console.warn('[API] saveCatDataToServer: remote server unreachable, saving locally.', err.message);
+    }
   }
 
-  const res = await fetch(`/api/cats/${id}`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data)
-  });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to save CAT data");
-  return res.json();
+  // Fallback: save to local overrides (persisted to localStorage)
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  if (!localOverrides[id]) localOverrides[id] = {};
+  if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
+  if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
+  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+  return { success: true, message: "Modifications enregistrées localement." };
 }
 
 export async function deleteCatFromServer(id) {
-  if (isOfflineApp) {
-    // Mark as deleted in local storage overrides
-    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    if (!localOverrides[id]) localOverrides[id] = {};
-    localOverrides[id].deleted = true;
-    localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
-    return { success: true, message: "Fiche supprimée localement." };
+  // If a remote server is configured, try to delete directly on the server.
+  if (hasRemoteServer()) {
+    try {
+      const res = await fetch(getApiUrl(`/api/cats/${id}`), {
+        method: 'DELETE',
+        headers: getHeaders()
+      });
+      if (res.ok) return res.json();
+    } catch (err) {
+      console.warn('[API] deleteCatFromServer: remote server unreachable, deleting locally.', err.message);
+    }
   }
 
-  const res = await fetch(`/api/cats/${id}`, { 
-    method: 'DELETE',
-    headers: getHeaders()
-  });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to delete CAT");
-  return res.json();
+  // Fallback: mark as deleted in local storage overrides
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  if (!localOverrides[id]) localOverrides[id] = {};
+  localOverrides[id].deleted = true;
+  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+  return { success: true, message: "Fiche supprimée localement." };
 }
 
 export async function createCatOnServer(catData) {
