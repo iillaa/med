@@ -613,10 +613,18 @@ function showReportExportModal(jsonStr, fileName, report) {
     shareBtn.addEventListener('click', async () => {
       try {
         if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-          // Native Capacitor Share/Filesystem integration
+          // Native Capacitor Share/Filesystem integration via window.Capacitor.Plugins to avoid ES bare import issues
           try {
-            const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
-            const { Share } = await import('@capacitor/share');
+            const Plugins = window.Capacitor.Plugins;
+            const Filesystem = Plugins.Filesystem;
+            const Share = Plugins.Share;
+
+            if (!Filesystem || !Share) {
+              throw new Error("Capacitor Filesystem or Share plugin is not loaded on window.Capacitor.Plugins. Make sure they are registered in the native app wrapper.");
+            }
+
+            const Directory = { Documents: 'DOCUMENTS' };
+            const Encoding = { UTF8: 'utf8' };
 
             // 1. Request permission
             try { await Filesystem.requestPermissions(); } catch (_) {}
@@ -685,7 +693,16 @@ function showReportExportModal(jsonStr, fileName, report) {
     try {
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
         try {
-          const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
+          const Plugins = window.Capacitor.Plugins;
+          const Filesystem = Plugins.Filesystem;
+
+          if (!Filesystem) {
+            throw new Error("Capacitor Filesystem plugin is not loaded on window.Capacitor.Plugins.");
+          }
+
+          const Directory = { Documents: 'DOCUMENTS' };
+          const Encoding = { UTF8: 'utf8' };
+
           try { await Filesystem.requestPermissions(); } catch (_) {}
 
           try {
