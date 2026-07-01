@@ -198,11 +198,10 @@ export async function fetchCats() {
 
 export async function fetchPdfs() {
   if (isOfflineApp) {
-    // Dynamically retrieve PDF filenames from indexed pdfs index
-    const res = await fetch('data/pdf_index.json');
-    if (!res.ok) throw new Error("Failed to fetch PDFs index statically");
-    const index = await res.json();
-    return index.map(doc => doc.pdf);
+    // Load only the list of filenames instead of the heavy index structure containing all parsed texts
+    const res = await fetch('data/pdf_list.json');
+    if (!res.ok) throw new Error("Failed to fetch PDFs list statically");
+    return res.json();
   }
 
   const res = await fetch('/api/pdfs', { headers: getHeaders() });
