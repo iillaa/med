@@ -607,27 +607,66 @@ function showReportExportModal(jsonStr, fileName, report) {
   document.getElementById('report-modal-close').addEventListener('click', () => modal.remove());
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 
-  // Share button (uses Web Share API — works in Capacitor WebView and Chrome on Android)
+  // Share button (uses native Capacitor Share plugin if native, otherwise falls back to Web Share API)
   const shareBtn = document.getElementById('report-btn-share');
   if (shareBtn) {
     shareBtn.addEventListener('click', async () => {
       try {
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+          // Native Capacitor Share/Filesystem integration
+          try {
+            const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
+            const { Share } = await import('@capacitor/share');
+
+            // 1. Request permission
+            try { await Filesystem.requestPermissions(); } catch (_) {}
+
+            // 2. Create drcat folder in Documents directory
+            try {
+              await Filesystem.stat({ path: 'drcat', directory: Directory.Documents });
+            } catch {
+              await Filesystem.mkdir({ path: 'drcat', directory: Directory.Documents, recursive: true });
+            }
+
+            // 3. Write file
+            const fileUri = `drcat/${fileName}`;
+            const writeResult = await Filesystem.writeFile({
+              path: fileUri,
+              data: jsonStr,
+              directory: Directory.Documents,
+              encoding: Encoding.UTF8
+            });
+
+            // 4. Share natively using the local file URI
+            await Share.share({
+              title: 'Dr.CAT Auto-Diagnostic',
+              text: `Rapport de diagnostic Dr.CAT - ${new Date().toLocaleString('fr-FR')}`,
+              url: writeResult.uri,
+              dialogTitle: 'Partager le rapport Dr.CAT'
+            });
+            showToast("Rapport partagé !", "fa-share-nodes", 3000);
+            modal.remove();
+            return;
+          } catch (nativeErr) {
+            console.error("[Export] Native Capacitor share failed:", nativeErr);
+          }
+        }
+
+        // Web API / Browser fallback
         const blob = new Blob([jsonStr], { type: 'application/json' });
         const file = new File([blob], fileName, { type: 'application/json' });
         
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          // Can share files directly (most Android apps like Telegram support this)
           await navigator.share({
             title: 'Dr.CAT Diagnostic Report',
             text: `Rapport de diagnostic Dr.CAT - ${new Date().toLocaleString('fr-FR')}`,
             files: [file]
           });
-          showToast("Rapport partagé avec succès !", "fa-share-nodes", 3000);
+          showToast("Rapport partagé !", "fa-share-nodes", 3000);
         } else if (navigator.share) {
-          // Fallback: share text content only
           await navigator.share({
             title: 'Dr.CAT Diagnostic Report',
-            text: jsonStr.slice(0, 5000) // most share targets have a text limit
+            text: jsonStr.slice(0, 5000)
           });
           showToast("Texte du rapport partagé !", "fa-share-nodes", 3000);
         }
@@ -641,9 +680,35 @@ function showReportExportModal(jsonStr, fileName, report) {
     });
   }
 
-  // Download button
-  document.getElementById('report-btn-download').addEventListener('click', () => {
+  // Download button (saves natively to Documents/drcat in standalone, otherwise standard download)
+  document.getElementById('report-btn-download').addEventListener('click', async () => {
     try {
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+          const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
+          try { await Filesystem.requestPermissions(); } catch (_) {}
+
+          try {
+            await Filesystem.stat({ path: 'drcat', directory: Directory.Documents });
+          } catch {
+            await Filesystem.mkdir({ path: 'drcat', directory: Directory.Documents, recursive: true });
+          }
+
+          await Filesystem.writeFile({
+            path: `drcat/${fileName}`,
+            data: jsonStr,
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8
+          });
+
+          showToast("Fichier enregistré dans Documents/drcat/ !", "fa-floppy-disk", 5000);
+          return;
+        } catch (nativeErr) {
+          console.error("[Export] Native Capacitor write failed:", nativeErr);
+        }
+      }
+
+      // Web download fallback
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');

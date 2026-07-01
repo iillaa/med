@@ -374,22 +374,25 @@ async function initApp() {
     workspace.restoreAppState();
 
     // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
-    Promise.all([
-      api.fetchPdfs(),
-      api.fetchPdfIndexStatus()
-    ]).then(([pdfs, pdfIndexStatus]) => {
-      state.allPdfs = pdfs;
-      state.pdfIndexStatus = pdfIndexStatus;
-      
-      // Update UI components that depend on PDF statuses
-      workspace.updatePdfIndexStatus();
-      if (state.activeCat) {
-        workspace.selectCat(state.activeCat, true);
-      }
-      console.log("[Background] PDFs and index status loaded successfully.");
-    }).catch(err => {
-      console.error("[Background] Failed to load PDFs and index status:", err);
-    });
+    // Using setTimeout to give the UI thread a chance to complete layout and record startup milestones
+    setTimeout(() => {
+      Promise.all([
+        api.fetchPdfs(),
+        api.fetchPdfIndexStatus()
+      ]).then(([pdfs, pdfIndexStatus]) => {
+        state.allPdfs = pdfs;
+        state.pdfIndexStatus = pdfIndexStatus;
+        
+        // Update UI components that depend on PDF statuses
+        workspace.updatePdfIndexStatus();
+        if (state.activeCat) {
+          workspace.selectCat(state.activeCat, true);
+        }
+        console.log("[Background] PDFs and index status loaded successfully.");
+      }).catch(err => {
+        console.error("[Background] Failed to load PDFs and index status:", err);
+      });
+    }, 1500);
 
   } catch (err) {
     console.error('Error initializing app:', err);
