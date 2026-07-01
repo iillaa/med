@@ -412,8 +412,9 @@ function renderLogs() {
   }
 
   term.innerHTML = logs.map(l => {
-    let color = '#38bdf8'; // INFO: light blue
-    if (l.severity === 'WARN') color = '#fbbf24'; // yellow
+    let color = '#e2e8f0'; // LOG: light gray
+    if (l.severity === 'INFO') color = '#38bdf8'; // blue
+    else if (l.severity === 'WARN') color = '#fbbf24'; // yellow
     else if (l.severity === 'ERROR') color = '#f87171'; // red
     
     return `<div style="margin-bottom: 4px;"><span style="color: var(--text-muted);">[${l.time}]</span> <span style="color: ${color}; font-weight: bold;">[${l.severity}]</span> ${escapeHtmlLogs(l.message)}</div>`;
