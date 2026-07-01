@@ -239,8 +239,13 @@ async function renderPerformanceUI() {
       if (serverUptime) serverUptime.textContent = `${h}h ${m}m`;
 
       if (serverWrites) {
-        serverWrites.textContent = `Moy: ${server.writeDurations.avgMs}ms (max: ${server.writeDurations.maxMs}ms)`;
-        if (server.writeDurations.avgMs > T.dbWrite.good) {
+        const writes = server.writeDurations;
+        // Calculate averaged total across all phases that have data
+        const phaseAvgs = [writes.backup.avgMs, writes.write.avgMs, writes.rename.avgMs].filter(v => v > 0);
+        const totalAvg = phaseAvgs.length > 0 ? Math.round(phaseAvgs.reduce((a, b) => a + b, 0) / phaseAvgs.length) : 0;
+        const totalMax = Math.max(writes.backup.maxMs, writes.write.maxMs, writes.rename.maxMs);
+        serverWrites.textContent = `Moy: ${totalAvg}ms (max: ${totalMax}ms)`;
+        if (totalAvg > T.dbWrite.good) {
           serverWrites.style.color = '#fbbf24';
         }
       }
