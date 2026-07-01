@@ -97,10 +97,13 @@ async function indexPdfs(force = false) {
       if (!force && existing && existing.mtime === mtime && existing.size === size) {
         newIndex.push(existing);
         indexState.indexedFiles++;
+        if (global.perfServer) global.perfServer.recordCacheHit();
         continue;
       }
 
       console.log(`Parsing new/modified PDF: "${file}" (${(size / 1024 / 1024).toFixed(2)} MB)...`);
+      if (global.perfServer) global.perfServer.recordCacheMiss();
+      const parseStart = Date.now();
       try {
         const dataBuffer = await fs.promises.readFile(filePath);
         const parser = new PDFParse({ data: dataBuffer });
@@ -119,6 +122,9 @@ async function indexPdfs(force = false) {
           mtime: mtime,
           pages: pages
         });
+        
+        const parseDuration = Date.now() - parseStart;
+        if (global.perfServer) global.perfServer.recordPdfParse(file, parseDuration, pages.length);
         updated = true;
       } catch (err) {
         console.error(`Failed to parse "${file}":`, err);

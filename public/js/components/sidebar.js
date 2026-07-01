@@ -99,6 +99,7 @@ export function populateCategoryFilter(cats) {
 
 // Render CATs list
 export function renderCatList(cats, onSelectCat) {
+  if (window.perf) window.perf.startMeasure('sidebar.renderCatList');
   if (!catList) catList = document.getElementById('cat-list');
   if (!catList) return;
 
@@ -129,6 +130,10 @@ export function renderCatList(cats, onSelectCat) {
 
     catList.appendChild(li);
   });
+  if (window.perf) {
+    window.perf.endMeasure('sidebar.renderCatList');
+    window.perf.recordMilestone('sidebarRendered');
+  }
 }
 
 // Update the list item state dot & label on the fly

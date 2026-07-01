@@ -240,6 +240,7 @@ function startQuizSession() {
 }
 
 function renderQuestion() {
+  if (window.perf) window.perf.startMeasure('quiz.renderQuestion');
   const session = state.quizSession;
   const q = session.questions[session.currentIndex];
 
@@ -290,6 +291,7 @@ function renderQuestion() {
     }
     if (submitTextBtn) submitTextBtn.style.display = 'block';
   }
+  if (window.perf) window.perf.endMeasure('quiz.renderQuestion');
 }
 
 function generateQCMOptions(question) {
