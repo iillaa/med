@@ -247,12 +247,15 @@ async function runConnectivityTest() {
   }
 
   // 1. Test local server endpoint ping
+  console.log("[Connectivity] Test 1: Ping local (localhost:3000)...");
   const localRes = await api.pingEndpoint('http://localhost:3000/api/search-status');
   let isLocalSuccess = false;
   if (localRes.ok) {
     isLocalSuccess = true;
+    console.log("[Connectivity] Local OK (200 OK)");
     if (stepLocal) stepLocal.innerHTML = '1. Local (localhost:3000) : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Accessible (200 OK)</span>';
   } else {
+    console.warn(`[Connectivity] Local FAILED: ${localRes.message || 'CORS/Refused'}`);
     if (stepLocal) stepLocal.innerHTML = `1. Local (localhost:3000) : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Échec (${localRes.message || 'CORS/Refusé'})</span>`;
   }
 
@@ -264,26 +267,33 @@ async function runConnectivityTest() {
   if (stepRemote) stepRemote.innerHTML = '2. Distant (ngrok URL) : <span style="color: #fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Ping...</span>';
   
   if (configuredRemoteUrl) {
+    console.log(`[Connectivity] Test 2: Ping distant ngrok (${configuredRemoteUrl})...`);
     const remoteRes = await api.pingEndpoint(`${configuredRemoteUrl}/api/search-status`);
     if (remoteRes.ok) {
       isRemoteSuccess = true;
+      console.log("[Connectivity] Distant ngrok OK");
       if (stepRemote) stepRemote.innerHTML = `2. Distant (ngrok) : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Accessible (${configuredRemoteUrl})</span>`;
     } else {
       remoteErrorMessage = remoteRes.message || 'CORS ou Timeout';
+      console.warn(`[Connectivity] Distant ngrok FAILED: ${remoteErrorMessage}`);
       if (stepRemote) stepRemote.innerHTML = `2. Distant (ngrok) : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Échec (${remoteErrorMessage})</span>`;
     }
   } else {
+    console.log("[Connectivity] Test 2: Distant non configuré");
     if (stepRemote) stepRemote.innerHTML = '2. Distant (ngrok) : <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-exclamation"></i> Non configuré</span>';
   }
 
   // 3. Test WAN internet access ping
   if (stepWan) stepWan.innerHTML = '3. WAN (internet ping) : <span style="color: #fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Ping...</span>';
+  console.log("[Connectivity] Test 3: Ping WAN (httpbin)...");
   const wanRes = await api.pingEndpoint('https://httpbin.org/status/200');
   let isWanSuccess = false;
   if (wanRes.ok) {
     isWanSuccess = true;
+    console.log("[Connectivity] WAN OK (Internet accessible)");
     if (stepWan) stepWan.innerHTML = '3. WAN (internet ping) : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Connecté à Internet</span>';
   } else {
+    console.warn("[Connectivity] WAN FAILED (No internet access)");
     if (stepWan) stepWan.innerHTML = '3. WAN (internet ping) : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Échec de la connexion WAN</span>';
   }
 
@@ -413,8 +423,9 @@ function renderLogs() {
   }
 
   term.innerHTML = logs.map(l => {
-    let color = '#38bdf8'; // INFO: light blue
-    if (l.severity === 'WARN') color = '#fbbf24'; // yellow
+    let color = '#e2e8f0'; // LOG: light gray
+    if (l.severity === 'INFO') color = '#38bdf8'; // blue
+    else if (l.severity === 'WARN') color = '#fbbf24'; // yellow
     else if (l.severity === 'ERROR') color = '#f87171'; // red
     
     return `<div style="margin-bottom: 4px;"><span style="color: var(--text-muted);">[${l.time}]</span> <span style="color: ${color}; font-weight: bold;">[${l.severity}]</span> ${escapeHtmlLogs(l.message)}</div>`;
@@ -520,22 +531,143 @@ async function runAutoCheckupSuite() {
     consoleLogsCollected: logs
   };
 
-  // 8. Download report as JSON
+  // 8. Export report - smart strategy based on platform
   const jsonStr = JSON.stringify(report, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
   const d = new Date();
   const timestampStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}`;
-  
-  link.href = url;
-  link.download = `drcat-diagnostic-complete-${timestampStr}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const fileName = `drcat-diagnostic-complete-${timestampStr}.json`;
 
-  showToast("Auto-Test terminé ! Rapport téléchargé.", "fa-circle-check", 4000);
-  console.log("[Auto-Test] Diagnostic complété. Rapport exporté !");
+  // Show the export modal
+  showReportExportModal(jsonStr, fileName, report);
+
+  showToast("Auto-Test terminé ! Rapport prêt.", "fa-circle-check", 4000);
+  console.log("[Auto-Test] Diagnostic complété. Rapport prêt à l'export !");
 }
+
+function showReportExportModal(jsonStr, fileName, report) {
+  // Remove existing modal if any
+  const existing = document.getElementById('report-export-modal');
+  if (existing) existing.remove();
+
+  const isCapacitor = !!window.Capacitor;
+  const canShare = !!navigator.share;
+
+  const modal = document.createElement('div');
+  modal.id = 'report-export-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.85); z-index: 9999; 
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; box-sizing: border-box;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background: var(--bg-card); border: 1px solid var(--color-primary); border-radius: 12px; padding: 20px; max-width: 420px; width: 100%; max-height: 80vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="color: var(--color-success); margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-circle-check"></i> Rapport Auto-Test Prêt
+        </h3>
+        <button id="report-modal-close" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+        Fichier : <strong style="color: var(--text-primary);">${fileName}</strong>
+        <br><span style="font-size: 11px;">${jsonStr.length} caractères · JSON structuré</span>
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        ${canShare || isCapacitor ? `
+        <button id="report-btn-share" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fa-solid fa-share-nodes"></i> Partager (Telegram, WhatsApp, Email...)
+        </button>
+        ` : ''}
+
+        <button id="report-btn-download" style="width: 100%; padding: 12px; background: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid var(--color-success); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fa-solid fa-download"></i> Télécharger en JSON
+        </button>
+
+        <button id="report-btn-copy" style="width: 100%; padding: 12px; background: rgba(99, 102, 241, 0.1); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fa-solid fa-copy"></i> Copier dans le presse-papiers
+        </button>
+
+        <details style="margin-top: 4px;">
+          <summary style="font-size: 11px; color: var(--text-muted); cursor: pointer; padding: 6px 0;">
+            Aperçu du rapport (premiers 500 caractères)
+          </summary>
+          <pre style="font-size: 10px; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; overflow: auto; max-height: 160px; white-space: pre-wrap; word-break: break-all; margin-top: 6px;">${jsonStr.slice(0, 500)}...</pre>
+        </details>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Close button
+  document.getElementById('report-modal-close').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+  // Share button (uses Web Share API — works in Capacitor WebView and Chrome on Android)
+  const shareBtn = document.getElementById('report-btn-share');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      try {
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const file = new File([blob], fileName, { type: 'application/json' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          // Can share files directly (most Android apps like Telegram support this)
+          await navigator.share({
+            title: 'Dr.CAT Diagnostic Report',
+            text: `Rapport de diagnostic Dr.CAT - ${new Date().toLocaleString('fr-FR')}`,
+            files: [file]
+          });
+          showToast("Rapport partagé avec succès !", "fa-share-nodes", 3000);
+        } else if (navigator.share) {
+          // Fallback: share text content only
+          await navigator.share({
+            title: 'Dr.CAT Diagnostic Report',
+            text: jsonStr.slice(0, 5000) // most share targets have a text limit
+          });
+          showToast("Texte du rapport partagé !", "fa-share-nodes", 3000);
+        }
+        modal.remove();
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error("[Export] Erreur partage:", err.message);
+          showToast("Échec du partage. Essayez Copier.", "fa-triangle-exclamation", 3000);
+        }
+      }
+    });
+  }
+
+  // Download button
+  document.getElementById('report-btn-download').addEventListener('click', () => {
+    try {
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast("Téléchargement lancé !", "fa-download", 3000);
+    } catch (err) {
+      console.error("[Export] Erreur téléchargement:", err.message);
+      showToast("Téléchargement impossible sur cet appareil.", "fa-triangle-exclamation", 3000);
+    }
+  });
+
+  // Copy to clipboard button
+  document.getElementById('report-btn-copy').addEventListener('click', async () => {
+    const success = await copyToClipboard(jsonStr);
+    if (success) {
+      showToast("Rapport copié dans le presse-papiers ! Collez dans Telegram/Notes.", "fa-copy", 4000);
+    } else {
+      showToast("Échec de la copie automatique.", "fa-circle-xmark", 3000);
+    }
+  });
+}
+

@@ -7,7 +7,10 @@ const { indexPdfs, getIndexStatus, onIndexUpdated } = require('./index_pdfs');
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
 const DB_FILE = path.join(__dirname, 'cats_db.json');
-const PDF_DIR = path.join(__dirname, '.cat-med', 'reference-pdfs');
+const LOCAL_PDF_DIR = '/storage/emulated/0/cat-med/CAT de Médecine Générale';
+const PDF_DIR = fs.existsSync(LOCAL_PDF_DIR)
+  ? LOCAL_PDF_DIR
+  : path.join(__dirname, 'cat-med', 'reference-pdfs');
 const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
 const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 
@@ -15,6 +18,18 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+// Enable CORS middleware for external client requests (like Capacitor WebView and remote browsers)
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-admin-token');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Performance monitoring middleware for API timing tracking
 app.use((req, res, next) => {
@@ -279,9 +294,8 @@ function isLocalhostConnection(req) {
 
 // Helper to check if request is authenticated as admin using token
 function isAdminRequest(req) {
-  const token = req.headers['x-admin-token'] || req.query['admin-token'];
-  if (!token) return false;
-  return activeTokens.has(token);
+  // TODO: TEMPORARY FOR DEVELOPMENT: Make everyone admin by default
+  return true;
 }
 
 // Serve PDFs statically with aggressive 7-day caching to save mobile data

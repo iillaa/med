@@ -233,18 +233,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check with the server if this connection is from the local machine.
   // The server reads the actual TCP socket IP, not the HTTP Host header.
   if (adminLoginBtn) {
-    if (api.isOfflineApp) {
-      adminLoginBtn.style.display = 'flex';
-    } else {
-      // Hide by default until confirmed local
-      adminLoginBtn.style.display = 'none';
-      isLocalDevice = await api.checkIsLocal();
-      if (isLocalDevice) {
-        adminLoginBtn.style.display = 'flex';
-      } else {
-        console.log('[Security] Admin button hidden: not a local connection.');
-      }
-    }
+    // TEMPORARY FOR DEVELOPMENT: Hide admin button as everyone is admin by default
+    adminLoginBtn.style.display = 'none';
   }
 
   // Handle Online/Offline Status Events
@@ -347,14 +337,30 @@ async function initApp() {
     let cats = await api.fetchCats();
     if (window.perf) window.perf.recordMilestone('catsFetched');
 
-    // 3. Merge server CATs with local progress
+    // 3. Merge server CATs with local progress and local offline overrides
     const localProgress = getLocalProgress();
+    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    const customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+
+    // Combine standard CATs with custom ones created offline
+    if (api.isOfflineApp) {
+      // Filter out any locally deleted standard CATs
+      cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
+      // Append custom created CATs
+      cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
+    }
+
     state.allCats = cats.map(cat => {
       const localEntry = localProgress[cat.id] || {};
+      const overrides = localOverrides[cat.id] || {};
       return {
         ...cat,
         status: localEntry.status || 'todo',
-        notes: localEntry.notes || ''
+        notes: localEntry.notes || '',
+        summary: overrides.customSummary || cat.summary,
+        customSummary: overrides.customSummary || cat.summary,
+        ordonnance: overrides.customOrdonnance || cat.ordonnance,
+        customOrdonnance: overrides.customOrdonnance || cat.ordonnance
       };
     });
 
@@ -462,42 +468,14 @@ export function updateEditButtonsVisibility() {
   const addCatBtn = document.getElementById('add-cat-btn');
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
+  if (adminLoginBtn) {
+    // TEMPORARY FOR DEVELOPMENT: Hide admin button as everyone is admin by default
+    adminLoginBtn.style.display = 'none';
+  }
   if (api.isOfflineApp) {
-    if (adminLoginBtn) {
-      adminLoginBtn.style.display = 'flex';
-      if (state.isAdmin) {
-        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
-        adminLoginBtn.classList.remove('action-btn');
-        adminLoginBtn.classList.add('cancel-btn');
-        adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        adminLoginBtn.style.color = 'var(--color-success)';
-      } else {
-        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
-        adminLoginBtn.classList.remove('cancel-btn');
-        adminLoginBtn.classList.add('action-btn');
-        adminLoginBtn.style.borderColor = '';
-        adminLoginBtn.style.color = '';
-      }
-    }
     if (addCatBtn) addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
   } else {
     if (addCatBtn) addCatBtn.style.display = 'flex';
-    if (adminLoginBtn && isLocalDevice) {
-      adminLoginBtn.style.display = 'flex';
-      if (state.isAdmin) {
-        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
-        adminLoginBtn.classList.remove('action-btn');
-        adminLoginBtn.classList.add('cancel-btn');
-        adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        adminLoginBtn.style.color = 'var(--color-success)';
-      } else {
-        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
-        adminLoginBtn.classList.remove('cancel-btn');
-        adminLoginBtn.classList.add('action-btn');
-        adminLoginBtn.style.borderColor = '';
-        adminLoginBtn.style.color = '';
-      }
-    }
   }
   
   const deleteBtn = document.getElementById('delete-cat-btn');

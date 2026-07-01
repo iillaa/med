@@ -21,7 +21,9 @@ window.fetch = async function(...args) {
     const duration = performance.now() - start;
     if (window.perf && window.perf.recordApiCall) {
       const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
-      window.perf.recordApiCall(urlStr, 0, duration);
+      if (!urlStr.includes('/api/performance/server-metrics') && !urlStr.includes('/api/search-status')) {
+        window.perf.recordApiCall(urlStr, 0, duration);
+      }
     }
     throw err;
   }
@@ -94,6 +96,7 @@ export async function loginAdmin(password) {
     localStorage.setItem('dr_cat_admin_token', token);
     return { success: true, token };
   }
+
   const res = await fetch('/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -107,6 +110,11 @@ export async function loginAdmin(password) {
 }
 
 export async function logoutAdmin() {
+  if (isOfflineApp) {
+    localStorage.removeItem('dr_cat_admin_token');
+    return;
+  }
+
   try {
     await fetch('/api/logout', {
       method: 'POST',
@@ -119,19 +127,15 @@ export async function logoutAdmin() {
 }
 
 export async function checkAdminStatus() {
-  try {
-    const res = await fetch('/api/is-admin', {
-      headers: getHeaders()
-    });
-    const data = await res.json();
-    return !!data.isAdmin;
-  } catch (err) {
-    console.error("Failed to check admin status:", err);
-    return false;
-  }
+  // TODO: TEMPORARY FOR DEVELOPMENT: Make everyone admin by default
+  return true;
 }
 
 export async function checkIsLocal() {
+  if (isOfflineApp) {
+    return true; // Standalone app is always "local" to the device
+  }
+
   try {
     const res = await fetch('/api/is-local');
     const data = await res.json();
@@ -145,18 +149,42 @@ export async function checkIsLocal() {
 }
 
 export async function fetchCats() {
+  if (isOfflineApp) {
+    const res = await fetch('data/cats_db.json');
+    if (!res.ok) throw new Error("Failed to fetch CATs statically");
+    return res.json();
+  }
+
   const res = await fetch('/api/cats', { headers: getHeaders() });
   if (!res.ok) throw new Error("Failed to fetch CATs");
   return res.json();
 }
 
 export async function fetchPdfs() {
+  if (isOfflineApp) {
+    // Dynamically retrieve PDF filenames from indexed pdfs index
+    const res = await fetch('data/pdf_index.json');
+    if (!res.ok) throw new Error("Failed to fetch PDFs index statically");
+    const index = await res.json();
+    return index.map(doc => doc.pdf);
+  }
+
   const res = await fetch('/api/pdfs', { headers: getHeaders() });
   if (!res.ok) throw new Error("Failed to fetch PDFs");
   return res.json();
 }
 
 export async function saveCatDataToServer(id, data) {
+  if (isOfflineApp) {
+    // Save to local overrides (persisted to localStorage)
+    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    if (!localOverrides[id]) localOverrides[id] = {};
+    if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
+    if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
+    localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+    return { success: true, message: "Modifications enregistrées localement." };
+  }
+
   const res = await fetch(`/api/cats/${id}`, {
     method: 'POST',
     headers: getHeaders(),
@@ -168,6 +196,15 @@ export async function saveCatDataToServer(id, data) {
 }
 
 export async function deleteCatFromServer(id) {
+  if (isOfflineApp) {
+    // Mark as deleted in local storage overrides
+    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    if (!localOverrides[id]) localOverrides[id] = {};
+    localOverrides[id].deleted = true;
+    localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+    return { success: true, message: "Fiche supprimée localement." };
+  }
+
   const res = await fetch(`/api/cats/${id}`, { 
     method: 'DELETE',
     headers: getHeaders()
@@ -225,6 +262,10 @@ export async function submitSuggestion(suggestionData) {
 }
 
 export async function fetchSuggestions() {
+  if (isOfflineApp) {
+    return []; // No admin suggestions view in offline mode
+  }
+
   const res = await fetch('/api/suggestions', { headers: getHeaders() });
   if (res.status === 403) throw new Error("403 Forbidden");
   if (!res.ok) throw new Error("Failed to fetch suggestions");
@@ -232,6 +273,7 @@ export async function fetchSuggestions() {
 }
 
 export async function approveSuggestionOnServer(id) {
+  if (isOfflineApp) return { success: true };
   const res = await fetch(`/api/suggestions/${id}/approve`, { 
     method: 'POST',
     headers: getHeaders()
@@ -242,6 +284,7 @@ export async function approveSuggestionOnServer(id) {
 }
 
 export async function rejectSuggestionOnServer(id) {
+  if (isOfflineApp) return { success: true };
   const res = await fetch(`/api/suggestions/${id}/reject`, { 
     method: 'POST',
     headers: getHeaders()
@@ -252,12 +295,69 @@ export async function rejectSuggestionOnServer(id) {
 }
 
 export async function fetchSearchStatus() {
+  if (isOfflineApp) {
+    return {
+      isIndexing: false,
+      totalFiles: 76,
+      indexedFiles: 76,
+      currentFile: ''
+    };
+  }
+
   const res = await fetch('/api/search-status', { headers: getHeaders() });
   if (!res.ok) throw new Error("Failed to fetch search status");
   return res.json();
 }
 
 export async function searchPdfsContent(query) {
+  if (isOfflineApp) {
+    try {
+      if (!offlinePdfIndexCache) {
+        const indexRes = await fetch('data/pdf_index.json');
+        if (!indexRes.ok) throw new Error("Failed to load PDF index");
+        offlinePdfIndexCache = await indexRes.json();
+      }
+      
+      const cleanQuery = query.trim().toLowerCase();
+      const results = [];
+      
+      for (const doc of offlinePdfIndexCache) {
+        if (!doc.pages) continue;
+        for (const p of doc.pages) {
+          if (!p.text) continue;
+          const textLower = p.text.toLowerCase();
+          let indexMatch = textLower.indexOf(cleanQuery);
+          if (indexMatch !== -1) {
+            const start = Math.max(0, indexMatch - 60);
+            const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
+            let snippet = p.text.substring(start, end);
+            if (start > 0) snippet = '...' + snippet;
+            if (end < p.text.length) snippet = snippet + '...';
+            
+            results.push({
+              pdf: doc.pdf,
+              page: p.page,
+              snippet: snippet
+            });
+            if (results.length >= 100) break;
+          }
+        }
+        if (results.length >= 100) break;
+      }
+      
+      return {
+        ok: true,
+        json: async () => ({ results })
+      };
+    } catch (err) {
+      console.error("Offline search error:", err);
+      return {
+        ok: false,
+        json: async () => ({ error: "Failed to search offline", results: [] })
+      };
+    }
+  }
+
   const res = await fetch(`/api/search-pdfs?q=${encodeURIComponent(query)}`, {
     headers: getHeaders()
   });
@@ -265,6 +365,10 @@ export async function searchPdfsContent(query) {
 }
 
 export async function triggerReindexing() {
+  if (isOfflineApp) {
+    return { success: true, message: "La ré-indexation n'est pas prise en charge hors-ligne." };
+  }
+
   const res = await fetch('/api/reindex', { 
     method: 'POST',
     headers: getHeaders()
