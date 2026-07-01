@@ -5,6 +5,12 @@ import { formatBytes, copyToClipboard, captureConsoleWarnings, getDiagnosticsLog
 let isOpen = false;
 let updateIntervalId = null;
 
+export function updateDiagnosticsButtonVisibility() {
+  const toggleBtn = document.getElementById('toggle-diagnostics-btn');
+  if (!toggleBtn) return;
+  toggleBtn.style.display = state.isAdmin ? 'inline-flex' : 'none';
+}
+
 export function initDiagnostics() {
   const toggleBtn = document.getElementById('toggle-diagnostics-btn');
   const closeBtn = document.getElementById('close-diagnostics-btn');
@@ -12,12 +18,7 @@ export function initDiagnostics() {
   
   if (!toggleBtn || !panel) return;
 
-  // Only show the trigger button to admin users
-  if (state.isAdmin) {
-    toggleBtn.style.display = 'inline-flex';
-  } else {
-    toggleBtn.style.display = 'none';
-  }
+  updateDiagnosticsButtonVisibility();
 
   // Toggle button click listener
   toggleBtn.addEventListener('click', () => {

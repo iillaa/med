@@ -488,4 +488,7 @@ export function updateEditButtonsVisibility() {
     if (editSummaryBtnEl) editSummaryBtnEl.style.display = displayStyle;
     if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = displayStyle;
   }
+
+  // Ensure diagnostics button visibility is synced
+  diagnostics.updateDiagnosticsButtonVisibility();
 }
