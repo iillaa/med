@@ -1,0 +1,352 @@
+import { state } from '../state.js';
+import * as api from '../api.js';
+import { perf } from '../performance.js';
+import { formatBytes, formatDuration, formatPercent, getDiagnosticsLogs, showToast } from '../utils.js';
+
+let isOpen = false;
+let renderIntervalId = null;
+
+export function updatePerformanceButtonVisibility() {
+  const toggleBtn = document.getElementById('toggle-performance-btn');
+  if (!toggleBtn) return;
+  toggleBtn.style.display = state.isAdmin ? 'inline-flex' : 'none';
+}
+
+export function initPerformance() {
+  const toggleBtn = document.getElementById('toggle-performance-btn');
+  const closeBtn = document.getElementById('close-performance-btn');
+  const panel = document.getElementById('admin-performance-panel');
+
+  if (!toggleBtn || !panel) return;
+
+  updatePerformanceButtonVisibility();
+
+  toggleBtn.addEventListener('click', () => {
+    if (isOpen) {
+      collapsePanel();
+    } else {
+      expandPanel();
+    }
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', collapsePanel);
+  }
+
+  // Hook actions
+  document.getElementById('reset-perf-btn')?.addEventListener('click', resetMetrics);
+  document.getElementById('export-perf-btn')?.addEventListener('click', exportPerformanceReport);
+}
+
+function expandPanel() {
+  const panel = document.getElementById('admin-performance-panel');
+  if (!panel) return;
+
+  isOpen = true;
+  panel.style.display = 'block';
+
+  // Start FPS loops and memory logs
+  perf.startFrameMonitor();
+
+  // Initial draw and setup loop (1s intervals)
+  renderPerformanceUI();
+  renderIntervalId = setInterval(renderPerformanceUI, 1000);
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function collapsePanel() {
+  const panel = document.getElementById('admin-performance-panel');
+  if (!panel) return;
+
+  isOpen = false;
+  panel.style.display = 'none';
+
+  // Stop FPS loops
+  perf.stopFrameMonitor();
+
+  if (renderIntervalId) {
+    clearInterval(renderIntervalId);
+    renderIntervalId = null;
+  }
+}
+
+async function renderPerformanceUI() {
+  if (!isOpen) return;
+
+  const data = perf.getMetrics();
+  const T = perf.THRESHOLDS;
+
+  // 1. Frame Rate (FPS) & Jank
+  const fpsVal = document.getElementById('perf-fps-val');
+  const dropsVal = document.getElementById('perf-drops-val');
+  const majorDropsVal = document.getElementById('perf-major-drops-val');
+  const fpsStatusMsg = document.getElementById('perf-fps-status-msg');
+
+  if (fpsVal) {
+    fpsVal.textContent = `${data.frame.fps} FPS`;
+    if (data.frame.fps >= T.fps.good) {
+      fpsVal.style.color = 'var(--color-success)';
+    } else if (data.frame.fps >= T.fps.warn) {
+      fpsVal.style.color = '#fbbf24'; // yellow
+    } else {
+      fpsVal.style.color = '#f87171'; // red
+    }
+  }
+
+  if (dropsVal) {
+    dropsVal.textContent = `${data.frame.drops} jank (${formatPercent(data.frame.jankRate)})`;
+    dropsVal.style.background = data.frame.jankRate > 0.05 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+    dropsVal.style.color = data.frame.jankRate > 0.05 ? '#f87171' : 'var(--text-muted)';
+  }
+
+  if (majorDropsVal) {
+    majorDropsVal.textContent = `${data.frame.major}`;
+    majorDropsVal.style.background = data.frame.major > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+    majorDropsVal.style.color = data.frame.major > 0 ? '#f87171' : 'var(--text-muted)';
+  }
+
+  if (fpsStatusMsg) {
+    if (data.frame.fps >= T.fps.good && data.frame.jankRate < 0.03) {
+      fpsStatusMsg.textContent = 'Fluide et stable ✅';
+      fpsStatusMsg.style.background = 'rgba(16, 185, 129, 0.15)';
+      fpsStatusMsg.style.color = '#a7f3d0';
+    } else if (data.frame.fps < T.fps.warn || data.frame.jankRate > 0.08) {
+      fpsStatusMsg.textContent = 'Ralentissements critiques 🔴';
+      fpsStatusMsg.style.background = 'rgba(239, 68, 68, 0.15)';
+      fpsStatusMsg.style.color = '#fca5a5';
+    } else {
+      fpsStatusMsg.textContent = 'Saccades légères ⚠️';
+      fpsStatusMsg.style.background = 'rgba(245, 158, 11, 0.15)';
+      fpsStatusMsg.style.color = '#fde047';
+    }
+  }
+
+  // 2. Component Render Times
+  renderComponentMetric('perf-render-sidebar', data.renders['sidebar.renderCatList'], T.render);
+  renderComponentMetric('perf-render-workspace', data.renders['workspace.selectCat'], T.render);
+  renderComponentMetric('perf-render-dashboard', data.renders['dashboard.renderDashboard'], T.render);
+  renderComponentMetric('perf-render-quiz', data.renders['quiz.renderQuestion'], T.render);
+
+  // 3. API Timing Latency List
+  const apiList = document.getElementById('perf-api-list');
+  if (apiList) {
+    const paths = Object.keys(data.api);
+    if (paths.length === 0) {
+      apiList.innerHTML = '<span style="font-style: italic;">Aucune requête API capturée.</span>';
+    } else {
+      apiList.innerHTML = paths.map(path => {
+        const item = data.api[path];
+        const isRemote = !path.includes('localhost') && path.startsWith('http');
+        const limit = isRemote ? T.apiRemote : T.apiLocal;
+        let style = 'color: var(--text-primary);';
+        let badge = '';
+
+        if (item.avgMs > limit.warn) {
+          style = 'color: #f87171; font-weight: bold;';
+          badge = ' 🔴';
+        } else if (item.avgMs > limit.good) {
+          style = 'color: #fbbf24;';
+          badge = ' ⚠️';
+        }
+        
+        return `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+          <span style="word-break: break-all; max-width: 70%;">${path} (${item.count})</span>
+          <span style="${style}">${item.avgMs}ms (max: ${item.maxMs}ms)${badge}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // 4. Interaction Latency List
+  const interactionsList = document.getElementById('perf-interactions-list');
+  if (interactionsList) {
+    const labels = Object.keys(data.interactions);
+    if (labels.length === 0) {
+      interactionsList.innerHTML = '<span style="font-style: italic;">Touchez des éléments pour mesurer...</span>';
+    } else {
+      interactionsList.innerHTML = labels.map(label => {
+        const item = data.interactions[label];
+        let style = 'color: var(--text-primary);';
+        let badge = '';
+
+        if (item.avgMs > T.interaction.warn) {
+          style = 'color: #f87171; font-weight: bold;';
+          badge = ' 🔴';
+        } else if (item.avgMs > T.interaction.good) {
+          style = 'color: #fbbf24;';
+          badge = ' ⚠️';
+        }
+
+        return `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+          <span>${label} (${item.count})</span>
+          <span style="${style}">${item.avgMs}ms (max: ${item.maxMs}ms)${badge}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // 5. Local Memory & I/O
+  const heapVal = document.getElementById('perf-heap-val');
+  const heapGrowth = document.getElementById('perf-heap-growth');
+  const ioReads = document.getElementById('perf-io-reads');
+  const ioWrites = document.getElementById('perf-io-writes');
+
+  if (heapVal) {
+    heapVal.textContent = data.memory.supported 
+      ? `${formatBytes(data.memory.usedJSHeapSize)} / ${formatBytes(data.memory.totalJSHeapSize)}`
+      : 'N/A (WebView standard)';
+  }
+
+  if (heapGrowth && data.memory.supported) {
+    const change = data.memory.growthBytes;
+    const sign = change >= 0 ? '+' : '';
+    heapGrowth.textContent = `${sign}${formatBytes(change)}`;
+    if (change > 5 * 1024 * 1024) {
+      heapGrowth.style.color = '#fbbf24'; // Warning if >5MB growth
+    } else {
+      heapGrowth.style.color = 'var(--text-muted)';
+    }
+  } else if (heapGrowth) {
+    heapGrowth.textContent = '--';
+  }
+
+  if (ioReads) {
+    ioReads.textContent = `${data.localStorage.readCount} appels (moy: ${data.localStorage.readAvgMs.toFixed(1)}ms)`;
+  }
+  if (ioWrites) {
+    ioWrites.textContent = `${data.localStorage.writeCount} appels (moy: ${data.localStorage.writeAvgMs.toFixed(1)}ms)`;
+    if (data.localStorage.writeAvgMs > 10) {
+      ioWrites.style.color = '#fbbf24';
+    } else {
+      ioWrites.style.color = 'var(--text-muted)';
+    }
+  }
+
+  // 6. Server Timing Statistics
+  const serverUptime = document.getElementById('perf-server-uptime');
+  const serverWrites = document.getElementById('perf-server-writes');
+  const serverPdf = document.getElementById('perf-server-pdf');
+  const serverCache = document.getElementById('perf-server-cache');
+
+  if (!api.isOfflineApp) {
+    try {
+      const server = await api.fetchServerMetrics();
+      
+      const up = server.uptimeSeconds;
+      const h = Math.floor(up / 3600);
+      const m = Math.floor((up % 3600) / 60);
+      if (serverUptime) serverUptime.textContent = `${h}h ${m}m`;
+
+      if (serverWrites) {
+        serverWrites.textContent = `Moy: ${server.writeDurations.avgMs}ms (max: ${server.writeDurations.maxMs}ms)`;
+        if (server.writeDurations.avgMs > T.dbWrite.good) {
+          serverWrites.style.color = '#fbbf24';
+        }
+      }
+
+      if (serverPdf) {
+        serverPdf.textContent = server.pdfParse.totalFiles > 0 
+          ? `${server.pdfParse.avgParseMs}ms / fichier (${server.pdfParse.totalFiles} analysés)`
+          : 'Aucun scan requis';
+      }
+
+      if (serverCache) {
+        serverCache.textContent = formatPercent(server.cacheHitRate);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch server performance metrics:", err);
+    }
+  } else {
+    if (serverUptime) serverUptime.textContent = 'N/A (Standalone Client)';
+    if (serverWrites) serverWrites.textContent = 'N/A';
+    if (serverPdf) serverPdf.textContent = 'N/A';
+    if (serverCache) serverCache.textContent = '100% (Assets locaux)';
+  }
+
+  // 7. Boot Milestones Render
+  renderMilestoneEl('milestone-dom', data.milestones.domContentLoaded);
+  renderMilestoneEl('milestone-cats', data.milestones.catsFetched);
+  renderMilestoneEl('milestone-sidebar', data.milestones.sidebarRendered);
+  renderMilestoneEl('milestone-dashboard', data.milestones.dashboardReady);
+}
+
+function renderComponentMetric(elementId, ms, limits) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  if (ms === undefined || ms === null) {
+    el.textContent = '--';
+    el.style.color = 'var(--text-muted)';
+    return;
+  }
+
+  el.textContent = `${ms.toFixed(1)}ms`;
+  if (ms <= limits.good) {
+    el.style.color = 'var(--color-success)';
+  } else if (ms <= limits.warn) {
+    el.style.color = '#fbbf24';
+    el.textContent += ' ⚠️';
+  } else {
+    el.style.color = '#f87171';
+    el.textContent += ' 🔴';
+  }
+}
+
+function renderMilestoneEl(elementId, val) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  if (val === null || val === undefined) {
+    el.textContent = '--';
+  } else {
+    el.textContent = `${(val / 1000).toFixed(2)}s`;
+  }
+}
+
+function resetMetrics() {
+  perf.reset();
+  renderPerformanceUI();
+  showToast("Métriques de performance réinitialisées.", "fa-trash-can", 3000);
+}
+
+async function exportPerformanceReport() {
+  showToast("Génération du rapport en cours...", "fa-spinner fa-spin", 2000);
+
+  const clientMetrics = perf.getMetrics();
+  let serverMetrics = {};
+
+  if (!api.isOfflineApp) {
+    try {
+      serverMetrics = await api.fetchServerMetrics();
+    } catch (_) {}
+  }
+
+  const report = {
+    appName: "Dr. CAT - Diagnostic & Performance Profile",
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    isOfflineApp: api.isOfflineApp,
+    connectionAtExport: navigator.onLine ? "Online" : "Offline",
+    performanceTimeline: clientMetrics,
+    serverPerformanceTimeline: serverMetrics,
+    recentConsoleLogs: getDiagnosticsLogs()
+  };
+
+  const jsonStr = JSON.stringify(report, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  const d = new Date();
+  const timestampStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}`;
+  
+  link.href = url;
+  link.download = `drcat-performance-${timestampStr}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showToast("Rapport performance téléchargé avec succès !", "fa-file-export", 4000);
+}

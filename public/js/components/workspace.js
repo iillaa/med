@@ -478,6 +478,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
 }
 
 export function selectCat(cat, preserveTab = false) {
+  if (window.perf) window.perf.startMeasure('workspace.selectCat');
   state.activeCat = cat;
   state.activePrescriptionVariantIndex = 0;
 
@@ -583,6 +584,7 @@ export function selectCat(cat, preserveTab = false) {
       }
     }
   }
+  if (window.perf) window.perf.endMeasure('workspace.selectCat');
 }
 
 export function renderSummary(text) {

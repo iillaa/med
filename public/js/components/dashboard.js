@@ -176,6 +176,7 @@ export function showDashboard(onSelectCat) {
 }
 
 export function renderDashboard(onSelectCat) {
+  if (window.perf) window.perf.startMeasure('dashboard.renderDashboard');
   if (!welcomeScreen || welcomeScreen.style.display === 'none') return;
 
   // 1. Calculate stats and update values
@@ -198,75 +199,72 @@ export function renderDashboard(onSelectCat) {
   if (resumeList) {
     resumeList.innerHTML = '';
     
-    const inProgressCats = state.allCats.filter(cat => cat.status === 'doing');
-    
-    if (inProgressCats.length === 0) {
-      resumeList.innerHTML = `
-        <li class="empty-state-card">
-          <i class="fa-solid fa-book-open-reader empty-state-icon"></i>
-          <div>
-            <strong>Aucune fiche en cours</strong>
-            <p>Sélectionnez une CAT dans la liste à gauche pour commencer votre révision.</p>
-          </div>
-        </li>
-      `;
+    // Sort active cats by last read timestamp
+    const activeCats = state.allCats
+      .filter(c => c.status === 'doing' || c.status === 'done')
+      .sort((a, b) => (b.lastRead || 0) - (a.lastRead || 0));
+
+    if (activeCats.length === 0) {
+      resumeList.innerHTML = '<li class="empty-state">Aucun cours en cours. Sélectionnez un cours dans la barre latérale pour commencer !</li>';
     } else {
-      // Show last 5
-      inProgressCats.slice(-5).reverse().forEach(cat => {
+      activeCats.slice(0, 3).forEach(cat => {
         const li = document.createElement('li');
-        li.className = 'resume-item';
         li.innerHTML = `
-          <span class="resume-item-title">${cat.id}. ${escapeHTML(cat.title)}</span>
-          <span class="resume-item-meta"><i class="fa-solid fa-play"></i> Continuer</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <span class="resume-title" style="font-weight: 500; cursor: pointer; color: var(--color-primary);">${cat.id}. ${cat.title}</span>
+              <span style="font-size: 11px; color: var(--text-muted); display: block;">Spécialité : ${cat.category}</span>
+            </div>
+            <span class="badge ${cat.status === 'done' ? 'badge-success' : 'badge-warning'}" style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">
+              ${cat.status === 'done' ? 'Maîtrisé' : 'En cours'}
+            </span>
+          </div>
         `;
-        li.addEventListener('click', () => {
-          onSelectCat(cat);
-        });
+        li.querySelector('.resume-title').addEventListener('click', () => onSelectCat(cat));
         resumeList.appendChild(li);
       });
     }
   }
 
-  // 3. Populate "Progrès par spécialité" (Category progress list)
+  // 3. Populate Categories progress breakdown
   if (categoriesDiv) {
     categoriesDiv.innerHTML = '';
 
-    // Get categories and calculate stats for each
-    const catStats = {};
+    // Group cats by category
+    const categoriesMap = {};
     state.allCats.forEach(cat => {
-      if (!catStats[cat.category]) {
-        catStats[cat.category] = { total: 0, done: 0 };
+      if (!categoriesMap[cat.category]) {
+        categoriesMap[cat.category] = { total: 0, done: 0 };
       }
-      catStats[cat.category].total++;
+      categoriesMap[cat.category].total++;
       if (cat.status === 'done') {
-        catStats[cat.category].done++;
+        categoriesMap[cat.category].done++;
       }
     });
 
-    // Render sorted by category name
-    Object.keys(catStats).sort().forEach(catName => {
-      const stats = catStats[catName];
-      const catPercent = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
+    Object.keys(categoriesMap).forEach(catName => {
+      const info = categoriesMap[catName];
+      const catPercent = info.total > 0 ? Math.round((info.done / info.total) * 100) : 0;
       
       const item = document.createElement('div');
       item.className = 'category-progress-item';
       item.innerHTML = `
-        <div class="category-progress-header">
-          <span>${escapeHTML(catName)}</span>
-          <span>${stats.done}/${stats.total} (${catPercent}%)</span>
+        <div class="category-progress-info">
+          <span>${catName}</span>
+          <span>${info.done}/${info.total} (${catPercent}%)</span>
         </div>
-        <div class="category-progress-bar">
-          <div class="category-progress-fill" style="width: ${catPercent}%"></div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width: ${catPercent}%"></div>
         </div>
       `;
       categoriesDiv.appendChild(item);
     });
   }
 
-  // 4. First-run welcome banner (shown only when user hasn't started anything)
-  const firstRunBanner = document.getElementById('first-run-banner');
+  // 4. Update the callout first-run banner if needed
+  const firstRunBanner = document.getElementById('dash-first-run-banner');
   if (firstRunBanner) {
-    const hasStarted = state.allCats.some(c => c.status === 'doing' || c.status === 'done');
+    const hasStarted = state.allCats.some(c => c.status !== 'todo' || c.notes);
     firstRunBanner.style.display = hasStarted ? 'none' : 'flex';
   }
 
@@ -277,6 +275,11 @@ export function renderDashboard(onSelectCat) {
 
   if (state.isAdmin) {
     loadPendingSuggestions();
+  }
+
+  if (window.perf) {
+    window.perf.endMeasure('dashboard.renderDashboard');
+    window.perf.recordMilestone('dashboardReady');
   }
 }
 

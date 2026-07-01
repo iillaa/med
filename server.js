@@ -18,6 +18,20 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+// Performance monitoring middleware for API timing tracking
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    // Only track API requests to avoid static asset noise
+    if (req.path.startsWith('/api')) {
+      const duration = Date.now() - start;
+      global.perfServer.recordRequest(req.path, req.method, duration, res.statusCode);
+    }
+  });
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   lastModified: false,
@@ -50,11 +64,53 @@ class AsyncLock {
 }
 const dbLock = new AsyncLock();
 
+// Server-side performance recording structures
+const endpointTimings = new Map();
+const pdfParseTimes = [];
+let writeDurations = [];
+let cacheHits = 0;
+let cacheMisses = 0;
+
+global.perfServer = {
+  recordRequest(path, method, duration, status) {
+    const key = `${method} ${path}`;
+    if (!endpointTimings.has(key)) {
+      endpointTimings.set(key, { samples: [], errors: 0 });
+    }
+    const data = endpointTimings.get(key);
+    data.samples.push(duration);
+    if (data.samples.length > 100) {
+      data.samples.shift();
+    }
+    if (status >= 400) {
+      data.errors++;
+    }
+  },
+  recordPdfParse(file, duration, pages) {
+    pdfParseTimes.push({ file, duration, pages });
+    if (pdfParseTimes.length > 200) {
+      pdfParseTimes.shift();
+    }
+  },
+  recordWrite(duration) {
+    writeDurations.push(duration);
+    if (writeDurations.length > 100) {
+      writeDurations.shift();
+    }
+  },
+  recordCacheHit() {
+    cacheHits++;
+  },
+  recordCacheMiss() {
+    cacheMisses++;
+  }
+};
+
 // Asynchronous atomic file writes and backups to ensure data integrity
 async function safeWriteJsonAsync(filePath, data) {
   const tempPath = filePath + '.tmp';
   const backupPath = filePath + '.bak';
-  
+  const start = Date.now();
   try {
     const jsonString = JSON.stringify(data, null, 2);
     const exists = await fs.promises.access(filePath).then(() => true).catch(() => false);
@@ -63,6 +119,8 @@ async function safeWriteJsonAsync(filePath, data) {
     }
     await fs.promises.writeFile(tempPath, jsonString, 'utf-8');
     await fs.promises.rename(tempPath, filePath);
+    const duration = Date.now() - start;
+    global.perfServer.recordWrite(duration);
   } catch (err) {
     console.error(`[Data Integrity Error] Failed to write atomically to ${filePath}:`, err);
     const tempExists = await fs.promises.access(tempPath).then(() => true).catch(() => false);
@@ -874,6 +932,98 @@ app.get('/api/diagnostics/ngrok-tunnels', async (req, res) => {
     res.json(tunnelsData);
   } catch (err) {
     res.status(502).json({ error: "ngrok not running on localhost:4040" });
+  }
+});
+
+app.get('/api/performance/server-metrics', (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de performance.' });
+  }
+  try {
+    const getPercentileLocal = (arr, q) => {
+      if (arr.length === 0) return 0;
+      const sorted = [...arr].sort((a, b) => a - b);
+      const pos = (sorted.length - 1) * q;
+      const base = Math.floor(pos);
+      const rest = pos - base;
+      if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+      } else {
+        return sorted[base];
+      }
+    };
+
+    const memory = process.memoryUsage();
+    
+    // Calculate stats per endpoint
+    const endpoints = {};
+    for (const [key, data] of endpointTimings.entries()) {
+      const samples = data.samples;
+      const count = samples.length;
+      if (count === 0) continue;
+      
+      const sum = samples.reduce((a, b) => a + b, 0);
+      const avgMs = parseFloat((sum / count).toFixed(1));
+      const minMs = Math.min(...samples);
+      const maxMs = Math.max(...samples);
+      const p95Ms = parseFloat(getPercentileLocal(samples, 0.95).toFixed(1));
+      
+      endpoints[key] = {
+        count,
+        minMs,
+        avgMs,
+        maxMs,
+        p95Ms,
+        errors: data.errors
+      };
+    }
+
+    // Calculate PDF parse statistics
+    let totalPdfFiles = pdfParseTimes.length;
+    let avgParseMs = 0;
+    let slowestPdf = '--';
+    if (totalPdfFiles > 0) {
+      const sumParse = pdfParseTimes.reduce((sum, item) => sum + item.duration, 0);
+      avgParseMs = Math.round(sumParse / totalPdfFiles);
+      const sortedByDuration = [...pdfParseTimes].sort((a, b) => b.duration - a.duration);
+      slowestPdf = `${sortedByDuration[0].file}: ${sortedByDuration[0].duration}ms`;
+    }
+
+    // Calculate DB write durations statistics
+    let avgWriteMs = 0;
+    let maxWriteMs = 0;
+    if (writeDurations.length > 0) {
+      const sumWrite = writeDurations.reduce((sum, d) => sum + d, 0);
+      avgWriteMs = Math.round(sumWrite / writeDurations.length);
+      maxWriteMs = Math.max(...writeDurations);
+    }
+
+    // Cache hit rates
+    const totalIndexerHits = cacheHits + cacheMisses;
+    const cacheHitRate = totalIndexerHits > 0 ? parseFloat((cacheHits / totalIndexerHits).toFixed(4)) : 1.0;
+
+    res.json({
+      uptimeSeconds: Math.floor(process.uptime()),
+      memoryUsage: {
+        rss: memory.rss,
+        heapUsed: memory.heapUsed
+      },
+      endpoints,
+      pdfParse: {
+        totalFiles: totalPdfFiles,
+        avgParseMs,
+        slowest: slowestPdf
+      },
+      writeDurations: {
+        avgMs: avgWriteMs,
+        maxMs: maxWriteMs
+      },
+      lockQueueDepth: 0,
+      cacheHitRate
+    });
+  } catch (err) {
+    console.error("Server performance metrics error:", err);
+    res.status(500).json({ error: "Failed to get server performance metrics" });
   }
 });
 

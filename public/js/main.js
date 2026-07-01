@@ -5,6 +5,7 @@ import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
 import * as diagnostics from './components/diagnostics.js';
+import * as performanceComponent from './components/performance.js';
 import { showToast } from './utils.js';
 
 // Tracks whether the current physical device is localhost (set once on load)
@@ -100,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   dashboard.initDashboard(selectCatWrapper, onSuggestionHandled);
   quiz.initQuiz(selectCatWrapper);
   diagnostics.initDiagnostics();
+  performanceComponent.initPerformance();
 
   // Modal DOM Elements
   addCatBtn = document.getElementById('add-cat-btn');
@@ -339,6 +341,7 @@ async function initApp() {
 
     // 2. Fetch CATs first to build the interface instantly
     let cats = await api.fetchCats();
+    if (window.perf) window.perf.recordMilestone('catsFetched');
 
     // 3. Merge server CATs with local progress and local offline overrides
     const localProgress = getLocalProgress();
@@ -507,4 +510,5 @@ export function updateEditButtonsVisibility() {
 
   // Ensure diagnostics button visibility is synced
   diagnostics.updateDiagnosticsButtonVisibility();
+  performanceComponent.updatePerformanceButtonVisibility();
 }

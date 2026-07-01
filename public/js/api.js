@@ -3,6 +3,30 @@
 
 import { state } from './state.js';
 
+// Transparent wrapper to log API latencies
+const originalFetch = window.fetch;
+window.fetch = async function(...args) {
+  const start = performance.now();
+  try {
+    const res = await originalFetch(...args);
+    const duration = performance.now() - start;
+    if (window.perf && window.perf.recordApiCall) {
+      const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+      if (!urlStr.includes('/api/performance/server-metrics') && !urlStr.includes('/api/search-status')) {
+        window.perf.recordApiCall(urlStr, res.status, duration);
+      }
+    }
+    return res;
+  } catch (err) {
+    const duration = performance.now() - start;
+    if (window.perf && window.perf.recordApiCall) {
+      const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+      window.perf.recordApiCall(urlStr, 0, duration);
+    }
+    throw err;
+  }
+};
+
 // If you deploy your server on a hosted address (e.g. Stage 2 of the roadmap),
 // write the full URL here (e.g. 'https://med.iillaa.com'). This allows the standalone
 // app to send its edits/suggestions when the device is online at startup.
@@ -529,6 +553,15 @@ export async function fetchNgrokTunnels() {
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.error || "Failed to fetch ngrok tunnels");
+  }
+  return res.json();
+}
+
+export async function fetchServerMetrics() {
+  const res = await fetch(getApiUrl('/api/performance/server-metrics'), { headers: getHeaders() });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to fetch server metrics");
   }
   return res.json();
 }

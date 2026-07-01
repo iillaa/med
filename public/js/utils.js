@@ -403,3 +403,17 @@ export function clearDiagnosticsLogs() {
   diagnosticsLogBuffer = [];
   window.dispatchEvent(new CustomEvent('drcat-log-added'));
 }
+
+export function formatDuration(ms) {
+  if (ms === null || ms === undefined || isNaN(ms)) return '--';
+  if (ms < 1000) {
+    return `${ms.toFixed(0)}ms`;
+  }
+  return `${(ms / 1000).toFixed(2)}s`;
+}
+
+export function formatPercent(val) {
+  if (val === null || val === undefined || isNaN(val)) return '--';
+  const pct = val <= 1.0 && val > 0 ? val * 100 : val;
+  return `${pct.toFixed(1)}%`;
+}
