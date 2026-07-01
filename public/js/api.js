@@ -48,8 +48,24 @@ console.log("[API] Offline Standalone Mode:", isOfflineApp);
 // Module cache for client-side search in offline mode
 let offlinePdfIndexCache = null;
 
+/**
+ * Returns the configured remote server URL (ngrok or otherwise) if one is set.
+ * When this returns a URL, all API calls should go through the server even in Capacitor/offline mode.
+ */
+export function getRemoteServerUrl() {
+  return localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL || null;
+}
+
+/**
+ * True when a remote server URL is configured — meaning the app should try to
+ * sync with the server even if it is running as a Capacitor/standalone app.
+ */
+export function hasRemoteServer() {
+  return !!getRemoteServerUrl();
+}
+
 function getApiUrl(endpoint) {
-  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+  const configuredUrl = getRemoteServerUrl();
   if (isOfflineApp && configuredUrl) {
     return `${configuredUrl}${endpoint}`;
   }
@@ -153,14 +169,30 @@ export async function checkIsLocal() {
 }
 
 export async function fetchCats() {
+  // If a remote server is configured, always try it first (even in Capacitor/offline app mode)
+  // so users get the latest CATs from the server.
+  if (hasRemoteServer()) {
+    try {
+      const res = await fetch(getApiUrl('/api/cats'), { headers: getHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[API] fetchCats: loaded from remote server (' + data.length + ' CATs)');
+        return data;
+      }
+    } catch (err) {
+      console.warn('[API] fetchCats: remote server unreachable, falling back to bundled data.', err.message);
+    }
+  }
+
+  // Fallback: use the bundled static database (Capacitor app / no server)
   if (isOfflineApp) {
     const res = await fetch('data/cats_db.json');
-    if (!res.ok) throw new Error("Failed to fetch CATs statically");
+    if (!res.ok) throw new Error('Failed to fetch CATs statically');
     return res.json();
   }
 
   const res = await fetch('/api/cats', { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch CATs");
+  if (!res.ok) throw new Error('Failed to fetch CATs');
   return res.json();
 }
 
@@ -248,68 +280,72 @@ export async function createCatOnServer(catData) {
 }
 
 export async function submitSuggestion(suggestionData) {
-  if (isOfflineApp && !state.isOnlineAtStartup) {
-    // Offline suggestion is directly merged into local overrides as a shortcut
-    return saveCatDataToServer(suggestionData.catId, {
-      summary: suggestionData.summary,
-      ordonnance: suggestionData.ordonnance
-    });
+  // Always try to send to the server so the admin can review it.
+  if (hasRemoteServer()) {
+    try {
+      const res = await fetch(getApiUrl('/api/suggestions'), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(suggestionData)
+      });
+      if (res.ok) return res.json();
+    } catch (err) {
+      console.warn('[API] submitSuggestion: server unreachable, saving locally.', err.message);
+    }
   }
 
-  const res = await fetch(getApiUrl('/api/suggestions'), {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(suggestionData)
+  // Fallback: save locally if server unreachable
+  return saveCatDataToServer(suggestionData.catId, {
+    summary: suggestionData.summary,
+    ordonnance: suggestionData.ordonnance
   });
-  if (!res.ok) throw new Error("Failed to submit suggestion");
-  return res.json();
 }
 
 export async function fetchSuggestions() {
-  if (isOfflineApp) {
-    return []; // No admin suggestions view in offline mode
-  }
-
-  const res = await fetch('/api/suggestions', { headers: getHeaders() });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to fetch suggestions");
+  // Fetch from server (via ngrok in Capacitor mode) so admin can see all user submissions.
+  const url = hasRemoteServer() ? getApiUrl('/api/suggestions') : '/api/suggestions';
+  const res = await fetch(url, { headers: getHeaders() });
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to fetch suggestions');
   return res.json();
 }
 
 export async function approveSuggestionOnServer(id) {
-  if (isOfflineApp) return { success: true };
-  const res = await fetch(`/api/suggestions/${id}/approve`, { 
+  const base = hasRemoteServer() ? getRemoteServerUrl() : '';
+  const res = await fetch(`${base}/api/suggestions/${id}/approve`, { 
     method: 'POST',
     headers: getHeaders()
   });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to approve suggestion");
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to approve suggestion');
   return res.json();
 }
 
 export async function rejectSuggestionOnServer(id) {
-  if (isOfflineApp) return { success: true };
-  const res = await fetch(`/api/suggestions/${id}/reject`, { 
+  const base = hasRemoteServer() ? getRemoteServerUrl() : '';
+  const res = await fetch(`${base}/api/suggestions/${id}/reject`, { 
     method: 'POST',
     headers: getHeaders()
   });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to reject suggestion");
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to reject suggestion');
   return res.json();
 }
 
 export async function fetchSearchStatus() {
+  if (hasRemoteServer()) {
+    try {
+      const res = await fetch(getApiUrl('/api/search-status'), { headers: getHeaders() });
+      if (res.ok) return res.json();
+    } catch (_) {}
+  }
+
   if (isOfflineApp) {
-    return {
-      isIndexing: false,
-      totalFiles: 76,
-      indexedFiles: 76,
-      currentFile: ''
-    };
+    return { isIndexing: false, totalFiles: 76, indexedFiles: 76, currentFile: '' };
   }
 
   const res = await fetch('/api/search-status', { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch search status");
+  if (!res.ok) throw new Error('Failed to fetch search status');
   return res.json();
 }
 
