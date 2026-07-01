@@ -43,6 +43,7 @@ export function initDiagnostics() {
   document.getElementById('save-remote-url-btn')?.addEventListener('click', saveRemoteServerUrl);
   document.getElementById('copy-logs-btn')?.addEventListener('click', copyTerminalLogs);
   document.getElementById('clear-logs-btn')?.addEventListener('click', clearTerminalLogs);
+  document.getElementById('run-auto-checkup-btn')?.addEventListener('click', runAutoCheckupSuite);
 }
 
 function expandPanel() {
@@ -451,4 +452,90 @@ async function copyTerminalLogs() {
 function clearTerminalLogs() {
   clearDiagnosticsLogs();
   showToast("Journal de log vidé.", "fa-trash-can", 3000);
+}
+
+async function runAutoCheckupSuite() {
+  showToast("Lancement du Check-up Auto-Test...", "fa-microscope fa-spin", 3000);
+  
+  // 1. Reset client console logs and benchmarks
+  clearTerminalLogs();
+  if (window.perf) {
+    window.perf.reset();
+    window.perf.startFrameMonitor();
+  }
+
+  // Log diagnostic starting message
+  console.log("[Auto-Test] Lancement du check-up complet...");
+  console.log(`[Auto-Test] User Agent: ${navigator.userAgent}`);
+  console.log(`[Auto-Test] Plateforme: ${navigator.platform}`);
+
+  // 2. Fetch server diagnostic system information
+  console.log("[Auto-Test] Récupération des informations système du serveur...");
+  await refreshDiagnosticsData();
+
+  // 3. Trigger sequential connectivity test (Local, Remote, WAN)
+  console.log("[Auto-Test] Lancement des tests de connectivité réseau...");
+  await runConnectivityTest();
+
+  // 4. Trace tunnel information
+  console.log("[Auto-Test] Inspection du tunnel ngrok...");
+  await checkNgrokTunnel();
+
+  // 5. Let frame capture run for 1.5 seconds to measure rendering FPS / stutters
+  console.log("[Auto-Test] Capture du framerate et de la mémoire (patientez 1.5s)...");
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  if (window.perf) {
+    window.perf.stopFrameMonitor();
+  }
+
+  // 6. Pull server performance metrics
+  let serverPerformanceMetrics = {};
+  if (!api.isOfflineApp) {
+    try {
+      console.log("[Auto-Test] Récupération des latences des endpoints du serveur...");
+      serverPerformanceMetrics = await api.fetchServerMetrics();
+    } catch (err) {
+      console.warn("[Auto-Test] Échec de la récupération des latences serveur:", err.message);
+    }
+  }
+
+  // 7. Compile report payload
+  const clientPerformanceMetrics = window.perf ? window.perf.getMetrics() : {};
+  const logs = getDiagnosticsLogs();
+
+  const report = {
+    reportName: "Dr. CAT - Auto-Diagnostic Complet",
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    isOfflineApp: api.isOfflineApp,
+    connectionStatus: navigator.onLine ? "Online" : "Offline",
+    diagnosticsPanelStats: {
+      navigatorOnline: navigator.onLine,
+      remoteServerUrl: localStorage.getItem('dr_cat_remote_server_url') || api.REMOTE_SERVER_URL || '',
+      adminTokenPresent: !!localStorage.getItem('dr_cat_admin_token')
+    },
+    clientPerformanceMetrics,
+    serverPerformanceMetrics,
+    consoleLogsCollected: logs
+  };
+
+  // 8. Download report as JSON
+  const jsonStr = JSON.stringify(report, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  const d = new Date();
+  const timestampStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}`;
+  
+  link.href = url;
+  link.download = `drcat-diagnostic-complete-${timestampStr}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showToast("Auto-Test terminé ! Rapport téléchargé.", "fa-circle-check", 4000);
+  console.log("[Auto-Test] Diagnostic complété. Rapport exporté !");
 }
