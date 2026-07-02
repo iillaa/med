@@ -148,6 +148,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
   if (backToQuizBtn) {
     backToQuizBtn.addEventListener('click', () => {
+      state.quizSession.quizViewingCatId = null;
       if (workspace) workspace.style.display = 'none';
       const quizScreen = document.getElementById('quiz-screen');
       if (quizScreen) quizScreen.style.display = 'flex';
@@ -496,10 +497,13 @@ export function selectCat(cat, preserveTab = false) {
   const quizScreen = document.getElementById('quiz-screen');
   if (quizScreen) quizScreen.style.display = 'none';
 
-  // Toggle "Retour au Quiz" button if a quiz is in progress
+  // Toggle "Retour au Quiz" button if a quiz is in progress and we are viewing the quiz question's CAT
   const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
   if (backToQuizBtn) {
-    if (state.quizSession && state.quizSession.questions && state.quizSession.questions.length > 0) {
+    if (state.quizSession && 
+        state.quizSession.questions && 
+        state.quizSession.questions.length > 0 && 
+        state.quizSession.quizViewingCatId === cat.id) {
       backToQuizBtn.style.display = 'inline-flex';
     } else {
       backToQuizBtn.style.display = 'none';

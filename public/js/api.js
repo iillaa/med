@@ -147,8 +147,19 @@ export async function logoutAdmin() {
 }
 
 export async function checkAdminStatus() {
-  // TODO: TEMPORARY FOR DEVELOPMENT: Make everyone admin by default
-  return true;
+  const token = localStorage.getItem('dr_cat_admin_token');
+  if (!token) return false;
+
+  try {
+    const res = await fetch(getApiUrl('/api/is-admin'), { headers: getHeaders() });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.isAdmin;
+  } catch (err) {
+    console.error("Failed to check admin status:", err);
+    // Offline client fallback: local- prefix tokens are trusted locally
+    return token.startsWith('local-');
+  }
 }
 
 export async function checkIsLocal() {

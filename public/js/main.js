@@ -325,12 +325,13 @@ async function initApp() {
     }
     setTimeout(checkNetworkPeriodically, 8000);
 
+    // Check if current connection is local
+    isLocalDevice = await api.checkIsLocal();
+
     // 1. Check Admin status
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
 
-    // Initial button visibility update
-    const adminLoginBtn = document.getElementById('admin-login-btn');
     updateEditButtonsVisibility();
 
     // 2. Fetch CATs first to build the interface instantly
@@ -472,24 +473,82 @@ export function updateEditButtonsVisibility() {
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
   if (adminLoginBtn) {
-    // TEMPORARY FOR DEVELOPMENT: Hide admin button as everyone is admin by default
-    adminLoginBtn.style.display = 'none';
+    if (isLocalDevice || api.isOfflineApp || state.isAdmin) {
+      adminLoginBtn.style.display = 'flex';
+      if (state.isAdmin) {
+        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
+        adminLoginBtn.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+        adminLoginBtn.style.color = 'var(--color-success)';
+      } else {
+        adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
+        adminLoginBtn.style.backgroundColor = 'var(--bg-card)';
+        adminLoginBtn.style.color = 'var(--text-primary)';
+      }
+    } else {
+      adminLoginBtn.style.display = 'none';
+    }
   }
-  if (api.isOfflineApp) {
-    if (addCatBtn) addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
-  } else {
-    if (addCatBtn) addCatBtn.style.display = 'flex';
-  }
-  
-  const deleteBtn = document.getElementById('delete-cat-btn');
+
+  // Set edit buttons and add button text/icons dynamically based on Admin mode
   const editSummaryBtnEl = document.getElementById('edit-summary-btn');
   const editPrescriptionBtnEl = document.getElementById('edit-prescription-btn');
-  
-  if (api.isOfflineApp) {
-    if (deleteBtn) deleteBtn.style.display = 'none';
-    const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
-    if (editSummaryBtnEl) editSummaryBtnEl.style.display = displayStyle;
-    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = displayStyle;
+  const deleteBtn = document.getElementById('delete-cat-btn');
+
+  if (state.isAdmin) {
+    if (addCatBtn) {
+      addCatBtn.style.display = 'flex';
+      addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> CAT';
+    }
+    if (editSummaryBtnEl) {
+      editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i> Modifier la fiche';
+      editSummaryBtnEl.style.display = 'inline-flex';
+    }
+    if (editPrescriptionBtnEl) {
+      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i> Modifier ordonnance';
+      editPrescriptionBtnEl.style.display = 'inline-flex';
+    }
+    if (deleteBtn) {
+      // Core CATs cannot be deleted, custom CATs (id > 55) can be deleted by admin
+      if (state.activeCat && state.activeCat.id > 55) {
+        deleteBtn.style.display = 'inline-flex';
+      } else {
+        deleteBtn.style.display = 'none';
+      }
+    }
+  } else {
+    // Non-admin mode (suggestions only)
+    if (api.isOfflineApp) {
+      // In offline mode with no server connection, hide server-side suggestions buttons
+      if (addCatBtn) {
+        addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
+        addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
+      }
+      const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
+      if (editSummaryBtnEl) {
+        editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
+        editSummaryBtnEl.style.display = displayStyle;
+      }
+      if (editPrescriptionBtnEl) {
+        editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
+        editPrescriptionBtnEl.style.display = displayStyle;
+      }
+      if (deleteBtn) deleteBtn.style.display = 'none';
+    } else {
+      // Remote server connected web client (default view)
+      if (addCatBtn) {
+        addCatBtn.style.display = 'flex';
+        addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
+      }
+      if (editSummaryBtnEl) {
+        editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
+        editSummaryBtnEl.style.display = 'inline-flex';
+      }
+      if (editPrescriptionBtnEl) {
+        editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
+        editPrescriptionBtnEl.style.display = 'inline-flex';
+      }
+      if (deleteBtn) deleteBtn.style.display = 'none';
+    }
   }
 
   // Ensure diagnostics button visibility is synced
