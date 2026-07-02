@@ -7,31 +7,21 @@ let isOpen = false;
 let renderIntervalId = null;
 
 export function updatePerformanceButtonVisibility() {
-  const toggleBtn = document.getElementById('toggle-performance-btn');
-  if (!toggleBtn) return;
-  toggleBtn.style.display = state.isAdmin ? 'inline-flex' : 'none';
+  // Obsolete: tab header controls visibility inside Admin Control block
 }
 
 export function initPerformance() {
-  const toggleBtn = document.getElementById('toggle-performance-btn');
-  const closeBtn = document.getElementById('close-performance-btn');
-  const panel = document.getElementById('admin-performance-panel');
+  const panel = document.getElementById('admin-pane-performance');
+  if (!panel) return;
 
-  if (!toggleBtn || !panel) return;
-
-  updatePerformanceButtonVisibility();
-
-  toggleBtn.addEventListener('click', () => {
-    if (isOpen) {
-      collapsePanel();
-    } else {
+  // Listen to custom tab change event
+  window.addEventListener('drcat-admin-tab-changed', (e) => {
+    if (e.detail.activePaneId === 'admin-pane-performance') {
       expandPanel();
+    } else if (isOpen) {
+      collapsePanel();
     }
   });
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', collapsePanel);
-  }
 
   // Hook actions
   document.getElementById('reset-perf-btn')?.addEventListener('click', resetMetrics);
@@ -39,11 +29,10 @@ export function initPerformance() {
 }
 
 function expandPanel() {
-  const panel = document.getElementById('admin-performance-panel');
+  const panel = document.getElementById('admin-pane-performance');
   if (!panel) return;
 
   isOpen = true;
-  panel.style.display = 'block';
 
   // Start FPS loops and memory logs
   perf.startFrameMonitor();
@@ -51,16 +40,13 @@ function expandPanel() {
   // Initial draw and setup loop (1s intervals)
   renderPerformanceUI();
   renderIntervalId = setInterval(renderPerformanceUI, 1000);
-
-  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function collapsePanel() {
-  const panel = document.getElementById('admin-performance-panel');
+  const panel = document.getElementById('admin-pane-performance');
   if (!panel) return;
 
   isOpen = false;
-  panel.style.display = 'none';
 
   // Stop FPS loops
   perf.stopFrameMonitor();
