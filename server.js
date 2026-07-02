@@ -609,6 +609,43 @@ app.post('/api/suggestions/:id/reject', async (req, res) => {
   }
 });
 
+// POST /api/suggestions/:id/edit - Update a suggestion's content (Admin only)
+app.post('/api/suggestions/:id/edit', async (req, res) => {
+  if (!isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit.' });
+  }
+  try {
+    const sugId = req.params.id;
+    const { data } = req.body;
+
+    if (!data) {
+      return res.status(400).json({ error: 'Data requis.' });
+    }
+
+    const result = await dbLock.acquire(async () => {
+      const index = suggestionsCache.findIndex(s => s.id === sugId);
+      if (index === -1) {
+        return { notFound: true };
+      }
+
+      // Update fields dynamically
+      const sug = suggestionsCache[index];
+      sug.data = { ...sug.data, ...data };
+
+      await safeWriteJsonAsync(SUGGESTIONS_FILE, suggestionsCache);
+      return { success: true, message: 'Proposition mise à jour.', suggestion: sug };
+    });
+
+    if (result.notFound) {
+      return res.status(404).json({ error: 'Proposition introuvable.' });
+    }
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update suggestion' });
+  }
+});
+
 // Endpoint to list all actual files in reference-pdfs directory
 app.get('/api/pdfs', async (req, res) => {
   try {
