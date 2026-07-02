@@ -134,7 +134,7 @@ async function refreshDiagnosticsData() {
   }
 
   // Fetch Server-side Diagnostics
-  if (!api.isOfflineApp) {
+  if (!api.isOfflineApp || api.hasRemoteServer()) {
     try {
       const system = await api.fetchDiagnosticsSystem();
       document.getElementById('diag-node-version').textContent = system.nodeVersion || '--';
@@ -333,7 +333,7 @@ async function runConnectivityTest() {
 }
 
 async function checkNgrokTunnel() {
-  if (api.isOfflineApp) {
+  if (api.isOfflineApp && !api.hasRemoteServer()) {
     showToast("Le statut ngrok ne peut être inspecté que depuis le serveur.", "fa-triangle-exclamation", 4000);
     return;
   }
@@ -397,7 +397,7 @@ async function saveRemoteServerUrl() {
     }
 
     // 2. Persist to server config if online
-    if (!api.isOfflineApp) {
+    if (!api.isOfflineApp || api.hasRemoteServer()) {
       await api.updateDiagnosticsRemoteUrl(url);
     }
 
@@ -502,7 +502,7 @@ async function runAutoCheckupSuite() {
 
   // 6. Pull server performance metrics
   let serverPerformanceMetrics = {};
-  if (!api.isOfflineApp) {
+  if (!api.isOfflineApp || api.hasRemoteServer()) {
     try {
       console.log("[Auto-Test] Récupération des latences des endpoints du serveur...");
       serverPerformanceMetrics = await api.fetchServerMetrics();
