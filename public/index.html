@@ -245,39 +245,191 @@
                 <p class="block-desc" style="margin: 0 0 12px 0;">Informations système, logs de la console et tests de connectivité en temps réel.</p>
                 <button class="action-btn" id="run-auto-checkup-btn" style="width: 100%; font-size: 13px; padding: 10px; margin-bottom: 12px; border-color: var(--color-success); background: rgba(16, 185, 129, 0.1); color: var(--color-success); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px;"><i class="fa-solid fa-microscope"></i> Lancer le Check-up Complet (Auto-Test)</button>
                 
+                <div class="diag-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  
+                  <!-- Section 1: Connexion & Connectivity Test -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wifi"></i> Statut & Connectivité</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Navigator.onLine : <span id="diag-navigator-online" class="badge">--</span></div>
+                      <div>Mode détecté : <span id="diag-app-mode" class="badge">--</span></div>
+                      <div>URL distant : <span id="diag-remote-url" style="word-break: break-all;">--</span></div>
+                      <div>Token admin : <span id="diag-admin-token" class="badge">--</span></div>
+                    </div>
+                    <button class="action-btn" id="run-conn-test-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-bolt"></i> Tester la connexion</button>
+                    
+                    <div id="conn-test-results" style="margin-top: 12px; display: none; font-size: 12px; flex-direction: column; gap: 6px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                      <div style="font-weight: 600; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">Résultats des tests :</div>
+                      <div id="test-step-local">1. Local (localhost:3000) : <span class="status">--</span></div>
+                      <div id="test-step-remote">2. Distant (ngrok URL) : <span class="status">--</span></div>
+                      <div id="test-step-wan">3. WAN (internet ping) : <span class="status">--</span></div>
+                      <div id="diag-auto-analysis" style="margin-top: 6px; font-weight: 500; font-size: 11px; padding: 4px; border-radius: 4px; line-height: 1.4;"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Section 2: Ngrok Tunnel -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cloud-arrow-down"></i> Serveur Ngrok (Host)</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Tunnel actif : <span id="diag-ngrok-active" class="badge">--</span></div>
+                      <div>URL publique : <span id="diag-ngrok-url" style="word-break: break-all;">--</span></div>
+                      <div>Connexions : <span id="diag-ngrok-conns">--</span></div>
+                    </div>
+                    <button class="action-btn" id="check-ngrok-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-arrows-rotate"></i> Vérifier le tunnel</button>
+                  </div>
+
+                  <!-- Section 3: Server & OS Info -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Serveur Local</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Node : <span id="diag-node-version">--</span></div>
+                      <div>OS : <span id="diag-server-os">--</span></div>
+                      <div>Uptime : <span id="diag-server-uptime">--</span></div>
+                      <div>Mémoire : <span id="diag-server-mem">--</span></div>
+                      <div>Indexation : <span id="diag-indexing-active" class="badge">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 4: Database & PDF Index Stats -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-database"></i> Bases & Fichiers</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>CATs : <span id="diag-db-cats">--</span></div>
+                      <div>Suggestions : <span id="diag-db-sugs">--</span></div>
+                      <div>cats_db.json : <span id="diag-db-size-cats">--</span></div>
+                      <div>suggestions.json : <span id="diag-db-size-sugs">--</span></div>
+                      <div>pdf_index.json : <span id="diag-db-size-index">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 5: Config URL (Change URL at runtime) -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wrench"></i> Config Serveur Distant</h4>
+                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">Spécifiez l'adresse de votre serveur LAN ou tunnel ngrok :</div>
+                    <input type="text" id="diag-remote-url-input" placeholder="https://xxxx.ngrok-free.app" style="width: 100%; padding: 6px 10px; font-size: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); margin-bottom: 8px;">
+                    <button class="action-btn" id="save-remote-url-btn" style="width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder & Tester</button>
+                  </div>
+
+                  <!-- Section 6: Index PDF Status details -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-file-pdf"></i> Statut Index PDF</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Total PDFs : <span id="diag-pdf-docs">--</span></div>
+                      <div>Total Pages : <span id="diag-pdf-pages">--</span></div>
+                      <div>Indexé le : <span id="diag-pdf-time">--</span></div>
+                      <div>Santé de l'index : <span id="diag-pdf-health" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">--</span></div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Section 7: Console Logs Window -->
+                <div class="diag-logs-section" style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h4 style="font-size: 13.5px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-terminal"></i> Journal de la Console</h4>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="action-btn" id="copy-logs-btn" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-copy"></i> Copier</button>
+                      <button class="cancel-btn" id="clear-logs-btn" style="padding: 4px 10px; font-size: 11px; background: transparent; border-color: rgba(239, 68, 68, 0.3); color: #ef4444;"><i class="fa-solid fa-trash-can"></i> Vider</button>
+                    </div>
+                  </div>
+                  <div id="diag-logs-terminal" style="height: 150px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11.5px; overflow-y: auto; color: #a3e635; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">
+                    Aucune entrée de journal disponible. Ouvrez l'onglet Diagnostic pour commencer la capture.
+                  </div>
                 </div>
               </div>
 
-              <!-- Section 6: Server timings (Node) -->
-              <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Timings Serveur (Node.js)</h4>
-                <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                  <div>Uptime Serveur : <span id="perf-server-uptime">--</span></div>
-                  <div>Rendement écritures DB : <span id="perf-server-writes">--</span></div>
-                  <div>Indexation PDF (moyenne) : <span id="perf-server-pdf">--</span></div>
-                  <div>Hit rate cache index : <span id="perf-server-cache">--</span></div>
+              <!-- PANE 3: Performance -->
+              <div class="admin-pane-content" id="admin-pane-performance" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-gauge-high"></i> Tableau de Performance</h4>
                 </div>
+                <p class="block-desc" style="margin: 0 0 12px 0;">Mesure du framerate, temps de rendu des composants, latence réseau et snapshots mémoire.</p>
+
+                <div class="perf-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  
+                  <!-- Section 1: Frame Rate (FPS) -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-film"></i> Taux de Rafraîchissement</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>FPS Actuel : <span id="perf-fps-val" style="font-weight: bold; font-size: 14px;">--</span></div>
+                      <div>Pertes de frames (Jank) : <span id="perf-drops-val" class="badge">--</span></div>
+                      <div>Saccades majeures (>50ms) : <span id="perf-major-drops-val" class="badge">--</span></div>
+                      <div style="margin-top: 6px; font-weight: 500; font-size: 11px;">Stabilité globale :</div>
+                      <div id="perf-fps-status-msg" style="padding: 4px; border-radius: 4px; font-weight: 500; text-align: center;">--</div>
+                    </div>
+                  </div>
+
+                  <!-- Section 2: Component Render Times -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cube"></i> Rendu des Composants</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-muted);">
+                      <div style="display: flex; justify-content: space-between;"><span>Sidebar List :</span> <span id="perf-render-sidebar" style="font-weight: 500;">--</span></div>
+                      <div style="display: flex; justify-content: space-between;"><span>Workspace Fiche :</span> <span id="perf-render-workspace" style="font-weight: 500;">--</span></div>
+                      <div style="display: flex; justify-content: space-between;"><span>Dashboard :</span> <span id="perf-render-dashboard" style="font-weight: 500;">--</span></div>
+                      <div style="display: flex; justify-content: space-between;"><span>Quiz Question :</span> <span id="perf-render-quiz" style="font-weight: 500;">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 3: API Timing Latency -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-network-wired"></i> Latence des API Client</h4>
+                    <div id="perf-api-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; color: var(--text-muted); max-height: 150px; overflow-y: auto;">
+                      <span style="font-style: italic;">Aucune requête API capturée.</span>
+                    </div>
+                  </div>
+
+                  <!-- Section 4: Interaction Latency -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-hand-pointer"></i> Latence d'Interaction</h4>
+                    <div id="perf-interactions-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; color: var(--text-muted); max-height: 150px; overflow-y: auto;">
+                      <span style="font-style: italic;">Touchez des éléments pour mesurer...</span>
+                    </div>
+                  </div>
+
+                  <!-- Section 5: Local Memory Heap & I/O -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-microchip"></i> Mémoire & I/O Local</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>JS Heap : <span id="perf-heap-val">--</span></div>
+                      <div>Croissance : <span id="perf-heap-growth" style="font-weight: 500;">--</span></div>
+                      <div style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 4px; padding-top: 4px;">Lectures LocalStorage : <span id="perf-io-reads">--</span></div>
+                      <div>Écritures LocalStorage : <span id="perf-io-writes">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 6: Server timings (Node) -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Timings Serveur (Node.js)</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Uptime Serveur : <span id="perf-server-uptime">--</span></div>
+                      <div>Rendement écritures DB : <span id="perf-server-writes">--</span></div>
+                      <div>Indexation PDF (moyenne) : <span id="perf-server-pdf">--</span></div>
+                      <div>Hit rate cache index : <span id="perf-server-cache">--</span></div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Dashboard Boot Milestones -->
+                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
+                  <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-clock"></i> Jalons de Démarrage</h4>
+                  <div id="perf-boot-milestones" style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 11.5px; color: var(--text-muted);">
+                    <div>DOM Ready: <span id="milestone-dom" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                    <div>CATs Fetched: <span id="milestone-cats" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                    <div>Sidebar List: <span id="milestone-sidebar" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                    <div>Dashboard: <span id="milestone-dashboard" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                  </div>
+                </div>
+
+                <!-- Bottom Actions -->
+                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                  <button class="cancel-btn" id="reset-perf-btn" style="padding: 6px 14px; font-size: 12px; background: transparent; border-color: rgba(255,255,255,0.15); color: var(--text-muted);"><i class="fa-solid fa-trash-can"></i> Réinitialiser</button>
+                  <button class="action-btn" id="export-perf-btn" style="padding: 6px 14px; font-size: 12px; border-color: rgba(6, 182, 212, 0.4);"><i class="fa-solid fa-file-export"></i> Exporter le Rapport JSON</button>
+                </div>
+
               </div>
 
             </div>
-
-            <!-- Dashboard Boot Milestones -->
-            <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
-              <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-clock"></i> Jalons de Démarrage</h4>
-              <div id="perf-boot-milestones" style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 11.5px; color: var(--text-muted);">
-                <div>DOM Ready: <span id="milestone-dom" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-                <div>CATs Fetched: <span id="milestone-cats" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-                <div>Sidebar List: <span id="milestone-sidebar" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-                <div>Dashboard: <span id="milestone-dashboard" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-              </div>
-            </div>
-
-            <!-- Bottom Actions -->
-            <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
-              <button class="cancel-btn" id="reset-perf-btn" style="padding: 6px 14px; font-size: 12px; background: transparent; border-color: rgba(255,255,255,0.15); color: var(--text-muted);"><i class="fa-solid fa-trash-can"></i> Réinitialiser</button>
-              <button class="action-btn" id="export-perf-btn" style="padding: 6px 14px; font-size: 12px; border-color: rgba(6, 182, 212, 0.4);"><i class="fa-solid fa-file-export"></i> Exporter le Rapport JSON</button>
-            </div>
-
           </div>
 
           <div class="dashboard-content-split">
