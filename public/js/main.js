@@ -41,27 +41,13 @@ let addCatBtn, addCatModal, closeAddCatModalBtn, cancelAddCatBtn, addCatForm;
 
 // Entry Point
 document.addEventListener('DOMContentLoaded', async () => {
-  // Global Error Interceptor for Verbose Console Logs & Toast Notifications
-  window.onerror = function(message, source, lineno, colno, error) {
-    const errorStr = `[Runtime Error] ${message} at ${source}:${lineno}:${colno}`;
-    console.error(errorStr, error);
-    showToast("Une erreur d'exécution est survenue. Détails enregistrés dans l'onglet Diagnostic.", "fa-triangle-exclamation", 7000);
-    return false; // Let browser default log run as well
-  };
-
-  window.onunhandledrejection = function(event) {
-    const errorStr = `[Promise Rejection] ${event.reason}`;
-    console.error(errorStr, event.reason);
-    showToast("Erreur réseau ou réponse de base de données non reconnue.", "fa-circle-exclamation", 5000);
-  };
-
   // PWA Service Worker — only register on production, unregister on dev to avoid stale caches
   if ('serviceWorker' in navigator) {
     const isDev = location.hostname === 'localhost' ||
                   location.hostname === '127.0.0.1' ||
                   location.hostname.endsWith('.ngrok-free.app') ||
                   location.hostname.endsWith('.ngrok.io');
- 
+
     if (isDev) {
       // Development: aggressively unregister all service workers and clear caches
       navigator.serviceWorker.getRegistrations().then(regs => {
@@ -77,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   }
- 
+
   // Theme Toggle Initialization
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const themeToggleIcon = document.getElementById('theme-toggle-icon');
@@ -90,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       themeToggleIcon.classList.add('fa-sun');
     }
   }
- 
+
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('light-theme');
@@ -108,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
- 
+
   // Initialize Components
   sidebar.initSidebar(selectCatWrapper, onFilterTriggered);
   workspace.initWorkspace(onStatusChange, onCatDeleted, onProgressReset);
@@ -116,14 +102,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   quiz.initQuiz(selectCatWrapper);
   diagnostics.initDiagnostics();
   performanceComponent.initPerformance();
- 
+
   // Modal DOM Elements
   addCatBtn = document.getElementById('add-cat-btn');
   addCatModal = document.getElementById('add-cat-modal');
   closeAddCatModalBtn = document.getElementById('close-add-cat-modal-btn');
   cancelAddCatBtn = document.getElementById('cancel-add-cat-btn');
   addCatForm = document.getElementById('add-cat-form');
- 
+
   // Wire up Modal Event Listeners
   if (addCatBtn) {
     addCatBtn.addEventListener('click', () => {
@@ -146,15 +132,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (addCatModal) addCatModal.style.display = 'flex';
     });
   }
- 
+
   const closeModal = () => {
     if (addCatModal) addCatModal.style.display = 'none';
     if (addCatForm) addCatForm.reset();
   };
- 
+
   if (closeAddCatModalBtn) closeAddCatModalBtn.addEventListener('click', closeModal);
   if (cancelAddCatBtn) cancelAddCatBtn.addEventListener('click', closeModal);
- 
+
   if (addCatForm) {
     addCatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -167,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       const rawKeywords = document.getElementById('new-cat-pdf-keywords').value;
       const pdf_keywords = rawKeywords ? rawKeywords.split(',').map(kw => kw.trim()).filter(kw => kw) : [];
- 
+
       if (state.isAdmin) {
         try {
           const result = await api.createCatOnServer({ title, category, red_flags, summary, ordonnance, pdf_keywords });
@@ -193,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           "Attention : Cette nouvelle fiche ne sera pas ajoutée directement. Elle sera envoyée à l'administrateur du site pour relecture et validation avant d'être intégrée.\n\nSouhaitez-vous envoyer cette proposition ?"
         );
         if (!confirmSubmit) return;
- 
+
         try {
           const result = await api.submitSuggestion({
             type: 'add',
@@ -212,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
- 
+
   // Wire up Admin Login Button Event Listener
   let adminLoginBtn = document.getElementById('admin-login-btn');
   if (adminLoginBtn) {
@@ -242,12 +228,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
- 
+
   // --- Localhost-only Admin Button Visibility ---
+  // Check with the server if this connection is from the local machine.
+  // The server reads the actual TCP socket IP, not the HTTP Host header.
   if (adminLoginBtn) {
+    // TEMPORARY FOR DEVELOPMENT: Hide admin button as everyone is admin by default
     adminLoginBtn.style.display = 'none';
   }
- 
+
   // Handle Online/Offline Status Events
   window.addEventListener('online', () => {
     showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
@@ -255,9 +244,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('offline', () => {
     showToast("Connexion perdue. Les modifications locales seront enregistrées sur ce navigateur.", "fa-circle-xmark", 6000);
   });
- 
+
   // Handle keyboard shortcuts
   window.addEventListener('keydown', (e) => {
+    // 1. Focus search input when pressing 's' (if not already typing in an input/textarea)
     const isEditing = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
     if (e.key.toLowerCase() === 's' && !isEditing) {
       e.preventDefault();
@@ -267,7 +257,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchBox.select();
       }
     }
- 
+
+    // 2. Close modals with Esc
     if (e.key === 'Escape') {
       const modal = document.getElementById('add-cat-modal');
       if (modal && modal.style.display !== 'none') {
@@ -276,13 +267,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (form) form.reset();
       }
     }
- 
+
+    // 3. Arrow navigation for the CAT list (if not typing in search box)
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !isEditing) {
       e.preventDefault();
       const activeItem = document.querySelector('.cat-item.active');
       const items = Array.from(document.querySelectorAll('.cat-item'));
       if (items.length === 0) return;
- 
+
       let nextIndex = 0;
       if (activeItem) {
         const currentIndex = items.indexOf(activeItem);
@@ -300,29 +292,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   });
- 
+
   // Load Initial App State
   await initApp();
- 
+
   // Fetch initial PDF indexing status
   workspace.updatePdfIndexStatus();
 });
- 
-// App Initialization routine with robust fault-isolation boundaries
+
+// App Initialization routine
 async function initApp() {
-  // Perform robust connection ping test at boot
   try {
+    // Perform robust connection ping test at boot
     state.isOnlineAtStartup = await api.checkRealConnection();
     console.log("[Startup] Real connection check status:", state.isOnlineAtStartup);
-  } catch (err) {
-    console.warn("[Startup] Real connection check failed, assuming offline mode.", err);
-    state.isOnlineAtStartup = false;
-  }
- 
-  // Start background network check interval to alert transitions
-  let lastState = state.isOnlineAtStartup;
-  async function checkNetworkPeriodically() {
-    try {
+
+    // Start background network check interval to alert transitions
+    let lastState = state.isOnlineAtStartup;
+    async function checkNetworkPeriodically() {
       const isOnline = await api.checkRealConnection();
       if (lastState !== isOnline) {
         if (isOnline) {
@@ -334,118 +321,90 @@ async function initApp() {
         updateEditButtonsVisibility();
       }
       lastState = isOnline;
-    } catch (_) {}
+      setTimeout(checkNetworkPeriodically, 8000);
+    }
     setTimeout(checkNetworkPeriodically, 8000);
-  }
-  setTimeout(checkNetworkPeriodically, 8000);
- 
-  // Check if current connection is local
-  try {
+
+    // Check if current connection is local
     isLocalDevice = await api.checkIsLocal();
-  } catch (err) {
-    console.warn("[Startup] Localhost check failed, assuming non-local.", err);
-    isLocalDevice = false;
-  }
- 
-  // 1. Check Admin status
-  try {
+
+    // 1. Check Admin status
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
-  } catch (err) {
-    console.warn("[Startup] Admin status check failed.", err);
-    state.isAdmin = false;
-  }
- 
-  updateEditButtonsVisibility();
- 
-  // 2. Fetch CATs with isolated fallback (Auto-recovery Boundary)
-  let cats = [];
-  try {
-    cats = await api.fetchCats();
+
+    updateEditButtonsVisibility();
+
+    // 2. Fetch CATs first to build the interface instantly
+    let cats = await api.fetchCats();
     if (window.perf) window.perf.recordMilestone('catsFetched');
-  } catch (err) {
-    console.error("[Startup Error Boundary] Failed to fetch CATs from server. Retrying local bundled database...", err);
-    try {
-      // Automatic fallback to local bundled file to keep the app working
-      const res = await fetch('data/cats_db.json');
-      if (!res.ok) throw new Error("Local fallback CAT database missing");
-      cats = await res.json();
-      showToast("Serveur injoignable. Chargement de la base de secours locale.", "fa-triangle-exclamation", 6000);
-    } catch (fallbackErr) {
-      console.error("[Startup Error Boundary] Critical: Local fallback database failed to load.", fallbackErr);
-      showToast("Base de données indisponible. Vérifiez votre connexion.", "fa-circle-exclamation", 9000);
-      return; // Exit boot if both server and local files are completely dead
+
+    // 3. Merge server CATs with local progress and local offline overrides
+    const localProgress = getLocalProgress();
+    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    const customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+
+    // Combine standard CATs with custom ones created offline
+    if (api.isOfflineApp) {
+      // Filter out any locally deleted standard CATs
+      cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
+      // Append custom created CATs
+      cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
     }
-  }
- 
-  // 3. Merge server CATs with local progress and local offline overrides
-  const localProgress = getLocalProgress();
-  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-  const customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
- 
-  // Combine standard CATs with custom ones created offline
-  if (api.isOfflineApp) {
-    cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
-    cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
-  }
- 
-  state.allCats = cats.map(cat => {
-    const localEntry = localProgress[cat.id] || {};
-    const overrides = localOverrides[cat.id] || {};
-    return {
-      ...cat,
-      status: localEntry.status || 'todo',
-      notes: localEntry.notes || '',
-      summary: overrides.customSummary || cat.summary,
-      customSummary: overrides.customSummary || cat.summary,
-      ordonnance: overrides.customOrdonnance || cat.ordonnance,
-      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
-    };
-  });
- 
-  // 4. Instantly render UI Components
-  try {
+
+    state.allCats = cats.map(cat => {
+      const localEntry = localProgress[cat.id] || {};
+      const overrides = localOverrides[cat.id] || {};
+      return {
+        ...cat,
+        status: localEntry.status || 'todo',
+        notes: localEntry.notes || '',
+        summary: overrides.customSummary || cat.summary,
+        customSummary: overrides.customSummary || cat.summary,
+        ordonnance: overrides.customOrdonnance || cat.ordonnance,
+        customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+      };
+    });
+
+    // 4. Instantly render UI Components
     sidebar.populateCategoryFilter(state.allCats);
     sidebar.renderCatList(state.allCats, selectCatWrapper);
     calculateStats();
     dashboard.renderDashboard(selectCatWrapper);
-  } catch (err) {
-    console.error("[Startup Render Error] Failed rendering initial layout:", err);
-  }
- 
-  // 5. Restore saved navigation state (if returning from PDF reader)
-  try {
+
+    // 5. Restore saved navigation state (if returning from PDF reader)
     workspace.restoreAppState();
+
+    // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
+    // Using setTimeout to give the UI thread a chance to complete layout and record startup milestones
+    setTimeout(() => {
+      Promise.all([
+        api.fetchPdfs(),
+        api.fetchPdfIndexStatus()
+      ]).then(([pdfs, pdfIndexStatus]) => {
+        state.allPdfs = pdfs;
+        state.pdfIndexStatus = pdfIndexStatus;
+        
+        // Update UI components that depend on PDF statuses
+        workspace.updatePdfIndexStatus();
+        if (state.activeCat) {
+          workspace.selectCat(state.activeCat, true);
+        }
+        console.log("[Background] PDFs and index status loaded successfully.");
+      }).catch(err => {
+        console.error("[Background] Failed to load PDFs and index status:", err);
+      });
+    }, 1500);
+
   } catch (err) {
-    console.error("[Startup Navigation Error] Failed restoring previous state:", err);
+    console.error('Error initializing app:', err);
+    showToast(
+      "Erreur de connexion. Impossible de charger les données. Assurez-vous que le serveur Node tourne.",
+      "fa-circle-exclamation",
+      8000
+    );
   }
- 
-  // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
-  // If this fails, the app stays fully operational for CAT reading.
-  setTimeout(() => {
-    Promise.all([
-      api.fetchPdfs().catch(err => {
-        console.warn("[Background Boundary] PDF retrieval failed, falling back to local list.", err);
-        return fetch('data/pdf_list.json').then(r => r.json()).catch(() => []);
-      }),
-      api.fetchPdfIndexStatus().catch(err => {
-        console.warn("[Background Boundary] Index status retrieval failed.", err);
-        return {};
-      })
-    ]).then(([pdfs, pdfIndexStatus]) => {
-      state.allPdfs = pdfs;
-      state.pdfIndexStatus = pdfIndexStatus;
-      
-      workspace.updatePdfIndexStatus();
-      if (state.activeCat) {
-        workspace.selectCat(state.activeCat, true);
-      }
-      console.log("[Background] PDFs and index status loaded successfully.");
-    }).catch(err => {
-      console.error("[Background Critical] Async startup block failed:", err);
-    });
-  }, 1500);
 }
+
 // Select CAT wrapper that delegates to workspace component
 function selectCatWrapper(cat) {
   workspace.selectCat(cat);
@@ -514,8 +473,7 @@ export function updateEditButtonsVisibility() {
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
   if (adminLoginBtn) {
-    // Strictly restrict Admin login button to localhost browser environment (hide on Capacitor)
-    if (!api.isOfflineApp && (isLocalDevice || state.isAdmin)) {
+    if (isLocalDevice || api.isOfflineApp || state.isAdmin) {
       adminLoginBtn.style.display = 'flex';
       if (state.isAdmin) {
         adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';

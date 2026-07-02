@@ -76,8 +76,7 @@ function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
   // Add ngrok bypass header when communicating with ngrok URLs to skip the browser challenge page
-  const isNgrokUrl = (configuredUrl && configuredUrl.includes('ngrok')) || 
-                     window.location.hostname.includes('ngrok');
+  const isNgrokUrl = configuredUrl && configuredUrl.includes('ngrok');
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'x-admin-token': token } : {}),
@@ -85,15 +84,42 @@ function getHeaders(extraHeaders = {}) {
     ...extraHeaders
   };
 }
- 
+
 export async function loginAdmin(password) {
   if (isOfflineApp) {
-    return { success: false, error: 'Connexion administrateur impossible en mode hors-ligne.' };
+    // Offline mode: store a local PIN hash in localStorage so admin gating
+    // still requires authentication rather than accepting any password.
+    const STORAGE_KEY = 'dr_cat_offline_admin_hash';
+    const storedHash = localStorage.getItem(STORAGE_KEY);
+    if (!storedHash) {
+      // First-time setup: enforce non-empty password
+      if (!password || password.trim().length < 4) {
+        return { success: false, error: 'Mot de passe trop court (min 4 caractères).' };
+      }
+      const hash = Array.from(new TextEncoder().encode(password))
+        .reduce((h, b) => ((h << 5) - h + b) | 0, 0).toString(16);
+      localStorage.setItem(STORAGE_KEY, hash);
+      const token = 'local-' + Array.from(new Uint8Array(16)).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+      localStorage.setItem('dr_cat_admin_token', token);
+      return { success: true, token };
+    }
+    if (!password) {
+      return { success: false, error: 'Mot de passe requis.' };
+    }
+    const inputHash = Array.from(new TextEncoder().encode(password))
+      .reduce((h, b) => ((h << 5) - h + b) | 0, 0).toString(16);
+    if (inputHash !== storedHash) {
+      return { success: false, error: 'Mot de passe incorrect.' };
+    }
+    const token = localStorage.getItem('dr_cat_admin_token') ||
+      ('local-' + Array.from(new Uint8Array(16)).map(() => Math.floor(Math.random() * 16).toString(16)).join(''));
+    localStorage.setItem('dr_cat_admin_token', token);
+    return { success: true, token };
   }
- 
+
   const res = await fetch('/api/login', {
     method: 'POST',
-    headers: getHeaders(),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password })
   });
   const data = await res.json();
@@ -102,13 +128,13 @@ export async function loginAdmin(password) {
   }
   return data;
 }
- 
+
 export async function logoutAdmin() {
   if (isOfflineApp) {
     localStorage.removeItem('dr_cat_admin_token');
     return;
   }
- 
+
   try {
     await fetch('/api/logout', {
       method: 'POST',
@@ -119,11 +145,11 @@ export async function logoutAdmin() {
   }
   localStorage.removeItem('dr_cat_admin_token');
 }
- 
+
 export async function checkAdminStatus() {
   const token = localStorage.getItem('dr_cat_admin_token');
   if (!token) return false;
- 
+
   try {
     const res = await fetch(getApiUrl('/api/is-admin'), { headers: getHeaders() });
     if (!res.ok) return false;
@@ -131,17 +157,18 @@ export async function checkAdminStatus() {
     return !!data.isAdmin;
   } catch (err) {
     console.error("Failed to check admin status:", err);
-    return false;
+    // Offline client fallback: local- prefix tokens are trusted locally
+    return token.startsWith('local-');
   }
 }
- 
+
 export async function checkIsLocal() {
   if (isOfflineApp) {
     return true; // Standalone app is always "local" to the device
   }
- 
+
   try {
-    const res = await fetch('/api/is-local', { headers: getHeaders() });
+    const res = await fetch('/api/is-local');
     const data = await res.json();
     return !!data.isLocal;
   } catch (err) {
@@ -194,7 +221,8 @@ export async function fetchPdfs() {
 }
 
 export async function saveCatDataToServer(id, data) {
-  if (!isOfflineApp || hasRemoteServer()) {
+  // If a remote server is configured, try to save directly to the server.
+  if (hasRemoteServer()) {
     try {
       const res = await fetch(getApiUrl(`/api/cats/${id}`), {
         method: 'POST',
@@ -217,7 +245,8 @@ export async function saveCatDataToServer(id, data) {
 }
 
 export async function deleteCatFromServer(id) {
-  if (!isOfflineApp || hasRemoteServer()) {
+  // If a remote server is configured, try to delete directly on the server.
+  if (hasRemoteServer()) {
     try {
       const res = await fetch(getApiUrl(`/api/cats/${id}`), {
         method: 'DELETE',
@@ -238,38 +267,37 @@ export async function deleteCatFromServer(id) {
 }
 
 export async function createCatOnServer(catData) {
-  if (!isOfflineApp || hasRemoteServer()) {
-    try {
-      const res = await fetch(getApiUrl('/api/cats'), {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(catData)
-      });
-      if (res.ok) return res.json();
-    } catch (err) {
-      console.warn('[API] createCatOnServer: remote server unreachable, saving locally.', err.message);
-    }
+  if (isOfflineApp && !state.isOnlineAtStartup) {
+    // Generate new local CAT and save to local storage overrides
+    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    
+    const nextId = Math.max(100, ...customCats.map(c => c.id), ...Object.keys(localOverrides).map(Number)) + 1;
+    const newCat = {
+      id: nextId,
+      ...catData,
+      status: 'todo',
+      notes: ''
+    };
+    
+    customCats.push(newCat);
+    localStorage.setItem('dr_cat_custom_created_cats', JSON.stringify(customCats));
+    return { success: true, cat: newCat };
   }
 
-  // Fallback: Generate new local CAT and save to local storage overrides
-  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-  const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
-  
-  const nextId = Math.max(100, ...customCats.map(c => c.id), ...Object.keys(localOverrides).map(Number)) + 1;
-  const newCat = {
-    id: nextId,
-    ...catData,
-    status: 'todo',
-    notes: ''
-  };
-
-  customCats.push(newCat);
-  localStorage.setItem('dr_cat_custom_created_cats', JSON.stringify(customCats));
-  return { success: true, message: "Fiche créée localement.", cat: newCat };
+  const res = await fetch(getApiUrl('/api/cats'), {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(catData)
+  });
+  if (res.status === 403) throw new Error("403 Forbidden");
+  if (!res.ok) throw new Error("Failed to create CAT");
+  return res.json();
 }
 
 export async function submitSuggestion(suggestionData) {
-  if (!isOfflineApp || hasRemoteServer()) {
+  // Always try to send to the server so the admin can review it.
+  if (hasRemoteServer()) {
     try {
       const res = await fetch(getApiUrl('/api/suggestions'), {
         method: 'POST',
@@ -284,8 +312,8 @@ export async function submitSuggestion(suggestionData) {
 
   // Fallback: save locally if server unreachable
   return saveCatDataToServer(suggestionData.catId, {
-    summary: suggestionData.data ? suggestionData.data.summary : undefined,
-    ordonnance: suggestionData.data ? suggestionData.data.ordonnance : undefined
+    summary: suggestionData.summary,
+    ordonnance: suggestionData.ordonnance
   });
 }
 
@@ -317,18 +345,6 @@ export async function rejectSuggestionOnServer(id) {
   });
   if (res.status === 403) throw new Error('403 Forbidden');
   if (!res.ok) throw new Error('Failed to reject suggestion');
-  return res.json();
-}
-
-export async function updateSuggestionOnServer(id, updatedData) {
-  const base = hasRemoteServer() ? getRemoteServerUrl() : '';
-  const res = await fetch(`${base}/api/suggestions/${id}/edit`, { 
-    method: 'POST',
-    headers: getHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ data: updatedData })
-  });
-  if (res.status === 403) throw new Error('403 Forbidden');
-  if (!res.ok) throw new Error('Failed to update suggestion');
   return res.json();
 }
 
