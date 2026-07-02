@@ -14,9 +14,6 @@ export function initPerformance() {
   const panel = document.getElementById('admin-pane-performance');
   if (!panel) return;
 
-  // Start frame monitor immediately so it captures background usage and interactions
-  perf.startFrameMonitor();
-
   // Listen to custom tab change event
   window.addEventListener('drcat-admin-tab-changed', (e) => {
     if (e.detail.activePaneId === 'admin-pane-performance') {
@@ -37,7 +34,10 @@ function expandPanel() {
 
   isOpen = true;
 
-  // Draw immediately and start the UI update interval
+  // Start FPS loops and memory logs
+  perf.startFrameMonitor();
+
+  // Initial draw and setup loop (1s intervals)
   renderPerformanceUI();
   renderIntervalId = setInterval(renderPerformanceUI, 1000);
 }
@@ -48,7 +48,9 @@ function collapsePanel() {
 
   isOpen = false;
 
-  // Keep the frame monitor running in the background! Just stop the UI update intervals.
+  // Stop FPS loops
+  perf.stopFrameMonitor();
+
   if (renderIntervalId) {
     clearInterval(renderIntervalId);
     renderIntervalId = null;

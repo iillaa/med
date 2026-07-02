@@ -33,6 +33,47 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     mobileBrandLogo.addEventListener('click', () => showDashboard(onSelectCat));
   }
 
+  // --- Admin Tabbed Navigation Controller ---
+  const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
+  adminTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      if (!targetId) return;
+
+      // Toggle buttons
+      adminTabBtns.forEach(b => {
+        b.classList.remove('active');
+        b.style.color = 'var(--text-secondary)';
+        b.style.backgroundColor = 'transparent';
+      });
+      btn.classList.add('active');
+      btn.style.color = 'var(--color-primary)';
+      btn.style.backgroundColor = 'rgba(6, 182, 212, 0.1)';
+
+      // Toggle panes
+      const panes = document.querySelectorAll('.admin-pane-content');
+      panes.forEach(pane => {
+        pane.style.display = 'none';
+      });
+      const activePane = document.getElementById(targetId);
+      if (activePane) {
+        activePane.style.display = 'block';
+      }
+
+      // Dispatch global tab changed event so components can activate/deactivate loops
+      window.dispatchEvent(new CustomEvent('drcat-admin-tab-changed', {
+        detail: { activePaneId: targetId }
+      }));
+    });
+  });
+
+  // Apply default styles to the active tab button on load
+  const activeTabBtn = document.querySelector('.admin-tab-btn.active');
+  if (activeTabBtn) {
+    activeTabBtn.style.color = 'var(--color-primary)';
+    activeTabBtn.style.backgroundColor = 'rgba(6, 182, 212, 0.1)';
+  }
+
   // Register global window functions for inline onclick handlers in suggestions
   window.handleApproveSuggestion = async function(id) {
     if (!confirm("Voulez-vous vraiment accepter cette suggestion et l'intégrer à la base de données ?")) return;
