@@ -193,8 +193,7 @@ export async function fetchPdfs() {
 }
 
 export async function saveCatDataToServer(id, data) {
-  // If a remote server is configured, try to save directly to the server.
-  if (hasRemoteServer()) {
+  if (!isOfflineApp || hasRemoteServer()) {
     try {
       const res = await fetch(getApiUrl(`/api/cats/${id}`), {
         method: 'POST',
@@ -217,8 +216,7 @@ export async function saveCatDataToServer(id, data) {
 }
 
 export async function deleteCatFromServer(id) {
-  // If a remote server is configured, try to delete directly on the server.
-  if (hasRemoteServer()) {
+  if (!isOfflineApp || hasRemoteServer()) {
     try {
       const res = await fetch(getApiUrl(`/api/cats/${id}`), {
         method: 'DELETE',
@@ -239,37 +237,38 @@ export async function deleteCatFromServer(id) {
 }
 
 export async function createCatOnServer(catData) {
-  if (isOfflineApp && !state.isOnlineAtStartup) {
-    // Generate new local CAT and save to local storage overrides
-    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
-    
-    const nextId = Math.max(100, ...customCats.map(c => c.id), ...Object.keys(localOverrides).map(Number)) + 1;
-    const newCat = {
-      id: nextId,
-      ...catData,
-      status: 'todo',
-      notes: ''
-    };
-    
-    customCats.push(newCat);
-    localStorage.setItem('dr_cat_custom_created_cats', JSON.stringify(customCats));
-    return { success: true, cat: newCat };
+  if (!isOfflineApp || hasRemoteServer()) {
+    try {
+      const res = await fetch(getApiUrl('/api/cats'), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(catData)
+      });
+      if (res.ok) return res.json();
+    } catch (err) {
+      console.warn('[API] createCatOnServer: remote server unreachable, saving locally.', err.message);
+    }
   }
 
-  const res = await fetch(getApiUrl('/api/cats'), {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(catData)
-  });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to create CAT");
-  return res.json();
+  // Fallback: Generate new local CAT and save to local storage overrides
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+  
+  const nextId = Math.max(100, ...customCats.map(c => c.id), ...Object.keys(localOverrides).map(Number)) + 1;
+  const newCat = {
+    id: nextId,
+    ...catData,
+    status: 'todo',
+    notes: ''
+  };
+
+  customCats.push(newCat);
+  localStorage.setItem('dr_cat_custom_created_cats', JSON.stringify(customCats));
+  return { success: true, message: "Fiche créée localement.", cat: newCat };
 }
 
 export async function submitSuggestion(suggestionData) {
-  // Always try to send to the server so the admin can review it.
-  if (hasRemoteServer()) {
+  if (!isOfflineApp || hasRemoteServer()) {
     try {
       const res = await fetch(getApiUrl('/api/suggestions'), {
         method: 'POST',
@@ -284,8 +283,8 @@ export async function submitSuggestion(suggestionData) {
 
   // Fallback: save locally if server unreachable
   return saveCatDataToServer(suggestionData.catId, {
-    summary: suggestionData.summary,
-    ordonnance: suggestionData.ordonnance
+    summary: suggestionData.data ? suggestionData.data.summary : undefined,
+    ordonnance: suggestionData.data ? suggestionData.data.ordonnance : undefined
   });
 }
 
