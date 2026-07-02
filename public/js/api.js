@@ -76,7 +76,8 @@ function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
   // Add ngrok bypass header when communicating with ngrok URLs to skip the browser challenge page
-  const isNgrokUrl = configuredUrl && configuredUrl.includes('ngrok');
+  const isNgrokUrl = (configuredUrl && configuredUrl.includes('ngrok')) || 
+                     window.location.hostname.includes('ngrok');
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'x-admin-token': token } : {}),
@@ -84,15 +85,15 @@ function getHeaders(extraHeaders = {}) {
     ...extraHeaders
   };
 }
-
+ 
 export async function loginAdmin(password) {
   if (isOfflineApp) {
     return { success: false, error: 'Connexion administrateur impossible en mode hors-ligne.' };
   }
-
+ 
   const res = await fetch('/api/login', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify({ password })
   });
   const data = await res.json();
@@ -101,13 +102,13 @@ export async function loginAdmin(password) {
   }
   return data;
 }
-
+ 
 export async function logoutAdmin() {
   if (isOfflineApp) {
     localStorage.removeItem('dr_cat_admin_token');
     return;
   }
-
+ 
   try {
     await fetch('/api/logout', {
       method: 'POST',
@@ -118,11 +119,11 @@ export async function logoutAdmin() {
   }
   localStorage.removeItem('dr_cat_admin_token');
 }
-
+ 
 export async function checkAdminStatus() {
   const token = localStorage.getItem('dr_cat_admin_token');
   if (!token) return false;
-
+ 
   try {
     const res = await fetch(getApiUrl('/api/is-admin'), { headers: getHeaders() });
     if (!res.ok) return false;
@@ -133,14 +134,14 @@ export async function checkAdminStatus() {
     return false;
   }
 }
-
+ 
 export async function checkIsLocal() {
   if (isOfflineApp) {
     return true; // Standalone app is always "local" to the device
   }
-
+ 
   try {
-    const res = await fetch('/api/is-local');
+    const res = await fetch('/api/is-local', { headers: getHeaders() });
     const data = await res.json();
     return !!data.isLocal;
   } catch (err) {

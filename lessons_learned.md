@@ -37,3 +37,12 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 ### 4. Absolute Local System Paths in WebViews
 * **Problem**: Attempting to link local system files directly using `file:///storage/emulated/...` inside browser pages. Android WebViews block direct file scheme requests for security.
 * **Solution**: Bundle resources into the application assets folder during development compilation, or fetch files through Capacitor filesystem modules.
+
+### 5. Ngrok HTML Interception in AJAX Calls
+* **Problem**: When accessing the server remotely via an ngrok public tunnel, browsers without existing cookies or with strict privacy shield configurations (e.g. Brave, Firefox Private) intercept AJAX JSON calls and receive the ngrok HTML landing warning page. Parsing this HTML as JSON throws SyntaxErrors (unexpected '<') and breaks application startup (empty list rendering).
+* **Solution**: Updated `getHeaders()` to check if `window.location.hostname` contains `ngrok` dynamically. This automatically injects the `ngrok-skip-browser-warning: true` header to bypass the warning for all browser/app users.
+
+### 6. Misaligned Closing Elements causing UI Leaks
+* **Problem**: Misplaced closing `</div>` tags in the HTML can break layout containers. If an admin-only block is closed too early, succeeding admin components spill outside the container and bypass the admin state check, rendering visible to ordinary guest users.
+* **Solution**: Enforce strict validation of DOM hierarchy. Ensure all admin-only modules are fully encapsulated inside `#admin-moderation-panel`.
+
