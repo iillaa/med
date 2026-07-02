@@ -6,33 +6,21 @@ let isOpen = false;
 let updateIntervalId = null;
 
 export function updateDiagnosticsButtonVisibility() {
-  const toggleBtn = document.getElementById('toggle-diagnostics-btn');
-  if (!toggleBtn) return;
-  toggleBtn.style.display = state.isAdmin ? 'inline-flex' : 'none';
+  // Obsolete: tab header controls visibility inside Admin Control block
 }
 
 export function initDiagnostics() {
-  const toggleBtn = document.getElementById('toggle-diagnostics-btn');
-  const closeBtn = document.getElementById('close-diagnostics-btn');
-  const panel = document.getElementById('admin-diagnostics-panel');
-  
-  if (!toggleBtn || !panel) return;
+  const panel = document.getElementById('admin-pane-diagnostics');
+  if (!panel) return;
 
-  updateDiagnosticsButtonVisibility();
-
-  // Toggle button click listener
-  toggleBtn.addEventListener('click', () => {
-    if (isOpen) {
-      collapsePanel();
-    } else {
+  // Listen to custom tab change event
+  window.addEventListener('drcat-admin-tab-changed', (e) => {
+    if (e.detail.activePaneId === 'admin-pane-diagnostics') {
       expandPanel();
+    } else if (isOpen) {
+      collapsePanel();
     }
   });
-
-  // Close button inside panel click listener
-  if (closeBtn) {
-    closeBtn.addEventListener('click', collapsePanel);
-  }
 
   // Listen to CustomEvent for new console log added
   window.addEventListener('drcat-log-added', renderLogs);
@@ -47,11 +35,10 @@ export function initDiagnostics() {
 }
 
 function expandPanel() {
-  const panel = document.getElementById('admin-diagnostics-panel');
+  const panel = document.getElementById('admin-pane-diagnostics');
   if (!panel) return;
 
   isOpen = true;
-  panel.style.display = 'block';
   
   // Start capturing console warnings/errors
   captureConsoleWarnings(true);
@@ -63,17 +50,13 @@ function expandPanel() {
   updateIntervalId = setInterval(refreshDiagnosticsData, 10000);
   
   renderLogs();
-  
-  // Scroll to panel
-  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function collapsePanel() {
-  const panel = document.getElementById('admin-diagnostics-panel');
+  const panel = document.getElementById('admin-pane-diagnostics');
   if (!panel) return;
 
   isOpen = false;
-  panel.style.display = 'none';
   
   // Stop capturing console warnings/errors
   captureConsoleWarnings(false);
