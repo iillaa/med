@@ -319,6 +319,18 @@ export async function rejectSuggestionOnServer(id) {
   return res.json();
 }
 
+export async function updateSuggestionOnServer(id, updatedData) {
+  const base = hasRemoteServer() ? getRemoteServerUrl() : '';
+  const res = await fetch(`${base}/api/suggestions/${id}/edit`, { 
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ data: updatedData })
+  });
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to update suggestion');
+  return res.json();
+}
+
 export async function fetchSearchStatus() {
   if (hasRemoteServer()) {
     try {
