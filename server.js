@@ -325,8 +325,8 @@ function isLocalhostConnection(req) {
 
 // Helper to check if request is authenticated as admin using token
 function isAdminRequest(req) {
-  // TODO: TEMPORARY FOR DEVELOPMENT: Make everyone admin by default
-  return true;
+  const token = req.headers['x-admin-token'];
+  return token && activeTokens.has(token);
 }
 
 // Serve PDFs statically with aggressive 7-day caching to save mobile data
