@@ -473,7 +473,8 @@ export function updateEditButtonsVisibility() {
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
   if (adminLoginBtn) {
-    if (isLocalDevice || api.isOfflineApp || state.isAdmin) {
+    // Strictly restrict Admin login button to localhost browser environment (hide on Capacitor)
+    if (!api.isOfflineApp && (isLocalDevice || state.isAdmin)) {
       adminLoginBtn.style.display = 'flex';
       if (state.isAdmin) {
         adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';

@@ -87,34 +87,7 @@ function getHeaders(extraHeaders = {}) {
 
 export async function loginAdmin(password) {
   if (isOfflineApp) {
-    // Offline mode: store a local PIN hash in localStorage so admin gating
-    // still requires authentication rather than accepting any password.
-    const STORAGE_KEY = 'dr_cat_offline_admin_hash';
-    const storedHash = localStorage.getItem(STORAGE_KEY);
-    if (!storedHash) {
-      // First-time setup: enforce non-empty password
-      if (!password || password.trim().length < 4) {
-        return { success: false, error: 'Mot de passe trop court (min 4 caractères).' };
-      }
-      const hash = Array.from(new TextEncoder().encode(password))
-        .reduce((h, b) => ((h << 5) - h + b) | 0, 0).toString(16);
-      localStorage.setItem(STORAGE_KEY, hash);
-      const token = 'local-' + Array.from(new Uint8Array(16)).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-      localStorage.setItem('dr_cat_admin_token', token);
-      return { success: true, token };
-    }
-    if (!password) {
-      return { success: false, error: 'Mot de passe requis.' };
-    }
-    const inputHash = Array.from(new TextEncoder().encode(password))
-      .reduce((h, b) => ((h << 5) - h + b) | 0, 0).toString(16);
-    if (inputHash !== storedHash) {
-      return { success: false, error: 'Mot de passe incorrect.' };
-    }
-    const token = localStorage.getItem('dr_cat_admin_token') ||
-      ('local-' + Array.from(new Uint8Array(16)).map(() => Math.floor(Math.random() * 16).toString(16)).join(''));
-    localStorage.setItem('dr_cat_admin_token', token);
-    return { success: true, token };
+    return { success: false, error: 'Connexion administrateur impossible en mode hors-ligne.' };
   }
 
   const res = await fetch('/api/login', {
@@ -157,8 +130,7 @@ export async function checkAdminStatus() {
     return !!data.isAdmin;
   } catch (err) {
     console.error("Failed to check admin status:", err);
-    // Offline client fallback: local- prefix tokens are trusted locally
-    return token.startsWith('local-');
+    return false;
   }
 }
 
