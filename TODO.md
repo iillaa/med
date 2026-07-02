@@ -16,7 +16,7 @@
 - `[x]` **Add favicon** — browser tab shows blank icon; logo (`drcat_logo.png`) is ready, just needs a `<link rel="icon">` in the `<head>`
 - `[x]` **Add meta description** — needed for SEO and proper link previews when sharing
 - `[x]` **Offline support** — clarify/implement behavior when the connection drops; data loading should not silently fail
-- `[ ]` **Diagnostic & Logging Tools Panel** — (Prioritized before UI polish & performance) Add a diagnostics drawer/modal to test local server pings, change `REMOTE_SERVER_URL` at runtime, view offline override states, check loaded PDF index status, and trace console warnings.
+- `[x]` **Diagnostic & Logging Tools Panel** — Added a unified Admin Control Center tabbed panel containing auto-checkup, real pings connectivity tests, remote config overrides, PDF indexing coverage details, console terminal logging, and background performance metrics.
 
 ---
 
