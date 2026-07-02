@@ -585,3 +585,21 @@
 .light-theme .admin-tabs-header {
   background: rgba(0, 0, 0, 0.03) !important;
 }
+
+@media (max-width: 480px) {
+  .admin-tab-btn {
+    font-size: 11px !important;
+    padding: 10px 4px !important;
+    letter-spacing: 0px !important;
+    gap: 4px !important;
+    text-transform: none !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-tab-btn {
+    font-size: 10.5px !important;
+    padding: 8px 2px !important;
+    gap: 3px !important;
+  }
+}
