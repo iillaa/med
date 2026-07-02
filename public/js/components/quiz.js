@@ -111,6 +111,7 @@ export function initQuiz(onOpenCatCard) {
     viewRefBtn.addEventListener('click', () => {
       const q = state.quizSession.questions[state.quizSession.currentIndex];
       if (q && q.cat && globalOnOpenCatCard) {
+        state.quizSession.quizViewingCatId = q.cat.id;
         // Toggle workspace visible and select
         quizScreen.style.display = 'none';
         globalOnOpenCatCard(q.cat);

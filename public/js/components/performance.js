@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import * as api from '../api.js';
 import { perf } from '../performance.js';
-import { formatBytes, formatDuration, formatPercent, getDiagnosticsLogs, showToast } from '../utils.js';
+import { formatBytes, formatDuration, formatPercent, getDiagnosticsLogs, showToast, exportDataFile } from '../utils.js';
 
 let isOpen = false;
 let renderIntervalId = null;
@@ -338,20 +338,10 @@ async function exportPerformanceReport() {
     recentConsoleLogs: getDiagnosticsLogs()
   };
 
-  const jsonStr = JSON.stringify(report, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
   const d = new Date();
   const timestampStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}`;
-  
-  link.href = url;
-  link.download = `drcat-performance-${timestampStr}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const fileName = `drcat-performance-${timestampStr}.json`;
 
-  showToast("Rapport performance téléchargé avec succès !", "fa-file-export", 4000);
+  exportDataFile(fileName, "Rapport Performance", report);
+  showToast("Rapport performance généré !", "fa-file-export", 4000);
 }

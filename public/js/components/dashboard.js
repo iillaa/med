@@ -1,6 +1,6 @@
 import { state } from '../state.js';
 import * as api from '../api.js';
-import { escapeHTML } from '../utils.js';
+import { escapeHTML, exportDataFile } from '../utils.js';
 
 // DOM Elements
 let welcomeScreen, workspace, sidebar;
@@ -75,50 +75,15 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
   // Export progress handler
   const exportBtn = document.getElementById('export-progress-btn');
   if (exportBtn) {
-    exportBtn.addEventListener('click', async () => {
+    exportBtn.addEventListener('click', () => {
       const progressData = localStorage.getItem('dr_cat_user_progress');
       if (!progressData || progressData === '{}') {
         alert("Aucune progression enregistrée à exporter.");
         return;
       }
       
-      // If mobile standalone app, trigger native sharing dialog
-      if (api.isOfflineApp && navigator.share) {
-        try {
-          const file = new File([progressData], `drcat-progression.json`, { type: 'application/json' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: 'Progression Dr.CAT',
-              text: 'Sauvegarde de ma progression clinique Dr.CAT'
-            });
-            return;
-          }
-        } catch (err) {
-          console.error("File sharing failed, trying text sharing:", err);
-        }
-        
-        try {
-          await navigator.share({
-            title: 'Progression Dr.CAT',
-            text: progressData
-          });
-          return;
-        } catch (err) {
-          console.error("Native text sharing failed:", err);
-        }
-      }
-      
-      // Standard browser download fallback
-      const blob = new Blob([progressData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `drcat-progression-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const fileName = `drcat-progression-${new Date().toISOString().slice(0, 10)}.json`;
+      exportDataFile(fileName, "Sauvegarde Progression", progressData);
     });
   }
 
