@@ -291,21 +291,18 @@ export async function submitSuggestion(suggestionData) {
         headers: getHeaders(),
         body: JSON.stringify(suggestionData)
       });
-      if (res.ok) return res.json();
+      if (res.ok) {
+        return await res.json();
+      }
+      const errorData = await res.json().catch(() => ({}));
+      return { success: false, error: errorData.error || "Erreur lors de l'envoi de la proposition." };
     } catch (err) {
-      console.warn('[API] submitSuggestion: server unreachable, saving locally.', err.message);
+      console.warn('[API] submitSuggestion: server unreachable.', err.message);
+      return { success: false, error: "Le serveur est de garde ou injoignable. Impossible d'envoyer la proposition." };
     }
   }
 
-  // Fallback: save locally if server unreachable
-  if (suggestionData.type === 'add') {
-    return createCatOnServer(suggestionData.data);
-  } else {
-    return saveCatDataToServer(suggestionData.catId, {
-      summary: suggestionData.data ? suggestionData.data.summary : undefined,
-      ordonnance: suggestionData.data ? suggestionData.data.ordonnance : undefined
-    });
-  }
+  return { success: false, error: "L'application fonctionne en mode hors-ligne. Les propositions de fiches nécessitent une connexion au serveur." };
 }
 
 export async function fetchSuggestions() {
