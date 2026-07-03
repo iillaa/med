@@ -44,6 +44,10 @@ The following critical bugs have been successfully audited and resolved in the c
 * **Problem**: Browsers remote-connecting via ngrok were redirected to a landing page warning, breaking JSON parsing.
 * **Fix**: `getHeaders()` dynamically checks if the hostname contains `ngrok` and automatically injects the `ngrok-skip-browser-warning: true` header to bypass the warning. The server explicitly allows this custom header in its CORS preflight options.
 
+### 5. Offline 'Propose Add' Suggestion Logic
+* **Problem**: Proposing to add a new CAT while offline (or server unreachable) called the edit fallback (`saveCatDataToServer`) with `catId: undefined` instead of correctly calling `createCatOnServer` to save the custom CAT locally. This caused title/category metadata to be silently discarded.
+* **Fix**: Updated `public/js/api.js` (`submitSuggestion()`) so that the local fallback correctly routes `add` suggestions to `createCatOnServer` and `edit` suggestions to `saveCatDataToServer`.
+
 ---
 
 ## 🛠️ CLI Operations & Building
