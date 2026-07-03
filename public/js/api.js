@@ -53,7 +53,22 @@ let offlinePdfIndexCache = null;
  * When this returns a URL, all API calls should go through the server even in Capacitor/offline mode.
  */
 export function getRemoteServerUrl() {
-  return localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL || null;
+  const storedOverride = localStorage.getItem('dr_cat_remote_server_url');
+  const lastCompiledUrl = localStorage.getItem('dr_cat_last_compiled_url');
+
+  if (REMOTE_SERVER_URL && lastCompiledUrl !== REMOTE_SERVER_URL) {
+    // New build has a new target server URL! Clear the stale override.
+    localStorage.removeItem('dr_cat_remote_server_url');
+    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
+    return REMOTE_SERVER_URL;
+  }
+
+  // Ensure last compiled URL is tracked if we don't have it yet
+  if (REMOTE_SERVER_URL && !lastCompiledUrl) {
+    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
+  }
+
+  return storedOverride || REMOTE_SERVER_URL || null;
 }
 
 /**
