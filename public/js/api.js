@@ -298,10 +298,14 @@ export async function submitSuggestion(suggestionData) {
   }
 
   // Fallback: save locally if server unreachable
-  return saveCatDataToServer(suggestionData.catId, {
-    summary: suggestionData.data ? suggestionData.data.summary : undefined,
-    ordonnance: suggestionData.data ? suggestionData.data.ordonnance : undefined
-  });
+  if (suggestionData.type === 'add') {
+    return createCatOnServer(suggestionData.data);
+  } else {
+    return saveCatDataToServer(suggestionData.catId, {
+      summary: suggestionData.data ? suggestionData.data.summary : undefined,
+      ordonnance: suggestionData.data ? suggestionData.data.ordonnance : undefined
+    });
+  }
 }
 
 export async function fetchSuggestions() {
