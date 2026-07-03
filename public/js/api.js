@@ -283,23 +283,39 @@ export async function createCatOnServer(catData) {
   return { success: true, message: "Fiche créée localement.", cat: newCat };
 }
 
-export async function submitSuggestion(suggestionData) {
+export async function submitSuggestion(suggestionData, onAttempt) {
   if (!isOfflineApp || hasRemoteServer()) {
-    try {
-      const res = await fetch(getApiUrl('/api/suggestions'), {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(suggestionData)
-      });
-      if (res.ok) {
-        return await res.json();
+    let attempts = 0;
+    const maxAttempts = 3;
+    const delayBetweenAttempts = 1200; // Wait 1.2s between retries
+
+    while (attempts < maxAttempts) {
+      attempts++;
+      if (onAttempt) onAttempt(attempts);
+
+      try {
+        const res = await fetch(getApiUrl('/api/suggestions'), {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(suggestionData)
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status >= 400 && res.status < 500) {
+          return { success: false, error: errorData.error || "Erreur client lors de l'envoi." };
+        }
+      } catch (err) {
+        console.warn(`[API] submitSuggestion: attempt ${attempts} failed.`, err.message);
       }
-      const errorData = await res.json().catch(() => ({}));
-      return { success: false, error: errorData.error || "Erreur lors de l'envoi de la proposition." };
-    } catch (err) {
-      console.warn('[API] submitSuggestion: server unreachable.', err.message);
-      return { success: false, error: "Le serveur est de garde ou injoignable. Impossible d'envoyer la proposition." };
+
+      if (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
+      }
     }
+
+    return { success: false, error: "Le serveur est de garde ou injoignable après 3 tentatives. Proposition annulée." };
   }
 
   return { success: false, error: "L'application fonctionne en mode hors-ligne. Les propositions de fiches nécessitent une connexion au serveur." };

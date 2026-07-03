@@ -48,6 +48,12 @@ The following critical bugs have been successfully audited and resolved in the c
 * **Problem**: When offline or if the server was unreachable, proposed new CATs or modifications (meant as suggestions from guest users) fell back to local admin-like overrides (`createCatOnServer`/`saveCatDataToServer`). This generated ghost data in local storage and allowed guests to act like admins, while falsely notifying them that the suggestion was successfully sent to the server.
 * **Fix**: Updated `public/js/api.js` (`submitSuggestion()`) to strictly attempt remote transmission. If the server is unreachable, the operation fails cleanly with an error message returned to the user instead of polluting local storage. Only authentic local admins using the app can modify the local workspace offline.
 
+### 6. Premium Loading overlay & 3-Attempt Connection Retries
+* **Problem**: When users sent suggestions, the UI offered no feedback until the operation completed, and connection timeouts on mobile networks would instantly crash/fail the submission without a second chance.
+* **Fix**:
+  - **3-Attempt Loop**: Programmed a retry mechanism in `public/js/api.js` (`submitSuggestion()`) that automatically attempts to deliver the suggestion up to 3 times before failing.
+  - **Visual Loading Spinner**: Developed a glassmorphism loading overlay in `public/js/utils.js` (`showLoadingOverlay()`) with a rotating cyan spinner. It updates with the current attempt number (e.g. `Tentative 2/3`) and runs for a minimum of 2 seconds to prevent layout flashes.
+
 ---
 
 ## 🛠️ CLI Operations & Building
