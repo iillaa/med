@@ -626,3 +626,120 @@ export function exportDataFile(fileName, dataTitle, payload) {
   });
 }
 
+/**
+ * Show a modal loading overlay with backdrop blur and spinner.
+ * @param {string} initialMessage - The text to display.
+ * @returns {object} Controller containing updateMessage(msg) and hide() functions.
+ */
+export function showLoadingOverlay(initialMessage) {
+  if (!document.getElementById('drcat-loading-styles')) {
+    const style = document.createElement('style');
+    style.id = 'drcat-loading-styles';
+    style.textContent = `
+      #drcat-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(9, 13, 22, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 9999999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: all;
+      }
+      #drcat-loading-overlay.visible {
+        opacity: 1;
+      }
+      .drcat-spinner {
+        width: 46px;
+        height: 46px;
+        border: 4px solid rgba(6, 182, 212, 0.1);
+        border-left-color: #06b6d4;
+        border-radius: 50%;
+        animation: drcat-spin 1s linear infinite;
+      }
+      .drcat-loading-text {
+        color: #f8fafc;
+        font-size: 14.5px;
+        font-family: inherit;
+        font-weight: 500;
+        text-align: center;
+        max-width: 290px;
+        line-height: 1.5;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+      @keyframes drcat-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'drcat-loading-overlay';
+  overlay.innerHTML = `
+    <div class="drcat-spinner"></div>
+    <div class="drcat-loading-text" id="drcat-loading-text-el"></div>
+  `;
+  document.body.appendChild(overlay);
+  
+  // Trigger reflow to start transition
+  overlay.getBoundingClientRect();
+  overlay.classList.add('visible');
+
+  const textEl = document.getElementById('drcat-loading-text-el');
+  if (textEl) textEl.textContent = initialMessage;
+
+  return {
+    updateMessage(msg) {
+      if (textEl) textEl.textContent = msg;
+    },
+    hide() {
+      overlay.classList.remove('visible');
+      setTimeout(() => overlay.remove(), 300);
+    }
+  };
+}
+
+/**
+ * Executes a suggestion submission showing a spinner overlay with retry counts, guaranteeing a 2s display time.
+ */
+export async function runSuggestionWithUI(submitFn, suggestionData, successAlertText) {
+  const loader = showLoadingOverlay("Envoi de la proposition... (Tentative 1/3)");
+  const startTime = Date.now();
+  
+  try {
+    const result = await submitFn(suggestionData, (attempt) => {
+      loader.updateMessage(`Envoi de la proposition... (Tentative ${attempt}/3)`);
+    });
+    
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 2000) {
+      await new Promise(r => setTimeout(r, 2000 - elapsed));
+    }
+    
+    loader.hide();
+    
+    if (result.success) {
+      alert(successAlertText);
+      return true;
+    } else {
+      alert("Erreur : " + result.error);
+      return false;
+    }
+  } catch (err) {
+    loader.hide();
+    alert("Une erreur inattendue est survenue lors de l'envoi.");
+    return false;
+  }
+}
+

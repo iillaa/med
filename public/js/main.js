@@ -6,7 +6,7 @@ import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
 import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
-import { showToast } from './utils.js';
+import { showToast, runSuggestionWithUI } from './utils.js';
 
 // Tracks whether the current physical device is localhost (set once on load)
 let isLocalDevice = false;
@@ -195,15 +195,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!confirmSubmit) return;
  
         try {
-          const result = await api.submitSuggestion({
-            type: 'add',
-            data: { title, category, red_flags, summary, ordonnance, pdf_keywords }
-          });
-          if (result.success) {
+          const success = await runSuggestionWithUI(
+            api.submitSuggestion,
+            {
+              type: 'add',
+              data: { title, category, red_flags, summary, ordonnance, pdf_keywords }
+            },
+            `Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`
+          );
+          if (success) {
             closeModal();
-            alert(`Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`);
-          } else {
-            alert("Erreur : " + result.error);
           }
         } catch (err) {
           console.error(err);

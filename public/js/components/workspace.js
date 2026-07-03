@@ -1,6 +1,6 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
-import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast } from '../utils.js';
+import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI } from '../utils.js';
 
 // DOM Elements
 let workspace, welcomeScreen;
@@ -268,16 +268,15 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         if (!confirmSave) return;
 
         try {
-          const result = await api.submitSuggestion({
-            type: 'edit',
-            catId: state.activeCat.id,
-            data: { summary: newSummary }
-          });
-          if (result.success) {
-            alert("Votre proposition de modification a été envoyée à l'administrateur pour validation.");
-          } else {
-            alert("Erreur: " + result.error);
-          }
+          await runSuggestionWithUI(
+            api.submitSuggestion,
+            {
+              type: 'edit',
+              catId: state.activeCat.id,
+              data: { summary: newSummary }
+            },
+            "Votre proposition de modification a été envoyée à l'administrateur pour validation."
+          );
         } catch (err) {
           console.error(err);
           alert("Erreur lors de l'envoi de la proposition.");
@@ -362,16 +361,15 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         if (!confirmSave) return;
 
         try {
-          const result = await api.submitSuggestion({
-            type: 'edit',
-            catId: state.activeCat.id,
-            data: { ordonnance: newOrdonnance }
-          });
-          if (result.success) {
-            alert("Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation.");
-          } else {
-            alert("Erreur: " + result.error);
-          }
+          await runSuggestionWithUI(
+            api.submitSuggestion,
+            {
+              type: 'edit',
+              catId: state.activeCat.id,
+              data: { ordonnance: newOrdonnance }
+            },
+            "Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation."
+          );
         } catch (err) {
           console.error(err);
           alert("Erreur lors de l'envoi de la proposition.");
