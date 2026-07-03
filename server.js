@@ -49,8 +49,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   lastModified: false,
   setHeaders: (res, filePath) => {
-    // Never cache JS or CSS — always serve fresh during development
-    if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+    // Never cache HTML, JS, or CSS — always serve fresh
+    if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
   }
