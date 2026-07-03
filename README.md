@@ -134,9 +134,10 @@ L'application est pré-configurée avec le widget Termux. Cliquez sur le widget 
 ## 📱 Standalone Android App (Offline Mobile Mode)
 
 For offline clinical usage without running the Termux server:
-1. Switch to the `android-app` branch.
+1. Switch to the `light-android` branch.
 2. Build assets: `node build.js && npx cap sync`.
-3. The standalone APK is built automatically on push to the `android-app` branch via GitHub Actions workflows and can be downloaded from the Action Run page.
+   * **Note on Server URL**: During the build, the compiler reads the target server URL from `remote_server_config.json` and automatically bakes it into the app via `public/js/remote_config.js`. This allows the offline APK to fetch updates and send suggestions to your server when online.
+3. The standalone APK is built automatically on push to the `light-android` branch via GitHub Actions workflows and can be downloaded from the Actions Run page.
 
 ---
 
