@@ -16,7 +16,7 @@ node_modules/
 .DS_Store
 .cat-med/reference-pdfs
 
-# Generated PDF index cache (Tracked for search database)
+# Generated PDF index cache (Tracked for offline search build packaging)
 # pdf_index.json
 
 # Local ngrok binary
@@ -34,3 +34,4 @@ admin_password.txt*
 
 # Remote server URL config
 remote_server_config.json
+public/js/remote_config.js

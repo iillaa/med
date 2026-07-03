@@ -269,6 +269,20 @@ async function initializeData() {
   } catch (err) {
     console.error("Error loading remote_server_config.json:", err);
   }
+
+  // Generate public/js/remote_config.js dynamically for client app consumption
+  try {
+    const targetDir = path.join(__dirname, 'public', 'js');
+    await fs.promises.mkdir(targetDir, { recursive: true });
+    await fs.promises.writeFile(
+      path.join(targetDir, 'remote_config.js'),
+      `export const REMOTE_SERVER_URL = ${JSON.stringify(remoteServerUrl)};\n`,
+      'utf-8'
+    );
+    console.log(`[Config] Generated public/js/remote_config.js with URL: ${remoteServerUrl}`);
+  } catch (err) {
+    console.error("Error generating public/js/remote_config.js:", err);
+  }
 }
 
 // Register indexer update callback to keep memory index in sync
@@ -963,6 +977,13 @@ app.post('/api/diagnostics/remote-server-url', async (req, res) => {
     remoteServerUrl = url || '';
     
     await safeWriteJsonAsync(CONFIG_FILE, { url: remoteServerUrl });
+
+    // Also update remote_config.js for client bundles
+    await fs.promises.writeFile(
+      path.join(__dirname, 'public', 'js', 'remote_config.js'),
+      `export const REMOTE_SERVER_URL = ${JSON.stringify(remoteServerUrl)};\n`,
+      'utf-8'
+    );
 
     res.json({ success: true, url: remoteServerUrl });
   } catch (err) {

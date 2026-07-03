@@ -2,6 +2,9 @@
 // Support for both online (server-backed) mode and offline standalone (Capacitor/static) mode
 
 import { state } from './state.js';
+import { REMOTE_SERVER_URL } from './remote_config.js';
+export { REMOTE_SERVER_URL };
+
 
 // Transparent wrapper to log API latencies
 const originalFetch = window.fetch;
@@ -29,10 +32,7 @@ window.fetch = async function(...args) {
   }
 };
 
-// If you deploy your server on a hosted address (e.g. Stage 2 of the roadmap),
-// write the full URL here (e.g. 'https://med.iillaa.com'). This allows the standalone
-// app to send its edits/suggestions when the device is online at startup.
-const REMOTE_SERVER_URL = '';
+
 
 export const isOfflineApp = 
   window.location.protocol === 'file:' || 
