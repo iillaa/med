@@ -39,3 +39,27 @@ if (fs.existsSync(pdfIndexSource)) {
 } else {
   console.warn("pdf_index.json not found, skipping copy and list generation.");
 }
+
+// Generate public/js/remote_config.js from remote_server_config.json
+const configFile = path.join(__dirname, 'remote_server_config.json');
+let remoteServerUrl = '';
+if (fs.existsSync(configFile)) {
+  try {
+    const content = fs.readFileSync(configFile, 'utf-8');
+    const parsed = JSON.parse(content);
+    remoteServerUrl = parsed.url || '';
+  } catch (err) {
+    console.error("Error reading remote_server_config.json during build:", err);
+  }
+}
+const configJsPath = path.join(__dirname, 'public', 'js', 'remote_config.js');
+try {
+  fs.writeFileSync(
+    configJsPath,
+    `export const REMOTE_SERVER_URL = ${JSON.stringify(remoteServerUrl)};\n`,
+    'utf-8'
+  );
+  console.log(`Generated public/js/remote_config.js with URL: ${remoteServerUrl}`);
+} catch (err) {
+  console.error("Error writing remote_config.js during build:", err);
+}

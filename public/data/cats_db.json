@@ -752,5 +752,16 @@
       "Certificats_",
       "Certificats"
     ]
+  },
+  {
+    "id": 56,
+    "category": "Gg",
+    "title": "Test",
+    "summary": "Ft",
+    "red_flags": "Test",
+    "ordonnance": "D",
+    "pdf_keywords": [
+      "F"
+    ]
   }
 ]
