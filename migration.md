@@ -44,9 +44,9 @@ The following critical bugs have been successfully audited and resolved in the c
 * **Problem**: Browsers remote-connecting via ngrok were redirected to a landing page warning, breaking JSON parsing.
 * **Fix**: `getHeaders()` dynamically checks if the hostname contains `ngrok` and automatically injects the `ngrok-skip-browser-warning: true` header to bypass the warning. The server explicitly allows this custom header in its CORS preflight options.
 
-### 5. Offline 'Propose Add' Suggestion Logic
-* **Problem**: Proposing to add a new CAT while offline (or server unreachable) called the edit fallback (`saveCatDataToServer`) with `catId: undefined` instead of correctly calling `createCatOnServer` to save the custom CAT locally. This caused title/category metadata to be silently discarded.
-* **Fix**: Updated `public/js/api.js` (`submitSuggestion()`) so that the local fallback correctly routes `add` suggestions to `createCatOnServer` and `edit` suggestions to `saveCatDataToServer`.
+### 5. Secure Offline Suggestion Handling
+* **Problem**: When offline or if the server was unreachable, proposed new CATs or modifications (meant as suggestions from guest users) fell back to local admin-like overrides (`createCatOnServer`/`saveCatDataToServer`). This generated ghost data in local storage and allowed guests to act like admins, while falsely notifying them that the suggestion was successfully sent to the server.
+* **Fix**: Updated `public/js/api.js` (`submitSuggestion()`) to strictly attempt remote transmission. If the server is unreachable, the operation fails cleanly with an error message returned to the user instead of polluting local storage. Only authentic local admins using the app can modify the local workspace offline.
 
 ---
 
