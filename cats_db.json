@@ -752,29 +752,5 @@
       "Certificats_",
       "Certificats"
     ]
-  },
-  {
-    "id": 56,
-    "category": "Test",
-    "title": "Test",
-    "summary": "Test back ::: atzawdj nta lawal hahahaha ",
-    "red_flags": "Test",
-    "ordonnance": "Yyy",
-    "pdf_keywords": [
-      "Asp"
-    ]
-  },
-  {
-    "id": 57,
-    "category": "Test",
-    "title": "CAT devant intoxication alimentaire",
-    "summary": "1. Évaluation initiale & Diagnostic :\n\nInterrogatoire : Notion de cas similaires (repas commun), délai d'apparition (court pour Staph. aureus, long pour Salmonella), nature des aliments.\n\nClinique : Douleurs abdominales, vomissements, diarrhée, fièvre, signes de déshydratation.\n2. Conduite à tenir :\nÉvaluer l'état d'hydratation (pli cutané, soif, tension, diurèse).\n\nRepos digestif initial puis réalimentation progressive (éviter lait, graisses, fibres).\n\nRéhydratation orale (SRO) prioritaire.\n3. Traitement :\nAnti-sécrétoire : Racécadotril (Tiorfan) 100mg, 1 gélule 3x/jour (max 7 jours).\n\nAntispasmodique : Phloroglucinol (Spasfon) 80mg, 2 cp au moment de la crise.\n\nAntibiotiques : Généralement contre-indiqués (sauf cas sévères avec fièvre élevée, syndrome dysentérique : Ciprofloxacine 500mg 2x/j pendant 3-5 jours).\n4. Examens complémentaires :\nBiologie : Ionogramme sanguin, urée, créatinine (uniquement si signes de déshydratation clinique ou terrain fragile).\n\nBactériologie : Coproculture avec recherche de Salmonella, Shigella, Campylobacter (si diarrhée glaireuse/sanglante ou fièvre élevée).\n5. Orientation / Avis Spécialisé :\nAvis Gastro-entérologue si symptômes prolongés (>48h), suspicion de germe invasif (Salmonella/Shigella) ou terrain fragile. Hospitalisation urgente si déshydratation sévère ou choc septique.",
-    "red_flags": "Fièvre > 38.5°C, syndrome dysentérique (sang/glaires dans les selles), déshydratation clinique (perte de poids > 5%), terrain à risque (nourrisson, sujet âgé, immunodéprimé)",
-    "ordonnance": "this is a test .",
-    "pdf_keywords": [
-      "urgence",
-      "gastro",
-      "intoxication"
-    ]
   }
 ]
