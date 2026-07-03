@@ -72,10 +72,11 @@ To avoid parsing large medical directories on every restart:
 
 ## 📶 Offline-First Capabilities & PWA
 
-* **Startup Online Detection**:
-  During `initApp()` execution in `main.js`, the app queries `navigator.onLine`. If the device is offline, edit buttons are hidden, disabling server connection issues. If the device is online, suggestions can be proposed, which are sent directly to `REMOTE_SERVER_URL` when configured.
-* **PWA Caching**:
-  A standard `service-worker.js` registers event listeners for static asset fetch requests. If the network fails, it falls back to serving cached stylesheets, icons, and scripts.
+* **Startup Online Detection & Server Connection**:
+  During `initApp()` execution in `main.js`, the app queries `navigator.onLine`. If the device is online and a server connection is available, client suggestions and database updates are synced directly to/from `REMOTE_SERVER_URL`. The URL is dynamically compiled into `public/js/remote_config.js` (gitignored) from the server's `remote_server_config.json` during the build process, preventing manual setup on device WebViews.
+* **PWA Caching Strategy**:
+  A standard `service-worker.js` uses a **Network-First** caching strategy (updated in v2) for all static assets (HTML, CSS, JS). This ensures browser clients always load the fresh server version when online, while seamlessly falling back to cached copies if offline.
+
 
 ---
 
