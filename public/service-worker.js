@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-cat-v1';
+const CACHE_NAME = 'dr-cat-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -43,7 +43,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Intercept requests and serve from cache if offline
+// Intercept requests and serve from network first, falling back to cache if offline
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -53,13 +53,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-First strategy for static UI assets
+  // Network-First strategy for static UI assets
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((response) => {
+    fetch(event.request)
+      .then((response) => {
         // Cache newly requested static resources on the fly (except PDFs)
         if (response.status === 200 && !url.pathname.includes('/pdf/')) {
           const responseClone = response.clone();
@@ -68,7 +65,15 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // Network failed (offline), try cache
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Optional: Return a fallback offline page here if neither network nor cache has the resource
+        });
+      })
   );
 });
