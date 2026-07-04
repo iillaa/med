@@ -400,7 +400,7 @@ function submitWriteInAnswer() {
 
   // Lock inputs
   userTextArea.disabled = true;
-  const restoreBtn = setButtonLoading(submitTextBtn);
+  restoreBtn = setButtonLoading(submitTextBtn);
 
   // Compare and match keywords
   const keywordMatches = checkMatchedKeywords(userAnswer, q.correctAnswer);

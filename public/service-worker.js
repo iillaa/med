@@ -35,59 +35,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Intercept requests
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-
-  // Always bypass cache for JS files and API calls
-  if (url.pathname.startsWith('/api/') || url.pathname.match(/\.js(\?.*)?$/)) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // Network-First strategy for static assets only
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.status === 200 && !url.pathname.includes('/pdf/')) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-        });
-      })
-  );
-});
-
-// Activate Service Worker and clear old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
-
 // Intercept requests and serve from network first, falling back to cache if offline
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Bypass cache for API server calls so suggestion/admin processes query Node.js directly
-  if (url.pathname.startsWith('/api/')) {
+  // Also bypass cache for JS files to always get fresh versions
+  if (url.pathname.startsWith('/api/') || url.pathname.match(/\.js(\?.*)?$/)) {
     event.respondWith(fetch(event.request));
     return;
   }
@@ -96,7 +50,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Never cache JS files — they must always be fresh to pick up bug fixes and timeout changes
+        // Never cache JS files or PDF static resources
         if (response.status === 200 && !url.pathname.includes('/pdf/') && !url.pathname.match(/\.js(\?.*)?$/)) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -111,8 +65,8 @@ self.addEventListener('fetch', (event) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // Optional: Return a fallback offline page here if neither network nor cache has the resource
         });
       })
   );
 });
+

@@ -459,10 +459,12 @@ onIndexUpdated(async () => {
 //   - If no X-Forwarded-For at all → trust the raw socket address
 function isLocalhostConnection(req) {
   const LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+  const rawIp = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
 
   // 1. Check X-Forwarded-For (set by tunnel providers like ngrok, Cloudflare Tunnel, etc.)
+  // Secure check: Only trust X-Forwarded-For if the raw connection itself is local (from the tunnel proxy client)
   const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) {
+  if (forwarded && LOCAL_IPS.has(rawIp)) {
     // The header may contain a comma-separated list; the first entry is the real client IP
     const clientIp = forwarded.split(',')[0].trim();
     const cleanClient = clientIp.replace(/^::ffff:/, '');
@@ -474,8 +476,7 @@ function isLocalhostConnection(req) {
     return true;
   }
 
-  // 2. No forwarding header → trust the raw socket address
-  const rawIp = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+  // 2. No forwarding header or not from local socket (trust the raw socket address)
   if (LOCAL_IPS.has(rawIp)) return true;
 
   // 3. Also match the machine's own LAN interfaces (e.g. direct LAN access without proxy)
