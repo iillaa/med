@@ -5,8 +5,20 @@ on:
     branches:
       - android-app
       - light-android
-  workflow_dispatch:
+      - audit-project
 
+  # Enable manual triggering
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+          
 jobs:
   build:
     runs-on: ubuntu-latest
