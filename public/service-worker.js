@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-cat-v2';
+const CACHE_NAME = 'dr-cat-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -8,15 +8,7 @@ const ASSETS_TO_CACHE = [
   '/css/sidebar.css',
   '/css/workspace.css',
   '/css/modal.css',
-  '/css/variables.css',
-  '/js/main.js',
-  '/js/api.js',
-  '/js/state.js',
-  '/js/utils.js',
-  '/js/components/sidebar.js',
-  '/js/components/workspace.js',
-  '/js/components/dashboard.js',
-  '/js/components/quiz.js'
+  '/css/variables.css'
 ];
 
 // Install Service Worker and Cache App Shell Assets
@@ -25,6 +17,53 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     }).then(() => self.skipWaiting())
+  );
+});
+
+// Activate Service Worker and clear old caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Intercept requests
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // Always bypass cache for JS files and API calls
+  if (url.pathname.startsWith('/api/') || url.pathname.match(/\.js(\?.*)?$/)) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Network-First strategy for static assets only
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        if (response.status === 200 && !url.pathname.includes('/pdf/')) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+        });
+      })
   );
 });
 
@@ -57,8 +96,8 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cache newly requested static resources on the fly (except PDFs)
-        if (response.status === 200 && !url.pathname.includes('/pdf/')) {
+        // Never cache JS files — they must always be fresh to pick up bug fixes and timeout changes
+        if (response.status === 200 && !url.pathname.includes('/pdf/') && !url.pathname.match(/\.js(\?.*)?$/)) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);

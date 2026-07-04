@@ -12,7 +12,7 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 
 ### 2. Localhost Verification via Raw Sockets
 * **Choice**: Locking the login route by matching `req.socket.remoteAddress` and evaluating proxy headers (`X-Forwarded-For`).
-* **Benefit**: Guarantees that remote users accessing the app via port-forwarding (e.g., ngrok tunnels) cannot access the admin login page or brute-force administrative credentials.
+* **Benefit**: Guarantees that remote users accessing the app via port-forwarding (e.g., tunnel tunnels) cannot access the admin login page or brute-force administrative credentials.
 
 ### 3. Frozen Startup Connection State
 * **Choice**: Reading connection state once at load time (`state.isOnlineAtStartup = navigator.onLine`).
@@ -39,8 +39,8 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Solution**: Bundle resources into the application assets folder during development compilation, or fetch files through Capacitor filesystem modules.
 
 ### 5. Ngrok HTML Interception in AJAX Calls
-* **Problem**: When accessing the server remotely via an ngrok public tunnel, browsers without existing cookies or with strict privacy shield configurations (e.g. Brave, Firefox Private) intercept AJAX JSON calls and receive the ngrok HTML landing warning page. Parsing this HTML as JSON throws SyntaxErrors (unexpected '<') and breaks application startup (empty list rendering).
-* **Solution**: Updated `getHeaders()` to check if `window.location.hostname` contains `ngrok` dynamically. This automatically injects the `ngrok-skip-browser-warning: true` header to bypass the warning for all browser/app users.
+* **Problem**: When accessing the server remotely via an tunnel public tunnel, browsers without existing cookies or with strict privacy shield configurations (e.g. Brave, Firefox Private) intercept AJAX JSON calls and receive the tunnel HTML landing warning page. Parsing this HTML as JSON throws SyntaxErrors (unexpected '<') and breaks application startup (empty list rendering).
+* **Solution**: Updated `getHeaders()` to check if `window.location.hostname` contains `tunnel` dynamically. This automatically injects the `tunnel-skip-browser-warning: true` header to bypass the warning for all browser/app users.
 
 ### 6. Misaligned Closing Elements causing UI Leaks
 * **Problem**: Misplaced closing `</div>` tags in the HTML can break layout containers. If an admin-only block is closed too early, succeeding admin components spill outside the container and bypass the admin state check, rendering visible to ordinary guest users.

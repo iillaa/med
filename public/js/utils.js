@@ -192,23 +192,26 @@ export function parseSummaryMarkdown(text) {
     const lines = html.split('\n');
     let inTable = false;
     let tableHtml = '<table>';
+    let isFirstRow = true;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line.startsWith('|') && line.endsWith('|')) {
         if (!inTable) {
           inTable = true;
+          isFirstRow = true;
         }
         // Skip separator line | :--- | :--- |
         if (line.includes('---')) continue;
 
         const cells = line.split('|').slice(1, -1).map(c => c.trim());
+        const cellTag = isFirstRow ? 'th' : 'td';
         tableHtml += '<tr>';
         cells.forEach(cell => {
-          const cellTag = tableHtml.includes('<tr><tr>') ? 'td' : 'th'; // First row is header
           tableHtml += `<${cellTag}>${cell}</${cellTag}>`;
         });
         tableHtml += '</tr>';
+        isFirstRow = false;
       } else {
         if (inTable) {
           inTable = false;
@@ -741,5 +744,24 @@ export async function runSuggestionWithUI(submitFn, suggestionData, successAlert
     alert("Une erreur inattendue est survenue lors de l'envoi.");
     return false;
   }
+}
+
+/**
+ * Set a button into loading state (spinner + disabled) and returns a restore function.
+ * @param {HTMLElement} btn - The button element
+ * @param {string} [originalHTML] - Optional original innerHTML to restore later
+ * @returns {function} restore function to call when loading ends
+ */
+export function setButtonLoading(btn, originalHTML) {
+  if (!btn) return () => {};
+  const saved = originalHTML || btn.innerHTML;
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.innerHTML = `<span class="btn-spinner"></span> ${saved.replace(/<i class="fa-solid[^"]*"[^>]*><\/i>\s*/, '')}`;
+  return () => {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.innerHTML = saved;
+  };
 }
 

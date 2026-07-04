@@ -1,6 +1,6 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
-import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI } from '../utils.js';
+import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading } from '../utils.js';
 
 // DOM Elements
 let workspace, welcomeScreen;
@@ -122,6 +122,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   if (saveNotesBtn) {
     saveNotesBtn.addEventListener('click', () => {
       if (!state.activeCat) return;
+      const restore = setButtonLoading(saveNotesBtn, '<i class="fa-solid fa-floppy-disk"></i> Sauvegarder');
+      
       state.activeCat.notes = notesInput.value;
       
       const progress = getLocalProgress();
@@ -135,12 +137,15 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         saveIndicator.classList.remove('show');
       }, 2500);
 
-      // Remind user to back up their notes via export
-      showToast(
-        'Notes sauvegardées localement. Exportez régulièrement vos données depuis le <strong>tableau de bord</strong> pour les sécuriser.',
-        'fa-cloud-arrow-up',
-        6000
-      );
+      // Brief delay so the user sees the spinner even on fast local saves
+      setTimeout(() => {
+        restore();
+        showToast(
+          'Notes sauvegardées localement. Exportez régulièrement vos données depuis le <strong>tableau de bord</strong> pour les sécuriser.',
+          'fa-cloud-arrow-up',
+         6000
+        );
+      }, 400);
     });
   }
 
@@ -160,7 +165,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   // Print CAT Button
   const printCatBtn = document.getElementById('print-cat-btn');
   if (printCatBtn) {
-    printCatBtn.addEventListener('click', () => {
+    printCatBtn.addEventListener('click', async () => {
       if (!state.activeCat) return;
 
       // Set Date
@@ -213,13 +218,49 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         if (notesSec) notesSec.style.display = 'none';
       }
 
-      // Fire print (show informative toast in Capacitor offline app since native print is unsupported)
-      if (api.isOfflineApp) {
-        showToast("L'impression n'est pas prise en charge sur l'application mobile. Utilisez la version web pour imprimer.", "fa-circle-info", 4500);
+      // Fire print with fallbacks for mobile/Capacitor
+      if (typeof window.Capacitor !== 'undefined' || api.isOfflineApp) {
+        // Mobile: offer copy-to-clipboard as fallback
+        const text = buildPrintableText(state.activeCat);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            showToast("Texte copié dans le presse-papier. Vous pouvez le coller ailleurs.", "fa-clipboard-check", 4000);
+          } catch (_) {
+            showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
+          }
+        } else {
+          showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
+        }
       } else {
         window.print();
       }
     });
+  }
+
+  // Build a plain-text version of the CAT for clipboard/export
+  function buildPrintableText(cat) {
+    const lines = [
+      `Dr.CAT — ${cat.id}. ${cat.title}`,
+      `Catégorie : ${cat.category}`,
+      '-------------------------------------------'
+    ];
+    if (cat.red_flags && cat.red_flags.trim()) {
+      lines.push(`\nRED FLAGS:\n${cat.red_flags}`);
+    }
+    const summary = cat.customSummary || cat.summary;
+    if (summary && summary.trim()) {
+      lines.push(`\nCONDUCTE À TENIR:\n${summary}`);
+    }
+    const prescription = cat.customOrdonnance || cat.ordonnance;
+    if (prescription && prescription.trim()) {
+      lines.push(`\nORDONNANCE TYPE:\n${prescription}`);
+    }
+    if (cat.notes && cat.notes.trim()) {
+      lines.push(`\nNOTES:\n${cat.notes}`);
+    }
+    lines.push(`\nLe : ${new Date().toLocaleDateString('fr-FR')}`);
+    return lines.join('\n');
   }
 
   // Summary Edit Actions
@@ -243,31 +284,27 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       if (!state.activeCat) return;
       const newSummary = summaryEditor.value;
 
-      if (state.isAdmin) {
-        try {
+      const restore = setButtonLoading(saveSummaryBtn);
+
+      try {
+        if (state.isAdmin) {
           const result = await api.saveCatDataToServer(state.activeCat.id, { summary: newSummary });
           if (result.success) {
             state.activeCat.summary = newSummary;
             renderSummary(newSummary);
-            alert("Synthèse mise à jour avec succès !");
+            showToast("Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
           } else {
             alert("Erreur: " + result.error);
           }
-        } catch (err) {
-          console.error(err);
-          if (window.handleAdminError && await window.handleAdminError(err)) {
+        } else {
+          const confirmSave = confirm(
+            "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
+          );
+          if (!confirmSave) {
+            restore();
             return;
           }
-          alert("Erreur lors de la sauvegarde.");
-        }
-      } else {
-        // Confirmation dialog for suggestions
-        const confirmSave = confirm(
-          "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
-        );
-        if (!confirmSave) return;
 
-        try {
           await runSuggestionWithUI(
             api.submitSuggestion,
             {
@@ -277,10 +314,16 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             },
             "Votre proposition de modification a été envoyée à l'administrateur pour validation."
           );
-        } catch (err) {
-          console.error(err);
-          alert("Erreur lors de l'envoi de la proposition.");
         }
+      } catch (err) {
+        console.error(err);
+        if (window.handleAdminError && await window.handleAdminError(err)) {
+          restore();
+          return;
+        }
+        alert("Erreur lors de la sauvegarde.");
+      } finally {
+        restore();
       }
 
       summaryView.style.display = 'block';
@@ -336,31 +379,27 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       if (!state.activeCat) return;
       const newOrdonnance = prescriptionEditor.value;
 
-      if (state.isAdmin) {
-        try {
+      const restore = setButtonLoading(savePrescriptionBtn);
+
+      try {
+        if (state.isAdmin) {
           const result = await api.saveCatDataToServer(state.activeCat.id, { ordonnance: newOrdonnance });
           if (result.success) {
             state.activeCat.ordonnance = newOrdonnance;
             renderPrescription(newOrdonnance);
-            alert("Ordonnance type mise à jour avec succès !");
+            showToast("Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
           } else {
             alert("Erreur: " + result.error);
           }
-        } catch (err) {
-          console.error(err);
-          if (window.handleAdminError && await window.handleAdminError(err)) {
+        } else {
+          const confirmSave = confirm(
+            "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
+          );
+          if (!confirmSave) {
+            restore();
             return;
           }
-          alert("Erreur lors de la sauvegarde.");
-        }
-      } else {
-        // Confirmation dialog for suggestions
-        const confirmSave = confirm(
-          "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
-        );
-        if (!confirmSave) return;
 
-        try {
           await runSuggestionWithUI(
             api.submitSuggestion,
             {
@@ -370,10 +409,16 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             },
             "Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation."
           );
-        } catch (err) {
-          console.error(err);
-          alert("Erreur lors de l'envoi de la proposition.");
         }
+      } catch (err) {
+        console.error(err);
+        if (window.handleAdminError && await window.handleAdminError(err)) {
+          restore();
+          return;
+        }
+        alert("Erreur lors de la sauvegarde.");
+      } finally {
+        restore();
       }
 
       wsPrescription.style.display = 'block';
@@ -495,12 +540,10 @@ export function selectCat(cat, preserveTab = false) {
   const quizScreen = document.getElementById('quiz-screen');
   if (quizScreen) quizScreen.style.display = 'none';
 
-  // Toggle "Retour au Quiz" button if a quiz is in progress and we are viewing the quiz question's CAT
+  // Toggle "Retour au Quiz" button if we are viewing a CAT referenced from the quiz
   const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
   if (backToQuizBtn) {
     if (state.quizSession && 
-        state.quizSession.questions && 
-        state.quizSession.questions.length > 0 && 
         state.quizSession.quizViewingCatId === cat.id) {
       backToQuizBtn.style.display = 'inline-flex';
     } else {
@@ -852,6 +895,7 @@ async function performPdfSearch() {
   const query = pdfContentSearchInput.value.trim();
   if (!query) return;
 
+  const restoreSearchBtn = setButtonLoading(pdfContentSearchBtn, '<i class="fa-solid fa-magnifying-glass"></i> Rechercher');
   pdfSearchLoading.style.display = 'flex';
   pdfSearchResultsContainer.innerHTML = '';
 
@@ -879,11 +923,11 @@ async function performPdfSearch() {
       const regex = new RegExp(`(${escapedQuery})`, 'gi');
       const highlightedSnippet = escapedSnippet.replace(regex, '<mark>$1</mark>');
 
-      const displayTitle = res.pdf.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
+      const displayTitle = escapeHTML(res.pdf.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
                                   .replace(/^\d+锔忊儯/i, '')
                                   .replace(/馃[A-Z0-9]/g, '')
                                   .replace(/_/g, ' ')
-                                  .replace(/\.pdf$/i, '');
+                                  .replace(/\.pdf$/i, ''));
 
       resultsHtml += `
         <div class="pdf-search-result-card" data-pdf="${encodeURIComponent(res.pdf)}" data-page="${res.page}">
@@ -912,6 +956,7 @@ async function performPdfSearch() {
     pdfSearchResultsContainer.innerHTML = '<p class="text-danger text-center" style="margin-top: 20px;">Une erreur est survenue lors de la recherche.</p>';
   } finally {
     pdfSearchLoading.style.display = 'none';
+    if (restoreSearchBtn) restoreSearchBtn();
   }
 }
 

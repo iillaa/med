@@ -8,17 +8,31 @@
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#090d16">
-  <!-- Google Fonts: Outfit -->
+  <!-- Preload critical assets -->
+  <link rel="preload" href="style.css?v=18" as="style">
+  <link rel="preload" href="drcat_logo.png" as="image" type="image/png">
+  <!-- Google Fonts: Outfit with swap -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- FontAwesome Icons (non-blocking) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="style.css?v=18">
-  <!-- Capacitor native bridge script -->
-  <script src="capacitor.js"></script>
 </head>
 <body>
+  <!-- APP LOADING OVERLAY - shown during init, hidden when ready -->
+  <div id="app-loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-app); z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; transition: opacity 0.4s ease, visibility 0.4s ease;">
+    <img src="drcat_logo.png" alt="Dr.CAT" style="width: 72px; height: 72px; border-radius: 16px; object-fit: cover; animation: pulse-glow 2s ease-in-out infinite;">
+    <div style="text-align: center;">
+      <h1 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px;">Dr.CAT</h1>
+      <p style="font-size: 12px; color: var(--text-muted); margin: 0;">Rappel Clinique — Chargement...</p>
+    </div>
+    <div style="width: 120px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;">
+      <div id="app-loading-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--color-primary), #10b981); border-radius: 2px; transition: width 0.3s ease;"></div>
+    </div>
+    <div id="app-loading-msg" style="display: none; font-size: 11px; color: #f87171; text-align: center; margin-top: 8px; max-width: 260px; line-height: 1.3;"></div>
+  </div>
+
   <div class="app-container">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
@@ -261,21 +275,21 @@
                     <div id="conn-test-results" style="margin-top: 12px; display: none; font-size: 12px; flex-direction: column; gap: 6px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px;">
                       <div style="font-weight: 600; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">Résultats des tests :</div>
                       <div id="test-step-local">1. Local (localhost:3000) : <span class="status">--</span></div>
-                      <div id="test-step-remote">2. Distant (ngrok URL) : <span class="status">--</span></div>
+                       <div id="test-step-remote">2. Distant (URL configurée) : <span class="status">--</span></div>
                       <div id="test-step-wan">3. WAN (internet ping) : <span class="status">--</span></div>
                       <div id="diag-auto-analysis" style="margin-top: 6px; font-weight: 500; font-size: 11px; padding: 4px; border-radius: 4px; line-height: 1.4;"></div>
                     </div>
                   </div>
                   
-                  <!-- Section 2: Ngrok Tunnel -->
+                  <!-- Section 2: Tunnel Info -->
                   <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cloud-arrow-down"></i> Serveur Ngrok (Host)</h4>
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cloud-arrow-down"></i> Serveur Distant</h4>
                     <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                      <div>Tunnel actif : <span id="diag-ngrok-active" class="badge">--</span></div>
-                      <div>URL publique : <span id="diag-ngrok-url" style="word-break: break-all;">--</span></div>
-                      <div>Connexions : <span id="diag-ngrok-conns">--</span></div>
+                    <div>Tunnel actif : <span id="diag-tunnel-active" class="badge">--</span></div>
+                    <div>URL publique : <span id="diag-tunnel-url" style="word-break: break-all;">--</span></div>
+                    <div>Connexions : <span id="diag-tunnel-conns">--</span></div>
                     </div>
-                    <button class="action-btn" id="check-ngrok-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-arrows-rotate"></i> Vérifier le tunnel</button>
+                    <button class="action-btn" id="check-tunnel-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-arrows-rotate"></i> Vérifier le tunnel</button>
                   </div>
 
                   <!-- Section 3: Server & OS Info -->
@@ -305,8 +319,8 @@
                   <!-- Section 5: Config URL (Change URL at runtime) -->
                   <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
                     <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wrench"></i> Config Serveur Distant</h4>
-                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">Spécifiez l'adresse de votre serveur LAN ou tunnel ngrok :</div>
-                    <input type="text" id="diag-remote-url-input" placeholder="https://xxxx.ngrok-free.app" style="width: 100%; padding: 6px 10px; font-size: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); margin-bottom: 8px;">
+                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">Spécifiez l'adresse de votre serveur LAN ou tunnel :</div>
+                    <input type="text" id="diag-remote-url-input" placeholder="https://xxxx.tunnel-provider.com" style="width: 100%; padding: 6px 10px; font-size: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); margin-bottom: 8px;">
                     <button class="action-btn" id="save-remote-url-btn" style="width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder & Tester</button>
                   </div>
 
@@ -689,7 +703,7 @@
             </div>
 
             <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</label>
+              <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</div>
               <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
                   <input type="checkbox" id="quiz-type-specialty" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
@@ -934,7 +948,51 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js?v=2"></script>
+  <script>
+    (function() {
+      var started = Date.now();
+      var overlay = document.getElementById('app-loading-overlay');
+      var bar = document.getElementById('app-loading-bar');
+      var msg = document.getElementById('app-loading-msg');
+
+      function setProgress(pct) {
+        if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+      }
+      function showError(text) {
+        if (msg) msg.textContent = text;
+        if (msg) msg.style.display = 'block';
+        setProgress(100);
+      }
+
+      setProgress(2);
+
+      setTimeout(function() {
+        setProgress(8);
+        if (overlay && overlay.classList.contains('hidden')) {
+          overlay.classList.remove('hidden');
+        }
+      }, 600);
+
+      setTimeout(function() {
+        setProgress(15);
+      }, 1600);
+
+      setTimeout(function() {
+        if (overlay && !overlay.classList.contains('hidden')) {
+          showError('Chargement bloque. Verifiez la console ou reessayez.');
+        }
+      }, 20000);
+
+      window.__drCatRetry = function() {
+        if (overlay) overlay.classList.remove('hidden');
+        setProgress(3);
+        setTimeout(function() {
+          location.reload();
+        }, 300);
+      };
+    })();
+  </script>
 
 
 </body>

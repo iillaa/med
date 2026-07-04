@@ -17,17 +17,166 @@ const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 const app = express();
 const PORT = 3000;
 
+// ── Server Provider Abstraction ───────────────────────────
+// Loaded dynamically so the server can support any tunnel provider
+// without hardcoded ngrok references.
+async function loadServerProviders() {
+  try {
+    const providerPath = path.join(__dirname, 'public', 'js', 'server-providers.js');
+    const content = await fs.promises.readFile(providerPath, 'utf-8');
+    // Extract PROVIDERS array by evaluating the module source
+    const match = content.match(/export const PROVIDERS = (\[[\s\S]*?\]);/);
+    if (match) {
+      return eval('(' + match[1] + ')');
+    }
+  } catch (err) {
+    console.warn('[Providers] Failed to load provider registry, using fallback:', err.message);
+  }
+  // Fallback: minimal ngrok-only support if provider file missing
+  return [
+    {
+      id: 'ngrok',
+      urlPattern: /(^|\.)ngrok(-free)?\.(app|dev|io)$/,
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      managementPort: 4040,
+      managementPath: '/api/tunnels',
+      isDevHostname: (h) => /(^|\.)ngrok(-free)?\.(app|dev|io)$/.test(h),
+      isTunnelOrigin: (o) => o.includes('ngrok'),
+      tunnelLabel: 'Tunnel',
+    },
+    {
+      id: 'direct',
+      urlPattern: null,
+      extraHeaders: {},
+      managementPort: null,
+      managementPath: null,
+      isDevHostname: () => false,
+      isTunnelOrigin: () => false,
+      tunnelLabel: 'Serveur direct',
+    }
+  ];
+}
+
+function detectProvider(url, providers) {
+  if (!url) return providers[providers.length - 1];
+  for (const provider of providers) {
+    if (provider.urlPattern && provider.urlPattern.test(url)) {
+      return provider;
+    }
+  }
+  return providers[providers.length - 1];
+}
+
+function getProviderHeaders(provider) {
+  return provider.extraHeaders || {};
+}
+
+function getManagementEndpoint(provider) {
+  if (provider.managementPort && provider.managementPath) {
+    return { hostname: '127.0.0.1', port: provider.managementPort, path: provider.managementPath };
+  }
+  return null;
+}
+
+// Dynamic CORS origin allowlist built from configured remote URLs + provider patterns
+function buildAllowedOrigins(providers, configuredUrls) {
+  const origins = new Set([
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+  ]);
+  for (const url of configuredUrls) {
+    if (!url) continue;
+    origins.add(url);
+    const provider = detectProvider(url, providers);
+    if (provider.isTunnelOrigin) {
+      // Allow all origins matching the provider’s tunnel pattern (e.g. any .ngrok-free.app)
+      const pattern = provider.urlPattern;
+      if (pattern) {
+        // Extract the domain part from the URL
+        const urlObj = new URL(url);
+        const hostname = urlObj.hostname;
+        origins.add(hostname);
+      }
+    }
+  }
+  // Also add direct hostnames from configured URLs
+  for (const url of configuredUrls) {
+    if (!url) continue;
+    try {
+      const urlObj = new URL(url);
+      origins.add(`${urlObj.protocol}//${urlObj.hostname}`);
+    } catch (_) {}
+  }
+  return origins;
+}
+
+function isOriginAllowedDynamic(origin, allowedOrigins) {
+  if (!origin) return true;
+  if (allowedOrigins.has(origin)) return true;
+  // Check if origin matches any provider pattern
+  for (const allowed of allowedOrigins) {
+    if (allowed.includes('*')) {
+      const regex = new RegExp('^' + allowed.replace(/\*/g, '.*') + '$');
+      if (regex.test(origin)) return true;
+    }
+  }
+  return false;
+}
+
 app.use(express.json());
 
-// Enable CORS middleware for external client requests (like Capacitor WebView and remote browsers)
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  const requestedHeaders = req.headers['access-control-request-headers'];
-  res.setHeader('Access-Control-Allow-Headers', requestedHeaders || 'Content-Type, Authorization, x-admin-token, ngrok-skip-browser-warning');
+// CORS middleware — dynamically configured based on remote server URLs
+let serverProviders = [];
+let allowedOrigins = new Set();
+let configuredRemoteUrls = [];
+
+async function initializeProviders() {
+  serverProviders = await loadServerProviders();
   
+  // Load configured remote URLs
+  try {
+    const exists = await fs.promises.access(CONFIG_FILE).then(() => true).catch(() => false);
+    if (exists) {
+      const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
+      const parsed = JSON.parse(content);
+      configuredRemoteUrls = Array.isArray(parsed.urls) ? parsed.urls : (parsed.url ? [parsed.url] : []);
+      remoteServerUrl = configuredRemoteUrls[0] || '';
+      if (parsed.primaryProvider && serverProviders.find(p => p.id === parsed.primaryProvider)) {
+        console.log('[Providers] Primary provider:', parsed.primaryProvider);
+      }
+    }
+  } catch (err) {
+    console.error("Error loading remote_server_config.json:", err);
+  }
+  
+  allowedOrigins = buildAllowedOrigins(serverProviders, configuredRemoteUrls);
+  console.log('[Providers] Loaded', serverProviders.length, 'providers:', serverProviders.map(p => p.id).join(', '));
+  console.log('[Providers] Configured URLs:', configuredRemoteUrls.length > 0 ? configuredRemoteUrls : '(none)');
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowAll = !origin || isOriginAllowedDynamic(origin, allowedOrigins);
+  
+  if (allowAll) {
+    // Build allowed headers list including all provider-specific headers
+    const providerHeaders = serverProviders.flatMap(p => Object.keys(p.extraHeaders || {}));
+    const uniqueHeaders = new Set([
+      'Content-Type',
+      'Authorization',
+      'x-admin-token',
+      ...providerHeaders
+    ]);
+    
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', Array.from(uniqueHeaders).join(', '));
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
   next();
 });
@@ -219,6 +368,17 @@ async function initAdminPassword() {
 // Load databases and file indices on server startup
 async function initializeData() {
   await initAdminPassword();
+  await initializeProviders(); // Load provider registry before handling any requests
+  
+  // Ensure remote_config.js is always fresh before serving requests
+  try {
+    const buildModule = require('./build.js');
+    if (typeof buildModule.rebuildClientAssets === 'function') {
+      await buildModule.rebuildClientAssets();
+    }
+  } catch (err) {
+    console.warn('[Startup] Auto-build skipped:', err.message);
+  }
 
   // Load cats_db.json
   try {
@@ -265,23 +425,15 @@ async function initializeData() {
       const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
       const parsed = JSON.parse(content);
       remoteServerUrl = parsed.url || '';
+      if (remoteServerUrl) {
+        ALLOWED_ORIGINS.add(remoteServerUrl);
+        // Also add the ngrok tunnel URL variations
+        const urlObj = new URL(remoteServerUrl);
+        ALLOWED_ORIGINS.add(`${urlObj.protocol}//${urlObj.host}`);
+      }
     }
   } catch (err) {
     console.error("Error loading remote_server_config.json:", err);
-  }
-
-  // Generate public/js/remote_config.js dynamically for client app consumption
-  try {
-    const targetDir = path.join(__dirname, 'public', 'js');
-    await fs.promises.mkdir(targetDir, { recursive: true });
-    await fs.promises.writeFile(
-      path.join(targetDir, 'remote_config.js'),
-      `export const REMOTE_SERVER_URL = ${JSON.stringify(remoteServerUrl)};\n`,
-      'utf-8'
-    );
-    console.log(`[Config] Generated public/js/remote_config.js with URL: ${remoteServerUrl}`);
-  } catch (err) {
-    console.error("Error generating public/js/remote_config.js:", err);
   }
 }
 
@@ -308,7 +460,7 @@ onIndexUpdated(async () => {
 function isLocalhostConnection(req) {
   const LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
-  // 1. Check X-Forwarded-For (set by ngrok, nginx, etc.)
+  // 1. Check X-Forwarded-For (set by tunnel providers like ngrok, Cloudflare Tunnel, etc.)
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
     // The header may contain a comma-separated list; the first entry is the real client IP
@@ -341,7 +493,7 @@ function isLocalhostConnection(req) {
 // Helper to check if request is authenticated as admin using token
 function isAdminRequest(req) {
   const token = req.headers['x-admin-token'];
-  return token && activeTokens.has(token);
+  return Boolean(token && activeTokens.has(token));
 }
 
 // Serve PDFs statically with aggressive 7-day caching to save mobile data
@@ -362,14 +514,37 @@ app.get('/api/is-local', (req, res) => {
 });
 
 // Admin login route (only allowed from loopback interface)
+// Rate limited: max 5 failed attempts per 5 minutes per IP
+const loginAttempts = new Map(); // ip -> { count, lastAttempt }
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_RATE_LIMIT_MS = 5 * 60 * 1000;
+
 app.post('/api/login', (req, res) => {
   if (!isLocalhostConnection(req)) {
     return res.status(403).json({ error: "Connexion interdite depuis un appareil distant." });
   }
+
+  const ip = req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const attempt = loginAttempts.get(ip);
+
+  if (attempt && attempt.count >= MAX_LOGIN_ATTEMPTS && (now - attempt.lastAttempt) < LOGIN_RATE_LIMIT_MS) {
+    return res.status(429).json({ error: "Trop de tentatives. Réessayez dans 5 minutes." });
+  }
+
   const { password } = req.body;
   if (!password || password !== adminPassword) {
+    if (attempt) {
+      attempt.count++;
+      attempt.lastAttempt = now;
+    } else {
+      loginAttempts.set(ip, { count: 1, lastAttempt: now });
+    }
     return res.status(401).json({ error: "Mot de passe incorrect." });
   }
+
+  // Success — clear rate limit for this IP
+  loginAttempts.delete(ip);
   const token = crypto.randomBytes(16).toString('hex');
   activeTokens.add(token);
   res.json({ success: true, token });
@@ -969,71 +1144,56 @@ app.post('/api/diagnostics/remote-server-url', async (req, res) => {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
   try {
-    const { url } = req.body;
-    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-      return res.status(400).json({ error: "URL must start with http:// or https://" });
-    }
-
-    remoteServerUrl = url || '';
+    const { urls } = req.body;
+    let urlList = [];
     
-    await safeWriteJsonAsync(CONFIG_FILE, { url: remoteServerUrl });
+    if (Array.isArray(urls)) {
+      urlList = urls.filter(u => !u || (u.startsWith('http://') || u.startsWith('https://')));
+    } else if (typeof urls === 'string' && urls.trim()) {
+      urlList = [urls.trim()];
+    }
+    
+    remoteServerUrl = urlList[0] || '';
+    configuredRemoteUrls = urlList;
+    
+    await safeWriteJsonAsync(CONFIG_FILE, { urls: urlList });
 
-    // Also update remote_config.js for client bundles
+    // Also update remote_config.js for client bundles (primary URL only for backward compat)
     await fs.promises.writeFile(
       path.join(__dirname, 'public', 'js', 'remote_config.js'),
-      `export const REMOTE_SERVER_URL = ${JSON.stringify(remoteServerUrl)};\n`,
+      `export const REMOTE_SERVER_URL = ${JSON.stringify(remoteServerUrl)};\nexport const REMOTE_SERVER_URLS = ${JSON.stringify(configuredRemoteUrls)};\n`,
       'utf-8'
     );
 
-    res.json({ success: true, url: remoteServerUrl });
+    res.json({ success: true, urls: configuredRemoteUrls });
   } catch (err) {
     console.error("Update remote URL error:", err);
     res.status(500).json({ error: "Failed to update remote server URL" });
   }
 });
 
-app.get('/api/diagnostics/ngrok-tunnels', async (req, res) => {
+app.get('/api/diagnostics/tunnel-info', async (req, res) => {
   if (!isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
-  try {
-    const http = require('http');
-    const getTunnels = () => {
-      return new Promise((resolve, reject) => {
-        const reqOpts = {
-          hostname: '127.0.0.1',
-          port: 4040,
-          path: '/api/tunnels',
-          method: 'GET',
-          timeout: 2000
-        };
-
-        const pingReq = http.request(reqOpts, (pingRes) => {
-          let rawData = '';
-          pingRes.on('data', chunk => rawData += chunk);
-          pingRes.on('end', () => {
-            try {
-              resolve(JSON.parse(rawData));
-            } catch (err) {
-              reject(err);
-            }
-          });
-        });
-
-        pingReq.on('error', (err) => reject(err));
-        pingReq.on('timeout', () => {
-          pingReq.destroy();
-          reject(new Error("Timeout"));
-        });
-        pingReq.end();
-      });
+  
+  // Return info about all configured tunnel providers
+  const providerInfo = configuredRemoteUrls.map(url => {
+    const provider = detectProvider(url, serverProviders);
+    const mgmt = getManagementEndpoint(provider);
+    return {
+      url,
+      providerId: provider.id,
+      providerName: provider.name,
+      tunnelLabel: provider.tunnelLabel,
+      managementEndpoint: mgmt
     };
-
-    const tunnelsData = await getTunnels();
-    res.json(tunnelsData);
-  } catch (err) {
-    res.status(502).json({ error: "ngrok not running on localhost:4040" });
-  }
+  });
+  
+  res.json({ 
+    providers: serverProviders.map(p => ({ id: p.id, name: p.name })),
+    configuredTunnels: providerInfo
+  });
 });
 
 app.get('/api/performance/server-metrics', (req, res) => {

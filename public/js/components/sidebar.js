@@ -104,6 +104,24 @@ export function renderCatList(cats, onSelectCat) {
   if (!catList) return;
 
   catList.innerHTML = '';
+  
+  if (cats.length === 0) {
+    const emptyLi = document.createElement('li');
+    emptyLi.className = 'empty-state';
+    emptyLi.innerHTML = `
+      <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
+        <i class="fa-solid fa-filter-circle-xmark" style="font-size: 28px; margin-bottom: 10px; display: block; opacity: 0.6;"></i>
+        <span style="font-size: 13px; line-height: 1.5;">Aucune fiche ne correspond à vos filtres actuels.</span>
+      </div>
+    `;
+    catList.appendChild(emptyLi);
+    if (window.perf) {
+      window.perf.endMeasure('sidebar.renderCatList');
+      window.perf.recordMilestone('sidebarRendered');
+    }
+    return;
+  }
+
   cats.forEach(cat => {
     const li = document.createElement('li');
     li.className = `cat-item ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;

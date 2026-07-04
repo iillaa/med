@@ -2,20 +2,20 @@
 
 **Feature**: Diagnostics & Logging Tools Panel (Phase 4, Priority P0)  
 **Audience**: AI coding agent + human developer  
-**Goal**: Build an admin-only diagnostics interface that helps diagnose why the mobile app cannot connect to the ngrok server, fails to send suggestions, and fails to receive database updates.
+**Goal**: Build an admin-only diagnostics interface that helps diagnose why the mobile app cannot connect to the remote server, fails to send suggestions, and fails to receive database updates.
 
 ---
 
 ## 1. Product Mission
 
-The user has a medical review app (Dr. CAT) running on Termux/Android. The app works perfectly on localhost, but when trying to use it through an ngrok tunnel from another device, it fails silently:
+The user has a medical review app (Dr. CAT) running on Termux/Android. The app works perfectly on localhost, but when trying to use it through a tunnel from another device, it fails silently:
 - Suggestions submitted by non-admin users don't reach the server
 - Database updates don't sync back to clients
 - The app appears to be "offline" even when internet is available
 
 The Diagnostics Panel exists to surface **why** these failures happen, by exposing:
 1. What the app thinks its connection state is (online/offline/standalone)
-2. Whether the ngrok tunnel is actually reachable from the device
+2. Whether the tunnel is actually reachable from the device
 3. What errors are occurring in the console/logs
 4. Whether the remote server URL is configured correctly
 5. Server-side health (database size, PDF index status, memory)
@@ -28,11 +28,11 @@ The panel must allow the user to **copy logs** so they can paste them into a cha
 
 > As an admin user,  
 > I want to open a diagnostics panel from the dashboard,  
-> So that I can see exactly why my mobile app cannot connect to my ngrok server, copy the error logs, and fix the configuration.
+> So that I can see exactly why my mobile app cannot connect to the remote server, copy the error logs, and fix the configuration.
 
 **Acceptance Criteria**:
 - The panel is only visible to admin users (same gating as the moderation panel)
-- The panel shows connection status, ngrok tunnel status, server stats, DB stats, and console logs
+- The panel shows connection status, tunnel status, server stats, DB stats, and console logs
 - The user can manually trigger a connectivity test and see step-by-step results
 - The user can copy all visible logs to clipboard with one click
 - The user can change the REMOTE_SERVER_URL at runtime and test it immediately
@@ -52,21 +52,21 @@ Show the current detected state of the app's connectivity at a glance:
 ### 3.2 Manual Connectivity Test ("Tester la connexion")
 A button that runs a sequence of pings and shows results for each step:
 1. Ping the local server (if running on same device): `GET /api/search-status`
-2. Ping the configured remote server (ngrok): `GET <remote-url>/api/search-status`
+2. Ping the configured remote server: `GET <remote-url>/api/search-status`
 3. Test general WAN connectivity: `HEAD https://httpbin.org/status/200`
 4. Show the user-agent string to identify if running in Capacitor WebView, Chrome, etc.
 
 Each step shows a status badge (success/failure/pending) and the raw result or error message.
 
-**Critical for ngrok debugging**: If step 2 fails with a CORS error, the user knows to add CORS headers on their ngrok server. If it fails with timeout, the tunnel likely expired.
+**Critical for tunnel debugging**: If step 2 fails with a CORS error, the user knows to add CORS headers on their server. If it fails with timeout, the tunnel likely expired.
 
-### 3.3 Ngrok Tunnel Inspection
-Specific section for ngrok:
-- Show the configured ngrok public URL
-- Try to reach ngrok's local management API (`http://localhost:4040/api/tunnels`) **from the server side** to confirm the tunnel is still alive on the host
+### 3.3 Tunnel Inspection
+Specific section for the configured tunnel provider:
+- Show the configured public URL
+- Try to reach the provider's local management API **from the server side** to confirm the tunnel is still alive on the host
 - Show the tunnel status (active, expired, not running)
 
-This requires a new backend endpoint because the browser cannot reach `localhost:4040` on the server machine.
+This requires a new backend endpoint because the browser cannot reach the management API on the server machine.
 
 ### 3.4 Server System Info
 Show backend health:
@@ -175,7 +175,7 @@ Status values: `"green"` (≥90% pages have text), `"orange"` (≥5%), `"red"` (
 **Auth**: Admin only  
 **Returns**:
 ```json
-{ "url": "https://xxxx.ngrok-free.app" }
+{ "url": "https://xxxx.tunnel-provider.com" }
 ```
 If no URL is configured, returns `{ "url": "" }`
 
@@ -183,12 +183,12 @@ If no URL is configured, returns `{ "url": "" }`
 **Auth**: Admin only  
 **Request body**:
 ```json
-{ "url": "https://xxxx.ngrok-free.app" }
+{ "url": "https://xxxx.tunnel-provider.com" }
 ```
 **Validation**: URL must start with `http://` or `https://`  
 **Returns**:
 ```json
-{ "success": true, "url": "https://xxxx.ngrok-free.app" }
+{ "success": true, "url": "https://xxxx.tunnel-provider.com" }
 ```
 **Error responses**:
 - `400`: `{ "error": "URL must start with http:// or https://" }`
@@ -196,15 +196,15 @@ If no URL is configured, returns `{ "url": "" }`
 
 **Persistence**: The URL should be saved to a local config file (e.g., `remote_server_config.json` in project root, gitignored) so it survives server restarts. The file format is `{ "url": "..." }`.
 
-### 4.6 `GET /api/diagnostics/ngrok-tunnels`
+### 4.6 `GET /api/diagnostics/tunnel-info`
 **Auth**: Admin only  
-**Purpose**: Proxies the ngrok local management API from the server machine, so the mobile app can check if the tunnel is alive.  
+**Purpose**: Proxies the tunnel provider's local management API from the server machine, so the mobile app can check if the tunnel is alive.  
 **Returns** (success):
 ```json
 {
   "tunnels": [
     {
-      "public_url": "https://xxxx.ngrok-free.app",
+      "public_url": "https://xxxx.tunnel-provider.com",
       "proto": "https",
       "config": { "addr": "3000" },
       "metrics": { "conns": { "count": 5, "gauge": 1 } }
@@ -212,11 +212,11 @@ If no URL is configured, returns `{ "url": "" }`
   ]
 }
 ```
-**Returns** (ngrok not running):
+**Returns** (tunnel not running):
 ```json
-{ "error": "ngrok not running on localhost:4040" }
+{ "error": "tunnel provider not running" }
 ```
-**Implementation note**: The endpoint should make an HTTP request to `http://localhost:4040/api/tunnels` from the server process. If the connection is refused or times out, return the error JSON above. Do not crash the server if ngrok is not running.
+**Implementation note**: The endpoint should make an HTTP request to the provider's management API from the server process. If the connection is refused or times out, return the error JSON above. Do not crash the server if the tunnel provider is not running.
 
 ---
 
@@ -253,9 +253,9 @@ A new component file responsible for the diagnostics panel. It should:
 - Manage all DOM references for the panel
 - Handle the toggle (show/hide) and start/stop console capture
 - Fetch data from the new API endpoints and render it
-- Handle button clicks (ping test, ngrok check, save URL, copy logs, clear logs)
+- Handle button clicks (ping test, tunnel check, save URL, copy logs, clear logs)
 - Render console logs with timestamps and severity badges
-- Generate a simple automatic diagnosis based on ping results (e.g., "Ngrok tunnel may have expired — restart ngrok on your server")
+- Generate a simple automatic diagnosis based on ping results (e.g., "Tunnel may have expired — restart the tunnel on your server")
 
 **Integration point in `main.js`**:
 ```javascript
@@ -301,26 +301,26 @@ The panel should look like this when expanded:
 │  ┌─ Connexion ─────────────────────────────────┐ │
 │  │ Navigator.onLine : ✅ En ligne              │ │
 │  │ Mode détecté   : Mode serveur               │ │
-│  │ URL distant    : https://xxxx.ngrok-free.app │ │
+│  │ URL distant    : https://xxxx.tunnel-provider.com │ │
 │  │ Token admin    : ✅ Serveur                  │ │
 │  │                                              │ │
 │  │ [⚡ Tester la connexion]                     │ │
 │  │                                              │ │
 │  │ Step 1: localhost:3000 → ✅ 200 OK           │ │
-│  │ Step 2: ngrok URL    → ❌ CORS error         │ │
+│  │ Step 2: remote URL  → ❌ CORS error         │ │
 │  │ Step 3: WAN          → ✅ Accessible         │ │
 │  │                                              │ │
-│  │ 🔍 Diagnostic: Le serveur ngrok bloque les   │ │
+│  │ 🔍 Diagnostic: Le serveur distant bloque les  │ │
 │  │ requêtes CORS. Ajoutez les en-têtes CORS sur │ │
 │  │ votre serveur.                               │ │
 │  └──────────────────────────────────────────────┘ │
 │                                                  │
-│  ┌─ Serveur Ngrok ─────────────────────────────┐ │
+│  ┌─ Serveur Distant ─────────────────────────────┐ │
 │  │ Tunnel actif : ✅ Actif                      │ │
-│  │ URL publique : https://xxxx.ngrok-free.app   │ │
+│  │ URL publique : https://xxxx.tunnel-provider.com   │ │
 │  │                                              │ │
 │  │ [🔄 Vérifier le tunnel]                      │ │
-│  │ L'API ngrok est accessible sur localhost:4040│ │
+│  │ L'API du tunnel est accessible sur localhost:4040│ │
 │  └──────────────────────────────────────────────┘ │
 │                                                  │
 │  ┌─ Serveur Local ─────────────────────────────┐ │
@@ -342,7 +342,7 @@ The panel should look like this when expanded:
 │  └──────────────────────────────────────────────┘ │
 │                                                  │
 │  ┌─ Serveur Distant ───────────────────────────┐ │
-│  │ URL: [https://xxxx.ngrok-free.app      ]     │ │
+│  │ URL: [https://xxxx.tunnel-provider.com      ]     │ │
 │  │ [💾 Sauvegarder]                             │ │
 │  │ Statut: ✅ URL mise à jour et testée         │ │
 │  └──────────────────────────────────────────────┘ │
@@ -415,10 +415,10 @@ When this feature is complete, the user should be able to:
 
 1. Open the app as admin on their Android device
 2. Open the Diagnostics Panel from the dashboard
-3. Click "Tester la connexion" and see exactly which step fails (localhost, ngrok, or WAN)
-4. See a human-readable diagnosis like "CORS bloqué" or "Tunnel ngrok expiré"
+3. Click "Tester la connexion" and see exactly which step fails (localhost, remote server, or WAN)
+4. See a human-readable diagnosis like "CORS bloqué" or "Tunnel expiré"
 5. Click "Copier" on the logs section and paste the full log into a chat with their AI agent
-6. Change the ngrok URL in the panel, save it, and see the app immediately use the new URL without reloading
-7. Confirm via the ngrok section that the tunnel is still alive on the host machine
+6. Change the remote server URL in the panel, save it, and see the app immediately use the new URL without reloading
+7. Confirm via the tunnel section that the tunnel is still alive on the host machine
 
 If all 7 are true, the feature is done.

@@ -8,7 +8,7 @@ Ce document contient l'analyse structurelle des changements appliqués aujourd'h
 ## 📋 Table des Matières
 1. [Synthèse Globale des Commits](#1-synthèse-globale-des-commits)
 2. [Analyse Détaillée par Axe de Modification](#2-analyse-détaillée-par-axe-de-modification)
-   - [Axe A : Correction de la Synchronisation des Propositions (CORS / Ngrok)](#axe-a--correction-de-la-synchronisation-des-propositions-cors--ngrok)
+    - [Axe A : Correction de la Synchronisation des Propositions (CORS / tunnel)](#axe-a--correction-de-la-synchronisation-des-propositions-cors--tunnel)
    - [Axe B : Module de Révision & d'Édition Directe (Moderation Flow)](#axe-b--module-de-révision--dédition-directe-moderation-flow)
    - [Axe C : Refactoring de l'Interface en Centre de Contrôle Onglet](#axe-c--refactoring-de-linterface-en-centre-de-contrôle-onglet)
    - [Axe D : Profilage en Arrière-plan Continu (Continuous Performance Monitor)](#axe-d--profilage-en-arrière-plan-continu-continuous-performance-monitor)
@@ -34,7 +34,7 @@ gitGraph
 
 | Commit ID | Type | Description Technique | Impact Client |
 | :--- | :--- | :--- | :--- |
-| **`7f8d384`** | `fix` | Routage des appels API de synchronisation des modifications vers les URL relatives pour les clients web. | Rétablissement de la synchronisation des suggestions des testeurs externes (invités via Ngrok). |
+| **`7f8d384`** | `fix` | Routage des appels API de synchronisation des modifications vers les URL relatives pour les clients web. | Rétablissement de la synchronisation des suggestions des testeurs externes (invités via tunnel). |
 | **`a4d7ca3`** | `feat` | Création de la modale de révision dynamique et de l'endpoint d'édition des suggestions en attente. | Capacité pour l'administrateur de relire, éditer et peaufiner les propositions avant de les valider en base. |
 | **`cf7a9db`** | `refactor` | Consolidation des panels admin (Modération, Diagnostics, Performances) en un Centre de Contrôle unique à onglets. | Interface épurée, suppression du scroll encombrant sur le tableau de bord. |
 | **`3c3262f`** | `perf` | Persistance en arrière-plan du collecteur de frames (`FrameMonitor`) dès le chargement du site. | Mesure continue des FPS et des saccades (Janks) lors de la navigation complète de l'application. |
@@ -45,8 +45,8 @@ gitGraph
 
 ## 2. Analyse Détaillée par Axe de Modification
 
-### 🛠️ Axe A : Correction de la Synchronisation des Propositions (CORS / Ngrok)
-- **Problématique d'origine** : Les utilisateurs invités accédant au site web par le tunnel public Ngrok (`https://*.ngrok-free.dev`) ne voyaient pas leurs suggestions remonter vers l'administrateur. Le code client vérifiait `hasRemoteServer()`. N'ayant pas de variable `localStorage` configurée pour l'URL distante, la fonction renvoyait `false`. L'application considérait à tort le navigateur comme une application mobile hors-ligne et stockait les suggestions localement dans le `localStorage` de l'invité.
+### 🛠️ Axe A : Correction de la Synchronisation des Propositions (CORS / tunnel)
+- **Problématique d'origine** : Les utilisateurs invités accédant au site web par un tunnel public (`https://*.ngrok-free.dev`) ne voyaient pas leurs suggestions remonter vers l'administrateur. Le code client vérifiait `hasRemoteServer()`. N'ayant pas de variable `localStorage` configurée pour l'URL distante, la fonction renvoyait `false`. L'application considérait à tort le navigateur comme une application mobile hors-ligne et stockait les suggestions localement dans le `localStorage` de l'invité.
 - **Solution Senior** : Refactoring des méthodes de requêtes serveur (`api.js`) en ajoutant la condition `!isOfflineApp || hasRemoteServer()`.
   > [!NOTE]
   > Dans un navigateur web traditionnel, `isOfflineApp` est `false`. L'application interroge désormais directement le serveur via son chemin d'origine relatif (ex: `/api/suggestions`), assurant que toutes les actions des invités sont bien inscrites en base serveur.

@@ -1,3 +1,6 @@
 {
-  "url": "https://rendition-duchess-dry.ngrok-free.dev"
+  "primaryProvider": "ngrok",
+  "urls": [
+    "https://rendition-duchess-dry.ngrok-free.dev"
+  ]
 }
