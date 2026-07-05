@@ -200,9 +200,8 @@ async function bootstrapApp() {
           "Attention : Cette nouvelle fiche ne sera pas ajoutée directement. Elle sera envoyée à l'administrateur du site pour relecture et validation avant d'être intégrée.\n\nSouhaitez-vous envoyer cette proposition ?"
         );
         if (!confirmSubmit) return;
- 
         try {
-          const success = await runSuggestionWithUI(
+          const result = await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'add',
@@ -210,8 +209,13 @@ async function bootstrapApp() {
             },
             `Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`
           );
-          if (success) {
+          if (result && result.success) {
             closeModal();
+            if (result.local && result.cat) {
+              await initApp();
+              const newCat = state.allCats.find(c => c.id === result.cat.id);
+              if (newCat) selectCatWrapper(newCat);
+            }
           }
         } catch (err) {
           console.error(err);
@@ -641,19 +645,18 @@ export function updateEditButtonsVisibility() {
   } else {
     // Non-admin mode (suggestions only)
     if (api.isOfflineApp) {
-      // In offline mode with no server connection, hide server-side suggestions buttons
+      // In standalone app mode (Capacitor), always show suggestion/local-edit buttons so they can edit locally!
       if (addCatBtn) {
-        addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
+        addCatBtn.style.display = 'flex';
         addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
       }
-      const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
       if (editSummaryBtnEl) {
         editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
-        editSummaryBtnEl.style.display = displayStyle;
+        editSummaryBtnEl.style.display = 'inline-flex';
       }
       if (editPrescriptionBtnEl) {
         editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
-        editPrescriptionBtnEl.style.display = displayStyle;
+        editPrescriptionBtnEl.style.display = 'inline-flex';
       }
       if (deleteBtn) deleteBtn.style.display = 'none';
     } else {

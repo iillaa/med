@@ -733,16 +733,16 @@ export async function runSuggestionWithUI(submitFn, suggestionData, successAlert
     loader.hide();
     
     if (result.success) {
-      alert(successAlertText);
-      return true;
+      alert(result.local ? result.message : successAlertText);
+      return result;
     } else {
       alert("Erreur : " + result.error);
-      return false;
+      return null;
     }
   } catch (err) {
     loader.hide();
     alert("Une erreur inattendue est survenue lors de l'envoi.");
-    return false;
+    return null;
   }
 }
 
