@@ -1,6 +1,17 @@
 // Core Performance Monitor Module for Dr. CAT
 // Measures client-side frame drops, rendering, interaction, memory, and local storage I/O
 
+// ── Safe mode for Android (disables heavy monitoring) ──
+// Rationale: some Android WebViews can stall during startup if we wrap Storage
+// or start monitoring loops immediately on module import.
+const _isAndroidPerfSafeMode = (() => {
+  try {
+    return /android/i.test(navigator.userAgent);
+  } catch (_) {
+    return false;
+  }
+})();
+
 const THRESHOLDS = {
   fps: { good: 55, warn: 40 },
   render: { good: 50, warn: 150 },
@@ -11,8 +22,47 @@ const THRESHOLDS = {
   dbWrite: { good: 100, warn: 500 }
 };
 
+// Export a noop perf object on Android so module top-level side effects
+// (like Storage wrapping and global listeners) don't run.
+// Note: ES modules require exports at top-level, so we export `perf` once.
+let perf = null;
+
+if (_isAndroidPerfSafeMode) {
+  const perfNoop = {
+    THRESHOLDS,
+    startMeasure: () => {},
+    endMeasure: () => {},
+    recordMilestone: () => {},
+    recordApiCall: () => {},
+    recordInteraction: () => {},
+    startFrameMonitor: () => {},
+    stopFrameMonitor: () => {},
+    getFrameStats: () => ({ fps: 60, jankRate: 0, drops: 0, major: 0, totalFrames: 0 }),
+    getMetrics: () => ({
+      frame: { fps: 60, jankRate: 0, drops: 0, major: 0, totalFrames: 0 },
+      renders: {},
+      api: {},
+      interactions: {},
+      localStorage: { readCount: 0, writeCount: 0, readAvgMs: 0, writeAvgMs: 0 },
+      memory: { supported: false, usedJSHeapSize: 0, totalJSHeapSize: 0, jsHeapSizeLimit: 0, growthBytes: 0, snapshots: [] },
+      milestones: { domContentLoaded: null, catsFetched: null, sidebarRendered: null, dashboardReady: null }
+    }),
+    reset: () => {}
+  };
+  window.perf = perfNoop;
+  perf = perfNoop;
+} 
+
+
+
+// If we are in Android safe mode, stop here after exporting noop.
+if (_isAndroidPerfSafeMode) {
+  // Keep window.perf already set; do not run heavy initialization.
+} else {
+
 // Internal states
 const measurements = new Map();
+
 const apiTimings = new Map(); // path -> Array of last 50 durations
 const interactionTimings = new Map(); // type -> Array of last 50 durations
 const memorySnapshots = []; // Array of last 20 usedJSHeapSize readings
@@ -321,3 +371,5 @@ export const perf = {
 
 // Make perf globally visible to let api.js fetch wrapper record metrics easily
 window.perf = perf;
+}
+
