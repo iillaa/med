@@ -18,6 +18,8 @@
   <!-- FontAwesome Icons (non-blocking) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="style.css?v=18">
+  <!-- Capacitor native bridge script -->
+  <script src="capacitor.js"></script>
 </head>
 <body>
   <!-- APP LOADING OVERLAY - shown during init, hidden when ready -->
@@ -948,7 +950,7 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js?v=2"></script>
+  <script type="module" src="js/main.js"></script>
   <script>
     (function() {
       var started = Date.now();

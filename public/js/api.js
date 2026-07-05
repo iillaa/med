@@ -91,9 +91,9 @@ export function getPrimaryRemoteUrl() {
 
 function getApiUrl(endpoint, overrideUrl) {
   const configuredUrl = overrideUrl || getRemoteServerUrl();
-  // On localhost, always use relative paths to avoid cross-origin requests to the tunnel URL
-  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1';
-  if (isLocal) return endpoint;
+  // On localhost web browser (not standalone Capacitor app), use relative paths to avoid cross-origin requests to the tunnel URL
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  if (isLocalWebBrowser) return endpoint;
   if (isOfflineApp && configuredUrl) {
     return `${configuredUrl}${endpoint}`;
   }

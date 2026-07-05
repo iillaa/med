@@ -194,6 +194,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve dummy capacitor.js to prevent 404 warnings in web browsers
+app.get('/capacitor.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.send('// Capacitor bridge mock for web browser\n');
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   lastModified: false,
