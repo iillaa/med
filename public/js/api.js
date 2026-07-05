@@ -123,8 +123,9 @@ function getConfiguredRemoteUrls() {
 function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
-  // Use provider abstraction to determine required headers (e.g. ngrok skip-browser-warning)
-  const providerExtraHeaders = getExtraHeaders(configuredUrl);
+  // Only add provider headers if we are not on localhost or if explicitly hitting a remote URL
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'x-admin-token': token } : {}),
@@ -168,6 +169,7 @@ export async function logoutAdmin() {
 }
  
 export async function checkAdminStatus() {
+  if (isOfflineApp) return false; // No admin for Android app
   const token = localStorage.getItem('dr_cat_admin_token');
   if (!token) return false;
   if (isOfflineApp && navigator.onLine === false) return false;
@@ -219,9 +221,12 @@ async function fetchWithTimeout(url, options = {}) {
 }
 
 export async function fetchCats() {
+  // If we are on a local web browser, don't even try remote URLs to avoid redundant calls or hangs
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+
   // Try each configured remote server URL in order (failover support)
-  const remoteUrls = getConfiguredRemoteUrls();
-  if (navigator.onLine !== false) {
+  if (!isLocalWebBrowser && navigator.onLine !== false) {
+    const remoteUrls = getConfiguredRemoteUrls();
     for (const remoteUrl of remoteUrls) {
       try {
         const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
@@ -542,8 +547,8 @@ export function hasRemoteServerConfigured() {
 
 export async function checkRealConnection() {
   // On localhost, skip remote URL ping to avoid unnecessary cross-origin noise
-  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1';
-  if (isLocal) {
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  if (isLocalWebBrowser) {
     return navigator.onLine;
   }
 
