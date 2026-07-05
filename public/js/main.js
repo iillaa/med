@@ -1,5 +1,6 @@
 import { state, getLocalProgress } from './state.js';
 import * as api from './api.js';
+import { initDebugConsole } from './debug-console.js';
 import * as sidebar from './components/sidebar.js';
 import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
@@ -42,6 +43,9 @@ let addCatBtn, addCatModal, closeAddCatModalBtn, cancelAddCatBtn, addCatForm;
 
 // Entry Point
 async function bootstrapApp() {
+  // ── START DEBUG CONSOLE (catches everything from the beginning) ──
+  initDebugConsole();
+  
   // Protect all localStorage reads from crashing the app
   const origLocalStorageGetItem = Storage.prototype.getItem;
   Storage.prototype.getItem = function(key) {

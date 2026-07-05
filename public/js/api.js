@@ -71,8 +71,13 @@ export function getAppMode() {
   } else {
     _cachedAppMode = APP_MODES.WEB_CLIENT;
   }
+
+  // 🔍 LOG THE DETECTED MODE
+  console.log(`[App Mode] Detected: ${_cachedAppMode} (Capacitor: ${isCapacitor}, Online: ${isOnline}, Host: ${hostname})`);
+
   return _cachedAppMode;
 }
+
 
 // Permission helpers
 export function canEditDirectly() {
