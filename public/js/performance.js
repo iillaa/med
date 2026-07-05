@@ -77,14 +77,18 @@ function startMemorySnapshotLoop() {
   if (memoryIntervalId) clearInterval(memoryIntervalId);
   
   const recordMemory = () => {
-    if (performance.memory && performance.memory.usedJSHeapSize) {
-      memorySnapshots.push({
-        time: new Date().toLocaleTimeString('fr-FR'),
-        heapSize: performance.memory.usedJSHeapSize
-      });
-      if (memorySnapshots.length > 20) {
-        memorySnapshots.shift();
+    try {
+      if (performance.memory && performance.memory.usedJSHeapSize) {
+        memorySnapshots.push({
+          time: new Date().toLocaleTimeString('fr-FR'),
+          heapSize: performance.memory.usedJSHeapSize
+        });
+        if (memorySnapshots.length > 20) {
+          memorySnapshots.shift();
+        }
       }
+    } catch (_) {
+      // performance.memory may throw/ be unsupported on this browser
     }
   };
   

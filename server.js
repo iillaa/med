@@ -27,13 +27,18 @@ async function loadServerProviders() {
     // Extract PROVIDERS array by evaluating the module source
     const match = content.match(/export const PROVIDERS = (\[[\s\S]*?\]);/);
     if (match) {
-      return eval('(' + match[1] + ')');
+      try {
+        return (new Function('return ' + match[1]))();
+      } catch (_) {
+        return fallback;
+      }
     }
   } catch (err) {
     console.warn('[Providers] Failed to load provider registry, using fallback:', err.message);
   }
   // Fallback: minimal ngrok-only support if provider file missing
-  return [
+  const fallback = [
+
     {
       id: 'ngrok',
       urlPattern: /(^|\.)ngrok(-free)?\.(app|dev|io)$/,

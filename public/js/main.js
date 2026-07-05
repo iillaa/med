@@ -67,27 +67,31 @@ async function bootstrapApp() {
     showToast("Erreur réseau ou réponse de base de données non reconnue.", "fa-circle-exclamation", 5000);
   };
 
-  // PWA Service Worker — only register on production, unregister on dev to avoid stale caches
+  // PWA Service Worker — disable on Android to prevent logo freezes
+  const isAndroid = /android/i.test(navigator.userAgent);
   if ('serviceWorker' in navigator) {
-    const isDev = location.hostname === 'localhost' ||
-                  location.hostname === '127.0.0.1' ||
-                  PROVIDERS.some(p => p.isDevHostname(location.hostname));
-   
-    if (isDev) {
-      // Development: aggressively unregister all service workers and clear caches
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(reg => reg.unregister());
-      });
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    // Always unregister to avoid stale caches/clients.claim deadlocks
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => reg.unregister());
+    });
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+
+    if (!isAndroid) {
+      const isDev = location.hostname === 'localhost' ||
+                    location.hostname === '127.0.0.1' ||
+                    PROVIDERS.some(p => p.isDevHostname(location.hostname));
+      if (!isDev) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('PWA SW registered:', reg.scope))
+            .catch(err => console.error('PWA SW failed:', err));
+        });
+      }
     } else {
-      // Production: register the service worker for offline PWA support
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('PWA SW registered:', reg.scope))
-          .catch(err => console.error('PWA SW failed:', err));
-      });
+      console.log('[Startup] Service worker disabled on Android to prevent freezes.');
     }
   }
+
  
   // Theme Toggle Initialization
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
