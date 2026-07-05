@@ -305,7 +305,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             return;
           }
 
-          await runSuggestionWithUI(
+          const result = await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'edit',
@@ -314,6 +314,11 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             },
             "Votre proposition de modification a été envoyée à l'administrateur pour validation."
           );
+          if (result && result.success && result.local) {
+            state.activeCat.summary = newSummary;
+            state.activeCat.customSummary = newSummary;
+            renderSummary(newSummary);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -400,7 +405,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             return;
           }
 
-          await runSuggestionWithUI(
+          const result = await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'edit',
@@ -409,6 +414,11 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             },
             "Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation."
           );
+          if (result && result.success && result.local) {
+            state.activeCat.ordonnance = newOrdonnance;
+            state.activeCat.customOrdonnance = newOrdonnance;
+            renderPrescription(newOrdonnance);
+          }
         }
       } catch (err) {
         console.error(err);
