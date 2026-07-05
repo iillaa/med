@@ -341,12 +341,18 @@ async function initApp() {
   const phase1 = mark('connection-check');
 
   // Perform robust connection ping test at boot
-  // On localhost: skip remote URL ping to avoid useless cross-origin noise
-  const isLocalWebBrowser = !api.isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice);
-  if (isLocalWebBrowser) {
+  const mode = api.getAppMode();
+
+  if (mode === api.APP_MODES.ADMIN_LOCAL) {
+    // Localhost: we ARE the server. Just use navigator.onLine for status display.
     state.isOnlineAtStartup = navigator.onLine;
-    console.log("[Startup] Localhost detected, skipping remote connectivity ping. Online:", state.isOnlineAtStartup);
+    console.log("[Startup] Admin Local mode. Online status:", state.isOnlineAtStartup);
+  } else if (mode === api.APP_MODES.ANDROID_OFFLINE) {
+    // Android offline: explicitly offline
+    state.isOnlineAtStartup = false;
+    console.log("[Startup] Android Offline mode.");
   } else {
+    // WEB_CLIENT or ANDROID_ONLINE: check real connectivity
     try {
       state.isOnlineAtStartup = await api.checkRealConnection();
       console.log("[Startup] Real connection check status:", state.isOnlineAtStartup);
@@ -355,6 +361,7 @@ async function initApp() {
       state.isOnlineAtStartup = false;
     }
   }
+
   endMark(phase1);
   setLoadingProgress(25);
 
@@ -594,10 +601,14 @@ export function updateEditButtonsVisibility() {
   const addCatBtn = document.getElementById('add-cat-btn');
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
+  const mode = api.getAppMode();
+  const isAdminLocal = mode === api.APP_MODES.ADMIN_LOCAL;
+  const isWebOrAndroidOnline = [api.APP_MODES.WEB_CLIENT, api.APP_MODES.ANDROID_ONLINE].includes(mode);
+  const isAndroidOffline = mode === api.APP_MODES.ANDROID_OFFLINE;
+
+  // ── Admin Login Button: ONLY on localhost ──
   if (adminLoginBtn) {
-    // Strictly restrict Admin login button to localhost browser environment (hide on Capacitor)
-    const isLocalWebBrowser = !api.isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
-    if (isLocalWebBrowser) {
+    if (isAdminLocal) {
       adminLoginBtn.style.display = 'flex';
       if (state.isAdmin) {
         adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
@@ -613,16 +624,25 @@ export function updateEditButtonsVisibility() {
     }
   }
 
-  // Set edit buttons and add button text/icons dynamically based on Admin mode
+  // ── Add CAT Button ──
+  if (addCatBtn) {
+    if (isAdminLocal) {
+      addCatBtn.style.display = 'flex';
+      addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> CAT';
+    } else if (isWebOrAndroidOnline) {
+      addCatBtn.style.display = 'flex';
+      addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
+    } else {
+      addCatBtn.style.display = 'none';
+    }
+  }
+
+  // ── Edit Summary / Prescription / Delete buttons ──
   const editSummaryBtnEl = document.getElementById('edit-summary-btn');
   const editPrescriptionBtnEl = document.getElementById('edit-prescription-btn');
   const deleteBtn = document.getElementById('delete-cat-btn');
 
-  if (state.isAdmin) {
-    if (addCatBtn) {
-      addCatBtn.style.display = 'flex';
-      addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> CAT';
-    }
+  if (isAdminLocal && state.isAdmin) {
     if (editSummaryBtnEl) {
       editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i> Modifier la fiche';
       editSummaryBtnEl.style.display = 'inline-flex';
@@ -632,50 +652,25 @@ export function updateEditButtonsVisibility() {
       editPrescriptionBtnEl.style.display = 'inline-flex';
     }
     if (deleteBtn) {
-      // Core CATs cannot be deleted, custom CATs (id > 55) can be deleted by admin
-      if (state.activeCat && state.activeCat.id > 55) {
-        deleteBtn.style.display = 'inline-flex';
-      } else {
-        deleteBtn.style.display = 'none';
-      }
+      deleteBtn.style.display = (state.activeCat && state.activeCat.id > 55) ? 'inline-flex' : 'none';
     }
+  } else if (isWebOrAndroidOnline) {
+    if (editSummaryBtnEl) {
+      editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
+      editSummaryBtnEl.style.display = 'inline-flex';
+    }
+    if (editPrescriptionBtnEl) {
+      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
+      editPrescriptionBtnEl.style.display = 'inline-flex';
+    }
+    if (deleteBtn) deleteBtn.style.display = 'none';
   } else {
-    // Non-admin mode (suggestions only)
-    if (api.isOfflineApp) {
-      // In offline mode with no server connection, hide server-side suggestions buttons
-      if (addCatBtn) {
-        addCatBtn.style.display = (state.isOnlineAtStartup && api.hasRemoteServer()) ? 'flex' : 'none';
-        addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
-      }
-      const displayStyle = (state.isOnlineAtStartup && api.hasRemoteServer()) ? 'inline-flex' : 'none';
-      if (editSummaryBtnEl) {
-        editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
-        editSummaryBtnEl.style.display = displayStyle;
-      }
-      if (editPrescriptionBtnEl) {
-        editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
-        editPrescriptionBtnEl.style.display = displayStyle;
-      }
-      if (deleteBtn) deleteBtn.style.display = 'none';
-    } else {
-      // Remote server connected web client (default view) - NO ADMIN BUTTONS EVER
-      if (addCatBtn) {
-        addCatBtn.style.display = 'flex';
-        addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
-      }
-      if (editSummaryBtnEl) {
-        editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
-        editSummaryBtnEl.style.display = 'inline-flex';
-      }
-      if (editPrescriptionBtnEl) {
-        editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
-        editPrescriptionBtnEl.style.display = 'inline-flex';
-      }
-      if (deleteBtn) deleteBtn.style.display = 'none';
-    }
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'none';
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'none';
   }
 
-  // Ensure diagnostics button visibility is synced
   diagnostics.updateDiagnosticsButtonVisibility();
   performanceComponent.updatePerformanceButtonVisibility();
 }
+

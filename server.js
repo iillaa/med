@@ -376,15 +376,20 @@ async function initializeData() {
   await initAdminPassword();
   await initializeProviders(); // Load provider registry before handling any requests
   
-  // Ensure remote_config.js is always fresh before serving requests
+  // Run rebuild in background — never block server startup
   try {
     const buildModule = require('./build.js');
     if (typeof buildModule.rebuildClientAssets === 'function') {
-      await buildModule.rebuildClientAssets();
+      // No await — fire and forget
+      buildModule.rebuildClientAssets().catch(err => 
+        console.warn('[Startup] Auto-build failed in background:', err.message)
+      );
+      console.log('[Startup] Background rebuild initiated.');
     }
   } catch (err) {
-    console.warn('[Startup] Auto-build skipped:', err.message);
+    console.warn('[Startup] Auto-build module unavailable:', err.message);
   }
+
 
   // Load cats_db.json
   try {
