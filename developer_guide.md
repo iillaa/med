@@ -86,13 +86,13 @@ npx cap sync
 
 ## ⚙️ Configuring Server URLs & Syncing
 
-Dr. CAT allows standalone offline APK builds to communicate with a central server (e.g., ngrok or a custom hosted domain) to fetch updates and send suggestions.
+Dr. CAT allows standalone offline APK builds to communicate with a central server (e.g., tunnel or a custom hosted domain) to fetch updates and send suggestions.
 
 ### 1. How the Server URL is Managed
 * **Server Side**: The backend stores the remote server URL in `remote_server_config.json` (which is gitignored in the root folder). You can update it via the Admin Diagnostics panel in the web interface, or edit the file manually:
   ```json
   {
-    "url": "https://rendition-duchess-dry.ngrok-free.dev"
+    "url": "https://rendition-duchess-dry.tunnel-free.dev"
   }
   ```
 * **Client App Bundle**: At compile/build time, the build script reads `remote_server_config.json` and dynamically generates the client-side configuration file at `public/js/remote_config.js` (gitignored). This ensures the server URL is baked directly into the APK.
@@ -102,8 +102,8 @@ Dr. CAT allows standalone offline APK builds to communicate with a central serve
   1. Add your production domain to `remote_server_config.json` (or set it via the Admin Web Panel).
   2. Run `npm run build && npx cap sync` and compile your APK.
   3. **You never need to rebuild the APK again.** Even if you change your backend host, IP, or provider in the future, as long as your domain redirects to the new server, all installed client apps will automatically connect.
-* **Using a Temporary Tunnel (e.g., `ngrok`)**:
-  1. If you restart your ngrok server, the URL changes.
+* **Using a Temporary Tunnel (e.g., `tunnel`)**:
+  1. If you restart your tunnel server, the URL changes.
   2. Update the new URL on the server (using the Admin Web Panel, or editing `remote_server_config.json` directly).
   3. Recompile the app assets and sync Capacitor:
      ```bash

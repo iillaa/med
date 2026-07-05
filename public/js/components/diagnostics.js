@@ -27,7 +27,7 @@ export function initDiagnostics() {
 
   // Wire up action buttons
   document.getElementById('run-conn-test-btn')?.addEventListener('click', runConnectivityTest);
-  document.getElementById('check-ngrok-btn')?.addEventListener('click', checkNgrokTunnel);
+  document.getElementById('check-tunnel-btn')?.addEventListener('click', checkProviderTunnel);
   document.getElementById('save-remote-url-btn')?.addEventListener('click', saveRemoteServerUrl);
   document.getElementById('copy-logs-btn')?.addEventListener('click', copyTerminalLogs);
   document.getElementById('clear-logs-btn')?.addEventListener('click', clearTerminalLogs);
@@ -221,7 +221,7 @@ async function runConnectivityTest() {
   const analysisDiv = document.getElementById('diag-auto-analysis');
 
   if (stepLocal) stepLocal.innerHTML = '1. Local (localhost:3000) : <span style="color: #fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Ping...</span>';
-  if (stepRemote) stepRemote.innerHTML = '2. Distant (ngrok URL) : <span style="color: var(--text-muted);">En attente...</span>';
+  if (stepRemote) stepRemote.innerHTML = '2. Distant (URL configurée) : <span style="color: var(--text-muted);">En attente...</span>';
   if (stepWan) stepWan.innerHTML = '3. WAN (internet ping) : <span style="color: var(--text-muted);">En attente...</span>';
   if (analysisDiv) {
     analysisDiv.textContent = '';
@@ -247,23 +247,23 @@ async function runConnectivityTest() {
   let isRemoteSuccess = false;
   let remoteErrorMessage = '';
   
-  if (stepRemote) stepRemote.innerHTML = '2. Distant (ngrok URL) : <span style="color: #fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Ping...</span>';
+  if (stepRemote) stepRemote.innerHTML = '2. Distant (URL configurée) : <span style="color: #fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Ping...</span>';
   
   if (configuredRemoteUrl) {
-    console.log(`[Connectivity] Test 2: Ping distant ngrok (${configuredRemoteUrl})...`);
+    console.log(`[Connectivity] Test 2: Ping distant ${configuredRemoteUrl}...`);
     const remoteRes = await api.pingEndpoint(`${configuredRemoteUrl}/api/search-status`);
     if (remoteRes.ok) {
       isRemoteSuccess = true;
-      console.log("[Connectivity] Distant ngrok OK");
-      if (stepRemote) stepRemote.innerHTML = `2. Distant (ngrok) : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Accessible (${configuredRemoteUrl})</span>`;
+      console.log("[Connectivity] distant URL OK");
+      if (stepRemote) stepRemote.innerHTML = `2. Distant (URL configurée) : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Accessible (${configuredRemoteUrl})</span>`;
     } else {
       remoteErrorMessage = remoteRes.message || 'CORS ou Timeout';
-      console.warn(`[Connectivity] Distant ngrok FAILED: ${remoteErrorMessage}`);
-      if (stepRemote) stepRemote.innerHTML = `2. Distant (ngrok) : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Échec (${remoteErrorMessage})</span>`;
+      console.warn(`[Connectivity] Distant URL FAILED: ${remoteErrorMessage}`);
+      if (stepRemote) stepRemote.innerHTML = `2. Distant (URL configurée) : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Échec (${remoteErrorMessage})</span>`;
     }
   } else {
     console.log("[Connectivity] Test 2: Distant non configuré");
-    if (stepRemote) stepRemote.innerHTML = '2. Distant (ngrok) : <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-exclamation"></i> Non configuré</span>';
+    if (stepRemote) stepRemote.innerHTML = '2. Distant (URL configurée) : <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-exclamation"></i> Non configuré</span>';
   }
 
   // 3. Test WAN internet access ping
@@ -297,7 +297,7 @@ async function runConnectivityTest() {
       analysisDiv.style.color = '#fde047';
       
       if (remoteErrorMessage.includes('timed out') || remoteErrorMessage.includes('Failed to fetch')) {
-        analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> Le tunnel ngrok n\'est pas joignable (Timeout). L\'adresse a peut-être changé ou ngrok est arrêté sur le serveur.';
+        analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> Le tunnel n\'est pas joignable (Timeout). L\'adresse a peut-être changé ou le tunnel est arrêté sur le serveur.';
       } else {
         analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> Échec CORS suspecté. Assurez-vous que le serveur Node autorise les requêtes provenant de l\'appareil client.';
       }
@@ -305,59 +305,52 @@ async function runConnectivityTest() {
       analysisDiv.style.background = 'rgba(6, 182, 212, 0.15)';
       analysisDiv.style.border = '1px solid rgba(6, 182, 212, 0.3)';
       analysisDiv.style.color = '#99f6e4';
-      analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> L\'application fonctionne localement, mais aucune URL distante (ngrok) n\'est configurée pour la synchronisation.';
+      analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> L\'application fonctionne localement, mais aucune URL distante n\'est configurée pour la synchronisation.';
     } else {
       analysisDiv.style.background = 'rgba(16, 185, 129, 0.15)';
       analysisDiv.style.border = '1px solid rgba(16, 185, 129, 0.3)';
       analysisDiv.style.color = '#a7f3d0';
-      analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> Tous les tests sont au vert. La connectivité réseau et le tunnel ngrok fonctionnent parfaitement !';
+      analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> Tous les tests sont au vert. La connectivité réseau et le tunnel fonctionnent parfaitement !';
     }
   }
 }
 
-async function checkNgrokTunnel() {
+async function checkProviderTunnel() {
   if (api.isOfflineApp && !api.hasRemoteServer()) {
-    showToast("Le statut ngrok ne peut être inspecté que depuis le serveur.", "fa-triangle-exclamation", 4000);
+    showToast("Le statut du tunnel ne peut être inspecté que depuis le serveur.", "fa-triangle-exclamation", 4000);
     return;
   }
 
-  const activeSpan = document.getElementById('diag-ngrok-active');
-  const urlSpan = document.getElementById('diag-ngrok-url');
-  const connsSpan = document.getElementById('diag-ngrok-conns');
+  const activeSpan = document.getElementById('diag-tunnel-active');
+  const urlSpan = document.getElementById('diag-tunnel-url');
+  const connsSpan = document.getElementById('diag-tunnel-conns');
 
   if (activeSpan) activeSpan.textContent = 'Vérification...';
 
   try {
-    const data = await api.fetchNgrokTunnels();
-    if (data && data.tunnels && data.tunnels.length > 0) {
-      const t = data.tunnels[0];
-      if (activeSpan) {
-        activeSpan.textContent = 'Actif';
-        activeSpan.style.background = 'rgba(16, 185, 129, 0.2)';
-        activeSpan.style.color = 'var(--color-success)';
-      }
-      if (urlSpan) urlSpan.textContent = t.public_url;
-      
-      const connCount = t.metrics?.conns?.count || 0;
-      const connGauge = t.metrics?.conns?.gauge || 0;
-      if (connsSpan) connsSpan.textContent = `${connCount} (Actuellement actives: ${connGauge})`;
-    } else {
-      if (activeSpan) {
-        activeSpan.textContent = 'Aucun tunnel';
-        activeSpan.style.background = 'rgba(239, 68, 68, 0.2)';
-        activeSpan.style.color = '#f87171';
-      }
-      if (urlSpan) urlSpan.textContent = '--';
-      if (connsSpan) connsSpan.textContent = '--';
+    const data = await api.fetchTunnelInfo();
+    if (activeSpan) {
+      const hasActive = data.configuredTunnels && data.configuredTunnels.length > 0;
+      activeSpan.textContent = hasActive ? 'Configuré (' + data.configuredTunnels.length + ')' : 'Non configuré';
+      activeSpan.style.background = hasActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+      activeSpan.style.color = hasActive ? 'var(--color-success)' : '#fbbf24';
     }
+    
+    if (urlSpan && data.configuredTunnels && data.configuredTunnels.length > 0) {
+      urlSpan.textContent = data.configuredTunnels.map(t => t.url).join('\n');
+    } else if (urlSpan) {
+      urlSpan.textContent = 'Aucune URL configurée';
+    }
+    
+    if (connsSpan) connsSpan.textContent = '—';
   } catch (err) {
     if (activeSpan) {
-      activeSpan.textContent = 'Arrêté';
+      activeSpan.textContent = 'Injoignable';
       activeSpan.style.background = 'rgba(239, 68, 68, 0.2)';
       activeSpan.style.color = '#f87171';
     }
-    if (urlSpan) urlSpan.textContent = 'ngrok non démarré (localhost:4040)';
-    if (connsSpan) connsSpan.textContent = '--';
+    if (urlSpan) urlSpan.textContent = 'Erreur de connexion';
+    if (connsSpan) connsSpan.textContent = '—';
   }
 }
 
@@ -365,26 +358,31 @@ async function saveRemoteServerUrl() {
   const input = document.getElementById('diag-remote-url-input');
   if (!input) return;
 
-  const url = input.value.trim();
-  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-    showToast("L'URL doit commencer par http:// ou https://", "fa-triangle-exclamation", 4000);
+  const raw = input.value.trim();
+  // Support multiple URLs separated by commas or newlines
+  const urls = raw.split(/[,\n]/).map(u => u.trim()).filter(u => u.length > 0);
+  
+  if (urls.length === 0) {
+    showToast("Veuillez saisir au moins une URL.", "fa-triangle-exclamation", 4000);
+    return;
+  }
+
+  const invalid = urls.find(u => !u.startsWith('http://') && !u.startsWith('https://'));
+  if (invalid) {
+    showToast("Toutes les URLs doivent commencer par http:// ou https://", "fa-triangle-exclamation", 4000);
     return;
   }
 
   try {
     // 1. Save locally in local storage for instant Capacitor/offline mode use
-    if (url) {
-      localStorage.setItem('dr_cat_remote_server_url', url);
-    } else {
-      localStorage.removeItem('dr_cat_remote_server_url');
-    }
+    localStorage.setItem('dr_cat_remote_server_url', urls[0]);
 
     // 2. Persist to server config if online
     if (!api.isOfflineApp || api.hasRemoteServer()) {
-      await api.updateDiagnosticsRemoteUrl(url);
+      await api.updateDiagnosticsRemoteUrl(urls);
     }
 
-    showToast("Adresse du serveur mise à jour !", "fa-circle-check", 3000);
+    showToast(`${urls.length} adresse(s) de serveur enregistrée(s) !`, "fa-circle-check", 3000);
     
     // Refresh stats and run connection test automatically to verify URL validity
     refreshDiagnosticsData();
@@ -472,8 +470,8 @@ async function runAutoCheckupSuite() {
   await runConnectivityTest();
 
   // 4. Trace tunnel information
-  console.log("[Auto-Test] Inspection du tunnel ngrok...");
-  await checkNgrokTunnel();
+  console.log("[Auto-Test] Inspection du tunnel...");
+  await checkProviderTunnel();
 
   // 5. Let frame capture run for 1.5 seconds to measure rendering FPS / stutters
   console.log("[Auto-Test] Capture du framerate et de la mémoire (patientez 1.5s)...");

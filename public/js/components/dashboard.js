@@ -137,15 +137,15 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       if (sug.type === 'add') {
         fieldsHtml = `
           <div style="margin-bottom: 14px;">
-            <label style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Titre de la fiche</label>
+            <label for="review-sug-title" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Titre de la fiche</label>
             <input type="text" id="review-sug-title" value="${escapeHTML(sug.data.title || '')}" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none;">
           </div>
           <div style="margin-bottom: 14px;">
-            <label style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Spécialité</label>
+            <label for="review-sug-category" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Spécialité</label>
             <input type="text" id="review-sug-category" value="${escapeHTML(sug.data.category || '')}" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none;">
           </div>
           <div style="margin-bottom: 14px;">
-            <label style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Red Flags (signes de gravité)</label>
+            <label for="review-sug-redflags" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Red Flags (signes de gravité)</label>
             <textarea id="review-sug-redflags" rows="3" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:13px; font-family:inherit; resize:vertical; outline:none;">${escapeHTML(sug.data.red_flags || '')}</textarea>
           </div>
         `;
@@ -153,11 +153,11 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
 
       fieldsHtml += `
         <div style="margin-bottom: 14px;">
-          <label style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Synthèse de Conduite à Tenir</label>
+          <label for="review-sug-summary" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Synthèse de Conduite à Tenir</label>
           <textarea id="review-sug-summary" rows="12" style="width:100%; padding:12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:monospace; font-size:12px; line-height:1.5; resize:vertical; outline:none;">${escapeHTML(sug.data.summary || '')}</textarea>
         </div>
         <div style="margin-bottom: 14px;">
-          <label style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Ordonnance Type</label>
+          <label for="review-sug-ordonnance" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Ordonnance Type</label>
           <textarea id="review-sug-ordonnance" rows="8" style="width:100%; padding:12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:monospace; font-size:12px; line-height:1.5; resize:vertical; outline:none;">${escapeHTML(sug.data.ordonnance || '')}</textarea>
         </div>
       `;

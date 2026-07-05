@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { getCleanPdfName } from '../utils.js';
+import { getCleanPdfName, setButtonLoading } from '../utils.js';
 
 // DOM Elements
 let quizScreen, welcomeScreen, workspaceView;
@@ -13,6 +13,7 @@ let comparisonGrid, displayUserAnswer, displayCorrectAnswer;
 let keywordsMatchedPanel, keywordsMatchedTags;
 let selfGradingPanel, btnGradeFull, btnGradePartial, btnGradeZero;
 let viewRefBtn, nextBtn;
+let restoreBtn = null;
 let resultsScore, resultsFeedback, resultsTableBody, retryBtn, quitBtn;
 
 // Callbacks
@@ -290,7 +291,12 @@ function renderQuestion() {
       userTextArea.value = '';
       userTextArea.disabled = false;
     }
-    if (submitTextBtn) submitTextBtn.style.display = 'block';
+    if (submitTextBtn) {
+      submitTextBtn.style.display = 'block';
+      submitTextBtn.disabled = false;
+      submitTextBtn.classList.remove('loading');
+      submitTextBtn.innerHTML = '<i class="fa-solid fa-check"></i> Valider ma réponse';
+    }
   }
   if (window.perf) window.perf.endMeasure('quiz.renderQuestion');
 }
@@ -394,7 +400,7 @@ function submitWriteInAnswer() {
 
   // Lock inputs
   userTextArea.disabled = true;
-  submitTextBtn.style.display = 'none';
+  restoreBtn = setButtonLoading(submitTextBtn);
 
   // Compare and match keywords
   const keywordMatches = checkMatchedKeywords(userAnswer, q.correctAnswer);
@@ -468,6 +474,9 @@ function saveWriteInGrade(score) {
   feedbackStatus.textContent = `Score enregistré : +${score.toFixed(1)} point(s)`;
   feedbackHeader.style.color = score === 1.0 ? "var(--color-success)" : (score === 0.5 ? "var(--color-warning)" : "var(--color-danger)");
   feedbackHeader.querySelector('i').className = score === 1.0 ? "fa-solid fa-circle-check" : "fa-solid fa-circle-info";
+
+  // Restore submit button for next question
+  if (restoreBtn) restoreBtn();
 
   // Show Next Button
   if (nextBtn) nextBtn.style.display = 'block';
@@ -546,6 +555,7 @@ function showResults() {
       viewBtn.addEventListener('click', () => {
         const cat = state.allCats.find(c => c.id === ans.catId);
         if (cat && globalOnOpenCatCard) {
+          state.quizSession.quizViewingCatId = cat.id;
           quizScreen.style.display = 'none';
           globalOnOpenCatCard(cat);
         }

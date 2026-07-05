@@ -11,7 +11,7 @@ This document tracks our long-term objectives across three distinct phases, tran
 
 ```mermaid
 graph TD
-    P1[Phase 1: Local Polish - Termux/ngrok] -->|Fork/Branch| P2[Phase 2: Cloud Web Deployment]
+    P1[Phase 1: Local Polish - Termux/tunnel] -->|Fork/Branch| P2[Phase 2: Cloud Web Deployment]
     P2 -->|Capacitor Integration| P3[Phase 3: True Offline Android App]
 ```
 

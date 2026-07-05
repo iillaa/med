@@ -46,7 +46,7 @@ This feature exists to **measure what is actually slow** so fixes can be targete
 | **Frame rate (FPS)** | `requestAnimationFrame` loop measuring delta between frames | Direct measure of scroll and animation smoothness. Capacitor WebView often drops frames during list scroll or tab transitions. |
 | **Frame drops (jank)** | Count frames where delta > 16.6ms (one frame budget). Major drops if delta > 50ms. | Shows how often the UI feels "stuttery". A 3% drop rate is noticeable to users. |
 | **Component render time** | `performance.now()` before/after render functions | Identifies which component is the bottleneck. Rendering 55 CAT cards vs loading a PDF fiche have very different costs. |
-| **API round-trip time** | Timestamp on `fetch()` call start and end | Shows network + server latency per endpoint. Key for comparing localhost vs ngrok vs cloud latency. |
+| **API round-trip time** | Timestamp on `fetch()` call start and end | Shows network + server latency per endpoint. Key for comparing localhost vs tunnel vs cloud latency. |
 | **Interaction latency** | Tap/click timestamp → first paint after handler | Measures perceived responsiveness. Critical for mobile where users expect <100ms feedback. Capacitor bridge adds overhead here. |
 | **Initial load time** | `DOMContentLoaded` → time when sidebar + dashboard are fully interactive | First impression metric. Should be <2s on mobile. |
 | **PDF search duration** | Start/stop around `searchPdfsContent()` | Full-text search is in-memory but JSON traversal + DOM rendering can be slow across 78 PDFs. |
@@ -375,7 +375,7 @@ The JSON filename: `drcat-performance-YYYY-MM-DD-HHmmss.json`
 | FPS during scroll | 55-60 | 40-55 | <40 |
 | Component render | <50ms | 50-150ms | >150ms |
 | API round-trip (localhost) | <50ms | 50-200ms | >200ms |
-| API round-trip (ngrok) | <500ms | 500-1500ms | >1500ms |
+| API round-trip (tunnel) | <500ms | 500-1500ms | >1500ms |
 | Interaction latency | <80ms | 80-200ms | >200ms |
 | PDF search | <500ms | 500-2000ms | >2000ms |
 | DB write (server) | <100ms | 100-500ms | >500ms |
@@ -449,7 +449,7 @@ Capacitor WebView introduces specific performance problems this system will expo
 2. **Scroll jank**: Frame drop detector reveals exactly when scrolling the CAT list drops frames. You'll see if sidebar render is too heavy.
 3. **Cold start time**: Initial load timeline shows if WebView is slow to become interactive. >3s means the index page or initial fetches need pruning.
 4. **Memory leaks**: Memory growth metric over 10+ minutes of use will leak if components don't clean up event listeners. Current code cleans up in most places — this verifies it.
-5. **Offline vs online perf**: Comparing API round-trip times via ngrok vs localhost tells you if the tunnel itself is the bottleneck (ngrok adds 50-150ms RTT minimum).
+5. **Offline vs online perf**: Comparing API round-trip times via tunnel vs localhost tells you if the tunnel itself is the bottleneck (tunnels add 50-150ms RTT minimum).
 
 ---
 
@@ -473,7 +473,7 @@ When this feature is complete, the user should be able to:
 3. Scroll the app with the panel open and watch frame drops appear in real-time
 4. Click a button to export a complete JSON report with all metrics + server data
 5. Paste the exported JSON into a chat with an AI agent and get actionable bottleneck identification
-6. Compare metrics between localhost (Termux browser) and ngrok (mobile browser) to isolate network vs UI issues
+6. Compare metrics between localhost (Termux browser) and tunnel (mobile browser) to isolate network vs UI issues
 7. Verify that the monitoring overhead is negligible by checking that FPS stays at 60 even with the panel open
 
 If all 7 are true, the feature is done.

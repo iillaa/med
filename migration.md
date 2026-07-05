@@ -22,15 +22,15 @@ Welcome to the next session of **Dr. CAT — Rappel Clinique** development! This
 ## 🚀 Key Accomplishments & Major Bug Fixes
 The following critical bugs have been successfully audited and resolved in the current workspace:
 
-### 1. Zero-Setup Mobile/Tablet Server Connectivity (ngrok)
+### 1. Zero-Setup Mobile/Tablet Server Connectivity (tunnel)
 * **Problem**: In Capacitor/APK standalone mode, the app was entirely isolated. It couldn't fetch server updates or send suggestions because `REMOTE_SERVER_URL` was empty. Setting it manually via the Admin Diagnostics panel was impossible on mobile because the admin button was hidden for security.
 * **Fix**: 
   - **Dynamic Compiler Injection**: The build script `build.js` now reads the target URL from the tracked `remote_server_config.json` and bakes it directly into the static bundle at `public/js/remote_config.js` during compilation.
-  - **Tracked Configuration**: `remote_server_config.json` was removed from `.gitignore` so that GitHub Actions cloud builds can read it and compile the APK with the active ngrok URL.
+  - **Tracked Configuration**: `remote_server_config.json` was removed from `.gitignore` so that GitHub Actions cloud builds can read it and compile the APK with the active tunnel URL.
   - **Auto-Invalidation of Local Storage**: In `public/js/api.js` (`getRemoteServerUrl()`), if a new APK build is pushed with a new server URL, the client automatically detects the change, invalidates the stale URL in the device's `localStorage`, and connects to the new server instantly.
 
 ### 2. Website/App Silent Crashes
-* **Problem**: AJAX network syntax errors (e.g. ngrok HTML warnings parsed as JSON) would silently freeze the app and show blank lists.
+* **Problem**: AJAX network syntax errors (e.g. tunnel HTML warnings parsed as JSON) would silently freeze the app and show blank lists.
 * **Fix**: Implemented global error boundaries, unhandled promise rejection interceptors, and fallback static fetches in `public/js/main.js` and `api.js` to isolate errors and prevent full crashes.
 
 ### 3. Aggressive Browser Caching
@@ -41,8 +41,8 @@ The following critical bugs have been successfully audited and resolved in the c
   - Configured `server.js` (`express.static`) to inject `Cache-Control: no-store, no-cache, must-revalidate` headers for `.html` files in addition to `.js` and `.css`.
 
 ### 4. Ngrok Warning & CORS Interception
-* **Problem**: Browsers remote-connecting via ngrok were redirected to a landing page warning, breaking JSON parsing.
-* **Fix**: `getHeaders()` dynamically checks if the hostname contains `ngrok` and automatically injects the `ngrok-skip-browser-warning: true` header to bypass the warning. The server explicitly allows this custom header in its CORS preflight options.
+* **Problem**: Browsers remote-connecting via tunnel were redirected to a landing page warning, breaking JSON parsing.
+* **Fix**: `getHeaders()` dynamically checks if the hostname contains `tunnel` and automatically injects the `tunnel-skip-browser-warning: true` header to bypass the warning. The server explicitly allows this custom header in its CORS preflight options.
 
 ### 5. Secure Offline Suggestion Handling
 * **Problem**: When offline or if the server was unreachable, proposed new CATs or modifications (meant as suggestions from guest users) fell back to local admin-like overrides (`createCatOnServer`/`saveCatDataToServer`). This generated ghost data in local storage and allowed guests to act like admins, while falsely notifying them that the suggestion was successfully sent to the server.

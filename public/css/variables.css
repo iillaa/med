@@ -137,3 +137,18 @@ body {
   border-color: #e2e8f0;
   border-left-color: var(--color-primary);
 }
+
+/* ── App Loading Overlay ─────────────────────────────────── */
+#app-loading-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+#app-loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(6,182,212,0.3); }
+  50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
+}
