@@ -342,8 +342,8 @@ async function initApp() {
 
   // Perform robust connection ping test at boot
   // On localhost: skip remote URL ping to avoid useless cross-origin noise
-  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice;
-  if (isLocal) {
+  const isLocalWebBrowser = !api.isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice);
+  if (isLocalWebBrowser) {
     state.isOnlineAtStartup = navigator.onLine;
     console.log("[Startup] Localhost detected, skipping remote connectivity ping. Online:", state.isOnlineAtStartup);
   } else {
@@ -362,7 +362,8 @@ async function initApp() {
   let lastState = state.isOnlineAtStartup;
   async function checkNetworkPeriodically() {
     // On localhost, only use navigator.onLine — avoid cross-origin pings to the tunnel URL
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice) {
+    const isLocalWebBrowser = !api.isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice);
+    if (isLocalWebBrowser) {
       const current = navigator.onLine;
       if (lastState !== current) {
         if (current) {
@@ -595,7 +596,8 @@ export function updateEditButtonsVisibility() {
   
   if (adminLoginBtn) {
     // Strictly restrict Admin login button to localhost browser environment (hide on Capacitor)
-    if (!api.isOfflineApp && (isLocalDevice || state.isAdmin)) {
+    const isLocalWebBrowser = !api.isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+    if (isLocalWebBrowser) {
       adminLoginBtn.style.display = 'flex';
       if (state.isAdmin) {
         adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
@@ -642,10 +644,10 @@ export function updateEditButtonsVisibility() {
     if (api.isOfflineApp) {
       // In offline mode with no server connection, hide server-side suggestions buttons
       if (addCatBtn) {
-        addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
+        addCatBtn.style.display = (state.isOnlineAtStartup && api.hasRemoteServer()) ? 'flex' : 'none';
         addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
       }
-      const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
+      const displayStyle = (state.isOnlineAtStartup && api.hasRemoteServer()) ? 'inline-flex' : 'none';
       if (editSummaryBtnEl) {
         editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
         editSummaryBtnEl.style.display = displayStyle;
@@ -656,7 +658,7 @@ export function updateEditButtonsVisibility() {
       }
       if (deleteBtn) deleteBtn.style.display = 'none';
     } else {
-      // Remote server connected web client (default view)
+      // Remote server connected web client (default view) - NO ADMIN BUTTONS EVER
       if (addCatBtn) {
         addCatBtn.style.display = 'flex';
         addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
