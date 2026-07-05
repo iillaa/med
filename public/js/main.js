@@ -332,87 +332,18 @@ async function initApp() {
   if (loadingOverlay) loadingOverlay.classList.remove('hidden');
   if (loadingBar) loadingBar.style.width = '5%';
 
-  // Update loading bar helper
   const setLoadingProgress = (pct) => {
     if (loadingBar) loadingBar.style.width = `${Math.min(pct, 95)}%`;
   };
 
   setLoadingProgress(10);
 
-  // Startup breadcrumbs — helps diagnose where time is spent
-  const mark = (label) => { console.time('[Startup] ' + label); return label; };
-  const endMark = (label) => console.timeEnd('[Startup] ' + label);
-  const phase1 = mark('connection-check');
-
-  // Perform robust connection ping test at boot
+  // ── 1. Detect App Mode (Fast, no network) ──
   const mode = api.getAppMode();
+  console.log(`[Startup] Mode: ${mode}`);
+  setLoadingProgress(20);
 
-  if (mode === api.APP_MODES.ADMIN_LOCAL) {
-    // Localhost: we ARE the server. Just use navigator.onLine for status display.
-    state.isOnlineAtStartup = navigator.onLine;
-    console.log("[Startup] Admin Local mode. Online status:", state.isOnlineAtStartup);
-  } else if (mode === api.APP_MODES.ANDROID_OFFLINE) {
-    // Capacitor/Android WebView: start offline to avoid logo freeze.
-    // Actual connectivity is determined lazily during fetchCats()/other requests.
-    state.isOnlineAtStartup = false;
-    console.log("[Startup] Android Offline mode (startup fast-fail). ");
-  } else {
-    // WEB_CLIENT (and any non-capacitor web build): fast-fail instead of awaiting full checkRealConnection().
-    state.isOnlineAtStartup = await (async () => {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1000);
-        // Lightweight endpoint; if it succeeds we mark online.
-        const res = await fetch('/api/search-status', { signal: controller.signal, method: 'GET' });
-        clearTimeout(timeoutId);
-        return !!res && res.ok;
-      } catch (_) {
-        return false;
-      }
-    })();
-
-    console.log("[Startup] Fast ping result:", state.isOnlineAtStartup);
-  }
-
-  endMark(phase1);
-  setLoadingProgress(25);
-
-  // Start background network check interval to alert transitions
-  let lastState = state.isOnlineAtStartup;
-  async function checkNetworkPeriodically() {
-    // On localhost, only use navigator.onLine — avoid cross-origin pings to the tunnel URL
-    const isLocalWebBrowser = !api.isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice);
-    if (isLocalWebBrowser) {
-      const current = navigator.onLine;
-      if (lastState !== current) {
-        if (current) {
-          showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
-        } else {
-          showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000);
-        }
-        state.isOnlineAtStartup = current;
-        lastState = current;
-        updateEditButtonsVisibility();
-      }
-      setTimeout(checkNetworkPeriodically, 8000);
-      return;
-    }
-  }
-  setTimeout(checkNetworkPeriodically, 8000);
-
-  // Check if current connection is local
-  const phase2 = mark('localhost-check');
-  try {
-    isLocalDevice = await api.checkIsLocal();
-  } catch (err) {
-    console.warn("[Startup] Localhost check failed, assuming non-local.", err);
-    isLocalDevice = false;
-  }
-  endMark(phase2);
-  setLoadingProgress(40);
-
-  // 1. Check Admin status
-  const phase3 = mark('admin-check');
+  // ── 2. Admin Check (only if local) ──
   try {
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
@@ -420,39 +351,31 @@ async function initApp() {
     console.warn("[Startup] Admin status check failed.", err);
     state.isAdmin = false;
   }
-  endMark(phase3);
-
   updateEditButtonsVisibility();
-  setLoadingProgress(55);
+  setLoadingProgress(40);
 
-  // 2. Fetch CATs with isolated fallback (Auto-recovery Boundary)
-  const phase4 = mark('fetch-cats');
-  const fetchStart = performance.now();
+  // ── 3. Fetch CATs (CRITICAL: This must NEVER block on Android) ──
   let cats = [];
   try {
     cats = await api.fetchCats();
-    console.log('[Startup] fetchCats duration:', Math.round(performance.now() - fetchStart), 'ms');
     if (window.perf) window.perf.recordMilestone('catsFetched');
   } catch (err) {
-    console.error("[Startup Error Boundary] Failed to fetch CATs from server. Retrying local bundled database...", err);
-    console.log('[Startup] fetchCats FAILED after:', Math.round(performance.now() - fetchStart), 'ms');
+    console.error("[Startup Error] Fetch CATs failed, using emergency fallback.", err);
     try {
-      // Automatic fallback to local bundled file to keep the app working
       const res = await fetch('data/cats_db.json');
-      if (!res.ok) throw new Error("Local fallback CAT database missing");
+      if (!res.ok) throw new Error("Emergency fallback failed");
       cats = await res.json();
-      showToast("Serveur injoignable. Chargement de la base de secours locale.", "fa-triangle-exclamation", 6000);
+      showToast("Chargement de secours local.", "fa-triangle-exclamation", 4000);
     } catch (fallbackErr) {
-      console.error("[Startup Error Boundary] Critical: Local fallback database failed to load.", fallbackErr);
-      showToast("Base de données indisponible. Vérifiez votre connexion.", "fa-circle-exclamation", 9000);
+      console.error("[Startup Critical] No data available.", fallbackErr);
+      showToast("Base de données indisponible.", "fa-circle-exclamation", 9000);
       if (loadingOverlay) loadingOverlay.classList.add('hidden');
-      return; // Exit boot if both server and local files are completely dead
+      return;
     }
   }
-  endMark(phase4);
+  setLoadingProgress(60);
 
-  // 3. Merge server CATs with local progress and local offline overrides
-  const phase5 = mark('merge-cats');
+  // ── 4. Merge Data ──
   const localProgress = getLocalProgress();
   let localOverrides = {};
   let customCreatedCats = [];
@@ -461,7 +384,6 @@ async function initApp() {
     customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
   } catch (_) {}
 
-  // Combine standard CATs with custom ones created offline
   if (api.isOfflineApp) {
     cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
     cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
@@ -480,50 +402,35 @@ async function initApp() {
       customOrdonnance: overrides.customOrdonnance || cat.ordonnance
     };
   });
-  endMark(phase5);
+  setLoadingProgress(75);
 
-  // 4. Instantly render UI Components
-  const phase6 = mark('render-ui');
+  // ── 5. Render UI ──
   try {
     sidebar.populateCategoryFilter(state.allCats);
     sidebar.renderCatList(state.allCats, selectCatWrapper);
     calculateStats();
     dashboard.renderDashboard(selectCatWrapper);
   } catch (err) {
-    console.error("[Startup Render Error] Failed rendering initial layout:", err);
+    console.error("[Startup Render Error]", err);
   }
-  endMark(phase6);
-  setLoadingProgress(75);
+  setLoadingProgress(90);
 
-  // 5. Restore saved navigation state (if returning from PDF reader)
+  // ── 6. Restore Navigation State ──
   try {
     workspace.restoreAppState();
   } catch (err) {
-    console.error("[Startup Navigation Error] Failed restoring previous state:", err);
+    console.error("[Startup Navigation Error]", err);
   }
 
-  // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
-  // If this fails, the app stays fully operational for CAT reading.
+  // ── 7. Background Tasks (PDFs, Indexes) ──
   setTimeout(() => {
-    if (navigator.onLine === false) {
-      // Offline: load from local files directly without attempting remote API pings
-      fetch('data/pdf_list.json')
-        .then(r => r.json())
-        .then(pdfs => {
-          state.allPdfs = pdfs;
-          workspace.updatePdfIndexStatus();
-          console.log("[Background] PDFs loaded from local cache (offline).");
-        }).catch(err => console.error("Failed loading local PDF list:", err));
-      return;
-    }
-
     Promise.all([
       api.fetchPdfs().catch(err => {
-        console.warn("[Background Boundary] PDF retrieval failed, falling back to local list.", err);
+        console.warn("[Background] PDF fetch failed, using local list.", err);
         return fetch('data/pdf_list.json').then(r => r.json()).catch(() => []);
       }),
       api.fetchPdfIndexStatus().catch(err => {
-        console.warn("[Background Boundary] Index status retrieval failed.", err);
+        console.warn("[Background] Index status failed.", err);
         return {};
       })
     ]).then(([pdfs, pdfIndexStatus]) => {
@@ -533,19 +440,79 @@ async function initApp() {
       if (state.activeCat) {
         workspace.selectCat(state.activeCat, true);
       }
-      console.log("[Background] PDFs and index status loaded successfully.");
-    }).catch(err => {
-      console.error("[Background Critical] Async startup block failed:", err);
-    });
-  }, 1500);
+      console.log("[Background] PDFs loaded.");
+    }).catch(err => console.error("[Background] PDF load failed:", err));
+  }, 100);
 
   setLoadingProgress(100);
 
-  // Brief delay so the user sees 100% fill, then hide overlay
+  // ── 8. Hide Overlay ──
   setTimeout(() => {
     if (loadingOverlay) loadingOverlay.classList.add('hidden');
   }, 350);
+
+  // ── 9. 🔥 BACKGROUND SYNC FOR ANDROID (NO FREEZE + REMOTE SYNC) 🔥 ──
+  setTimeout(() => {
+    if (api.isOfflineApp && api.hasRemoteServer()) {
+      console.log('[Background Sync] Checking for remote updates...');
+      (async () => {
+        try {
+          const remoteUrls = api.getConfiguredRemoteUrls();
+          let reachable = false;
+          for (const url of remoteUrls) {
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 1500);
+              await fetch(`${url}/api/search-status`, {
+                signal: controller.signal,
+                mode: 'no-cors'
+              });
+              clearTimeout(timeoutId);
+              reachable = true;
+              break;
+            } catch (_) {}
+          }
+
+          if (reachable) {
+            console.log('[Background Sync] Server reachable! Fetching latest data...');
+            const freshCats = await api.fetchCats();
+
+            const localProgress = getLocalProgress();
+            const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+            const existingIds = new Set(freshCats.map(c => c.id));
+            const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+              .filter(c => !existingIds.has(c.id));
+
+            state.allCats = [...freshCats, ...customCats].map(cat => {
+              const localEntry = localProgress[cat.id] || {};
+              const overrides = localOverrides[cat.id] || {};
+              return {
+                ...cat,
+                status: localEntry.status || 'todo',
+                notes: localEntry.notes || '',
+                summary: overrides.customSummary || cat.summary,
+                customSummary: overrides.customSummary || cat.summary,
+                ordonnance: overrides.customOrdonnance || cat.ordonnance,
+                customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+              };
+            });
+
+            sidebar.renderCatList(state.allCats, selectCatWrapper);
+            calculateStats();
+            dashboard.renderDashboard(selectCatWrapper);
+            showToast('📡 Données mises à jour depuis le serveur!', 'fa-cloud-arrow-up', 3000);
+            console.log('[Background Sync] Update complete.');
+          } else {
+            console.log('[Background Sync] Server not reachable, staying offline.');
+          }
+        } catch (err) {
+          console.warn('[Background Sync] Failed:', err.message);
+        }
+      })();
+    }
+  }, 1000);
 }
+
 // Select CAT wrapper that delegates to workspace component
 function selectCatWrapper(cat) {
   workspace.selectCat(cat);
