@@ -62,21 +62,25 @@ export function getAppMode() {
   const isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
   const hostname = window.location.hostname;
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
-  const isOnline = navigator.onLine;
 
+  // In Capacitor/Android WebView, navigator.onLine is often unreliable.
+  // Default to ANDROID_OFFLINE and let actual fetch attempts determine reachability.
   if (isCapacitor) {
-    _cachedAppMode = isOnline ? APP_MODES.ANDROID_ONLINE : APP_MODES.ANDROID_OFFLINE;
-  } else if (isLocalhost) {
+    _cachedAppMode = APP_MODES.ANDROID_OFFLINE;
+    console.log(`[App Mode] Detected (Capacitor): ${_cachedAppMode} (Host: ${hostname}). navigator.onLine ignored.`);
+    return _cachedAppMode;
+  }
+
+  if (isLocalhost) {
     _cachedAppMode = APP_MODES.ADMIN_LOCAL;
   } else {
     _cachedAppMode = APP_MODES.WEB_CLIENT;
   }
 
-  // 🔍 LOG THE DETECTED MODE
-  console.log(`[App Mode] Detected: ${_cachedAppMode} (Capacitor: ${isCapacitor}, Online: ${isOnline}, Host: ${hostname})`);
-
+  console.log(`[App Mode] Detected: ${_cachedAppMode} (Host: ${hostname}).`);
   return _cachedAppMode;
 }
+
 
 
 // Permission helpers
@@ -250,8 +254,28 @@ export async function checkIsLocal() {
   }
 }
 
+// Fast-fail fetch with a short timeout for connectivity tests
+async function quickPing(url, timeoutMs = 1500) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      mode: 'no-cors'
+    });
+    clearTimeout(timeoutId);
+    return !!res;
+  } catch (_) {
+    clearTimeout(timeoutId);
+    return false;
+  }
+}
+
 // Shared fetch helper with strict timeout to prevent indefinite hangs
-const FETCH_TIMEOUT_MS = 8000;
+// For Android, we want very fast timeouts to avoid freezing
+const isCapacitorForTimeout = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+const FETCH_TIMEOUT_MS = isCapacitorForTimeout ? 3000 : 8000;
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -271,39 +295,73 @@ async function fetchWithTimeout(url, options = {}) {
 export async function fetchCats() {
   const mode = getAppMode();
 
-  // 1. ADMIN_LOCAL: Always load from local server (fast, no remote ping)
+  // 1. ADMIN_LOCAL: Fast local server load
   if (mode === APP_MODES.ADMIN_LOCAL) {
     const res = await fetchWithTimeout('/api/cats', { headers: getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch CATs from local server');
     return res.json();
   }
 
-  // 2. ANDROID_OFFLINE: Load bundled static file
+  // 2. ANDROID_OFFLINE: Load bundled static file instantly (no remote waiting)
   if (mode === APP_MODES.ANDROID_OFFLINE) {
+    console.log('[fetchCats] Offline mode — loading bundled data instantly.');
     const res = await fetchWithTimeout('data/cats_db.json');
     if (!res.ok) throw new Error('Failed to fetch CATs statically');
     return res.json();
   }
 
-  // 3. WEB_CLIENT or ANDROID_ONLINE: Try remote server(s) with failover
+  // 3. ANDROID_ONLINE or WEB_CLIENT: remote try, but bounded tightly to avoid logo freeze
   const remoteUrls = getConfiguredRemoteUrls();
-  if (remoteUrls.length > 0) {
-    for (const remoteUrl of remoteUrls) {
-      try {
-        const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
-        if (res.ok) {
-          const data = await res.json();
-          console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
-          return data;
-        }
-      } catch (err) {
-        console.warn('[API] fetchCats: remote server', remoteUrl, 'unreachable');
-      }
+
+  // In Capacitor/Android: never block UI for more than ~1.5s.
+  const isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+  const remoteTimeout = isCapacitor ? 1500 : 3000;
+
+  // Quick ping test (HEAD) with short timeout.
+  // If ping doesn't succeed quickly, fall back immediately to local bundle.
+  let reachable = false;
+  for (const url of remoteUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), remoteTimeout);
+      // For fast check we only care about whether the network path accepts the request.
+      await fetch(`${url}/api/search-status`, {
+        method: 'HEAD',
+        signal: controller.signal,
+        mode: 'no-cors'
+      });
+      clearTimeout(timeoutId);
+      reachable = true;
+      break;
+    } catch (_) {
+      // keep trying other URLs
     }
   }
 
-  // 4. Fallback: local bundle if remote fails
-  console.warn('[API] fetchCats: remote servers unreachable, falling back to local bundle.');
+  if (!reachable) {
+    console.log('[fetchCats] No remote server reachable within timeout — falling back to local bundle instantly.');
+    const res = await fetchWithTimeout('data/cats_db.json');
+    if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
+    return res.json();
+  }
+
+  // Reachable: attempt to fetch remote cats with the short global timeout.
+  // (fetchWithTimeout is capped to FETCH_TIMEOUT_MS=3000; for Android this is fine.)
+  for (const remoteUrl of remoteUrls) {
+    try {
+      const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
+        return data;
+      }
+    } catch (err) {
+      console.warn('[API] fetchCats: remote server', remoteUrl, 'unreachable');
+    }
+  }
+
+  // Ultimate fallback
+  console.warn('[API] fetchCats: all remote attempts failed, using local bundle.');
   const res = await fetchWithTimeout('data/cats_db.json');
   if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
   return res.json();

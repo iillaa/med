@@ -352,18 +352,26 @@ async function initApp() {
     state.isOnlineAtStartup = navigator.onLine;
     console.log("[Startup] Admin Local mode. Online status:", state.isOnlineAtStartup);
   } else if (mode === api.APP_MODES.ANDROID_OFFLINE) {
-    // Android offline: explicitly offline
+    // Capacitor/Android WebView: start offline to avoid logo freeze.
+    // Actual connectivity is determined lazily during fetchCats()/other requests.
     state.isOnlineAtStartup = false;
-    console.log("[Startup] Android Offline mode.");
+    console.log("[Startup] Android Offline mode (startup fast-fail). ");
   } else {
-    // WEB_CLIENT or ANDROID_ONLINE: check real connectivity
-    try {
-      state.isOnlineAtStartup = await api.checkRealConnection();
-      console.log("[Startup] Real connection check status:", state.isOnlineAtStartup);
-    } catch (err) {
-      console.warn("[Startup] Real connection check failed, assuming offline mode.", err);
-      state.isOnlineAtStartup = false;
-    }
+    // WEB_CLIENT (and any non-capacitor web build): fast-fail instead of awaiting full checkRealConnection().
+    state.isOnlineAtStartup = await (async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1000);
+        // Lightweight endpoint; if it succeeds we mark online.
+        const res = await fetch('/api/search-status', { signal: controller.signal, method: 'GET' });
+        clearTimeout(timeoutId);
+        return !!res && res.ok;
+      } catch (_) {
+        return false;
+      }
+    })();
+
+    console.log("[Startup] Fast ping result:", state.isOnlineAtStartup);
   }
 
   endMark(phase1);
