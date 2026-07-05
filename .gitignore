@@ -33,4 +33,6 @@ suggestions.json*
 admin_password.txt*
 
 # Remote server URL config
-public/js/remote_config.js
+# public/js/remote_config.js must be committed to avoid parse-time import failures
+# (build.js overwrites it during normal builds).
+
