@@ -201,7 +201,7 @@ async function bootstrapApp() {
         );
         if (!confirmSubmit) return;
         try {
-          const result = await runSuggestionWithUI(
+          const success = await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'add',
@@ -209,13 +209,8 @@ async function bootstrapApp() {
             },
             `Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`
           );
-          if (result && result.success) {
+          if (success) {
             closeModal();
-            if (result.local && result.cat) {
-              await initApp();
-              const newCat = state.allCats.find(c => c.id === result.cat.id);
-              if (newCat) selectCatWrapper(newCat);
-            }
           }
         } catch (err) {
           console.error(err);
@@ -645,18 +640,19 @@ export function updateEditButtonsVisibility() {
   } else {
     // Non-admin mode (suggestions only)
     if (api.isOfflineApp) {
-      // In standalone app mode (Capacitor), always show suggestion/local-edit buttons so they can edit locally!
+      // In offline mode with no server connection, hide server-side suggestions buttons
       if (addCatBtn) {
-        addCatBtn.style.display = 'flex';
+        addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
         addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
       }
+      const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
       if (editSummaryBtnEl) {
         editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
-        editSummaryBtnEl.style.display = 'inline-flex';
+        editSummaryBtnEl.style.display = displayStyle;
       }
       if (editPrescriptionBtnEl) {
         editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
-        editPrescriptionBtnEl.style.display = 'inline-flex';
+        editPrescriptionBtnEl.style.display = displayStyle;
       }
       if (deleteBtn) deleteBtn.style.display = 'none';
     } else {

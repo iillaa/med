@@ -329,9 +329,7 @@ export async function updateCatOverrides(id, data) {
 }
 
 export async function submitSuggestion(suggestionData, onAttempt) {
-  let serverError = null;
-
-  if (navigator.onLine !== false && (!isOfflineApp || hasRemoteServer())) {
+  if (!isOfflineApp || hasRemoteServer()) {
     let attempts = 0;
     const maxAttempts = 3;
     const delayBetweenAttempts = 1200; // Wait 1.2s between retries
@@ -351,53 +349,21 @@ export async function submitSuggestion(suggestionData, onAttempt) {
         }
         const errorData = await res.json().catch(() => ({}));
         if (res.status >= 400 && res.status < 500) {
-          serverError = errorData.error || "Erreur client lors de l'envoi.";
-          break; // Don't retry client errors
+          return { success: false, error: errorData.error || "Erreur client lors de l'envoi." };
         }
       } catch (err) {
         console.warn(`[API] submitSuggestion: attempt ${attempts} failed.`, err.message);
-        serverError = err.message;
       }
 
       if (attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
       }
     }
+
+    return { success: false, error: "Le serveur est de garde ou injoignable après 3 tentatives. Proposition annulée." };
   }
 
-  // Fallback: If remote transmission failed (server unreachable/offline) or if we are in offline app,
-  // save it locally on the client to prevent loss of work!
-  if (isOfflineApp) {
-    if (suggestionData.type === 'add') {
-      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
-      const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-      const nextId = Math.max(100, ...customCats.map(c => c.id), ...Object.keys(localOverrides).map(Number)) + 1;
-      
-      const newCat = {
-        id: nextId,
-        ...suggestionData.data,
-        status: 'todo',
-        notes: ''
-      };
-      
-      customCats.push(newCat);
-      localStorage.setItem('dr_cat_custom_created_cats', JSON.stringify(customCats));
-      return { success: true, message: "Serveur injoignable. Fiche créée localement sur cet appareil.", cat: newCat, local: true };
-    } else if (suggestionData.type === 'edit') {
-      const catId = suggestionData.catId;
-      const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-      if (!localOverrides[catId]) localOverrides[catId] = {};
-      
-      const data = suggestionData.data;
-      if (data.summary !== undefined) localOverrides[catId].customSummary = data.summary;
-      if (data.ordonnance !== undefined) localOverrides[catId].customOrdonnance = data.ordonnance;
-      
-      localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
-      return { success: true, message: "Serveur injoignable. Modifications enregistrées localement sur cet appareil.", local: true };
-    }
-  }
-
-  return { success: false, error: serverError || "Le serveur est injoignable et le mode hors-ligne n'est pas disponible dans ce navigateur." };
+  return { success: false, error: "L'application fonctionne en mode hors-ligne. Les propositions de fiches nécessitent une connexion au serveur." };
 }
 
 export async function fetchSuggestions() {
