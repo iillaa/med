@@ -170,6 +170,7 @@ export async function logoutAdmin() {
 export async function checkAdminStatus() {
   const token = localStorage.getItem('dr_cat_admin_token');
   if (!token) return false;
+  if (isOfflineApp && navigator.onLine === false) return false;
  
   try {
     const res = await fetchWithTimeout(getApiUrl('/api/is-admin'), { headers: getHeaders() });
@@ -220,16 +221,18 @@ async function fetchWithTimeout(url, options = {}) {
 export async function fetchCats() {
   // Try each configured remote server URL in order (failover support)
   const remoteUrls = getConfiguredRemoteUrls();
-  for (const remoteUrl of remoteUrls) {
-    try {
-      const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        console.log('[API] fetchCats: loaded from remote server ' + remoteUrl + ' (' + data.length + ' CATs)');
-        return data;
+  if (navigator.onLine !== false) {
+    for (const remoteUrl of remoteUrls) {
+      try {
+        const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
+        if (res.ok) {
+          const data = await res.json();
+          console.log('[API] fetchCats: loaded from remote server ' + remoteUrl + ' (' + data.length + ' CATs)');
+          return data;
+        }
+      } catch (err) {
+        console.warn('[API] fetchCats: remote server ' + remoteUrl + ' unreachable, trying next...', err.message);
       }
-    } catch (err) {
-      console.warn('[API] fetchCats: remote server ' + remoteUrl + ' unreachable, trying next...', err.message);
     }
   }
 

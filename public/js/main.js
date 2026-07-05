@@ -486,6 +486,18 @@ async function initApp() {
   // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
   // If this fails, the app stays fully operational for CAT reading.
   setTimeout(() => {
+    if (navigator.onLine === false) {
+      // Offline: load from local files directly without attempting remote API pings
+      fetch('data/pdf_list.json')
+        .then(r => r.json())
+        .then(pdfs => {
+          state.allPdfs = pdfs;
+          workspace.updatePdfIndexStatus();
+          console.log("[Background] PDFs loaded from local cache (offline).");
+        }).catch(err => console.error("Failed loading local PDF list:", err));
+      return;
+    }
+
     Promise.all([
       api.fetchPdfs().catch(err => {
         console.warn("[Background Boundary] PDF retrieval failed, falling back to local list.", err);
