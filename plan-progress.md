@@ -74,6 +74,5 @@ graph TD
 - `[x]` **Documentation Sync**: All docs (README, codemap, developer_guide, technical_architecture, lessons_learned) updated to reflect current architecture.
 - `[ ]` **Beta APK Distribution**: Share compiled APK with beta testers.
 - `[ ]` **Bug Triage**: Collect and triage reported bugs from testers.
-- `[ ]` **Offline Suggestion Queueing**: Queue suggestions submitted while offline and auto-upload when server is detected.
 - `[ ]` **Local PDF Index Caching**: Bundle the PDF search index inside the Capacitor APK for offline full-text search without ever connecting to the server.
 - `[ ]` **Database Schema Validation**: Validate `cats_db.json` structure on server boot to catch manual editing mistakes before they cause crashes.
