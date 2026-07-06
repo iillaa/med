@@ -1,5 +1,6 @@
 import { state, getLocalProgress } from './state.js';
 import * as api from './api.js';
+import { initDebugConsole } from './debug-console.js';
 import * as sidebar from './components/sidebar.js';
 import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
@@ -42,6 +43,9 @@ let addCatBtn, addCatModal, closeAddCatModalBtn, cancelAddCatBtn, addCatForm;
 
 // Entry Point
 async function bootstrapApp() {
+  // ── START DEBUG CONSOLE (catches everything from the beginning) ──
+  initDebugConsole();
+  
   // Protect all localStorage reads from crashing the app
   const origLocalStorageGetItem = Storage.prototype.getItem;
   Storage.prototype.getItem = function(key) {
@@ -63,27 +67,31 @@ async function bootstrapApp() {
     showToast("Erreur réseau ou réponse de base de données non reconnue.", "fa-circle-exclamation", 5000);
   };
 
-  // PWA Service Worker — only register on production, unregister on dev to avoid stale caches
+  // PWA Service Worker — disable on Android to prevent logo freezes
+  const isAndroid = /android/i.test(navigator.userAgent);
   if ('serviceWorker' in navigator) {
-    const isDev = location.hostname === 'localhost' ||
-                  location.hostname === '127.0.0.1' ||
-                  PROVIDERS.some(p => p.isDevHostname(location.hostname));
-   
-    if (isDev) {
-      // Development: aggressively unregister all service workers and clear caches
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(reg => reg.unregister());
-      });
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    // Always unregister to avoid stale caches/clients.claim deadlocks
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => reg.unregister());
+    });
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+
+    if (!isAndroid) {
+      const isDev = location.hostname === 'localhost' ||
+                    location.hostname === '127.0.0.1' ||
+                    PROVIDERS.some(p => p.isDevHostname(location.hostname));
+      if (!isDev) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('PWA SW registered:', reg.scope))
+            .catch(err => console.error('PWA SW failed:', err));
+        });
+      }
     } else {
-      // Production: register the service worker for offline PWA support
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('PWA SW registered:', reg.scope))
-          .catch(err => console.error('PWA SW failed:', err));
-      });
+      console.log('[Startup] Service worker disabled on Android to prevent freezes.');
     }
   }
+
  
   // Theme Toggle Initialization
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -257,11 +265,20 @@ async function bootstrapApp() {
  
   // Handle Online/Offline Status Events
   window.addEventListener('online', () => {
-    showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
+    showToast("Connexion réseau détectée. Synchronisation...", "fa-wifi", 4000);
+    runBackgroundSync();
   });
   window.addEventListener('offline', () => {
-    showToast("Connexion perdue. Les modifications locales seront enregistrées sur ce navigateur.", "fa-circle-xmark", 6000);
+    showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000);
+    if (api.isOfflineApp) {
+      api.setAppMode(api.APP_MODES.ANDROID_OFFLINE);
+      state.isOnlineAtStartup = false;
+    }
   });
+  window.addEventListener('drcat-app-mode-changed', () => {
+    updateEditButtonsVisibility();
+  });
+
  
   // Handle keyboard shortcuts
   window.addEventListener('keydown', (e) => {
@@ -328,71 +345,22 @@ async function initApp() {
   if (loadingOverlay) loadingOverlay.classList.remove('hidden');
   if (loadingBar) loadingBar.style.width = '5%';
 
-  // Update loading bar helper
   const setLoadingProgress = (pct) => {
-    if (loadingBar) loadingBar.style.width = `${Math.min(pct, 95)}%`;
+    if (window.setLoaderProgress) {
+      window.setLoaderProgress(pct);
+    } else if (loadingBar) {
+      loadingBar.style.width = `${pct}%`;
+    }
   };
 
   setLoadingProgress(10);
 
-  // Startup breadcrumbs — helps diagnose where time is spent
-  const mark = (label) => { console.time('[Startup] ' + label); return label; };
-  const endMark = (label) => console.timeEnd('[Startup] ' + label);
-  const phase1 = mark('connection-check');
+  // ── 1. Detect App Mode (Fast, no network) ──
+  const mode = api.getAppMode();
+  console.log(`[Startup] Mode: ${mode}`);
+  setLoadingProgress(20);
 
-  // Perform robust connection ping test at boot
-  // On localhost: skip remote URL ping to avoid useless cross-origin noise
-  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice;
-  if (isLocal) {
-    state.isOnlineAtStartup = navigator.onLine;
-    console.log("[Startup] Localhost detected, skipping remote connectivity ping. Online:", state.isOnlineAtStartup);
-  } else {
-    try {
-      state.isOnlineAtStartup = await api.checkRealConnection();
-      console.log("[Startup] Real connection check status:", state.isOnlineAtStartup);
-    } catch (err) {
-      console.warn("[Startup] Real connection check failed, assuming offline mode.", err);
-      state.isOnlineAtStartup = false;
-    }
-  }
-  endMark(phase1);
-  setLoadingProgress(25);
-
-  // Start background network check interval to alert transitions
-  let lastState = state.isOnlineAtStartup;
-  async function checkNetworkPeriodically() {
-    // On localhost, only use navigator.onLine — avoid cross-origin pings to the tunnel URL
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || isLocalDevice) {
-      const current = navigator.onLine;
-      if (lastState !== current) {
-        if (current) {
-          showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
-        } else {
-          showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000);
-        }
-        state.isOnlineAtStartup = current;
-        lastState = current;
-        updateEditButtonsVisibility();
-      }
-      setTimeout(checkNetworkPeriodically, 8000);
-      return;
-    }
-  }
-  setTimeout(checkNetworkPeriodically, 8000);
-
-  // Check if current connection is local
-  const phase2 = mark('localhost-check');
-  try {
-    isLocalDevice = await api.checkIsLocal();
-  } catch (err) {
-    console.warn("[Startup] Localhost check failed, assuming non-local.", err);
-    isLocalDevice = false;
-  }
-  endMark(phase2);
-  setLoadingProgress(40);
-
-  // 1. Check Admin status
-  const phase3 = mark('admin-check');
+  // ── 2. Admin Check (only if local) ──
   try {
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
@@ -400,39 +368,31 @@ async function initApp() {
     console.warn("[Startup] Admin status check failed.", err);
     state.isAdmin = false;
   }
-  endMark(phase3);
-
   updateEditButtonsVisibility();
-  setLoadingProgress(55);
+  setLoadingProgress(40);
 
-  // 2. Fetch CATs with isolated fallback (Auto-recovery Boundary)
-  const phase4 = mark('fetch-cats');
-  const fetchStart = performance.now();
+  // ── 3. Fetch CATs (CRITICAL: This must NEVER block on Android) ──
   let cats = [];
   try {
     cats = await api.fetchCats();
-    console.log('[Startup] fetchCats duration:', Math.round(performance.now() - fetchStart), 'ms');
     if (window.perf) window.perf.recordMilestone('catsFetched');
   } catch (err) {
-    console.error("[Startup Error Boundary] Failed to fetch CATs from server. Retrying local bundled database...", err);
-    console.log('[Startup] fetchCats FAILED after:', Math.round(performance.now() - fetchStart), 'ms');
+    console.error("[Startup Error] Fetch CATs failed, using emergency fallback.", err);
     try {
-      // Automatic fallback to local bundled file to keep the app working
       const res = await fetch('data/cats_db.json');
-      if (!res.ok) throw new Error("Local fallback CAT database missing");
+      if (!res.ok) throw new Error("Emergency fallback failed");
       cats = await res.json();
-      showToast("Serveur injoignable. Chargement de la base de secours locale.", "fa-triangle-exclamation", 6000);
+      showToast("Chargement de secours local.", "fa-triangle-exclamation", 4000);
     } catch (fallbackErr) {
-      console.error("[Startup Error Boundary] Critical: Local fallback database failed to load.", fallbackErr);
-      showToast("Base de données indisponible. Vérifiez votre connexion.", "fa-circle-exclamation", 9000);
+      console.error("[Startup Critical] No data available.", fallbackErr);
+      showToast("Base de données indisponible.", "fa-circle-exclamation", 9000);
       if (loadingOverlay) loadingOverlay.classList.add('hidden');
-      return; // Exit boot if both server and local files are completely dead
+      return;
     }
   }
-  endMark(phase4);
+  setLoadingProgress(60);
 
-  // 3. Merge server CATs with local progress and local offline overrides
-  const phase5 = mark('merge-cats');
+  // ── 4. Merge Data ──
   const localProgress = getLocalProgress();
   let localOverrides = {};
   let customCreatedCats = [];
@@ -441,7 +401,6 @@ async function initApp() {
     customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
   } catch (_) {}
 
-  // Combine standard CATs with custom ones created offline
   if (api.isOfflineApp) {
     cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
     cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
@@ -460,50 +419,35 @@ async function initApp() {
       customOrdonnance: overrides.customOrdonnance || cat.ordonnance
     };
   });
-  endMark(phase5);
+  setLoadingProgress(75);
 
-  // 4. Instantly render UI Components
-  const phase6 = mark('render-ui');
+  // ── 5. Render UI ──
   try {
     sidebar.populateCategoryFilter(state.allCats);
     sidebar.renderCatList(state.allCats, selectCatWrapper);
     calculateStats();
     dashboard.renderDashboard(selectCatWrapper);
   } catch (err) {
-    console.error("[Startup Render Error] Failed rendering initial layout:", err);
+    console.error("[Startup Render Error]", err);
   }
-  endMark(phase6);
-  setLoadingProgress(75);
+  setLoadingProgress(90);
 
-  // 5. Restore saved navigation state (if returning from PDF reader)
+  // ── 6. Restore Navigation State ──
   try {
     workspace.restoreAppState();
   } catch (err) {
-    console.error("[Startup Navigation Error] Failed restoring previous state:", err);
+    console.error("[Startup Navigation Error]", err);
   }
 
-  // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
-  // If this fails, the app stays fully operational for CAT reading.
+  // ── 7. Background Tasks (PDFs, Indexes) ──
   setTimeout(() => {
-    if (navigator.onLine === false) {
-      // Offline: load from local files directly without attempting remote API pings
-      fetch('data/pdf_list.json')
-        .then(r => r.json())
-        .then(pdfs => {
-          state.allPdfs = pdfs;
-          workspace.updatePdfIndexStatus();
-          console.log("[Background] PDFs loaded from local cache (offline).");
-        }).catch(err => console.error("Failed loading local PDF list:", err));
-      return;
-    }
-
     Promise.all([
       api.fetchPdfs().catch(err => {
-        console.warn("[Background Boundary] PDF retrieval failed, falling back to local list.", err);
+        console.warn("[Background] PDF fetch failed, using local list.", err);
         return fetch('data/pdf_list.json').then(r => r.json()).catch(() => []);
       }),
       api.fetchPdfIndexStatus().catch(err => {
-        console.warn("[Background Boundary] Index status retrieval failed.", err);
+        console.warn("[Background] Index status failed.", err);
         return {};
       })
     ]).then(([pdfs, pdfIndexStatus]) => {
@@ -513,19 +457,94 @@ async function initApp() {
       if (state.activeCat) {
         workspace.selectCat(state.activeCat, true);
       }
-      console.log("[Background] PDFs and index status loaded successfully.");
-    }).catch(err => {
-      console.error("[Background Critical] Async startup block failed:", err);
-    });
-  }, 1500);
+      console.log("[Background] PDFs loaded.");
+    }).catch(err => console.error("[Background] PDF load failed:", err));
+  }, 100);
 
   setLoadingProgress(100);
 
-  // Brief delay so the user sees 100% fill, then hide overlay
+  // ── 8. Hide Overlay ──
+  // (Automatically handled by window.setLoaderProgress(100) above)
+
+  // ── 9. 🔥 BACKGROUND SYNC FOR ANDROID (NO FREEZE + REMOTE SYNC) 🔥 ──
   setTimeout(() => {
-    if (loadingOverlay) loadingOverlay.classList.add('hidden');
-  }, 350);
+    runBackgroundSync();
+    // Periodically run background sync every 30 seconds
+    setInterval(runBackgroundSync, 30000);
+  }, 1000);
 }
+
+export async function runBackgroundSync() {
+  if (!api.isOfflineApp || !api.hasRemoteServer()) return;
+
+  console.log('[Background Sync] Checking for remote updates...');
+  try {
+    const remoteUrls = api.getConfiguredRemoteUrls();
+    let reachable = false;
+    for (const url of remoteUrls) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        await fetch(`${url}/api/search-status`, {
+          signal: controller.signal,
+          mode: 'no-cors'
+        });
+        clearTimeout(timeoutId);
+        reachable = true;
+        break;
+      } catch (_) {}
+    }
+
+    const wasOffline = (api.getAppMode() === api.APP_MODES.ANDROID_OFFLINE);
+
+    if (reachable) {
+      console.log('[Background Sync] Server reachable! Fetching latest data...');
+      
+      // Update app mode to ANDROID_ONLINE to allow api.fetchCats() to hit the server
+      api.setAppMode(api.APP_MODES.ANDROID_ONLINE);
+      state.isOnlineAtStartup = true;
+
+      const freshCats = await api.fetchCats();
+
+      const localProgress = getLocalProgress();
+      const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+      const existingIds = new Set(freshCats.map(c => c.id));
+      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+        .filter(c => !existingIds.has(c.id));
+
+      state.allCats = [...freshCats, ...customCats].map(cat => {
+        const localEntry = localProgress[cat.id] || {};
+        const overrides = localOverrides[cat.id] || {};
+        return {
+          ...cat,
+          status: localEntry.status || 'todo',
+          notes: localEntry.notes || '',
+          summary: overrides.customSummary || cat.summary,
+          customSummary: overrides.customSummary || cat.summary,
+          ordonnance: overrides.customOrdonnance || cat.ordonnance,
+          customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+        };
+      });
+
+      sidebar.renderCatList(state.allCats, selectCatWrapper);
+      calculateStats();
+      dashboard.renderDashboard(selectCatWrapper);
+
+      if (wasOffline) {
+        showToast('📡 Connexion serveur établie. Données synchronisées !', 'fa-cloud-arrow-up', 4000);
+      }
+      console.log('[Background Sync] Update complete.');
+    } else {
+      console.log('[Background Sync] Server not reachable, staying offline.');
+      api.setAppMode(api.APP_MODES.ANDROID_OFFLINE);
+      state.isOnlineAtStartup = false;
+    }
+  } catch (err) {
+    console.warn('[Background Sync] Failed:', err.message);
+  }
+}
+
+
 // Select CAT wrapper that delegates to workspace component
 function selectCatWrapper(cat) {
   workspace.selectCat(cat);
@@ -593,9 +612,14 @@ export function updateEditButtonsVisibility() {
   const addCatBtn = document.getElementById('add-cat-btn');
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
+  const mode = api.getAppMode();
+  const isAdminLocal = mode === api.APP_MODES.ADMIN_LOCAL;
+  const isWebOrAndroidOnline = [api.APP_MODES.WEB_CLIENT, api.APP_MODES.ANDROID_ONLINE].includes(mode);
+  const isAndroidOffline = mode === api.APP_MODES.ANDROID_OFFLINE;
+
+  // ── Admin Login Button: ONLY on localhost ──
   if (adminLoginBtn) {
-    // Strictly restrict Admin login button to localhost browser environment (hide on Capacitor)
-    if (!api.isOfflineApp && (isLocalDevice || state.isAdmin)) {
+    if (isAdminLocal) {
       adminLoginBtn.style.display = 'flex';
       if (state.isAdmin) {
         adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
@@ -611,16 +635,25 @@ export function updateEditButtonsVisibility() {
     }
   }
 
-  // Set edit buttons and add button text/icons dynamically based on Admin mode
+  // ── Add CAT Button ──
+  if (addCatBtn) {
+    if (isAdminLocal) {
+      addCatBtn.style.display = 'flex';
+      addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> CAT';
+    } else if (isWebOrAndroidOnline) {
+      addCatBtn.style.display = 'flex';
+      addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
+    } else {
+      addCatBtn.style.display = 'none';
+    }
+  }
+
+  // ── Edit Summary / Prescription / Delete buttons ──
   const editSummaryBtnEl = document.getElementById('edit-summary-btn');
   const editPrescriptionBtnEl = document.getElementById('edit-prescription-btn');
   const deleteBtn = document.getElementById('delete-cat-btn');
 
-  if (state.isAdmin) {
-    if (addCatBtn) {
-      addCatBtn.style.display = 'flex';
-      addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> CAT';
-    }
+  if (isAdminLocal && state.isAdmin) {
     if (editSummaryBtnEl) {
       editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i> Modifier la fiche';
       editSummaryBtnEl.style.display = 'inline-flex';
@@ -630,50 +663,25 @@ export function updateEditButtonsVisibility() {
       editPrescriptionBtnEl.style.display = 'inline-flex';
     }
     if (deleteBtn) {
-      // Core CATs cannot be deleted, custom CATs (id > 55) can be deleted by admin
-      if (state.activeCat && state.activeCat.id > 55) {
-        deleteBtn.style.display = 'inline-flex';
-      } else {
-        deleteBtn.style.display = 'none';
-      }
+      deleteBtn.style.display = (state.activeCat && state.activeCat.id > 55) ? 'inline-flex' : 'none';
     }
+  } else if (isWebOrAndroidOnline) {
+    if (editSummaryBtnEl) {
+      editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
+      editSummaryBtnEl.style.display = 'inline-flex';
+    }
+    if (editPrescriptionBtnEl) {
+      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
+      editPrescriptionBtnEl.style.display = 'inline-flex';
+    }
+    if (deleteBtn) deleteBtn.style.display = 'none';
   } else {
-    // Non-admin mode (suggestions only)
-    if (api.isOfflineApp) {
-      // In offline mode with no server connection, hide server-side suggestions buttons
-      if (addCatBtn) {
-        addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
-        addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
-      }
-      const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
-      if (editSummaryBtnEl) {
-        editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
-        editSummaryBtnEl.style.display = displayStyle;
-      }
-      if (editPrescriptionBtnEl) {
-        editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
-        editPrescriptionBtnEl.style.display = displayStyle;
-      }
-      if (deleteBtn) deleteBtn.style.display = 'none';
-    } else {
-      // Remote server connected web client (default view)
-      if (addCatBtn) {
-        addCatBtn.style.display = 'flex';
-        addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
-      }
-      if (editSummaryBtnEl) {
-        editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
-        editSummaryBtnEl.style.display = 'inline-flex';
-      }
-      if (editPrescriptionBtnEl) {
-        editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
-        editPrescriptionBtnEl.style.display = 'inline-flex';
-      }
-      if (deleteBtn) deleteBtn.style.display = 'none';
-    }
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'none';
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'none';
   }
 
-  // Ensure diagnostics button visibility is synced
   diagnostics.updateDiagnosticsButtonVisibility();
   performanceComponent.updatePerformanceButtonVisibility();
 }
+

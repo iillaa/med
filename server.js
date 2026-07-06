@@ -27,13 +27,18 @@ async function loadServerProviders() {
     // Extract PROVIDERS array by evaluating the module source
     const match = content.match(/export const PROVIDERS = (\[[\s\S]*?\]);/);
     if (match) {
-      return eval('(' + match[1] + ')');
+      try {
+        return (new Function('return ' + match[1]))();
+      } catch (_) {
+        return fallback;
+      }
     }
   } catch (err) {
     console.warn('[Providers] Failed to load provider registry, using fallback:', err.message);
   }
   // Fallback: minimal ngrok-only support if provider file missing
-  return [
+  const fallback = [
+
     {
       id: 'ngrok',
       urlPattern: /(^|\.)ngrok(-free)?\.(app|dev|io)$/,
@@ -376,15 +381,26 @@ async function initializeData() {
   await initAdminPassword();
   await initializeProviders(); // Load provider registry before handling any requests
   
-  // Ensure remote_config.js is always fresh before serving requests
+  // Run rebuild in background — never block server startup
   try {
     const buildModule = require('./build.js');
     if (typeof buildModule.rebuildClientAssets === 'function') {
-      await buildModule.rebuildClientAssets();
+      // Run in next tick/immediate to avoid blocking initial startup phase
+      setImmediate(() => {
+        try {
+          buildModule.rebuildClientAssets();
+          console.log('[Startup] Auto-build completed successfully.');
+        } catch (err) {
+          console.warn('[Startup] Auto-build failed in background:', err.message);
+        }
+      });
+      console.log('[Startup] Background rebuild scheduled.');
     }
   } catch (err) {
-    console.warn('[Startup] Auto-build skipped:', err.message);
+    console.warn('[Startup] Auto-build module unavailable:', err.message);
   }
+
+
 
   // Load cats_db.json
   try {
@@ -430,12 +446,13 @@ async function initializeData() {
     if (exists) {
       const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
       const parsed = JSON.parse(content);
-      remoteServerUrl = parsed.url || '';
+      remoteServerUrl = parsed.url || (Array.isArray(parsed.urls) ? parsed.urls[0] : '');
       if (remoteServerUrl) {
-        ALLOWED_ORIGINS.add(remoteServerUrl);
-        // Also add the ngrok tunnel URL variations
-        const urlObj = new URL(remoteServerUrl);
-        ALLOWED_ORIGINS.add(`${urlObj.protocol}//${urlObj.host}`);
+        allowedOrigins.add(remoteServerUrl);
+        try {
+          const urlObj = new URL(remoteServerUrl);
+          allowedOrigins.add(`${urlObj.protocol}//${urlObj.host}`);
+        } catch (_) {}
       }
     }
   } catch (err) {
@@ -443,7 +460,6 @@ async function initializeData() {
   }
 }
 
-// Register indexer update callback to keep memory index in sync
 onIndexUpdated(async () => {
   try {
     const exists = await fs.promises.access(INDEX_FILE).then(() => true).catch(() => false);
@@ -573,7 +589,7 @@ app.get('/api/cats', (req, res) => {
 
 // Endpoint to update a specific CAT's details directly (Admin only)
 app.post('/api/cats/:id', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
   }
   try {
@@ -608,7 +624,7 @@ app.post('/api/cats/:id', async (req, res) => {
 
 // Endpoint to add a new CAT to the database directly (Admin only)
 app.post('/api/cats', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
   }
   try {
@@ -643,7 +659,7 @@ app.post('/api/cats', async (req, res) => {
 
 // Endpoint to delete a custom CAT from the database (Admin only)
 app.delete('/api/cats/:id', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
   }
   try {
@@ -680,7 +696,7 @@ app.delete('/api/cats/:id', async (req, res) => {
 
 // GET /api/suggestions - List pending suggestions (Admin only)
 app.get('/api/suggestions', (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit.' });
   }
   res.json(suggestionsCache);
@@ -718,7 +734,7 @@ app.post('/api/suggestions', async (req, res) => {
 
 // POST /api/suggestions/:id/approve - Approve a suggestion (Admin only)
 app.post('/api/suggestions/:id/approve', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit.' });
   }
   try {
@@ -778,7 +794,7 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
 
 // POST /api/suggestions/:id/reject - Reject a suggestion (Admin only)
 app.post('/api/suggestions/:id/reject', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit.' });
   }
   try {
@@ -807,7 +823,7 @@ app.post('/api/suggestions/:id/reject', async (req, res) => {
 
 // POST /api/suggestions/:id/edit - Update a suggestion's content (Admin only)
 app.post('/api/suggestions/:id/edit', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit.' });
   }
   try {
@@ -955,7 +971,7 @@ app.get('/api/search-status', (req, res) => {
 
 // Trigger PDF re-indexing API (Admin only)
 app.post('/api/reindex', (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit.' });
   }
   try {
@@ -969,7 +985,7 @@ app.post('/api/reindex', (req, res) => {
 
 // Save Layout CSS Tunings from Browser (Admin only)
 app.post('/api/save-css', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit.' });
   }
   try {
@@ -1027,7 +1043,7 @@ ${endMarker}`;
 
 // System diagnostics API endpoints (Admin only)
 app.get('/api/diagnostics/system', (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
   try {
@@ -1053,7 +1069,7 @@ app.get('/api/diagnostics/system', (req, res) => {
 });
 
 app.get('/api/diagnostics/db-stats', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
   try {
@@ -1089,7 +1105,7 @@ app.get('/api/diagnostics/db-stats', async (req, res) => {
 });
 
 app.get('/api/diagnostics/index-detail', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
   try {
@@ -1140,14 +1156,14 @@ app.get('/api/diagnostics/index-detail', async (req, res) => {
 });
 
 app.get('/api/diagnostics/remote-server-url', (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
   res.json({ url: remoteServerUrl });
 });
 
 app.post('/api/diagnostics/remote-server-url', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
   try {
@@ -1180,7 +1196,7 @@ app.post('/api/diagnostics/remote-server-url', async (req, res) => {
 });
 
 app.get('/api/diagnostics/tunnel-info', async (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
   }
   
@@ -1204,7 +1220,7 @@ app.get('/api/diagnostics/tunnel-info', async (req, res) => {
 });
 
 app.get('/api/performance/server-metrics', (req, res) => {
-  if (!isAdminRequest(req)) {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
     return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de performance.' });
   }
   try {
@@ -1307,7 +1323,7 @@ app.get('/api/performance/server-metrics', (req, res) => {
 
 // Start application after loading caches
 initializeData().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT,  () => {
     console.log(`=================================================`);
     console.log(`Medical CAT Learning App is running!`);
     console.log(`Local Access: http://localhost:${PORT}`);

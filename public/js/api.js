@@ -46,6 +46,68 @@ export const isOfflineApp =
 
 console.log("[API] Offline Standalone Mode:", isOfflineApp);
 
+// ── Clean App Mode Detection ──────────────────────────────
+export const APP_MODES = {
+  ADMIN_LOCAL: 'admin_local',
+  WEB_CLIENT: 'web_client',
+  ANDROID_ONLINE: 'android_online',
+  ANDROID_OFFLINE: 'android_offline'
+};
+
+let _cachedAppMode = null;
+
+export function getAppMode() {
+  if (_cachedAppMode) return _cachedAppMode;
+
+  const isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+
+  // In Capacitor/Android WebView, navigator.onLine is often unreliable.
+  // Default to ANDROID_OFFLINE and let actual fetch attempts determine reachability.
+  if (isCapacitor) {
+    _cachedAppMode = APP_MODES.ANDROID_OFFLINE;
+    console.log(`[App Mode] Detected (Capacitor): ${_cachedAppMode} (Host: ${hostname}). navigator.onLine ignored.`);
+    return _cachedAppMode;
+  }
+
+  if (isLocalhost) {
+    _cachedAppMode = APP_MODES.ADMIN_LOCAL;
+  } else {
+    _cachedAppMode = APP_MODES.WEB_CLIENT;
+  }
+
+  console.log(`[App Mode] Detected: ${_cachedAppMode} (Host: ${hostname}).`);
+  return _cachedAppMode;
+}
+
+export function setAppMode(mode) {
+  const oldMode = _cachedAppMode;
+  _cachedAppMode = mode;
+  if (oldMode !== mode) {
+    console.log(`[API] App Mode changed from ${oldMode} to ${mode}`);
+    window.dispatchEvent(new CustomEvent('drcat-app-mode-changed', { detail: { oldMode, mode } }));
+  }
+}
+
+
+
+
+// Permission helpers
+export function canEditDirectly() {
+  return getAppMode() === APP_MODES.ADMIN_LOCAL;
+}
+export function canSuggest() {
+  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
+}
+export function canSync() {
+  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
+}
+export function isAdminMode() {
+  return getAppMode() === APP_MODES.ADMIN_LOCAL;
+}
+
+
 // Module cache for client-side search in offline mode
 let offlinePdfIndexCache = null;
 
@@ -123,8 +185,9 @@ function getConfiguredRemoteUrls() {
 function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
-  // Use provider abstraction to determine required headers (e.g. ngrok skip-browser-warning)
-  const providerExtraHeaders = getExtraHeaders(configuredUrl);
+  // Only add provider headers if we are not on localhost or if explicitly hitting a remote URL
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'x-admin-token': token } : {}),
@@ -168,6 +231,7 @@ export async function logoutAdmin() {
 }
  
 export async function checkAdminStatus() {
+  if (isOfflineApp) return false; // No admin for Android app
   const token = localStorage.getItem('dr_cat_admin_token');
   if (!token) return false;
   if (isOfflineApp && navigator.onLine === false) return false;
@@ -200,8 +264,28 @@ export async function checkIsLocal() {
   }
 }
 
+// Fast-fail fetch with a short timeout for connectivity tests
+async function quickPing(url, timeoutMs = 1500) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      mode: 'no-cors'
+    });
+    clearTimeout(timeoutId);
+    return !!res;
+  } catch (_) {
+    clearTimeout(timeoutId);
+    return false;
+  }
+}
+
 // Shared fetch helper with strict timeout to prevent indefinite hangs
-const FETCH_TIMEOUT_MS = 8000;
+// For Android, we want very fast timeouts to avoid freezing
+const isCapacitorForTimeout = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+const FETCH_TIMEOUT_MS = isCapacitorForTimeout ? 3000 : 8000;
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -219,34 +303,80 @@ async function fetchWithTimeout(url, options = {}) {
 }
 
 export async function fetchCats() {
-  // Try each configured remote server URL in order (failover support)
-  const remoteUrls = getConfiguredRemoteUrls();
-  if (navigator.onLine !== false) {
-    for (const remoteUrl of remoteUrls) {
-      try {
-        const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
-        if (res.ok) {
-          const data = await res.json();
-          console.log('[API] fetchCats: loaded from remote server ' + remoteUrl + ' (' + data.length + ' CATs)');
-          return data;
-        }
-      } catch (err) {
-        console.warn('[API] fetchCats: remote server ' + remoteUrl + ' unreachable, trying next...', err.message);
-      }
-    }
+  const mode = getAppMode();
+
+  // 1. ADMIN_LOCAL: Fast local server load
+  if (mode === APP_MODES.ADMIN_LOCAL) {
+    const res = await fetchWithTimeout('/api/cats', { headers: getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch CATs from local server');
+    return res.json();
   }
 
-  // Fallback: use the bundled static database (Capacitor app / no server)
-  if (isOfflineApp) {
+  // 2. ANDROID_OFFLINE: Load bundled static file instantly (no remote waiting)
+  if (mode === APP_MODES.ANDROID_OFFLINE) {
+    console.log('[fetchCats] Offline mode — loading bundled data instantly.');
     const res = await fetchWithTimeout('data/cats_db.json');
     if (!res.ok) throw new Error('Failed to fetch CATs statically');
     return res.json();
   }
 
-  const res = await fetchWithTimeout('/api/cats', { headers: getHeaders() });
-  if (!res.ok) throw new Error('Failed to fetch CATs');
+  // 3. ANDROID_ONLINE or WEB_CLIENT: remote try, but bounded tightly to avoid logo freeze
+  const remoteUrls = getConfiguredRemoteUrls();
+
+  // In Capacitor/Android: never block UI for more than ~1.5s.
+  const isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+  const remoteTimeout = isCapacitor ? 1500 : 3000;
+
+  // Quick ping test (HEAD) with short timeout.
+  // If ping doesn't succeed quickly, fall back immediately to local bundle.
+  let reachable = false;
+  for (const url of remoteUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), remoteTimeout);
+      // For fast check we only care about whether the network path accepts the request.
+      await fetch(`${url}/api/search-status`, {
+        method: 'HEAD',
+        signal: controller.signal,
+        mode: 'no-cors'
+      });
+      clearTimeout(timeoutId);
+      reachable = true;
+      break;
+    } catch (_) {
+      // keep trying other URLs
+    }
+  }
+
+  if (!reachable) {
+    console.log('[fetchCats] No remote server reachable within timeout — falling back to local bundle instantly.');
+    const res = await fetchWithTimeout('data/cats_db.json');
+    if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
+    return res.json();
+  }
+
+  // Reachable: attempt to fetch remote cats with the short global timeout.
+  // (fetchWithTimeout is capped to FETCH_TIMEOUT_MS=3000; for Android this is fine.)
+  for (const remoteUrl of remoteUrls) {
+    try {
+      const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
+        return data;
+      }
+    } catch (err) {
+      console.warn('[API] fetchCats: remote server', remoteUrl, 'unreachable');
+    }
+  }
+
+  // Ultimate fallback
+  console.warn('[API] fetchCats: all remote attempts failed, using local bundle.');
+  const res = await fetchWithTimeout('data/cats_db.json');
+  if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
   return res.json();
 }
+
 
 export async function fetchPdfs() {
   if (isOfflineApp) {
@@ -329,42 +459,59 @@ export async function updateCatOverrides(id, data) {
 }
 
 export async function submitSuggestion(suggestionData, onAttempt) {
-  if (!isOfflineApp || hasRemoteServer()) {
-    let attempts = 0;
-    const maxAttempts = 3;
-    const delayBetweenAttempts = 1200; // Wait 1.2s between retries
+  const mode = getAppMode();
 
-    while (attempts < maxAttempts) {
-      attempts++;
-      if (onAttempt) onAttempt(attempts);
-
-      try {
-        const res = await fetchWithTimeout(getApiUrl('/api/suggestions'), {
-          method: 'POST',
-          headers: getHeaders(),
-          body: JSON.stringify(suggestionData)
-        });
-        if (res.ok) {
-          return await res.json();
-        }
-        const errorData = await res.json().catch(() => ({}));
-        if (res.status >= 400 && res.status < 500) {
-          return { success: false, error: errorData.error || "Erreur client lors de l'envoi." };
-        }
-      } catch (err) {
-        console.warn(`[API] submitSuggestion: attempt ${attempts} failed.`, err.message);
-      }
-
-      if (attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
-      }
-    }
-
-    return { success: false, error: "Le serveur est de garde ou injoignable après 3 tentatives. Proposition annulée." };
+  // Offline Android: strictly read-only, no suggestions
+  if (mode === APP_MODES.ANDROID_OFFLINE) {
+    return { 
+      success: false, 
+      error: 'Mode hors-ligne. Connexion Internet requise pour envoyer des suggestions.' 
+    };
   }
 
-  return { success: false, error: "L'application fonctionne en mode hors-ligne. Les propositions de fiches nécessitent une connexion au serveur." };
+  // Admin local: we don't use suggestions here; admins edit directly.
+  if (mode === APP_MODES.ADMIN_LOCAL) {
+    return { 
+      success: false, 
+      error: 'Les administrateurs modifient directement les fiches. Utilisez le bouton "Modifier".' 
+    };
+  }
+
+  // WEB_CLIENT or ANDROID_ONLINE: Try to send to remote server with retries
+  let attempts = 0;
+  const maxAttempts = 3;
+  const delayBetweenAttempts = 1200;
+
+  while (attempts < maxAttempts) {
+    attempts++;
+    if (onAttempt) onAttempt(attempts);
+
+    try {
+      const res = await fetchWithTimeout(getApiUrl('/api/suggestions'), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(suggestionData)
+      });
+      if (res.ok) return await res.json();
+      const errorData = await res.json().catch(() => ({}));
+      if (res.status >= 400 && res.status < 500) {
+        return { success: false, error: errorData.error || "Erreur client." };
+      }
+    } catch (err) {
+      console.warn(`[API] submitSuggestion: attempt ${attempts} failed.`, err.message);
+    }
+
+    if (attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
+    }
+  }
+
+  return { 
+    success: false, 
+    error: "Le serveur est injoignable après 3 tentatives." 
+  };
 }
+
 
 export async function fetchSuggestions() {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
@@ -542,8 +689,8 @@ export function hasRemoteServerConfigured() {
 
 export async function checkRealConnection() {
   // On localhost, skip remote URL ping to avoid unnecessary cross-origin noise
-  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1';
-  if (isLocal) {
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  if (isLocalWebBrowser) {
     return navigator.onLine;
   }
 

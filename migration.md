@@ -54,6 +54,26 @@ The following critical bugs have been successfully audited and resolved in the c
   - **3-Attempt Loop**: Programmed a retry mechanism in `public/js/api.js` (`submitSuggestion()`) that automatically attempts to deliver the suggestion up to 3 times before failing.
   - **Visual Loading Spinner**: Developed a glassmorphism loading overlay in `public/js/utils.js` (`showLoadingOverlay()`) with a rotating cyan spinner. It updates with the current attempt number (e.g. `Tentative 2/3`) and runs for a minimum of 2 seconds to prevent layout flashes.
 
+### 7. Resolved Parse-Time ES Module SyntaxError in performance.js
+* **Problem**: Nesting `export` statements inside `if`/`else` blocks is invalid ES Module syntax. Strict JS engines (like Android WebView's V8) fail with a parse-time `SyntaxError`, freezing the app on a black/blank screen before any logs can capture.
+* **Fix**: Restructured `public/js/performance.js` to declare all measurements variables top-level and conditionally export either active measurements or no-op handlers in a single top-level `perf` object.
+
+### 8. Dynamic Offline App Sync & Mode Transitions
+* **Problem**: Caching `ANDROID_OFFLINE` statically on boot blocked Capacitor sync tasks. Even when background pings confirmed the ngrok server was reachable, the local database was loaded and the moderation queue buttons remained hidden.
+* **Fix**: Implemented `api.setAppMode()` which dispatches custom `drcat-app-mode-changed` events. The app now listens for these and dynamically updates UI buttons, running background checks every 30s to sync local storage edits once the server comes online.
+
+### 9. Unified Event-Driven Loader Overlay
+* **Problem**: Using simulated progress bar timers (600ms/1600ms) caused race conditions. If the page loaded in under 300ms on localhost, the app finished and closed the loader banner, only for the 600ms timer to fire afterward, re-opening the banner and freezing the screen.
+* **Fix**: Unified the boot progress bar inside `public/index.html` and `public/js/main.js` into a single event-driven `window.setLoaderProgress()` function. It automatically closes the banner exactly 350ms after progress reaches 100%, and verifies `window.__drCatBooted` to ignore stale timers.
+
+### 10. Verbose Debug Console with Light Mode Contrast
+* **Problem**: The floating bug log console (`🐛`) hardcoded light grey text (`#e2e8f0`) inline for log messages. When the app switched to light mode, the text was completely invisible against the white/light background panel.
+* **Fix**: Migrated log rendering to CSS classes. Created high-contrast, theme-aware CSS configurations for logs, timestamps, and levels (e.g., deep red for errors, amber for warnings, and dark slate for messages in light mode).
+
+### 11. Safe Next-Tick Asset Rebuilding
+* **Problem**: The startup auto-builder in `server.js` tried to run `.catch()` on a synchronous function, throwing a `TypeError` and crashing server initialization.
+* **Fix**: Deployed the synchronous asset builder task inside a deferred `setImmediate()` container with standard try-catch blocks.
+
 ---
 
 ## 🛠️ CLI Operations & Building

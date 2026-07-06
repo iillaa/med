@@ -46,3 +46,23 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Misplaced closing `</div>` tags in the HTML can break layout containers. If an admin-only block is closed too early, succeeding admin components spill outside the container and bypass the admin state check, rendering visible to ordinary guest users.
 * **Solution**: Enforce strict validation of DOM hierarchy. Ensure all admin-only modules are fully encapsulated inside `#admin-moderation-panel`.
 
+### 7. ES Module Syntax Constraints in WebView Environments
+* **Problem**: Attempting to conditionally toggle module logic on Android by nesting `export` statements inside blocks (like `if` / `else` blocks) is syntactically invalid under ECMAScript Module specifications. Some strict JavaScript engines (like Android WebView's V8) will fail at parse-time with a `SyntaxError`, killing the entire import graph and freezing the application on startup without throwing runtime caught exceptions.
+* **Solution**: Keep all `export` statements at the top level of the file. Use ternary assignments or local variable pointers initialized at runtime to conditionally choose implementation structures before exporting them.
+
+### 8. Race Conditions on Ultra-Fast Page Boots
+* **Problem**: Setting delayed simulated progress bar timers (e.g. `setTimeout(..., 600)`) in the loading overlay to make loading feel smooth can cause race conditions when the app loads extremely quickly (e.g. under 100ms on localhost). The app completes loading, hides the loading banner, but then the delayed timeout fires *afterward*, re-showing the overlay and leaving the app permanently covered.
+* **Solution**: Unify the loader logic into a single event-driven progress manager (`window.setLoaderProgress()`). Track successful boot via a boolean flag (`window.__drCatBooted = true`) and verify it inside all loader timers and event handlers to discard stale tasks.
+
+### 9. Capturing-Phase Error Listeners Trapping Non-Fatal Asset 404s
+* **Problem**: Listening to `error` events in the capturing phase (`true`) to catch early startup module crashes also traps normal resource loading failures (like a `404 Not Found` for `capacitor.js` on localhost). If the error handler automatically locks the loading screen visible on any error, these harmless warnings will freeze the app.
+* **Solution**: Filter out element-level errors by checking `if (event.target && event.target !== window) return;` to only process real JavaScript runtime execution crashes.
+
+### 10. Static Caching of App Modes
+* **Problem**: Caching the app mode statically at launch (e.g., locking the app mode to `ANDROID_OFFLINE` on standalone Capacitor boot) prevents background sync handlers from ever retrieving remote server updates, even if they detect the server is reachable. Calling `api.fetchCats()` continues to load local bundle copies.
+* **Solution**: Implement dynamic setter interfaces (`api.setAppMode()`) that dispatch custom DOM events (`drcat-app-mode-changed`) so that relevant UI elements automatically re-evaluate their state (e.g., toggling edit controls or refreshing data grids).
+
+### 11. Invoking Promise Catch Handlers on Synchronous Methods
+* **Problem**: Attempting to attach `.catch()` directly to synchronous functions (like asset builders that return `undefined`) throws a `TypeError: Cannot read properties of undefined (reading 'catch')` which blocks thread execution and crashes the boot phase.
+* **Solution**: Standardize synchronous wrapper callbacks or wrap synchronous tasks inside a try/catch block inside a non-blocking `setImmediate()` or next-tick deferral.
+
