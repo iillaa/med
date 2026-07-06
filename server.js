@@ -21,24 +21,7 @@ const PORT = 3000;
 // Loaded dynamically so the server can support any tunnel provider
 // without hardcoded ngrok references.
 async function loadServerProviders() {
-  try {
-    const providerPath = path.join(__dirname, 'public', 'js', 'server-providers.js');
-    const content = await fs.promises.readFile(providerPath, 'utf-8');
-    // Extract PROVIDERS array by evaluating the module source
-    const match = content.match(/export const PROVIDERS = (\[[\s\S]*?\]);/);
-    if (match) {
-      try {
-        return (new Function('return ' + match[1]))();
-      } catch (_) {
-        return fallback;
-      }
-    }
-  } catch (err) {
-    console.warn('[Providers] Failed to load provider registry, using fallback:', err.message);
-  }
-  // Fallback: minimal ngrok-only support if provider file missing
   const fallback = [
-
     {
       id: 'ngrok',
       urlPattern: /(^|\.)ngrok(-free)?\.(app|dev|io)$/,
@@ -60,6 +43,23 @@ async function loadServerProviders() {
       tunnelLabel: 'Serveur direct',
     }
   ];
+
+  try {
+    const providerPath = path.join(__dirname, 'public', 'js', 'server-providers.js');
+    const content = await fs.promises.readFile(providerPath, 'utf-8');
+    // Extract PROVIDERS array by evaluating the module source
+    const match = content.match(/export const PROVIDERS = (\[[\s\S]*?\]);/);
+    if (match) {
+      try {
+        return (new Function('return ' + match[1]))();
+      } catch (_) {
+        return fallback;
+      }
+    }
+  } catch (err) {
+    console.warn('[Providers] Failed to load provider registry, using fallback:', err.message);
+  }
+  return fallback;
 }
 
 function detectProvider(url, providers) {
