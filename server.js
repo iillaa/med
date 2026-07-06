@@ -167,8 +167,16 @@ async function initializeProviders() {
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const allowAll = !origin || isOriginAllowedDynamic(origin, allowedOrigins);
-  
+
+  // Always allow Capacitor app and localhost origins unconditionally
+  const isAlwaysAllowed = !origin
+    || origin === 'http://localhost'
+    || origin === 'capacitor://localhost'
+    || origin.startsWith('http://localhost:')
+    || origin.startsWith('http://127.0.0.1:');
+
+  const allowAll = isAlwaysAllowed || isOriginAllowedDynamic(origin, allowedOrigins);
+
   if (allowAll) {
     // Build allowed headers list including all provider-specific headers
     const providerHeaders = serverProviders.flatMap(p => Object.keys(p.extraHeaders || {}));
@@ -176,19 +184,24 @@ app.use((req, res, next) => {
       'Content-Type',
       'Authorization',
       'x-admin-token',
+      'ngrok-skip-browser-warning',  // always explicitly allowed
       ...providerHeaders
     ]);
-    
+
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', Array.from(uniqueHeaders).join(', '));
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
+
+  // OPTIONS must always return after headers are set (or not — but never before)
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
   }
+
   next();
 });
+
 
 // Performance monitoring middleware for API timing tracking
 app.use((req, res, next) => {
