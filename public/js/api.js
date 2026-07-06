@@ -81,6 +81,16 @@ export function getAppMode() {
   return _cachedAppMode;
 }
 
+export function setAppMode(mode) {
+  const oldMode = _cachedAppMode;
+  _cachedAppMode = mode;
+  if (oldMode !== mode) {
+    console.log(`[API] App Mode changed from ${oldMode} to ${mode}`);
+    window.dispatchEvent(new CustomEvent('drcat-app-mode-changed', { detail: { oldMode, mode } }));
+  }
+}
+
+
 
 
 // Permission helpers

@@ -265,11 +265,20 @@ async function bootstrapApp() {
  
   // Handle Online/Offline Status Events
   window.addEventListener('online', () => {
-    showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
+    showToast("Connexion réseau détectée. Synchronisation...", "fa-wifi", 4000);
+    runBackgroundSync();
   });
   window.addEventListener('offline', () => {
-    showToast("Connexion perdue. Les modifications locales seront enregistrées sur ce navigateur.", "fa-circle-xmark", 6000);
+    showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000);
+    if (api.isOfflineApp) {
+      api.setAppMode(api.APP_MODES.ANDROID_OFFLINE);
+      state.isOnlineAtStartup = false;
+    }
   });
+  window.addEventListener('drcat-app-mode-changed', () => {
+    updateEditButtonsVisibility();
+  });
+
  
   // Handle keyboard shortcuts
   window.addEventListener('keydown', (e) => {
@@ -337,7 +346,11 @@ async function initApp() {
   if (loadingBar) loadingBar.style.width = '5%';
 
   const setLoadingProgress = (pct) => {
-    if (loadingBar) loadingBar.style.width = `${Math.min(pct, 95)}%`;
+    if (window.setLoaderProgress) {
+      window.setLoaderProgress(pct);
+    } else if (loadingBar) {
+      loadingBar.style.width = `${pct}%`;
+    }
   };
 
   setLoadingProgress(10);
@@ -451,71 +464,86 @@ async function initApp() {
   setLoadingProgress(100);
 
   // ── 8. Hide Overlay ──
-  setTimeout(() => {
-    if (loadingOverlay) loadingOverlay.classList.add('hidden');
-  }, 350);
+  // (Automatically handled by window.setLoaderProgress(100) above)
 
   // ── 9. 🔥 BACKGROUND SYNC FOR ANDROID (NO FREEZE + REMOTE SYNC) 🔥 ──
   setTimeout(() => {
-    if (api.isOfflineApp && api.hasRemoteServer()) {
-      console.log('[Background Sync] Checking for remote updates...');
-      (async () => {
-        try {
-          const remoteUrls = api.getConfiguredRemoteUrls();
-          let reachable = false;
-          for (const url of remoteUrls) {
-            try {
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 1500);
-              await fetch(`${url}/api/search-status`, {
-                signal: controller.signal,
-                mode: 'no-cors'
-              });
-              clearTimeout(timeoutId);
-              reachable = true;
-              break;
-            } catch (_) {}
-          }
-
-          if (reachable) {
-            console.log('[Background Sync] Server reachable! Fetching latest data...');
-            const freshCats = await api.fetchCats();
-
-            const localProgress = getLocalProgress();
-            const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-            const existingIds = new Set(freshCats.map(c => c.id));
-            const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
-              .filter(c => !existingIds.has(c.id));
-
-            state.allCats = [...freshCats, ...customCats].map(cat => {
-              const localEntry = localProgress[cat.id] || {};
-              const overrides = localOverrides[cat.id] || {};
-              return {
-                ...cat,
-                status: localEntry.status || 'todo',
-                notes: localEntry.notes || '',
-                summary: overrides.customSummary || cat.summary,
-                customSummary: overrides.customSummary || cat.summary,
-                ordonnance: overrides.customOrdonnance || cat.ordonnance,
-                customOrdonnance: overrides.customOrdonnance || cat.ordonnance
-              };
-            });
-
-            sidebar.renderCatList(state.allCats, selectCatWrapper);
-            calculateStats();
-            dashboard.renderDashboard(selectCatWrapper);
-            showToast('📡 Données mises à jour depuis le serveur!', 'fa-cloud-arrow-up', 3000);
-            console.log('[Background Sync] Update complete.');
-          } else {
-            console.log('[Background Sync] Server not reachable, staying offline.');
-          }
-        } catch (err) {
-          console.warn('[Background Sync] Failed:', err.message);
-        }
-      })();
-    }
+    runBackgroundSync();
+    // Periodically run background sync every 30 seconds
+    setInterval(runBackgroundSync, 30000);
   }, 1000);
 }
+
+export async function runBackgroundSync() {
+  if (!api.isOfflineApp || !api.hasRemoteServer()) return;
+
+  console.log('[Background Sync] Checking for remote updates...');
+  try {
+    const remoteUrls = api.getConfiguredRemoteUrls();
+    let reachable = false;
+    for (const url of remoteUrls) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        await fetch(`${url}/api/search-status`, {
+          signal: controller.signal,
+          mode: 'no-cors'
+        });
+        clearTimeout(timeoutId);
+        reachable = true;
+        break;
+      } catch (_) {}
+    }
+
+    const wasOffline = (api.getAppMode() === api.APP_MODES.ANDROID_OFFLINE);
+
+    if (reachable) {
+      console.log('[Background Sync] Server reachable! Fetching latest data...');
+      
+      // Update app mode to ANDROID_ONLINE to allow api.fetchCats() to hit the server
+      api.setAppMode(api.APP_MODES.ANDROID_ONLINE);
+      state.isOnlineAtStartup = true;
+
+      const freshCats = await api.fetchCats();
+
+      const localProgress = getLocalProgress();
+      const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+      const existingIds = new Set(freshCats.map(c => c.id));
+      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+        .filter(c => !existingIds.has(c.id));
+
+      state.allCats = [...freshCats, ...customCats].map(cat => {
+        const localEntry = localProgress[cat.id] || {};
+        const overrides = localOverrides[cat.id] || {};
+        return {
+          ...cat,
+          status: localEntry.status || 'todo',
+          notes: localEntry.notes || '',
+          summary: overrides.customSummary || cat.summary,
+          customSummary: overrides.customSummary || cat.summary,
+          ordonnance: overrides.customOrdonnance || cat.ordonnance,
+          customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+        };
+      });
+
+      sidebar.renderCatList(state.allCats, selectCatWrapper);
+      calculateStats();
+      dashboard.renderDashboard(selectCatWrapper);
+
+      if (wasOffline) {
+        showToast('📡 Connexion serveur établie. Données synchronisées !', 'fa-cloud-arrow-up', 4000);
+      }
+      console.log('[Background Sync] Update complete.');
+    } else {
+      console.log('[Background Sync] Server not reachable, staying offline.');
+      api.setAppMode(api.APP_MODES.ANDROID_OFFLINE);
+      state.isOnlineAtStartup = false;
+    }
+  } catch (err) {
+    console.warn('[Background Sync] Failed:', err.message);
+  }
+}
+
 
 // Select CAT wrapper that delegates to workspace component
 function selectCatWrapper(cat) {

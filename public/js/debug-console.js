@@ -1,7 +1,7 @@
 // Debug Console — automatic capture & floating UI for Android/mobile
 let logBuffer = [];
 const MAX_LOGS = 200;
-let isViewerOpen = false;
+let isViewerOpen = true; // CHANGED FOR VERBOSE DEBUGGING: open by default
 let originalConsole = {};
 
 // ── Capture Helpers ──────────────────────────────────────────
@@ -107,13 +107,11 @@ function renderLogs() {
   }
 
   container.innerHTML = logBuffer.map(log => {
-    const color = getLogColor(log.level);
-    const icon = log.level === 'ERROR' ? '❌' : log.level === 'WARN' ? '⚠️' : log.level === 'NETWORK' ? '🌐' : 'ℹ️';
-    void icon; // icon kept for parity with provided snippet
-    return `<div style="padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); font-family: monospace; font-size: 11px; line-height: 1.4; display: flex; gap: 8px;">
-      <span style="color: #64748b; white-space: nowrap;">[${log.timestamp}]</span>
-      <span style="color: ${color}; font-weight: bold; min-width: 50px;">${log.level}</span>
-      <span style="color: #e2e8f0; word-break: break-all;">${log.message}</span>
+    const levelClass = (log.level || 'info').toLowerCase();
+    return `<div class="log-row ${levelClass}" style="padding: 4px 8px; font-family: monospace; font-size: 11px; line-height: 1.4; display: flex; gap: 8px;">
+      <span class="log-time" style="white-space: nowrap;">[${log.timestamp}]</span>
+      <span class="log-level" style="font-weight: bold; min-width: 50px;">${log.level}</span>
+      <span class="log-message" style="word-break: break-all;">${log.message}</span>
     </div>`;
   }).join('');
 
@@ -274,6 +272,40 @@ function createUI() {
       .light-theme #debug-console-content div {
         border-bottom-color: rgba(0,0,0,0.05);
       }
+
+      /* Dynamic high-contrast theme-friendly log text colors */
+      #debug-console-content .log-row {
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+      }
+      .light-theme #debug-console-content .log-row {
+        border-bottom-color: rgba(0,0,0,0.05);
+      }
+      #debug-console-content .log-time {
+        color: #64748b;
+      }
+      .light-theme #debug-console-content .log-time {
+        color: #475569;
+      }
+      #debug-console-content .log-message {
+        color: #e2e8f0;
+      }
+      .light-theme #debug-console-content .log-message {
+        color: #0f172a;
+      }
+
+      /* Dark Theme Log Colors (Vibrant/Light) */
+      #debug-console-content .log-row.error .log-level { color: #f87171; }
+      #debug-console-content .log-row.warn .log-level { color: #fbbf24; }
+      #debug-console-content .log-row.info .log-level { color: #38bdf8; }
+      #debug-console-content .log-row.network .log-level { color: #a78bfa; }
+      #debug-console-content .log-row .log-level { color: #94a3b8; }
+
+      /* Light Theme Log Colors (High Contrast/Darker) */
+      .light-theme #debug-console-content .log-row.error .log-level { color: #dc2626; }
+      .light-theme #debug-console-content .log-row.warn .log-level { color: #b45309; }
+      .light-theme #debug-console-content .log-row.info .log-level { color: #0891b2; }
+      .light-theme #debug-console-content .log-row.network .log-level { color: #6d28d9; }
+      .light-theme #debug-console-content .log-row .log-level { color: #475569; }
     `;
     document.head.appendChild(style);
   }
@@ -303,7 +335,7 @@ function createUI() {
       <div id="debug-console-content"></div>
     `;
     document.body.appendChild(panel);
-    panel.style.display = 'none';
+    panel.style.display = 'flex'; // CHANGED FOR VERBOSE DEBUGGING: show by default
 
     document.getElementById('debug-close-btn').addEventListener('click', toggleViewer);
     document.getElementById('debug-clear-btn').addEventListener('click', () => {
@@ -332,6 +364,7 @@ function createUI() {
 export function initDebugConsole() {
   startDebugConsole();
   createUI();
+  renderLogs(); // CHANGED FOR VERBOSE DEBUGGING: populate logs immediately
 
   // Log startup info
   console.log('📱 Dr.CAT Debug Console active.');

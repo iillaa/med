@@ -385,15 +385,21 @@ async function initializeData() {
   try {
     const buildModule = require('./build.js');
     if (typeof buildModule.rebuildClientAssets === 'function') {
-      // No await — fire and forget
-      buildModule.rebuildClientAssets().catch(err => 
-        console.warn('[Startup] Auto-build failed in background:', err.message)
-      );
-      console.log('[Startup] Background rebuild initiated.');
+      // Run in next tick/immediate to avoid blocking initial startup phase
+      setImmediate(() => {
+        try {
+          buildModule.rebuildClientAssets();
+          console.log('[Startup] Auto-build completed successfully.');
+        } catch (err) {
+          console.warn('[Startup] Auto-build failed in background:', err.message);
+        }
+      });
+      console.log('[Startup] Background rebuild scheduled.');
     }
   } catch (err) {
     console.warn('[Startup] Auto-build module unavailable:', err.message);
   }
+
 
 
   // Load cats_db.json

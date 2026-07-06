@@ -1,9 +1,6 @@
 // Core Performance Monitor Module for Dr. CAT
 // Measures client-side frame drops, rendering, interaction, memory, and local storage I/O
 
-// ── Safe mode for Android (disables heavy monitoring) ──
-// Rationale: some Android WebViews can stall during startup if we wrap Storage
-// or start monitoring loops immediately on module import.
 const _isAndroidPerfSafeMode = (() => {
   try {
     return /android/i.test(navigator.userAgent);
@@ -15,54 +12,14 @@ const _isAndroidPerfSafeMode = (() => {
 const THRESHOLDS = {
   fps: { good: 55, warn: 40 },
   render: { good: 50, warn: 150 },
-  apiLocal: { good: 50, warn: 200 },
-  apiRemote: { good: 500, warn: 1500 },
-  interaction: { good: 80, warn: 200 },
-  pdfSearch: { good: 500, warn: 2000 },
+  apiLocal: { good: 100, warn: 300 },
+  apiRemote: { good: 400, warn: 1000 },
+  interaction: { good: 100, warn: 250 },
   dbWrite: { good: 100, warn: 500 }
 };
 
-// Export a noop perf object on Android so module top-level side effects
-// (like Storage wrapping and global listeners) don't run.
-// Note: ES modules require exports at top-level, so we export `perf` once.
-let perf = null;
-
-if (_isAndroidPerfSafeMode) {
-  const perfNoop = {
-    THRESHOLDS,
-    startMeasure: () => {},
-    endMeasure: () => {},
-    recordMilestone: () => {},
-    recordApiCall: () => {},
-    recordInteraction: () => {},
-    startFrameMonitor: () => {},
-    stopFrameMonitor: () => {},
-    getFrameStats: () => ({ fps: 60, jankRate: 0, drops: 0, major: 0, totalFrames: 0 }),
-    getMetrics: () => ({
-      frame: { fps: 60, jankRate: 0, drops: 0, major: 0, totalFrames: 0 },
-      renders: {},
-      api: {},
-      interactions: {},
-      localStorage: { readCount: 0, writeCount: 0, readAvgMs: 0, writeAvgMs: 0 },
-      memory: { supported: false, usedJSHeapSize: 0, totalJSHeapSize: 0, jsHeapSizeLimit: 0, growthBytes: 0, snapshots: [] },
-      milestones: { domContentLoaded: null, catsFetched: null, sidebarRendered: null, dashboardReady: null }
-    }),
-    reset: () => {}
-  };
-  window.perf = perfNoop;
-  perf = perfNoop;
-} 
-
-
-
-// If we are in Android safe mode, stop here after exporting noop.
-if (_isAndroidPerfSafeMode) {
-  // Keep window.perf already set; do not run heavy initialization.
-} else {
-
 // Internal states
 const measurements = new Map();
-
 const apiTimings = new Map(); // path -> Array of last 50 durations
 const interactionTimings = new Map(); // type -> Array of last 50 durations
 const memorySnapshots = []; // Array of last 20 usedJSHeapSize readings
@@ -90,40 +47,50 @@ let localStorageWriteCount = 0;
 let localStorageReadTotalMs = 0;
 let localStorageWriteTotalMs = 0;
 
-function frameLoop() {
-  if (!isFrameMonitoring) return;
-  
-  const now = performance.now();
-  if (lastFrameTime > 0) {
-    const delta = now - lastFrameTime;
-    frameCount++;
-    fpsHistory.push(delta);
-    if (fpsHistory.length > 60) fpsHistory.shift();
-
-    if (delta > 20) {
-      frameDrops++; // missed > 1 frame budget (16.6ms)
-    }
-    if (delta > 50) {
-      majorDrops++; // missed > 3 frame budgets (heavy jank)
-    }
-  }
-  lastFrameTime = now;
-
-  if (document.visibilityState === 'visible') {
-    requestAnimationFrame(frameLoop);
+// Setup milestone for DOMContentLoaded (only if not in safe mode)
+if (!_isAndroidPerfSafeMode) {
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    milestones.domContentLoaded = performance.now();
+  } else {
+    window.addEventListener('DOMContentLoaded', () => {
+      milestones.domContentLoaded = performance.now();
+    });
   }
 }
 
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && isFrameMonitoring) {
-    lastFrameTime = performance.now();
-    requestAnimationFrame(frameLoop);
-  }
-});
+// Wrap localStorage if not in safe mode
+if (!_isAndroidPerfSafeMode) {
+  try {
+    const originalGetItem = Storage.prototype.getItem;
+    Storage.prototype.getItem = function(key) {
+      const start = performance.now();
+      const val = originalGetItem.call(this, key);
+      const dur = performance.now() - start;
+      if (this === localStorage) {
+        localStorageReadCount++;
+        localStorageReadTotalMs += dur;
+      }
+      return val;
+    };
 
-// Memory snapshot loop (runs every 30s when monitoring is active)
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value) {
+      const start = performance.now();
+      originalSetItem.call(this, key, value);
+      const dur = performance.now() - start;
+      if (this === localStorage) {
+        localStorageWriteCount++;
+        localStorageWriteTotalMs += dur;
+      }
+    };
+  } catch (err) {
+    console.warn('[Perf] LocalStorage interception disabled:', err.message);
+  }
+}
+
 let memoryIntervalId = null;
 function startMemorySnapshotLoop() {
+  if (_isAndroidPerfSafeMode) return;
   if (memoryIntervalId) clearInterval(memoryIntervalId);
   
   const recordMemory = () => {
@@ -142,71 +109,32 @@ function startMemorySnapshotLoop() {
     }
   };
   
-  recordMemory(); // initial
-  memoryIntervalId = setInterval(recordMemory, 30000);
+  recordMemory();
+  memoryIntervalId = setInterval(recordMemory, 10000); // Check memory every 10s
 }
 
-function stopMemorySnapshotLoop() {
-  if (memoryIntervalId) {
-    clearInterval(memoryIntervalId);
-    memoryIntervalId = null;
-  }
-}
-
-// Wrap localStorage during init to measure synchronous file block overhead
-function wrapLocalStorage() {
-  const originalGet = Storage.prototype.getItem;
-  const originalSet = Storage.prototype.setItem;
-
-  Storage.prototype.getItem = function(key) {
-    const start = performance.now();
-    const val = originalGet.call(this, key);
-    const duration = performance.now() - start;
-    localStorageReadCount++;
-    localStorageReadTotalMs += duration;
-    return val;
-  };
-
-  Storage.prototype.setItem = function(key, value) {
-    const start = performance.now();
-    originalSet.call(this, key, value);
-    const duration = performance.now() - start;
-    localStorageWriteCount++;
-    localStorageWriteTotalMs += duration;
-    return value;
-  };
-}
-
-// Initialize immediately on import
-wrapLocalStorage();
-
-// Hook pointerdown event to measure Tap-to-Paint interaction latency
-document.addEventListener('pointerdown', (e) => {
-  const target = e.target.closest('button, .cat-item, .tab-btn, .action-btn, .suggestion-btn');
-  if (!target) return;
-  
-  const start = performance.now();
-  // Time from touch down to next paint frame completion
-  requestAnimationFrame(() => {
-    const latency = performance.now() - start;
-    const tagName = target.tagName.toLowerCase();
-    const className = target.className.split(' ')[0] || '';
-    const label = className ? `${tagName}.${className}` : tagName;
-    
-    perf.recordInteraction(label, latency);
-  });
-});
-
-// Setup milestone for DOMContentLoaded
-if (document.readyState === 'interactive' || document.readyState === 'complete') {
-  milestones.domContentLoaded = performance.now();
-} else {
-  window.addEventListener('DOMContentLoaded', () => {
-    milestones.domContentLoaded = performance.now();
-  });
-}
-
-export const perf = {
+// We export the perf object. If in safe mode, we use noops.
+export const perf = _isAndroidPerfSafeMode ? {
+  THRESHOLDS,
+  startMeasure: () => {},
+  endMeasure: () => {},
+  recordMilestone: () => {},
+  recordApiCall: () => {},
+  recordInteraction: () => {},
+  startFrameMonitor: () => {},
+  stopFrameMonitor: () => {},
+  getFrameStats: () => ({ fps: 60, jankRate: 0, drops: 0, major: 0, totalFrames: 0 }),
+  getMetrics: () => ({
+    frame: { fps: 60, jankRate: 0, drops: 0, major: 0, totalFrames: 0 },
+    renders: {},
+    api: {},
+    interactions: {},
+    localStorage: { readCount: 0, writeCount: 0, readAvgMs: 0, writeAvgMs: 0 },
+    memory: { supported: false, usedJSHeapSize: 0, totalJSHeapSize: 0, jsHeapSizeLimit: 0, growthBytes: 0, snapshots: [] },
+    milestones: { domContentLoaded: null, catsFetched: null, sidebarRendered: null, dashboardReady: null }
+  }),
+  reset: () => {}
+} : {
   THRESHOLDS,
   
   startMeasure(name) {
@@ -222,63 +150,101 @@ export const perf = {
   },
 
   recordMilestone(name) {
-    if (milestones.hasOwnProperty(name)) {
-      milestones[name] = performance.now();
-    }
+    milestones[name] = performance.now();
+    console.log(`[Perf Milestone] ${name} reached at +${Math.round(milestones[name])}ms`);
   },
 
-  recordApiCall(url, status, duration) {
-    let cleanPath = url;
+  recordApiCall(url, status, durationMs) {
+    let cleanUrl = url;
     try {
       const parsed = new URL(url, window.location.origin);
-      cleanPath = parsed.pathname;
+      cleanUrl = parsed.pathname;
     } catch (_) {}
 
-    if (!apiTimings.has(cleanPath)) {
-      apiTimings.set(cleanPath, []);
+    if (!apiTimings.has(cleanUrl)) {
+      apiTimings.set(cleanUrl, []);
     }
-    const samples = apiTimings.get(cleanPath);
-    samples.push({ duration, status });
-    if (samples.length > 50) samples.shift();
+    const list = apiTimings.get(cleanUrl);
+    list.push({ duration: durationMs, status });
+    if (list.length > 50) list.shift();
   },
 
-  recordInteraction(label, duration) {
-    if (!interactionTimings.has(label)) {
-      interactionTimings.set(label, []);
-    }
-    const samples = interactionTimings.get(label);
-    samples.push(duration);
-    if (samples.length > 50) samples.shift();
+  recordInteraction(type) {
+    this.startMeasure(`interaction.${type}`);
+    
+    // Auto-resolve interactions after render finishes via requestAnimationFrame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const name = `interaction.${type}`;
+        const m = measurements.get(name);
+        if (m) {
+          m.end = performance.now();
+          const duration = m.end - m.start;
+          
+          if (!interactionTimings.has(type)) {
+            interactionTimings.set(type, []);
+          }
+          const list = interactionTimings.get(type);
+          list.push(duration);
+          if (list.length > 50) list.shift();
+          measurements.delete(name);
+        }
+      });
+    });
   },
 
   startFrameMonitor() {
     if (isFrameMonitoring) return;
     isFrameMonitoring = true;
-    lastFrameTime = 0;
-    requestAnimationFrame(frameLoop);
+    lastFrameTime = performance.now();
+    frameCount = 0;
+    frameDrops = 0;
+    majorDrops = 0;
+    fpsHistory = [];
+    
     startMemorySnapshotLoop();
+
+    const monitor = (time) => {
+      if (!isFrameMonitoring) return;
+      
+      const delta = time - lastFrameTime;
+      lastFrameTime = time;
+      frameCount++;
+
+      // A frame taking longer than 33.3ms (less than 30fps) is a frame drop/jank
+      if (delta > 33.3) {
+        frameDrops++;
+        if (delta > 100) { // Severe lag (>100ms)
+          majorDrops++;
+        }
+      }
+
+      fpsHistory.push(delta);
+      if (fpsHistory.length > 60) fpsHistory.shift();
+
+      requestAnimationFrame(monitor);
+    };
+
+    requestAnimationFrame(monitor);
   },
 
   stopFrameMonitor() {
     isFrameMonitoring = false;
-    stopMemorySnapshotLoop();
+    if (memoryIntervalId) {
+      clearInterval(memoryIntervalId);
+      memoryIntervalId = null;
+    }
   },
 
   getFrameStats() {
-    if (frameCount === 0) return { fps: 60, jankRate: 0, drops: 0, major: 0 };
+    if (fpsHistory.length === 0) return { fps: 60, jankRate: 0, drops: 0, major: 0, totalFrames: 0 };
     
-    // Compute immediate average FPS from history
-    let avgFps = 60;
-    if (fpsHistory.length > 0) {
-      const avgDuration = fpsHistory.reduce((sum, d) => sum + d, 0) / fpsHistory.length;
-      avgFps = Math.min(60, Math.round(1000 / avgDuration));
-    }
-
-    const jankRate = frameDrops / frameCount;
-
+    const avgFrameTime = fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length;
+    const computedFps = Math.min(60, Math.round(1000 / avgFrameTime));
+    
     return {
-      fps: avgFps,
-      jankRate,
+      fps: computedFps,
+      jankRate: frameCount > 0 ? frameDrops / frameCount : 0,
       drops: frameDrops,
       major: majorDrops,
       totalFrames: frameCount
@@ -286,15 +252,13 @@ export const perf = {
   },
 
   getMetrics() {
-    // Component Renders
     const renders = {};
     for (const [name, data] of measurements.entries()) {
-      if (data.duration !== undefined) {
-        renders[name] = data.duration;
+      if (name.startsWith('render.') || name.startsWith('quiz.')) {
+        renders[name] = Math.round(data.duration || 0);
       }
     }
 
-    // API averages
     const api = {};
     for (const [path, list] of apiTimings.entries()) {
       const durations = list.map(item => item.duration);
@@ -308,7 +272,6 @@ export const perf = {
       };
     }
 
-    // Interaction averages
     const interactions = {};
     for (const [label, list] of interactionTimings.entries()) {
       const sum = list.reduce((a, b) => a + b, 0);
@@ -319,7 +282,6 @@ export const perf = {
       };
     }
 
-    // Memory stats
     let initialHeap = memorySnapshots[0]?.heapSize || 0;
     let currentHeap = memorySnapshots[memorySnapshots.length - 1]?.heapSize || 0;
     let growth = currentHeap - initialHeap;
@@ -369,7 +331,4 @@ export const perf = {
   }
 };
 
-// Make perf globally visible to let api.js fetch wrapper record metrics easily
 window.perf = perf;
-}
-
