@@ -78,3 +78,13 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Using `mode: 'no-cors'` in network pings returns an opaque response with status `0` even if the server is unreachable or intercepts the request with a warning HTML page (like Ngrok's phishing interstitial). This triggers false-positive "online" transitions.
 * **Solution**: Perform standard CORS requests for connectivity checks and dynamically inject the active provider's skip headers to verify true API availability.
 
+### 15. Capacitor Android WebView Sends `https://localhost`, Not `http://localhost`
+* **Problem**: All CORS allowlists were written assuming `http://localhost` as the Capacitor app's origin. On real Android tablets running Chrome WebView 148+, the Capacitor context sends `Origin: https://localhost` (with **https**). The server rejected this origin silently, set no CORS headers on the OPTIONS preflight, and the browser blocked every real request — showing "Failed to fetch" on the GET, never on the OPTIONS.
+* **Discovery**: Only visible by reading raw request headers from the Ngrok inspector (`http://localhost:4040/inspect/http`). The origin field read `https://localhost`, not `http://localhost`.
+* **Solution**: Always add both `http://localhost` **and** `https://localhost` (plus their port variants) to every CORS allowlist and origin check. Never assume the protocol of a Capacitor WebView origin.
+
+### 16. CORS Preflight (`OPTIONS`) Must Set Headers Before Returning 204
+* **Problem**: The CORS middleware set response headers inside an `if (allowAll)` block, but returned `res.sendStatus(204)` **outside** that block. If the origin wasn't recognized, the 204 came back with zero CORS headers. The browser treated the bare 204 as a CORS rejection and blocked the actual GET — even though the OPTIONS itself "succeeded" with 204.
+* **Solution**: The `OPTIONS` early return must be placed **inside** the `if (allowAll)` block, or placed after all headers are unconditionally set. A 204 without `Access-Control-Allow-Origin` is a CORS block from the browser's perspective.
+
+
