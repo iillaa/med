@@ -27,6 +27,28 @@ const milestones = {
   dashboardReady: null
 };
 
+// Telemetry Event Log Buffer
+const perfLogBuffer = [];
+const MAX_PERF_LOGS = 50;
+
+function addPerfLog(msg) {
+  const time = new Date().toLocaleTimeString('fr-FR', { hour12: false });
+  perfLogBuffer.push({ time, message: msg });
+  if (perfLogBuffer.length > MAX_PERF_LOGS) {
+    perfLogBuffer.shift();
+  }
+  window.dispatchEvent(new CustomEvent('drcat-perf-log-added'));
+}
+
+function getPerfLogs() {
+  return [...perfLogBuffer];
+}
+
+function clearPerfLogs() {
+  perfLogBuffer.length = 0;
+  window.dispatchEvent(new CustomEvent('drcat-perf-log-added'));
+}
+
 // Frame monitor state
 let isFrameMonitoring = false;
 let lastFrameTime = 0;
@@ -145,7 +167,7 @@ export const perf = _isAndroidPerfSafeMode ? {
 
   recordMilestone(name) {
     milestones[name] = performance.now();
-    console.debug(`[Perf Milestone] ${name} reached at +${Math.round(milestones[name])}ms`);
+    addPerfLog(`[Milestone] ${name} reached at +${Math.round(milestones[name])}ms`);
   },
 
   recordApiCall(url, status, durationMs) {
@@ -161,6 +183,8 @@ export const perf = _isAndroidPerfSafeMode ? {
     const list = apiTimings.get(cleanUrl);
     list.push({ duration: durationMs, status });
     if (list.length > 50) list.shift();
+
+    addPerfLog(`[API] ${cleanUrl} -> ${status} (${Math.round(durationMs)}ms)`);
   },
 
   recordInteraction(type) {
@@ -182,6 +206,8 @@ export const perf = _isAndroidPerfSafeMode ? {
           list.push(duration);
           if (list.length > 50) list.shift();
           measurements.delete(name);
+
+          addPerfLog(`[Interaction] ${type} finished in ${Math.round(duration)}ms`);
         }
       });
     });
@@ -248,9 +274,7 @@ export const perf = _isAndroidPerfSafeMode ? {
   getMetrics() {
     const renders = {};
     for (const [name, data] of measurements.entries()) {
-      if (name.startsWith('render.') || name.startsWith('quiz.')) {
-        renders[name] = Math.round(data.duration || 0);
-      }
+      renders[name] = Math.round(data.duration || 0);
     }
 
     const api = {};
@@ -322,7 +346,30 @@ export const perf = _isAndroidPerfSafeMode ? {
     localStorageReadTotalMs = 0;
     localStorageWriteTotalMs = 0;
     lastFrameTime = 0;
+    clearPerfLogs();
+  },
+
+  getPerfLogs() {
+    return getPerfLogs();
+  },
+
+  clearPerfLogs() {
+    clearPerfLogs();
   }
 };
 
 window.perf = perf;
+
+// Auto-record interaction latency for all user click events globally
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!target) return;
+    
+    // Find nearest clickable container (button, link, list item, filter pill, select option, etc.)
+    const clickable = target.closest('button, a, li, .status-pill, input, select, [role="button"]') || target;
+    const label = clickable.id ? `#${clickable.id}` : clickable.className ? `.${clickable.className.split(' ')[0]}` : clickable.tagName.toLowerCase();
+    
+    perf.recordInteraction(`click:${label}`);
+  }, { passive: true });
+}

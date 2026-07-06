@@ -26,6 +26,9 @@ export function initPerformance() {
     }
   });
 
+  // Listen for performance log changes
+  window.addEventListener('drcat-perf-log-added', renderPerfLogs);
+
   // Hook actions
   document.getElementById('reset-perf-btn')?.addEventListener('click', resetMetrics);
   document.getElementById('export-perf-btn')?.addEventListener('click', exportPerformanceReport);
@@ -39,7 +42,10 @@ function expandPanel() {
 
   // Draw immediately and start the UI update interval
   renderPerformanceUI();
-  renderIntervalId = setInterval(renderPerformanceUI, 1000);
+  renderPerfLogs();
+  renderIntervalId = setInterval(() => {
+    renderPerformanceUI();
+  }, 1000);
 }
 
 function collapsePanel() {
@@ -328,4 +334,24 @@ async function exportPerformanceReport() {
 
   exportDataFile(fileName, "Rapport Performance", report);
   showToast("Rapport performance généré !", "fa-file-export", 4000);
+}
+
+function renderPerfLogs() {
+  const container = document.getElementById('perf-console-logs');
+  if (!container) return;
+
+  const logs = perf.getPerfLogs();
+  if (logs.length === 0) {
+    container.innerHTML = '<span style="font-style: italic; color: var(--text-muted);">En attente d\'événements de performance...</span>';
+    return;
+  }
+
+  container.innerHTML = logs.map(l => {
+    return `<div style="margin-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 2px;">
+      <span style="color: var(--text-muted); font-size: 9px;">[${l.time}]</span> ${l.message}
+    </div>`;
+  }).join('');
+
+  // Auto-scroll to bottom
+  container.scrollTop = container.scrollHeight;
 }
