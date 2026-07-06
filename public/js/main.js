@@ -8,7 +8,7 @@ import * as quiz from './components/quiz.js';
 import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
 import { showToast, runSuggestionWithUI } from './utils.js';
-import { PROVIDERS } from './server-providers.js';
+import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 
 // Tracks whether the current physical device is localhost (set once on load)
 let isLocalDevice = false;
@@ -483,7 +483,11 @@ export async function runBackgroundSync() {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 1500);
-        const headers = await api.getHeaders();
+        // Merge base headers + provider-specific bypass headers (e.g. ngrok-skip-browser-warning)
+        const headers = {
+          ...api.getHeaders(),
+          ...getExtraHeaders(url)
+        };
         const res = await fetch(`${url}/api/search-status`, {
           signal: controller.signal,
           headers

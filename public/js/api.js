@@ -182,7 +182,7 @@ export function getConfiguredRemoteUrls() {
   return [];
 }
 
-function getHeaders(extraHeaders = {}) {
+export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
   // Only add provider headers if we are not on localhost or if explicitly hitting a remote URL
