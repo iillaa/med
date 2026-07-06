@@ -93,13 +93,20 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 └── public/                      # Interface Frontend statique
     ├── drcat_logo.png           # Logo officiel (stéthoscope & croix médicale en C)
     ├── index.html               # Structure HTML5 de l'application
-    ├── style.css                # Design sombre clinique (glassmorphism, responsive)
+    ├── style.css                # Point d'entrée de style CSS
+    ├── css/                     # Dossier des feuilles de style CSS modulaires
+    ├── pdf_viewer.html          # Visionneuse PDF intégrée avec surbrillance
+    ├── manifest.json            # Manifest PWA pour installation mobile
+    ├── service-worker.js        # Service Worker gérant le cache offline du client web
     └── js/
         ├── main.js              # Point d'entrée, orchestration, admin auth
         ├── api.js               # Couche de communication avec l'API serveur
         ├── state.js             # État global de l'application
+        ├── utils.js             # Utilitaires globaux (escapes HTML, toasts, clipboard)
+        ├── debug-console.js     # Console de débogage mobile (l'icône insecte 🐛)
         ├── performance.js       # Module de télémétrie et de suivi de performance
         ├── server-providers.js  # Registre et détection des tunnels serveurs
+        ├── remote_config.js     # Config générée avec les URLs distantes (⚠️ hors git)
         └── components/
             ├── sidebar.js       # Sidebar, recherche, filtres, liste des fiches
             ├── workspace.js     # Vue détaillée d'une fiche CAT (tabs, éditeurs)
