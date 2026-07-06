@@ -119,8 +119,13 @@ function buildAllowedOrigins(providers, configuredUrls) {
 
 function isOriginAllowedDynamic(origin, allowedOrigins) {
   if (!origin) return true;
-  // Always allow Capacitor app origins and local development hosts
-  if (origin === 'http://localhost' || origin === 'capacitor://localhost' || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+  // Always allow Capacitor app origins and local development hosts (both http and https)
+  if (
+    origin === 'http://localhost' || origin === 'https://localhost' ||
+    origin === 'capacitor://localhost' ||
+    origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:') ||
+    origin.startsWith('http://127.0.0.1:') || origin.startsWith('https://127.0.0.1:')
+  ) {
     return true;
   }
   if (allowedOrigins.has(origin)) return true;
@@ -169,11 +174,15 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
 
   // Always allow Capacitor app and localhost origins unconditionally
+  // NOTE: Capacitor on Android sends Origin: https://localhost (not http://)
   const isAlwaysAllowed = !origin
     || origin === 'http://localhost'
+    || origin === 'https://localhost'
     || origin === 'capacitor://localhost'
     || origin.startsWith('http://localhost:')
-    || origin.startsWith('http://127.0.0.1:');
+    || origin.startsWith('https://localhost:')
+    || origin.startsWith('http://127.0.0.1:')
+    || origin.startsWith('https://127.0.0.1:');
 
   const allowAll = isAlwaysAllowed || isOriginAllowedDynamic(origin, allowedOrigins);
 
