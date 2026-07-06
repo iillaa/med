@@ -435,7 +435,13 @@
 
                 <!-- Telemetry & Performance Event Logs Console -->
                 <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
-                  <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-receipt"></i> Journal de Télémétrie & Performance</h4>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h4 style="font-size: 13px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-receipt"></i> Journal de Télémétrie & Performance</h4>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="action-btn" id="copy-perf-logs-btn" style="padding: 2px 8px; font-size: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-copy"></i> Copier</button>
+                      <button class="cancel-btn" id="clear-perf-logs-btn" style="padding: 2px 8px; font-size: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;"><i class="fa-solid fa-trash"></i> Vider</button>
+                    </div>
+                  </div>
                   <div id="perf-console-logs" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 6px; font-family: monospace; font-size: 10px; color: #38bdf8; height: 120px; overflow-y: auto; line-height: 1.4; white-space: pre-wrap; word-break: break-all;">
                     <span style="font-style: italic; color: var(--text-muted);">En attente d'événements de performance...</span>
                   </div>
