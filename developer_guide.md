@@ -42,21 +42,21 @@ The repository contains two primary branches that serve different architectures:
 ```mermaid
 gitGraph
     commit id: "Init"
-    branch android-app
+    branch light-android
     checkout master
     commit id: "Server Features"
-    checkout android-app
+    checkout light-android
     commit id: "Capacitor Config"
     checkout master
     commit id: "Bug Fix"
-    checkout android-app
+    checkout light-android
     merge master id: "Merge updates"
 ```
 
 1. **`master` branch**:
    * **Target**: The Node.js/Express server and client-side web application.
    * **Use Case**: Running the local Termux server, local browser interface, network device connections, and administering/indexing PDFs.
-2. **`android-app` branch**:
+2. **`light-android` branch**:
    * **Target**: Standalone offline-first Android wrapper.
    * **Use Case**: Compiles client-side static code using Capacitor. Hides admin-specific tools when offline, runs local JSON/localStorage mock backups, and hosts the GitHub CI/CD Actions build configuration.
 
@@ -119,7 +119,7 @@ Dr. CAT allows standalone offline APK builds to communicate with a central serve
 Dr. CAT is compiled into an `.apk` automatically on GitHub.
 
 1. **GitHub Actions Workflow**:
-   The workflow defined in `.github/workflows/build-apk.yml` triggers on every push to the `android-app` branch.
+   The workflow defined in `.github/workflows/build-apk.yml` triggers on every push to the `light-android` branch.
 2. **Steps performed in Cloud CI**:
    * Sets up Java 17 and Android SDK.
    * Installs Node modules.

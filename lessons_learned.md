@@ -62,7 +62,19 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Caching the app mode statically at launch (e.g., locking the app mode to `ANDROID_OFFLINE` on standalone Capacitor boot) prevents background sync handlers from ever retrieving remote server updates, even if they detect the server is reachable. Calling `api.fetchCats()` continues to load local bundle copies.
 * **Solution**: Implement dynamic setter interfaces (`api.setAppMode()`) that dispatch custom DOM events (`drcat-app-mode-changed`) so that relevant UI elements automatically re-evaluate their state (e.g., toggling edit controls or refreshing data grids).
 
-### 11. Invoking Promise Catch Handlers on Synchronous Methods
-* **Problem**: Attempting to attach `.catch()` directly to synchronous functions (like asset builders that return `undefined`) throws a `TypeError: Cannot read properties of undefined (reading 'catch')` which blocks thread execution and crashes the boot phase.
+### 11. Invoking Catch Handlers on Synchronous Methods
+* **Problem**: Attempting to attach `.catch()` directly to synchronous functions (like asset builders that return `undefined`) throws a `TypeError` which blocks thread execution and crashes the boot phase.
 * **Solution**: Standardize synchronous wrapper callbacks or wrap synchronous tasks inside a try/catch block inside a non-blocking `setImmediate()` or next-tick deferral.
+
+### 12. Temporal Dead Zone (TDZ) in Fallback Variables
+* **Problem**: Referencing a block-scoped `const` variable (like a fallback config array) inside a catch statement *before* the variable's declaration line causes a `ReferenceError` TDZ violation.
+* **Solution**: Always declare fallback variables at the very top of the function scope so they are fully initialized and accessible from all catch blocks.
+
+### 13. Capacitor Mobile WebView CORS Origin Limits
+* **Problem**: Standalone mobile apps running in Capacitor use custom webview origin schemes (e.g., `http://localhost` on Android or `capacitor://localhost` on iOS) without any port designation. If the backend CORS configurations only allowed origins with ports (e.g., `http://localhost:3000`), mobile client requests were blocked by the browser engine.
+* **Solution**: Explicitly add the portless schemes (`http://localhost`, `capacitor://localhost`) and wildcards as allowed origins by default on the server.
+
+### 14. False Positives in Server Pings using `no-cors`
+* **Problem**: Using `mode: 'no-cors'` in network pings returns an opaque response with status `0` even if the server is unreachable or intercepts the request with a warning HTML page (like Ngrok's phishing interstitial). This triggers false-positive "online" transitions.
+* **Solution**: Perform standard CORS requests for connectivity checks and dynamically inject the active provider's skip headers to verify true API availability.
 
