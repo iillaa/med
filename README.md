@@ -98,11 +98,15 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
         ├── main.js              # Point d'entrée, orchestration, admin auth
         ├── api.js               # Couche de communication avec l'API serveur
         ├── state.js             # État global de l'application
+        ├── performance.js       # Module de télémétrie et de suivi de performance
+        ├── server-providers.js  # Registre et détection des tunnels serveurs
         └── components/
             ├── sidebar.js       # Sidebar, recherche, filtres, liste des fiches
             ├── workspace.js     # Vue détaillée d'une fiche CAT (tabs, éditeurs)
             ├── dashboard.js     # Tableau de bord, stats, modération admin
-            └── quiz.js          # Moteur du système de quiz (QCM + rédaction)
+            ├── quiz.js          # Moteur du système de quiz (QCM + rédaction)
+            ├── diagnostics.js   # Panneau d'outils de diagnostics cliniques
+            └── performance.js   # Panneau de télémétrie et journal d'événements
 ```
 
 ---
