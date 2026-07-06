@@ -1,13 +1,7 @@
 // Core Performance Monitor Module for Dr. CAT
 // Measures client-side frame drops, rendering, interaction, memory, and local storage I/O
 
-const _isAndroidPerfSafeMode = (() => {
-  try {
-    return /android/i.test(navigator.userAgent);
-  } catch (_) {
-    return false;
-  }
-})();
+const _isAndroidPerfSafeMode = false;
 
 const THRESHOLDS = {
   fps: { good: 55, warn: 40 },
@@ -151,7 +145,7 @@ export const perf = _isAndroidPerfSafeMode ? {
 
   recordMilestone(name) {
     milestones[name] = performance.now();
-    console.log(`[Perf Milestone] ${name} reached at +${Math.round(milestones[name])}ms`);
+    console.debug(`[Perf Milestone] ${name} reached at +${Math.round(milestones[name])}ms`);
   },
 
   recordApiCall(url, status, durationMs) {
