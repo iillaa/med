@@ -98,9 +98,7 @@ Compile the Android build and share the resulting APK with your testers. Ensure 
 
 As you continue to build and expand Dr. CAT, here are the next features you should vibe-code:
 
-1. **Offline Suggestion Queueing**:
-   * *Concept*: Instead of showing an error when submitting a suggestion while offline (`ANDROID_OFFLINE`), store the suggestion in `localStorage.setItem('dr_cat_queued_suggestions', ...)` and auto-upload them when the background sync detects the server is online.
-2. **Local PDF Index Caching**:
+1. **Local PDF Index Caching**:
    * *Concept*: Store the PDF index locally inside the Capacitor package during build so that search is fully functional even when the user is completely offline without ever connecting to the server.
-3. **Database JSON Validation**:
+2. **Database JSON Validation**:
    * *Concept*: Add a schema validator on server boot to verify `cats_db.json` structure, preventing server crashes if the database file is manually edited with typos.
