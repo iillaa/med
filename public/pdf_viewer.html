@@ -298,7 +298,7 @@
                                     .replace(/\.pdf$/i, '');
     document.getElementById('doc-title').textContent = displayTitle;
 
-    const pdfUrl = `/pdfs/${encodeURIComponent(pdfFileName)}`;
+    const pdfUrl = `pdfs/${encodeURIComponent(pdfFileName)}`;
     
     let pdfDoc = null;
     let pageRendering = false;
