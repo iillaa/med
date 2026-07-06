@@ -40,7 +40,7 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 10px;">
-      <button onclick="window.__drCatBooted=true; document.getElementById('app-loading-overlay').style.opacity='0'; setTimeout(function(){document.getElementById('app-loading-overlay').classList.add('hidden')}, 400);" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: sans-serif; transition: all 0.2s;">✕ Ignorer</button>
+      <button onclick="if(window.setLoaderProgress) window.setLoaderProgress(100); else { var ov = document.getElementById('app-loading-overlay'); if(ov) { ov.style.opacity='0'; ov.style.visibility='hidden'; ov.classList.add('hidden'); } window.__drCatBooted=true; }" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: sans-serif; transition: all 0.2s;">✕ Ignorer</button>
     </div>
   </div>
 

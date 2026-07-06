@@ -1,7 +1,7 @@
 // Debug Console — automatic capture & floating UI for Android/mobile
 let logBuffer = [];
 const MAX_LOGS = 200;
-let isViewerOpen = true; // CHANGED FOR VERBOSE DEBUGGING: open by default
+let isViewerOpen = false;
 let originalConsole = {};
 
 // ── Capture Helpers ──────────────────────────────────────────
@@ -335,7 +335,7 @@ function createUI() {
       <div id="debug-console-content"></div>
     `;
     document.body.appendChild(panel);
-    panel.style.display = 'flex'; // CHANGED FOR VERBOSE DEBUGGING: show by default
+    panel.style.display = 'none';
 
     document.getElementById('debug-close-btn').addEventListener('click', toggleViewer);
     document.getElementById('debug-clear-btn').addEventListener('click', () => {
@@ -364,7 +364,6 @@ function createUI() {
 export function initDebugConsole() {
   startDebugConsole();
   createUI();
-  renderLogs(); // CHANGED FOR VERBOSE DEBUGGING: populate logs immediately
 
   // Log startup info
   console.log('📱 Dr.CAT Debug Console active.');
