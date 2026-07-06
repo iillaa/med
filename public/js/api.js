@@ -162,7 +162,7 @@ function getApiUrl(endpoint, overrideUrl) {
   return endpoint;
 }
 
-function getConfiguredRemoteUrls() {
+export function getConfiguredRemoteUrls() {
   const stored = localStorage.getItem('dr_cat_remote_server_url');
   if (stored) return [stored];
   
