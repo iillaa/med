@@ -483,10 +483,12 @@ export async function runBackgroundSync() {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 1500);
-        await fetch(`${url}/api/search-status`, {
+        const headers = await api.getHeaders();
+        const res = await fetch(`${url}/api/search-status`, {
           signal: controller.signal,
-          mode: 'no-cors'
+          headers
         });
+        if (!res.ok) throw new Error('Server returned error status');
         clearTimeout(timeoutId);
         reachable = true;
         break;

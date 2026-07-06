@@ -119,6 +119,10 @@ function buildAllowedOrigins(providers, configuredUrls) {
 
 function isOriginAllowedDynamic(origin, allowedOrigins) {
   if (!origin) return true;
+  // Always allow Capacitor app origins and local development hosts
+  if (origin === 'http://localhost' || origin === 'capacitor://localhost' || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+    return true;
+  }
   if (allowedOrigins.has(origin)) return true;
   // Check if origin matches any provider pattern
   for (const allowed of allowedOrigins) {
