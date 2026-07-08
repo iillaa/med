@@ -40,6 +40,11 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       const targetId = btn.getAttribute('data-target');
       if (!targetId) return;
 
+      // Block suggestions tab when dev-unlocked in offline mode
+      if (targetId === 'admin-pane-suggestions' && window.__drCatDevDiagnosticsUnlocked) {
+        return;
+      }
+
       // Toggle buttons
       adminTabBtns.forEach(b => {
         b.classList.remove('active');
@@ -392,17 +397,38 @@ export function renderDashboard(onSelectCat) {
   }
 
   // 5. Load Admin suggestions panel
+  const devUnlocked = !!(window.__drCatDevDiagnosticsUnlocked && api.isOfflineApp);
   if (adminPanel) {
-    adminPanel.style.display = state.isAdmin ? 'block' : 'none';
+    adminPanel.style.display = (state.isAdmin || devUnlocked) ? 'block' : 'none';
   }
 
   if (state.isAdmin) {
     loadPendingSuggestions();
+  } else if (devUnlocked) {
+    // Dev unlock: show panel but do NOT load suggestions or enable admin CRUD
+    autoSelectDevTab();
   }
 
   if (window.perf) {
     window.perf.endMeasure('dashboard.renderDashboard');
     window.perf.recordMilestone('dashboardReady');
+  }
+}
+
+function autoSelectDevTab() {
+  const diagTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-diagnostics"]');
+  if (diagTab) {
+    diagTab.click();
+  }
+  disableAdminTabsForDev();
+}
+
+function disableAdminTabsForDev() {
+  const sugTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-suggestions"]');
+  if (sugTab) {
+    sugTab.style.opacity = '0.4';
+    sugTab.style.pointerEvents = 'none';
+    sugTab.style.filter = 'grayscale(1)';
   }
 }
 
