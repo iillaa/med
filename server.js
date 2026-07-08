@@ -248,7 +248,10 @@ let suggestionsCache = [];
 let pdfIndex = [];
 let adminPassword = '';
 let remoteServerUrl = '';
-const activeTokens = new Set();
+const activeTokens = new Map(); // token -> { expiresAt }
+
+// Admin token TTL: 12 hours (in ms)
+const ADMIN_TOKEN_TTL = 12 * 60 * 60 * 1000;
 
 // A lightweight asynchronous queue lock to serialize write operations on json databases
 class AsyncLock {
@@ -324,12 +327,11 @@ global.perfServer = {
 };
 
 // Asynchronous atomic file writes and backups to ensure data integrity
-async function safeWriteJsonAsync(filePath, data) {
+async function safeWriteAsync(filePath, content) {
   const tempPath = filePath + '.tmp';
   const backupPath = filePath + '.bak';
   const phases = {};
   try {
-    const jsonString = JSON.stringify(data, null, 2);
     const exists = await fs.promises.access(filePath).then(() => true).catch(() => false);
     if (exists) {
       const copyStart = Date.now();
@@ -337,7 +339,7 @@ async function safeWriteJsonAsync(filePath, data) {
       phases.backup = Date.now() - copyStart;
     }
     const writeStart = Date.now();
-    await fs.promises.writeFile(tempPath, jsonString, 'utf-8');
+    await fs.promises.writeFile(tempPath, content, 'utf-8');
     phases.write = Date.now() - writeStart;
     const renameStart = Date.now();
     await fs.promises.rename(tempPath, filePath);
@@ -353,33 +355,12 @@ async function safeWriteJsonAsync(filePath, data) {
   }
 }
 
-// Asynchronous atomic file writes and backups for plain text files (like CSS)
+async function safeWriteJsonAsync(filePath, data) {
+  await safeWriteAsync(filePath, JSON.stringify(data, null, 2));
+}
+
 async function safeWriteTextAsync(filePath, textContent) {
-  const tempPath = filePath + '.tmp';
-  const backupPath = filePath + '.bak';
-  const phases = {};
-  try {
-    const exists = await fs.promises.access(filePath).then(() => true).catch(() => false);
-    if (exists) {
-      const copyStart = Date.now();
-      await fs.promises.copyFile(filePath, backupPath);
-      phases.backup = Date.now() - copyStart;
-    }
-    const writeStart = Date.now();
-    await fs.promises.writeFile(tempPath, textContent, 'utf-8');
-    phases.write = Date.now() - writeStart;
-    const renameStart = Date.now();
-    await fs.promises.rename(tempPath, filePath);
-    phases.rename = Date.now() - renameStart;
-    global.perfServer.recordWrite(phases);
-  } catch (err) {
-    console.error(`[Data Integrity Error] Failed to write text atomically to ${filePath}:`, err);
-    const tempExists = await fs.promises.access(tempPath).then(() => true).catch(() => false);
-    if (tempExists) {
-      try { await fs.promises.unlink(tempPath); } catch (_) {}
-    }
-    throw err;
-  }
+  await safeWriteAsync(filePath, textContent);
 }
 
 
@@ -542,7 +523,14 @@ function isLocalhostConnection(req) {
 // Helper to check if request is authenticated as admin using token
 function isAdminRequest(req) {
   const token = req.headers['x-admin-token'];
-  return Boolean(token && activeTokens.has(token));
+  if (!token || !activeTokens.has(token)) return false;
+  
+  const entry = activeTokens.get(token);
+  if (Date.now() > entry.expiresAt) {
+    activeTokens.delete(token);
+    return false;
+  }
+  return true;
 }
 
 // Serve PDFs statically with aggressive 7-day caching to save mobile data
@@ -595,7 +583,7 @@ app.post('/api/login', (req, res) => {
   // Success — clear rate limit for this IP
   loginAttempts.delete(ip);
   const token = crypto.randomBytes(16).toString('hex');
-  activeTokens.add(token);
+  activeTokens.set(token, { expiresAt: Date.now() + ADMIN_TOKEN_TTL });
   res.json({ success: true, token });
 });
 

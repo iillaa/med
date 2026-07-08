@@ -10,8 +10,7 @@ import * as performanceComponent from './components/performance.js';
 import { showToast, runSuggestionWithUI } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 
-// Tracks whether the current physical device is localhost (set once on load)
-let isLocalDevice = false;
+// Tracks app mode (set once on load via api.getAppMode())
 
 
 // Global administrative error interceptor

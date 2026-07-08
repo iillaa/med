@@ -200,10 +200,10 @@ async function refreshDiagnosticsData() {
     }
 
     // Display local storage database length counts
-    const localCats = JSON.parse(localStorage.getItem('dr_cat_user_cats') || '[]');
-    document.getElementById('diag-db-cats').textContent = `${localCats.length + 55} (55 base, ${localCats.length} perso)`;
+    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    document.getElementById('diag-db-cats').textContent = `${55 + customCats.length} (55 base, ${customCats.length} perso)`;
     document.getElementById('diag-db-sugs').textContent = 'Envoi direct au serveur';
-    document.getElementById('diag-db-size-cats').textContent = formatBytes(localStorage.getItem('dr_cat_user_cats')?.length || 0);
+    document.getElementById('diag-db-size-cats').textContent = formatBytes(localStorage.getItem('dr_cat_custom_created_cats')?.length || 0);
     document.getElementById('diag-db-size-sugs').textContent = '0 B (N/A)';
     document.getElementById('diag-db-size-index').textContent = 'Bundled local asset';
   }

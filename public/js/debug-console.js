@@ -1,8 +1,13 @@
 // Debug Console — automatic capture & floating UI for Android/mobile
+import { isOfflineApp } from './api.js';
+import { showToast } from './utils.js';
 let logBuffer = [];
 const MAX_LOGS = 200;
 let isViewerOpen = false;
 let originalConsole = {};
+let devUnlockClickCount = 0;
+const DEV_UNLOCK_THRESHOLD = 3;
+let devUnlockCooldown = false;
 
 // ── Capture Helpers ──────────────────────────────────────────
 function addLog(level, args, meta = {}) {
@@ -124,6 +129,20 @@ function toggleViewer() {
   isViewerOpen = !isViewerOpen;
   panel.style.display = isViewerOpen ? 'flex' : 'none';
   if (isViewerOpen) renderLogs();
+}
+
+function attemptDevUnlock() {
+  if (devUnlockCooldown) return;
+  if (!isOfflineApp) return;
+
+  devUnlockClickCount++;
+  if (devUnlockClickCount >= DEV_UNLOCK_THRESHOLD) {
+    devUnlockClickCount = 0;
+    devUnlockCooldown = true;
+    window.__drCatDevDiagnosticsUnlocked = true;
+    showToast("🔓 Diagnostics/Performance déverrouillés pour le dev (offline).", "fa-unlock", 4000);
+    setTimeout(() => { devUnlockCooldown = false; }, 5000);
+  }
 }
 
 function createUI() {
@@ -316,7 +335,10 @@ function createUI() {
     btn.id = 'debug-toggle-btn';
     btn.innerHTML = '🐛<span class="badge" id="debug-badge"></span>';
     document.body.appendChild(btn);
-    btn.addEventListener('click', toggleViewer);
+    btn.addEventListener('click', () => {
+      attemptDevUnlock();
+      toggleViewer();
+    });
   }
 
   // Panel

@@ -21,11 +21,10 @@ let globalOnOpenCatCard = null;
 
 // Stop Words for Keyword Matcher
 const FRENCH_STOP_WORDS = new Set([
-  'pour', 'avec', 'dans', 'chez', 'mais', 'sans', 'plus', 'moins', 'sous', 
-  'fois', 'jour', 'sont', 'cette', 'dont', 'dans', 'votre', 'leur', 'leurs',
-  'comme', 'dans', 'plus', 'tres', 'avec', 'card', 'sujet', 'fiche', 'dans',
-  'tout', 'tous', 'toute', 'toutes', 'cette', 'ces', 'une', 'des', 'les', 'par',
-  'encas', 'dans', 'pour', 'avec', 'clinique', 'devant'
+  'pour', 'avec', 'dans', 'chez', 'mais', 'sans', 'plus', 'moins', 'sous',
+  'fois', 'jour', 'sont', 'cette', 'dont', 'votre', 'leur', 'leurs',
+  'comme', 'tout', 'tous', 'toute', 'toutes', 'ces', 'une', 'des', 'les', 'par',
+  'encas', 'clinique', 'devant', 'sujet', 'fiche', 'card', 'tres', 'très'
 ]);
 
 export function initQuiz(onOpenCatCard) {
@@ -501,13 +500,9 @@ function showResults() {
   const session = state.quizSession;
   const percent = Math.round((session.score / session.questions.length) * 100);
   
-  // Clear active quiz session questions so Back to Quiz button is hidden
-  const questionsCopy = [...session.questions];
-  session.questions = [];
-
   // Set score text
   if (resultsScore) {
-    resultsScore.textContent = `${session.score.toFixed(1)} / ${questionsCopy.length}`;
+    resultsScore.textContent = `${session.score.toFixed(1)} / ${session.questions.length}`;
   }
 
   // Set descriptive feedback based on score
