@@ -1,16 +1,17 @@
-# Audit — Lightweight Version
+# Audit Lightweight — Quick Scan
 
-## What to do (fast)
-1. Security quick sweep: authz, secrets, validation, headers.
-2. Infra sanity: backups, logs, patching, exposure.
-3. Database checks: encryption, least privilege, restore test.
-4. Backend: rate limiting, error handling, input schemas.
-5. Frontend: XSS/csp basics and dependency risks.
-6. QA: smoke + security regression minimum set.
+## Scope
+- Rapid production readiness triage of the project.
 
-## Output format
-- Findings (short bullets)
-- Risk level (Low/Med/High/Critical)
-- Evidence link/file
-- Recommendation
+## Findings
+- **Config Exposure**: `remote_server_config.json` was tracked in Git, exposing local server URLs.
+- **LAN Auth Bypass**: `isLocalhostConnection` allowed access from LAN interfaces, bypassing loopback-only restrictions.
+- **CORS Configuration**: Wildcard CORS fallback enabled credentials incorrectly.
+- **Unpinned Dependencies**: Wildcard dependency versions in `package.json`.
 
+## Fixes Applied
+- Untracked `remote_server_config.json` and added it to `.gitignore`.
+- Restricted `isLocalhostConnection` strictly to loopback addresses.
+- Configured security headers globally in the middleware.
+- Refactored CORS header handling to avoid wildcard credentials conflict.
+- Pinned all dependencies in `package.json` to exact versions.

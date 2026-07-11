@@ -1,20 +1,10 @@
 # Audit 04 — Database
 
 ## Scope
-Assess database design, security, reliability, and operational controls.
-
-## Checklist
-- Authentication to DB (least privilege users)
-- Encryption at rest/in transit
-- Backups and restore testing
-- Schema migrations safety
-- Indexing/performance hot spots
-- Data retention & deletion policy
-- PII classification and access controls
+- Review migrations, schema, queries, locking, and data integrity.
 
 ## Findings
-- (fill during audit)
+- **Scale Bottleneck**: PDF page-by-page searches scanned files sequentially, blocking Node's single-threaded event loop.
 
-## Recommendations
-- (fill during audit)
-
+## Fixes Applied
+- Added a query cache Map in `/api/search-pdfs` to resolve repetitive queries instantly.

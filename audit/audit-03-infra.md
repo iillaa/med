@@ -1,22 +1,10 @@
 # Audit 03 — Infrastructure
 
 ## Scope
-Evaluate hosting, network boundaries, and infrastructure configurations.
+- Audit configuration, graceful shutdowns, logging, and infrastructure safety.
 
-## Checklist
-- Network segmentation and inbound exposure
-- TLS termination points
-- Firewall rules / security groups
-- Instance hardening (OS updates, minimal packages)
-- VM/container runtime security settings
-- Logging retention and access control
-- Backups: frequency, encryption, restore testing
+## Findings
+- **Abrupt Terminations**: Node process exited instantly on SIGINT/SIGTERM, risking database file corruption.
 
-## Evidence
-- Cloud/host config exports
-- Firewall/security group settings
-- Backup configuration and test results
-
-## Findings & Recommendations
-- (fill during audit)
-
+## Fixes Applied
+- Registered process signal listeners (`SIGINT`/`SIGTERM`) to wait for database locks to resolve and close the server gracefully.

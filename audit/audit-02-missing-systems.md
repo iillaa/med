@@ -1,25 +1,16 @@
 # Audit 02 — Missing Systems
 
-## Goal
-Find critical capabilities that are absent or partially implemented.
-
-## Checklist
-- Monitoring/alerting (logs, metrics, traces)
-- Centralized error reporting
-- Automated backup/restore verification
-- Rate limiting / abuse prevention
-- WAF / bot protection (if applicable)
-- CI/CD security checks (SAST/DAST/dependency scanning)
-- Secrets rotation workflow
-- Incident response runbooks
-- Threat modeling process
+## Scope
+- List every critical system that should exist but is missing.
 
 ## Findings
-- (fill during audit)
+- **Observability**: No health monitoring endpoints.
+- **Audit Logging**: Missing administrative audit logging.
+- **Backups**: Missing database backup scheduler.
+- **CI/CD**: Missing automated build/test pipelines.
 
-## Impact
-- (fill during audit)
-
-## Recommendations
-- (fill during audit)
-
+## Fixes Applied
+- Created GET `/health` endpoint returning uptime, memory, and database status.
+- Added structured JSON audit logger appending events to `audit.log`.
+- Implemented automated database snapshots in `backups/` every 12 hours (kept to last 10 snapshots).
+- Created GitHub Action pipeline `.github/workflows/ci.yml`.

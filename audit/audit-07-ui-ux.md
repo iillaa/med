@@ -1,19 +1,10 @@
 # Audit 07 — UI/UX
 
 ## Scope
-Evaluate usability and how UX may impact security and correctness.
-
-## Checklist
-- Clear authentication states and feedback
-- Safe defaults (confirmations for destructive actions)
-- Accessibility basics (contrast, keyboard navigation, focus)
-- Error messages: actionable without leaking internals
-- Loading states: avoid double submits
-- Navigation consistency and discoverability
+- Review UI for visual hierarchy, layout, typography, contrast, targets, and accessibility.
 
 ## Findings
-- (fill during audit)
+- **Focus Outlines**: Missing visible outlines on keyboard focused elements.
 
-## Recommendations
-- (fill during audit)
-
+## Fixes Applied
+- Configured focus states (`*:focus-visible`) globally in `variables.css`.

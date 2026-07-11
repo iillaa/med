@@ -4,23 +4,10 @@
 - Identify application and infrastructure security gaps.
 - Prioritize findings by exploitability and impact.
 
-## Checklist
-- AuthN/AuthZ: verify role-based access controls, least privilege.
-- Secrets: ensure no secrets in repo/client bundles.
-- Transport: enforce HTTPS/TLS, secure cookies.
-- Input handling: validate/sanitize all external inputs.
-- Session management: cookie flags, rotation, expiration.
-- Error handling: avoid leaking stack traces and internals.
-- Dependency hygiene: audit for vulnerable packages.
-
-## Evidence to collect
-- Server middleware/security headers config
-- Auth endpoints + policy enforcement locations
-- Dependency list + versions
-
 ## Findings
-- (fill during audit)
+- **Plaintext Password Storage**: Plaintext passwords stored in local `admin_password.txt` file.
+- **Session Token Memory Leak**: In-memory tokens accumulated without garbage collection.
 
-## Recommendations
-- (fill during audit)
-
+## Fixes Applied
+- Upgraded to PBKDF2 key derivation hashing with local salts (`salt:hash` format) and timing-safe binary comparisons.
+- Added an hourly cron interval to prune expired session tokens.

@@ -1,21 +1,10 @@
 # Audit 08 — AI Safety
 
 ## Scope
-If the system uses AI/LLMs: evaluate prompt safety, data handling, and abuse.
-
-## Checklist
-- Prompt injection resistance
-- Output constraints and safe formatting
-- Tool/function calling safety (allowlists)
-- Data minimization (no unnecessary secrets/PII sent)
-- Logging of prompts/responses (with redaction)
-- Refusal behavior and escalation paths
-- Abuse detection (spam, jailbreak attempts)
-- Human-in-the-loop where risk is high
+- Audit AI components for prompt injection, jailbreaking, context leakage, and token abuse.
 
 ## Findings
-- (fill during audit)
+- No AI/LLM models are integrated directly in the current application architecture.
 
-## Recommendations
-- (fill during audit)
-
+## Fixes Applied
+- None required.

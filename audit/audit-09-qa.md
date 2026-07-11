@@ -1,18 +1,12 @@
-# Audit 09 — QA
+# Audit 09 — QA & Crash Prevention
 
 ## Scope
-Define a QA and testing strategy aligned with findings.
+- Review code and tests for missing validation, crash scenarios, and error handling.
 
-## Test Plan Checklist
-- Unit tests for business logic and validation
-- Integration tests for API flows
-- Authz matrix tests (roles x endpoints)
-- Security test cases (input fuzzing, injection probes)
-- Performance regression tests
-- E2E smoke tests for key user journeys
-- Backup/restore verification test (if applicable)
-- Release checklist and rollback procedure
+## Findings
+- **JSON Parsing Crash**: Malformed JSON payloads threw uncaught SyntaxErrors leaking stack traces.
+- **NaN Query Parameters**: Non-numeric CAT IDs caused lock contention on update requests.
 
-## Findings & Next Steps
-- (fill during audit)
-
+## Fixes Applied
+- Registered global JSON parsing SyntaxError catcher.
+- Added `isNaN` checks on update API routes.

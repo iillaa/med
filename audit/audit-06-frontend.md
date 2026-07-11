@@ -1,20 +1,10 @@
 # Audit 06 — Frontend
 
 ## Scope
-Assess client-side security, dependency risks, and correctness.
-
-## Checklist
-- XSS protections (escaping, avoiding dangerouslySetInnerHTML)
-- Secure handling of tokens/credentials
-- Content Security Policy (CSP)
-- Dependency versioning and integrity
-- Secure storage (avoid localStorage for sensitive tokens)
-- Input validation before submission (UX + safety)
-- Error boundary behavior (no data leakage)
+- Review components, state, data fetching, validation, loading/empty/error states.
 
 ## Findings
-- (fill during audit)
+- **Empty Submissions**: Suggestion modifications allowed whitespace-only or empty strings.
 
-## Recommendations
-- (fill during audit)
-
+## Fixes Applied
+- Added client-side presence validation alerts to prevent saving empty contents in `workspace.js`.
