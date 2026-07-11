@@ -264,6 +264,75 @@ function cleanOrientationOfClues(text, title, category) {
   return result;
 }
 
+function parseClinicalSigns(cat) {
+  if (!cat || !cat.summary) return '';
+  const sec1Match = cat.summary.match(/\*\*1\.[^*]+\*\*([\s\S]+?)(?=\*\*2\.|\*\*3\.|\*\*4\.|\*\*5\.|\n\n|$)/);
+  if (!sec1Match) return '';
+  const sec1Text = sec1Match[1].trim();
+  
+  const cliniqueMatch = sec1Text.match(/-\s*Clinique\s*:\s*([^\n]+)/i);
+  if (cliniqueMatch) {
+    return cliniqueMatch[1].trim();
+  }
+  
+  const diagMatch = sec1Text.match(/-\s*Diagnostic\s*:\s*([^\n]+)/i);
+  if (diagMatch) {
+    return diagMatch[1].trim();
+  }
+
+  const bullets = sec1Text.split('\n').filter(line => line.trim().startsWith('-'));
+  if (bullets.length > 0) {
+    return bullets.slice(0, 2).map(b => b.replace(/^-\s*/, '').trim()).join('. ');
+  }
+  
+  return sec1Text;
+}
+
+function generateClinicalVignette(cat) {
+  const cleanTitle = cat.title
+    .replace(/^CAT devant\s+/i, '')
+    .replace(/^Différence entre\s+/i, '')
+    .replace(/^Interprétation du\s+/i, '')
+    .trim();
+
+  let gender = Math.random() > 0.5 ? "Un patient" : "Une patiente";
+  let age = Math.floor(Math.random() * 50) + 18;
+
+  if (cat.category === 'Pédiatrie') {
+    gender = Math.random() > 0.5 ? "Un enfant" : "Une fillette";
+    age = Math.floor(Math.random() * 10) + 1;
+    if (age === 1) age = "12 mois";
+    else age = `${age} ans`;
+  } else if (cat.category === 'Gynécologie / Obstétrique') {
+    gender = "Une patiente";
+  }
+
+  let signs = parseClinicalSigns(cat);
+  signs = signs.replace(/\*\*/g, '').replace(/\[la pathologie\]/g, cleanTitle).trim();
+  
+  signs = signs.substring(0, 220).trim();
+  if (signs.endsWith('.') === false && signs.length > 0) signs += '...';
+
+  const settings = [
+    "se présente à votre cabinet médical",
+    "se présente aux urgences",
+    "vous consulte",
+    "arrive en consultation"
+  ];
+  const setting = settings[Math.floor(Math.random() * settings.length)];
+
+  let ageStr = typeof age === 'number' ? `${age} ans` : age;
+  let text = `${gender} de ${ageStr} ${setting}`;
+  
+  if (signs && signs.length > 5) {
+    text += ` présentant les signes suivants : <br><em>"${signs}"</em>.`;
+  } else {
+    text += ` pour suspicion de : <br><strong>"${cleanTitle}"</strong>.`;
+  }
+  
+  return text;
+}
+
 function startQuizSession() {
   const selectedCategory = quizCategorySelect ? quizCategorySelect.value : 'all';
   const questionCount = quizCountSelect ? parseInt(quizCountSelect.value) : 10;
@@ -320,15 +389,22 @@ function startQuizSession() {
   const generatedQuestions = [];
 
   filteredCats.forEach(cat => {
+    const vignette = generateClinicalVignette(cat);
+
     // 1. Clinical QCM Question (Cas Clinique & Orientation)
     if (includeClinical) {
       const rawOrientation = getOrientationText(cat);
       if (rawOrientation && rawOrientation.trim().length > 0) {
         const correctAnswer = cleanOrientationOfClues(rawOrientation, cat.title, cat.category);
         if (correctAnswer && correctAnswer.trim().length > 0) {
-          const otherCats = (state.allCats || []).filter(c => c.id !== cat.id);
+          let candidateCats = (state.allCats || []).filter(c => c.id !== cat.id && c.category === cat.category);
+          if (candidateCats.length < 3) {
+            const otherSpecialtyCats = (state.allCats || []).filter(c => c.id !== cat.id && c.category !== cat.category);
+            candidateCats = [...candidateCats, ...otherSpecialtyCats];
+          }
+
           const otherOrientations = Array.from(new Set(
-            otherCats.map(c => {
+            candidateCats.map(c => {
               const rawText = getOrientationText(c);
               return cleanOrientationOfClues(rawText, c.title, c.category);
             }).filter(t => t && t.trim().length > 0 && t !== correctAnswer)
@@ -341,7 +417,7 @@ function startQuizSession() {
           generatedQuestions.push({
             type: 'clinical',
             cat: cat,
-            questionText: `Vous recevez un patient présentant des symptômes évocateurs de : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est la conduite à tenir ou l'orientation thérapeutique prioritaire à ce stade ?`,
+            questionText: `<strong>Simulation de Cas Clinique :</strong><br><br>${vignette}<br><br>En tant que clinicien, quelle est votre <strong>conduite à tenir ou orientation thérapeutique</strong> prioritaire à ce stade ?`,
             correctAnswer: correctAnswer,
             options: options,
             points: 1.0
@@ -356,9 +432,14 @@ function startQuizSession() {
       if (rawOrdonnance && rawOrdonnance.trim().length > 0) {
         const correctAnswer = cleanTextOfClues(rawOrdonnance, cat.title, cat.category);
         if (correctAnswer && correctAnswer.trim().length > 0) {
-          const otherCats = (state.allCats || []).filter(c => c.id !== cat.id);
+          let candidateCats = (state.allCats || []).filter(c => c.id !== cat.id && c.category === cat.category);
+          if (candidateCats.length < 3) {
+            const otherSpecialtyCats = (state.allCats || []).filter(c => c.id !== cat.id && c.category !== cat.category);
+            candidateCats = [...candidateCats, ...otherSpecialtyCats];
+          }
+
           const otherOrdonnances = Array.from(new Set(
-            otherCats.map(c => cleanTextOfClues(c.ordonnance, c.title, c.category))
+            candidateCats.map(c => cleanTextOfClues(c.ordonnance, c.title, c.category))
               .filter(o => o && o.trim().length > 0 && o !== correctAnswer)
           ));
           shuffleArray(otherOrdonnances);
@@ -369,7 +450,7 @@ function startQuizSession() {
           generatedQuestions.push({
             type: 'posology',
             cat: cat,
-            questionText: `Pour la situation clinique suivante : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est l'ordonnance type recommandée (molécules, posologies et durées de traitement) ?`,
+            questionText: `<strong>Prescription Médicale :</strong><br><br>${vignette}<br><br>Quelle est l'<strong>ordonnance type recommandée</strong> (molécules, posologies et durées de traitement) pour ce patient ?`,
             correctAnswer: correctAnswer,
             options: options,
             points: 1.0
@@ -383,7 +464,7 @@ function startQuizSession() {
       generatedQuestions.push({
         type: 'redflags',
         cat: cat,
-        questionText: `Quels sont les <strong>Red Flags / Signes de Gravité</strong> cliniques à rechercher devant la situation suivante : <br><strong>"${cat.title}"</strong> ?`,
+        questionText: `<strong>Signes de Gravité (Red Flags) :</strong><br><br>${vignette}<br><br>Quels sont les <strong>Red Flags / Signes de Gravité</strong> cliniques prioritaires à rechercher ou éliminer pour ce patient ?`,
         correctAnswer: cat.red_flags,
         points: 1.0
       });
@@ -394,7 +475,7 @@ function startQuizSession() {
       generatedQuestions.push({
         type: 'prescription',
         cat: cat,
-        questionText: `Rédigez l'<strong>Ordonnance Type</strong> (traitements, posologies, et durées conseillées) pour : <br><strong>"${cat.title}"</strong>`,
+        questionText: `<strong>Rédaction d'Ordonnance :</strong><br><br>${vignette}<br><br>Rédigez l'<strong>Ordonnance Type</strong> complète (traitements, posologies, et durées conseillées) pour ce patient.`,
         correctAnswer: cat.ordonnance,
         points: 1.0
       });
