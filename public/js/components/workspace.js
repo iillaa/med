@@ -539,16 +539,22 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   if (workspace) {
     workspace.addEventListener('touchstart', (e) => {
       // Ignore swipe inside textareas or input fields to prevent cursor interference
+      if (!e.target || !e.target.tagName) return;
       const tagName = e.target.tagName.toLowerCase();
-      if (tagName === 'textarea' || tagName === 'input' || e.target.closest('#summary-editor') || e.target.closest('#notes-input')) return;
+      const hasClosest = typeof e.target.closest === 'function';
+      const insideEditor = hasClosest && (e.target.closest('#summary-editor') || e.target.closest('#notes-input'));
+      if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
       
       touchstartX = e.changedTouches[0].screenX;
       touchstartY = e.changedTouches[0].screenY;
     }, { passive: true });
 
     workspace.addEventListener('touchend', (e) => {
+      if (!e.target || !e.target.tagName) return;
       const tagName = e.target.tagName.toLowerCase();
-      if (tagName === 'textarea' || tagName === 'input' || e.target.closest('#summary-editor') || e.target.closest('#notes-input')) return;
+      const hasClosest = typeof e.target.closest === 'function';
+      const insideEditor = hasClosest && (e.target.closest('#summary-editor') || e.target.closest('#notes-input'));
+      if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
 
       touchendX = e.changedTouches[0].screenX;
       touchendY = e.changedTouches[0].screenY;
