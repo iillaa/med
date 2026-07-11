@@ -37,3 +37,4 @@ admin_password.txt*
 
 # Remote server URL config
 public/js/remote_config.js
+remote_server_config.json*

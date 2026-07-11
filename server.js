@@ -170,7 +170,42 @@ async function initializeProviders() {
   console.log('[Providers] Configured URLs:', configuredRemoteUrls.length > 0 ? configuredRemoteUrls : '(none)');
 }
 
+// Rate limiting store
+const apiRateLimits = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const MAX_REQUESTS_PER_WINDOW = 60;
+
 app.use((req, res, next) => {
+  // 1. Apply secure HTTP security headers
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // 2. Custom rate limiter for APIs
+  if (req.path.startsWith('/api/')) {
+    const LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+    const rawIp = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+    
+    // Only rate limit non-loopback connections
+    if (!LOCAL_IPS.has(rawIp)) {
+      const now = Date.now();
+      const ip = rawIp || 'unknown';
+      let limit = apiRateLimits.get(ip);
+      
+      if (!limit || (now - limit.windowStart) > RATE_LIMIT_WINDOW_MS) {
+        limit = { count: 1, windowStart: now };
+        apiRateLimits.set(ip, limit);
+      } else {
+        limit.count++;
+      }
+      
+      if (limit.count > MAX_REQUESTS_PER_WINDOW) {
+        res.setHeader('Retry-After', Math.ceil((RATE_LIMIT_WINDOW_MS - (now - limit.windowStart)) / 1000));
+        return res.status(429).json({ error: "Trop de requêtes. Veuillez réessayer dans une minute." });
+      }
+    }
+  }
+
   const origin = req.headers.origin;
 
   // Always allow Capacitor app and localhost origins unconditionally
@@ -185,6 +220,13 @@ app.use((req, res, next) => {
     || origin.startsWith('https://127.0.0.1:');
 
   const allowAll = isAlwaysAllowed || isOriginAllowedDynamic(origin, allowedOrigins);
+
+  // 3. CSRF Validation on state-modifying requests
+  if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
+    if (origin && !allowAll) {
+      return res.status(403).json({ error: 'CORS/CSRF validation failed: Origin not allowed.' });
+    }
+  }
 
   if (allowAll) {
     // Build allowed headers list including all provider-specific headers
@@ -414,12 +456,35 @@ async function initializeData() {
     const exists = await fs.promises.access(DB_FILE).then(() => true).catch(() => false);
     if (exists) {
       const content = await fs.promises.readFile(DB_FILE, 'utf-8');
-      catsCache = JSON.parse(content);
+      const parsed = JSON.parse(content);
+      if (!Array.isArray(parsed)) {
+        throw new Error("Database content is not an array");
+      }
+      for (const item of parsed) {
+        if (typeof item.id !== 'number' || !item.title || !item.category) {
+          throw new Error(`Invalid CAT structure for item ID: ${item.id}`);
+        }
+      }
+      catsCache = parsed;
     } else {
       console.warn(`Database file not found at: ${DB_FILE}`);
     }
   } catch (err) {
-    console.error("Error reading cats_db.json cache:", err);
+    console.error("Error reading or validating cats_db.json cache:", err);
+    try {
+      const backupExists = await fs.promises.access(DB_FILE + '.bak').then(() => true).catch(() => false);
+      if (backupExists) {
+        console.warn("Attempting to restore database from backup cats_db.json.bak...");
+        const backupContent = await fs.promises.readFile(DB_FILE + '.bak', 'utf-8');
+        const backupParsed = JSON.parse(backupContent);
+        if (Array.isArray(backupParsed)) {
+          catsCache = backupParsed;
+          console.log("[Backup] Successfully restored database cache from backup file.");
+        }
+      }
+    } catch (backupErr) {
+      console.error("Failed to restore from backup:", backupErr);
+    }
   }
 
   // Load suggestions.json
@@ -506,18 +571,7 @@ function isLocalhostConnection(req) {
   }
 
   // 2. No forwarding header or not from local socket (trust the raw socket address)
-  if (LOCAL_IPS.has(rawIp)) return true;
-
-  // 3. Also match the machine's own LAN interfaces (e.g. direct LAN access without proxy)
-  const os = require('os');
-  const interfaces = os.networkInterfaces();
-  const localAddresses = [];
-  for (const name of Object.keys(interfaces)) {
-    for (const netInterface of interfaces[name]) {
-      localAddresses.push(netInterface.address);
-    }
-  }
-  return localAddresses.includes(rawIp);
+  return LOCAL_IPS.has(rawIp);
 }
 
 // Helper to check if request is authenticated as admin using token
@@ -1012,6 +1066,10 @@ app.post('/api/save-css', async (req, res) => {
       return res.status(400).json({ error: "Layout parameters must be valid numbers" });
     }
 
+    if (gap < 0 || gap > 100 || maxHeight < 100 || maxHeight > 3000 || ratio < 0.1 || ratio > 10 || padding < 0 || padding > 100) {
+      return res.status(400).json({ error: "Layout parameters out of safe bounds" });
+    }
+
     const cssPath = path.join(__dirname, 'public', 'style.css');
 
     await dbLock.acquire(async () => {
@@ -1350,4 +1408,18 @@ initializeData().then(() => {
 }).catch(err => {
   console.error("Critical: Failed to initialize application data caches:", err);
   process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[CRITICAL] Uncaught Exception:', err);
+  try {
+    fs.appendFileSync(path.join(__dirname, 'server.log'), `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`);
+  } catch (_) {}
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
+  try {
+    fs.appendFileSync(path.join(__dirname, 'server.log'), `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`);
+  } catch (_) {}
 });
