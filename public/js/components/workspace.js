@@ -542,8 +542,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       isSwipeActive = false;
       if (!e.target || typeof e.target.closest !== 'function') return;
 
-      // Limit swipe navigation to the top section panel (header, red flags banner, or tabs bar)
-      const isTopPanel = e.target.closest('.workspace-header') || e.target.closest('#red-flags-banner') || e.target.closest('.tabs-nav');
+      // Limit swipe navigation to the top section panel (header or red flags banner)
+      const isTopPanel = e.target.closest('.workspace-header') || e.target.closest('#red-flags-banner');
       if (!isTopPanel) return;
 
       // Ignore swipe inside textareas or input fields to prevent cursor interference
