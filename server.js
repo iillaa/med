@@ -410,6 +410,56 @@ async function safeWriteTextAsync(filePath, textContent) {
   await safeWriteAsync(filePath, textContent);
 }
 
+const AUDIT_LOG_FILE = path.join(__dirname, 'audit.log');
+const BACKUPS_DIR = path.join(__dirname, 'backups');
+
+async function logAuditEvent(action, details, req) {
+  try {
+    const timestamp = new Date().toISOString();
+    const rawIp = req ? (req.socket.remoteAddress || '').replace(/^::ffff:/, '') : 'system';
+    const token = req ? req.headers['x-admin-token'] || 'no-token' : 'system';
+    const logLine = JSON.stringify({ timestamp, action, ip: rawIp, token: token.substring(0, 6) + '...', details }) + '\n';
+    await fs.promises.appendFile(AUDIT_LOG_FILE, logLine, 'utf-8');
+  } catch (err) {
+    console.error('[Audit Logger] Failed to write to audit log:', err);
+  }
+}
+
+async function runDatabaseBackup() {
+  try {
+    const exists = await fs.promises.access(BACKUPS_DIR).then(() => true).catch(() => false);
+    if (!exists) {
+      await fs.promises.mkdir(BACKUPS_DIR);
+    }
+    
+    // Check if db exists
+    const dbExists = await fs.promises.access(DB_FILE).then(() => true).catch(() => false);
+    if (!dbExists) return;
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = path.join(BACKUPS_DIR, `cats_db_${timestamp}.json`);
+    await fs.promises.copyFile(DB_FILE, backupPath);
+    console.log(`[Backup] Automated snapshot created: ${backupPath}`);
+    
+    // Prune old backups (keep only the last 10)
+    const files = await fs.promises.readdir(BACKUPS_DIR);
+    const backupFiles = files
+      .filter(f => f.startsWith('cats_db_') && f.endsWith('.json'))
+      .map(f => ({ name: f, time: fs.statSync(path.join(BACKUPS_DIR, f)).mtimeMs }))
+      .sort((a, b) => b.time - a.time);
+
+    if (backupFiles.length > 10) {
+      const toDelete = backupFiles.slice(10);
+      for (const file of toDelete) {
+        await fs.promises.unlink(path.join(BACKUPS_DIR, file.name));
+        console.log(`[Backup] Pruned old backup snapshot: ${file.name}`);
+      }
+    }
+  } catch (err) {
+    console.error('[Backup] Automated backup failed:', err);
+  }
+}
+
 
 // Initialize admin password on startup
 async function initAdminPassword() {
@@ -548,6 +598,10 @@ async function initializeData() {
   } catch (err) {
     console.error("Error loading remote_server_config.json:", err);
   }
+  
+  // Run dynamic backup on boot and schedule every 12 hours
+  await runDatabaseBackup();
+  setInterval(runDatabaseBackup, 12 * 60 * 60 * 1000);
 }
 
 onIndexUpdated(async () => {
@@ -611,6 +665,26 @@ app.use('/pdfs', express.static(PDF_DIR, {
   immutable: true
 }));
 
+// GET /health - Check system status and health parameters
+app.get('/health', (req, res) => {
+  const memory = process.memoryUsage();
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    database: {
+      loaded: catsCache.length > 0,
+      records: catsCache.length,
+    },
+    system: {
+      memoryUsage: {
+        rss: `${Math.round(memory.rss / 1024 / 1024)} MB`,
+        heapUsed: `${Math.round(memory.heapUsed / 1024 / 1024)} MB`
+      }
+    }
+  });
+});
+
 // API to check if current user is Admin
 app.get('/api/is-admin', (req, res) => {
   res.json({ isAdmin: isAdminRequest(req) });
@@ -660,6 +734,7 @@ app.post('/api/login', (req, res) => {
     } else {
       loginAttempts.set(ip, { count: 1, lastAttempt: now });
     }
+    logAuditEvent('login_failed', { ip }, req);
     return res.status(401).json({ error: "Mot de passe incorrect." });
   }
 
@@ -667,6 +742,7 @@ app.post('/api/login', (req, res) => {
   loginAttempts.delete(ip);
   const token = crypto.randomBytes(16).toString('hex');
   activeTokens.set(token, { expiresAt: Date.now() + ADMIN_TOKEN_TTL });
+  logAuditEvent('login_success', {}, req);
   res.json({ success: true, token });
 });
 
@@ -676,6 +752,7 @@ app.post('/api/logout', (req, res) => {
   if (token) {
     activeTokens.delete(token);
   }
+  logAuditEvent('logout', {}, req);
   res.json({ success: true });
 });
 
@@ -712,6 +789,7 @@ app.post('/api/cats/:id', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'CAT fiche introuvable.' });
     }
+    logAuditEvent('cat_update', { id: catId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -747,6 +825,7 @@ app.post('/api/cats', async (req, res) => {
       return { success: true, cat: newCat };
     });
 
+    logAuditEvent('cat_create', { id: result.cat.id, title: result.cat.title }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -784,6 +863,7 @@ app.delete('/api/cats/:id', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'CAT fiche not found' });
     }
+    logAuditEvent('cat_delete', { id: catId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -882,6 +962,7 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: result.message || 'Proposition introuvable.' });
     }
+    logAuditEvent('suggestion_approve', { id: sugId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -911,6 +992,7 @@ app.post('/api/suggestions/:id/reject', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'Proposition introuvable.' });
     }
+    logAuditEvent('suggestion_reject', { id: sugId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -948,6 +1030,7 @@ app.post('/api/suggestions/:id/edit', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'Proposition introuvable.' });
     }
+    logAuditEvent('suggestion_edit', { id: sugId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -1073,6 +1156,7 @@ app.post('/api/reindex', (req, res) => {
   }
   try {
     indexPdfs(true).catch(err => console.error("Error in forced indexing:", err));
+    logAuditEvent('pdf_reindex_triggered', {}, req);
     res.json({ success: true, message: "Reindexing started in background" });
   } catch (err) {
     console.error(err);
@@ -1133,6 +1217,7 @@ ${endMarker}`;
       }
 
       await safeWriteTextAsync(cssPath, cssContent);
+      logAuditEvent('css_save', { gap, maxHeight, ratio, padding }, req);
       res.json({ success: true, message: "CSS updated successfully!" });
     });
     
