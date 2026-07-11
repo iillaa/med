@@ -136,7 +136,31 @@
       <!-- LEVEL 3: Scrollable CAT List (dominant, takes remaining space) -->
       <div class="cat-list-wrapper">
         <ul class="cat-list" id="cat-list">
-          <!-- Dynamically populated -->
+          <!-- Shimmer Skeletons displayed during boot loading -->
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
         </ul>
       </div>
     </aside>
@@ -183,40 +207,46 @@
             </div>
           </header>
           
-          <!-- Quick Stats Grid -->
-          <div class="dashboard-grid">
-            <div class="dash-card mastery-card">
-              <div class="dash-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">Taux de Maîtrise</span>
-                <span class="dash-card-val" id="dash-mastery-rate">0%</span>
+            <!-- Quick Stats Grid -->
+            <div class="dashboard-grid">
+              <div class="dash-card mastery-card animate-entrance delay-1">
+                <div class="mastery-circular-container">
+                  <svg class="progress-ring" width="52" height="52">
+                    <circle class="progress-ring-circle-bg" stroke="var(--border-color)" stroke-width="3.5" fill="transparent" r="22" cx="26" cy="26"/>
+                    <circle class="progress-ring-circle" id="dash-mastery-ring" stroke="var(--color-primary)" stroke-width="3.5" stroke-linecap="round" fill="transparent" r="22" cx="26" cy="26" stroke-dasharray="138.23" stroke-dashoffset="138.23"/>
+                  </svg>
+                  <div class="mastery-value" id="dash-mastery-rate">0%</div>
+                </div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Taux de Maîtrise</span>
+                  <span class="dash-card-desc">Progression globale</span>
+                </div>
               </div>
-            </div>
-            
-            <div class="dash-card done-card">
-              <div class="dash-card-icon"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">Maîtrisés</span>
-                <span class="dash-card-val" id="dash-count-done">0 / 55</span>
+              
+              <div class="dash-card done-card animate-entrance delay-2">
+                <div class="dash-card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Maîtrisés</span>
+                  <span class="dash-card-val" id="dash-count-done">0 / 55</span>
+                </div>
               </div>
-            </div>
-
-            <div class="dash-card doing-card">
-              <div class="dash-card-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">En cours</span>
-                <span class="dash-card-val" id="dash-count-doing">0 / 55</span>
+  
+              <div class="dash-card doing-card animate-entrance delay-3">
+                <div class="dash-card-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">En cours</span>
+                  <span class="dash-card-val" id="dash-count-doing">0 / 55</span>
+                </div>
               </div>
-            </div>
-
-            <div class="dash-card streak-card" style="border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.02);">
-              <div class="dash-card-icon" style="color: var(--color-warning); background: rgba(245, 158, 11, 0.08);"><i class="fa-solid fa-fire"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">Série d'Études</span>
-                <span class="dash-card-val" id="dash-streak-count">0 jour</span>
+  
+              <div class="dash-card streak-card animate-entrance delay-4" style="border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.02);">
+                <div class="dash-card-icon" style="color: var(--color-warning); background: rgba(245, 158, 11, 0.08);"><i class="fa-solid fa-fire"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Série d'Études</span>
+                  <span class="dash-card-val" id="dash-streak-count">0 jour</span>
+                </div>
               </div>
-            </div>
-          </div><!-- /.dashboard-grid -->
+            </div><!-- /.dashboard-grid -->
 
           <!-- First-Run Welcome Banner (hidden after first CAT started) -->
           <div id="first-run-banner" style="display: none; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.07), rgba(16,185,129,0.05)); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -472,7 +502,7 @@
 
           <div class="dashboard-content-split">
             <!-- Resume block -->
-            <div class="dashboard-block resume-block">
+            <div class="dashboard-block resume-block animate-entrance delay-3">
               <h3><i class="fa-solid fa-clock-rotate-left"></i> Reprendre la révision</h3>
               <p class="block-desc">Vos derniers cours en cours de lecture :</p>
               <ul class="resume-list" id="dash-resume-list">
@@ -481,7 +511,7 @@
             </div>
 
             <!-- Categories progress block -->
-            <div class="dashboard-block categories-block">
+            <div class="dashboard-block categories-block animate-entrance delay-4">
               <h3><i class="fa-solid fa-chart-pie"></i> Progrès par spécialité</h3>
               <div class="categories-list" id="dash-categories-progress">
                 <!-- Dynamically populated -->

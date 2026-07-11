@@ -32,10 +32,10 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 
 ## 📱 Mobile UX & Android-Specific
 
-- `[ ]` **Haptic Feedback**: Use Capacitor's `Haptics` plugin to add short vibration pulses on correct quiz answers and long pulses on wrong answers — creates a physical feedback loop for learning.
-- `[ ]` **Swipe Navigation**: Implement swipe-left/right gestures on the workspace detail view to navigate between consecutive CATs in the current filter list.
-- `[ ]` **App Update Notification**: When background sync detects a new version of `cats_db.json`, show a subtle toast ("Nouvelles fiches disponibles — Actualiser?") instead of auto-reloading.
-- `[ ]` **Screen Wake Lock**: Keep the screen awake while in quiz mode using the `WakeLock` API so doctors don't need to keep tapping the screen to stay in quiz mode.
+- `[x]` **Haptic Feedback**: Use Capacitor's `Haptics` plugin to add short vibration pulses on correct quiz answers and long pulses on wrong answers — creates a physical feedback loop for learning.
+- `[x]` **Swipe Navigation**: Implement swipe-left/right gestures on the workspace detail view to navigate between consecutive CATs in the current filter list.
+- `[x]` **App Update Notification**: When background sync detects a new version of `cats_db.json`, show a subtle toast ("Nouvelles fiches disponibles — Actualiser?") instead of auto-reloading.
+- `[x]` **Screen Wake Lock**: Keep the screen awake while in quiz mode using the `WakeLock` API so doctors don't need to keep tapping the screen to stay in quiz mode.
 
 ---
 
@@ -60,10 +60,10 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 
 ## 💅 UI Polish & Animations
 
-- `[ ]` **Micro-Animations**: Add subtle entrance animations (fade-in + slide-up) for CAT detail cards, quiz panels, and dashboard stats using CSS `@keyframes`.
-- `[ ]` **Skeleton Loading Screens**: Replace blank loading flashes with shimmer skeleton placeholders while CAT data is being fetched.
-- `[ ]` **Progress Ring Animation**: Animate the specialty completion rings on the dashboard using SVG stroke-dashoffset transitions.
-- `[ ]` **Dark/Light Mode Persistence**: Remember the user's chosen theme across sessions using `localStorage`.
+- `[x]` **Micro-Animations**: Add subtle entrance animations (fade-in + slide-up) for CAT detail cards, quiz panels, and dashboard stats using CSS `@keyframes`.
+- `[x]` **Skeleton Loading Screens**: Replace blank loading flashes with shimmer skeleton placeholders while CAT data is being fetched.
+- `[x]` **Progress Ring Animation**: Animate the specialty completion rings on the dashboard using SVG stroke-dashoffset transitions.
+- `[x]` **Dark/Light Mode Persistence**: Remember the user's chosen theme across sessions using `localStorage`.
 
 ---
 

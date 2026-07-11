@@ -61,6 +61,41 @@
   color: var(--color-primary);
 }
 
+.mastery-circular-container {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-circle-bg {
+  stroke: var(--border-color);
+}
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mastery-value {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dash-card-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 .done-card .dash-card-icon {
   background-color: rgba(16, 185, 129, 0.1);
   color: var(--color-success);

@@ -453,3 +453,44 @@
     display: block;
   }
 }
+
+/* Shimmer Skeleton Loader */
+.cat-item-skeleton {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, 
+    var(--border-color) 25%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    var(--border-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmerLoading 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+.skeleton-title {
+  height: 14px;
+  width: 80%;
+}
+
+.skeleton-meta {
+  height: 10px;
+  width: 50%;
+}
+
+@keyframes shimmerLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+

@@ -615,6 +615,13 @@ function renderQuestion() {
     if (timerWrapper) timerWrapper.style.display = 'none';
   }
 
+  const questionCard = document.getElementById('quiz-question-card');
+  if (questionCard) {
+    questionCard.classList.remove('animate-entrance');
+    void questionCard.offsetWidth; // trigger reflow
+    questionCard.classList.add('animate-entrance');
+  }
+
   if (window.perf) window.perf.endMeasure('quiz.renderQuestion');
 }
 

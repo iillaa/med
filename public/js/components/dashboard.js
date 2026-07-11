@@ -318,7 +318,16 @@ export function renderDashboard(onSelectCat) {
   const total = state.allCats.length;
   const percent = total > 0 ? Math.round((done / total) * 100) : 0;
 
-  if (dashMasteryRate) dashMasteryRate.textContent = `${percent}%`;
+  if (dashMasteryRate) {
+    dashMasteryRate.textContent = `${percent}%`;
+    const ring = document.getElementById('dash-mastery-ring');
+    if (ring) {
+      const radius = 22;
+      const circumference = 2 * Math.PI * radius; // 138.23
+      const offset = circumference - (percent / 100) * circumference;
+      ring.style.strokeDashoffset = offset;
+    }
+  }
   if (dashCountDone) dashCountDone.textContent = `${done} / ${total}`;
   if (dashCountDoing) dashCountDoing.textContent = `${doing} / ${total}`;
   if (dashCountTodo) dashCountTodo.textContent = `${todo} / ${total}`;
