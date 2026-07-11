@@ -288,9 +288,14 @@ app.use(express.static(path.join(__dirname, 'public'), {
 let catsCache = [];
 let suggestionsCache = [];
 let pdfIndex = [];
-let adminPassword = '';
+let adminPasswordHash = '';
+let adminPasswordSalt = '';
 let remoteServerUrl = '';
 const activeTokens = new Map(); // token -> { expiresAt }
+
+function hashPassword(password, salt) {
+  return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+}
 
 // Admin token TTL: 12 hours (in ms)
 const ADMIN_TOKEN_TTL = 12 * 60 * 60 * 1000;
@@ -411,13 +416,26 @@ async function initAdminPassword() {
   try {
     const exists = await fs.promises.access(PASSWORD_FILE).then(() => true).catch(() => false);
     if (exists) {
-      adminPassword = (await fs.promises.readFile(PASSWORD_FILE, 'utf-8')).trim();
+      const rawContent = (await fs.promises.readFile(PASSWORD_FILE, 'utf-8')).trim();
+      if (rawContent.includes(':')) {
+        const parts = rawContent.split(':');
+        adminPasswordSalt = parts[0];
+        adminPasswordHash = parts[1];
+      } else {
+        // Migrate old plain-text password to hash format
+        adminPasswordSalt = crypto.randomBytes(16).toString('hex');
+        adminPasswordHash = hashPassword(rawContent, adminPasswordSalt);
+        await fs.promises.writeFile(PASSWORD_FILE, `${adminPasswordSalt}:${adminPasswordHash}`, 'utf-8');
+        console.log(`[SECURITY] Migrated plain-text password in ${PASSWORD_FILE} to PBKDF2 hash.`);
+      }
     } else {
-      adminPassword = crypto.randomBytes(16).toString('hex'); // 32-character hex password (~128 bits)
-      await fs.promises.writeFile(PASSWORD_FILE, adminPassword, 'utf-8');
+      const plainPassword = crypto.randomBytes(16).toString('hex'); // 32-character hex password
+      adminPasswordSalt = crypto.randomBytes(16).toString('hex');
+      adminPasswordHash = hashPassword(plainPassword, adminPasswordSalt);
+      await fs.promises.writeFile(PASSWORD_FILE, `${adminPasswordSalt}:${adminPasswordHash}`, 'utf-8');
       console.log(`\n=================================================`);
-      console.log(`[SECURITY] Generated Admin Password: ${adminPassword}`);
-      console.log(`Saved to: ${PASSWORD_FILE}`);
+      console.log(`[SECURITY] Generated Admin Password: ${plainPassword}`);
+      console.log(`Saved (hashed) to: ${PASSWORD_FILE}`);
       console.log(`=================================================\n`);
     }
   } catch (err) {
@@ -624,7 +642,18 @@ app.post('/api/login', (req, res) => {
   }
 
   const { password } = req.body;
-  if (!password || password !== adminPassword) {
+  
+  let isPasswordCorrect = false;
+  if (password && adminPasswordHash && adminPasswordSalt) {
+    const inputHash = hashPassword(password, adminPasswordSalt);
+    const inputBuffer = Buffer.from(inputHash, 'hex');
+    const storedBuffer = Buffer.from(adminPasswordHash, 'hex');
+    if (inputBuffer.length === storedBuffer.length && crypto.timingSafeEqual(inputBuffer, storedBuffer)) {
+      isPasswordCorrect = true;
+    }
+  }
+
+  if (!isPasswordCorrect) {
     if (attempt) {
       attempt.count++;
       attempt.lastAttempt = now;
@@ -1423,3 +1452,13 @@ process.on('unhandledRejection', (reason, promise) => {
     fs.appendFileSync(path.join(__dirname, 'server.log'), `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`);
   } catch (_) {}
 });
+
+// Periodic token pruning (every 1 hour)
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, entry] of activeTokens.entries()) {
+    if (now > entry.expiresAt) {
+      activeTokens.delete(token);
+    }
+  }
+}, 60 * 60 * 1000);
