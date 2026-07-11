@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import * as api from '../api.js';
 import { perf } from '../performance.js';
-import { formatBytes, formatDuration, formatPercent, getDiagnosticsLogs, showToast, exportDataFile } from '../utils.js';
+import { formatBytes, formatDuration, formatPercent, getDiagnosticsLogs, showToast, exportDataFile, copyToClipboard } from '../utils.js';
 
 let isOpen = false;
 let renderIntervalId = null;
@@ -32,6 +32,8 @@ export function initPerformance() {
   // Hook actions
   document.getElementById('reset-perf-btn')?.addEventListener('click', resetMetrics);
   document.getElementById('export-perf-btn')?.addEventListener('click', exportPerformanceReport);
+  document.getElementById('copy-perf-logs-btn')?.addEventListener('click', copyPerformanceLogs);
+  document.getElementById('clear-perf-logs-btn')?.addEventListener('click', clearPerformanceLogs);
 }
 
 function expandPanel() {
@@ -354,4 +356,21 @@ function renderPerfLogs() {
 
   // Auto-scroll to bottom
   container.scrollTop = container.scrollHeight;
+}
+
+function copyPerformanceLogs() {
+  const logs = perf.getPerfLogs();
+  if (logs.length === 0) {
+    showToast("Aucun log de performance à copier.", "fa-triangle-exclamation", 3000);
+    return;
+  }
+  const text = logs.map(l => `[${l.time}] ${l.message}`).join('\n');
+  copyToClipboard(text).then(() => {
+    showToast("Logs de performance copiés !", "fa-copy", 3000);
+  });
+}
+
+function clearPerformanceLogs() {
+  perf.clearPerfLogs();
+  showToast("Logs de performance vidés.", "fa-trash", 3000);
 }
