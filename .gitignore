@@ -10,6 +10,9 @@ node_modules/
 # Local backups (tracked by Git history instead)
 *.bak
 
+# Kilo agent-manager / worktree internals
+.kilo/
+
 # IDE & Tool configurations
 .antigravitycli/
 .gemini/
@@ -33,6 +36,9 @@ suggestions.json*
 admin_password.txt*
 
 # Remote server URL config
-# public/js/remote_config.js must be committed to avoid parse-time import failures
-# (build.js overwrites it during normal builds).
+public/js/remote_config.js
+remote_server_config.json*
 
+# Backups and audit logs
+backups/
+audit.log

@@ -323,6 +323,18 @@ export function renderDashboard(onSelectCat) {
   if (dashCountDoing) dashCountDoing.textContent = `${doing} / ${total}`;
   if (dashCountTodo) dashCountTodo.textContent = `${todo} / ${total}`;
 
+  let streakCount = 0;
+  try {
+    const streakInfo = JSON.parse(localStorage.getItem('dr_cat_streak') || '{"count": 0}');
+    streakCount = (streakInfo && typeof streakInfo.count === 'number') ? streakInfo.count : 0;
+  } catch (e) {
+    console.warn("Failed to parse study streak info", e);
+  }
+  const streakCountEl = document.getElementById('dash-streak-count');
+  if (streakCountEl) {
+    streakCountEl.textContent = `${streakCount} jour${streakCount > 1 ? 's' : ''}`;
+  }
+
   // 2. Populate "Reprendre la révision" (Resume list)
   if (resumeList) {
     resumeList.innerHTML = '';

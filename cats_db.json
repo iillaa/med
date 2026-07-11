@@ -191,7 +191,7 @@
     "ordonnance": "**Pour l'adulte :**\n1. Tardyferon 80mg (Fer) : 1 à 2 comprimés par jour à prendre avec un grand verre d'eau le matin avant le repas pendant 3 mois.\n\n**Pour l'enfant :**\n1. Inofer sirop ou Fumafer poudre : Dose correspondant à 3 mg/kg/j de fer métal en 2 prises par jour.",
     "pdf_keywords": [
       "Hématologie",
-      "Trt Anémie",
+      "Trt Anémie_",
       "Bilans",
       "Pédiatrie"
     ]
@@ -205,7 +205,7 @@
     "ordonnance": "**Devant une carence avérée en B12 (Maladie de Biermer) :**\n1. Vitamine B12 (Hydroxocobalamine) 1000 µg / 2ml injectable : 1 ampoule en IM tous les deux jours pendant 10 jours (phase d'attaque), puis 1 ampoule par mois à vie (phase d'entretien).\n\n**Devant une carence en B9 :**\n1. Acide Folique (Foldine) 5mg : 1 comprimé par jour pendant 2 mois.",
     "pdf_keywords": [
       "Hématologie",
-      "Trt Anémie",
+      "Trt Anémie_",
       "Bilans"
     ]
   },
@@ -355,6 +355,7 @@
     "pdf_keywords": [
       "Pneumologie",
       "Urgences",
+      "Radio thoracique_",
       "Radio thoracique",
       "Ordonnances"
     ]
@@ -383,7 +384,7 @@
     "ordonnance": "**Pour un adulte en crise d'asthme modérée :**\n1. Ventoline (Salbutamol) 100 µg/dose inhalateur : 4 bouffées via chambre d'inhalation au moment de la crise, à répéter toutes les 20-30 minutes en cas de persistance des sifflements, puis 2 à 4 bouffées 4 à 6 fois par jour si besoin.\n2. Solupred (Prednisolone) 20mg : 3 comprimés orodispersibles le matin (soit 60mg) en une seule prise au cours du petit-déjeuner pendant 5 jours.\n3. Chambre d'inhalation (type AeroChamber) : 1 dispositif pour faciliter les prises de Ventoline.\n\n**Traitement de fond à initier ou réévaluer (recommandé GINA) :**\n1. Symbicort (Budésonide/Formotérol) 120/4.5 µg : 1 à 2 inhalations matin et soir comme traitement quotidien et à la demande en cas de gne.",
     "pdf_keywords": [
       "Pneumologie",
-      "Médicaments des urgences",
+      "Médicaments des urgences_",
       "Pédiatrie",
       "Radio thoracique",
       "Urgences",
@@ -400,6 +401,7 @@
     "pdf_keywords": [
       "Pneumologie",
       "Urgences",
+      "Radio thoracique_",
       "Radio thoracique"
     ]
   },
@@ -478,7 +480,7 @@
     "pdf_keywords": [
       "Dermatologie",
       "CAT Dermatologie",
-      "Médicaments des urgences",
+      "Médicaments des urgences_",
       "Urgences"
     ]
   },
@@ -544,6 +546,7 @@
     "ordonnance": "**Pour Leishmaniose cutanée simple (Infiltration locale) :**\n1. Glucantime ampoules injectables : Infiltration intra-lésionnelle au cabinet médical une fois par semaine pendant 5 à 6 semaines.\n2. Soins locaux : Nettoyage antiseptique et pansement stérile après chaque séance.",
     "pdf_keywords": [
       "Dermatologie",
+      "Dermatologie_",
       "Infectieux",
       "Bilans"
     ]
@@ -556,7 +559,7 @@
     "red_flags": "Signes de sepsis grave ou choc septique (hypotension, tachycardie, marbrures, confusion), anurie ou oligurie, rein unique ou insuffisance rénale sévère, suspicion d'obstacle (PNA obstructive avec fièvre persistante ou douleur intolérable sous traitement - urgence médico-chirurgicale), rétention aiguë d'urines chez l'homme (globe vésical en cas de prostatite - nécessite un drainage par cathéter sus-pubien, la pose d'une sonde urétrale étant contre-indiquée en phase aiguë).",
     "ordonnance": "**Pour une Cystite aiguë simple (Femme adulte) :**\n1. Monuril (Fosfomycine-trométamol) 3g : 1 sachet en dose unique, à prendre à distance d'un repas (au moins 2h avant ou après), de préférence le soir au coucher après avoir vidé la vessie.\n2. Doliprane 1g (Paracétamol) : 1 comprimé toutes les 6 heures en cas de douleur mictionnelle ou pelvienne, max 4 comprimés par jour.\n\n**Pour une Pyélonéphrite aiguë simple non grave (probabiliste) :**\n1. Ciprofloxacine 500mg : 1 comprimé matin et soir au milieu des repas pendant 7 jours.\n2. ECBU (Examen Cytobactériologique des Urines) : À réaliser en laboratoire d'analyses médicales de toute urgence AVANT le début des antibiotiques.\n3. Doliprane 1g : 1 comprimé en cas de fièvre, max 4 comprimés par jour.",
     "pdf_keywords": [
-      "Urologie",
+      "Urologie_",
       "Infectieux",
       "Bilans"
     ]
@@ -569,8 +572,8 @@
     "red_flags": "Fièvre, contractions utérines associées, vomissements rendant impossible le traitement oral, intolérance aux bêta-lactamines.",
     "ordonnance": "**Pour Cystite gravidique (en attente des résultats d'ECBU prélevé) :**\n1. Monuril (Fosfomycine) 3g : 1 sachet en dose unique.\n2. Boire abondamment (eau de source) > 2L/jour.\n3. Reprendre contact dès réception de l'antibiogramme (sous 48h) pour confirmer l'efficacité.",
     "pdf_keywords": [
-      "Gynecologie",
-      "Urologie",
+      "Gynecologie_",
+      "Urologie_",
       "Médicaments et Grossesse",
       "Grossesse"
     ]
@@ -585,7 +588,7 @@
     "pdf_keywords": [
       "Pédiatrie",
       "Médicaments en Pédiatrie",
-      "Urologie",
+      "Urologie_",
       "Urgences"
     ]
   },
@@ -597,9 +600,9 @@
     "red_flags": "Colique néphrétique fébrile (Pyélonéphrite obstructive - URGENCE médico-chirurgicale absolue : risque de choc septique rapide, nécessite drainage chirurgical), rein unique, anurie (absence d'urines depuis > 12h), douleur rebelle aux AINS et morphiniques.",
     "ordonnance": "1. Profénid (Kétoprofène) 100mg : 1 comprimé matin, midi et soir au cours des repas pendant 5 jours (sauf contre-indication rénale ou ulcéreuse).\n2. Esoméprazole 20mg : 1 gélule par jour (protecteur gastrique).\n3. Tramadol 50mg : 1 gélule toutes les 6 à 8 heures si la douleur persiste sous AINS.\n4. Tamiser les urines à chaque miction.",
     "pdf_keywords": [
-      "Urologie",
+      "Urologie_",
       "Urgences",
-      "Médicaments des urgences",
+      "Médicaments des urgences_",
       "ASP",
       "Ordonnances"
     ]
@@ -627,7 +630,7 @@
     "ordonnance": "**En ambulatoire, devant suspicion de listériose (après hémocultures réalisées) :**\n1. Amoxicilline 1g : 1 comprimé 3 fois par jour pendant 10 jours.\n2. Paracétamol 1g : 1 comprimé en cas de fièvre, à renouveler toutes les 6 heures si besoin (max 4/jour).",
     "pdf_keywords": [
       "Médicaments et Grossesse",
-      "Gynécologie",
+      "Gynécologie_",
       "Bilans",
       "Grossesse"
     ]
@@ -640,7 +643,7 @@
     "red_flags": "Douleur pelvienne aiguë fébrile avec défense (suspicion de péritonite ou d'abcès du Douglas/tubo-ovarien - nécessite hospitalisation urgente en gynécologie pour traitement IV et drainage éventuel).",
     "ordonnance": "**Pour Mycose vaginale simple :**\n1. Econazole LP 150mg ovule : 1 ovule à introduire profondément dans le vagin le soir au coucher en dose unique (à renouveler après 3 jours si prurit persistant).\n2. Econazole 1% crème : 1 application vulvaire 2 fois par jour pendant 7 jours.\n\n**Pour Vaginose bactérienne :**\n1. Flagyl (Métronidazole) 500mg : 1 comprimé matin et soir pendant 7 jours.",
     "pdf_keywords": [
-      "Gynécologie",
+      "Gynécologie_",
       "Infectieux",
       "Médicaments et Grossesse",
       "Grossesse"
@@ -654,7 +657,7 @@
     "red_flags": "Signes d'hypocalcémie associée (paresthésies péri-buccales, crampes musculaires, spasmes carpo-pédaux - signe de Trousseau) nécessitant un dosage du calcium et magnésium sérique.",
     "ordonnance": "**Pour adulte avec carence sévère avérée (< 15 ng/mL) :**\n1. Uvedose (Cholécalciférol) 100 000 UI solution buvable en ampoule : 1 ampoule par voie orale à prendre avec un repas gras, toutes les 2 semaines, au total 4 ampoules (pendant 2 mois).\n2. Puis relais d'entretien : 1 ampoule de 100 000 UI tous les 3 mois.",
     "pdf_keywords": [
-      "Endocrinologie",
+      "Endocrinologie_",
       "Médicaments en Pédiatrie",
       "Bilans",
       "ioniques"
@@ -682,7 +685,7 @@
     "red_flags": "Baisse de l'acuité visuelle, douleur oculaire profonde, pupille asymétrique (myosis ou mydriase fixe), cornée trouble, traumatisme oculaire récent.",
     "ordonnance": "**Pour Conjonctivite bactérienne simple :**\n1. Désinfection oculaire : Dacudoses (sérum physiologique) : Laver l'œil 4 à 6 fois par jour avec une compresse stérile différente pour chaque œil.\n2. Fucithalmic (Acide fusidique) collyre : 1 goutte dans l'œil atteint matin et soir pendant 5 jours.\n*Ne jamais prescrire de collyre corticoïde ou anesthésique local sans avis ophtalmologique (risque de perforation cornéenne en cas d'herpès ou ulcère).*",
     "pdf_keywords": [
-      "Ophtalmologie",
+      "Ophtalmologie_",
       "CAT Urgences",
       "Urgences"
     ]
@@ -696,7 +699,7 @@
     "ordonnance": "**Bilan d'urgence et lettre d'orientation :**\n1. Lettre d'orientation détaillée décrivant les signes cliniques (perte de poids, polyurie) et les résultats de la bandelette urinaire.\n2. Bandelette urinaire réalisée au cabinet (noter les croix de glucose et de cétones).\n3. Glycémie capillaire.",
     "pdf_keywords": [
       "Pédiatrie",
-      "Endocrinologie",
+      "Endocrinologie_",
       "Urgences",
       "Médicaments en Pédiatrie",
       "je没ne"
@@ -710,8 +713,8 @@
     "red_flags": "Oubli de mentionner une allergie médicamenteuse grave, oubli de noter l'heure d'administration d'un traitement d'urgence (ex: adrénaline, trinitrine, morphiniques).",
     "ordonnance": "**Modèle de rédaction standard :**\n\n*Dr. [Nom] [Prénom]*\n*Médecin Généraliste*\n*Alger, le [Date]*\n\n*A l'attention de Monsieur le Médecin de garde des Urgences de [Hôpital]*\n\n*Objet : Orientation de M./Mme [Nom du patient], né(e) le [Date]*\n\n*Cher Confrère,*\n*Je vous adresse ce jour M./Mme [Nom] pour prise en charge spécialisée d'une [Suspicion diagnostique...]*\n*Cliniquement, le patient présente depuis [Délai] des douleurs de type [Type] associées à [Signes associés].*\n*A l'examen de ce jour à [Heure] : TA: [..], Pouls: [..], T°: [..]°C. On note [Signes physiques].*\n*Antécédents majeurs : [..]*\n*Traitement habituel : [..]*\n*Je vous remercie pour votre collaboration confraternelle.*\n\n*Dr. [Signature]*",
     "pdf_keywords": [
-      "Certificats",
-      "Entretiens"
+      "Certificats_",
+      "Entretiens_"
     ]
   },
   {
@@ -722,6 +725,7 @@
     "red_flags": "Certificat de complaisance (sans examen physique réel), mention de propos accusateurs envers un tiers, signature antidatée.",
     "ordonnance": "**Modèle de certificat descriptif de lésions :**\n\n*Je soussigné, Dr [Nom] [Prénom], certifie avoir examiné ce jour, le [Date] à [Heure], M. [Nom du patient], né le [Date de naissance].*\n*Le patient déclare avoir été victime d'une agression physique le [Date des faits].*\n*L'examen clinique met en évidence les lésions suivantes :*\n*- Une ecchymose de [Dimensions] au niveau de [Localisation anatomique].*\n*- Une dermabrasion linéaire de [Longueur] au niveau de [Localisation].*\n*- Une douleur à la palpation de [Zone], sans impotence fonctionnelle constatée ce jour.*\n*Certificat rédigé à la demande de l'intéressé et remis en mains propres pour faire valoir ce que de droit.*\n\n*Fait à [Ville], le [Date]*\n*Dr [Signature et Cachet]*",
     "pdf_keywords": [
+      "Certificats_",
       "Certificats"
     ]
   },
@@ -733,6 +737,7 @@
     "red_flags": "Délivrer un certificat de sport sans ausculter le patient (risque de mort subite par cardiomyopathie hypertrophique non détectée), attester d'une \"bonne santé\" absolue (préférer la formule \"absence de signes cliniques de contre-indication\").",
     "ordonnance": "**Modèle de Certificat de non-contre-indication à la pratique du sport :**\n\n*Je soussigné, Dr [Nom] [Prénom], certifie avoir examiné ce jour M./Mme [Nom du patient], né(e) le [Date].*\n*L'examen clinique de ce jour (incluant une auscultation cardiaque et une mesure de la pression artérielle) n'a pas révélé de signe clinique apparent de contre-indication à la pratique de [Préciser le sport, ex : football en compétition].*\n*Certificat rédigé à la demande de l'intéressé et remis en mains propres pour faire valoir ce que de droit.*\n\n*Fait à [Ville], le [Date]*\n*Dr [Signature/Cachet]*",
     "pdf_keywords": [
+      "Certificats_",
       "Certificats"
     ]
   },
@@ -744,16 +749,8 @@
     "red_flags": "Confondre ITT et arrêt de travail (un retraité peut avoir une ITT de 10 jours sans arrêt de travail professionnel), description imprécise des lésions (ex : \"nombreuses blessures sur tout le corps\" sans détails), omettre de décrire l'état psychologique.",
     "ordonnance": "**Modèle de certificat médico-légal CBU avec ITT :**\n\n*Je soussigné, Dr [Nom] [Prénom], certifie avoir examiné le [Date] à [Heure] M. [Nom du patient] né le [Date].*\n*Le patient déclare avoir subi une agression physique le [Date des faits] à [Heure].*\n*Les constatations cliniques physiques et psychologiques de ce jour sont :*\n*- Au niveau du visage : Une ecchymose bleutée périorbitaire droite de 4 cm de diamètre.*\n*- Au niveau du thorax : Douleur vive à la palpation de la 5ème côte gauche sans signe d'insuffisance respiratoire.*\n*- État psychologique : Syndrome de stress aigu caractérisé par une hypervigilance et une prostration.* \n*Au vu de ces constatations, j'estime la durée de l'Incapacité Totale de Travail (ITT) au sens médical et médico-légal à : [Nombre en lettres] jours (X jours), sous réserve de complications ultérieures.*\n*Certificat remis en mains propres à l'intéressé...*\n\n*Fait à [Ville], le [Date]*\n*Dr [Signature/Cachet]*",
     "pdf_keywords": [
+      "Certificats_",
       "Certificats"
     ]
-  },
-  {
-    "id": 56,
-    "category": "hhh",
-    "title": "kijj",
-    "summary": "gggggggg",
-    "red_flags": "gg",
-    "ordonnance": "",
-    "pdf_keywords": []
   }
 ]

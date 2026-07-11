@@ -141,6 +141,14 @@ function isOriginAllowedDynamic(origin, allowedOrigins) {
 
 app.use(express.json());
 
+// Graceful JSON parsing SyntaxError catcher
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: "Malformed JSON payload: Invalid syntax." });
+  }
+  next(err);
+});
+
 // CORS middleware — dynamically configured based on remote server URLs
 let serverProviders = [];
 let allowedOrigins = new Set();
@@ -170,7 +178,42 @@ async function initializeProviders() {
   console.log('[Providers] Configured URLs:', configuredRemoteUrls.length > 0 ? configuredRemoteUrls : '(none)');
 }
 
+// Rate limiting store
+const apiRateLimits = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const MAX_REQUESTS_PER_WINDOW = 60;
+
 app.use((req, res, next) => {
+  // 1. Apply secure HTTP security headers
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // 2. Custom rate limiter for APIs
+  if (req.path.startsWith('/api/')) {
+    const LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+    const rawIp = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+    
+    // Only rate limit non-loopback connections
+    if (!LOCAL_IPS.has(rawIp)) {
+      const now = Date.now();
+      const ip = rawIp || 'unknown';
+      let limit = apiRateLimits.get(ip);
+      
+      if (!limit || (now - limit.windowStart) > RATE_LIMIT_WINDOW_MS) {
+        limit = { count: 1, windowStart: now };
+        apiRateLimits.set(ip, limit);
+      } else {
+        limit.count++;
+      }
+      
+      if (limit.count > MAX_REQUESTS_PER_WINDOW) {
+        res.setHeader('Retry-After', Math.ceil((RATE_LIMIT_WINDOW_MS - (now - limit.windowStart)) / 1000));
+        return res.status(429).json({ error: "Trop de requêtes. Veuillez réessayer dans une minute." });
+      }
+    }
+  }
+
   const origin = req.headers.origin;
 
   // Always allow Capacitor app and localhost origins unconditionally
@@ -185,6 +228,13 @@ app.use((req, res, next) => {
     || origin.startsWith('https://127.0.0.1:');
 
   const allowAll = isAlwaysAllowed || isOriginAllowedDynamic(origin, allowedOrigins);
+
+  // 3. CSRF Validation on state-modifying requests
+  if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
+    if (origin && !allowAll) {
+      return res.status(403).json({ error: 'CORS/CSRF validation failed: Origin not allowed.' });
+    }
+  }
 
   if (allowAll) {
     // Build allowed headers list including all provider-specific headers
@@ -246,9 +296,15 @@ app.use(express.static(path.join(__dirname, 'public'), {
 let catsCache = [];
 let suggestionsCache = [];
 let pdfIndex = [];
-let adminPassword = '';
+let adminPasswordHash = '';
+let adminPasswordSalt = '';
 let remoteServerUrl = '';
 const activeTokens = new Map(); // token -> { expiresAt }
+const searchCache = new Map(); // cleanQuery -> results
+
+function hashPassword(password, salt) {
+  return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+}
 
 // Admin token TTL: 12 hours (in ms)
 const ADMIN_TOKEN_TTL = 12 * 60 * 60 * 1000;
@@ -363,19 +419,82 @@ async function safeWriteTextAsync(filePath, textContent) {
   await safeWriteAsync(filePath, textContent);
 }
 
+const AUDIT_LOG_FILE = path.join(__dirname, 'audit.log');
+const BACKUPS_DIR = path.join(__dirname, 'backups');
+
+async function logAuditEvent(action, details, req) {
+  try {
+    const timestamp = new Date().toISOString();
+    const rawIp = req ? (req.socket.remoteAddress || '').replace(/^::ffff:/, '') : 'system';
+    const token = req ? req.headers['x-admin-token'] || 'no-token' : 'system';
+    const logLine = JSON.stringify({ timestamp, action, ip: rawIp, token: token.substring(0, 6) + '...', details }) + '\n';
+    await fs.promises.appendFile(AUDIT_LOG_FILE, logLine, 'utf-8');
+  } catch (err) {
+    console.error('[Audit Logger] Failed to write to audit log:', err);
+  }
+}
+
+async function runDatabaseBackup() {
+  try {
+    const exists = await fs.promises.access(BACKUPS_DIR).then(() => true).catch(() => false);
+    if (!exists) {
+      await fs.promises.mkdir(BACKUPS_DIR);
+    }
+    
+    // Check if db exists
+    const dbExists = await fs.promises.access(DB_FILE).then(() => true).catch(() => false);
+    if (!dbExists) return;
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = path.join(BACKUPS_DIR, `cats_db_${timestamp}.json`);
+    await fs.promises.copyFile(DB_FILE, backupPath);
+    console.log(`[Backup] Automated snapshot created: ${backupPath}`);
+    
+    // Prune old backups (keep only the last 10)
+    const files = await fs.promises.readdir(BACKUPS_DIR);
+    const backupFiles = files
+      .filter(f => f.startsWith('cats_db_') && f.endsWith('.json'))
+      .map(f => ({ name: f, time: fs.statSync(path.join(BACKUPS_DIR, f)).mtimeMs }))
+      .sort((a, b) => b.time - a.time);
+
+    if (backupFiles.length > 10) {
+      const toDelete = backupFiles.slice(10);
+      for (const file of toDelete) {
+        await fs.promises.unlink(path.join(BACKUPS_DIR, file.name));
+        console.log(`[Backup] Pruned old backup snapshot: ${file.name}`);
+      }
+    }
+  } catch (err) {
+    console.error('[Backup] Automated backup failed:', err);
+  }
+}
+
 
 // Initialize admin password on startup
 async function initAdminPassword() {
   try {
     const exists = await fs.promises.access(PASSWORD_FILE).then(() => true).catch(() => false);
     if (exists) {
-      adminPassword = (await fs.promises.readFile(PASSWORD_FILE, 'utf-8')).trim();
+      const rawContent = (await fs.promises.readFile(PASSWORD_FILE, 'utf-8')).trim();
+      if (rawContent.includes(':')) {
+        const parts = rawContent.split(':');
+        adminPasswordSalt = parts[0];
+        adminPasswordHash = parts[1];
+      } else {
+        // Migrate old plain-text password to hash format
+        adminPasswordSalt = crypto.randomBytes(16).toString('hex');
+        adminPasswordHash = hashPassword(rawContent, adminPasswordSalt);
+        await fs.promises.writeFile(PASSWORD_FILE, `${adminPasswordSalt}:${adminPasswordHash}`, 'utf-8');
+        console.log(`[SECURITY] Migrated plain-text password in ${PASSWORD_FILE} to PBKDF2 hash.`);
+      }
     } else {
-      adminPassword = crypto.randomBytes(16).toString('hex'); // 32-character hex password (~128 bits)
-      await fs.promises.writeFile(PASSWORD_FILE, adminPassword, 'utf-8');
+      const plainPassword = crypto.randomBytes(16).toString('hex'); // 32-character hex password
+      adminPasswordSalt = crypto.randomBytes(16).toString('hex');
+      adminPasswordHash = hashPassword(plainPassword, adminPasswordSalt);
+      await fs.promises.writeFile(PASSWORD_FILE, `${adminPasswordSalt}:${adminPasswordHash}`, 'utf-8');
       console.log(`\n=================================================`);
-      console.log(`[SECURITY] Generated Admin Password: ${adminPassword}`);
-      console.log(`Saved to: ${PASSWORD_FILE}`);
+      console.log(`[SECURITY] Generated Admin Password: ${plainPassword}`);
+      console.log(`Saved (hashed) to: ${PASSWORD_FILE}`);
       console.log(`=================================================\n`);
     }
   } catch (err) {
@@ -414,12 +533,35 @@ async function initializeData() {
     const exists = await fs.promises.access(DB_FILE).then(() => true).catch(() => false);
     if (exists) {
       const content = await fs.promises.readFile(DB_FILE, 'utf-8');
-      catsCache = JSON.parse(content);
+      const parsed = JSON.parse(content);
+      if (!Array.isArray(parsed)) {
+        throw new Error("Database content is not an array");
+      }
+      for (const item of parsed) {
+        if (typeof item.id !== 'number' || !item.title || !item.category) {
+          throw new Error(`Invalid CAT structure for item ID: ${item.id}`);
+        }
+      }
+      catsCache = parsed;
     } else {
       console.warn(`Database file not found at: ${DB_FILE}`);
     }
   } catch (err) {
-    console.error("Error reading cats_db.json cache:", err);
+    console.error("Error reading or validating cats_db.json cache:", err);
+    try {
+      const backupExists = await fs.promises.access(DB_FILE + '.bak').then(() => true).catch(() => false);
+      if (backupExists) {
+        console.warn("Attempting to restore database from backup cats_db.json.bak...");
+        const backupContent = await fs.promises.readFile(DB_FILE + '.bak', 'utf-8');
+        const backupParsed = JSON.parse(backupContent);
+        if (Array.isArray(backupParsed)) {
+          catsCache = backupParsed;
+          console.log("[Backup] Successfully restored database cache from backup file.");
+        }
+      }
+    } catch (backupErr) {
+      console.error("Failed to restore from backup:", backupErr);
+    }
   }
 
   // Load suggestions.json
@@ -465,6 +607,10 @@ async function initializeData() {
   } catch (err) {
     console.error("Error loading remote_server_config.json:", err);
   }
+  
+  // Run dynamic backup on boot and schedule every 12 hours
+  await runDatabaseBackup();
+  setInterval(runDatabaseBackup, 12 * 60 * 60 * 1000);
 }
 
 onIndexUpdated(async () => {
@@ -473,7 +619,8 @@ onIndexUpdated(async () => {
     if (exists) {
       const content = await fs.promises.readFile(INDEX_FILE, 'utf-8');
       pdfIndex = JSON.parse(content);
-      console.log("[Cache] PDF Index cache reloaded into memory.");
+      searchCache.clear();
+      console.log("[Cache] PDF Index cache and search cache reloaded/cleared.");
     }
   } catch (err) {
     console.error("Error updating PDF index in memory cache:", err);
@@ -506,18 +653,7 @@ function isLocalhostConnection(req) {
   }
 
   // 2. No forwarding header or not from local socket (trust the raw socket address)
-  if (LOCAL_IPS.has(rawIp)) return true;
-
-  // 3. Also match the machine's own LAN interfaces (e.g. direct LAN access without proxy)
-  const os = require('os');
-  const interfaces = os.networkInterfaces();
-  const localAddresses = [];
-  for (const name of Object.keys(interfaces)) {
-    for (const netInterface of interfaces[name]) {
-      localAddresses.push(netInterface.address);
-    }
-  }
-  return localAddresses.includes(rawIp);
+  return LOCAL_IPS.has(rawIp);
 }
 
 // Helper to check if request is authenticated as admin using token
@@ -538,6 +674,26 @@ app.use('/pdfs', express.static(PDF_DIR, {
   maxAge: '7d',
   immutable: true
 }));
+
+// GET /health - Check system status and health parameters
+app.get('/health', (req, res) => {
+  const memory = process.memoryUsage();
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    database: {
+      loaded: catsCache.length > 0,
+      records: catsCache.length,
+    },
+    system: {
+      memoryUsage: {
+        rss: `${Math.round(memory.rss / 1024 / 1024)} MB`,
+        heapUsed: `${Math.round(memory.heapUsed / 1024 / 1024)} MB`
+      }
+    }
+  });
+});
 
 // API to check if current user is Admin
 app.get('/api/is-admin', (req, res) => {
@@ -570,13 +726,25 @@ app.post('/api/login', (req, res) => {
   }
 
   const { password } = req.body;
-  if (!password || password !== adminPassword) {
+  
+  let isPasswordCorrect = false;
+  if (password && adminPasswordHash && adminPasswordSalt) {
+    const inputHash = hashPassword(password, adminPasswordSalt);
+    const inputBuffer = Buffer.from(inputHash, 'hex');
+    const storedBuffer = Buffer.from(adminPasswordHash, 'hex');
+    if (inputBuffer.length === storedBuffer.length && crypto.timingSafeEqual(inputBuffer, storedBuffer)) {
+      isPasswordCorrect = true;
+    }
+  }
+
+  if (!isPasswordCorrect) {
     if (attempt) {
       attempt.count++;
       attempt.lastAttempt = now;
     } else {
       loginAttempts.set(ip, { count: 1, lastAttempt: now });
     }
+    logAuditEvent('login_failed', { ip }, req);
     return res.status(401).json({ error: "Mot de passe incorrect." });
   }
 
@@ -584,6 +752,7 @@ app.post('/api/login', (req, res) => {
   loginAttempts.delete(ip);
   const token = crypto.randomBytes(16).toString('hex');
   activeTokens.set(token, { expiresAt: Date.now() + ADMIN_TOKEN_TTL });
+  logAuditEvent('login_success', {}, req);
   res.json({ success: true, token });
 });
 
@@ -593,6 +762,7 @@ app.post('/api/logout', (req, res) => {
   if (token) {
     activeTokens.delete(token);
   }
+  logAuditEvent('logout', {}, req);
   res.json({ success: true });
 });
 
@@ -608,6 +778,9 @@ app.post('/api/cats/:id', async (req, res) => {
   }
   try {
     const catId = parseInt(req.params.id);
+    if (isNaN(catId)) {
+      return res.status(400).json({ error: 'Invalid CAT ID' });
+    }
     const { summary, ordonnance, category, title, red_flags } = req.body;
 
     const result = await dbLock.acquire(async () => {
@@ -629,6 +802,7 @@ app.post('/api/cats/:id', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'CAT fiche introuvable.' });
     }
+    logAuditEvent('cat_update', { id: catId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -664,6 +838,7 @@ app.post('/api/cats', async (req, res) => {
       return { success: true, cat: newCat };
     });
 
+    logAuditEvent('cat_create', { id: result.cat.id, title: result.cat.title }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -701,6 +876,7 @@ app.delete('/api/cats/:id', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'CAT fiche not found' });
     }
+    logAuditEvent('cat_delete', { id: catId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -724,12 +900,27 @@ app.post('/api/suggestions', async (req, res) => {
       return res.status(400).json({ error: 'Type (add/edit) et Data sont requis.' });
     }
 
+    const targetCatId = catId ? parseInt(catId) : null;
+    
+    // Deduplication check: discard duplicate uploads within a 5-minute window
+    const duplicate = suggestionsCache.find(s => 
+      s.type === type && 
+      s.catId === targetCatId &&
+      s.data.title === data.title &&
+      s.data.summary === data.summary &&
+      (Date.now() - s.timestamp) < 5 * 60 * 1000
+    );
+
+    if (duplicate) {
+      return res.json({ success: true, message: 'Proposition déjà reçue (doublon ignoré).', suggestion: duplicate });
+    }
+
     const result = await dbLock.acquire(async () => {
       const suggestionId = 'sug_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       const newSug = {
         id: suggestionId,
-        type, // 'add' or 'edit'
-        catId: catId ? parseInt(catId) : null,
+        type,
+        catId: targetCatId,
         timestamp: Date.now(),
         data
       };
@@ -799,6 +990,7 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: result.message || 'Proposition introuvable.' });
     }
+    logAuditEvent('suggestion_approve', { id: sugId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -828,6 +1020,7 @@ app.post('/api/suggestions/:id/reject', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'Proposition introuvable.' });
     }
+    logAuditEvent('suggestion_reject', { id: sugId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -865,6 +1058,7 @@ app.post('/api/suggestions/:id/edit', async (req, res) => {
     if (result.notFound) {
       return res.status(404).json({ error: 'Proposition introuvable.' });
     }
+    logAuditEvent('suggestion_edit', { id: sugId }, req);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -902,6 +1096,14 @@ app.get('/api/search-pdfs', (req, res) => {
       return res.status(503).json({ error: "PDF index not yet built. Please wait a few moments." });
     }
 
+    // Check query cache
+    const cachedResults = searchCache.get(cleanQuery);
+    if (cachedResults) {
+      if (global.perfServer) global.perfServer.recordCacheHit();
+      return res.json({ results: cachedResults });
+    }
+
+    if (global.perfServer) global.perfServer.recordCacheMiss();
     const results = [];
 
     // Search across cached in-memory pages
@@ -935,6 +1137,13 @@ app.get('/api/search-pdfs', (req, res) => {
         break;
       }
     }
+
+    // Capped search cache storage (max 100 entries)
+    if (searchCache.size >= 100) {
+      const oldestKey = searchCache.keys().next().value;
+      searchCache.delete(oldestKey);
+    }
+    searchCache.set(cleanQuery, results);
 
     res.json({ results });
   } catch (err) {
@@ -990,6 +1199,7 @@ app.post('/api/reindex', (req, res) => {
   }
   try {
     indexPdfs(true).catch(err => console.error("Error in forced indexing:", err));
+    logAuditEvent('pdf_reindex_triggered', {}, req);
     res.json({ success: true, message: "Reindexing started in background" });
   } catch (err) {
     console.error(err);
@@ -1010,6 +1220,10 @@ app.post('/api/save-css', async (req, res) => {
     
     if (isNaN(gap) || isNaN(maxHeight) || isNaN(ratio) || isNaN(padding)) {
       return res.status(400).json({ error: "Layout parameters must be valid numbers" });
+    }
+
+    if (gap < 0 || gap > 100 || maxHeight < 100 || maxHeight > 3000 || ratio < 0.1 || ratio > 10 || padding < 0 || padding > 100) {
+      return res.status(400).json({ error: "Layout parameters out of safe bounds" });
     }
 
     const cssPath = path.join(__dirname, 'public', 'style.css');
@@ -1046,6 +1260,7 @@ ${endMarker}`;
       }
 
       await safeWriteTextAsync(cssPath, cssContent);
+      logAuditEvent('css_save', { gap, maxHeight, ratio, padding }, req);
       res.json({ success: true, message: "CSS updated successfully!" });
     });
     
@@ -1335,9 +1550,11 @@ app.get('/api/performance/server-metrics', (req, res) => {
   }
 });
 
+let serverInstance = null;
+
 // Start application after loading caches
 initializeData().then(() => {
-  app.listen(PORT,  () => {
+  serverInstance = app.listen(PORT,  () => {
     console.log(`=================================================`);
     console.log(`Medical CAT Learning App is running!`);
     console.log(`Local Access: http://localhost:${PORT}`);
@@ -1351,3 +1568,54 @@ initializeData().then(() => {
   console.error("Critical: Failed to initialize application data caches:", err);
   process.exit(1);
 });
+
+function gracefulShutdown(signal) {
+  console.log(`Received ${signal}. Shutting down gracefully...`);
+  if (serverInstance) {
+    serverInstance.close(async () => {
+      console.log('HTTP server closed.');
+      // Wait for any pending lock acquisitions to finish
+      try {
+        await dbLock.acquire(() => Promise.resolve());
+        console.log('Database locks cleared.');
+      } catch (err) {
+        console.error('Error clearing database locks during shutdown:', err);
+      }
+      process.exit(0);
+    });
+    // Force close after 10 seconds if shutdown hangs
+    setTimeout(() => {
+      console.error('Graceful shutdown timed out, force exiting...');
+      process.exit(1);
+    }, 10000);
+  } else {
+    process.exit(0);
+  }
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+process.on('uncaughtException', (err) => {
+  console.error('[CRITICAL] Uncaught Exception:', err);
+  try {
+    fs.appendFileSync(path.join(__dirname, 'server.log'), `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`);
+  } catch (_) {}
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
+  try {
+    fs.appendFileSync(path.join(__dirname, 'server.log'), `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`);
+  } catch (_) {}
+});
+
+// Periodic token pruning (every 1 hour)
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, entry] of activeTokens.entries()) {
+    if (now > entry.expiresAt) {
+      activeTokens.delete(token);
+    }
+  }
+}, 60 * 60 * 1000);

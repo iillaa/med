@@ -41,11 +41,11 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 
 ## 🎯 Quiz & Learning System
 
-- `[ ]` **Spaced Repetition**: Track the last time each CAT was quizzed and prioritize CATs that haven't been reviewed in the longest time using an SM-2 or Leitner algorithm.
-- `[ ]` **Weak Points Report**: After a quiz session, show a breakdown of which specialties had the lowest scores and offer a "Refaire les erreurs" quick-fire round.
-- `[ ]` **Timed Mode**: Add an optional countdown timer per question to simulate real exam pressure.
-- `[ ]` **Quiz Streak**: Track daily quiz streaks and show a streak counter on the dashboard to encourage habit building.
-- `[ ]` **Keyword Hint Mode**: During redaction questions, add an optional "Show 3 keyword hints" button that reveals a few key terms at the cost of a score penalty.
+- `[x]` **Spaced Repetition**: Track the last time each CAT was quizzed and prioritize CATs that haven't been reviewed in the longest time using an SM-2 or Leitner algorithm.
+- `[x]` **Weak Points Report**: After a quiz session, show a breakdown of which specialties had the lowest scores and offer a "Refaire les erreurs" quick-fire round.
+- `[x]` **Timed Mode**: Add an optional countdown timer per question to simulate real exam pressure.
+- `[x]` **Quiz Streak**: Track daily quiz streaks and show a streak counter on the dashboard to encourage habit building.
+- `[x]` **Keyword Hint Mode**: During redaction questions, add an optional "Show 3 keyword hints" button that reveals a few key terms at the cost of a score penalty.
 
 ---
 

@@ -284,6 +284,11 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       if (!state.activeCat) return;
       const newSummary = summaryEditor.value;
 
+      if (!newSummary.trim()) {
+        alert("La synthèse ne peut pas être vide.");
+        return;
+      }
+
       const restore = setButtonLoading(saveSummaryBtn);
 
       try {
@@ -378,6 +383,11 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     savePrescriptionBtn.addEventListener('click', async () => {
       if (!state.activeCat) return;
       const newOrdonnance = prescriptionEditor.value;
+
+      if (!newOrdonnance.trim()) {
+        alert("L'ordonnance ne peut pas être vide.");
+        return;
+      }
 
       const restore = setButtonLoading(savePrescriptionBtn);
 
