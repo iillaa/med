@@ -781,5 +781,15 @@ export function updateEditButtonsVisibility() {
 
   diagnostics.updateDiagnosticsButtonVisibility();
   performanceComponent.updatePerformanceButtonVisibility();
+
+  // ── Specialty Export Container: ONLY for Admin ──
+  const specialtyExportContainer = document.querySelector('.specialty-export-container');
+  if (specialtyExportContainer) {
+    if (isAdminLocal && state.isAdmin) {
+      specialtyExportContainer.style.display = 'flex';
+    } else {
+      specialtyExportContainer.style.display = 'none';
+    }
+  }
 }
 

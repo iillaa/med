@@ -394,7 +394,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
         };
       });
       
-      exportDataFile(list, `Fiches_DrCAT_${specialty.replace(/\s+/g, '_')}.json`);
+      exportDataFile(`Fiches_DrCAT_${specialty.replace(/\s+/g, '_')}.json`, 'Export Spécialité', list);
       showToast(`Exportation réussie de ${list.length} fiches !`, "fa-circle-check", 3000);
     });
   }
