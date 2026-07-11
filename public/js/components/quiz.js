@@ -446,7 +446,19 @@ function startQuizSession() {
 function renderQuestion() {
   if (window.perf) window.perf.startMeasure('quiz.renderQuestion');
   const session = state.quizSession;
+  if (!session || !session.questions || session.questions.length === 0) {
+    console.error("No questions found in the quiz session.");
+    alert("Erreur: Aucune question disponible pour ce quiz.");
+    showQuizSetup();
+    return;
+  }
+
   const q = session.questions[session.currentIndex];
+  if (!q) {
+    console.error("Question at index is undefined:", session.currentIndex);
+    showQuizSetup();
+    return;
+  }
 
   // Update progress widgets
   const progressPercent = Math.round((session.currentIndex / session.questions.length) * 100);
@@ -1066,7 +1078,12 @@ function getKeywordHints(correctAnswer) {
 }
 
 function updateLeitnerStats(catId, wasCorrect) {
-  const leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}');
+  let leitnerData = {};
+  try {
+    leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}') || {};
+  } catch (e) {
+    console.warn("Failed to parse Leitner spaced repetition data", e);
+  }
   const current = leitnerData[catId] || { box: 1, lastQuizzed: 0 };
   
   if (wasCorrect) {
@@ -1077,12 +1094,19 @@ function updateLeitnerStats(catId, wasCorrect) {
   current.lastQuizzed = Date.now();
   
   leitnerData[catId] = current;
-  localStorage.setItem('dr_cat_leitner', JSON.stringify(leitnerData));
+  try {
+    localStorage.setItem('dr_cat_leitner', JSON.stringify(leitnerData));
+  } catch (e) {}
 }
 
 function updateQuizStreak() {
   const todayStr = new Date().toISOString().split('T')[0];
-  const streakInfo = JSON.parse(localStorage.getItem('dr_cat_streak') || '{"count":0,"lastDate":""}');
+  let streakInfo = { count: 0, lastDate: "" };
+  try {
+    streakInfo = JSON.parse(localStorage.getItem('dr_cat_streak') || '{"count":0,"lastDate":""}') || { count: 0, lastDate: "" };
+  } catch (e) {
+    console.warn("Failed to parse study streak info", e);
+  }
   
   if (streakInfo.lastDate === todayStr) {
     return;
@@ -1099,7 +1123,9 @@ function updateQuizStreak() {
   }
   
   streakInfo.lastDate = todayStr;
-  localStorage.setItem('dr_cat_streak', JSON.stringify(streakInfo));
+  try {
+    localStorage.setItem('dr_cat_streak', JSON.stringify(streakInfo));
+  } catch (e) {}
   
   // Try to update UI if on dashboard
   const streakCountEl = document.getElementById('dash-streak-count');
