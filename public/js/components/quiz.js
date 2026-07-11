@@ -260,28 +260,29 @@ function startQuizSession() {
       const rawOrientation = getOrientationText(cat);
       if (rawOrientation && rawOrientation.trim().length > 0) {
         const correctAnswer = cleanOrientationOfClues(rawOrientation, cat.title, cat.category);
-        
-        // Find other orientations as distractors
-        const otherCats = state.allCats.filter(c => c.id !== cat.id);
-        const otherOrientations = Array.from(new Set(
-          otherCats.map(c => {
-            const rawText = getOrientationText(c);
-            return cleanOrientationOfClues(rawText, c.title, c.category);
-          }).filter(t => t && t.trim().length > 0 && t !== correctAnswer)
-        ));
-        shuffleArray(otherOrientations);
-        const distractors = otherOrientations.slice(0, 3);
-        const options = [correctAnswer, ...distractors];
-        shuffleArray(options);
+        if (correctAnswer && correctAnswer.trim().length > 0) {
+          // Find other orientations as distractors
+          const otherCats = state.allCats.filter(c => c.id !== cat.id);
+          const otherOrientations = Array.from(new Set(
+            otherCats.map(c => {
+              const rawText = getOrientationText(c);
+              return cleanOrientationOfClues(rawText, c.title, c.category);
+            }).filter(t => t && t.trim().length > 0 && t !== correctAnswer)
+          ));
+          shuffleArray(otherOrientations);
+          const distractors = otherOrientations.slice(0, 3);
+          const options = [correctAnswer, ...distractors];
+          shuffleArray(options);
 
-        generatedQuestions.push({
-          type: 'clinical',
-          cat: cat,
-          questionText: `Vous recevez un patient présentant des symptômes évocateurs de : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est la conduite à tenir ou l'orientation thérapeutique prioritaire à ce stade ?`,
-          correctAnswer: correctAnswer,
-          options: options,
-          points: 1.0
-        });
+          generatedQuestions.push({
+            type: 'clinical',
+            cat: cat,
+            questionText: `Vous recevez un patient présentant des symptômes évocateurs de : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est la conduite à tenir ou l'orientation thérapeutique prioritaire à ce stade ?`,
+            correctAnswer: correctAnswer,
+            options: options,
+            points: 1.0
+          });
+        }
       }
     }
 
@@ -290,26 +291,27 @@ function startQuizSession() {
       const rawOrdonnance = cat.ordonnance;
       if (rawOrdonnance && rawOrdonnance.trim().length > 0) {
         const correctAnswer = cleanTextOfClues(rawOrdonnance, cat.title, cat.category);
-        
-        // Find other ordonnances as distractors
-        const otherCats = state.allCats.filter(c => c.id !== cat.id);
-        const otherOrdonnances = Array.from(new Set(
-          otherCats.map(c => cleanTextOfClues(c.ordonnance, c.title, c.category))
-            .filter(o => o && o.trim().length > 0 && o !== correctAnswer)
-        ));
-        shuffleArray(otherOrdonnances);
-        const distractors = otherOrdonnances.slice(0, 3);
-        const options = [correctAnswer, ...distractors];
-        shuffleArray(options);
+        if (correctAnswer && correctAnswer.trim().length > 0) {
+          // Find other ordonnances as distractors
+          const otherCats = state.allCats.filter(c => c.id !== cat.id);
+          const otherOrdonnances = Array.from(new Set(
+            otherCats.map(c => cleanTextOfClues(c.ordonnance, c.title, c.category))
+              .filter(o => o && o.trim().length > 0 && o !== correctAnswer)
+          ));
+          shuffleArray(otherOrdonnances);
+          const distractors = otherOrdonnances.slice(0, 3);
+          const options = [correctAnswer, ...distractors];
+          shuffleArray(options);
 
-        generatedQuestions.push({
-          type: 'posology',
-          cat: cat,
-          questionText: `Pour la situation clinique suivante : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est l'ordonnance type recommandée (molécules, posologies et durées de traitement) ?`,
-          correctAnswer: correctAnswer,
-          options: options,
-          points: 1.0
-        });
+          generatedQuestions.push({
+            type: 'posology',
+            cat: cat,
+            questionText: `Pour la situation clinique suivante : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est l'ordonnance type recommandée (molécules, posologies et durées de traitement) ?`,
+            correctAnswer: correctAnswer,
+            options: options,
+            points: 1.0
+          });
+        }
       }
     }
 
