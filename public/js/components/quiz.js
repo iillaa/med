@@ -265,27 +265,60 @@ function cleanOrientationOfClues(text, title, category) {
 }
 
 function startQuizSession() {
-  const selectedCategory = quizCategorySelect.value;
-  const questionCount = parseInt(quizCountSelect.value);
-  const includeClinical = checkboxSpecialty.checked; // Mapping checkboxSpecialty to Clinical Case
-  const includePosology = checkboxPosology.checked;
-  const includeRedflags = checkboxRedflags.checked;
-  const includePrescription = checkboxPrescription.checked;
+  try {
+    const selectedCategory = quizCategorySelect ? quizCategorySelect.value : 'all';
+    const questionCount = quizCountSelect ? parseInt(quizCountSelect.value) : 10;
+    const includeClinical = checkboxSpecialty ? checkboxSpecialty.checked : false;
+    const includePosology = checkboxPosology ? checkboxPosology.checked : false;
+    const includeRedflags = checkboxRedflags ? checkboxRedflags.checked : false;
+    const includePrescription = checkboxPrescription ? checkboxPrescription.checked : false;
 
-  if (!includeClinical && !includePosology && !includeRedflags && !includePrescription) {
-    alert("Veuillez sélectionner au moins un type de question.");
-    return;
-  }
+    if (!includeClinical && !includePosology && !includeRedflags && !includePrescription) {
+      alert("Veuillez sélectionner au moins un type de question.");
+      return;
+    }
 
-  // Filter CATs by category selection
-  const filteredCats = selectedCategory === 'all' 
-    ? state.allCats 
-    : state.allCats.filter(c => c.category === selectedCategory);
+    // Filter CATs by category selection
+    let filteredCats = selectedCategory === 'all' 
+      ? state.allCats 
+      : state.allCats.filter(c => c.category === selectedCategory);
 
-  if (filteredCats.length === 0) {
-    alert("Aucune fiche trouvée dans cette catégorie.");
-    return;
-  }
+    if (filteredCats.length === 0) {
+      alert("Aucune fiche trouvée dans cette catégorie.");
+      return;
+    }
+
+    // Load Leitner Data with try-catch safety
+    let leitnerData = {};
+    try {
+      leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}') || {};
+    } catch (e) {
+      console.warn("Failed to parse Leitner spaced repetition data", e);
+    }
+
+    const boxIntervals = {
+      1: 1 * 24 * 60 * 60 * 1000,
+      2: 3 * 24 * 60 * 60 * 1000,
+      3: 7 * 24 * 60 * 60 * 1000,
+      4: 14 * 24 * 60 * 60 * 1000,
+      5: 30 * 24 * 60 * 60 * 1000
+    };
+
+    // Prioritize using Leitner Spaced Repetition if checked
+    if (checkboxSpacedRepetition && checkboxSpacedRepetition.checked) {
+      filteredCats = [...filteredCats].sort((a, b) => {
+        const statsA = leitnerData[a.id] || { box: 1, lastQuizzed: 0 };
+        const statsB = leitnerData[b.id] || { box: 1, lastQuizzed: 0 };
+        
+        const dueA = (Date.now() - (statsA.lastQuizzed || 0)) / boxIntervals[statsA.box || 1];
+        const dueB = (Date.now() - (statsB.lastQuizzed || 0)) / boxIntervals[statsB.box || 1];
+        
+        return dueB - dueA; // Descending (most overdue / highest ratio first)
+      });
+    } else {
+      // Normal mode: shuffle
+      shuffleArray(filteredCats);
+    }
 
   // Generate Questions list
   const generatedQuestions = [];
@@ -399,11 +432,15 @@ function startQuizSession() {
   state.quizSession.timerSeconds = parseInt(selectTimerSeconds.value) || 30;
 
   // Transition views
-  quizSetupView.style.display = 'none';
-  quizActiveView.style.display = 'flex';
-  quizResultsView.style.display = 'none';
+  if (quizSetupView) quizSetupView.style.display = 'none';
+  if (quizActiveView) quizActiveView.style.display = 'flex';
+  if (quizResultsView) quizResultsView.style.display = 'none';
 
   renderQuestion();
+  } catch (err) {
+    console.error("Error in startQuizSession:", err);
+    alert("Une erreur s'est produite lors du démarrage du quiz.");
+  }
 }
 
 function renderQuestion() {
