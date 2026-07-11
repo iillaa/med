@@ -509,34 +509,50 @@ export async function runBackgroundSync() {
 
       const freshCats = await api.fetchCats();
 
-      const localProgress = getLocalProgress();
-      const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-      const existingIds = new Set(freshCats.map(c => c.id));
-      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
-        .filter(c => !existingIds.has(c.id));
+      // Check if the remote fiches are different from currently loaded ones (excluding custom offline fiches)
+      const localServerCats = (state.allCats || []).filter(c => !c.id.toString().startsWith('offline-') && c.id <= 1000);
+      let isUpdated = localServerCats.length !== freshCats.length;
+      
+      if (!isUpdated) {
+        for (const remote of freshCats) {
+          const local = localServerCats.find(c => c.id === remote.id);
+          if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
+            isUpdated = true;
+            break;
+          }
+        }
+      }
 
-      state.allCats = [...freshCats, ...customCats].map(cat => {
-        const localEntry = localProgress[cat.id] || {};
-        const overrides = localOverrides[cat.id] || {};
-        return {
-          ...cat,
-          status: localEntry.status || 'todo',
-          notes: localEntry.notes || '',
-          summary: overrides.customSummary || cat.summary,
-          customSummary: overrides.customSummary || cat.summary,
-          ordonnance: overrides.customOrdonnance || cat.ordonnance,
-          customOrdonnance: overrides.customOrdonnance || cat.ordonnance
-        };
-      });
+      if (isUpdated) {
+        console.log('[Background Sync] Server changes detected! Offering update...');
+        showToast(
+          'Nouvelles fiches disponibles — <span id="update-app-toast-btn" style="color:#06b6d4; font-weight:700; text-decoration:underline; cursor:pointer;">Actualiser ?</span>',
+          'fa-arrows-rotate',
+          15000
+        );
 
-      sidebar.renderCatList(state.allCats, selectCatWrapper);
-      calculateStats();
-      dashboard.renderDashboard(selectCatWrapper);
+        // Attach action listener to the toast link
+        setTimeout(() => {
+          const updateBtn = document.getElementById('update-app-toast-btn');
+          if (updateBtn) {
+            updateBtn.addEventListener('click', (event) => {
+              event.preventDefault();
+              applySyncUpdates(freshCats);
+              
+              const toast = document.getElementById('drcat-toast');
+              if (toast) toast.remove();
+              
+              showToast('Mise à jour appliquée avec succès !', 'fa-circle-check', 3000);
+            });
+          }
+        }, 150);
+      } else {
+        console.log('[Background Sync] Remote database is in sync. No action needed.');
+      }
 
       if (wasOffline) {
         showToast('📡 Connexion serveur établie. Données synchronisées !', 'fa-cloud-arrow-up', 4000);
       }
-      console.log('[Background Sync] Update complete.');
     } else {
       console.log('[Background Sync] Server not reachable, staying offline.');
       api.setAppMode(api.APP_MODES.ANDROID_OFFLINE);
@@ -545,6 +561,33 @@ export async function runBackgroundSync() {
   } catch (err) {
     console.warn('[Background Sync] Failed:', err.message);
   }
+}
+
+// Helper to safely apply background sync updates to the UI
+function applySyncUpdates(freshCats) {
+  const localProgress = getLocalProgress();
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  const existingIds = new Set(freshCats.map(c => c.id));
+  const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+    .filter(c => !existingIds.has(c.id));
+
+  state.allCats = [...freshCats, ...customCats].map(cat => {
+    const localEntry = localProgress[cat.id] || {};
+    const overrides = localOverrides[cat.id] || {};
+    return {
+      ...cat,
+      status: localEntry.status || 'todo',
+      notes: localEntry.notes || '',
+      summary: overrides.customSummary || cat.summary,
+      customSummary: overrides.customSummary || cat.summary,
+      ordonnance: overrides.customOrdonnance || cat.ordonnance,
+      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+    };
+  });
+
+  sidebar.renderCatList(state.allCats, selectCatWrapper);
+  calculateStats();
+  dashboard.renderDashboard(selectCatWrapper);
 }
 
 
