@@ -314,6 +314,22 @@
                     </button>
                   </div>
                 </div>
+
+                <!-- PDF Upload Box -->
+                <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                  <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 13.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-file-pdf"></i> Ajouter un Document PDF de Référence</h4>
+                  <p class="block-desc" style="margin: 0 0 10px 0;">Déposez ou sélectionnez un document PDF médical de référence. Il sera automatiquement indexé pour les recherches de termes.</p>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="file" id="diag-pdf-upload-input" accept=".pdf" style="display: none;">
+                    <button class="action-btn" id="diag-pdf-upload-trigger-btn" style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: rgba(6,182,212,0.1); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                      <i class="fa-solid fa-file-arrow-up"></i> Choisir le fichier PDF
+                    </button>
+                    <span id="diag-pdf-upload-filename" class="text-muted" style="font-size: 11.5px;">Aucun fichier sélectionné</span>
+                    <button class="action-btn" id="diag-pdf-upload-submit-btn" disabled style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: var(--color-success); border: 1px solid var(--color-success); color: #fff; border-radius: 4px; cursor: not-allowed; opacity: 0.5; transition: all 0.2s;">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Uploader
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- PANE 2: Diagnostics -->
@@ -397,16 +413,6 @@
                       <div>Total Pages : <span id="diag-pdf-pages">--</span></div>
                       <div>Indexé le : <span id="diag-pdf-time">--</span></div>
                       <div>Santé de l'index : <span id="diag-pdf-health" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">--</span></div>
-                    </div>
-                    <!-- PDF Upload Block -->
-                    <div style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 10px; margin-top: 10px;">
-                      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Déposer ou sélectionner un nouveau document PDF :</div>
-                      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                        <input type="file" id="diag-pdf-upload-input" accept=".pdf" style="display: none;">
-                        <button class="action-btn" id="diag-pdf-upload-trigger-btn" style="padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-file-arrow-up"></i> Choisir</button>
-                        <span id="diag-pdf-upload-filename" class="text-muted" style="font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px;">Aucun</span>
-                        <button class="action-btn" id="diag-pdf-upload-submit-btn" disabled style="padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; background: var(--color-success); border-color: var(--color-success); color: white; border-radius: 4px; opacity: 0.5; cursor: not-allowed; transition: all 0.2s;"><i class="fa-solid fa-cloud-arrow-up"></i> Uploader</button>
-                      </div>
                     </div>
                   </div>
 

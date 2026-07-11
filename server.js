@@ -777,6 +777,60 @@ app.get('/api/cats', (req, res) => {
   res.json(catsCache);
 });
 
+// Endpoint to bulk-import fiches (Admin only)
+app.post('/api/cats/bulk-import', async (req, res) => {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit.' });
+  }
+  try {
+    const importList = req.body;
+    if (!Array.isArray(importList)) {
+      return res.status(400).json({ error: 'L\'importation doit être un tableau de fiches.' });
+    }
+
+    // Validate entries
+    for (const item of importList) {
+      if (!item.title || !item.category) {
+        return res.status(400).json({ error: 'Chaque fiche doit contenir au moins un titre et une spécialité.' });
+      }
+    }
+
+    const result = await dbLock.acquire(async () => {
+      let importedCount = 0;
+      let nextId = catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
+
+      for (const item of importList) {
+        const newCat = {
+          id: nextId++,
+          category: item.category,
+          title: item.title,
+          summary: item.summary || '',
+          red_flags: item.red_flags || '',
+          ordonnance: item.ordonnance || '',
+          pdf_keywords: item.pdf_keywords || [],
+          updatedAt: Date.now(),
+          history: [{
+            timestamp: Date.now(),
+            action: 'create',
+            detail: 'Importation groupée par l\'administrateur'
+          }]
+        };
+        catsCache.push(newCat);
+        importedCount++;
+      }
+
+      await safeWriteJsonAsync(DB_FILE, catsCache);
+      return { success: true, count: importedCount };
+    });
+
+    logAuditEvent('cats_bulk_import', { count: result.count }, req);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de l\'importation groupée.' });
+  }
+});
+
 // Endpoint to update a specific CAT's details directly (Admin only)
 app.post('/api/cats/:id', async (req, res) => {
   if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
@@ -866,59 +920,6 @@ app.post('/api/cats', async (req, res) => {
   }
 });
 
-// Endpoint to bulk-import fiches (Admin only)
-app.post('/api/cats/bulk-import', async (req, res) => {
-  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
-    return res.status(403).json({ error: 'Accès interdit.' });
-  }
-  try {
-    const importList = req.body;
-    if (!Array.isArray(importList)) {
-      return res.status(400).json({ error: 'L\'importation doit être un tableau de fiches.' });
-    }
-
-    // Validate entries
-    for (const item of importList) {
-      if (!item.title || !item.category) {
-        return res.status(400).json({ error: 'Chaque fiche doit contenir au moins un titre et une spécialité.' });
-      }
-    }
-
-    const result = await dbLock.acquire(async () => {
-      let importedCount = 0;
-      let nextId = catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
-
-      for (const item of importList) {
-        const newCat = {
-          id: nextId++,
-          category: item.category,
-          title: item.title,
-          summary: item.summary || '',
-          red_flags: item.red_flags || '',
-          ordonnance: item.ordonnance || '',
-          pdf_keywords: item.pdf_keywords || [],
-          updatedAt: Date.now(),
-          history: [{
-            timestamp: Date.now(),
-            action: 'create',
-            detail: 'Importation groupée par l\'administrateur'
-          }]
-        };
-        catsCache.push(newCat);
-        importedCount++;
-      }
-
-      await safeWriteJsonAsync(DB_FILE, catsCache);
-      return { success: true, count: importedCount };
-    });
-
-    logAuditEvent('cats_bulk_import', { count: result.count }, req);
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de l\'importation groupée.' });
-  }
-});
 
 // Endpoint to delete a custom CAT from the database (Admin only)
 app.delete('/api/cats/:id', async (req, res) => {
