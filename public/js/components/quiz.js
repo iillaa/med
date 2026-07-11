@@ -1,11 +1,19 @@
 import { state } from '../state.js';
-import { getCleanPdfName, setButtonLoading } from '../utils.js';
+import { getCleanPdfName, setButtonLoading, showToast } from '../utils.js';
 
 // DOM Elements
 let quizScreen, welcomeScreen, workspaceView;
 let quizSetupView, quizActiveView, quizResultsView;
 let quizCategorySelect, quizCountSelect;
 let checkboxSpecialty, checkboxRedflags, checkboxPrescription, checkboxPosology;
+let checkboxSpacedRepetition, checkboxTimedMode, selectTimerSeconds;
+let timerWrapper, timerCount, timerFill;
+let hintBtn, hintBox;
+let weakPointsPanel, categoryScoresList, retryErrorsBtn;
+let timerIntervalId = null;
+let timeLeft = 0;
+let currentTimerDuration = 30;
+let questionMaxPoints = 1.0;
 let progressText, progressFill, startQuizBtn;
 let qMeta, qPoints, qTitle, qcmContainer, writeinContainer, userTextArea, submitTextBtn;
 let feedbackPanel, feedbackHeader, feedbackStatus;
@@ -87,6 +95,29 @@ export function initQuiz(onOpenCatCard) {
   retryBtn = document.getElementById('quiz-retry-btn');
   quitBtn = document.getElementById('quiz-quit-btn');
 
+  // Custom DOM Elements Mapping
+  checkboxSpacedRepetition = document.getElementById('quiz-spaced-repetition');
+  checkboxTimedMode = document.getElementById('quiz-timed-mode');
+  selectTimerSeconds = document.getElementById('quiz-timer-seconds');
+  
+  timerWrapper = document.getElementById('quiz-timer-wrapper');
+  timerCount = document.getElementById('quiz-timer-count');
+  timerFill = document.getElementById('quiz-timer-fill');
+
+  hintBtn = document.getElementById('quiz-hint-btn');
+  hintBox = document.getElementById('quiz-hint-box');
+
+  weakPointsPanel = document.getElementById('quiz-weak-points-panel');
+  categoryScoresList = document.getElementById('quiz-category-scores-list');
+  retryErrorsBtn = document.getElementById('quiz-retry-errors-btn');
+
+  // Timed Mode display toggler
+  if (checkboxTimedMode && selectTimerSeconds) {
+    checkboxTimedMode.addEventListener('change', () => {
+      selectTimerSeconds.style.display = checkboxTimedMode.checked ? 'block' : 'none';
+    });
+  }
+
   // Setup Sidebar Trigger Button
   const sidebarQuizBtn = document.getElementById('start-quiz-nav-btn');
   if (sidebarQuizBtn) {
@@ -108,6 +139,9 @@ export function initQuiz(onOpenCatCard) {
   if (btnGradePartial) btnGradePartial.addEventListener('click', () => saveWriteInGrade(0.5));
   if (btnGradeZero) btnGradeZero.addEventListener('click', () => saveWriteInGrade(0.0));
 
+  if (hintBtn) hintBtn.addEventListener('click', showHint);
+  if (retryErrorsBtn) retryErrorsBtn.addEventListener('click', retryFailedQuestions);
+
   if (viewRefBtn) {
     viewRefBtn.addEventListener('click', () => {
       const q = state.quizSession.questions[state.quizSession.currentIndex];
@@ -124,6 +158,7 @@ export function initQuiz(onOpenCatCard) {
   if (retryBtn) retryBtn.addEventListener('click', showQuizSetup);
   if (quitBtn) {
     quitBtn.addEventListener('click', () => {
+      if (timerIntervalId) clearInterval(timerIntervalId);
       quizScreen.style.display = 'none';
       if (welcomeScreen) welcomeScreen.style.display = 'flex';
       // Clear active quiz session
@@ -135,6 +170,7 @@ export function initQuiz(onOpenCatCard) {
 }
 
 export function showQuizSetup() {
+  if (timerIntervalId) clearInterval(timerIntervalId);
   if (workspaceView) workspaceView.style.display = 'none';
   if (welcomeScreen) welcomeScreen.style.display = 'none';
   if (quizScreen) quizScreen.style.display = 'flex';
@@ -343,17 +379,24 @@ function startQuizSession() {
     return;
   }
 
-  // Shuffle questions
-  shuffleArray(generatedQuestions);
-
-  // Take the requested count
-  const selectedQuestions = generatedQuestions.slice(0, questionCount);
+  let selectedQuestions = [];
+  if (checkboxSpacedRepetition && checkboxSpacedRepetition.checked) {
+    // Keep the priority order (overdue cards first), slice first, then shuffle selected questions
+    selectedQuestions = generatedQuestions.slice(0, questionCount);
+    shuffleArray(selectedQuestions);
+  } else {
+    // Normal mode: shuffle everything and slice
+    shuffleArray(generatedQuestions);
+    selectedQuestions = generatedQuestions.slice(0, questionCount);
+  }
 
   // Initialize state session
   state.quizSession.questions = selectedQuestions;
   state.quizSession.currentIndex = 0;
   state.quizSession.answers = [];
   state.quizSession.score = 0;
+  state.quizSession.isTimed = !!(checkboxTimedMode && checkboxTimedMode.checked);
+  state.quizSession.timerSeconds = parseInt(selectTimerSeconds.value) || 30;
 
   // Transition views
   quizSetupView.style.display = 'none';
@@ -375,6 +418,23 @@ function renderQuestion() {
 
   // Render text
   if (qTitle) qTitle.innerHTML = q.questionText;
+
+  // Reset Hint Panel
+  questionMaxPoints = 1.0;
+  if (hintBox) {
+    hintBox.style.display = 'none';
+    hintBox.innerHTML = '';
+  }
+  if (hintBtn) {
+    hintBtn.disabled = false;
+    hintBtn.style.opacity = '1';
+    // Show only for write-in questions
+    if (q.type === 'redflags' || q.type === 'prescription') {
+      hintBtn.style.display = 'flex';
+    } else {
+      hintBtn.style.display = 'none';
+    }
+  }
 
   // Toggle Type Badge
   if (qMeta) {
@@ -425,6 +485,15 @@ function renderQuestion() {
       submitTextBtn.innerHTML = '<i class="fa-solid fa-check"></i> Valider ma réponse';
     }
   }
+
+  // Handle Question Countdown Timer
+  if (session.isTimed) {
+    if (timerWrapper) timerWrapper.style.display = 'flex';
+    startQuestionTimer();
+  } else {
+    if (timerWrapper) timerWrapper.style.display = 'none';
+  }
+
   if (window.perf) window.perf.endMeasure('quiz.renderQuestion');
 }
 
@@ -460,6 +529,7 @@ function generateQCMOptions(question) {
     btn.innerHTML = `<span style="font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.4; display:block; text-align:left;">${opt.replace(/\n/g, '<br>')}</span>`;
     
     btn.addEventListener('click', () => {
+      if (timerIntervalId) clearInterval(timerIntervalId);
       // Disable all options
       qcmContainer.querySelectorAll('button').forEach(b => {
         b.disabled = true;
@@ -491,6 +561,9 @@ function generateQCMOptions(question) {
         correctAnswer: question.correctAnswer,
         score: isCorrect ? question.points : 0
       });
+
+      // Update Leitner spaced repetition stats
+      updateLeitnerStats(question.cat.id, isCorrect);
 
       // Show Feedback Panel
       showQCMFeedback(isCorrect, question.correctAnswer, opt);
@@ -529,6 +602,7 @@ function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
 }
 
 function submitWriteInAnswer() {
+  if (timerIntervalId) clearInterval(timerIntervalId);
   const session = state.quizSession;
   const q = session.questions[session.currentIndex];
   const userAnswer = userTextArea.value.trim();
@@ -592,12 +666,16 @@ function submitWriteInAnswer() {
 }
 
 function saveWriteInGrade(score) {
+  if (timerIntervalId) clearInterval(timerIntervalId);
   const session = state.quizSession;
   const q = session.questions[session.currentIndex];
   const userAnswer = userTextArea.value.trim();
 
+  // Apply hint penalty if applicable
+  const finalScore = score * questionMaxPoints;
+
   // Save score
-  session.score += score;
+  session.score += finalScore;
 
   // Add to answer history
   session.answers.push({
@@ -606,12 +684,15 @@ function saveWriteInGrade(score) {
     type: q.type,
     userAnswer: userAnswer,
     correctAnswer: q.correctAnswer,
-    score: score
+    score: finalScore
   });
+
+  // Update Leitner Spaced Repetition stats
+  updateLeitnerStats(q.cat.id, finalScore >= 1.0);
 
   // Hide self grading keys and confirm
   selfGradingPanel.style.display = 'none';
-  feedbackStatus.textContent = `Score enregistré : +${score.toFixed(1)} point(s)`;
+  feedbackStatus.textContent = `Score enregistré : +${finalScore.toFixed(1)} point(s)`;
   feedbackHeader.style.color = score === 1.0 ? "var(--color-success)" : (score === 0.5 ? "var(--color-warning)" : "var(--color-danger)");
   feedbackHeader.querySelector('i').className = score === 1.0 ? "fa-solid fa-circle-check" : "fa-solid fa-circle-info";
 
@@ -634,6 +715,7 @@ function advanceQuestion() {
 }
 
 function showResults() {
+  if (timerIntervalId) clearInterval(timerIntervalId);
   quizSetupView.style.display = 'none';
   quizActiveView.style.display = 'none';
   quizResultsView.style.display = 'flex';
@@ -662,6 +744,73 @@ function showResults() {
       resultsScore.style.color = "var(--color-danger)";
     }
   }
+
+  // Calculate Weak Points Report per Category
+  const categoryStats = {};
+  session.answers.forEach(ans => {
+    const cat = state.allCats.find(c => c.id === ans.catId);
+    const category = cat ? cat.category : "Général";
+    if (!categoryStats[category]) {
+      categoryStats[category] = { totalPoints: 0, maxPoints: 0 };
+    }
+    categoryStats[category].totalPoints += ans.score;
+    categoryStats[category].maxPoints += 1.0;
+  });
+
+  if (categoryScoresList && weakPointsPanel) {
+    categoryScoresList.innerHTML = '';
+    let hasWeakPoints = false;
+    
+    Object.keys(categoryStats).forEach(category => {
+      const stats = categoryStats[category];
+      const catPercent = Math.round((stats.totalPoints / stats.maxPoints) * 100);
+      const isWeak = catPercent < 80;
+      if (isWeak) hasWeakPoints = true;
+
+      const barColor = isWeak ? 'var(--color-danger)' : 'var(--color-success)';
+      const warningIcon = isWeak ? '<i class="fa-solid fa-triangle-exclamation" style="color: var(--color-warning); margin-left: 6px;"></i>' : '';
+
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      div.style.flexDirection = 'column';
+      div.style.gap = '4px';
+      div.style.width = '100%';
+      div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+          <span style="font-weight: 600; color: var(--text-primary);">${category}${warningIcon}</span>
+          <span style="font-weight: 700; color: ${isWeak ? 'var(--color-danger)' : 'var(--color-success)'};">${catPercent}% (${stats.totalPoints.toFixed(1)}/${stats.maxPoints})</span>
+        </div>
+        <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; width: 100%;">
+          <div style="width: ${catPercent}%; height: 100%; background: ${barColor}; border-radius: 3px;"></div>
+        </div>
+      `;
+      categoryScoresList.appendChild(div);
+    });
+
+    weakPointsPanel.style.display = 'flex';
+  }
+
+  // Handle retry errors button logic
+  const failedQuestions = [];
+  session.answers.forEach((ans, idx) => {
+    if (ans.score < 1.0) {
+      failedQuestions.push(session.questions[idx]);
+    }
+  });
+
+  state.quizSession.failedQuestions = failedQuestions;
+
+  if (retryErrorsBtn) {
+    if (failedQuestions.length > 0) {
+      retryErrorsBtn.style.display = 'flex';
+      retryErrorsBtn.innerHTML = `<i class="fa-solid fa-rotate-left"></i> Refaire les erreurs (${failedQuestions.length})`;
+    } else {
+      retryErrorsBtn.style.display = 'none';
+    }
+  }
+
+  // Update Daily Study Streak
+  updateQuizStreak();
 
   // Populate results details table
   if (resultsTableBody) {
@@ -741,4 +890,204 @@ function checkMatchedKeywords(userAnswer, referenceText) {
     const matched = cleanUserAnswer.includes(normalizedWord);
     return { word, matched };
   });
+}
+
+function startQuestionTimer() {
+  if (timerIntervalId) clearInterval(timerIntervalId);
+
+  const session = state.quizSession;
+  if (!session || !session.isTimed) return;
+
+  timeLeft = session.timerSeconds;
+  updateTimerUI();
+
+  timerIntervalId = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerIntervalId);
+      handleTimerExpiration();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  if (timerCount) timerCount.textContent = `${timeLeft}s`;
+  if (timerFill && state.quizSession) {
+    const percent = (timeLeft / state.quizSession.timerSeconds) * 100;
+    timerFill.style.width = `${percent}%`;
+    
+    if (timeLeft <= 5) {
+      timerFill.style.backgroundColor = 'var(--color-danger)';
+    } else {
+      timerFill.style.backgroundColor = 'var(--color-warning)';
+    }
+  }
+}
+
+function handleTimerExpiration() {
+  const session = state.quizSession;
+  const q = session.questions[session.currentIndex];
+  
+  if (q.type === 'clinical' || q.type === 'posology') {
+    // QCM Question: Auto-fail
+    qcmContainer.querySelectorAll('button').forEach(b => {
+      b.disabled = true;
+      b.style.pointerEvents = 'none';
+      if (b.dataset.option === q.correctAnswer) {
+        b.style.borderColor = 'var(--color-success)';
+        b.style.background = 'rgba(16, 185, 129, 0.05)';
+      }
+    });
+
+    session.answers.push({
+      catId: q.cat.id,
+      catTitle: q.cat.title,
+      type: q.type,
+      userAnswer: "[Temps écoulé]",
+      correctAnswer: q.correctAnswer,
+      score: 0
+    });
+
+    updateLeitnerStats(q.cat.id, false);
+
+    showQCMFeedback(false, q.correctAnswer, "[Temps écoulé]");
+  } else {
+    // Write-In Question: Lock & evaluate empty answer
+    userTextArea.disabled = true;
+    if (submitTextBtn) submitTextBtn.style.display = 'none';
+
+    if (displayUserAnswer) displayUserAnswer.textContent = "[Temps écoulé]";
+    if (displayCorrectAnswer) displayCorrectAnswer.textContent = q.correctAnswer;
+    
+    if (keywordsMatchedTags) {
+      keywordsMatchedTags.innerHTML = '<span class="text-muted" style="font-size:12px;">Temps écoulé. Aucun mot-clé validé.</span>';
+    }
+
+    if (feedbackPanel) feedbackPanel.style.display = 'flex';
+    if (comparisonGrid) comparisonGrid.style.display = 'grid';
+    if (keywordsMatchedPanel) keywordsMatchedPanel.style.display = 'flex';
+    if (selfGradingPanel) selfGradingPanel.style.display = 'none';
+    
+    feedbackStatus.textContent = "Temps écoulé ! Réponse enregistrée (0 pt).";
+    feedbackHeader.style.color = "var(--color-danger)";
+    const icon = feedbackHeader.querySelector('i');
+    if (icon) icon.className = "fa-solid fa-clock";
+
+    session.answers.push({
+      catId: q.cat.id,
+      catTitle: q.cat.title,
+      type: q.type,
+      userAnswer: "[Temps écoulé]",
+      correctAnswer: q.correctAnswer,
+      score: 0
+    });
+
+    updateLeitnerStats(q.cat.id, false);
+
+    if (nextBtn) nextBtn.style.display = 'block';
+  }
+}
+
+function showHint() {
+  const session = state.quizSession;
+  const q = session.questions[session.currentIndex];
+  if (!q) return;
+
+  const hints = getKeywordHints(q.correctAnswer);
+  if (hintBox) {
+    hintBox.innerHTML = `<i class="fa-regular fa-lightbulb"></i> <strong>Indices clés :</strong> ${hints}`;
+    hintBox.style.display = 'block';
+  }
+  if (hintBtn) {
+    hintBtn.disabled = true;
+    hintBtn.style.opacity = '0.5';
+  }
+  questionMaxPoints = 0.5; // Apply score penalty
+  showToast("Indice révélé ! Valeur max de la question : 0.5 pt", "fa-lightbulb", 3000);
+}
+
+function getKeywordHints(correctAnswer) {
+  if (!correctAnswer) return "";
+  
+  const words = correctAnswer.toLowerCase()
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'\n]/g, " ")
+    .replace(/\b\d+mg\b/g, '')
+    .replace(/\b\d+g\b/g, '')
+    .split(/\s+/)
+    .filter(w => {
+      return w.length > 4 && 
+             !FRENCH_STOP_WORDS.has(w) && 
+             !['comprimé', 'comprimés', 'gélule', 'gélules', 'sachet', 'sachets', 'traitement', 'traitements', 'pendant', 'jours', 'semaines', 'matin', 'soir'].includes(w);
+    });
+
+  const uniqueWords = Array.from(new Set(words));
+  shuffleArray(uniqueWords);
+  const selected = uniqueWords.slice(0, 3);
+  if (selected.length === 0) return "Aucun indice disponible pour cette question.";
+  return selected.join(', ');
+}
+
+function updateLeitnerStats(catId, wasCorrect) {
+  const leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}');
+  const current = leitnerData[catId] || { box: 1, lastQuizzed: 0 };
+  
+  if (wasCorrect) {
+    current.box = Math.min(5, (current.box || 1) + 1);
+  } else {
+    current.box = 1;
+  }
+  current.lastQuizzed = Date.now();
+  
+  leitnerData[catId] = current;
+  localStorage.setItem('dr_cat_leitner', JSON.stringify(leitnerData));
+}
+
+function updateQuizStreak() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const streakInfo = JSON.parse(localStorage.getItem('dr_cat_streak') || '{"count":0,"lastDate":""}');
+  
+  if (streakInfo.lastDate === todayStr) {
+    return;
+  }
+  
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  
+  if (streakInfo.lastDate === yesterdayStr) {
+    streakInfo.count += 1;
+  } else {
+    streakInfo.count = 1;
+  }
+  
+  streakInfo.lastDate = todayStr;
+  localStorage.setItem('dr_cat_streak', JSON.stringify(streakInfo));
+  
+  // Try to update UI if on dashboard
+  const streakCountEl = document.getElementById('dash-streak-count');
+  if (streakCountEl) {
+    streakCountEl.textContent = `${streakInfo.count} jour${streakInfo.count > 1 ? 's' : ''}`;
+  }
+}
+
+function retryFailedQuestions() {
+  const session = state.quizSession;
+  if (!session.failedQuestions || session.failedQuestions.length === 0) return;
+
+  const newQuestions = [...session.failedQuestions];
+  shuffleArray(newQuestions);
+
+  session.questions = newQuestions;
+  session.currentIndex = 0;
+  session.answers = [];
+  session.score = 0;
+  session.failedQuestions = [];
+
+  // Transition views
+  quizSetupView.style.display = 'none';
+  quizActiveView.style.display = 'flex';
+  quizResultsView.style.display = 'none';
+
+  renderQuestion();
 }

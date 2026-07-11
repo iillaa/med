@@ -323,6 +323,12 @@ export function renderDashboard(onSelectCat) {
   if (dashCountDoing) dashCountDoing.textContent = `${doing} / ${total}`;
   if (dashCountTodo) dashCountTodo.textContent = `${todo} / ${total}`;
 
+  const streakInfo = JSON.parse(localStorage.getItem('dr_cat_streak') || '{"count": 0}');
+  const streakCountEl = document.getElementById('dash-streak-count');
+  if (streakCountEl) {
+    streakCountEl.textContent = `${streakInfo.count || 0} jour${(streakInfo.count || 0) > 1 ? 's' : ''}`;
+  }
+
   // 2. Populate "Reprendre la révision" (Resume list)
   if (resumeList) {
     resumeList.innerHTML = '';
