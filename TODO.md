@@ -17,7 +17,7 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 
 - `[x]` **Local PDF Index Caching**: Bundle the full `pdf_index.json` inside the Capacitor APK during `npm run build` so full-text PDF search works in `android_offline` mode without ever needing a server connection.
 - `[ ]` **Incremental Sync**: Instead of a full `cats_db.json` pull on every sync, send a `?since=<timestamp>` query param to the server so only modified CATs are transferred, reducing bandwidth for mobile testers.
-- `[ ]` **Sync Conflict Resolution**: If a user modifies a CAT locally (via localStorage override) AND the server has a newer version of the same CAT, present a diff-view to let the admin pick which version to keep.
+
 
 ---
 
