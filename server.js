@@ -1507,9 +1507,11 @@ app.get('/api/performance/server-metrics', (req, res) => {
   }
 });
 
+let serverInstance = null;
+
 // Start application after loading caches
 initializeData().then(() => {
-  app.listen(PORT,  () => {
+  serverInstance = app.listen(PORT,  () => {
     console.log(`=================================================`);
     console.log(`Medical CAT Learning App is running!`);
     console.log(`Local Access: http://localhost:${PORT}`);
@@ -1523,6 +1525,33 @@ initializeData().then(() => {
   console.error("Critical: Failed to initialize application data caches:", err);
   process.exit(1);
 });
+
+function gracefulShutdown(signal) {
+  console.log(`Received ${signal}. Shutting down gracefully...`);
+  if (serverInstance) {
+    serverInstance.close(async () => {
+      console.log('HTTP server closed.');
+      // Wait for any pending lock acquisitions to finish
+      try {
+        await dbLock.acquire(() => Promise.resolve());
+        console.log('Database locks cleared.');
+      } catch (err) {
+        console.error('Error clearing database locks during shutdown:', err);
+      }
+      process.exit(0);
+    });
+    // Force close after 10 seconds if shutdown hangs
+    setTimeout(() => {
+      console.error('Graceful shutdown timed out, force exiting...');
+      process.exit(1);
+    }, 10000);
+  } else {
+    process.exit(0);
+  }
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 process.on('uncaughtException', (err) => {
   console.error('[CRITICAL] Uncaught Exception:', err);
