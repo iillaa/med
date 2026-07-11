@@ -141,6 +141,14 @@ function isOriginAllowedDynamic(origin, allowedOrigins) {
 
 app.use(express.json());
 
+// Graceful JSON parsing SyntaxError catcher
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: "Malformed JSON payload: Invalid syntax." });
+  }
+  next(err);
+});
+
 // CORS middleware — dynamically configured based on remote server URLs
 let serverProviders = [];
 let allowedOrigins = new Set();
@@ -770,6 +778,9 @@ app.post('/api/cats/:id', async (req, res) => {
   }
   try {
     const catId = parseInt(req.params.id);
+    if (isNaN(catId)) {
+      return res.status(400).json({ error: 'Invalid CAT ID' });
+    }
     const { summary, ordonnance, category, title, red_flags } = req.body;
 
     const result = await dbLock.acquire(async () => {
