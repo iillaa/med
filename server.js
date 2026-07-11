@@ -889,12 +889,27 @@ app.post('/api/suggestions', async (req, res) => {
       return res.status(400).json({ error: 'Type (add/edit) et Data sont requis.' });
     }
 
+    const targetCatId = catId ? parseInt(catId) : null;
+    
+    // Deduplication check: discard duplicate uploads within a 5-minute window
+    const duplicate = suggestionsCache.find(s => 
+      s.type === type && 
+      s.catId === targetCatId &&
+      s.data.title === data.title &&
+      s.data.summary === data.summary &&
+      (Date.now() - s.timestamp) < 5 * 60 * 1000
+    );
+
+    if (duplicate) {
+      return res.json({ success: true, message: 'Proposition déjà reçue (doublon ignoré).', suggestion: duplicate });
+    }
+
     const result = await dbLock.acquire(async () => {
       const suggestionId = 'sug_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       const newSug = {
         id: suggestionId,
-        type, // 'add' or 'edit'
-        catId: catId ? parseInt(catId) : null,
+        type,
+        catId: targetCatId,
         timestamp: Date.now(),
         data
       };
