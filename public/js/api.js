@@ -302,12 +302,13 @@ async function fetchWithTimeout(url, options = {}) {
   }
 }
 
-export async function fetchCats() {
+export async function fetchCats(since) {
   const mode = getAppMode();
+  const queryParam = (typeof since === 'number' && !isNaN(since)) ? `?since=${since}` : '';
 
   // 1. ADMIN_LOCAL: Fast local server load
   if (mode === APP_MODES.ADMIN_LOCAL) {
-    const res = await fetchWithTimeout('/api/cats', { headers: getHeaders() });
+    const res = await fetchWithTimeout(`/api/cats${queryParam}`, { headers: getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch CATs from local server');
     return res.json();
   }
@@ -359,7 +360,7 @@ export async function fetchCats() {
   // (fetchWithTimeout is capped to FETCH_TIMEOUT_MS=3000; for Android this is fine.)
   for (const remoteUrl of remoteUrls) {
     try {
-      const res = await fetchWithTimeout(getApiUrl('/api/cats', remoteUrl), { headers: getHeaders() });
+      const res = await fetchWithTimeout(getApiUrl(`/api/cats${queryParam}`, remoteUrl), { headers: getHeaders() });
       if (res.ok) {
         const data = await res.json();
         console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
@@ -445,8 +446,27 @@ export async function createCatOnServer(catData) {
   } catch (err) {
     console.warn('[API] createCatOnServer failed:', err.message);
   }
-  return { success: false, error: err?.message || "Failed to create CAT" };
+  return { success: false, error: "Failed to create CAT" };
 }
+
+export async function bulkImportCats(importList) {
+  try {
+    const res = await fetchWithTimeout('/api/cats/bulk-import', {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(importList)
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to bulk import CATs");
+    }
+    return res.json();
+  } catch (err) {
+    console.warn('[API] bulkImportCats failed:', err.message);
+    throw err;
+  }
+}
+
 
 export async function updateCatOverrides(id, data) {
   // Fallback: save to local overrides (persisted to localStorage)
@@ -828,3 +848,13 @@ export async function fetchServerMetrics() {
   }
   return res.json();
 }
+
+export async function fetchRateLimits() {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/rate-limits'), { headers: getHeaders() });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to fetch rate limits");
+  }
+  return res.json();
+}
+

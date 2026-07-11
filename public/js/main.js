@@ -372,6 +372,7 @@ async function initApp() {
   let cats = [];
   try {
     cats = await api.fetchCats();
+    localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
     if (window.perf) window.perf.recordMilestone('catsFetched');
   } catch (err) {
     console.error("[Startup Error] Fetch CATs failed, using emergency fallback.", err);
@@ -507,18 +508,42 @@ export async function runBackgroundSync() {
       api.setAppMode(api.APP_MODES.ANDROID_ONLINE);
       state.isOnlineAtStartup = true;
 
-      const freshCats = await api.fetchCats();
+      const lastSyncTime = parseInt(localStorage.getItem('dr_cat_last_sync_time') || '0');
+      const freshCats = await api.fetchCats(lastSyncTime);
 
-      // Check if the remote fiches are different from currently loaded ones (excluding custom offline fiches)
+      if (freshCats.length === 0) {
+        console.log('[Background Sync] Remote database is in sync. No action needed.');
+        localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+        if (wasOffline) {
+          showToast('📡 Connexion serveur établie. Données synchronisées !', 'fa-cloud-arrow-up', 4000);
+        }
+        return;
+      }
+
+      // Check if this is a full list or an incremental update
       const localServerCats = (state.allCats || []).filter(c => !c.id.toString().startsWith('offline-') && c.id <= 1000);
-      let isUpdated = localServerCats.length !== freshCats.length;
-      
-      if (!isUpdated) {
+      const isIncremental = freshCats.length < (localServerCats.length * 0.7);
+
+      let isUpdated = false;
+      if (isIncremental) {
+        // If incremental, we have updates if any card is new or modified
         for (const remote of freshCats) {
           const local = localServerCats.find(c => c.id === remote.id);
           if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
             isUpdated = true;
             break;
+          }
+        }
+      } else {
+        // If full list (e.g. static fallback), compare counts and contents
+        isUpdated = localServerCats.length !== freshCats.length;
+        if (!isUpdated) {
+          for (const remote of freshCats) {
+            const local = localServerCats.find(c => c.id === remote.id);
+            if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
+              isUpdated = true;
+              break;
+            }
           }
         }
       }
@@ -537,7 +562,7 @@ export async function runBackgroundSync() {
           if (updateBtn) {
             updateBtn.addEventListener('click', (event) => {
               event.preventDefault();
-              applySyncUpdates(freshCats);
+              applySyncUpdates(freshCats, isIncremental);
               
               const toast = document.getElementById('drcat-toast');
               if (toast) toast.remove();
@@ -548,6 +573,7 @@ export async function runBackgroundSync() {
         }, 150);
       } else {
         console.log('[Background Sync] Remote database is in sync. No action needed.');
+        localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
       }
 
       if (wasOffline) {
@@ -564,27 +590,53 @@ export async function runBackgroundSync() {
 }
 
 // Helper to safely apply background sync updates to the UI
-function applySyncUpdates(freshCats) {
+function applySyncUpdates(freshCats, isIncremental) {
   const localProgress = getLocalProgress();
   const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-  const existingIds = new Set(freshCats.map(c => c.id));
-  const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
-    .filter(c => !existingIds.has(c.id));
 
-  state.allCats = [...freshCats, ...customCats].map(cat => {
-    const localEntry = localProgress[cat.id] || {};
-    const overrides = localOverrides[cat.id] || {};
-    return {
-      ...cat,
-      status: localEntry.status || 'todo',
-      notes: localEntry.notes || '',
-      summary: overrides.customSummary || cat.summary,
-      customSummary: overrides.customSummary || cat.summary,
-      ordonnance: overrides.customOrdonnance || cat.ordonnance,
-      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
-    };
-  });
+  if (isIncremental) {
+    // Incremental merge: update or insert fiches inside state.allCats
+    freshCats.forEach(remote => {
+      const idx = state.allCats.findIndex(c => c.id === remote.id);
+      const localEntry = localProgress[remote.id] || {};
+      const overrides = localOverrides[remote.id] || {};
+      const merged = {
+        ...remote,
+        status: localEntry.status || 'todo',
+        notes: localEntry.notes || '',
+        summary: overrides.customSummary || remote.summary,
+        customSummary: overrides.customSummary || remote.summary,
+        ordonnance: overrides.customOrdonnance || remote.ordonnance,
+        customOrdonnance: overrides.customOrdonnance || remote.ordonnance
+      };
+      if (idx !== -1) {
+        state.allCats[idx] = merged;
+      } else {
+        state.allCats.push(merged);
+      }
+    });
+  } else {
+    // Full replacement merge
+    const existingIds = new Set(freshCats.map(c => c.id));
+    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+      .filter(c => !existingIds.has(c.id));
 
+    state.allCats = [...freshCats, ...customCats].map(cat => {
+      const localEntry = localProgress[cat.id] || {};
+      const overrides = localOverrides[cat.id] || {};
+      return {
+        ...cat,
+        status: localEntry.status || 'todo',
+        notes: localEntry.notes || '',
+        summary: overrides.customSummary || cat.summary,
+        customSummary: overrides.customSummary || cat.summary,
+        ordonnance: overrides.customOrdonnance || cat.ordonnance,
+        customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+      };
+    });
+  }
+
+  localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
   sidebar.renderCatList(state.allCats, selectCatWrapper);
   calculateStats();
   dashboard.renderDashboard(selectCatWrapper);

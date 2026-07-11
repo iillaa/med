@@ -16,7 +16,7 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 ## 🌐 Sync & Offline Improvements
 
 - `[x]` **Local PDF Index Caching**: Bundle the full `pdf_index.json` inside the Capacitor APK during `npm run build` so full-text PDF search works in `android_offline` mode without ever needing a server connection.
-- `[ ]` **Incremental Sync**: Instead of a full `cats_db.json` pull on every sync, send a `?since=<timestamp>` query param to the server so only modified CATs are transferred, reducing bandwidth for mobile testers.
+- `[x]` **Incremental Sync**: Instead of a full `cats_db.json` pull on every sync, send a `?since=<timestamp>` query param to the server so only modified CATs are transferred, reducing bandwidth for mobile testers.
 
 
 ---
@@ -24,9 +24,9 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 ## 🗄️ Database & Content
 
 - `[x]` **Database Schema Validation**: Add a JSON schema validator that runs on server boot to verify `cats_db.json` structure. If a field is missing or has the wrong type (e.g., a manual edit typo), log a clear warning instead of crashing silently.
-- `[ ]` **CAT Version History**: Store a changelog array inside each CAT object so the admin can see who modified what and when, and revert to a previous version.
-- `[ ]` **Bulk CAT Import**: Allow importing a batch of CATs from a JSON file upload via the Admin Panel, instead of creating them one by one.
-- `[ ]` **CAT Export per Specialty**: Allow downloading all CATs of a specific specialty as a standalone JSON file for sharing with other doctors.
+- `[x]` **CAT Version History**: Store a changelog array inside each CAT object so the admin can see who modified what and when, and revert to a previous version.
+- `[x]` **Bulk CAT Import**: Allow importing a batch of CATs from a JSON file upload via the Admin Panel, instead of creating them one by one.
+- `[x]` **CAT Export per Specialty**: Allow downloading all CATs of a specific specialty as a standalone JSON file for sharing with other doctors.
 
 ---
 
@@ -52,8 +52,7 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 ## 🛠️ Developer & Admin Tooling
 
 - `[x]` **Admin URL Updater UI**: Add a form in the Admin Diagnostics panel to update the server URL in `remote_server_config.json` directly from the browser, triggering a hot-reload of the providers list without a server restart.
-- `[ ]` **Rate Limit Dashboard**: Display the current rate-limit counters (failed logins per IP) in the Admin panel so the admin can see if someone is attempting to brute-force the login.
-- `[ ]` **PDF Upload via Admin Panel**: Allow uploading new PDF files directly from the browser Admin panel to the `.cat-med/reference-pdfs/` directory, triggering automatic re-indexing.
+- `[x]` **Rate Limit Dashboard**: Display the current rate-limit counters (failed logins per IP) in the Admin panel so the admin can see if someone is attempting to brute-force the login.
 - `[x]` **Test Suite CI Integration**: Run `node test_api.js` automatically as part of the GitHub Actions build to catch API regressions before the APK is compiled.
 
 ---

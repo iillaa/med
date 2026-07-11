@@ -185,6 +185,32 @@ async function refreshDiagnosticsData() {
     } catch (err) {
       console.warn("Failed to fetch index details stats:", err);
     }
+
+    try {
+      const rateLimits = await api.fetchRateLimits();
+      const limitsList = document.getElementById('diag-rate-limits-list');
+      if (limitsList) {
+        if (rateLimits.length === 0) {
+          limitsList.innerHTML = '<p class="text-muted text-center" style="margin: 8px 0; font-style: italic;">Aucune IP bloquée.</p>';
+        } else {
+          let html = '';
+          rateLimits.forEach(item => {
+            const timeAgo = Math.round((Date.now() - item.lastAttempt) / 1000);
+            let timeStr = `${timeAgo}s`;
+            if (timeAgo > 60) {
+              timeStr = `${Math.round(timeAgo / 60)}m`;
+            }
+            html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px; margin-bottom: 4px;">`;
+            html += `  <span style="font-family: monospace; color: var(--text-primary);">${item.ip}</span>`;
+            html += `  <span style="color: #f87171; font-weight: bold;">${item.count} échec(s) (${timeStr})</span>`;
+            html += `</div>`;
+          });
+          limitsList.innerHTML = html;
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch rate limits diagnostics stats:", err);
+    }
   } else {
     // Offline / Standalone Capacitor mode displays
     document.getElementById('diag-node-version').textContent = 'N/A (WebView)';

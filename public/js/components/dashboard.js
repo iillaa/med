@@ -6,8 +6,10 @@ import { escapeHTML, exportDataFile, showToast } from '../utils.js';
 let welcomeScreen, workspace, sidebar;
 let dashMasteryRate, dashCountDone, dashCountDoing, dashCountTodo;
 let resumeList, categoriesDiv, adminPanel, suggestionsList;
+let suggestionCallback = null;
 
 export function initDashboard(onSelectCat, onSuggestionHandled) {
+  suggestionCallback = onSuggestionHandled;
   welcomeScreen = document.getElementById('welcome-screen');
   workspace = document.getElementById('workspace');
   sidebar = document.getElementById('sidebar');
@@ -283,6 +285,119 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       reader.readAsText(file);
     });
   }
+
+  // --- Bulk Import Event Listeners ---
+  const bulkImportInput = document.getElementById('admin-bulk-import-input');
+  const bulkImportTriggerBtn = document.getElementById('admin-bulk-import-trigger-btn');
+  const bulkImportFileName = document.getElementById('bulk-import-file-name');
+  const bulkImportSubmitBtn = document.getElementById('admin-bulk-import-submit-btn');
+
+  let importData = null;
+
+  if (bulkImportTriggerBtn && bulkImportInput) {
+    bulkImportTriggerBtn.addEventListener('click', () => bulkImportInput.click());
+  }
+
+  if (bulkImportInput) {
+    bulkImportInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) {
+        if (bulkImportFileName) bulkImportFileName.textContent = 'Aucun fichier sélectionné';
+        if (bulkImportSubmitBtn) {
+          bulkImportSubmitBtn.disabled = true;
+          bulkImportSubmitBtn.style.opacity = '0.5';
+          bulkImportSubmitBtn.style.cursor = 'not-allowed';
+        }
+        importData = null;
+        return;
+      }
+
+      if (bulkImportFileName) bulkImportFileName.textContent = file.name;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (!Array.isArray(parsed)) {
+            throw new Error("Le fichier JSON doit contenir un tableau de fiches.");
+          }
+          importData = parsed;
+          if (bulkImportSubmitBtn) {
+            bulkImportSubmitBtn.disabled = false;
+            bulkImportSubmitBtn.style.opacity = '1';
+            bulkImportSubmitBtn.style.cursor = 'pointer';
+          }
+        } catch (err) {
+          showToast(`Erreur JSON: ${err.message}`, 'fa-triangle-exclamation', 4000);
+          if (bulkImportFileName) bulkImportFileName.textContent = 'Fichier JSON invalide';
+          if (bulkImportSubmitBtn) {
+            bulkImportSubmitBtn.disabled = true;
+            bulkImportSubmitBtn.style.opacity = '0.5';
+            bulkImportSubmitBtn.style.cursor = 'not-allowed';
+          }
+          importData = null;
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  if (bulkImportSubmitBtn) {
+    bulkImportSubmitBtn.addEventListener('click', async () => {
+      if (!importData) return;
+      
+      try {
+        bulkImportSubmitBtn.disabled = true;
+        bulkImportSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importation...';
+        
+        const result = await api.bulkImportCats(importData);
+        showToast(`${result.count} fiches importées avec succès !`, 'fa-circle-check', 4000);
+        
+        // Clear state
+        importData = null;
+        if (bulkImportInput) bulkImportInput.value = '';
+        if (bulkImportFileName) bulkImportFileName.textContent = 'Aucun fichier sélectionné';
+        bulkImportSubmitBtn.disabled = true;
+        bulkImportSubmitBtn.style.opacity = '0.5';
+        bulkImportSubmitBtn.style.cursor = 'not-allowed';
+        bulkImportSubmitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Importer';
+        
+        // Trigger app reload/sync dynamically
+        if (suggestionCallback) await suggestionCallback();
+      } catch (err) {
+        showToast(`Échec de l'importation: ${err.message}`, 'fa-triangle-exclamation', 4000);
+        bulkImportSubmitBtn.disabled = false;
+        bulkImportSubmitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Importer';
+      }
+    });
+  }
+
+  // --- Export Specialty Button Event Listener ---
+  const exportSpecialtyBtn = document.getElementById('export-specialty-btn');
+  const exportSpecialtySelect = document.getElementById('export-specialty-select');
+  if (exportSpecialtyBtn && exportSpecialtySelect) {
+    exportSpecialtyBtn.addEventListener('click', () => {
+      const specialty = exportSpecialtySelect.value;
+      if (!specialty) {
+        showToast("Veuillez sélectionner une spécialité.", "fa-triangle-exclamation", 3000);
+        return;
+      }
+      
+      const list = state.allCats.filter(c => c.category === specialty).map(c => {
+        return {
+          category: c.category,
+          title: c.title,
+          summary: c.summary,
+          red_flags: c.red_flags,
+          ordonnance: c.ordonnance,
+          pdf_keywords: c.pdf_keywords || []
+        };
+      });
+      
+      exportDataFile(list, `Fiches_DrCAT_${specialty.replace(/\s+/g, '_')}.json`);
+      showToast(`Exportation réussie de ${list.length} fiches !`, "fa-circle-check", 3000);
+    });
+  }
 }
 
 export function showDashboard(onSelectCat) {
@@ -306,6 +421,21 @@ export function showDashboard(onSelectCat) {
 export function renderDashboard(onSelectCat) {
   if (window.perf) window.perf.startMeasure('dashboard.renderDashboard');
   if (!welcomeScreen || welcomeScreen.style.display === 'none') return;
+
+  // Populate Export Specialty Dropdown
+  const exportSpecialtySelect = document.getElementById('export-specialty-select');
+  if (exportSpecialtySelect) {
+    const activeCategories = Array.from(new Set(state.allCats.map(c => c.category))).sort();
+    const currentValue = exportSpecialtySelect.value;
+    exportSpecialtySelect.innerHTML = '<option value="">Choisir spécialité...</option>';
+    activeCategories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      if (cat === currentValue) opt.selected = true;
+      exportSpecialtySelect.appendChild(opt);
+    });
+  }
 
   // 1. Calculate stats and update values
   let todo = 0, doing = 0, done = 0;

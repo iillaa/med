@@ -190,12 +190,20 @@
               <h2>Tableau de Bord 🩺</h2>
               <p>Suivi de votre apprentissage des 55 conduites à tenir</p>
             </div>
-             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <div class="specialty-export-container" style="display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: var(--radius-md);">
+                <select id="export-specialty-select" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
+                  <option value="">Sélectionner spécialité...</option>
+                </select>
+                <button class="action-btn" id="export-specialty-btn" style="font-size: 11px; padding: 4px 8px; border: none; background: rgba(6,182,212,0.1); color: var(--color-primary); cursor: pointer; display: flex; align-items: center; gap: 4px; border-radius: 4px; font-weight: 600;">
+                  <i class="fa-solid fa-file-export"></i> Exporter
+                </button>
+              </div>
               <button class="action-btn" id="export-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
-                <i class="fa-solid fa-download"></i> Exporter
+                <i class="fa-solid fa-download"></i> Exporter Progrès
               </button>
               <button class="action-btn" id="import-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
-                <i class="fa-solid fa-upload"></i> Importer
+                <i class="fa-solid fa-upload"></i> Importer Progrès
               </button>
               <input type="file" id="import-progress-file" accept=".json" style="display: none;">
               <button class="action-btn" id="admin-login-btn" style="font-size: 12px; padding: 6px 12px; display: none; align-items: center; gap: 6px;">
@@ -290,6 +298,22 @@
                   <!-- Dynamically populated -->
                   <p class="text-muted text-center" style="padding: 10px 0;">Aucune proposition en attente.</p>
                 </div>
+
+                <!-- Bulk Import Box -->
+                <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                  <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 13.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-file-import"></i> Importation Groupée (JSON)</h4>
+                  <p class="block-desc" style="margin: 0 0 10px 0;">Sélectionnez un fichier JSON contenant une liste de fiches pour les importer en lot.</p>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="file" id="admin-bulk-import-input" accept=".json" style="display: none;">
+                    <button class="action-btn" id="admin-bulk-import-trigger-btn" style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: rgba(6,182,212,0.1); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                      <i class="fa-solid fa-folder-open"></i> Choisir le fichier JSON
+                    </button>
+                    <span id="bulk-import-file-name" class="text-muted" style="font-size: 11.5px;">Aucun fichier sélectionné</span>
+                    <button class="action-btn" id="admin-bulk-import-submit-btn" disabled style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; border-radius: 4px; cursor: not-allowed; opacity: 0.5; transition: all 0.2s;">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Importer
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- PANE 2: Diagnostics -->
@@ -373,6 +397,15 @@
                       <div>Total Pages : <span id="diag-pdf-pages">--</span></div>
                       <div>Indexé le : <span id="diag-pdf-time">--</span></div>
                       <div>Santé de l'index : <span id="diag-pdf-health" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 8: Rate Limiting / Failed Logins -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-user-lock"></i> Tentatives de Connexion</h4>
+                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px;">IP bloquées ou sous surveillance :</div>
+                    <div id="diag-rate-limits-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; max-height: 120px; overflow-y: auto;">
+                      <p class="text-muted text-center" style="margin: 8px 0; font-style: italic;">Aucune IP bloquée.</p>
                     </div>
                   </div>
 

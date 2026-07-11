@@ -768,6 +768,11 @@ app.post('/api/logout', (req, res) => {
 
 // Endpoint to get all CATs (served from memory cache)
 app.get('/api/cats', (req, res) => {
+  const since = parseInt(req.query.since);
+  if (!isNaN(since)) {
+    const filtered = catsCache.filter(c => (c.updatedAt || 0) > since);
+    return res.json(filtered);
+  }
   res.json(catsCache);
 });
 
@@ -794,6 +799,14 @@ app.post('/api/cats/:id', async (req, res) => {
       if (category !== undefined) cat.category = category;
       if (title !== undefined) cat.title = title;
       if (red_flags !== undefined) cat.red_flags = red_flags;
+
+      cat.updatedAt = Date.now();
+      if (!cat.history) cat.history = [];
+      cat.history.push({
+        timestamp: Date.now(),
+        action: 'edit',
+        detail: 'Modifié directement par l\'administrateur'
+      });
 
       await safeWriteJsonAsync(DB_FILE, catsCache);
       return { success: true, message: `CAT ${catId} mise à jour directement.` };
@@ -830,7 +843,13 @@ app.post('/api/cats', async (req, res) => {
         summary: summary || '',
         red_flags: red_flags || '',
         ordonnance: ordonnance || '',
-        pdf_keywords: pdf_keywords || []
+        pdf_keywords: pdf_keywords || [],
+        updatedAt: Date.now(),
+        history: [{
+          timestamp: Date.now(),
+          action: 'create',
+          detail: 'Créé directement par l\'administrateur'
+        }]
       };
 
       catsCache.push(newCat);
@@ -843,6 +862,60 @@ app.post('/api/cats', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create new CAT' });
+  }
+});
+
+// Endpoint to bulk-import fiches (Admin only)
+app.post('/api/cats/bulk-import', async (req, res) => {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit.' });
+  }
+  try {
+    const importList = req.body;
+    if (!Array.isArray(importList)) {
+      return res.status(400).json({ error: 'L\'importation doit être un tableau de fiches.' });
+    }
+
+    // Validate entries
+    for (const item of importList) {
+      if (!item.title || !item.category) {
+        return res.status(400).json({ error: 'Chaque fiche doit contenir au moins un titre et une spécialité.' });
+      }
+    }
+
+    const result = await dbLock.acquire(async () => {
+      let importedCount = 0;
+      let nextId = catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
+
+      for (const item of importList) {
+        const newCat = {
+          id: nextId++,
+          category: item.category,
+          title: item.title,
+          summary: item.summary || '',
+          red_flags: item.red_flags || '',
+          ordonnance: item.ordonnance || '',
+          pdf_keywords: item.pdf_keywords || [],
+          updatedAt: Date.now(),
+          history: [{
+            timestamp: Date.now(),
+            action: 'create',
+            detail: 'Importation groupée par l\'administrateur'
+          }]
+        };
+        catsCache.push(newCat);
+        importedCount++;
+      }
+
+      await safeWriteJsonAsync(DB_FILE, catsCache);
+      return { success: true, count: importedCount };
+    });
+
+    logAuditEvent('cats_bulk_import', { count: result.count }, req);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de l\'importation groupée.' });
   }
 });
 
@@ -962,7 +1035,13 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
           summary: sug.data.summary || '',
           red_flags: sug.data.red_flags || '',
           ordonnance: sug.data.ordonnance || '',
-          pdf_keywords: sug.data.pdf_keywords || []
+          pdf_keywords: sug.data.pdf_keywords || [],
+          updatedAt: Date.now(),
+          history: [{
+            timestamp: Date.now(),
+            action: 'create',
+            detail: 'Créé via approbation d\'une proposition de fiche'
+          }]
         };
         catsCache.push(newCat);
         await safeWriteJsonAsync(DB_FILE, catsCache);
@@ -974,6 +1053,15 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
           if (sug.data.category !== undefined) cat.category = sug.data.category;
           if (sug.data.title !== undefined) cat.title = sug.data.title;
           if (sug.data.red_flags !== undefined) cat.red_flags = sug.data.red_flags;
+
+          cat.updatedAt = Date.now();
+          if (!cat.history) cat.history = [];
+          cat.history.push({
+            timestamp: Date.now(),
+            action: 'edit',
+            detail: 'Modifié via approbation d\'une proposition de modification'
+          });
+
           await safeWriteJsonAsync(DB_FILE, catsCache);
         } else {
           return { notFound: true, message: 'Fiche CAT d\'origine introuvable.' };
@@ -1446,6 +1534,17 @@ app.get('/api/diagnostics/tunnel-info', async (req, res) => {
     providers: serverProviders.map(p => ({ id: p.id, name: p.name })),
     configuredTunnels: providerInfo
   });
+});
+
+app.get('/api/diagnostics/rate-limits', (req, res) => {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
+  }
+  const limits = [];
+  loginAttempts.forEach((val, key) => {
+    limits.push({ ip: key, count: val.count, lastAttempt: val.lastAttempt });
+  });
+  res.json(limits);
 });
 
 app.get('/api/performance/server-metrics', (req, res) => {
