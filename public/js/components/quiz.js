@@ -174,6 +174,60 @@ function getOrientationText(cat) {
   return "";
 }
 
+function cleanTextOfClues(text, title, category) {
+  if (!text) return "";
+  let lines = text.split('\n');
+  let cleanLines = [];
+  for (let line of lines) {
+    let trimmed = line.trim();
+    if (!trimmed) continue;
+    // Skip lines starting with markdown bold header prefixes
+    if (trimmed.startsWith('**') && (trimmed.toLowerCase().includes('pour') || trimmed.toLowerCase().includes('cas') || trimmed.toLowerCase().includes('symptômes') || trimmed.toLowerCase().includes('en cas') || trimmed.endsWith(':**') || trimmed.includes(':\*\*'))) {
+      continue;
+    }
+    cleanLines.push(trimmed);
+  }
+  let result = cleanLines.join('\n');
+
+  // Replace occurrences of title and category to avoid dead giveaways
+  if (title) {
+    const cleanTitle = title.replace(/^CAT devant\s+/i, '').replace(/^Différence entre\s+/i, '').replace(/^Interprétation du\s+/i, '').trim();
+    if (cleanTitle.length > 2) {
+      const escapedTitle = cleanTitle.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(escapedTitle, 'gi');
+      result = result.replace(regex, '[la pathologie]');
+    }
+  }
+  if (category) {
+    const escapedCat = category.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(escapedCat, 'gi');
+    result = result.replace(regex, '[spécialité]');
+  }
+
+  return result;
+}
+
+function cleanOrientationOfClues(text, title, category) {
+  if (!text) return "";
+  let result = text.trim();
+  
+  if (title) {
+    const cleanTitle = title.replace(/^CAT devant\s+/i, '').replace(/^Différence entre\s+/i, '').replace(/^Interprétation du\s+/i, '').trim();
+    if (cleanTitle.length > 2) {
+      const escapedTitle = cleanTitle.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(escapedTitle, 'gi');
+      result = result.replace(regex, '[la pathologie]');
+    }
+  }
+  if (category) {
+    const escapedCat = category.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(escapedCat, 'gi');
+    result = result.replace(regex, '[spécialité]');
+  }
+
+  return result;
+}
+
 function startQuizSession() {
   const selectedCategory = quizCategorySelect.value;
   const questionCount = parseInt(quizCountSelect.value);
@@ -203,12 +257,17 @@ function startQuizSession() {
   filteredCats.forEach(cat => {
     // 1. Clinical QCM Question (Cas Clinique & Orientation)
     if (includeClinical) {
-      const correctAnswer = getOrientationText(cat);
-      if (correctAnswer && correctAnswer.trim().length > 0) {
+      const rawOrientation = getOrientationText(cat);
+      if (rawOrientation && rawOrientation.trim().length > 0) {
+        const correctAnswer = cleanOrientationOfClues(rawOrientation, cat.title, cat.category);
+        
         // Find other orientations as distractors
         const otherCats = state.allCats.filter(c => c.id !== cat.id);
         const otherOrientations = Array.from(new Set(
-          otherCats.map(c => getOrientationText(c)).filter(t => t && t.trim().length > 0 && t !== correctAnswer)
+          otherCats.map(c => {
+            const rawText = getOrientationText(c);
+            return cleanOrientationOfClues(rawText, c.title, c.category);
+          }).filter(t => t && t.trim().length > 0 && t !== correctAnswer)
         ));
         shuffleArray(otherOrientations);
         const distractors = otherOrientations.slice(0, 3);
@@ -228,12 +287,15 @@ function startQuizSession() {
 
     // 2. Posology QCM Question (Ordonnance & Posologie)
     if (includePosology) {
-      const correctAnswer = cat.ordonnance;
-      if (correctAnswer && correctAnswer.trim().length > 0) {
+      const rawOrdonnance = cat.ordonnance;
+      if (rawOrdonnance && rawOrdonnance.trim().length > 0) {
+        const correctAnswer = cleanTextOfClues(rawOrdonnance, cat.title, cat.category);
+        
         // Find other ordonnances as distractors
         const otherCats = state.allCats.filter(c => c.id !== cat.id);
         const otherOrdonnances = Array.from(new Set(
-          otherCats.map(c => c.ordonnance).filter(o => o && o.trim().length > 0 && o !== correctAnswer)
+          otherCats.map(c => cleanTextOfClues(c.ordonnance, c.title, c.category))
+            .filter(o => o && o.trim().length > 0 && o !== correctAnswer)
         ));
         shuffleArray(otherOrdonnances);
         const distractors = otherOrdonnances.slice(0, 3);
