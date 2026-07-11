@@ -765,3 +765,45 @@ export function setButtonLoading(btn, originalHTML) {
   };
 }
 
+/**
+ * Triggers a haptic vibration feedback.
+ * @param {boolean} success - true for a short success pulse, false for a long error pulse.
+ */
+export function triggerHaptic(success) {
+  try {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+      const Haptics = window.Capacitor.Plugins.Haptics;
+      if (success) {
+        if (typeof Haptics.impact === 'function') {
+          Haptics.impact({ style: 'light' });
+        } else if (typeof Haptics.vibrate === 'function') {
+          Haptics.vibrate({ duration: 80 });
+        }
+      } else {
+        if (typeof Haptics.vibrate === 'function') {
+          Haptics.vibrate({ duration: 400 });
+        } else if (typeof Haptics.impact === 'function') {
+          Haptics.impact({ style: 'heavy' });
+        }
+      }
+      return;
+    }
+  } catch (e) {
+    console.warn("Capacitor Haptics failed:", e);
+  }
+
+  // Fallback to Web Vibrate API
+  try {
+    if (typeof navigator.vibrate === 'function') {
+      if (success) {
+        navigator.vibrate(80);
+      } else {
+        navigator.vibrate([300, 100, 300]);
+      }
+    }
+  } catch (e) {
+    console.warn("Web Vibrate API failed:", e);
+  }
+}
+
+

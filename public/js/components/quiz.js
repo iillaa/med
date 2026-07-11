@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { getCleanPdfName, setButtonLoading, showToast } from '../utils.js';
+import { getCleanPdfName, setButtonLoading, showToast, triggerHaptic } from '../utils.js';
 
 // DOM Elements
 let quizScreen, welcomeScreen, workspaceView;
@@ -159,6 +159,7 @@ export function initQuiz(onOpenCatCard) {
   if (quitBtn) {
     quitBtn.addEventListener('click', () => {
       if (timerIntervalId) clearInterval(timerIntervalId);
+      releaseWakeLock();
       quizScreen.style.display = 'none';
       if (welcomeScreen) welcomeScreen.style.display = 'flex';
       // Clear active quiz session
@@ -510,6 +511,7 @@ function startQuizSession() {
   if (quizActiveView) quizActiveView.style.display = 'flex';
   if (quizResultsView) quizResultsView.style.display = 'none';
 
+  requestWakeLock();
   renderQuestion();
 }
 
@@ -662,6 +664,7 @@ function generateQCMOptions(question) {
       });
 
       const isCorrect = (opt === question.correctAnswer);
+      triggerHaptic(isCorrect);
       if (isCorrect) {
         btn.style.borderColor = 'var(--color-success)';
         btn.style.background = 'rgba(16, 185, 129, 0.08)';
@@ -795,6 +798,7 @@ function submitWriteInAnswer() {
 
 function saveWriteInGrade(score) {
   if (timerIntervalId) clearInterval(timerIntervalId);
+  triggerHaptic(score >= 0.5);
   const session = state.quizSession;
   const q = session.questions[session.currentIndex];
   const userAnswer = userTextArea.value.trim();
@@ -844,6 +848,7 @@ function advanceQuestion() {
 
 function showResults() {
   if (timerIntervalId) clearInterval(timerIntervalId);
+  releaseWakeLock();
   if (quizSetupView) quizSetupView.style.display = 'none';
   if (quizActiveView) quizActiveView.style.display = 'none';
   if (quizResultsView) quizResultsView.style.display = 'flex';
@@ -1233,3 +1238,41 @@ function retryFailedQuestions() {
 
   renderQuestion();
 }
+
+// Screen Wake Lock API management
+let wakeLock = null;
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('[Wake Lock] Screen Wake Lock acquired.');
+    }
+  } catch (err) {
+    console.warn(`[Wake Lock] Failed to acquire screen wake lock: ${err.message}`);
+  }
+}
+
+function releaseWakeLock() {
+  try {
+    if (wakeLock !== null) {
+      wakeLock.release().then(() => {
+        wakeLock = null;
+        console.log('[Wake Lock] Screen Wake Lock released.');
+      });
+    }
+  } catch (err) {
+    console.warn(`[Wake Lock] Failed to release screen wake lock: ${err.message}`);
+  }
+}
+
+// Re-acquire wake lock if application visibility changes (resumed / minimized)
+document.addEventListener('visibilitychange', async () => {
+  const session = state.quizSession;
+  if (session && session.questions && session.questions.length > 0 && session.currentIndex < session.questions.length) {
+    if (document.visibilityState === 'visible') {
+      await requestWakeLock();
+    }
+  }
+});
+

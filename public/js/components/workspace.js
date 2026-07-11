@@ -1,6 +1,6 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
-import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading } from '../utils.js';
+import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading, triggerHaptic } from '../utils.js';
 
 // DOM Elements
 let workspace, welcomeScreen;
@@ -529,6 +529,66 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       saveAppStateBeforeNavigation();
     }
   });
+
+  // Swipe navigation touch gesture listeners for mobile
+  let touchstartX = 0;
+  let touchstartY = 0;
+  let touchendX = 0;
+  let touchendY = 0;
+
+  if (workspace) {
+    workspace.addEventListener('touchstart', (e) => {
+      // Ignore swipe inside textareas or input fields to prevent cursor interference
+      const tagName = e.target.tagName.toLowerCase();
+      if (tagName === 'textarea' || tagName === 'input' || e.target.closest('#summary-editor') || e.target.closest('#notes-input')) return;
+      
+      touchstartX = e.changedTouches[0].screenX;
+      touchstartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    workspace.addEventListener('touchend', (e) => {
+      const tagName = e.target.tagName.toLowerCase();
+      if (tagName === 'textarea' || tagName === 'input' || e.target.closest('#summary-editor') || e.target.closest('#notes-input')) return;
+
+      touchendX = e.changedTouches[0].screenX;
+      touchendY = e.changedTouches[0].screenY;
+      handleSwipeGesture();
+    }, { passive: true });
+  }
+
+  function handleSwipeGesture() {
+    const diffX = touchendX - touchstartX;
+    const diffY = touchendY - touchstartY;
+    const minDistance = 60; // minimum touch distance
+
+    // Verify it is a primary horizontal swipe (horizontal distance is greater than twice vertical distance)
+    if (Math.abs(diffX) > minDistance && Math.abs(diffX) > Math.abs(diffY) * 2) {
+      const activeItem = document.querySelector('.cat-item.active');
+      const items = Array.from(document.querySelectorAll('.cat-item'));
+      if (items.length === 0 || !activeItem) return;
+
+      const currentIndex = items.indexOf(activeItem);
+      if (currentIndex === -1) return;
+
+      let nextIndex = currentIndex;
+      if (diffX < 0) {
+        // Swipe Left -> Next CAT card
+        nextIndex = (currentIndex + 1) % items.length;
+      } else {
+        // Swipe Right -> Previous CAT card
+        nextIndex = (currentIndex - 1 + items.length) % items.length;
+      }
+
+      const targetItem = items[nextIndex];
+      if (targetItem) {
+        targetItem.click();
+        targetItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        
+        // Lightweight haptic vibration response
+        triggerHaptic(true);
+      }
+    }
+  }
 }
 
 export function selectCat(cat, preserveTab = false) {
