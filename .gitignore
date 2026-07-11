@@ -10,6 +10,9 @@ node_modules/
 # Local backups (tracked by Git history instead)
 *.bak
 
+# Kilo agent-manager / worktree internals
+.kilo/
+
 # IDE & Tool configurations
 .antigravitycli/
 .gemini/
