@@ -535,26 +535,32 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   let touchstartY = 0;
   let touchendX = 0;
   let touchendY = 0;
+  let isSwipeActive = false;
 
   if (workspace) {
     workspace.addEventListener('touchstart', (e) => {
+      isSwipeActive = false;
+      if (!e.target || typeof e.target.closest !== 'function') return;
+
+      // Limit swipe navigation to the top section panel (header, red flags banner, or tabs bar)
+      const isTopPanel = e.target.closest('.workspace-header') || e.target.closest('#red-flags-banner') || e.target.closest('.tabs-nav');
+      if (!isTopPanel) return;
+
       // Ignore swipe inside textareas or input fields to prevent cursor interference
-      if (!e.target || !e.target.tagName) return;
       const tagName = e.target.tagName.toLowerCase();
-      const hasClosest = typeof e.target.closest === 'function';
-      const insideEditor = hasClosest && (e.target.closest('#summary-editor') || e.target.closest('#notes-input'));
+      const insideEditor = e.target.closest('#summary-editor') || e.target.closest('#notes-input');
       if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
       
+      isSwipeActive = true;
       touchstartX = e.changedTouches[0].screenX;
       touchstartY = e.changedTouches[0].screenY;
     }, { passive: true });
 
     workspace.addEventListener('touchend', (e) => {
-      if (!e.target || !e.target.tagName) return;
-      const tagName = e.target.tagName.toLowerCase();
-      const hasClosest = typeof e.target.closest === 'function';
-      const insideEditor = hasClosest && (e.target.closest('#summary-editor') || e.target.closest('#notes-input'));
-      if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
+      if (!isSwipeActive) return;
+      isSwipeActive = false;
+
+      if (!e.target || typeof e.target.closest !== 'function') return;
 
       touchendX = e.changedTouches[0].screenX;
       touchendY = e.changedTouches[0].screenY;
