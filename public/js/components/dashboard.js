@@ -351,7 +351,13 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
         bulkImportSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importation...';
         
         const result = await api.bulkImportCats(importData);
-        showToast(`${result.count} fiches importées avec succès !`, 'fa-circle-check', 4000);
+        if (result.count > 0 && result.skippedCount > 0) {
+          showToast(`${result.count} fiches importées, ${result.skippedCount} ignorées (déjà existantes).`, 'fa-circle-check', 5000);
+        } else if (result.count === 0 && result.skippedCount > 0) {
+          showToast(`Aucune nouvelle fiche. Les ${result.skippedCount} fiches existaient déjà.`, 'fa-circle-exclamation', 5000);
+        } else {
+          showToast(`${result.count} fiches importées avec succès !`, 'fa-circle-check', 4000);
+        }
         
         // Clear state
         importData = null;

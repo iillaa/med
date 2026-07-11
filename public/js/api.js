@@ -600,11 +600,29 @@ export async function searchPdfsContent(query) {
       
       const cleanQuery = query.trim().toLowerCase();
       const results = [];
+
+      // 1. Filename matches first (High Relevance)
+      for (const doc of offlinePdfIndexCache) {
+        if (doc.pdf.toLowerCase().includes(cleanQuery)) {
+          results.push({
+            pdf: doc.pdf,
+            page: 1,
+            snippet: "[Titre du fichier correspond] Document de référence disponible."
+          });
+        }
+      }
       
+      // 2. Text page content matches
       for (const doc of offlinePdfIndexCache) {
         if (!doc.pages) continue;
         for (const p of doc.pages) {
           if (!p.text) continue;
+          
+          // Avoid duplicate results for the same page (e.g. if page 1 matched filename)
+          if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
+            continue;
+          }
+
           const textLower = p.text.toLowerCase();
           let indexMatch = textLower.indexOf(cleanQuery);
           if (indexMatch !== -1) {

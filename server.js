@@ -797,13 +797,25 @@ app.post('/api/cats/bulk-import', async (req, res) => {
 
     const result = await dbLock.acquire(async () => {
       let importedCount = 0;
+      let skippedCount = 0;
+      const skippedTitles = [];
       let nextId = catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
 
       for (const item of importList) {
+        const normTitle = item.title.trim().toLowerCase();
+        const normCat = item.category.trim().toLowerCase();
+        const exists = catsCache.some(c => c.title.trim().toLowerCase() === normTitle && c.category.trim().toLowerCase() === normCat);
+
+        if (exists) {
+          skippedCount++;
+          skippedTitles.push(item.title);
+          continue;
+        }
+
         const newCat = {
           id: nextId++,
-          category: item.category,
-          title: item.title,
+          category: item.category.trim(),
+          title: item.title.trim(),
           summary: item.summary || '',
           red_flags: item.red_flags || '',
           ordonnance: item.ordonnance || '',
@@ -819,8 +831,10 @@ app.post('/api/cats/bulk-import', async (req, res) => {
         importedCount++;
       }
 
-      await safeWriteJsonAsync(DB_FILE, catsCache);
-      return { success: true, count: importedCount };
+      if (importedCount > 0) {
+        await safeWriteJsonAsync(DB_FILE, catsCache);
+      }
+      return { success: true, count: importedCount, skippedCount, skippedTitles };
     });
 
     logAuditEvent('cats_bulk_import', { count: result.count }, req);
@@ -1196,11 +1210,28 @@ app.get('/api/search-pdfs', (req, res) => {
     if (global.perfServer) global.perfServer.recordCacheMiss();
     const results = [];
 
-    // Search across cached in-memory pages
+    // 1. Filename matches first (High Relevance)
+    for (const doc of pdfIndex) {
+      if (doc.pdf.toLowerCase().includes(cleanQuery)) {
+        results.push({
+          pdf: doc.pdf,
+          page: 1,
+          snippet: "[Titre du fichier correspond] Document de référence disponible."
+        });
+      }
+    }
+
+    // 2. Search across cached in-memory pages
     for (const doc of pdfIndex) {
       if (!doc.pages) continue;
       for (const p of doc.pages) {
         if (!p.text) continue;
+
+        // Avoid duplicate results for the same page (e.g. if page 1 matched filename)
+        if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
+          continue;
+        }
+
         const textLower = p.text.toLowerCase();
         
         let indexMatch = textLower.indexOf(cleanQuery);
