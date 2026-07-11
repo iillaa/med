@@ -5,7 +5,7 @@ import { getCleanPdfName, setButtonLoading } from '../utils.js';
 let quizScreen, welcomeScreen, workspaceView;
 let quizSetupView, quizActiveView, quizResultsView;
 let quizCategorySelect, quizCountSelect;
-let checkboxSpecialty, checkboxRedflags, checkboxPrescription;
+let checkboxSpecialty, checkboxRedflags, checkboxPrescription, checkboxPosology;
 let progressText, progressFill, startQuizBtn;
 let qMeta, qPoints, qTitle, qcmContainer, writeinContainer, userTextArea, submitTextBtn;
 let feedbackPanel, feedbackHeader, feedbackStatus;
@@ -46,6 +46,7 @@ export function initQuiz(onOpenCatCard) {
   checkboxSpecialty = document.getElementById('quiz-type-specialty');
   checkboxRedflags = document.getElementById('quiz-type-redflags');
   checkboxPrescription = document.getElementById('quiz-type-prescription');
+  checkboxPosology = document.getElementById('quiz-type-posology');
   startQuizBtn = document.getElementById('start-quiz-btn');
 
   // Active View Elements
@@ -155,14 +156,33 @@ export function showQuizSetup() {
   }
 }
 
+function getOrientationText(cat) {
+  if (!cat || !cat.summary) return "";
+  const marker = "5. Orientation";
+  const index = cat.summary.indexOf(marker);
+  if (index !== -1) {
+    let text = cat.summary.substring(index + marker.length);
+    text = text.replace(/^[^\n\r]*[\n\r]+/, '').trim(); // skip the header line
+    const lines = text.split('\n');
+    const resultLines = [];
+    for (const line of lines) {
+      if (line.includes('**')) break; // next section
+      resultLines.push(line.replace(/^-\s*/, '').trim());
+    }
+    return resultLines.filter(l => l).join(' ');
+  }
+  return "";
+}
+
 function startQuizSession() {
   const selectedCategory = quizCategorySelect.value;
   const questionCount = parseInt(quizCountSelect.value);
-  const includeSpecialty = checkboxSpecialty.checked;
+  const includeClinical = checkboxSpecialty.checked; // Mapping checkboxSpecialty to Clinical Case
+  const includePosology = checkboxPosology.checked;
   const includeRedflags = checkboxRedflags.checked;
   const includePrescription = checkboxPrescription.checked;
 
-  if (!includeSpecialty && !includeRedflags && !includePrescription) {
+  if (!includeClinical && !includePosology && !includeRedflags && !includePrescription) {
     alert("Veuillez sélectionner au moins un type de question.");
     return;
   }
@@ -181,18 +201,57 @@ function startQuizSession() {
   const generatedQuestions = [];
 
   filteredCats.forEach(cat => {
-    // 1. Specialty QCM Question
-    if (includeSpecialty) {
-      generatedQuestions.push({
-        type: 'specialty',
-        cat: cat,
-        questionText: `À quelle spécialité ou catégorie appartient la conduite à tenir : <br><strong>"${cat.title}"</strong> ?`,
-        correctAnswer: cat.category,
-        points: 1.0
-      });
+    // 1. Clinical QCM Question (Cas Clinique & Orientation)
+    if (includeClinical) {
+      const correctAnswer = getOrientationText(cat);
+      if (correctAnswer && correctAnswer.trim().length > 0) {
+        // Find other orientations as distractors
+        const otherCats = state.allCats.filter(c => c.id !== cat.id);
+        const otherOrientations = Array.from(new Set(
+          otherCats.map(c => getOrientationText(c)).filter(t => t && t.trim().length > 0 && t !== correctAnswer)
+        ));
+        shuffleArray(otherOrientations);
+        const distractors = otherOrientations.slice(0, 3);
+        const options = [correctAnswer, ...distractors];
+        shuffleArray(options);
+
+        generatedQuestions.push({
+          type: 'clinical',
+          cat: cat,
+          questionText: `Vous recevez un patient présentant des symptômes évocateurs de : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est la conduite à tenir ou l'orientation thérapeutique prioritaire à ce stade ?`,
+          correctAnswer: correctAnswer,
+          options: options,
+          points: 1.0
+        });
+      }
     }
 
-    // 2. Red Flags Write-In Question
+    // 2. Posology QCM Question (Ordonnance & Posologie)
+    if (includePosology) {
+      const correctAnswer = cat.ordonnance;
+      if (correctAnswer && correctAnswer.trim().length > 0) {
+        // Find other ordonnances as distractors
+        const otherCats = state.allCats.filter(c => c.id !== cat.id);
+        const otherOrdonnances = Array.from(new Set(
+          otherCats.map(c => c.ordonnance).filter(o => o && o.trim().length > 0 && o !== correctAnswer)
+        ));
+        shuffleArray(otherOrdonnances);
+        const distractors = otherOrdonnances.slice(0, 3);
+        const options = [correctAnswer, ...distractors];
+        shuffleArray(options);
+
+        generatedQuestions.push({
+          type: 'posology',
+          cat: cat,
+          questionText: `Pour la situation clinique suivante : <br><strong>"${cat.title}"</strong>.<br><br>Quelle est l'ordonnance type recommandée (molécules, posologies et durées de traitement) ?`,
+          correctAnswer: correctAnswer,
+          options: options,
+          points: 1.0
+        });
+      }
+    }
+
+    // 3. Red Flags Write-In Question
     if (includeRedflags && cat.red_flags && cat.red_flags.trim().length > 0) {
       generatedQuestions.push({
         type: 'redflags',
@@ -203,7 +262,7 @@ function startQuizSession() {
       });
     }
 
-    // 3. Prescription Write-In Question
+    // 4. Prescription Write-In Question
     if (includePrescription && cat.ordonnance && cat.ordonnance.trim().length > 0) {
       generatedQuestions.push({
         type: 'prescription',
@@ -255,18 +314,23 @@ function renderQuestion() {
 
   // Toggle Type Badge
   if (qMeta) {
-    if (q.type === 'specialty') {
-      qMeta.textContent = "QCM - Spécialité";
+    if (q.type === 'clinical') {
+      qMeta.textContent = "Cas Clinique 🩺";
       qMeta.className = "cat-badge";
       qMeta.style.backgroundColor = "var(--color-primary)";
       qMeta.style.color = "#000";
+    } else if (q.type === 'posology') {
+      qMeta.textContent = "Ordonnance QCM 💊";
+      qMeta.className = "cat-badge";
+      qMeta.style.backgroundColor = "var(--color-warning)";
+      qMeta.style.color = "#000";
     } else if (q.type === 'redflags') {
-      qMeta.textContent = "Signes de Gravité";
+      qMeta.textContent = "Signes de Gravité ✍️";
       qMeta.className = "cat-badge";
       qMeta.style.backgroundColor = "var(--color-danger)";
       qMeta.style.color = "#fff";
     } else {
-      qMeta.textContent = "Ordonnance Type";
+      qMeta.textContent = "Ordonnance Type ✍️";
       qMeta.className = "cat-badge";
       qMeta.style.backgroundColor = "var(--color-success)";
       qMeta.style.color = "#000";
@@ -279,7 +343,7 @@ function renderQuestion() {
   if (feedbackPanel) feedbackPanel.style.display = 'none';
 
   // Toggle Inputs according to type
-  if (q.type === 'specialty') {
+  if (q.type === 'clinical' || q.type === 'posology') {
     qcmContainer.style.display = 'flex';
     writeinContainer.style.display = 'none';
     generateQCMOptions(q);
@@ -303,16 +367,21 @@ function renderQuestion() {
 function generateQCMOptions(question) {
   qcmContainer.innerHTML = '';
 
-  // Get distinct categories as distractors
-  const categories = Array.from(new Set(state.allCats.map(c => c.category)))
-    .filter(cat => cat !== question.correctAnswer);
-  
-  shuffleArray(categories);
-  const distractors = categories.slice(0, 3);
+  let options = [];
+  if (question.options) {
+    options = [...question.options];
+  } else {
+    // Get distinct categories as distractors
+    const categories = Array.from(new Set(state.allCats.map(c => c.category)))
+      .filter(cat => cat !== question.correctAnswer);
+    
+    shuffleArray(categories);
+    const distractors = categories.slice(0, 3);
 
-  // Combine correct and distractors
-  const options = [question.correctAnswer, ...distractors];
-  shuffleArray(options);
+    // Combine correct and distractors
+    options = [question.correctAnswer, ...distractors];
+    shuffleArray(options);
+  }
 
   options.forEach(opt => {
     const btn = document.createElement('button');
@@ -322,7 +391,9 @@ function generateQCMOptions(question) {
     btn.style.padding = '14px 20px';
     btn.style.background = 'var(--bg-card)';
     btn.style.border = '1px solid var(--border-color)';
-    btn.innerHTML = `<span style="font-size:13.5px; font-weight:600; color:var(--text-primary);">${opt}</span>`;
+    btn.style.borderRadius = 'var(--radius-sm)';
+    btn.dataset.option = opt;
+    btn.innerHTML = `<span style="font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.4; display:block; text-align:left;">${opt.replace(/\n/g, '<br>')}</span>`;
     
     btn.addEventListener('click', () => {
       // Disable all options
@@ -331,8 +402,7 @@ function generateQCMOptions(question) {
         b.style.pointerEvents = 'none';
         
         // Highlight correct option in green
-        const text = b.querySelector('span').textContent;
-        if (text === question.correctAnswer) {
+        if (b.dataset.option === question.correctAnswer) {
           b.style.borderColor = 'var(--color-success)';
           b.style.background = 'rgba(16, 185, 129, 0.05)';
         }
@@ -359,27 +429,34 @@ function generateQCMOptions(question) {
       });
 
       // Show Feedback Panel
-      showQCMFeedback(isCorrect, question.correctAnswer);
+      showQCMFeedback(isCorrect, question.correctAnswer, opt);
     });
 
     qcmContainer.appendChild(btn);
   });
 }
 
-function showQCMFeedback(isCorrect, correctAnswer) {
+function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
   if (!feedbackPanel) return;
 
   feedbackPanel.style.display = 'flex';
-  comparisonGrid.style.display = 'none';
+  comparisonGrid.style.display = 'grid'; // Show side-by-side comparison for clinical / posology details
   keywordsMatchedPanel.style.display = 'none';
   selfGradingPanel.style.display = 'none';
+
+  if (displayUserAnswer) {
+    displayUserAnswer.innerHTML = `<span style="font-size:13px; line-height:1.4; display:block;">${userAnswer.replace(/\n/g, '<br>')}</span>`;
+  }
+  if (displayCorrectAnswer) {
+    displayCorrectAnswer.innerHTML = `<span style="font-size:13px; line-height:1.4; display:block;">${correctAnswer.replace(/\n/g, '<br>')}</span>`;
+  }
 
   if (isCorrect) {
     feedbackStatus.textContent = "Bonne réponse ! (+1.0 point)";
     feedbackHeader.style.color = "var(--color-success)";
     feedbackHeader.querySelector('i').className = "fa-solid fa-circle-check";
   } else {
-    feedbackStatus.textContent = `Incorrect. La bonne réponse était : "${correctAnswer}"`;
+    feedbackStatus.textContent = "Incorrect. Voir le comparatif ci-dessous :";
     feedbackHeader.style.color = "var(--color-danger)";
     feedbackHeader.querySelector('i').className = "fa-solid fa-circle-xmark";
   }
@@ -530,9 +607,10 @@ function showResults() {
       tr.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
       
       let typeLabel = '';
-      if (ans.type === 'specialty') typeLabel = 'Catégorie';
+      if (ans.type === 'clinical') typeLabel = 'Cas Clinique';
+      else if (ans.type === 'posology') typeLabel = 'Ordonnance QCM';
       else if (ans.type === 'redflags') typeLabel = 'Red Flags';
-      else typeLabel = 'Prescription';
+      else typeLabel = 'Ordonnance Écrite';
 
       tr.innerHTML = `
         <td style="padding: 10px; font-weight: 500; color: #fff;">${idx + 1}. ${ans.catTitle}</td>
