@@ -292,6 +292,7 @@ let adminPasswordHash = '';
 let adminPasswordSalt = '';
 let remoteServerUrl = '';
 const activeTokens = new Map(); // token -> { expiresAt }
+const searchCache = new Map(); // cleanQuery -> results
 
 function hashPassword(password, salt) {
   return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
@@ -610,7 +611,8 @@ onIndexUpdated(async () => {
     if (exists) {
       const content = await fs.promises.readFile(INDEX_FILE, 'utf-8');
       pdfIndex = JSON.parse(content);
-      console.log("[Cache] PDF Index cache reloaded into memory.");
+      searchCache.clear();
+      console.log("[Cache] PDF Index cache and search cache reloaded/cleared.");
     }
   } catch (err) {
     console.error("Error updating PDF index in memory cache:", err);
@@ -1068,6 +1070,14 @@ app.get('/api/search-pdfs', (req, res) => {
       return res.status(503).json({ error: "PDF index not yet built. Please wait a few moments." });
     }
 
+    // Check query cache
+    const cachedResults = searchCache.get(cleanQuery);
+    if (cachedResults) {
+      if (global.perfServer) global.perfServer.recordCacheHit();
+      return res.json({ results: cachedResults });
+    }
+
+    if (global.perfServer) global.perfServer.recordCacheMiss();
     const results = [];
 
     // Search across cached in-memory pages
@@ -1101,6 +1111,13 @@ app.get('/api/search-pdfs', (req, res) => {
         break;
       }
     }
+
+    // Capped search cache storage (max 100 entries)
+    if (searchCache.size >= 100) {
+      const oldestKey = searchCache.keys().next().value;
+      searchCache.delete(oldestKey);
+    }
+    searchCache.set(cleanQuery, results);
 
     res.json({ results });
   } catch (err) {
