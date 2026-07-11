@@ -53,6 +53,7 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 
 - `[x]` **Admin URL Updater UI**: Add a form in the Admin Diagnostics panel to update the server URL in `remote_server_config.json` directly from the browser, triggering a hot-reload of the providers list without a server restart.
 - `[x]` **Rate Limit Dashboard**: Display the current rate-limit counters (failed logins per IP) in the Admin panel so the admin can see if someone is attempting to brute-force the login.
+- `[x]` **PDF Upload via Admin Panel**: Allow uploading new PDF files directly from the browser Admin panel to the `.cat-med/reference-pdfs/` directory, triggering automatic re-indexing.
 - `[x]` **Test Suite CI Integration**: Run `node test_api.js` automatically as part of the GitHub Actions build to catch API regressions before the APK is compiled.
 
 ---

@@ -139,7 +139,8 @@ function isOriginAllowedDynamic(origin, allowedOrigins) {
   return false;
 }
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Graceful JSON parsing SyntaxError catcher
 app.use((err, req, res, next) => {
@@ -1292,6 +1293,39 @@ app.post('/api/reindex', (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to trigger reindexing" });
+  }
+});
+
+// POST /api/diagnostics/upload-pdf - Upload PDF file (Admin only)
+app.post('/api/diagnostics/upload-pdf', async (req, res) => {
+  if (!isLocalhostConnection(req) || !isAdminRequest(req)) {
+    return res.status(403).json({ error: 'Accès interdit.' });
+  }
+  try {
+    const { filename, base64Data } = req.body;
+    if (!filename || !base64Data) {
+      return res.status(400).json({ error: 'Filename and base64Data are required.' });
+    }
+
+    const cleanFilename = path.basename(filename);
+    if (!cleanFilename.toLowerCase().endsWith('.pdf')) {
+      return res.status(400).json({ error: 'Only PDF files are supported.' });
+    }
+
+    const targetPath = path.join(PDF_DIR, cleanFilename);
+    const fileBuffer = Buffer.from(base64Data, 'base64');
+
+    await fs.promises.writeFile(targetPath, fileBuffer);
+    console.log(`[PDF Upload] Saved ${cleanFilename} to reference-pdfs folder.`);
+
+    // Trigger PDF indexing in the background
+    indexPdfs(true).catch(err => console.error("Error in post-upload indexing:", err));
+
+    logAuditEvent('pdf_upload_triggered', { filename: cleanFilename }, req);
+    res.json({ success: true, message: `PDF ${cleanFilename} uploaded and indexing started.` });
+  } catch (err) {
+    console.error('[PDF Upload Error]', err);
+    res.status(500).json({ error: 'Failed to write PDF file to server storage.' });
   }
 });
 

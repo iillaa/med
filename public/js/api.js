@@ -858,3 +858,17 @@ export async function fetchRateLimits() {
   return res.json();
 }
 
+export async function uploadPdf(filename, base64Data) {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/upload-pdf'), {
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ filename, base64Data })
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to upload PDF file");
+  }
+  return res.json();
+}
+
+

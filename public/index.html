@@ -392,11 +392,21 @@
                   <!-- Section 6: Index PDF Status details -->
                   <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
                     <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-file-pdf"></i> Statut Index PDF</h4>
-                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
                       <div>Total PDFs : <span id="diag-pdf-docs">--</span></div>
                       <div>Total Pages : <span id="diag-pdf-pages">--</span></div>
                       <div>Indexé le : <span id="diag-pdf-time">--</span></div>
                       <div>Santé de l'index : <span id="diag-pdf-health" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">--</span></div>
+                    </div>
+                    <!-- PDF Upload Block -->
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 10px; margin-top: 10px;">
+                      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Déposer ou sélectionner un nouveau document PDF :</div>
+                      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <input type="file" id="diag-pdf-upload-input" accept=".pdf" style="display: none;">
+                        <button class="action-btn" id="diag-pdf-upload-trigger-btn" style="padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; border-radius: 4px; cursor: pointer;"><i class="fa-solid fa-file-arrow-up"></i> Choisir</button>
+                        <span id="diag-pdf-upload-filename" class="text-muted" style="font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px;">Aucun</span>
+                        <button class="action-btn" id="diag-pdf-upload-submit-btn" disabled style="padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; background: var(--color-success); border-color: var(--color-success); color: white; border-radius: 4px; opacity: 0.5; cursor: not-allowed; transition: all 0.2s;"><i class="fa-solid fa-cloud-arrow-up"></i> Uploader</button>
+                      </div>
                     </div>
                   </div>
 
