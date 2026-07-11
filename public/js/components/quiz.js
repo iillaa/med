@@ -175,13 +175,13 @@ export function showQuizSetup() {
   if (welcomeScreen) welcomeScreen.style.display = 'none';
   if (quizScreen) quizScreen.style.display = 'flex';
 
-  quizSetupView.style.display = 'flex';
-  quizActiveView.style.display = 'none';
-  quizResultsView.style.display = 'none';
+  if (quizSetupView) quizSetupView.style.display = 'flex';
+  if (quizActiveView) quizActiveView.style.display = 'none';
+  if (quizResultsView) quizResultsView.style.display = 'none';
 
   // Populate Categories drop-down in setup
   if (quizCategorySelect) {
-    const categories = new Set(state.allCats.map(c => c.category));
+    const categories = new Set((state.allCats || []).map(c => c.category));
     quizCategorySelect.innerHTML = '<option value="all">Toutes les spécialités</option>';
     categories.forEach(cat => {
       const opt = document.createElement('option');
@@ -265,60 +265,56 @@ function cleanOrientationOfClues(text, title, category) {
 }
 
 function startQuizSession() {
+  const selectedCategory = quizCategorySelect ? quizCategorySelect.value : 'all';
+  const questionCount = quizCountSelect ? parseInt(quizCountSelect.value) : 10;
+  const includeClinical = checkboxSpecialty ? checkboxSpecialty.checked : false;
+  const includePosology = checkboxPosology ? checkboxPosology.checked : false;
+  const includeRedflags = checkboxRedflags ? checkboxRedflags.checked : false;
+  const includePrescription = checkboxPrescription ? checkboxPrescription.checked : false;
+
+  if (!includeClinical && !includePosology && !includeRedflags && !includePrescription) {
+    alert("Veuillez sélectionner au moins un type de question.");
+    return;
+  }
+
+  // Filter CATs by category selection
+  let filteredCats = selectedCategory === 'all'
+    ? (state.allCats || [])
+    : (state.allCats || []).filter(c => c.category === selectedCategory);
+
+  if (filteredCats.length === 0) {
+    alert("Aucune fiche trouvée dans cette catégorie.");
+    return;
+  }
+
+  // Load Leitner spaced-repetition data
+  let leitnerData = {};
   try {
-    const selectedCategory = quizCategorySelect ? quizCategorySelect.value : 'all';
-    const questionCount = quizCountSelect ? parseInt(quizCountSelect.value) : 10;
-    const includeClinical = checkboxSpecialty ? checkboxSpecialty.checked : false;
-    const includePosology = checkboxPosology ? checkboxPosology.checked : false;
-    const includeRedflags = checkboxRedflags ? checkboxRedflags.checked : false;
-    const includePrescription = checkboxPrescription ? checkboxPrescription.checked : false;
+    leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}') || {};
+  } catch (e) {
+    console.warn("Failed to parse Leitner spaced repetition data", e);
+  }
 
-    if (!includeClinical && !includePosology && !includeRedflags && !includePrescription) {
-      alert("Veuillez sélectionner au moins un type de question.");
-      return;
-    }
+  const boxIntervals = {
+    1: 1  * 24 * 60 * 60 * 1000,
+    2: 3  * 24 * 60 * 60 * 1000,
+    3: 7  * 24 * 60 * 60 * 1000,
+    4: 14 * 24 * 60 * 60 * 1000,
+    5: 30 * 24 * 60 * 60 * 1000
+  };
 
-    // Filter CATs by category selection
-    let filteredCats = selectedCategory === 'all' 
-      ? state.allCats 
-      : state.allCats.filter(c => c.category === selectedCategory);
-
-    if (filteredCats.length === 0) {
-      alert("Aucune fiche trouvée dans cette catégorie.");
-      return;
-    }
-
-    // Load Leitner Data with try-catch safety
-    let leitnerData = {};
-    try {
-      leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}') || {};
-    } catch (e) {
-      console.warn("Failed to parse Leitner spaced repetition data", e);
-    }
-
-    const boxIntervals = {
-      1: 1 * 24 * 60 * 60 * 1000,
-      2: 3 * 24 * 60 * 60 * 1000,
-      3: 7 * 24 * 60 * 60 * 1000,
-      4: 14 * 24 * 60 * 60 * 1000,
-      5: 30 * 24 * 60 * 60 * 1000
-    };
-
-    // Prioritize using Leitner Spaced Repetition if checked
-    if (checkboxSpacedRepetition && checkboxSpacedRepetition.checked) {
-      filteredCats = [...filteredCats].sort((a, b) => {
-        const statsA = leitnerData[a.id] || { box: 1, lastQuizzed: 0 };
-        const statsB = leitnerData[b.id] || { box: 1, lastQuizzed: 0 };
-        
-        const dueA = (Date.now() - (statsA.lastQuizzed || 0)) / boxIntervals[statsA.box || 1];
-        const dueB = (Date.now() - (statsB.lastQuizzed || 0)) / boxIntervals[statsB.box || 1];
-        
-        return dueB - dueA; // Descending (most overdue / highest ratio first)
-      });
-    } else {
-      // Normal mode: shuffle
-      shuffleArray(filteredCats);
-    }
+  // Sort/shuffle based on Spaced Repetition checkbox
+  if (checkboxSpacedRepetition && checkboxSpacedRepetition.checked) {
+    filteredCats = [...filteredCats].sort((a, b) => {
+      const statsA = leitnerData[a.id] || { box: 1, lastQuizzed: 0 };
+      const statsB = leitnerData[b.id] || { box: 1, lastQuizzed: 0 };
+      const dueA = (Date.now() - (statsA.lastQuizzed || 0)) / boxIntervals[statsA.box || 1];
+      const dueB = (Date.now() - (statsB.lastQuizzed || 0)) / boxIntervals[statsB.box || 1];
+      return dueB - dueA;
+    });
+  } else {
+    shuffleArray(filteredCats);
+  }
 
   // Generate Questions list
   const generatedQuestions = [];
@@ -330,8 +326,7 @@ function startQuizSession() {
       if (rawOrientation && rawOrientation.trim().length > 0) {
         const correctAnswer = cleanOrientationOfClues(rawOrientation, cat.title, cat.category);
         if (correctAnswer && correctAnswer.trim().length > 0) {
-          // Find other orientations as distractors
-          const otherCats = state.allCats.filter(c => c.id !== cat.id);
+          const otherCats = (state.allCats || []).filter(c => c.id !== cat.id);
           const otherOrientations = Array.from(new Set(
             otherCats.map(c => {
               const rawText = getOrientationText(c);
@@ -361,8 +356,7 @@ function startQuizSession() {
       if (rawOrdonnance && rawOrdonnance.trim().length > 0) {
         const correctAnswer = cleanTextOfClues(rawOrdonnance, cat.title, cat.category);
         if (correctAnswer && correctAnswer.trim().length > 0) {
-          // Find other ordonnances as distractors
-          const otherCats = state.allCats.filter(c => c.id !== cat.id);
+          const otherCats = (state.allCats || []).filter(c => c.id !== cat.id);
           const otherOrdonnances = Array.from(new Set(
             otherCats.map(c => cleanTextOfClues(c.ordonnance, c.title, c.category))
               .filter(o => o && o.trim().length > 0 && o !== correctAnswer)
@@ -414,11 +408,9 @@ function startQuizSession() {
 
   let selectedQuestions = [];
   if (checkboxSpacedRepetition && checkboxSpacedRepetition.checked) {
-    // Keep the priority order (overdue cards first), slice first, then shuffle selected questions
     selectedQuestions = generatedQuestions.slice(0, questionCount);
     shuffleArray(selectedQuestions);
   } else {
-    // Normal mode: shuffle everything and slice
     shuffleArray(generatedQuestions);
     selectedQuestions = generatedQuestions.slice(0, questionCount);
   }
@@ -428,8 +420,9 @@ function startQuizSession() {
   state.quizSession.currentIndex = 0;
   state.quizSession.answers = [];
   state.quizSession.score = 0;
+  state.quizSession.failedQuestions = [];
   state.quizSession.isTimed = !!(checkboxTimedMode && checkboxTimedMode.checked);
-  state.quizSession.timerSeconds = parseInt(selectTimerSeconds.value) || 30;
+  state.quizSession.timerSeconds = (selectTimerSeconds ? parseInt(selectTimerSeconds.value) : 0) || 30;
 
   // Transition views
   if (quizSetupView) quizSetupView.style.display = 'none';
@@ -437,10 +430,6 @@ function startQuizSession() {
   if (quizResultsView) quizResultsView.style.display = 'none';
 
   renderQuestion();
-  } catch (err) {
-    console.error("Error in startQuizSession:", err);
-    alert("Une erreur s'est produite lors du démarrage du quiz.");
-  }
 }
 
 function renderQuestion() {
@@ -626,9 +615,9 @@ function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
   if (!feedbackPanel) return;
 
   feedbackPanel.style.display = 'flex';
-  comparisonGrid.style.display = 'grid'; // Show side-by-side comparison for clinical / posology details
-  keywordsMatchedPanel.style.display = 'none';
-  selfGradingPanel.style.display = 'none';
+  if (comparisonGrid) comparisonGrid.style.display = 'grid';
+  if (keywordsMatchedPanel) keywordsMatchedPanel.style.display = 'none';
+  if (selfGradingPanel) selfGradingPanel.style.display = 'none';
 
   if (displayUserAnswer) {
     displayUserAnswer.innerHTML = `<span style="font-size:13px; line-height:1.4; display:block;">${userAnswer.replace(/\n/g, '<br>')}</span>`;
@@ -638,13 +627,19 @@ function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
   }
 
   if (isCorrect) {
-    feedbackStatus.textContent = "Bonne réponse ! (+1.0 point)";
-    feedbackHeader.style.color = "var(--color-success)";
-    feedbackHeader.querySelector('i').className = "fa-solid fa-circle-check";
+    if (feedbackStatus) feedbackStatus.textContent = "Bonne réponse ! (+1.0 point)";
+    if (feedbackHeader) {
+      feedbackHeader.style.color = "var(--color-success)";
+      const icon = feedbackHeader.querySelector('i');
+      if (icon) icon.className = "fa-solid fa-circle-check";
+    }
   } else {
-    feedbackStatus.textContent = "Incorrect. Voir le comparatif ci-dessous :";
-    feedbackHeader.style.color = "var(--color-danger)";
-    feedbackHeader.querySelector('i').className = "fa-solid fa-circle-xmark";
+    if (feedbackStatus) feedbackStatus.textContent = "Incorrect. Voir le comparatif ci-dessous :";
+    if (feedbackHeader) {
+      feedbackHeader.style.color = "var(--color-danger)";
+      const icon = feedbackHeader.querySelector('i');
+      if (icon) icon.className = "fa-solid fa-circle-xmark";
+    }
   }
 
   if (nextBtn) nextBtn.style.display = 'block';
@@ -706,9 +701,12 @@ function submitWriteInAnswer() {
   if (keywordsMatchedPanel) keywordsMatchedPanel.style.display = 'flex';
   if (selfGradingPanel) selfGradingPanel.style.display = 'flex';
 
-  feedbackStatus.textContent = "Veuillez évaluer votre réponse ci-dessous :";
-  feedbackHeader.style.color = "var(--color-primary)";
-  feedbackHeader.querySelector('i').className = "fa-solid fa-circle-info";
+  if (feedbackStatus) feedbackStatus.textContent = "Veuillez évaluer votre réponse ci-dessous :";
+  if (feedbackHeader) {
+    feedbackHeader.style.color = "var(--color-primary)";
+    const icon = feedbackHeader.querySelector('i');
+    if (icon) icon.className = "fa-solid fa-circle-info";
+  }
 
   // Hide Next Button until self grading is selected
   if (nextBtn) nextBtn.style.display = 'none';
@@ -765,9 +763,9 @@ function advanceQuestion() {
 
 function showResults() {
   if (timerIntervalId) clearInterval(timerIntervalId);
-  quizSetupView.style.display = 'none';
-  quizActiveView.style.display = 'none';
-  quizResultsView.style.display = 'flex';
+  if (quizSetupView) quizSetupView.style.display = 'none';
+  if (quizActiveView) quizActiveView.style.display = 'none';
+  if (quizResultsView) quizResultsView.style.display = 'flex';
 
   const session = state.quizSession;
   const percent = Math.round((session.score / session.questions.length) * 100);
@@ -1148,9 +1146,9 @@ function retryFailedQuestions() {
   session.failedQuestions = [];
 
   // Transition views
-  quizSetupView.style.display = 'none';
-  quizActiveView.style.display = 'flex';
-  quizResultsView.style.display = 'none';
+  if (quizSetupView) quizSetupView.style.display = 'none';
+  if (quizActiveView) quizActiveView.style.display = 'flex';
+  if (quizResultsView) quizResultsView.style.display = 'none';
 
   renderQuestion();
 }
