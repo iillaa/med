@@ -677,6 +677,17 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
   sidebar.renderCatList(state.allCats, selectCatWrapper);
   calculateStats();
   dashboard.renderDashboard(selectCatWrapper);
+
+  // If the user has a fiche open, refresh it or go to dashboard if it was deleted
+  if (state.activeCat) {
+    const activeId = state.activeCat.id;
+    const updatedCat = state.allCats.find(c => c.id === activeId);
+    if (updatedCat) {
+      workspace.selectCat(updatedCat, true);
+    } else {
+      dashboard.showDashboard(selectCatWrapper);
+    }
+  }
 }
 
 
