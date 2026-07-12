@@ -635,7 +635,7 @@ export function renderDashboard(onSelectCat) {
   }
 
   // 5. Load Admin suggestions panel
-  const devUnlocked = !!(window.__drCatDevDiagnosticsUnlocked && api.isOfflineApp);
+  const devUnlocked = !!window.__drCatDevDiagnosticsUnlocked;
   if (adminPanel) {
     adminPanel.style.display = (state.isAdmin || devUnlocked) ? 'block' : 'none';
   }
