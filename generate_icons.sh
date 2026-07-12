@@ -49,7 +49,8 @@ for entry in "${adaptive_sizes[@]}"; do
   mkdir -p "$DIR"
   
   # Generate adaptive icon foreground (Padded to 66% safe zone, letting system shape mask handle the boundary)
-  magick convert "$LOGO" -resize "${scale}x${scale}" -background none -gravity center -extent "${canvas}x${canvas}" "${DIR}/ic_launcher_foreground.png"
+  # We key out the white background with 5% fuzz to ensure the foreground is transparent around the logo.
+  magick convert "$LOGO" -fuzz 5% -transparent "white" -resize "${scale}x${scale}" -background none -gravity center -extent "${canvas}x${canvas}" "${DIR}/ic_launcher_foreground.png"
   echo "  ✓ mipmap-${suffix} (foreground): ${canvas}x${canvas} (scaled to ${scale}x${scale})"
 done
 
