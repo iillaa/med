@@ -1,3 +1,6 @@
+# Local Termux shortcuts (device-specific paths)
+shortcuts/
+
 # Dependencies
 node_modules/
 
@@ -6,6 +9,9 @@ node_modules/
 
 # Local backups (tracked by Git history instead)
 *.bak
+
+# Kilo agent-manager / worktree internals
+.kilo/
 
 # IDE & Tool configurations
 .antigravitycli/
@@ -28,3 +34,11 @@ suggestions.json*
 
 # Admin Password
 admin_password.txt*
+
+# Remote server URL config
+public/js/remote_config.js
+remote_server_config.json*
+
+# Backups and audit logs
+backups/
+audit.log

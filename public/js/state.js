@@ -13,7 +13,8 @@ export const state = {
     questions: [],
     currentIndex: 0,
     answers: [], // stores history of answers: { catId, questionTitle, type, score, userAnswer, correctAnswer }
-    score: 0
+    score: 0,
+    quizViewingCatId: null
   }
 };
 

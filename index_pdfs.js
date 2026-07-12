@@ -2,10 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { PDFParse } = require('pdf-parse');
 
-const LOCAL_PDF_DIR = '/storage/emulated/0/cat-med/CAT de Médecine Générale';
-const PDF_DIR = fs.existsSync(LOCAL_PDF_DIR)
-  ? LOCAL_PDF_DIR
-  : path.join(__dirname, 'cat-med', 'reference-pdfs');
+const PDF_DIR = path.join(__dirname, '.cat-med', 'reference-pdfs');
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 
 // Status object to track indexing state in memory
@@ -100,10 +97,13 @@ async function indexPdfs(force = false) {
       if (!force && existing && existing.mtime === mtime && existing.size === size) {
         newIndex.push(existing);
         indexState.indexedFiles++;
+        if (global.perfServer) global.perfServer.recordCacheHit();
         continue;
       }
 
       console.log(`Parsing new/modified PDF: "${file}" (${(size / 1024 / 1024).toFixed(2)} MB)...`);
+      if (global.perfServer) global.perfServer.recordCacheMiss();
+      const parseStart = Date.now();
       try {
         const dataBuffer = await fs.promises.readFile(filePath);
         const parser = new PDFParse({ data: dataBuffer });
@@ -122,6 +122,9 @@ async function indexPdfs(force = false) {
           mtime: mtime,
           pages: pages
         });
+        
+        const parseDuration = Date.now() - parseStart;
+        if (global.perfServer) global.perfServer.recordPdfParse(file, parseDuration, pages.length);
         updated = true;
       } catch (err) {
         console.error(`Failed to parse "${file}":`, err);

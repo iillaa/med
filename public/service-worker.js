@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-cat-v1';
+const CACHE_NAME = 'dr-cat-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -8,15 +8,7 @@ const ASSETS_TO_CACHE = [
   '/css/sidebar.css',
   '/css/workspace.css',
   '/css/modal.css',
-  '/css/variables.css',
-  '/js/main.js',
-  '/js/api.js',
-  '/js/state.js',
-  '/js/utils.js',
-  '/js/components/sidebar.js',
-  '/js/components/workspace.js',
-  '/js/components/dashboard.js',
-  '/js/components/quiz.js'
+  '/css/variables.css'
 ];
 
 // Install Service Worker and Cache App Shell Assets
@@ -43,32 +35,38 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Intercept requests and serve from cache if offline
+// Intercept requests and serve from network first, falling back to cache if offline
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Bypass cache for API server calls so suggestion/admin processes query Node.js directly
-  if (url.pathname.startsWith('/api/')) {
+  // Also bypass cache for JS files to always get fresh versions
+  if (url.pathname.startsWith('/api/') || url.pathname.match(/\.js(\?.*)?$/)) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // Cache-First strategy for static UI assets
+  // Network-First strategy for static UI assets
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((response) => {
-        // Cache newly requested static resources on the fly (except PDFs)
-        if (response.status === 200 && !url.pathname.includes('/pdf/')) {
+    fetch(event.request)
+      .then((response) => {
+        // Never cache JS files or PDF static resources
+        if (response.status === 200 && !url.pathname.includes('/pdf/') && !url.pathname.match(/\.js(\?.*)?$/)) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
           });
         }
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // Network failed (offline), try cache
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+        });
+      })
   );
 });
+

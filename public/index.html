@@ -8,16 +8,42 @@
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#090d16">
-  <!-- Google Fonts: Outfit -->
+  <!-- Preload critical assets -->
+  <link rel="preload" href="style.css?v=18" as="style">
+  <link rel="preload" href="drcat_logo.png" as="image" type="image/png">
+  <!-- Google Fonts: Outfit with swap -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- FontAwesome Icons (non-blocking) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="style.css?v=18">
-
+  <!-- Capacitor native bridge script -->
+  <script src="capacitor.js"></script>
 </head>
 <body>
+  <!-- APP LOADING OVERLAY - shown during init, hidden when ready -->
+  <div id="app-loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: rgba(9, 13, 22, 0.96); border-bottom: 2px solid var(--color-primary); z-index: 9999999; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; transition: opacity 0.4s ease, visibility 0.4s ease; gap: 15px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <img src="drcat_logo.png" alt="Dr.CAT" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; animation: pulse-glow 2s ease-in-out infinite;">
+      <div>
+        <h1 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Dr.CAT</h1>
+        <p style="font-size: 10px; color: var(--text-muted); margin: 0;">Chargement en cours...</p>
+      </div>
+    </div>
+    
+    <div style="flex-grow: 1; max-width: 300px; display: flex; flex-direction: column; gap: 4px;">
+      <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;">
+        <div id="app-loading-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--color-primary), #10b981); border-radius: 2px; transition: width 0.3s ease;"></div>
+      </div>
+      <div id="app-loading-msg" style="display: none; font-size: 9px; color: #f87171; overflow-y: auto; max-height: 30px; line-height: 1.2;"></div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button onclick="if(window.setLoaderProgress) window.setLoaderProgress(100); else { var ov = document.getElementById('app-loading-overlay'); if(ov) { ov.style.opacity='0'; ov.style.visibility='hidden'; ov.classList.add('hidden'); } window.__drCatBooted=true; }" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: sans-serif; transition: all 0.2s;">✕ Ignorer</button>
+    </div>
+  </div>
+
   <div class="app-container">
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
@@ -110,7 +136,31 @@
       <!-- LEVEL 3: Scrollable CAT List (dominant, takes remaining space) -->
       <div class="cat-list-wrapper">
         <ul class="cat-list" id="cat-list">
-          <!-- Dynamically populated -->
+          <!-- Shimmer Skeletons displayed during boot loading -->
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
         </ul>
       </div>
     </aside>
@@ -140,12 +190,20 @@
               <h2>Tableau de Bord 🩺</h2>
               <p>Suivi de votre apprentissage des 55 conduites à tenir</p>
             </div>
-             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <div class="specialty-export-container" style="display: none; align-items: center; gap: 6px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: var(--radius-md);">
+                <select id="export-specialty-select" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
+                  <option value="">Sélectionner spécialité...</option>
+                </select>
+                <button class="action-btn" id="export-specialty-btn" style="font-size: 11px; padding: 4px 8px; border: none; background: rgba(6,182,212,0.1); color: var(--color-primary); cursor: pointer; display: flex; align-items: center; gap: 4px; border-radius: 4px; font-weight: 600;">
+                  <i class="fa-solid fa-file-export"></i> Exporter
+                </button>
+              </div>
               <button class="action-btn" id="export-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
-                <i class="fa-solid fa-download"></i> Exporter
+                <i class="fa-solid fa-download"></i> Exporter Progrès
               </button>
               <button class="action-btn" id="import-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
-                <i class="fa-solid fa-upload"></i> Importer
+                <i class="fa-solid fa-upload"></i> Importer Progrès
               </button>
               <input type="file" id="import-progress-file" accept=".json" style="display: none;">
               <button class="action-btn" id="admin-login-btn" style="font-size: 12px; padding: 6px 12px; display: none; align-items: center; gap: 6px;">
@@ -157,40 +215,46 @@
             </div>
           </header>
           
-          <!-- Quick Stats Grid -->
-          <div class="dashboard-grid">
-            <div class="dash-card mastery-card">
-              <div class="dash-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">Taux de Maîtrise</span>
-                <span class="dash-card-val" id="dash-mastery-rate">0%</span>
+            <!-- Quick Stats Grid -->
+            <div class="dashboard-grid">
+              <div class="dash-card mastery-card animate-entrance delay-1">
+                <div class="mastery-circular-container">
+                  <svg class="progress-ring" width="52" height="52">
+                    <circle class="progress-ring-circle-bg" stroke="var(--border-color)" stroke-width="3.5" fill="transparent" r="22" cx="26" cy="26"/>
+                    <circle class="progress-ring-circle" id="dash-mastery-ring" stroke="var(--color-primary)" stroke-width="3.5" stroke-linecap="round" fill="transparent" r="22" cx="26" cy="26" stroke-dasharray="138.23" stroke-dashoffset="138.23"/>
+                  </svg>
+                  <div class="mastery-value" id="dash-mastery-rate">0%</div>
+                </div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Taux de Maîtrise</span>
+                  <span class="dash-card-desc">Progression globale</span>
+                </div>
               </div>
-            </div>
-            
-            <div class="dash-card done-card">
-              <div class="dash-card-icon"><i class="fa-solid fa-circle-check"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">Maîtrisés</span>
-                <span class="dash-card-val" id="dash-count-done">0 / 55</span>
+              
+              <div class="dash-card done-card animate-entrance delay-2">
+                <div class="dash-card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Maîtrisés</span>
+                  <span class="dash-card-val" id="dash-count-done">0 / 55</span>
+                </div>
               </div>
-            </div>
-
-            <div class="dash-card doing-card">
-              <div class="dash-card-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">En cours</span>
-                <span class="dash-card-val" id="dash-count-doing">0 / 55</span>
+  
+              <div class="dash-card doing-card animate-entrance delay-3">
+                <div class="dash-card-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">En cours</span>
+                  <span class="dash-card-val" id="dash-count-doing">0 / 55</span>
+                </div>
               </div>
-            </div>
-
-            <div class="dash-card todo-card">
-              <div class="dash-card-icon"><i class="fa-regular fa-circle"></i></div>
-              <div class="dash-card-info">
-                <span class="dash-card-label">À faire</span>
-                <span class="dash-card-val" id="dash-count-todo">0 / 55</span>
+  
+              <div class="dash-card streak-card animate-entrance delay-4" style="border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.02);">
+                <div class="dash-card-icon" style="color: var(--color-warning); background: rgba(245, 158, 11, 0.08);"><i class="fa-solid fa-fire"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Série d'Études</span>
+                  <span class="dash-card-val" id="dash-streak-count">0 jour</span>
+                </div>
               </div>
-            </div><!-- /.dash-card.todo-card -->
-          </div><!-- /.dashboard-grid -->
+            </div><!-- /.dashboard-grid -->
 
           <!-- First-Run Welcome Banner (hidden after first CAT started) -->
           <div id="first-run-banner" style="display: none; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.07), rgba(16,185,129,0.05)); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -206,19 +270,288 @@
             </div>
           </div>
 
-          <!-- Admin Moderation Panel (Visible only to Admin) -->
-          <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px;">
-            <h3 style="color: var(--color-primary);"><i class="fa-solid fa-user-shield"></i> Propositions de modifications en attente</h3>
-            <p class="block-desc">Validez ou rejetez les suggestions soumises par vos collègues :</p>
-            <div class="suggestions-list" id="suggestions-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-              <!-- Dynamically populated -->
-              <p class="text-muted text-center" style="padding: 10px 0;">Aucune proposition en attente.</p>
+          <!-- Admin Control Center (Visible only to Admin) -->
+          <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px; padding: 0; overflow: hidden; background: var(--bg-sidebar); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <!-- Admin Tabs Header -->
+            <div class="admin-tabs-header" style="display: flex; background: rgba(0,0,0,0.25); border-bottom: 1px solid var(--border-color); padding: 4px; gap: 4px;">
+              <button class="admin-tab-btn active" data-target="admin-pane-suggestions" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-inbox"></i> Propositions
+              </button>
+              <button class="admin-tab-btn" data-target="admin-pane-diagnostics" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-stethoscope"></i> Diagnostic
+              </button>
+              <button class="admin-tab-btn" data-target="admin-pane-performance" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-gauge-high"></i> Performance
+              </button>
+            </div>
+
+            <!-- Admin Tab Panes -->
+            <div class="admin-panes-container" style="padding: 20px;">
+              
+              <!-- PANE 1: Suggestions Moderation -->
+              <div class="admin-pane-content" id="admin-pane-suggestions" style="display: block;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-user-shield"></i> Propositions en attente</h4>
+                </div>
+                <p class="block-desc" style="margin: 0 0 12px 0;">Validez ou rejetez les suggestions soumises par vos collègues :</p>
+                <div class="suggestions-list" id="suggestions-list" style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Dynamically populated -->
+                  <p class="text-muted text-center" style="padding: 10px 0;">Aucune proposition en attente.</p>
+                </div>
+
+                <!-- Bulk Import Box -->
+                <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                  <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 13.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-file-import"></i> Importation Groupée (JSON)</h4>
+                  <p class="block-desc" style="margin: 0 0 10px 0;">Sélectionnez un fichier JSON contenant une liste de fiches pour les importer en lot.</p>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="file" id="admin-bulk-import-input" accept=".json" style="display: none;">
+                    <button class="action-btn" id="admin-bulk-import-trigger-btn" style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: rgba(6,182,212,0.1); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                      <i class="fa-solid fa-folder-open"></i> Choisir le fichier JSON
+                    </button>
+                    <span id="bulk-import-file-name" class="text-muted" style="font-size: 11.5px;">Aucun fichier sélectionné</span>
+                    <button class="action-btn" id="admin-bulk-import-submit-btn" disabled style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; border-radius: 4px; cursor: not-allowed; opacity: 0.5; transition: all 0.2s;">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Importer
+                    </button>
+                  </div>
+                </div>
+
+                <!-- PDF Upload Box -->
+                <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                  <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 13.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-file-pdf"></i> Ajouter un Document PDF de Référence</h4>
+                  <p class="block-desc" style="margin: 0 0 10px 0;">Déposez ou sélectionnez un document PDF médical de référence. Il sera automatiquement indexé pour les recherches de termes.</p>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="file" id="diag-pdf-upload-input" accept=".pdf" style="display: none;">
+                    <button class="action-btn" id="diag-pdf-upload-trigger-btn" style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: rgba(6,182,212,0.1); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                      <i class="fa-solid fa-file-arrow-up"></i> Choisir le fichier PDF
+                    </button>
+                    <span id="diag-pdf-upload-filename" class="text-muted" style="font-size: 11.5px;">Aucun fichier sélectionné</span>
+                    <button class="action-btn" id="diag-pdf-upload-submit-btn" disabled style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: var(--color-success); border: 1px solid var(--color-success); color: #fff; border-radius: 4px; cursor: not-allowed; opacity: 0.5; transition: all 0.2s;">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Uploader
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANE 2: Diagnostics -->
+              <div class="admin-pane-content" id="admin-pane-diagnostics" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-stethoscope"></i> Outils de Diagnostic</h4>
+                </div>
+                <p class="block-desc" style="margin: 0 0 12px 0;">Informations système, logs de la console et tests de connectivité en temps réel.</p>
+                <button class="action-btn" id="run-auto-checkup-btn" style="width: 100%; font-size: 13px; padding: 10px; margin-bottom: 12px; border-color: var(--color-success); background: rgba(16, 185, 129, 0.1); color: var(--color-success); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px;"><i class="fa-solid fa-microscope"></i> Lancer le Check-up Complet (Auto-Test)</button>
+                
+                <div class="diag-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  
+                  <!-- Section 1: Connexion & Connectivity Test -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wifi"></i> Statut & Connectivité</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Navigator.onLine : <span id="diag-navigator-online" class="badge">--</span></div>
+                      <div>Mode détecté : <span id="diag-app-mode" class="badge">--</span></div>
+                      <div>URL distant : <span id="diag-remote-url" style="word-break: break-all;">--</span></div>
+                      <div>Token admin : <span id="diag-admin-token" class="badge">--</span></div>
+                    </div>
+                    <button class="action-btn" id="run-conn-test-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-bolt"></i> Tester la connexion</button>
+                    
+                    <div id="conn-test-results" style="margin-top: 12px; display: none; font-size: 12px; flex-direction: column; gap: 6px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                      <div style="font-weight: 600; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">Résultats des tests :</div>
+                      <div id="test-step-local">1. Local (localhost:3000) : <span class="status">--</span></div>
+                       <div id="test-step-remote">2. Distant (URL configurée) : <span class="status">--</span></div>
+                      <div id="test-step-wan">3. WAN (internet ping) : <span class="status">--</span></div>
+                      <div id="diag-auto-analysis" style="margin-top: 6px; font-weight: 500; font-size: 11px; padding: 4px; border-radius: 4px; line-height: 1.4;"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Section 2: Tunnel Info -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cloud-arrow-down"></i> Serveur Distant</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                    <div>Tunnel actif : <span id="diag-tunnel-active" class="badge">--</span></div>
+                    <div>URL publique : <span id="diag-tunnel-url" style="word-break: break-all;">--</span></div>
+                    <div>Connexions : <span id="diag-tunnel-conns">--</span></div>
+                    </div>
+                    <button class="action-btn" id="check-tunnel-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-arrows-rotate"></i> Vérifier le tunnel</button>
+                  </div>
+
+                  <!-- Section 3: Server & OS Info -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Serveur Local</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Node : <span id="diag-node-version">--</span></div>
+                      <div>OS : <span id="diag-server-os">--</span></div>
+                      <div>Uptime : <span id="diag-server-uptime">--</span></div>
+                      <div>Mémoire : <span id="diag-server-mem">--</span></div>
+                      <div>Indexation : <span id="diag-indexing-active" class="badge">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 4: Database & PDF Index Stats -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-database"></i> Bases & Fichiers</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>CATs : <span id="diag-db-cats">--</span></div>
+                      <div>Suggestions : <span id="diag-db-sugs">--</span></div>
+                      <div>cats_db.json : <span id="diag-db-size-cats">--</span></div>
+                      <div>suggestions.json : <span id="diag-db-size-sugs">--</span></div>
+                      <div>pdf_index.json : <span id="diag-db-size-index">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 5: Config URL (Change URL at runtime) -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wrench"></i> Config Serveur Distant</h4>
+                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">Spécifiez l'adresse de votre serveur LAN ou tunnel :</div>
+                    <input type="text" id="diag-remote-url-input" placeholder="https://xxxx.tunnel-provider.com" style="width: 100%; padding: 6px 10px; font-size: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); margin-bottom: 8px;">
+                    <button class="action-btn" id="save-remote-url-btn" style="width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder & Tester</button>
+                  </div>
+
+                  <!-- Section 6: Index PDF Status details -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-file-pdf"></i> Statut Index PDF</h4>
+                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                      <div>Total PDFs : <span id="diag-pdf-docs">--</span></div>
+                      <div>Total Pages : <span id="diag-pdf-pages">--</span></div>
+                      <div>Indexé le : <span id="diag-pdf-time">--</span></div>
+                      <div>Santé de l'index : <span id="diag-pdf-health" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 8: Rate Limiting / Failed Logins -->
+                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-user-lock"></i> Tentatives de Connexion</h4>
+                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px;">IP bloquées ou sous surveillance :</div>
+                    <div id="diag-rate-limits-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; max-height: 120px; overflow-y: auto;">
+                      <p class="text-muted text-center" style="margin: 8px 0; font-style: italic;">Aucune IP bloquée.</p>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Section 7: Console Logs Window -->
+                <div class="diag-logs-section" style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h4 style="font-size: 13.5px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-terminal"></i> Journal de la Console</h4>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="action-btn" id="copy-logs-btn" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-copy"></i> Copier</button>
+                      <button class="cancel-btn" id="clear-logs-btn" style="padding: 4px 10px; font-size: 11px; background: transparent; border-color: rgba(239, 68, 68, 0.3); color: #ef4444;"><i class="fa-solid fa-trash-can"></i> Vider</button>
+                    </div>
+                  </div>
+                  <div id="diag-logs-terminal" style="height: 150px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11.5px; overflow-y: auto; color: #a3e635; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">
+                    Aucune entrée de journal disponible. Ouvrez l'onglet Diagnostic pour commencer la capture.
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANE 3: Performance -->
+              <div class="admin-pane-content" id="admin-pane-performance" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-gauge-high"></i> Tableau de Performance</h4>
+                </div>
+                <p class="block-desc" style="margin: 0 0 12px 0;">Mesure du framerate, temps de rendu des composants, latence réseau et snapshots mémoire.</p>
+
+                <div class="perf-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  
+                  <!-- Section 1: Frame Rate (FPS) -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-film"></i> Taux de Rafraîchissement</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>FPS Actuel : <span id="perf-fps-val" style="font-weight: bold; font-size: 14px;">--</span></div>
+                      <div>Pertes de frames (Jank) : <span id="perf-drops-val" class="badge">--</span></div>
+                      <div>Saccades majeures (>50ms) : <span id="perf-major-drops-val" class="badge">--</span></div>
+                      <div style="margin-top: 6px; font-weight: 500; font-size: 11px;">Stabilité globale :</div>
+                      <div id="perf-fps-status-msg" style="padding: 4px; border-radius: 4px; font-weight: 500; text-align: center;">--</div>
+                    </div>
+                  </div>
+
+                  <!-- Section 2: Component Render Times -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cube"></i> Rendu des Composants</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-muted);">
+                      <div style="display: flex; justify-content: space-between;"><span>Sidebar List :</span> <span id="perf-render-sidebar" style="font-weight: 500;">--</span></div>
+                      <div style="display: flex; justify-content: space-between;"><span>Workspace Fiche :</span> <span id="perf-render-workspace" style="font-weight: 500;">--</span></div>
+                      <div style="display: flex; justify-content: space-between;"><span>Dashboard :</span> <span id="perf-render-dashboard" style="font-weight: 500;">--</span></div>
+                      <div style="display: flex; justify-content: space-between;"><span>Quiz Question :</span> <span id="perf-render-quiz" style="font-weight: 500;">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 3: API Timing Latency -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-network-wired"></i> Latence des API Client</h4>
+                    <div id="perf-api-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; color: var(--text-muted); max-height: 150px; overflow-y: auto;">
+                      <span style="font-style: italic;">Aucune requête API capturée.</span>
+                    </div>
+                  </div>
+
+                  <!-- Section 4: Interaction Latency -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-hand-pointer"></i> Latence d'Interaction</h4>
+                    <div id="perf-interactions-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; color: var(--text-muted); max-height: 150px; overflow-y: auto;">
+                      <span style="font-style: italic;">Touchez des éléments pour mesurer...</span>
+                    </div>
+                  </div>
+
+                  <!-- Section 5: Local Memory Heap & I/O -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-microchip"></i> Mémoire & I/O Local</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>JS Heap : <span id="perf-heap-val">--</span></div>
+                      <div>Croissance : <span id="perf-heap-growth" style="font-weight: 500;">--</span></div>
+                      <div style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 4px; padding-top: 4px;">Lectures LocalStorage : <span id="perf-io-reads">--</span></div>
+                      <div>Écritures LocalStorage : <span id="perf-io-writes">--</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Section 6: Server timings (Node) -->
+                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
+                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Timings Serveur (Node.js)</h4>
+                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
+                      <div>Uptime Serveur : <span id="perf-server-uptime">--</span></div>
+                      <div>Rendement écritures DB : <span id="perf-server-writes">--</span></div>
+                      <div>Indexation PDF (moyenne) : <span id="perf-server-pdf">--</span></div>
+                      <div>Hit rate cache index : <span id="perf-server-cache">--</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Telemetry & Performance Event Logs Console -->
+                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h4 style="font-size: 13px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-receipt"></i> Journal de Télémétrie & Performance</h4>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="action-btn" id="copy-perf-logs-btn" style="padding: 2px 8px; font-size: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-copy"></i> Copier</button>
+                      <button class="cancel-btn" id="clear-perf-logs-btn" style="padding: 2px 8px; font-size: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;"><i class="fa-solid fa-trash"></i> Vider</button>
+                    </div>
+                  </div>
+                  <div id="perf-console-logs" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 6px; font-family: monospace; font-size: 10px; color: #38bdf8; height: 120px; overflow-y: auto; line-height: 1.4; white-space: pre-wrap; word-break: break-all;">
+                    <span style="font-style: italic; color: var(--text-muted);">En attente d'événements de performance...</span>
+                  </div>
+                </div>
+
+                <!-- Dashboard Boot Milestones -->
+                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
+                  <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-clock"></i> Jalons de Démarrage</h4>
+                  <div id="perf-boot-milestones" style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 11.5px; color: var(--text-muted);">
+                    <div>DOM Ready: <span id="milestone-dom" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                    <div>CATs Fetched: <span id="milestone-cats" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                    <div>Sidebar List: <span id="milestone-sidebar" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                    <div>Dashboard: <span id="milestone-dashboard" style="color: var(--text-primary); font-weight: 500;">--</span></div>
+                  </div>
+                </div>
+
+                <!-- Bottom Actions -->
+                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                  <button class="cancel-btn" id="reset-perf-btn" style="padding: 6px 14px; font-size: 12px; background: transparent; border-color: rgba(255,255,255,0.15); color: var(--text-muted);"><i class="fa-solid fa-trash-can"></i> Réinitialiser</button>
+                  <button class="action-btn" id="export-perf-btn" style="padding: 6px 14px; font-size: 12px; border-color: rgba(6, 182, 212, 0.4);"><i class="fa-solid fa-file-export"></i> Exporter le Rapport JSON</button>
+                </div>
+
+              </div>
+
             </div>
           </div>
 
           <div class="dashboard-content-split">
             <!-- Resume block -->
-            <div class="dashboard-block resume-block">
+            <div class="dashboard-block resume-block animate-entrance delay-3">
               <h3><i class="fa-solid fa-clock-rotate-left"></i> Reprendre la révision</h3>
               <p class="block-desc">Vos derniers cours en cours de lecture :</p>
               <ul class="resume-list" id="dash-resume-list">
@@ -227,7 +560,7 @@
             </div>
 
             <!-- Categories progress block -->
-            <div class="dashboard-block categories-block">
+            <div class="dashboard-block categories-block animate-entrance delay-4">
               <h3><i class="fa-solid fa-chart-pie"></i> Progrès par spécialité</h3>
               <div class="categories-list" id="dash-categories-progress">
                 <!-- Dynamically populated -->
@@ -469,15 +802,21 @@
                 <option value="10" selected>10 questions</option>
                 <option value="15">15 questions</option>
                 <option value="20">20 questions</option>
+                <option value="30">30 questions</option>
+                <option value="50">50 questions</option>
               </select>
             </div>
 
             <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</label>
+              <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</div>
               <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
                   <input type="checkbox" id="quiz-type-specialty" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
-                  <span>Spécialités de la CAT (Choix multiples - QCM)</span>
+                  <span>Cas Clinique & Orientation (QCM 🩺)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+                  <input type="checkbox" id="quiz-type-posology" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                  <span>Ordonnance & Posologie (QCM 💊)</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
                   <input type="checkbox" id="quiz-type-redflags" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
@@ -488,6 +827,27 @@
                   <span>Ordonnance Type / Traitement (Écrire la réponse ✍️)</span>
                 </label>
               </div>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+              <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-graduation-cap"></i> Mode d'apprentissage :</div>
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; margin-top: 4px;">
+                <input type="checkbox" id="quiz-spaced-repetition" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                <span>Priorité répétition espacée (Leitner 📅)</span>
+              </label>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+              <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-clock"></i> Limite de temps :</div>
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; margin-top: 4px;">
+                <input type="checkbox" id="quiz-timed-mode" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                <span>Activer le chronomètre par question</span>
+              </label>
+              <select id="quiz-timer-seconds" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); margin-top: 4px; display: none;">
+                <option value="15">15 secondes</option>
+                <option value="30" selected>30 secondes</option>
+                <option value="60">60 secondes</option>
+              </select>
             </div>
 
             <button class="action-btn" id="start-quiz-btn" style="width: 100%; font-weight: 700; margin-top: 10px; justify-content: center; display: flex; gap: 8px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; padding: 12px; font-size: 14px; border-radius: var(--radius-md);">
@@ -506,6 +866,17 @@
           <!-- Progress Bar Fill -->
           <div class="category-progress-bar" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
             <div id="quiz-progress-fill" style="width: 10%; height: 100%; background: linear-gradient(90deg, var(--color-primary), #10b981); border-radius: 4px; transition: width 0.3s ease;"></div>
+          </div>
+
+          <!-- Timer Bar (visible if Timed Mode is on) -->
+          <div id="quiz-timer-wrapper" style="display: none; flex-direction: column; gap: 4px; margin-bottom: 10px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--color-danger);">
+              <span><i class="fa-solid fa-clock"></i> Temps restant :</span>
+              <span id="quiz-timer-count">30s</span>
+            </div>
+            <div style="height: 6px; background: rgba(239, 68, 68, 0.1); border-radius: 3px; overflow: hidden; width: 100%;">
+              <div id="quiz-timer-fill" style="width: 100%; height: 100%; background: var(--color-danger); transition: width 0.1s linear;"></div>
+            </div>
           </div>
 
           <!-- Question Content Card -->
@@ -527,6 +898,17 @@
             <div id="quiz-writein-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 100%;">
               <label for="quiz-user-text" style="font-size: 13px; color: var(--text-secondary);">Saisissez votre conduite à tenir ou traitement ci-dessous :</label>
               <textarea id="quiz-user-text" rows="5" placeholder="Écrivez votre réponse ici. Essayez de mentionner les médicaments clés, les posologies, ou les critères d'urgence précis..." style="width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; color: var(--text-primary); font-family: var(--font-sans); font-size: 13.5px; resize: vertical;"></textarea>
+              
+              <!-- Hint Button & Box -->
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                <button id="quiz-hint-btn" class="action-btn" style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-secondary); font-size: 12px; padding: 6px 12px; align-self: flex-start; display: flex; gap: 6px; font-weight: 600;">
+                  <i class="fa-regular fa-lightbulb" style="color: var(--color-warning);"></i> Obtenir un indice (-0.5 pt)
+                </button>
+                <div id="quiz-hint-box" style="display: none; font-size: 12.5px; padding: 10px 14px; background: rgba(245, 158, 11, 0.05); border: 1px dashed rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); color: var(--color-warning); font-weight: 500;">
+                  <!-- Indice content -->
+                </div>
+              </div>
+
               <button class="action-btn" id="quiz-submit-text-btn" style="width: 100%; font-weight: 700; justify-content: center; display: flex; gap: 8px;">
                 <i class="fa-solid fa-circle-check"></i> Valider ma réponse
               </button>
@@ -589,8 +971,17 @@
             <div style="font-size: 40px; font-weight: 800; color: var(--color-primary); margin: 16px 0;" id="quiz-results-score">8.5 / 10</div>
             <p id="quiz-results-feedback" style="color: var(--text-secondary); font-size: 14.5px; max-width: 480px; margin: 0 auto; line-height: 1.5;">Félicitations, vous consolidez vos acquis ! Révisez les points faibles identifiés ci-dessous.</p>
             <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
-              <button class="action-btn" id="quiz-retry-btn" style="padding: 10px 20px; font-weight: 700; display: flex; gap: 8px;"><i class="fa-solid fa-rotate-left"></i> Recommencer un Quiz</button>
+              <button class="action-btn" id="quiz-retry-btn" style="padding: 10px 20px; font-weight: 700; display: flex; gap: 8px;"><i class="fa-solid fa-rotate-left"></i> Recommencer</button>
+              <button class="action-btn" id="quiz-retry-errors-btn" style="padding: 10px 20px; font-weight: 700; display: none; gap: 8px; background: linear-gradient(135deg, var(--color-warning), #d97706) !important; color: #000 !important;"><i class="fa-solid fa-triangle-exclamation"></i> Corriger mes erreurs</button>
               <button class="cancel-btn" id="quiz-quit-btn" style="padding: 10px 20px; display: flex; gap: 8px; justify-content: center; align-items: center;"><i class="fa-solid fa-house"></i> Tableau de bord</button>
+            </div>
+          </div>
+
+          <!-- Weak Points & Category Breakdown Panel -->
+          <div class="dashboard-block" id="quiz-weak-points-panel" style="display: none; gap: 12px; padding: 20px;">
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-triangle-exclamation" style="color: var(--color-warning);"></i> Analyse par Spécialité & Points Faibles</h3>
+            <div id="quiz-category-scores-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px; width: 100%;">
+              <!-- Dynamic category breakdown bars -->
             </div>
           </div>
 
@@ -719,6 +1110,104 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+  <script>
+    window.__drCatBooted = false;
+    (function() {
+      var started = Date.now();
+      var overlay = document.getElementById('app-loading-overlay');
+      var bar = document.getElementById('app-loading-bar');
+      var msg = document.getElementById('app-loading-msg');
+
+      window.setLoaderProgress = function(pct) {
+        if (bar) {
+          bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        }
+        if (pct >= 100) {
+          if (msg && msg.style.display === 'block') {
+            return;
+          }
+          setTimeout(function() {
+            if (overlay) {
+              overlay.style.opacity = '0';
+              overlay.style.visibility = 'hidden';
+              overlay.classList.add('hidden');
+            }
+            window.__drCatBooted = true;
+          }, 350);
+        }
+      };
+
+      function showError(text) {
+        if (msg) {
+          msg.textContent = text;
+          msg.style.display = 'block';
+          msg.style.whiteSpace = 'pre-wrap';
+          msg.style.textAlign = 'left';
+          msg.style.fontFamily = 'monospace';
+          msg.style.fontSize = '10px';
+          msg.style.maxHeight = '250px';
+          msg.style.overflowY = 'auto';
+          msg.style.background = 'rgba(239, 68, 68, 0.1)';
+          msg.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          msg.style.padding = '8px';
+          msg.style.borderRadius = '6px';
+        }
+        if (overlay) {
+          overlay.style.opacity = '1';
+          overlay.style.visibility = 'visible';
+          overlay.classList.remove('hidden');
+        }
+        window.setLoaderProgress(100);
+      }
+
+      window.addEventListener('error', function(event) {
+        // Ignore resource loading errors (e.g., 404s on images, stylesheets, or capacitor.js)
+        if (event.target && event.target !== window) {
+          return;
+        }
+        // Only freeze the loading banner for startup/bootstrap failures
+        if (window.__drCatBooted) {
+          return;
+        }
+        var errMessage = event.message || 'Unknown Error';
+        var source = event.filename ? event.filename.split('/').pop() : 'unknown';
+        var lineno = event.lineno || 0;
+        var colno = event.colno || 0;
+        var errorStr = '💥 Startup Crash: ' + errMessage + ' (' + source + ':' + lineno + ':' + colno + ')';
+        if (event.error && event.error.stack) {
+          errorStr += '\n' + event.error.stack;
+        }
+        showError(errorStr);
+      }, true);
+
+      window.addEventListener('unhandledrejection', function(event) {
+        // Only freeze the loading banner for startup/bootstrap failures
+        if (window.__drCatBooted) {
+          return;
+        }
+        var reason = event.reason;
+        var errorStr = '💥 Startup Promise Rejected: ' + (reason && reason.message ? reason.message : reason);
+        if (reason && reason.stack) {
+          errorStr += '\n' + reason.stack;
+        }
+        showError(errorStr);
+      }, true);
+
+      window.setLoaderProgress(2);
+
+      window.__drCatRetry = function() {
+        if (overlay) {
+          overlay.style.opacity = '1';
+          overlay.style.visibility = 'visible';
+          overlay.classList.remove('hidden');
+        }
+        window.setLoaderProgress(3);
+        setTimeout(function() {
+          location.reload();
+        }, 300);
+      };
+    })();
+  </script>
 
 
 </body>

@@ -10,6 +10,38 @@
   overflow: hidden;
 }
 
+/* ── View Transitions (fade between main screens) ── */
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+#welcome-screen, #workspace, #quiz-screen {
+  animation: viewFadeIn 0.22s ease both;
+}
+
+/* Premium micro-animations for cards and blocks */
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-entrance {
+  animation: cardEntrance 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.delay-1 { animation-delay: 50ms; }
+.delay-2 { animation-delay: 100ms; }
+.delay-3 { animation-delay: 150ms; }
+.delay-4 { animation-delay: 200ms; }
+.delay-5 { animation-delay: 250ms; }
+
+
 .sidebar-overlay {
   position: fixed;
   top: 0;

@@ -2,11 +2,38 @@
 // Support for both online (server-backed) mode and offline standalone (Capacitor/static) mode
 
 import { state } from './state.js';
+import { REMOTE_SERVER_URL, REMOTE_SERVER_URLS } from './remote_config.js';
+import { detectProvider, getExtraHeaders, isTunnelUrl, PROVIDERS, getTunnelLabel, sortUrlsByProviderPriority, getPrimaryProviderId } from './server-providers.js';
+export { REMOTE_SERVER_URL };
 
-// If you deploy your server on a hosted address (e.g. Stage 2 of the roadmap),
-// write the full URL here (e.g. 'https://med.iillaa.com'). This allows the standalone
-// app to send its edits/suggestions when the device is online at startup.
-const REMOTE_SERVER_URL = '';
+
+// Transparent wrapper to log API latencies
+const originalFetch = window.fetch;
+window.fetch = async function(...args) {
+  const start = performance.now();
+  try {
+    const res = await originalFetch(...args);
+    const duration = performance.now() - start;
+    if (window.perf && window.perf.recordApiCall) {
+      const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+      if (!urlStr.includes('/api/performance/server-metrics') && !urlStr.includes('/api/search-status')) {
+        window.perf.recordApiCall(urlStr, res.status, duration);
+      }
+    }
+    return res;
+  } catch (err) {
+    const duration = performance.now() - start;
+    if (window.perf && window.perf.recordApiCall) {
+      const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+      if (!urlStr.includes('/api/performance/server-metrics') && !urlStr.includes('/api/search-status')) {
+        window.perf.recordApiCall(urlStr, 0, duration);
+      }
+    }
+    throw err;
+  }
+};
+
+
 
 export const isOfflineApp = 
   window.location.protocol === 'file:' || 
@@ -19,36 +46,164 @@ export const isOfflineApp =
 
 console.log("[API] Offline Standalone Mode:", isOfflineApp);
 
+// ── Clean App Mode Detection ──────────────────────────────
+export const APP_MODES = {
+  ADMIN_LOCAL: 'admin_local',
+  WEB_CLIENT: 'web_client',
+  ANDROID_ONLINE: 'android_online',
+  ANDROID_OFFLINE: 'android_offline'
+};
+
+let _cachedAppMode = null;
+
+export function getAppMode() {
+  if (_cachedAppMode) return _cachedAppMode;
+
+  const isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+
+  // In Capacitor/Android WebView, navigator.onLine is often unreliable.
+  // Default to ANDROID_OFFLINE and let actual fetch attempts determine reachability.
+  if (isCapacitor) {
+    _cachedAppMode = APP_MODES.ANDROID_OFFLINE;
+    console.log(`[App Mode] Detected (Capacitor): ${_cachedAppMode} (Host: ${hostname}). navigator.onLine ignored.`);
+    return _cachedAppMode;
+  }
+
+  if (isLocalhost) {
+    _cachedAppMode = APP_MODES.ADMIN_LOCAL;
+  } else {
+    _cachedAppMode = APP_MODES.WEB_CLIENT;
+  }
+
+  console.log(`[App Mode] Detected: ${_cachedAppMode} (Host: ${hostname}).`);
+  return _cachedAppMode;
+}
+
+export function setAppMode(mode) {
+  const oldMode = _cachedAppMode;
+  _cachedAppMode = mode;
+  if (oldMode !== mode) {
+    console.log(`[API] App Mode changed from ${oldMode} to ${mode}`);
+    window.dispatchEvent(new CustomEvent('drcat-app-mode-changed', { detail: { oldMode, mode } }));
+  }
+}
+
+
+
+
+// Permission helpers
+export function canEditDirectly() {
+  return getAppMode() === APP_MODES.ADMIN_LOCAL;
+}
+export function canSuggest() {
+  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
+}
+export function canSync() {
+  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
+}
+export function isAdminMode() {
+  return getAppMode() === APP_MODES.ADMIN_LOCAL;
+}
+
+
 // Module cache for client-side search in offline mode
 let offlinePdfIndexCache = null;
 
-function getApiUrl(endpoint) {
-  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+/**
+ * Returns the configured remote server URL (tunnel or otherwise) if one is set.
+ * When this returns a URL, all API calls should go through the server even in Capacitor/offline mode.
+ */
+export function getRemoteServerUrl() {
+  const storedOverride = localStorage.getItem('dr_cat_remote_server_url');
+  const lastCompiledUrl = localStorage.getItem('dr_cat_last_compiled_url');
+
+  if (REMOTE_SERVER_URL && lastCompiledUrl !== REMOTE_SERVER_URL) {
+    // New build has a new target server URL! Clear the stale override.
+    localStorage.removeItem('dr_cat_remote_server_url');
+    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
+    return REMOTE_SERVER_URL;
+  }
+
+  // Ensure last compiled URL is tracked if we don't have it yet
+  if (REMOTE_SERVER_URL && !lastCompiledUrl) {
+    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
+  }
+
+  return storedOverride || REMOTE_SERVER_URL || null;
+}
+
+/**
+ * True when a remote server URL is configured — meaning the app should try to
+ * sync with the server even if it is running as a Capacitor/standalone app.
+ */
+export function hasRemoteServer() {
+  return !!getPrimaryRemoteUrl();
+}
+
+/**
+ * Returns the primary remote server URL (the one configured as highest priority).
+ * Use this for quick "should we sync?" checks.
+ */
+export function getPrimaryRemoteUrl() {
+  const urls = getConfiguredRemoteUrls();
+  return urls.length > 0 ? urls[0] : null;
+}
+
+function getApiUrl(endpoint, overrideUrl) {
+  const configuredUrl = overrideUrl || getRemoteServerUrl();
+  // On localhost web browser (not standalone Capacitor app), use relative paths to avoid cross-origin requests to the tunnel URL
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  if (isLocalWebBrowser) return endpoint;
   if (isOfflineApp && configuredUrl) {
     return `${configuredUrl}${endpoint}`;
   }
   return endpoint;
 }
 
-function getHeaders(extraHeaders = {}) {
+export function getConfiguredRemoteUrls() {
+  const stored = localStorage.getItem('dr_cat_remote_server_url');
+  if (stored) return [stored];
+  
+  // Load from server-generated config if available
+  let config = null;
+  if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS) && REMOTE_SERVER_URLS.length > 0) {
+    config = { urls: REMOTE_SERVER_URLS };
+  } else if (REMOTE_SERVER_URL) {
+    config = { urls: [REMOTE_SERVER_URL] };
+  }
+  
+  if (config && config.urls && config.urls.length > 0) {
+    const primaryId = getPrimaryProviderId(config);
+    return sortUrlsByProviderPriority(config.urls, primaryId);
+  }
+  
+  return [];
+}
+
+export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
+  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+  // Only add provider headers if we are not on localhost or if explicitly hitting a remote URL
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'x-admin-token': token } : {}),
+    ...providerExtraHeaders,
     ...extraHeaders
   };
 }
-
+ 
 export async function loginAdmin(password) {
   if (isOfflineApp) {
-    // Standalone app local admin bypass: accept any password for friction-free local customizations
-    localStorage.setItem('dr_cat_admin_token', 'local-token');
-    return { success: true, token: 'local-token' };
+    return { success: false, error: 'Connexion administrateur impossible en mode hors-ligne.' };
   }
-
-  const res = await fetch('/api/login', {
+ 
+  const res = await fetchWithTimeout('/api/login', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders(),
     body: JSON.stringify({ password })
   });
   const data = await res.json();
@@ -57,15 +212,15 @@ export async function loginAdmin(password) {
   }
   return data;
 }
-
+ 
 export async function logoutAdmin() {
   if (isOfflineApp) {
     localStorage.removeItem('dr_cat_admin_token');
     return;
   }
-
+ 
   try {
-    await fetch('/api/logout', {
+    await fetchWithTimeout('/api/logout', {
       method: 'POST',
       headers: getHeaders()
     });
@@ -74,17 +229,16 @@ export async function logoutAdmin() {
   }
   localStorage.removeItem('dr_cat_admin_token');
 }
-
+ 
 export async function checkAdminStatus() {
-  if (isOfflineApp) {
-    const token = localStorage.getItem('dr_cat_admin_token');
-    return token === 'local-token';
-  }
-
+  if (isOfflineApp) return false; // No admin for Android app
+  const token = localStorage.getItem('dr_cat_admin_token');
+  if (!token) return false;
+  if (isOfflineApp && navigator.onLine === false) return false;
+ 
   try {
-    const res = await fetch('/api/is-admin', {
-      headers: getHeaders()
-    });
+    const res = await fetchWithTimeout(getApiUrl('/api/is-admin'), { headers: getHeaders() });
+    if (!res.ok) return false;
     const data = await res.json();
     return !!data.isAdmin;
   } catch (err) {
@@ -92,14 +246,14 @@ export async function checkAdminStatus() {
     return false;
   }
 }
-
+ 
 export async function checkIsLocal() {
   if (isOfflineApp) {
     return true; // Standalone app is always "local" to the device
   }
-
+  
   try {
-    const res = await fetch('/api/is-local');
+    const res = await fetchWithTimeout('/api/is-local', { headers: getHeaders() });
     const data = await res.json();
     return !!data.isLocal;
   } catch (err) {
@@ -110,164 +264,328 @@ export async function checkIsLocal() {
   }
 }
 
-export async function fetchCats() {
-  if (isOfflineApp) {
-    const res = await fetch('data/cats_db.json');
-    if (!res.ok) throw new Error("Failed to fetch CATs statically");
+// Fast-fail fetch with a short timeout for connectivity tests
+async function quickPing(url, timeoutMs = 1500) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      mode: 'no-cors'
+    });
+    clearTimeout(timeoutId);
+    return !!res;
+  } catch (_) {
+    clearTimeout(timeoutId);
+    return false;
+  }
+}
+
+// Shared fetch helper with strict timeout to prevent indefinite hangs
+// For Android, we want very fast timeouts to avoid freezing
+const isCapacitorForTimeout = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+const FETCH_TIMEOUT_MS = isCapacitorForTimeout ? 3000 : 8000;
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeoutId);
+    return res;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error(`Request timed out after ${FETCH_TIMEOUT_MS}ms: ${url}`);
+    }
+    throw err;
+  }
+}
+
+export async function fetchCats(since) {
+  const mode = getAppMode();
+  const queryParam = (typeof since === 'number' && !isNaN(since)) ? `?since=${since}` : '';
+
+  // 1. ADMIN_LOCAL: Fast local server load
+  if (mode === APP_MODES.ADMIN_LOCAL) {
+    const res = await fetchWithTimeout(`/api/cats${queryParam}`, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch CATs from local server');
     return res.json();
   }
 
-  const res = await fetch('/api/cats', { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch CATs");
+  // 2. ANDROID_OFFLINE: Load bundled static file instantly (no remote waiting)
+  if (mode === APP_MODES.ANDROID_OFFLINE) {
+    console.log('[fetchCats] Offline mode — loading bundled data instantly.');
+    const res = await fetchWithTimeout('data/cats_db.json');
+    if (!res.ok) throw new Error('Failed to fetch CATs statically');
+    return res.json();
+  }
+
+  // 3. ANDROID_ONLINE or WEB_CLIENT: remote try, but bounded tightly to avoid logo freeze
+  const remoteUrls = getConfiguredRemoteUrls();
+
+  // In Capacitor/Android: never block UI for more than ~1.5s.
+  const isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+  const remoteTimeout = isCapacitor ? 1500 : 3000;
+
+  // Quick ping test (HEAD) with short timeout.
+  // If ping doesn't succeed quickly, fall back immediately to local bundle.
+  let reachable = false;
+  for (const url of remoteUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), remoteTimeout);
+      // For fast check we only care about whether the network path accepts the request.
+      await fetch(`${url}/api/search-status`, {
+        method: 'HEAD',
+        signal: controller.signal,
+        mode: 'no-cors'
+      });
+      clearTimeout(timeoutId);
+      reachable = true;
+      break;
+    } catch (_) {
+      // keep trying other URLs
+    }
+  }
+
+  if (!reachable) {
+    console.log('[fetchCats] No remote server reachable within timeout — falling back to local bundle instantly.');
+    const res = await fetchWithTimeout('data/cats_db.json');
+    if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
+    return res.json();
+  }
+
+  // Reachable: attempt to fetch remote cats with the short global timeout.
+  // (fetchWithTimeout is capped to FETCH_TIMEOUT_MS=3000; for Android this is fine.)
+  for (const remoteUrl of remoteUrls) {
+    try {
+      const res = await fetchWithTimeout(getApiUrl(`/api/cats${queryParam}`, remoteUrl), { headers: getHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
+        return data;
+      }
+    } catch (err) {
+      console.warn('[API] fetchCats: remote server', remoteUrl, 'unreachable');
+    }
+  }
+
+  // Ultimate fallback
+  console.warn('[API] fetchCats: all remote attempts failed, using local bundle.');
+  const res = await fetchWithTimeout('data/cats_db.json');
+  if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
   return res.json();
 }
 
+
 export async function fetchPdfs() {
   if (isOfflineApp) {
-    // Dynamically retrieve PDF filenames from indexed pdfs index
-    const res = await fetch('data/pdf_index.json');
-    if (!res.ok) throw new Error("Failed to fetch PDFs index statically");
-    const index = await res.json();
-    return index.map(doc => doc.pdf);
+    // Load only the list of filenames instead of the heavy index structure containing all parsed texts
+    const res = await fetchWithTimeout('data/pdf_list.json');
+    if (!res.ok) throw new Error("Failed to fetch PDFs list statically");
+    return res.json();
   }
 
-  const res = await fetch('/api/pdfs', { headers: getHeaders() });
+  const res = await fetchWithTimeout('/api/pdfs', { headers: getHeaders() });
   if (!res.ok) throw new Error("Failed to fetch PDFs");
   return res.json();
 }
 
 export async function saveCatDataToServer(id, data) {
-  if (isOfflineApp) {
-    // Save to local overrides (persisted to localStorage)
-    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    if (!localOverrides[id]) localOverrides[id] = {};
-    if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
-    if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
-    localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
-    return { success: true, message: "Modifications enregistrées localement." };
+  // Admin action: always use local server. Admin is localhost-only, never tunnel.
+  try {
+    const res = await fetchWithTimeout(`/api/cats/${id}`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (res.ok) return res.json();
+  } catch (err) {
+    console.warn('[API] saveCatDataToServer failed:', err.message);
   }
 
-  const res = await fetch(`/api/cats/${id}`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data)
-  });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to save CAT data");
-  return res.json();
+  // Fallback: save to local overrides (persisted to localStorage)
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  if (!localOverrides[id]) localOverrides[id] = {};
+  if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
+  if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
+  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+  return { success: true, message: "Modifications enregistrées localement." };
 }
 
 export async function deleteCatFromServer(id) {
-  if (isOfflineApp) {
-    // Mark as deleted in local storage overrides
-    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    if (!localOverrides[id]) localOverrides[id] = {};
-    localOverrides[id].deleted = true;
-    localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
-    return { success: true, message: "Fiche supprimée localement." };
+  // Admin action: always use local server. Admin is localhost-only, never tunnel.
+  try {
+    const res = await fetchWithTimeout(`/api/cats/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    if (res.ok) return res.json();
+  } catch (err) {
+    console.warn('[API] deleteCatFromServer failed:', err.message);
   }
 
-  const res = await fetch(`/api/cats/${id}`, { 
-    method: 'DELETE',
-    headers: getHeaders()
-  });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to delete CAT");
-  return res.json();
+  // Fallback: mark as deleted in local storage overrides
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  if (!localOverrides[id]) localOverrides[id] = {};
+  localOverrides[id].deleted = true;
+  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+  return { success: true, message: "Fiche supprimée localement." };
 }
 
 export async function createCatOnServer(catData) {
-  if (isOfflineApp && !state.isOnlineAtStartup) {
-    // Generate new local CAT and save to local storage overrides
-    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
-    
-    const nextId = Math.max(100, ...customCats.map(c => c.id), ...Object.keys(localOverrides).map(Number)) + 1;
-    const newCat = {
-      id: nextId,
-      ...catData,
-      status: 'todo',
-      notes: ''
-    };
-    
-    customCats.push(newCat);
-    localStorage.setItem('dr_cat_custom_created_cats', JSON.stringify(customCats));
-    return { success: true, cat: newCat };
-  }
-
-  const res = await fetch(getApiUrl('/api/cats'), {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(catData)
-  });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to create CAT");
-  return res.json();
-}
-
-export async function submitSuggestion(suggestionData) {
-  if (isOfflineApp && !state.isOnlineAtStartup) {
-    // Offline suggestion is directly merged into local overrides as a shortcut
-    return saveCatDataToServer(suggestionData.catId, {
-      summary: suggestionData.summary,
-      ordonnance: suggestionData.ordonnance
+  // Admin action: always use local server. Admin is localhost-only, never tunnel.
+  try {
+    const res = await fetchWithTimeout('/api/cats', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(catData)
     });
+    if (res.ok) return res.json();
+  } catch (err) {
+    console.warn('[API] createCatOnServer failed:', err.message);
+  }
+  return { success: false, error: "Failed to create CAT" };
+}
+
+export async function bulkImportCats(importList) {
+  try {
+    const res = await fetchWithTimeout('/api/cats/bulk-import', {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(importList)
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to bulk import CATs");
+    }
+    return res.json();
+  } catch (err) {
+    console.warn('[API] bulkImportCats failed:', err.message);
+    throw err;
+  }
+}
+
+
+export async function updateCatOverrides(id, data) {
+  // Fallback: save to local overrides (persisted to localStorage)
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  if (!localOverrides[id]) localOverrides[id] = {};
+  if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
+  if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
+  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+  return { success: true, message: "Modifications enregistrées localement." };
+}
+
+export async function submitSuggestion(suggestionData, onAttempt) {
+  const mode = getAppMode();
+
+  // Offline Android: strictly read-only, no suggestions
+  if (mode === APP_MODES.ANDROID_OFFLINE) {
+    return { 
+      success: false, 
+      error: 'Mode hors-ligne. Connexion Internet requise pour envoyer des suggestions.' 
+    };
   }
 
-  const res = await fetch(getApiUrl('/api/suggestions'), {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(suggestionData)
-  });
-  if (!res.ok) throw new Error("Failed to submit suggestion");
-  return res.json();
+  // Admin local: we don't use suggestions here; admins edit directly.
+  if (mode === APP_MODES.ADMIN_LOCAL) {
+    return { 
+      success: false, 
+      error: 'Les administrateurs modifient directement les fiches. Utilisez le bouton "Modifier".' 
+    };
+  }
+
+  // WEB_CLIENT or ANDROID_ONLINE: Try to send to remote server with retries
+  let attempts = 0;
+  const maxAttempts = 3;
+  const delayBetweenAttempts = 1200;
+
+  while (attempts < maxAttempts) {
+    attempts++;
+    if (onAttempt) onAttempt(attempts);
+
+    try {
+      const res = await fetchWithTimeout(getApiUrl('/api/suggestions'), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(suggestionData)
+      });
+      if (res.ok) return await res.json();
+      const errorData = await res.json().catch(() => ({}));
+      if (res.status >= 400 && res.status < 500) {
+        return { success: false, error: errorData.error || "Erreur client." };
+      }
+    } catch (err) {
+      console.warn(`[API] submitSuggestion: attempt ${attempts} failed.`, err.message);
+    }
+
+    if (attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
+    }
+  }
+
+  return { 
+    success: false, 
+    error: "Le serveur est injoignable après 3 tentatives." 
+  };
 }
+
 
 export async function fetchSuggestions() {
-  if (isOfflineApp) {
-    return []; // No admin suggestions view in offline mode
-  }
-
-  const res = await fetch('/api/suggestions', { headers: getHeaders() });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to fetch suggestions");
+  // Admin action: always use local server. Admin is localhost-only, never tunnel.
+  const res = await fetchWithTimeout('/api/suggestions', { headers: getHeaders() });
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to fetch suggestions');
   return res.json();
 }
 
 export async function approveSuggestionOnServer(id) {
-  if (isOfflineApp) return { success: true };
-  const res = await fetch(`/api/suggestions/${id}/approve`, { 
+  const res = await fetchWithTimeout(getApiUrl(`/api/suggestions/${id}/approve`), { 
     method: 'POST',
     headers: getHeaders()
   });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to approve suggestion");
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to approve suggestion');
   return res.json();
 }
 
 export async function rejectSuggestionOnServer(id) {
-  if (isOfflineApp) return { success: true };
-  const res = await fetch(`/api/suggestions/${id}/reject`, { 
+  const res = await fetchWithTimeout(getApiUrl(`/api/suggestions/${id}/reject`), { 
     method: 'POST',
     headers: getHeaders()
   });
-  if (res.status === 403) throw new Error("403 Forbidden");
-  if (!res.ok) throw new Error("Failed to reject suggestion");
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to reject suggestion');
+  return res.json();
+}
+
+export async function updateSuggestionOnServer(id, updatedData) {
+  const res = await fetchWithTimeout(getApiUrl(`/api/suggestions/${id}/edit`), { 
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ data: updatedData })
+  });
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to update suggestion');
   return res.json();
 }
 
 export async function fetchSearchStatus() {
-  if (isOfflineApp) {
-    return {
-      isIndexing: false,
-      totalFiles: 76,
-      indexedFiles: 76,
-      currentFile: ''
-    };
+  if (hasRemoteServer()) {
+    try {
+      const res = await fetchWithTimeout(getApiUrl('/api/search-status'), { headers: getHeaders() });
+      if (res.ok) return res.json();
+    } catch (_) {}
   }
 
-  const res = await fetch('/api/search-status', { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch search status");
+  if (isOfflineApp) {
+    return { isIndexing: false, totalFiles: 76, indexedFiles: 76, currentFile: '' };
+  }
+
+  const res = await fetchWithTimeout('/api/search-status', { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch search status');
   return res.json();
 }
 
@@ -282,11 +600,29 @@ export async function searchPdfsContent(query) {
       
       const cleanQuery = query.trim().toLowerCase();
       const results = [];
+
+      // 1. Filename matches first (High Relevance)
+      for (const doc of offlinePdfIndexCache) {
+        if (doc.pdf.toLowerCase().includes(cleanQuery)) {
+          results.push({
+            pdf: doc.pdf,
+            page: 1,
+            snippet: "[Titre du fichier correspond] Document de référence disponible."
+          });
+        }
+      }
       
+      // 2. Text page content matches
       for (const doc of offlinePdfIndexCache) {
         if (!doc.pages) continue;
         for (const p of doc.pages) {
           if (!p.text) continue;
+          
+          // Avoid duplicate results for the same page (e.g. if page 1 matched filename)
+          if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
+            continue;
+          }
+
           const textLower = p.text.toLowerCase();
           let indexMatch = textLower.indexOf(cleanQuery);
           if (indexMatch !== -1) {
@@ -320,7 +656,7 @@ export async function searchPdfsContent(query) {
     }
   }
 
-  const res = await fetch(`/api/search-pdfs?q=${encodeURIComponent(query)}`, {
+  const res = await fetchWithTimeout(`/api/search-pdfs?q=${encodeURIComponent(query)}`, {
     headers: getHeaders()
   });
   return res;
@@ -331,7 +667,7 @@ export async function triggerReindexing() {
     return { success: true, message: "La ré-indexation n'est pas prise en charge hors-ligne." };
   }
 
-  const res = await fetch('/api/reindex', { 
+  const res = await fetchWithTimeout('/api/reindex', { 
     method: 'POST',
     headers: getHeaders()
   });
@@ -376,7 +712,7 @@ export async function fetchPdfIndexStatus() {
 
   // Server mode: fetch pre-calculated status from API
   try {
-    const res = await fetch('/api/pdf-index-status', { headers: getHeaders() });
+    const res = await fetchWithTimeout('/api/pdf-index-status', { headers: getHeaders() });
     if (!res.ok) throw new Error("Failed to fetch PDF index status from server");
     return res.json();
   } catch (err) {
@@ -390,27 +726,36 @@ export function hasRemoteServerConfigured() {
 }
 
 export async function checkRealConnection() {
-  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+  // On localhost, skip remote URL ping to avoid unnecessary cross-origin noise
+  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  if (isLocalWebBrowser) {
+    return navigator.onLine;
+  }
+
+  const configuredUrls = getConfiguredRemoteUrls();
   
-  if (configuredUrl) {
+  for (const configuredUrl of configuredUrls) {
     try {
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 2000); // 2s timeout
+      const id = setTimeout(() => controller.abort(), 3000);
+      const providerHeaders = getExtraHeaders(configuredUrl);
       const res = await fetch(`${configuredUrl}/api/search-status`, {
-        signal: controller.signal
+        signal: controller.signal,
+        headers: { ...getHeaders(), ...providerHeaders }
       });
       clearTimeout(id);
-      return res.ok;
+      if (res.ok) return true;
+      // If we got a response but not ok (e.g. tunnel HTML challenge page) fall through to WAN check
     } catch (_) {
-      return false;
+      // Connection failed, try next configured URL
     }
   }
 
-  // WAN connectivity HEAD request ping (avoiding CORS body parsing restrictions)
+  // WAN connectivity fallback ping — use a simpler endpoint that doesn't require CORS
   try {
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 2000);
-    await fetch('https://httpbin.org/status/200', {
+    const id = setTimeout(() => controller.abort(), 3000);
+    await fetchWithTimeout('https://httpbin.org/get', {
       method: 'HEAD',
       mode: 'no-cors',
       signal: controller.signal
@@ -421,3 +766,127 @@ export async function checkRealConnection() {
     return false;
   }
 }
+
+export async function pingEndpoint(url, timeoutMs = 2500) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    // Determine headers and mode depending on URL type
+    const provider = detectProvider(url);
+    const providerHeaders = getExtraHeaders(url);
+    const isCorsSafePing = url.includes('httpbin.org') || url.includes('localhost') || url.includes('127.0.0.1');
+    const fetchOpts = {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        ...(isCorsSafePing ? getHeaders() : {}),
+        ...providerHeaders
+      }
+    };
+    
+    // For general external domains we want to avoid getting blocked by CORS if they don't support custom headers
+    if (!isCorsSafePing) {
+      fetchOpts.mode = 'cors';
+    }
+
+    const res = await fetch(url, fetchOpts);
+    clearTimeout(timeoutId);
+    return {
+      ok: res.ok,
+      status: res.status,
+      statusText: res.statusText
+    };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    let message = err.message || 'Unknown network error';
+    if (err.name === 'AbortError') {
+      message = `Request timed out after ${timeoutMs}ms`;
+    }
+    return {
+      ok: false,
+      status: 0,
+      statusText: 'Error',
+      error: err,
+      message
+    };
+  }
+}
+
+export async function fetchDiagnosticsSystem() {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/system'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch system diagnostics");
+  return res.json();
+}
+
+export async function fetchDiagnosticsDbStats() {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/db-stats'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch DB stats");
+  return res.json();
+}
+
+export async function fetchDiagnosticsIndexDetail() {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/index-detail'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch index details");
+  return res.json();
+}
+
+export async function fetchDiagnosticsRemoteUrl() {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/remote-server-url'), { headers: getHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch remote server URL");
+  return res.json();
+}
+
+export async function updateDiagnosticsRemoteUrl(url) {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/remote-server-url'), {
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ url })
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to update remote server URL");
+  }
+  return res.json();
+}
+
+export async function fetchTunnelInfo() {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/tunnel-info'), { headers: getHeaders() });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to fetch tunnel info");
+  }
+  return res.json();
+}
+
+export async function fetchServerMetrics() {
+  const res = await fetchWithTimeout(getApiUrl('/api/performance/server-metrics'), { headers: getHeaders() });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to fetch server metrics");
+  }
+  return res.json();
+}
+
+export async function fetchRateLimits() {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/rate-limits'), { headers: getHeaders() });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to fetch rate limits");
+  }
+  return res.json();
+}
+
+export async function uploadPdf(filename, base64Data) {
+  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/upload-pdf'), {
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ filename, base64Data })
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to upload PDF file");
+  }
+  return res.json();
+}
+
+

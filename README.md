@@ -93,16 +93,27 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 └── public/                      # Interface Frontend statique
     ├── drcat_logo.png           # Logo officiel (stéthoscope & croix médicale en C)
     ├── index.html               # Structure HTML5 de l'application
-    ├── style.css                # Design sombre clinique (glassmorphism, responsive)
+    ├── style.css                # Point d'entrée de style CSS
+    ├── css/                     # Dossier des feuilles de style CSS modulaires
+    ├── pdf_viewer.html          # Visionneuse PDF intégrée avec surbrillance
+    ├── manifest.json            # Manifest PWA pour installation mobile
+    ├── service-worker.js        # Service Worker gérant le cache offline du client web
     └── js/
         ├── main.js              # Point d'entrée, orchestration, admin auth
         ├── api.js               # Couche de communication avec l'API serveur
         ├── state.js             # État global de l'application
+        ├── utils.js             # Utilitaires globaux (escapes HTML, toasts, clipboard)
+        ├── debug-console.js     # Console de débogage mobile (l'icône insecte 🐛)
+        ├── performance.js       # Module de télémétrie et de suivi de performance
+        ├── server-providers.js  # Registre et détection des tunnels serveurs
+        ├── remote_config.js     # Config générée avec les URLs distantes (⚠️ hors git)
         └── components/
             ├── sidebar.js       # Sidebar, recherche, filtres, liste des fiches
             ├── workspace.js     # Vue détaillée d'une fiche CAT (tabs, éditeurs)
             ├── dashboard.js     # Tableau de bord, stats, modération admin
-            └── quiz.js          # Moteur du système de quiz (QCM + rédaction)
+            ├── quiz.js          # Moteur du système de quiz (QCM + rédaction)
+            ├── diagnostics.js   # Panneau d'outils de diagnostics cliniques
+            └── performance.js   # Panneau de télémétrie et journal d'événements
 ```
 
 ---
@@ -134,9 +145,10 @@ L'application est pré-configurée avec le widget Termux. Cliquez sur le widget 
 ## 📱 Standalone Android App (Offline Mobile Mode)
 
 For offline clinical usage without running the Termux server:
-1. Switch to the `android-app` branch.
+1. Switch to the `light-android` branch.
 2. Build assets: `node build.js && npx cap sync`.
-3. The standalone APK is built automatically on push to the `android-app` branch via GitHub Actions workflows and can be downloaded from the Action Run page.
+   * **Note on Server URL**: During the build, the compiler reads the target server URL from `remote_server_config.json` and automatically bakes it into the app via `public/js/remote_config.js`. This allows the offline APK to fetch updates and send suggestions to your server when online.
+3. The standalone APK is built automatically on push to the `light-android` branch via GitHub Actions workflows and can be downloaded from the Actions Run page.
 
 ---
 

@@ -1,6 +1,6 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
-import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast } from '../utils.js';
+import { getCleanPdfName, parsePrescriptionText, parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading, triggerHaptic } from '../utils.js';
 
 // DOM Elements
 let workspace, welcomeScreen;
@@ -122,6 +122,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   if (saveNotesBtn) {
     saveNotesBtn.addEventListener('click', () => {
       if (!state.activeCat) return;
+      const restore = setButtonLoading(saveNotesBtn, '<i class="fa-solid fa-floppy-disk"></i> Sauvegarder');
+      
       state.activeCat.notes = notesInput.value;
       
       const progress = getLocalProgress();
@@ -135,12 +137,15 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         saveIndicator.classList.remove('show');
       }, 2500);
 
-      // Remind user to back up their notes via export
-      showToast(
-        'Notes sauvegardées localement. Exportez régulièrement vos données depuis le <strong>tableau de bord</strong> pour les sécuriser.',
-        'fa-cloud-arrow-up',
-        6000
-      );
+      // Brief delay so the user sees the spinner even on fast local saves
+      setTimeout(() => {
+        restore();
+        showToast(
+          'Notes sauvegardées localement. Exportez régulièrement vos données depuis le <strong>tableau de bord</strong> pour les sécuriser.',
+          'fa-cloud-arrow-up',
+         6000
+        );
+      }, 400);
     });
   }
 
@@ -148,6 +153,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
   if (backToQuizBtn) {
     backToQuizBtn.addEventListener('click', () => {
+      state.quizSession.quizViewingCatId = null;
       if (workspace) workspace.style.display = 'none';
       const quizScreen = document.getElementById('quiz-screen');
       if (quizScreen) quizScreen.style.display = 'flex';
@@ -159,7 +165,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   // Print CAT Button
   const printCatBtn = document.getElementById('print-cat-btn');
   if (printCatBtn) {
-    printCatBtn.addEventListener('click', () => {
+    printCatBtn.addEventListener('click', async () => {
       if (!state.activeCat) return;
 
       // Set Date
@@ -212,13 +218,49 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         if (notesSec) notesSec.style.display = 'none';
       }
 
-      // Fire print (show informative toast in Capacitor offline app since native print is unsupported)
-      if (api.isOfflineApp) {
-        showToast("L'impression n'est pas prise en charge sur l'application mobile. Utilisez la version web pour imprimer.", "fa-circle-info", 4500);
+      // Fire print with fallbacks for mobile/Capacitor
+      if (typeof window.Capacitor !== 'undefined' || api.isOfflineApp) {
+        // Mobile: offer copy-to-clipboard as fallback
+        const text = buildPrintableText(state.activeCat);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            showToast("Texte copié dans le presse-papier. Vous pouvez le coller ailleurs.", "fa-clipboard-check", 4000);
+          } catch (_) {
+            showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
+          }
+        } else {
+          showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
+        }
       } else {
         window.print();
       }
     });
+  }
+
+  // Build a plain-text version of the CAT for clipboard/export
+  function buildPrintableText(cat) {
+    const lines = [
+      `Dr.CAT — ${cat.id}. ${cat.title}`,
+      `Catégorie : ${cat.category}`,
+      '-------------------------------------------'
+    ];
+    if (cat.red_flags && cat.red_flags.trim()) {
+      lines.push(`\nRED FLAGS:\n${cat.red_flags}`);
+    }
+    const summary = cat.customSummary || cat.summary;
+    if (summary && summary.trim()) {
+      lines.push(`\nCONDUCTE À TENIR:\n${summary}`);
+    }
+    const prescription = cat.customOrdonnance || cat.ordonnance;
+    if (prescription && prescription.trim()) {
+      lines.push(`\nORDONNANCE TYPE:\n${prescription}`);
+    }
+    if (cat.notes && cat.notes.trim()) {
+      lines.push(`\nNOTES:\n${cat.notes}`);
+    }
+    lines.push(`\nLe : ${new Date().toLocaleDateString('fr-FR')}`);
+    return lines.join('\n');
   }
 
   // Summary Edit Actions
@@ -242,45 +284,51 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       if (!state.activeCat) return;
       const newSummary = summaryEditor.value;
 
-      if (state.isAdmin) {
-        try {
+      if (!newSummary.trim()) {
+        alert("La synthèse ne peut pas être vide.");
+        return;
+      }
+
+      const restore = setButtonLoading(saveSummaryBtn);
+
+      try {
+        if (state.isAdmin) {
           const result = await api.saveCatDataToServer(state.activeCat.id, { summary: newSummary });
           if (result.success) {
             state.activeCat.summary = newSummary;
             renderSummary(newSummary);
-            alert("Synthèse mise à jour avec succès !");
+            showToast("Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
           } else {
             alert("Erreur: " + result.error);
           }
-        } catch (err) {
-          console.error(err);
-          if (window.handleAdminError && await window.handleAdminError(err)) {
+        } else {
+          const confirmSave = confirm(
+            "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
+          );
+          if (!confirmSave) {
+            restore();
             return;
           }
-          alert("Erreur lors de la sauvegarde.");
-        }
-      } else {
-        // Confirmation dialog for suggestions
-        const confirmSave = confirm(
-          "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
-        );
-        if (!confirmSave) return;
 
-        try {
-          const result = await api.submitSuggestion({
-            type: 'edit',
-            catId: state.activeCat.id,
-            data: { summary: newSummary }
-          });
-          if (result.success) {
-            alert("Votre proposition de modification a été envoyée à l'administrateur pour validation.");
-          } else {
-            alert("Erreur: " + result.error);
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Erreur lors de l'envoi de la proposition.");
+          await runSuggestionWithUI(
+            api.submitSuggestion,
+            {
+              type: 'edit',
+              catId: state.activeCat.id,
+              data: { summary: newSummary }
+            },
+            "Votre proposition de modification a été envoyée à l'administrateur pour validation."
+          );
         }
+      } catch (err) {
+        console.error(err);
+        if (window.handleAdminError && await window.handleAdminError(err)) {
+          restore();
+          return;
+        }
+        alert("Erreur lors de la sauvegarde.");
+      } finally {
+        restore();
       }
 
       summaryView.style.display = 'block';
@@ -336,45 +384,51 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       if (!state.activeCat) return;
       const newOrdonnance = prescriptionEditor.value;
 
-      if (state.isAdmin) {
-        try {
+      if (!newOrdonnance.trim()) {
+        alert("L'ordonnance ne peut pas être vide.");
+        return;
+      }
+
+      const restore = setButtonLoading(savePrescriptionBtn);
+
+      try {
+        if (state.isAdmin) {
           const result = await api.saveCatDataToServer(state.activeCat.id, { ordonnance: newOrdonnance });
           if (result.success) {
             state.activeCat.ordonnance = newOrdonnance;
             renderPrescription(newOrdonnance);
-            alert("Ordonnance type mise à jour avec succès !");
+            showToast("Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
           } else {
             alert("Erreur: " + result.error);
           }
-        } catch (err) {
-          console.error(err);
-          if (window.handleAdminError && await window.handleAdminError(err)) {
+        } else {
+          const confirmSave = confirm(
+            "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
+          );
+          if (!confirmSave) {
+            restore();
             return;
           }
-          alert("Erreur lors de la sauvegarde.");
-        }
-      } else {
-        // Confirmation dialog for suggestions
-        const confirmSave = confirm(
-          "Attention : Vos modifications ne seront pas appliquées directement dans l'application. Elles seront envoyées à l'administrateur du site pour relecture et validation avant d'être intégrées.\n\nSouhaitez-vous envoyer cette proposition ?"
-        );
-        if (!confirmSave) return;
 
-        try {
-          const result = await api.submitSuggestion({
-            type: 'edit',
-            catId: state.activeCat.id,
-            data: { ordonnance: newOrdonnance }
-          });
-          if (result.success) {
-            alert("Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation.");
-          } else {
-            alert("Erreur: " + result.error);
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Erreur lors de l'envoi de la proposition.");
+          await runSuggestionWithUI(
+            api.submitSuggestion,
+            {
+              type: 'edit',
+              catId: state.activeCat.id,
+              data: { ordonnance: newOrdonnance }
+            },
+            "Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation."
+          );
         }
+      } catch (err) {
+        console.error(err);
+        if (window.handleAdminError && await window.handleAdminError(err)) {
+          restore();
+          return;
+        }
+        alert("Erreur lors de la sauvegarde.");
+      } finally {
+        restore();
       }
 
       wsPrescription.style.display = 'block';
@@ -475,9 +529,82 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       saveAppStateBeforeNavigation();
     }
   });
+
+  // Swipe navigation touch gesture listeners for mobile
+  let touchstartX = 0;
+  let touchstartY = 0;
+  let touchendX = 0;
+  let touchendY = 0;
+  let isSwipeActive = false;
+
+  if (workspace) {
+    workspace.addEventListener('touchstart', (e) => {
+      isSwipeActive = false;
+      if (!e.target || typeof e.target.closest !== 'function') return;
+
+      // Limit swipe navigation to the top section panel (header or red flags banner)
+      const isTopPanel = e.target.closest('.workspace-header') || e.target.closest('#red-flags-banner');
+      if (!isTopPanel) return;
+
+      // Ignore swipe inside textareas or input fields to prevent cursor interference
+      const tagName = e.target.tagName.toLowerCase();
+      const insideEditor = e.target.closest('#summary-editor') || e.target.closest('#notes-input');
+      if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
+      
+      isSwipeActive = true;
+      touchstartX = e.changedTouches[0].screenX;
+      touchstartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    workspace.addEventListener('touchend', (e) => {
+      if (!isSwipeActive) return;
+      isSwipeActive = false;
+
+      if (!e.target || typeof e.target.closest !== 'function') return;
+
+      touchendX = e.changedTouches[0].screenX;
+      touchendY = e.changedTouches[0].screenY;
+      handleSwipeGesture();
+    }, { passive: true });
+  }
+
+  function handleSwipeGesture() {
+    const diffX = touchendX - touchstartX;
+    const diffY = touchendY - touchstartY;
+    const minDistance = 60; // minimum touch distance
+
+    // Verify it is a primary horizontal swipe (horizontal distance is greater than twice vertical distance)
+    if (Math.abs(diffX) > minDistance && Math.abs(diffX) > Math.abs(diffY) * 2) {
+      const activeItem = document.querySelector('.cat-item.active');
+      const items = Array.from(document.querySelectorAll('.cat-item'));
+      if (items.length === 0 || !activeItem) return;
+
+      const currentIndex = items.indexOf(activeItem);
+      if (currentIndex === -1) return;
+
+      let nextIndex = currentIndex;
+      if (diffX < 0) {
+        // Swipe Left -> Next CAT card
+        nextIndex = (currentIndex + 1) % items.length;
+      } else {
+        // Swipe Right -> Previous CAT card
+        nextIndex = (currentIndex - 1 + items.length) % items.length;
+      }
+
+      const targetItem = items[nextIndex];
+      if (targetItem) {
+        targetItem.click();
+        targetItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        
+        // Lightweight haptic vibration response
+        triggerHaptic(true);
+      }
+    }
+  }
 }
 
 export function selectCat(cat, preserveTab = false) {
+  if (window.perf) window.perf.startMeasure('workspace.selectCat');
   state.activeCat = cat;
   state.activePrescriptionVariantIndex = 0;
 
@@ -495,10 +622,11 @@ export function selectCat(cat, preserveTab = false) {
   const quizScreen = document.getElementById('quiz-screen');
   if (quizScreen) quizScreen.style.display = 'none';
 
-  // Toggle "Retour au Quiz" button if a quiz is in progress
+  // Toggle "Retour au Quiz" button if we are viewing a CAT referenced from the quiz
   const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
   if (backToQuizBtn) {
-    if (state.quizSession && state.quizSession.questions && state.quizSession.questions.length > 0) {
+    if (state.quizSession && 
+        state.quizSession.quizViewingCatId === cat.id) {
       backToQuizBtn.style.display = 'inline-flex';
     } else {
       backToQuizBtn.style.display = 'none';
@@ -530,7 +658,7 @@ export function selectCat(cat, preserveTab = false) {
   });
 
   // Render markdown summary
-  renderSummary(cat.customSummary || cat.summary);
+  renderSummary(cat.customSummary || cat.summary, cat);
 
   // Set Notes
   if (notesInput) notesInput.value = cat.notes || '';
@@ -583,11 +711,24 @@ export function selectCat(cat, preserveTab = false) {
       }
     }
   }
+  if (window.perf) window.perf.endMeasure('workspace.selectCat');
 }
 
-export function renderSummary(text) {
+export function renderSummary(text, cat) {
   if (!summaryView) return;
   summaryView.innerHTML = parseSummaryMarkdown(text);
+
+  if (cat && cat.history && cat.history.length > 0) {
+    let historyHtml = '<div class="cat-history-section" style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:14px; pointer-events:none;">';
+    historyHtml += '<h4 style="font-size:11.5px; color:var(--text-secondary); margin-bottom:8px; display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-clock-rotate-left"></i> Historique des versions</h4>';
+    historyHtml += '<ul style="list-style:none; padding:0; margin:0; font-size:11px; color:var(--text-muted); display:flex; flex-direction:column; gap:4px;">';
+    cat.history.forEach(h => {
+      const dateStr = new Date(h.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      historyHtml += `<li><span style="font-weight:600; color:var(--text-secondary);">${dateStr}</span> — ${escapeHTML(h.detail || h.action)}</li>`;
+    });
+    historyHtml += '</ul></div>';
+    summaryView.innerHTML += historyHtml;
+  }
 }
 
 export function renderPrescription(text) {
@@ -848,6 +989,7 @@ async function performPdfSearch() {
   const query = pdfContentSearchInput.value.trim();
   if (!query) return;
 
+  const restoreSearchBtn = setButtonLoading(pdfContentSearchBtn, '<i class="fa-solid fa-magnifying-glass"></i> Rechercher');
   pdfSearchLoading.style.display = 'flex';
   pdfSearchResultsContainer.innerHTML = '';
 
@@ -875,11 +1017,11 @@ async function performPdfSearch() {
       const regex = new RegExp(`(${escapedQuery})`, 'gi');
       const highlightedSnippet = escapedSnippet.replace(regex, '<mark>$1</mark>');
 
-      const displayTitle = res.pdf.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
+      const displayTitle = escapeHTML(res.pdf.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
                                   .replace(/^\d+锔忊儯/i, '')
                                   .replace(/馃[A-Z0-9]/g, '')
                                   .replace(/_/g, ' ')
-                                  .replace(/\.pdf$/i, '');
+                                  .replace(/\.pdf$/i, ''));
 
       resultsHtml += `
         <div class="pdf-search-result-card" data-pdf="${encodeURIComponent(res.pdf)}" data-page="${res.page}">
@@ -908,6 +1050,7 @@ async function performPdfSearch() {
     pdfSearchResultsContainer.innerHTML = '<p class="text-danger text-center" style="margin-top: 20px;">Une erreur est survenue lors de la recherche.</p>';
   } finally {
     pdfSearchLoading.style.display = 'none';
+    if (restoreSearchBtn) restoreSearchBtn();
   }
 }
 

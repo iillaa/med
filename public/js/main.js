@@ -1,13 +1,16 @@
 import { state, getLocalProgress } from './state.js';
 import * as api from './api.js';
+import { initDebugConsole } from './debug-console.js';
 import * as sidebar from './components/sidebar.js';
 import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
-import { showToast } from './utils.js';
+import * as diagnostics from './components/diagnostics.js';
+import * as performanceComponent from './components/performance.js';
+import { showToast, runSuggestionWithUI } from './utils.js';
+import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 
-// Tracks whether the current physical device is localhost (set once on load)
-let isLocalDevice = false;
+// Tracks app mode (set once on load via api.getAppMode())
 
 
 // Global administrative error interceptor
@@ -38,30 +41,55 @@ window.handleAdminError = async function(err) {
 let addCatBtn, addCatModal, closeAddCatModalBtn, cancelAddCatBtn, addCatForm;
 
 // Entry Point
-document.addEventListener('DOMContentLoaded', async () => {
-  // PWA Service Worker — only register on production, unregister on dev to avoid stale caches
-  if ('serviceWorker' in navigator) {
-    const isDev = location.hostname === 'localhost' ||
-                  location.hostname === '127.0.0.1' ||
-                  location.hostname.endsWith('.ngrok-free.app') ||
-                  location.hostname.endsWith('.ngrok.io');
+async function bootstrapApp() {
+  // ── START DEBUG CONSOLE (catches everything from the beginning) ──
+  initDebugConsole();
+  
+  // Protect all localStorage reads from crashing the app
+  const origLocalStorageGetItem = Storage.prototype.getItem;
+  Storage.prototype.getItem = function(key) {
+    try { return origLocalStorageGetItem.call(this, key); }
+    catch (_) { return null; }
+  };
 
-    if (isDev) {
-      // Development: aggressively unregister all service workers and clear caches
+  // Global Error Interceptor for Verbose Console Logs & Toast Notifications
+  window.onerror = function(message, source, lineno, colno, error) {
+    const errorStr = `[Runtime Error] ${message} at ${source}:${lineno}:${colno}`;
+    console.error(errorStr, error);
+    showToast("Une erreur d'exécution est survenue. Détails enregistrés dans l'onglet Diagnostic.", "fa-triangle-exclamation", 7000);
+    return false; // Let browser default log run as well
+  };
+
+  window.onunhandledrejection = function(event) {
+    const errorStr = `[Promise Rejection] ${event.reason}`;
+    console.error(errorStr, event.reason);
+    showToast("Erreur réseau ou réponse de base de données non reconnue.", "fa-circle-exclamation", 5000);
+  };
+
+  // PWA Service Worker — disable in standalone Capacitor offline app to prevent logo freezes
+  if ('serviceWorker' in navigator) {
+    if (api.isOfflineApp) {
+      // Always unregister to avoid stale caches/clients.claim deadlocks in Capacitor standalone app
       navigator.serviceWorker.getRegistrations().then(regs => {
         regs.forEach(reg => reg.unregister());
       });
       caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      console.log('[Startup] Service worker disabled in Standalone Offline App to prevent freezes.');
     } else {
-      // Production: register the service worker for offline PWA support
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('PWA SW registered:', reg.scope))
-          .catch(err => console.error('PWA SW failed:', err));
-      });
+      const isDev = location.hostname === 'localhost' ||
+                    location.hostname === '127.0.0.1' ||
+                    PROVIDERS.some(p => p.isDevHostname(location.hostname));
+      if (!isDev) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('PWA SW registered:', reg.scope))
+            .catch(err => console.error('PWA SW failed:', err));
+        });
+      }
     }
   }
 
+ 
   // Theme Toggle Initialization
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const themeToggleIcon = document.getElementById('theme-toggle-icon');
@@ -74,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       themeToggleIcon.classList.add('fa-sun');
     }
   }
-
+ 
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('light-theme');
@@ -92,20 +120,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
-
+ 
   // Initialize Components
   sidebar.initSidebar(selectCatWrapper, onFilterTriggered);
   workspace.initWorkspace(onStatusChange, onCatDeleted, onProgressReset);
   dashboard.initDashboard(selectCatWrapper, onSuggestionHandled);
   quiz.initQuiz(selectCatWrapper);
-
+  diagnostics.initDiagnostics();
+  performanceComponent.initPerformance();
+ 
   // Modal DOM Elements
   addCatBtn = document.getElementById('add-cat-btn');
   addCatModal = document.getElementById('add-cat-modal');
   closeAddCatModalBtn = document.getElementById('close-add-cat-modal-btn');
   cancelAddCatBtn = document.getElementById('cancel-add-cat-btn');
   addCatForm = document.getElementById('add-cat-form');
-
+ 
   // Wire up Modal Event Listeners
   if (addCatBtn) {
     addCatBtn.addEventListener('click', () => {
@@ -128,15 +158,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (addCatModal) addCatModal.style.display = 'flex';
     });
   }
-
+ 
   const closeModal = () => {
     if (addCatModal) addCatModal.style.display = 'none';
     if (addCatForm) addCatForm.reset();
   };
-
+ 
   if (closeAddCatModalBtn) closeAddCatModalBtn.addEventListener('click', closeModal);
   if (cancelAddCatBtn) cancelAddCatBtn.addEventListener('click', closeModal);
-
+ 
   if (addCatForm) {
     addCatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -149,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       const rawKeywords = document.getElementById('new-cat-pdf-keywords').value;
       const pdf_keywords = rawKeywords ? rawKeywords.split(',').map(kw => kw.trim()).filter(kw => kw) : [];
-
+ 
       if (state.isAdmin) {
         try {
           const result = await api.createCatOnServer({ title, category, red_flags, summary, ordonnance, pdf_keywords });
@@ -175,17 +205,17 @@ document.addEventListener('DOMContentLoaded', async () => {
           "Attention : Cette nouvelle fiche ne sera pas ajoutée directement. Elle sera envoyée à l'administrateur du site pour relecture et validation avant d'être intégrée.\n\nSouhaitez-vous envoyer cette proposition ?"
         );
         if (!confirmSubmit) return;
-
         try {
-          const result = await api.submitSuggestion({
-            type: 'add',
-            data: { title, category, red_flags, summary, ordonnance, pdf_keywords }
-          });
-          if (result.success) {
+          const success = await runSuggestionWithUI(
+            api.submitSuggestion,
+            {
+              type: 'add',
+              data: { title, category, red_flags, summary, ordonnance, pdf_keywords }
+            },
+            `Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`
+          );
+          if (success) {
             closeModal();
-            alert(`Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`);
-          } else {
-            alert("Erreur : " + result.error);
           }
         } catch (err) {
           console.error(err);
@@ -194,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
-
+ 
   // Wire up Admin Login Button Event Listener
   let adminLoginBtn = document.getElementById('admin-login-btn');
   if (adminLoginBtn) {
@@ -214,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               alert("Connexion réussie !");
               location.reload();
             } else {
-              alert("Mot de passe incorrect.");
+              alert(res.error || "Mot de passe incorrect.");
             }
           } catch (err) {
             console.error("Login error:", err);
@@ -224,32 +254,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
-
+ 
   // --- Localhost-only Admin Button Visibility ---
-  // Check with the server if this connection is from the local machine.
-  // The server reads the actual TCP socket IP, not the HTTP Host header.
   if (adminLoginBtn) {
-    // Hide by default until confirmed local
     adminLoginBtn.style.display = 'none';
-    isLocalDevice = await api.checkIsLocal();
-    if (isLocalDevice) {
-      adminLoginBtn.style.display = 'flex';
-    } else {
-      console.log('[Security] Admin button hidden: not a local connection.');
-    }
   }
-
+ 
   // Handle Online/Offline Status Events
   window.addEventListener('online', () => {
-    showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
+    showToast("Connexion réseau détectée. Synchronisation...", "fa-wifi", 4000);
+    runBackgroundSync();
   });
   window.addEventListener('offline', () => {
-    showToast("Connexion perdue. Les modifications locales seront enregistrées sur ce navigateur.", "fa-circle-xmark", 6000);
+    showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000);
+    if (api.isOfflineApp) {
+      api.setAppMode(api.APP_MODES.ANDROID_OFFLINE);
+      state.isOnlineAtStartup = false;
+    }
+  });
+  window.addEventListener('drcat-app-mode-changed', () => {
+    updateEditButtonsVisibility();
   });
 
+ 
   // Handle keyboard shortcuts
   window.addEventListener('keydown', (e) => {
-    // 1. Focus search input when pressing 's' (if not already typing in an input/textarea)
     const isEditing = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
     if (e.key.toLowerCase() === 's' && !isEditing) {
       e.preventDefault();
@@ -259,8 +288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchBox.select();
       }
     }
-
-    // 2. Close modals with Esc
+ 
     if (e.key === 'Escape') {
       const modal = document.getElementById('add-cat-modal');
       if (modal && modal.style.display !== 'none') {
@@ -269,14 +297,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (form) form.reset();
       }
     }
-
-    // 3. Arrow navigation for the CAT list (if not typing in search box)
+ 
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !isEditing) {
       e.preventDefault();
       const activeItem = document.querySelector('.cat-item.active');
       const items = Array.from(document.querySelectorAll('.cat-item'));
       if (items.length === 0) return;
-
+ 
       let nextIndex = 0;
       if (activeItem) {
         const currentIndex = items.indexOf(activeItem);
@@ -294,64 +321,307 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   });
-
+ 
   // Load Initial App State
   await initApp();
-
+ 
   // Fetch initial PDF indexing status
   workspace.updatePdfIndexStatus();
-});
+}
 
-// App Initialization routine
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapApp);
+} else {
+  bootstrapApp();
+}
+ 
+// App Initialization routine with robust fault-isolation boundaries
 async function initApp() {
-  try {
-    // Perform robust connection ping test at boot
-    state.isOnlineAtStartup = await api.checkRealConnection();
-    console.log("[Startup] Real connection check status:", state.isOnlineAtStartup);
+  const loadingOverlay = document.getElementById('app-loading-overlay');
+  const loadingBar = document.getElementById('app-loading-bar');
+  if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+  if (loadingBar) loadingBar.style.width = '5%';
 
-    // Start background network check interval to alert transitions
-    let lastState = state.isOnlineAtStartup;
-    async function checkNetworkPeriodically() {
-      const isOnline = await api.checkRealConnection();
-      if (lastState !== isOnline) {
-        if (isOnline) {
-          showToast("Connexion rétablie ! L'application fonctionne en ligne.", "fa-wifi", 4000);
-        } else {
-          showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000);
-        }
-        state.isOnlineAtStartup = isOnline;
-        updateEditButtonsVisibility();
-      }
-      lastState = isOnline;
-      setTimeout(checkNetworkPeriodically, 8000);
+  const setLoadingProgress = (pct) => {
+    if (window.setLoaderProgress) {
+      window.setLoaderProgress(pct);
+    } else if (loadingBar) {
+      loadingBar.style.width = `${pct}%`;
     }
-    setTimeout(checkNetworkPeriodically, 8000);
+  };
 
-    // 1. Check Admin status
+  setLoadingProgress(10);
+
+  // ── 1. Detect App Mode (Fast, no network) ──
+  const mode = api.getAppMode();
+  console.log(`[Startup] Mode: ${mode}`);
+  setLoadingProgress(20);
+
+  // ── 2. Admin Check (only if local) ──
+  try {
     state.isAdmin = await api.checkAdminStatus();
     console.log("Admin mode:", state.isAdmin);
+  } catch (err) {
+    console.warn("[Startup] Admin status check failed.", err);
+    state.isAdmin = false;
+  }
+  updateEditButtonsVisibility();
+  setLoadingProgress(40);
 
-    // Initial button visibility update
-    const adminLoginBtn = document.getElementById('admin-login-btn');
-    updateEditButtonsVisibility();
+  // ── 3. Fetch CATs (CRITICAL: This must NEVER block on Android) ──
+  let cats = [];
+  try {
+    cats = await api.fetchCats();
+    localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+    if (window.perf) window.perf.recordMilestone('catsFetched');
+  } catch (err) {
+    console.error("[Startup Error] Fetch CATs failed, using emergency fallback.", err);
+    try {
+      const res = await fetch('data/cats_db.json');
+      if (!res.ok) throw new Error("Emergency fallback failed");
+      cats = await res.json();
+      showToast("Chargement de secours local.", "fa-triangle-exclamation", 4000);
+    } catch (fallbackErr) {
+      console.error("[Startup Critical] No data available.", fallbackErr);
+      showToast("Base de données indisponible.", "fa-circle-exclamation", 9000);
+      if (loadingOverlay) loadingOverlay.classList.add('hidden');
+      return;
+    }
+  }
+  setLoadingProgress(60);
 
-    // 2. Fetch CATs first to build the interface instantly
-    let cats = await api.fetchCats();
+  // ── 4. Merge Data ──
+  const localProgress = getLocalProgress();
+  let localOverrides = {};
+  let customCreatedCats = [];
+  try {
+    localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+  } catch (_) {}
 
-    // 3. Merge server CATs with local progress and local offline overrides
-    const localProgress = getLocalProgress();
-    const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    const customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+  if (api.isOfflineApp) {
+    cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
+    cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
+  }
 
-    // Combine standard CATs with custom ones created offline
-    if (api.isOfflineApp) {
-      // Filter out any locally deleted standard CATs
-      cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
-      // Append custom created CATs
-      cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
+  state.allCats = cats.map(cat => {
+    const localEntry = localProgress[cat.id] || {};
+    const overrides = localOverrides[cat.id] || {};
+    return {
+      ...cat,
+      status: localEntry.status || 'todo',
+      notes: localEntry.notes || '',
+      summary: overrides.customSummary || cat.summary,
+      customSummary: overrides.customSummary || cat.summary,
+      ordonnance: overrides.customOrdonnance || cat.ordonnance,
+      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+    };
+  });
+  setLoadingProgress(75);
+
+  // ── 5. Render UI ──
+  try {
+    sidebar.populateCategoryFilter(state.allCats);
+    sidebar.renderCatList(state.allCats, selectCatWrapper);
+    calculateStats();
+    dashboard.renderDashboard(selectCatWrapper);
+  } catch (err) {
+    console.error("[Startup Render Error]", err);
+  }
+  setLoadingProgress(90);
+
+  // ── 6. Restore Navigation State ──
+  try {
+    workspace.restoreAppState();
+  } catch (err) {
+    console.error("[Startup Navigation Error]", err);
+  }
+
+  // ── 7. Background Tasks (PDFs, Indexes) ──
+  setTimeout(() => {
+    Promise.all([
+      api.fetchPdfs().catch(err => {
+        console.warn("[Background] PDF fetch failed, using local list.", err);
+        return fetch('data/pdf_list.json').then(r => r.json()).catch(() => []);
+      }),
+      api.fetchPdfIndexStatus().catch(err => {
+        console.warn("[Background] Index status failed.", err);
+        return {};
+      })
+    ]).then(([pdfs, pdfIndexStatus]) => {
+      state.allPdfs = pdfs;
+      state.pdfIndexStatus = pdfIndexStatus;
+      workspace.updatePdfIndexStatus();
+      if (state.activeCat) {
+        workspace.selectCat(state.activeCat, true);
+      }
+      console.log("[Background] PDFs loaded.");
+    }).catch(err => console.error("[Background] PDF load failed:", err));
+  }, 100);
+
+  setLoadingProgress(100);
+
+  // ── 8. Hide Overlay ──
+  // (Automatically handled by window.setLoaderProgress(100) above)
+
+  // ── 9. 🔥 BACKGROUND SYNC FOR ANDROID (NO FREEZE + REMOTE SYNC) 🔥 ──
+  setTimeout(() => {
+    runBackgroundSync();
+    // Periodically run background sync every 30 seconds
+    setInterval(runBackgroundSync, 30000);
+  }, 1000);
+}
+
+export async function runBackgroundSync() {
+  if (!api.isOfflineApp || !api.hasRemoteServer()) return;
+
+  console.log('[Background Sync] Checking for remote updates...');
+  try {
+    const remoteUrls = api.getConfiguredRemoteUrls();
+    let reachable = false;
+    for (const url of remoteUrls) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        // Merge base headers + provider-specific bypass headers (e.g. ngrok-skip-browser-warning)
+        const headers = {
+          ...api.getHeaders(),
+          ...getExtraHeaders(url)
+        };
+        const res = await fetch(`${url}/api/search-status`, {
+          signal: controller.signal,
+          headers
+        });
+        if (!res.ok) throw new Error('Server returned error status');
+        clearTimeout(timeoutId);
+        reachable = true;
+        break;
+      } catch (_) {}
     }
 
-    state.allCats = cats.map(cat => {
+    const wasOffline = (api.getAppMode() === api.APP_MODES.ANDROID_OFFLINE);
+
+    if (reachable) {
+      console.log('[Background Sync] Server reachable! Fetching latest data...');
+      
+      // Update app mode to ANDROID_ONLINE to allow api.fetchCats() to hit the server
+      api.setAppMode(api.APP_MODES.ANDROID_ONLINE);
+      state.isOnlineAtStartup = true;
+
+      const lastSyncTime = parseInt(localStorage.getItem('dr_cat_last_sync_time') || '0');
+      const freshCats = await api.fetchCats(lastSyncTime);
+
+      if (freshCats.length === 0) {
+        console.log('[Background Sync] Remote database is in sync. No action needed.');
+        localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+        if (wasOffline) {
+          showToast('📡 Connexion serveur établie. Données synchronisées !', 'fa-cloud-arrow-up', 4000);
+        }
+        return;
+      }
+
+      // Check if this is a full list or an incremental update
+      const localServerCats = (state.allCats || []).filter(c => !c.id.toString().startsWith('offline-') && c.id <= 1000);
+      const isIncremental = freshCats.length < (localServerCats.length * 0.7);
+
+      let isUpdated = false;
+      if (isIncremental) {
+        // If incremental, we have updates if any card is new or modified
+        for (const remote of freshCats) {
+          const local = localServerCats.find(c => c.id === remote.id);
+          if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
+            isUpdated = true;
+            break;
+          }
+        }
+      } else {
+        // If full list (e.g. static fallback), compare counts and contents
+        isUpdated = localServerCats.length !== freshCats.length;
+        if (!isUpdated) {
+          for (const remote of freshCats) {
+            const local = localServerCats.find(c => c.id === remote.id);
+            if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
+              isUpdated = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (isUpdated) {
+        console.log('[Background Sync] Server changes detected! Offering update...');
+        showToast(
+          'Nouvelles fiches disponibles — <span id="update-app-toast-btn" style="color:#06b6d4; font-weight:700; text-decoration:underline; cursor:pointer;">Actualiser ?</span>',
+          'fa-arrows-rotate',
+          15000
+        );
+
+        // Attach action listener to the toast link
+        setTimeout(() => {
+          const updateBtn = document.getElementById('update-app-toast-btn');
+          if (updateBtn) {
+            updateBtn.addEventListener('click', (event) => {
+              event.preventDefault();
+              applySyncUpdates(freshCats, isIncremental);
+              
+              const toast = document.getElementById('drcat-toast');
+              if (toast) toast.remove();
+              
+              showToast('Mise à jour appliquée avec succès !', 'fa-circle-check', 3000);
+            });
+          }
+        }, 150);
+      } else {
+        console.log('[Background Sync] Remote database is in sync. No action needed.');
+        localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+      }
+
+      if (wasOffline) {
+        showToast('📡 Connexion serveur établie. Données synchronisées !', 'fa-cloud-arrow-up', 4000);
+      }
+    } else {
+      console.log('[Background Sync] Server not reachable, staying offline.');
+      api.setAppMode(api.APP_MODES.ANDROID_OFFLINE);
+      state.isOnlineAtStartup = false;
+    }
+  } catch (err) {
+    console.warn('[Background Sync] Failed:', err.message);
+  }
+}
+
+// Helper to safely apply background sync updates to the UI
+function applySyncUpdates(freshCats, isIncremental) {
+  const localProgress = getLocalProgress();
+  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+
+  if (isIncremental) {
+    // Incremental merge: update or insert fiches inside state.allCats
+    freshCats.forEach(remote => {
+      const idx = state.allCats.findIndex(c => c.id === remote.id);
+      const localEntry = localProgress[remote.id] || {};
+      const overrides = localOverrides[remote.id] || {};
+      const merged = {
+        ...remote,
+        status: localEntry.status || 'todo',
+        notes: localEntry.notes || '',
+        summary: overrides.customSummary || remote.summary,
+        customSummary: overrides.customSummary || remote.summary,
+        ordonnance: overrides.customOrdonnance || remote.ordonnance,
+        customOrdonnance: overrides.customOrdonnance || remote.ordonnance
+      };
+      if (idx !== -1) {
+        state.allCats[idx] = merged;
+      } else {
+        state.allCats.push(merged);
+      }
+    });
+  } else {
+    // Full replacement merge
+    const existingIds = new Set(freshCats.map(c => c.id));
+    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+      .filter(c => !existingIds.has(c.id));
+
+    state.allCats = [...freshCats, ...customCats].map(cat => {
       const localEntry = localProgress[cat.id] || {};
       const overrides = localOverrides[cat.id] || {};
       return {
@@ -364,43 +634,14 @@ async function initApp() {
         customOrdonnance: overrides.customOrdonnance || cat.ordonnance
       };
     });
-
-    // 4. Instantly render UI Components
-    sidebar.populateCategoryFilter(state.allCats);
-    sidebar.renderCatList(state.allCats, selectCatWrapper);
-    calculateStats();
-    dashboard.renderDashboard(selectCatWrapper);
-
-    // 5. Restore saved navigation state (if returning from PDF reader)
-    workspace.restoreAppState();
-
-    // 6. Fetch PDFs and index status asynchronously in the background to speed up initial load
-    Promise.all([
-      api.fetchPdfs(),
-      api.fetchPdfIndexStatus()
-    ]).then(([pdfs, pdfIndexStatus]) => {
-      state.allPdfs = pdfs;
-      state.pdfIndexStatus = pdfIndexStatus;
-      
-      // Update UI components that depend on PDF statuses
-      workspace.updatePdfIndexStatus();
-      if (state.activeCat) {
-        workspace.selectCat(state.activeCat, true);
-      }
-      console.log("[Background] PDFs and index status loaded successfully.");
-    }).catch(err => {
-      console.error("[Background] Failed to load PDFs and index status:", err);
-    });
-
-  } catch (err) {
-    console.error('Error initializing app:', err);
-    showToast(
-      "Erreur de connexion. Impossible de charger les données. Assurez-vous que le serveur Node tourne.",
-      "fa-circle-exclamation",
-      8000
-    );
   }
+
+  localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+  sidebar.renderCatList(state.allCats, selectCatWrapper);
+  calculateStats();
+  dashboard.renderDashboard(selectCatWrapper);
 }
+
 
 // Select CAT wrapper that delegates to workspace component
 function selectCatWrapper(cat) {
@@ -469,37 +710,86 @@ export function updateEditButtonsVisibility() {
   const addCatBtn = document.getElementById('add-cat-btn');
   const adminLoginBtn = document.getElementById('admin-login-btn');
   
-  if (api.isOfflineApp) {
-    if (adminLoginBtn) adminLoginBtn.style.display = 'none';
-    if (addCatBtn) addCatBtn.style.display = state.isOnlineAtStartup ? 'flex' : 'none';
-  } else {
-    if (addCatBtn) addCatBtn.style.display = 'flex';
-    if (adminLoginBtn && isLocalDevice) {
+  const mode = api.getAppMode();
+  const isAdminLocal = mode === api.APP_MODES.ADMIN_LOCAL;
+  const isWebOrAndroidOnline = [api.APP_MODES.WEB_CLIENT, api.APP_MODES.ANDROID_ONLINE].includes(mode);
+  const isAndroidOffline = mode === api.APP_MODES.ANDROID_OFFLINE;
+
+  // ── Admin Login Button: ONLY on localhost ──
+  if (adminLoginBtn) {
+    if (isAdminLocal) {
       adminLoginBtn.style.display = 'flex';
       if (state.isAdmin) {
         adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Déconnexion Admin';
-        adminLoginBtn.classList.remove('action-btn');
-        adminLoginBtn.classList.add('cancel-btn');
-        adminLoginBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        adminLoginBtn.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
         adminLoginBtn.style.color = 'var(--color-success)';
       } else {
         adminLoginBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Connexion Admin';
-        adminLoginBtn.classList.remove('cancel-btn');
-        adminLoginBtn.classList.add('action-btn');
-        adminLoginBtn.style.borderColor = '';
-        adminLoginBtn.style.color = '';
+        adminLoginBtn.style.backgroundColor = 'var(--bg-card)';
+        adminLoginBtn.style.color = 'var(--text-primary)';
       }
+    } else {
+      adminLoginBtn.style.display = 'none';
     }
   }
-  
-  const deleteBtn = document.getElementById('delete-cat-btn');
+
+  // ── Add CAT Button ──
+  if (addCatBtn) {
+    if (isAdminLocal) {
+      addCatBtn.style.display = 'flex';
+      addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> CAT';
+    } else if (isWebOrAndroidOnline) {
+      addCatBtn.style.display = 'flex';
+      addCatBtn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> Suggérer CAT';
+    } else {
+      addCatBtn.style.display = 'none';
+    }
+  }
+
+  // ── Edit Summary / Prescription / Delete buttons ──
   const editSummaryBtnEl = document.getElementById('edit-summary-btn');
   const editPrescriptionBtnEl = document.getElementById('edit-prescription-btn');
-  
-  if (api.isOfflineApp) {
+  const deleteBtn = document.getElementById('delete-cat-btn');
+
+  if (isAdminLocal && state.isAdmin) {
+    if (editSummaryBtnEl) {
+      editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i> Modifier la fiche';
+      editSummaryBtnEl.style.display = 'inline-flex';
+    }
+    if (editPrescriptionBtnEl) {
+      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i> Modifier ordonnance';
+      editPrescriptionBtnEl.style.display = 'inline-flex';
+    }
+    if (deleteBtn) {
+      deleteBtn.style.display = (state.activeCat && state.activeCat.id > 55) ? 'inline-flex' : 'none';
+    }
+  } else if (isWebOrAndroidOnline) {
+    if (editSummaryBtnEl) {
+      editSummaryBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer modif.';
+      editSummaryBtnEl.style.display = 'inline-flex';
+    }
+    if (editPrescriptionBtnEl) {
+      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
+      editPrescriptionBtnEl.style.display = 'inline-flex';
+    }
     if (deleteBtn) deleteBtn.style.display = 'none';
-    const displayStyle = state.isOnlineAtStartup ? 'inline-flex' : 'none';
-    if (editSummaryBtnEl) editSummaryBtnEl.style.display = displayStyle;
-    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = displayStyle;
+  } else {
+    if (editSummaryBtnEl) editSummaryBtnEl.style.display = 'none';
+    if (editPrescriptionBtnEl) editPrescriptionBtnEl.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'none';
+  }
+
+  diagnostics.updateDiagnosticsButtonVisibility();
+  performanceComponent.updatePerformanceButtonVisibility();
+
+  // ── Specialty Export Container: ONLY for Admin ──
+  const specialtyExportContainer = document.querySelector('.specialty-export-container');
+  if (specialtyExportContainer) {
+    if (isAdminLocal && state.isAdmin) {
+      specialtyExportContainer.style.display = 'flex';
+    } else {
+      specialtyExportContainer.style.display = 'none';
+    }
   }
 }
+

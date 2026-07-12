@@ -12,7 +12,7 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 
 ### 2. Localhost Verification via Raw Sockets
 * **Choice**: Locking the login route by matching `req.socket.remoteAddress` and evaluating proxy headers (`X-Forwarded-For`).
-* **Benefit**: Guarantees that remote users accessing the app via port-forwarding (e.g., ngrok tunnels) cannot access the admin login page or brute-force administrative credentials.
+* **Benefit**: Guarantees that remote users accessing the app via port-forwarding (e.g., tunnel tunnels) cannot access the admin login page or brute-force administrative credentials.
 
 ### 3. Frozen Startup Connection State
 * **Choice**: Reading connection state once at load time (`state.isOnlineAtStartup = navigator.onLine`).
@@ -37,3 +37,54 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 ### 4. Absolute Local System Paths in WebViews
 * **Problem**: Attempting to link local system files directly using `file:///storage/emulated/...` inside browser pages. Android WebViews block direct file scheme requests for security.
 * **Solution**: Bundle resources into the application assets folder during development compilation, or fetch files through Capacitor filesystem modules.
+
+### 5. Ngrok HTML Interception in AJAX Calls
+* **Problem**: When accessing the server remotely via an tunnel public tunnel, browsers without existing cookies or with strict privacy shield configurations (e.g. Brave, Firefox Private) intercept AJAX JSON calls and receive the tunnel HTML landing warning page. Parsing this HTML as JSON throws SyntaxErrors (unexpected '<') and breaks application startup (empty list rendering).
+* **Solution**: Updated `getHeaders()` to check if `window.location.hostname` contains `tunnel` dynamically. This automatically injects the `tunnel-skip-browser-warning: true` header to bypass the warning for all browser/app users.
+
+### 6. Misaligned Closing Elements causing UI Leaks
+* **Problem**: Misplaced closing `</div>` tags in the HTML can break layout containers. If an admin-only block is closed too early, succeeding admin components spill outside the container and bypass the admin state check, rendering visible to ordinary guest users.
+* **Solution**: Enforce strict validation of DOM hierarchy. Ensure all admin-only modules are fully encapsulated inside `#admin-moderation-panel`.
+
+### 7. ES Module Syntax Constraints in WebView Environments
+* **Problem**: Attempting to conditionally toggle module logic on Android by nesting `export` statements inside blocks (like `if` / `else` blocks) is syntactically invalid under ECMAScript Module specifications. Some strict JavaScript engines (like Android WebView's V8) will fail at parse-time with a `SyntaxError`, killing the entire import graph and freezing the application on startup without throwing runtime caught exceptions.
+* **Solution**: Keep all `export` statements at the top level of the file. Use ternary assignments or local variable pointers initialized at runtime to conditionally choose implementation structures before exporting them.
+
+### 8. Race Conditions on Ultra-Fast Page Boots
+* **Problem**: Setting delayed simulated progress bar timers (e.g. `setTimeout(..., 600)`) in the loading overlay to make loading feel smooth can cause race conditions when the app loads extremely quickly (e.g. under 100ms on localhost). The app completes loading, hides the loading banner, but then the delayed timeout fires *afterward*, re-showing the overlay and leaving the app permanently covered.
+* **Solution**: Unify the loader logic into a single event-driven progress manager (`window.setLoaderProgress()`). Track successful boot via a boolean flag (`window.__drCatBooted = true`) and verify it inside all loader timers and event handlers to discard stale tasks.
+
+### 9. Capturing-Phase Error Listeners Trapping Non-Fatal Asset 404s
+* **Problem**: Listening to `error` events in the capturing phase (`true`) to catch early startup module crashes also traps normal resource loading failures (like a `404 Not Found` for `capacitor.js` on localhost). If the error handler automatically locks the loading screen visible on any error, these harmless warnings will freeze the app.
+* **Solution**: Filter out element-level errors by checking `if (event.target && event.target !== window) return;` to only process real JavaScript runtime execution crashes.
+
+### 10. Static Caching of App Modes
+* **Problem**: Caching the app mode statically at launch (e.g., locking the app mode to `ANDROID_OFFLINE` on standalone Capacitor boot) prevents background sync handlers from ever retrieving remote server updates, even if they detect the server is reachable. Calling `api.fetchCats()` continues to load local bundle copies.
+* **Solution**: Implement dynamic setter interfaces (`api.setAppMode()`) that dispatch custom DOM events (`drcat-app-mode-changed`) so that relevant UI elements automatically re-evaluate their state (e.g., toggling edit controls or refreshing data grids).
+
+### 11. Invoking Catch Handlers on Synchronous Methods
+* **Problem**: Attempting to attach `.catch()` directly to synchronous functions (like asset builders that return `undefined`) throws a `TypeError` which blocks thread execution and crashes the boot phase.
+* **Solution**: Standardize synchronous wrapper callbacks or wrap synchronous tasks inside a try/catch block inside a non-blocking `setImmediate()` or next-tick deferral.
+
+### 12. Temporal Dead Zone (TDZ) in Fallback Variables
+* **Problem**: Referencing a block-scoped `const` variable (like a fallback config array) inside a catch statement *before* the variable's declaration line causes a `ReferenceError` TDZ violation.
+* **Solution**: Always declare fallback variables at the very top of the function scope so they are fully initialized and accessible from all catch blocks.
+
+### 13. Capacitor Mobile WebView CORS Origin Limits
+* **Problem**: Standalone mobile apps running in Capacitor use custom webview origin schemes (e.g., `http://localhost` on Android or `capacitor://localhost` on iOS) without any port designation. If the backend CORS configurations only allowed origins with ports (e.g., `http://localhost:3000`), mobile client requests were blocked by the browser engine.
+* **Solution**: Explicitly add the portless schemes (`http://localhost`, `capacitor://localhost`) and wildcards as allowed origins by default on the server.
+
+### 14. False Positives in Server Pings using `no-cors`
+* **Problem**: Using `mode: 'no-cors'` in network pings returns an opaque response with status `0` even if the server is unreachable or intercepts the request with a warning HTML page (like Ngrok's phishing interstitial). This triggers false-positive "online" transitions.
+* **Solution**: Perform standard CORS requests for connectivity checks and dynamically inject the active provider's skip headers to verify true API availability.
+
+### 15. Capacitor Android WebView Sends `https://localhost`, Not `http://localhost`
+* **Problem**: All CORS allowlists were written assuming `http://localhost` as the Capacitor app's origin. On real Android tablets running Chrome WebView 148+, the Capacitor context sends `Origin: https://localhost` (with **https**). The server rejected this origin silently, set no CORS headers on the OPTIONS preflight, and the browser blocked every real request — showing "Failed to fetch" on the GET, never on the OPTIONS.
+* **Discovery**: Only visible by reading raw request headers from the Ngrok inspector (`http://localhost:4040/inspect/http`). The origin field read `https://localhost`, not `http://localhost`.
+* **Solution**: Always add both `http://localhost` **and** `https://localhost` (plus their port variants) to every CORS allowlist and origin check. Never assume the protocol of a Capacitor WebView origin.
+
+### 16. CORS Preflight (`OPTIONS`) Must Set Headers Before Returning 204
+* **Problem**: The CORS middleware set response headers inside an `if (allowAll)` block, but returned `res.sendStatus(204)` **outside** that block. If the origin wasn't recognized, the 204 came back with zero CORS headers. The browser treated the bare 204 as a CORS rejection and blocked the actual GET — even though the OPTIONS itself "succeeded" with 204.
+* **Solution**: The `OPTIONS` early return must be placed **inside** the `if (allowAll)` block, or placed after all headers are unconditionally set. A 204 without `Access-Control-Allow-Origin` is a CORS block from the browser's perspective.
+
+

@@ -1,9 +1,6 @@
 # Dr.CAT — Multi-Stage Roadmap & Progress
 
-This document tracks our long-term objectives across three distinct phases, transitioning from local development to cloud deployment, and finally to a native offline-first Android app.
-
-> [!IMPORTANT]
-> **Priority Strategy**: Core features and operational functionality (navigation stack preservation, file sharing, and print warnings) take absolute precedence. Once all elements are functionally 100% verified, we will initiate Phase 4: Performance optimization and UI/animation polish.
+This document tracks our long-term objectives across four distinct phases, transitioning from local development to cloud deployment, and finally to a native offline-first Android app with full developer tooling.
 
 ---
 
@@ -11,15 +8,17 @@ This document tracks our long-term objectives across three distinct phases, tran
 
 ```mermaid
 graph TD
-    P1[Phase 1: Local Polish - Termux/ngrok] -->|Fork/Branch| P2[Phase 2: Cloud Web Deployment]
+    P1[Phase 1: Local Polish - Termux/tunnel] -->|Fork/Branch| P2[Phase 2: Cloud Web Deployment]
     P2 -->|Capacitor Integration| P3[Phase 3: True Offline Android App]
+    P3 -->|Tooling Layer| P4[Phase 4: Diagnostics, Performance & Polish]
+    P4 -->|Beta Ship| P5[Phase 5: Beta Test & Feedback Loop]
 ```
 
 ---
 
 ## 📍 Progress Tracker
 
-### Phase 1: Local Polish (Current)
+### Phase 1: Local Polish ✅ COMPLETE
 *Goal: Perfect the user interface, responsiveness, and study features locally on Termux.*
 
 - `[x]` **Layout Adjustments**: Strict 50/50 dashboard split, tablet spacing, and mobile scroll heights.
@@ -33,7 +32,7 @@ graph TD
 
 ---
 
-### Phase 2: Cloud Web Deployment (Fork)
+### Phase 2: Cloud Web Deployment (Future)
 *Goal: Host Dr.CAT publicly on a production cloud server to act as the central sync hub.*
 
 - `[ ]` **Fork repository** for public web deployment.
@@ -43,19 +42,37 @@ graph TD
 
 ---
 
-### Phase 3: True Offline Android App (App Fork)
-*Goal: Wrap the frontend into an offline-first Android app package (.apk) that caches files locally and syncs with the Cloud Hub when connected.*
+### Phase 3: True Offline Android App ✅ COMPLETE
+*Goal: Wrap the frontend into an offline-first Android app package (.apk) that caches files locally and syncs with the server when connected.*
 
 - `[x]` **Capacitor integration** to wrap the HTML/CSS/JS frontend.
 - `[x]` **Offline Database**: Configure local data storage on the phone (LocalStorage fallback overrides & custom creations) so the app works with zero network connection.
 - `[x]` **Local PDF Bundler**: Embed reference PDFs directly into the app assets during build compilation (`build.js`).
-- `[x]` **Sync Engine**: Built client suggestion syncing using `REMOTE_SERVER_URL` and `isOnlineAtStartup` checking.
-- `[x]` **CI/CD Build Action**: Automate compile packaging to `.apk` on every GitHub push.
+- `[x]` **Provider-Agnostic Sync Engine**: Built client sync using `server-providers.js` + `remote_server_config.json` for dynamic provider switching (Ngrok, Cloudflare, custom domains).
+- `[x]` **Dynamic App Mode System**: `api.setAppMode()` + `drcat-app-mode-changed` event lets UI react live to connectivity changes.
+- `[x]` **CI/CD Build Action**: Automate compile packaging to `.apk` on every push to `light-android` branch via GitHub Actions.
+- `[x]` **CORS Fix for Capacitor WebViews**: Added `http://localhost` and `capacitor://localhost` to the server's allowed origins.
 
 ---
 
-### Phase 4: Diagnostics, Performance & Polish (Upcoming)
-*Goal: Provide logging tools, diagnose network/sync status on native devices, and improve animation smoothness.*
+### Phase 4: Diagnostics, Performance & Developer Tooling ✅ COMPLETE
+*Goal: Provide logging tools, diagnose network/sync status on native devices, and give developers full visibility into app health.*
 
-- `[ ]` **Diagnostics Panel**: Add a settings panel in the app to configure `REMOTE_SERVER_URL` at runtime, test backend ping connectivity, see logs, and verify indexed PDF file counts.
-- `[ ]` **UI Transitions Smoothness**: Implement hardware-accelerated layouts, prune DOM elements, and add micro-animations.
+- `[x]` **Diagnostics Panel**: Live server health panel showing endpoint latency, sync status, PDF index coverage, and active provider URL. Supports full JSON export.
+- `[x]` **Performance / Telemetry Panel**: Real-time metric cards for component render times and user interaction latency. Telemetry engine (`performance.js`) profiles all clicks and boot milestones.
+- `[x]` **Telemetry Journal Console**: In-app scrollable log console inside the Performance panel — with **Copy** and **Clear** buttons — keeping the main debug console clean.
+- `[x]` **Mobile Debug Console**: Floating 🐛 button console with network request interceptor, console routing, and full Copy/Clear controls for Android-native debugging.
+- `[x]` **Startup Freeze Fix**: Resolved all Android startup race conditions — fast-fail offline mode, no more frozen loading screens on APK boot.
+- `[x]` **CORS & Provider Sync Bug Fixes**: Fixed `no-cors` false positives in connectivity pings; migrated to provider-aware headers for real connection verification.
+
+---
+
+### Phase 5: Beta Test & Feedback Loop 🚀 ACTIVE
+*Goal: Ship the app to real clinical colleagues, collect feedback, iterate on bugs and missing features.*
+
+- `[x]` **Codebase Audit**: Full senior developer audit completed — security, performance, data integrity, and architecture verified.
+- `[x]` **Documentation Sync**: All docs (README, codemap, developer_guide, technical_architecture, lessons_learned) updated to reflect current architecture.
+- `[ ]` **Beta APK Distribution**: Share compiled APK with beta testers.
+- `[ ]` **Bug Triage**: Collect and triage reported bugs from testers.
+- `[ ]` **Local PDF Index Caching**: Bundle the PDF search index inside the Capacitor APK for offline full-text search without ever connecting to the server.
+- `[ ]` **Database Schema Validation**: Validate `cats_db.json` structure on server boot to catch manual editing mistakes before they cause crashes.
