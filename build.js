@@ -7,12 +7,23 @@ function rebuildClientAssets() {
     fs.mkdirSync(publicDataDir, { recursive: true });
   }
 
-  // Copy cats_db.json
-  fs.copyFileSync(
-    path.join(__dirname, 'cats_db.json'),
-    path.join(publicDataDir, 'cats_db.json')
-  );
-  console.log("Copied cats_db.json to public/data/");
+  // Copy cats_db.json (stripping version history to optimize PWA client asset size)
+  try {
+    const rawDb = fs.readFileSync(path.join(__dirname, 'cats_db.json'), 'utf-8');
+    const db = JSON.parse(rawDb);
+    const cleanDb = db.map(c => {
+      const { history, ...rest } = c;
+      return rest;
+    });
+    fs.writeFileSync(
+      path.join(publicDataDir, 'cats_db.json'),
+      JSON.stringify(cleanDb, null, 2),
+      'utf-8'
+    );
+    console.log("Copied cats_db.json (with history stripped) to public/data/");
+  } catch (err) {
+    console.error("Error packaging cats_db.json during build:", err);
+  }
 
   // Copy pdf_index.json and generate pdf_list.json
   const pdfIndexSource = path.join(__dirname, 'pdf_index.json');

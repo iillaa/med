@@ -772,12 +772,23 @@ app.post('/api/logout', (req, res) => {
 
 // Endpoint to get all CATs (served from memory cache)
 app.get('/api/cats', (req, res) => {
+  const isAdmin = isAdminRequest(req);
   const since = parseInt(req.query.since);
+  
+  let result = catsCache;
   if (!isNaN(since)) {
-    const filtered = catsCache.filter(c => (c.updatedAt || 0) > since);
-    return res.json(filtered);
+    result = catsCache.filter(c => (c.updatedAt || 0) > since);
   }
-  res.json(catsCache);
+
+  if (!isAdmin) {
+    // Strip history logs to save bandwidth for regular users
+    result = result.map(c => {
+      const { history, ...rest } = c;
+      return rest;
+    });
+  }
+
+  res.json(result);
 });
 
 // Endpoint to bulk-import fiches (Admin only)
@@ -866,6 +877,13 @@ app.post('/api/cats/:id', async (req, res) => {
         return { notFound: true };
       }
 
+      const previousState = {};
+      if (summary !== undefined && cat.summary !== summary) previousState.summary = cat.summary;
+      if (ordonnance !== undefined && cat.ordonnance !== ordonnance) previousState.ordonnance = cat.ordonnance;
+      if (category !== undefined && cat.category !== category) previousState.category = cat.category;
+      if (title !== undefined && cat.title !== title) previousState.title = cat.title;
+      if (red_flags !== undefined && cat.red_flags !== red_flags) previousState.red_flags = cat.red_flags;
+
       if (summary !== undefined) cat.summary = summary;
       if (ordonnance !== undefined) cat.ordonnance = ordonnance;
       if (category !== undefined) cat.category = category;
@@ -877,7 +895,8 @@ app.post('/api/cats/:id', async (req, res) => {
       cat.history.push({
         timestamp: Date.now(),
         action: 'edit',
-        detail: 'Modifié directement par l\'administrateur'
+        detail: 'Modifié directement par l\'administrateur',
+        previousState: Object.keys(previousState).length > 0 ? previousState : undefined
       });
 
       await safeWriteJsonAsync(DB_FILE, catsCache);
@@ -1067,6 +1086,13 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
       } else if (sug.type === 'edit') {
         const cat = catsCache.find(c => c.id === parseInt(sug.catId));
         if (cat) {
+          const previousState = {};
+          if (sug.data.summary !== undefined && cat.summary !== sug.data.summary) previousState.summary = cat.summary;
+          if (sug.data.ordonnance !== undefined && cat.ordonnance !== sug.data.ordonnance) previousState.ordonnance = cat.ordonnance;
+          if (sug.data.category !== undefined && cat.category !== sug.data.category) previousState.category = cat.category;
+          if (sug.data.title !== undefined && cat.title !== sug.data.title) previousState.title = cat.title;
+          if (sug.data.red_flags !== undefined && cat.red_flags !== sug.data.red_flags) previousState.red_flags = cat.red_flags;
+
           if (sug.data.summary !== undefined) cat.summary = sug.data.summary;
           if (sug.data.ordonnance !== undefined) cat.ordonnance = sug.data.ordonnance;
           if (sug.data.category !== undefined) cat.category = sug.data.category;
@@ -1078,7 +1104,8 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
           cat.history.push({
             timestamp: Date.now(),
             action: 'edit',
-            detail: 'Modifié via approbation d\'une proposition de modification'
+            detail: 'Modifié via approbation d\'une proposition de modification',
+            previousState: Object.keys(previousState).length > 0 ? previousState : undefined
           });
 
           await safeWriteJsonAsync(DB_FILE, catsCache);
