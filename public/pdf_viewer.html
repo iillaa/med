@@ -233,8 +233,8 @@
     }
   </style>
 
-  <!-- Load PDF.js from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- Load PDF.js locally -->
+  <script src="js/pdf.min.js"></script>
 </head>
 <body>
 
@@ -277,7 +277,7 @@
 
   <script>
     // Set PDF.js worker source
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdf.worker.min.js';
 
     // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
