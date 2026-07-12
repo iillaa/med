@@ -77,7 +77,7 @@ jobs:
         if: steps.build_config.outputs.build_type == 'release' && env.SIGNING_KEY != ''
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-        uses: r0adrunner/sign-android-release@v1
+        uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
           releaseDirectory: android/app/build/outputs/apk/release
