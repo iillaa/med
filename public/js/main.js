@@ -459,6 +459,17 @@ async function initApp() {
     }).catch(err => console.error("[Background] PDF load failed:", err));
   }, 100);
 
+  // Listener to force UI re-render when developer mode is unlocked/toggled
+  document.addEventListener('dr-cat-dev-unlocked', () => {
+    try {
+      calculateStats();
+      dashboard.renderDashboard(selectCatWrapper);
+      updateEditButtonsVisibility();
+    } catch (err) {
+      console.error("[Dev Unlock UI Render Error]", err);
+    }
+  });
+
   setLoadingProgress(100);
 
   // ── 8. Hide Overlay ──

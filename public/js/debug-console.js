@@ -133,14 +133,15 @@ function toggleViewer() {
 
 function attemptDevUnlock() {
   if (devUnlockCooldown) return;
-  if (!isOfflineApp) return;
 
   devUnlockClickCount++;
   if (devUnlockClickCount >= DEV_UNLOCK_THRESHOLD) {
     devUnlockClickCount = 0;
     devUnlockCooldown = true;
     window.__drCatDevDiagnosticsUnlocked = true;
-    showToast("🔓 Diagnostics/Performance déverrouillés pour le dev (offline).", "fa-unlock", 4000);
+    localStorage.setItem('drCatDevDiagnosticsUnlocked', 'true');
+    showToast("🔓 Diagnostics/Performance déverrouillés pour le dev.", "fa-unlock", 4000);
+    document.dispatchEvent(new CustomEvent('dr-cat-dev-unlocked'));
     setTimeout(() => { devUnlockCooldown = false; }, 5000);
   }
 }
@@ -334,6 +335,11 @@ function createUI() {
     const btn = document.createElement('div');
     btn.id = 'debug-toggle-btn';
     btn.innerHTML = '🐛<span class="badge" id="debug-badge"></span>';
+    
+    // Hidden by default, unless developer mode is enabled in localStorage
+    const isVisible = localStorage.getItem('drCatDebugConsoleVisible') === 'true';
+    btn.style.display = isVisible ? 'flex' : 'none';
+    
     document.body.appendChild(btn);
     btn.addEventListener('click', () => {
       attemptDevUnlock();
@@ -384,12 +390,68 @@ function createUI() {
 
 // ── Init ──────────────────────────────────────────────────────
 export function initDebugConsole() {
+  // Read saved diagnostic unlock status
+  window.__drCatDevDiagnosticsUnlocked = localStorage.getItem('drCatDevDiagnosticsUnlocked') === 'true';
+
   startDebugConsole();
   createUI();
 
+  // 10 click Easter Egg on brand logo to toggle debug console button visibility
+  let logoClicks = 0;
+  let logoClickTimeout = null;
+
+  const handleLogoClick = () => {
+    logoClicks++;
+    
+    if (logoClickTimeout) clearTimeout(logoClickTimeout);
+    logoClickTimeout = setTimeout(() => {
+      logoClicks = 0;
+    }, 4000); // reset count if inactive for 4 seconds
+
+    if (logoClicks >= 10) {
+      logoClicks = 0;
+      clearTimeout(logoClickTimeout);
+      
+      const btn = document.getElementById('debug-toggle-btn');
+      if (btn) {
+        // Toggle visibility
+        const currentlyVisible = btn.style.display === 'flex';
+        if (currentlyVisible) {
+          btn.style.display = 'none';
+          localStorage.removeItem('drCatDebugConsoleVisible');
+          // Also lock diagnostics when hiding
+          localStorage.removeItem('drCatDevDiagnosticsUnlocked');
+          window.__drCatDevDiagnosticsUnlocked = false;
+          document.dispatchEvent(new CustomEvent('dr-cat-dev-unlocked'));
+          showToast("🐛 Mode Débogage désactivé.", "fa-bug", 3000);
+        } else {
+          btn.style.setProperty('display', 'flex', 'important');
+          localStorage.setItem('drCatDebugConsoleVisible', 'true');
+          showToast("🐛 Mode Débogage activé ! Tapotez 3 fois sur l'icône 🐛 pour déverrouiller les diagnostics.", "fa-bug", 5000);
+        }
+      }
+    }
+  };
+
+  const registerLogoListeners = () => {
+    const desktopLogo = document.getElementById('brand-logo');
+    const mobileLogo = document.getElementById('mobile-brand-logo');
+
+    if (desktopLogo) {
+      desktopLogo.removeEventListener('click', handleLogoClick);
+      desktopLogo.addEventListener('click', handleLogoClick);
+    }
+    if (mobileLogo) {
+      mobileLogo.removeEventListener('click', handleLogoClick);
+      mobileLogo.addEventListener('click', handleLogoClick);
+    }
+  };
+
+  // Register immediately and again after 500ms (to cover all runtime layouts)
+  registerLogoListeners();
+  setTimeout(registerLogoListeners, 500);
+
   // Log startup info
   console.log('📱 Dr.CAT Debug Console active.');
-  console.log('🔍 Tap the 🐛 button in the bottom-right corner to open the log viewer.');
-  console.log('🌐 Network requests will be logged automatically.');
 }
 
