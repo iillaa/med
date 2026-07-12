@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Dr.CAT</string>
+    <string name="title_activity_main">Dr.CAT</string>
+    <string name="package_name">com.drcat.app</string>
+    <string name="custom_url_scheme">com.drcat.app</string>
+</resources>

@@ -50,14 +50,47 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - name: Determine Build Type and Configuration
+        id: build_config
+        run: |
+          BUILD_TYPE="debug"
+          GRADLE_CMD="assembleDebug"
+          ARTIFACT_NAME="drcat-debug-apk"
+          
+          if [ "${{ github.event.inputs.build_type }}" = "release" ]; then
+            BUILD_TYPE="release"
+            GRADLE_CMD="assembleRelease"
+            ARTIFACT_NAME="drcat-release-apk"
+          fi
+          
+          echo "build_type=$BUILD_TYPE" >> $GITHUB_OUTPUT
+          echo "gradle_cmd=$GRADLE_CMD" >> $GITHUB_OUTPUT
+          echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+
       - name: Build Android App (Gradle)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew ${{ steps.build_config.outputs.gradle_cmd }}
+
+      - name: Sign Release APK
+        if: steps.build_config.outputs.build_type == 'release' && secrets.SIGNING_KEY != ''
+        uses: r0adrunner/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: drcat-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: ${{ steps.build_config.outputs.artifact_name }}
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/release/*-unsigned.apk
+            android/app/build/outputs/apk/release/*-signed.apk
+            android/app/build/outputs/apk/release/app-release.apk
+
