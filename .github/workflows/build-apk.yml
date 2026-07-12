@@ -36,6 +36,13 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Generate Remote Server Config
+        if: env.REMOTE_SERVER_URL_SECRET != ''
+        env:
+          REMOTE_SERVER_URL_SECRET: ${{ secrets.REMOTE_SERVER_URL }}
+        run: |
+          echo '{"urls": ["${{ secrets.REMOTE_SERVER_URL }}"], "primaryProvider": "ngrok"}' > remote_server_config.json
+
       - name: Copy Databases (Build Step)
         run: npm run build
 
