@@ -74,7 +74,7 @@ jobs:
           ./gradlew ${{ steps.build_config.outputs.gradle_cmd }}
 
       - name: Sign Release APK
-        if: steps.build_config.outputs.build_type == 'release' && secrets.SIGNING_KEY != ''
+        if: ${{ steps.build_config.outputs.build_type == 'release' && secrets.SIGNING_KEY != '' }}
         uses: r0adrunner/sign-android-release@v1
         id: sign_app
         with:
