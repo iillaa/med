@@ -140,7 +140,15 @@ function attemptDevUnlock() {
     devUnlockCooldown = true;
     window.__drCatDevDiagnosticsUnlocked = true;
     localStorage.setItem('drCatDevDiagnosticsUnlocked', 'true');
-    showToast("🔓 Diagnostics/Performance déverrouillés pour le dev.", "fa-unlock", 4000);
+    showToast("🔓 Diagnostics/Performance déverrouillés !", "fa-unlock", 4000);
+    
+    // Automatically close the log viewer overlay so the user sees the dashboard
+    const panel = document.getElementById('debug-console-panel');
+    if (panel) {
+      panel.style.display = 'none';
+      isViewerOpen = false;
+    }
+
     document.dispatchEvent(new CustomEvent('dr-cat-dev-unlocked'));
     setTimeout(() => { devUnlockCooldown = false; }, 5000);
   }

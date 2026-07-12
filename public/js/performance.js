@@ -368,7 +368,7 @@ if (typeof document !== 'undefined') {
     
     // Find nearest clickable container (button, link, list item, filter pill, select option, etc.)
     const clickable = target.closest('button, a, li, .status-pill, input, select, [role="button"]') || target;
-    const label = clickable.id ? `#${clickable.id}` : clickable.className ? `.${clickable.className.split(' ')[0]}` : clickable.tagName.toLowerCase();
+    const label = clickable.id ? `#${clickable.id}` : (clickable.className && typeof clickable.className === 'string') ? `.${clickable.className.split(' ')[0]}` : clickable.tagName.toLowerCase();
     
     perf.recordInteraction(`click:${label}`);
   }, { passive: true });
