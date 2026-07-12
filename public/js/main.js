@@ -372,7 +372,6 @@ async function initApp() {
   let cats = [];
   try {
     cats = await api.fetchCats();
-    localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
     if (window.perf) window.perf.recordMilestone('catsFetched');
   } catch (err) {
     console.error("[Startup Error] Fetch CATs failed, using emergency fallback.", err);
@@ -522,7 +521,21 @@ export async function runBackgroundSync() {
       const lastSyncTime = parseInt(localStorage.getItem('dr_cat_last_sync_time') || '0');
       const freshCats = await api.fetchCats(lastSyncTime);
 
-      if (freshCats.length === 0) {
+      // Check if any CATs were deleted on the server
+      let hasDeletions = false;
+      let activeIdsSet = null;
+      if (freshCats.activeIds) {
+        activeIdsSet = new Set(freshCats.activeIds.split(',').map(id => parseInt(id)));
+        const localServerCats = (state.allCats || []).filter(c => !c.id.toString().startsWith('offline-') && c.id <= 1000);
+        for (const local of localServerCats) {
+          if (!activeIdsSet.has(local.id)) {
+            hasDeletions = true;
+            break;
+          }
+        }
+      }
+
+      if (freshCats.length === 0 && !hasDeletions) {
         console.log('[Background Sync] Remote database is in sync. No action needed.');
         localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
         if (wasOffline) {
@@ -535,25 +548,27 @@ export async function runBackgroundSync() {
       const localServerCats = (state.allCats || []).filter(c => !c.id.toString().startsWith('offline-') && c.id <= 1000);
       const isIncremental = freshCats.length < (localServerCats.length * 0.7);
 
-      let isUpdated = false;
-      if (isIncremental) {
-        // If incremental, we have updates if any card is new or modified
-        for (const remote of freshCats) {
-          const local = localServerCats.find(c => c.id === remote.id);
-          if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
-            isUpdated = true;
-            break;
-          }
-        }
-      } else {
-        // If full list (e.g. static fallback), compare counts and contents
-        isUpdated = localServerCats.length !== freshCats.length;
-        if (!isUpdated) {
+      let isUpdated = hasDeletions;
+      if (!isUpdated) {
+        if (isIncremental) {
+          // If incremental, we have updates if any card is new or modified
           for (const remote of freshCats) {
             const local = localServerCats.find(c => c.id === remote.id);
             if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
               isUpdated = true;
               break;
+            }
+          }
+        } else {
+          // If full list (e.g. static fallback), compare counts and contents
+          isUpdated = localServerCats.length !== freshCats.length;
+          if (!isUpdated) {
+            for (const remote of freshCats) {
+              const local = localServerCats.find(c => c.id === remote.id);
+              if (!local || local.title !== remote.title || local.summary !== remote.summary || local.ordonnance !== remote.ordonnance) {
+                isUpdated = true;
+                break;
+              }
             }
           }
         }
@@ -562,7 +577,7 @@ export async function runBackgroundSync() {
       if (isUpdated) {
         console.log('[Background Sync] Server changes detected! Offering update...');
         showToast(
-          'Nouvelles fiches disponibles — <span id="update-app-toast-btn" style="color:#06b6d4; font-weight:700; text-decoration:underline; cursor:pointer;">Actualiser ?</span>',
+          'Nouvelles fiches ou modifications disponibles — <span id="update-app-toast-btn" style="color:#06b6d4; font-weight:700; text-decoration:underline; cursor:pointer;">Actualiser ?</span>',
           'fa-arrows-rotate',
           15000
         );
@@ -573,7 +588,7 @@ export async function runBackgroundSync() {
           if (updateBtn) {
             updateBtn.addEventListener('click', (event) => {
               event.preventDefault();
-              applySyncUpdates(freshCats, isIncremental);
+              applySyncUpdates(freshCats, isIncremental, activeIdsSet);
               
               const toast = document.getElementById('drcat-toast');
               if (toast) toast.remove();
@@ -601,7 +616,7 @@ export async function runBackgroundSync() {
 }
 
 // Helper to safely apply background sync updates to the UI
-function applySyncUpdates(freshCats, isIncremental) {
+function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
   const localProgress = getLocalProgress();
   const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
 
@@ -626,6 +641,16 @@ function applySyncUpdates(freshCats, isIncremental) {
         state.allCats.push(merged);
       }
     });
+
+    // Handle deletions if we have the list of active IDs from the server
+    if (activeIdsSet) {
+      state.allCats = state.allCats.filter(c => {
+        // Keep custom offline created cats (IDs > 1000 or offline-)
+        if (c.id > 1000 || c.id.toString().startsWith('offline-')) return true;
+        // Only keep if the ID is active on the server
+        return activeIdsSet.has(c.id);
+      });
+    }
   } else {
     // Full replacement merge
     const existingIds = new Set(freshCats.map(c => c.id));

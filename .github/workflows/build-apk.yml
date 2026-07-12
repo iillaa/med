@@ -13,11 +13,11 @@ on:
       build_type:
         description: 'Build Type'
         required: true
-        default: 'debug'
+        default: 'release'
         type: choice
         options:
-          - debug
           - release
+          - debug
           
 jobs:
   build:
@@ -60,14 +60,14 @@ jobs:
       - name: Determine Build Type and Configuration
         id: build_config
         run: |
-          BUILD_TYPE="debug"
-          GRADLE_CMD="assembleDebug"
-          ARTIFACT_NAME="drcat-debug-apk"
+          BUILD_TYPE="release"
+          GRADLE_CMD="assembleRelease"
+          ARTIFACT_NAME="drcat-release-apk"
           
-          if [ "${{ github.event.inputs.build_type }}" = "release" ]; then
-            BUILD_TYPE="release"
-            GRADLE_CMD="assembleRelease"
-            ARTIFACT_NAME="drcat-release-apk"
+          if [ "${{ github.event.inputs.build_type }}" = "debug" ]; then
+            BUILD_TYPE="debug"
+            GRADLE_CMD="assembleDebug"
+            ARTIFACT_NAME="drcat-debug-apk"
           fi
           
           echo "build_type=$BUILD_TYPE" >> $GITHUB_OUTPUT

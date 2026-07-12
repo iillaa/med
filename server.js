@@ -775,6 +775,10 @@ app.get('/api/cats', (req, res) => {
   const isAdmin = isAdminRequest(req);
   const since = parseInt(req.query.since);
   
+  // Expose active IDs for deletion sync
+  res.setHeader('Access-Control-Expose-Headers', 'X-Active-Cat-IDs');
+  res.setHeader('X-Active-Cat-IDs', catsCache.map(c => c.id).join(','));
+  
   let result = catsCache;
   if (!isNaN(since)) {
     result = catsCache.filter(c => (c.updatedAt || 0) > since);

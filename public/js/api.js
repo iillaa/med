@@ -310,7 +310,10 @@ export async function fetchCats(since) {
   if (mode === APP_MODES.ADMIN_LOCAL) {
     const res = await fetchWithTimeout(`/api/cats${queryParam}`, { headers: getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch CATs from local server');
-    return res.json();
+    const data = await res.json();
+    const activeIds = res.headers.get('X-Active-Cat-IDs');
+    if (activeIds) data.activeIds = activeIds;
+    return data;
   }
 
   // 2. ANDROID_OFFLINE: Load cached synced database or static fallback instantly
@@ -377,6 +380,10 @@ export async function fetchCats(since) {
       const res = await fetchWithTimeout(getApiUrl(`/api/cats${queryParam}`, remoteUrl), { headers: getHeaders() });
       if (res.ok) {
         const data = await res.json();
+        const activeIds = res.headers.get('X-Active-Cat-IDs');
+        if (activeIds) {
+          data.activeIds = activeIds;
+        }
         console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
         
         // Cache updates locally in localStorage for offline availability!
@@ -405,6 +412,17 @@ export async function fetchCats(since) {
                 currentCached.push(remote);
               }
             });
+
+            // Prune deleted items from the local cache
+            if (activeIds) {
+              const activeSet = new Set(activeIds.split(',').map(id => parseInt(id)));
+              currentCached = currentCached.filter(c => {
+                // Keep custom offline created cats
+                if (c.id > 1000 || c.id.toString().startsWith('offline-')) return true;
+                return activeSet.has(c.id);
+              });
+            }
+            
             localStorage.setItem('dr_cat_synced_database', JSON.stringify(currentCached));
           }
         } catch (cacheErr) {
