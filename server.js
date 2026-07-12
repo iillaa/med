@@ -216,10 +216,13 @@ app.use((req, res, next) => {
   }
 
   const origin = req.headers.origin;
+  const requestHost = req.headers.host;
+  const isSameOrigin = origin && (origin === `http://${requestHost}` || origin === `https://${requestHost}`);
 
-  // Always allow Capacitor app and localhost origins unconditionally
+  // Always allow Same-Origin, Capacitor app, and localhost origins unconditionally
   // NOTE: Capacitor on Android sends Origin: https://localhost (not http://)
   const isAlwaysAllowed = !origin
+    || isSameOrigin
     || origin === 'http://localhost'
     || origin === 'https://localhost'
     || origin === 'capacitor://localhost'
