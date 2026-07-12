@@ -84,6 +84,7 @@ jobs:
         if: steps.build_config.outputs.build_type == 'release' && env.SIGNING_KEY != ''
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          BUILD_TOOLS_VERSION: "34.0.0"
         uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
