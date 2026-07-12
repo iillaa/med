@@ -153,7 +153,7 @@ If you modify or update the app logo, you can regenerate all modern adaptive and
 
 ## 🐛 Developer Diagnostics Easter Egg
 
-For security, administrative controls (direct DB editing and suggestion moderation) are locked on native standalone mobile builds. However, developers can unlock real-time diagnostics, server configurations, and performance metrics:
+Direct database writing and suggestion moderation are unavailable on standalone mobile builds because there is no Node.js backend running on the device. However, developers can unlock real-time diagnostics, server configurations, and performance metrics:
 1. **Show Toggle Button**: Click or tap the **Dr. CAT logo** (in the desktop sidebar or the mobile header banner) **10 times** consecutively. A bug (🐛) button will appear in the bottom-right corner of the screen.
 2. **Unlock Diagnostics Panel**: Click or tap the **🐛 button 3 times** consecutively. This triggers a toast notification confirming activation, automatically closes the log viewer overlay, and reveals the **Admin Control Center** (Diagnostics/Performance tabs) at the bottom of the main dashboard.
 3. **Persistence**: The developer mode state is saved to local storage and persists across application restarts.

@@ -313,8 +313,15 @@ export async function fetchCats(since) {
     return res.json();
   }
 
-  // 2. ANDROID_OFFLINE: Load bundled static file instantly (no remote waiting)
+  // 2. ANDROID_OFFLINE: Load cached synced database or static fallback instantly
   if (mode === APP_MODES.ANDROID_OFFLINE) {
+    const cachedDb = localStorage.getItem('dr_cat_synced_database');
+    if (cachedDb && !queryParam) {
+      console.log('[fetchCats] Offline mode — loading cached synced database.');
+      try {
+        return JSON.parse(cachedDb);
+      } catch (_) {}
+    }
     console.log('[fetchCats] Offline mode — loading bundled data instantly.');
     const res = await fetchWithTimeout('data/cats_db.json');
     if (!res.ok) throw new Error('Failed to fetch CATs statically');
@@ -351,6 +358,13 @@ export async function fetchCats(since) {
 
   if (!reachable) {
     console.log('[fetchCats] No remote server reachable within timeout — falling back to local bundle instantly.');
+    const cachedDb = localStorage.getItem('dr_cat_synced_database');
+    if (cachedDb && !queryParam) {
+      try {
+        console.log('[fetchCats] Loaded cached synced database on unreachable remote.');
+        return JSON.parse(cachedDb);
+      } catch (_) {}
+    }
     const res = await fetchWithTimeout('data/cats_db.json');
     if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
     return res.json();
@@ -364,6 +378,39 @@ export async function fetchCats(since) {
       if (res.ok) {
         const data = await res.json();
         console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
+        
+        // Cache updates locally in localStorage for offline availability!
+        try {
+          if (!since) {
+            // Full database fetch: overwrite cache
+            localStorage.setItem('dr_cat_synced_database', JSON.stringify(data));
+          } else {
+            // Incremental fetch: merge with existing cache
+            let currentCached = [];
+            const cachedDb = localStorage.getItem('dr_cat_synced_database');
+            if (cachedDb) {
+              currentCached = JSON.parse(cachedDb);
+            } else {
+              // Load static bundled data as baseline if cache is empty
+              const fallbackRes = await fetchWithTimeout('data/cats_db.json');
+              if (fallbackRes.ok) currentCached = await fallbackRes.json();
+            }
+            
+            // Merge updates
+            data.forEach(remote => {
+              const idx = currentCached.findIndex(c => c.id === remote.id);
+              if (idx !== -1) {
+                currentCached[idx] = remote;
+              } else {
+                currentCached.push(remote);
+              }
+            });
+            localStorage.setItem('dr_cat_synced_database', JSON.stringify(currentCached));
+          }
+        } catch (cacheErr) {
+          console.error('[API] Failed to cache synced database:', cacheErr);
+        }
+
         return data;
       }
     } catch (err) {
@@ -373,6 +420,13 @@ export async function fetchCats(since) {
 
   // Ultimate fallback
   console.warn('[API] fetchCats: all remote attempts failed, using local bundle.');
+  const cachedDb = localStorage.getItem('dr_cat_synced_database');
+  if (cachedDb && !queryParam) {
+    try {
+      console.log('[fetchCats] Loaded cached synced database on ultimate fallback.');
+      return JSON.parse(cachedDb);
+    } catch (_) {}
+  }
   const res = await fetchWithTimeout('data/cats_db.json');
   if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
   return res.json();

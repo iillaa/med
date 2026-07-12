@@ -29,6 +29,7 @@ export function initDiagnostics() {
   document.getElementById('run-conn-test-btn')?.addEventListener('click', runConnectivityTest);
   document.getElementById('check-tunnel-btn')?.addEventListener('click', checkProviderTunnel);
   document.getElementById('save-remote-url-btn')?.addEventListener('click', saveRemoteServerUrl);
+  document.getElementById('reset-remote-url-btn')?.addEventListener('click', resetRemoteServerUrl);
   document.getElementById('copy-logs-btn')?.addEventListener('click', copyTerminalLogs);
   document.getElementById('clear-logs-btn')?.addEventListener('click', clearTerminalLogs);
   document.getElementById('run-auto-checkup-btn')?.addEventListener('click', runAutoCheckupSuite);}
@@ -402,9 +403,13 @@ async function saveRemoteServerUrl() {
     // 1. Save locally in local storage for instant Capacitor/offline mode use
     localStorage.setItem('dr_cat_remote_server_url', urls[0]);
 
-    // 2. Persist to server config if online
-    if (!api.isOfflineApp || api.hasRemoteServer()) {
-      await api.updateDiagnosticsRemoteUrl(urls);
+    // 2. Persist to server config ONLY if we are running in a web browser connected to the server
+    if (!api.isOfflineApp) {
+      try {
+        await api.updateDiagnosticsRemoteUrl(urls);
+      } catch (serverErr) {
+        console.warn("Could not save config to server file system:", serverErr);
+      }
     }
 
     showToast(`${urls.length} adresse(s) de serveur enregistrée(s) !`, "fa-circle-check", 3000);
@@ -415,6 +420,28 @@ async function saveRemoteServerUrl() {
   } catch (err) {
     console.error(err);
     showToast(`Erreur d'enregistrement : ${err.message}`, "fa-circle-xmark", 5000);
+  }
+}
+
+function resetRemoteServerUrl() {
+  try {
+    // 1. Remove user overrides from localStorage
+    localStorage.removeItem('dr_cat_remote_server_url');
+
+    // 2. Reset input value to default compiled server URL
+    const input = document.getElementById('diag-remote-url-input');
+    if (input) {
+      input.value = api.REMOTE_SERVER_URL || '';
+    }
+
+    showToast("Adresse de serveur réinitialisée à celle d'origine !", "fa-arrow-rotate-left", 3000);
+
+    // Refresh stats and run connection test automatically to verify URL validity
+    refreshDiagnosticsData();
+    runConnectivityTest();
+  } catch (err) {
+    console.error(err);
+    showToast(`Erreur de réinitialisation : ${err.message}`, "fa-circle-xmark", 5000);
   }
 }
 

@@ -53,7 +53,10 @@
         <div class="brand" id="brand-logo" style="cursor: pointer;">
           <img src="drcat_logo.png" alt="Dr.CAT Logo" class="brand-icon" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;">
           <div>
-            <h1>Dr.CAT</h1>
+            <h1 style="display: flex; align-items: center; gap: 5px;">
+              Dr.CAT
+              <span style="font-size: 8px; font-weight: 800; background: rgba(6, 182, 212, 0.15); color: var(--color-primary); padding: 1px 4px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">BETA</span>
+            </h1>
             <p>Rappel Clinique</p>
           </div>
         </div>
@@ -175,9 +178,12 @@
         <button class="menu-btn" id="open-sidebar-btn">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <div class="mobile-brand" id="mobile-brand-logo" style="cursor: pointer;">
+        <div class="mobile-brand" id="mobile-brand-logo" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
           <img src="drcat_logo.png" alt="Dr.CAT" style="width:24px;height:24px;border-radius:6px;object-fit:cover;">
-          <span>Dr.CAT</span>
+          <span style="display: flex; align-items: center; gap: 4px;">
+            Dr.CAT
+            <span style="font-size: 7px; font-weight: 800; background: rgba(6, 182, 212, 0.15); color: var(--color-primary); padding: 1px 3px; border-radius: 3px; text-transform: uppercase; line-height: 1;">BETA</span>
+          </span>
         </div>
         <div class="mobile-status-placeholder"></div>
       </header>
@@ -402,7 +408,10 @@
                     <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wrench"></i> Config Serveur Distant</h4>
                     <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">Spécifiez l'adresse de votre serveur LAN ou tunnel :</div>
                     <input type="text" id="diag-remote-url-input" placeholder="https://xxxx.tunnel-provider.com" style="width: 100%; padding: 6px 10px; font-size: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); margin-bottom: 8px;">
-                    <button class="action-btn" id="save-remote-url-btn" style="width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder & Tester</button>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="action-btn" id="save-remote-url-btn" style="flex: 1; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-floppy-disk"></i> Sauvegarder & Tester</button>
+                      <button class="action-btn" id="reset-remote-url-btn" style="font-size: 12px; padding: 6px 12px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;" title="Réinitialiser à l'URL d'origine"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+                    </div>
                   </div>
 
                   <!-- Section 6: Index PDF Status details -->
