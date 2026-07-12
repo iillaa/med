@@ -518,7 +518,8 @@ export async function runBackgroundSync() {
       api.setAppMode(api.APP_MODES.ANDROID_ONLINE);
       state.isOnlineAtStartup = true;
 
-      const lastSyncTime = parseInt(localStorage.getItem('dr_cat_last_sync_time') || '0');
+      const lastSyncTimeStr = localStorage.getItem('dr_cat_last_sync_time');
+      const lastSyncTime = lastSyncTimeStr ? parseInt(lastSyncTimeStr) : null;
       const freshCats = await api.fetchCats(lastSyncTime);
 
       // Check if any CATs were deleted on the server

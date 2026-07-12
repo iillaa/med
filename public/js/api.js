@@ -320,9 +320,13 @@ export async function fetchCats(since) {
   if (mode === APP_MODES.ANDROID_OFFLINE) {
     const cachedDb = localStorage.getItem('dr_cat_synced_database');
     if (cachedDb && !queryParam) {
-      console.log('[fetchCats] Offline mode — loading cached synced database.');
       try {
-        return JSON.parse(cachedDb);
+        const parsed = JSON.parse(cachedDb);
+        if (Array.isArray(parsed) && parsed.length >= 40) {
+          console.log('[fetchCats] Offline mode — loading cached synced database.');
+          return parsed;
+        }
+        console.warn('[fetchCats] Cached database looks corrupted or incomplete (length < 40). Falling back to static bundle.');
       } catch (_) {}
     }
     console.log('[fetchCats] Offline mode — loading bundled data instantly.');
@@ -364,8 +368,11 @@ export async function fetchCats(since) {
     const cachedDb = localStorage.getItem('dr_cat_synced_database');
     if (cachedDb && !queryParam) {
       try {
-        console.log('[fetchCats] Loaded cached synced database on unreachable remote.');
-        return JSON.parse(cachedDb);
+        const parsed = JSON.parse(cachedDb);
+        if (Array.isArray(parsed) && parsed.length >= 40) {
+          console.log('[fetchCats] Loaded cached synced database on unreachable remote.');
+          return parsed;
+        }
       } catch (_) {}
     }
     const res = await fetchWithTimeout('data/cats_db.json');
@@ -388,7 +395,7 @@ export async function fetchCats(since) {
         
         // Cache updates locally in localStorage for offline availability!
         try {
-          if (!since) {
+          if (since === undefined || since === null) {
             // Full database fetch: overwrite cache
             localStorage.setItem('dr_cat_synced_database', JSON.stringify(data));
           } else {
@@ -441,8 +448,11 @@ export async function fetchCats(since) {
   const cachedDb = localStorage.getItem('dr_cat_synced_database');
   if (cachedDb && !queryParam) {
     try {
-      console.log('[fetchCats] Loaded cached synced database on ultimate fallback.');
-      return JSON.parse(cachedDb);
+      const parsed = JSON.parse(cachedDb);
+      if (Array.isArray(parsed) && parsed.length >= 40) {
+        console.log('[fetchCats] Loaded cached synced database on ultimate fallback.');
+        return parsed;
+      }
     } catch (_) {}
   }
   const res = await fetchWithTimeout('data/cats_db.json');
