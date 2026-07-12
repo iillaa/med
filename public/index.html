@@ -568,20 +568,29 @@
             </div>
           </div>
 
-          <!-- About, Legal & Beta Disclaimer Block -->
-          <div class="dashboard-block about-legal-block animate-entrance delay-5" style="margin-top: 20px; border-color: rgba(6, 182, 212, 0.15); background: rgba(30, 41, 59, 0.25);">
-            <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
-              <div style="font-size: 32px; flex-shrink: 0; padding-top: 2px;">⚠️</div>
-              <div style="flex: 1; min-width: 250px;">
-                <h3 style="font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
-                  <i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Informations & Mentions Légales
-                </h3>
-                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 10px 0;">
-                  Cette application est une version <strong>BETA</strong> d'aide-mémoire et de révision clinique, conçue et développée par <strong>Dr. K-Ali</strong>. Pour toute suggestion ou signalement d'erreur, vous pouvez écrire à : <a href="mailto:airdrop257@gmail.com" style="color: var(--color-primary); font-weight: 600; text-decoration: underline;">airdrop257@gmail.com</a>. Vos notes et progressions sont enregistrées localement sur votre appareil.
-                </p>
-                <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 0; font-style: italic; border-left: 2px solid var(--border-color); padding-left: 10px;">
-                  <strong>Avertissement médical :</strong> Les conduites à tenir et ordonnances types sont présentées à titre purement indicatif et pédagogique. Elles ne se substituent pas au jugement clinique individuel du médecin, ni aux recommandations officielles en vigueur. L'auteur décline toute responsabilité quant aux décisions diagnostiques ou thérapeutiques prises sur la base de ce contenu.
-                </p>
+          <!-- About, Legal & Beta Disclaimer Block (Collapsible) -->
+          <div class="dashboard-block about-legal-block animate-entrance delay-5" id="about-legal-block" style="margin-top: 20px; border-color: rgba(6, 182, 212, 0.15); background: rgba(30, 41, 59, 0.25); padding: 12px 16px; transition: all 0.3s ease; position: relative;">
+            <div id="about-legal-header" 
+                 onclick="const content = document.getElementById('about-legal-content'); const chevron = document.getElementById('about-legal-chevron'); const isExpanded = content.style.maxHeight === '500px'; content.style.maxHeight = isExpanded ? '0px' : '500px'; chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';"
+                 style="display: flex; align-items: center; justify-content: space-between; user-select: none; cursor: pointer;">
+              <h3 style="font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Informations & Mentions Légales
+                <span style="font-size: 10px; font-weight: 500; background: rgba(6,182,212,0.15); color: var(--color-primary); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Dr. K-Ali</span>
+              </h3>
+              <i class="fa-solid fa-chevron-down" id="about-legal-chevron" style="font-size: 12px; color: var(--text-muted); transition: transform 0.2s ease;"></i>
+            </div>
+            
+            <div id="about-legal-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 0px;">
+              <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
+                <div style="font-size: 28px; flex-shrink: 0; padding-top: 2px;">⚠️</div>
+                <div style="flex: 1; min-width: 250px;">
+                  <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 10px 0;">
+                    Cette application est une version <strong>BETA</strong> d'aide-mémoire et de révision clinique, conçue et développée par <strong>Dr. K-Ali</strong>. Pour toute suggestion ou signalement d'erreur, vous pouvez écrire à : <a href="mailto:airdrop257@gmail.com" style="color: var(--color-primary); font-weight: 600; text-decoration: underline;">airdrop257@gmail.com</a>. Vos notes et progressions sont enregistrées localement sur votre appareil.
+                  </p>
+                  <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 0; font-style: italic; border-left: 2px solid var(--border-color); padding-left: 10px;">
+                    <strong>Avertissement médical :</strong> Les conduites à tenir et ordonnances types sont présentées à titre purement indicatif et pédagogique. Elles ne se substituent pas au jugement clinique individuel du médecin, ni aux recommandations officielles en vigueur. L'auteur décline toute responsabilité quant aux décisions diagnostiques ou thérapeutiques prises sur la base de ce contenu.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
