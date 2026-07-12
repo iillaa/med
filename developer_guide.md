@@ -119,12 +119,42 @@ Dr. CAT allows standalone offline APK builds to communicate with a central serve
 Dr. CAT is compiled into an `.apk` automatically on GitHub.
 
 1. **GitHub Actions Workflow**:
-   The workflow defined in `.github/workflows/build-apk.yml` triggers on every push to the `light-android` branch.
+   The workflow defined in `.github/workflows/build-apk.yml` triggers on every push to the `android-app` and `light-android` branches.
 2. **Steps performed in Cloud CI**:
    * Sets up Java 17 and Android SDK.
    * Installs Node modules.
-   * Runs `node build.js` to clone JSON databases.
+   * Checks for a repository secret named `REMOTE_SERVER_URL` and dynamically creates the git-ignored `remote_server_config.json` before building.
+   * Runs `node build.js` to clone JSON databases and write the remote configuration variables into `public/js/remote_config.js`.
    * Runs `npx cap sync` to compile mobile wrapper assets.
-   * Builds the release APK using Gradle.
-3. **Artifact Output**:
-   The resulting `.apk` is saved as a downloadable build artifact on the GitHub Actions run summary page. Download and install it on any Android tablet/mobile device.
+   * Builds and signs the release APK using Gradle.
+3. **Repository Secrets Configuration**:
+   To successfully build, sign, and pre-configure the APK, define these secrets in your GitHub repository (**Settings ➔ Secrets and variables ➔ Actions**):
+   * `REMOTE_SERVER_URL`: The default public URL of your Node.js/ngrok backend (e.g., `https://rendition-duchess-dry.ngrok-free.dev`). If defined, this is baked directly into the APK so it boots up online out-of-the-box.
+   * `SIGNING_KEY`: The base64-encoded Android Keystore (.jks/.keystore) file.
+   * `ALIAS`: The key alias defined when creating the keystore.
+   * `KEYSTORE_PASSWORD`: The main password of the keystore file.
+   * `KEY_PASSWORD`: The password of the specific key alias.
+4. **Artifact Output**:
+   The resulting `.apk` is saved as a downloadable build artifact on the GitHub Actions run summary page.
+
+---
+
+## 🎨 Asset Regeneration (Launcher Icons)
+
+If you modify or update the app logo, you can regenerate all modern adaptive and legacy rounded launcher resolutions automatically.
+1. **Requirements**: Make sure `imagemagick` is installed on your local environment.
+2. **Execute**: Place the new square logo at `logo_med.png` in the repository root and run:
+   ```bash
+   bash generate_icons.sh
+   ```
+   This script automatically applies a circular mask to legacy and adaptive icon shapes to guarantee perfect, professional circular icons that comply with modern Android launcher layouts.
+
+---
+
+## 🐛 Developer Diagnostics Easter Egg
+
+For security, administrative controls (direct DB editing and suggestion moderation) are locked on native standalone mobile builds. However, developers can unlock real-time diagnostics, server configurations, and performance metrics:
+1. **Show Toggle Button**: Click or tap the **Dr. CAT logo** (in the desktop sidebar or the mobile header banner) **10 times** consecutively. A bug (🐛) button will appear in the bottom-right corner of the screen.
+2. **Unlock Diagnostics Panel**: Click or tap the **🐛 button 3 times** consecutively. This triggers a toast notification confirming activation, automatically closes the log viewer overlay, and reveals the **Admin Control Center** (Diagnostics/Performance tabs) at the bottom of the main dashboard.
+3. **Persistence**: The developer mode state is saved to local storage and persists across application restarts.
+

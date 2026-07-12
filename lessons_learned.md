@@ -87,4 +87,13 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: The CORS middleware set response headers inside an `if (allowAll)` block, but returned `res.sendStatus(204)` **outside** that block. If the origin wasn't recognized, the 204 came back with zero CORS headers. The browser treated the bare 204 as a CORS rejection and blocked the actual GET — even though the OPTIONS itself "succeeded" with 204.
 * **Solution**: The `OPTIONS` early return must be placed **inside** the `if (allowAll)` block, or placed after all headers are unconditionally set. A 204 without `Access-Control-Allow-Origin` is a CORS block from the browser's perspective.
 
+### 17. SVG Element `className` Type Mismatch in Event Listeners
+* **Problem**: A global click listener tracking user interaction latency crashed when users clicked on SVG icons (like FontAwesome `<i>` or `<svg>` tags). In JavaScript, the `className` of an HTML element is a string, but the `className` of an SVG element is an instance of `SVGAnimatedString` (an object). Calling `.split(' ')` directly on this object throws a `TypeError: split is not a function`, killing the click event bubble.
+* **Solution**: Before performing string operations like `.split()` or `.includes()` on `element.className`, always check that its type is a string using `typeof element.className === 'string'`.
+
+### 18. Git-Ignored Configuration Files in CI Pipelines
+* **Problem**: Storing local server parameters (like private Ngrok links) in git-ignored config files (e.g. `remote_server_config.json`) is great for local security, but causes the remote build container (GitHub Actions) to compile the APK with empty configurations. This left the generated standalone APK stuck in local offline mode upon fresh install.
+* **Solution**: Modify the CI workflow file to check for a repository secret (e.g., `REMOTE_SERVER_URL`) and dynamically generate the required config files inside the runner's workspace before executing the build. This maintains credential confidentiality while ensuring builds boot up online out-of-the-box.
+
+
 
