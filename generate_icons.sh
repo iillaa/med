@@ -35,21 +35,21 @@ for entry in "${legacy_sizes[@]}"; do
   DIR="android/app/src/main/res/mipmap-${suffix}"
   mkdir -p "$DIR"
   
-  # Generate standard legacy icon
+  # Generate standard legacy icon (Square)
   magick convert "$LOGO" -resize "${size}x${size}" "${DIR}/ic_launcher.png"
-  # Generate round legacy icon
-  magick convert "$LOGO" -resize "${size}x${size}" "${DIR}/ic_launcher_round.png"
+  # Generate round legacy icon (Cropped into a perfect circle with transparent corners)
+  magick convert "$LOGO" -resize 512x512 -alpha on -background none \( +clone -channel A -evaluate set 0 +channel -fill white -draw "circle 256,256 256,0" \) -compose DstIn -composite -resize "${size}x${size}" "${DIR}/ic_launcher_round.png"
   echo "  ✓ mipmap-${suffix}: ${size}x${size}"
 done
 
-echo "📱 Generating Adaptive Foreground Icons (Padded for Safe Zone)..."
+echo "📱 Generating Adaptive Foreground Icons (Padded & Rounded for Safe Zone)..."
 for entry in "${adaptive_sizes[@]}"; do
   read -r canvas scale suffix <<< "$entry"
   DIR="android/app/src/main/res/mipmap-${suffix}"
   mkdir -p "$DIR"
   
-  # Generate adaptive icon foreground centered with 66% safe zone margin
-  magick convert "$LOGO" -resize "${scale}x${scale}" -background none -gravity center -extent "${canvas}x${canvas}" "${DIR}/ic_launcher_foreground.png"
+  # Generate adaptive icon foreground (Cropped into a perfect circle, scaled to 66% safe zone, and padded)
+  magick convert "$LOGO" -resize 512x512 -alpha on -background none \( +clone -channel A -evaluate set 0 +channel -fill white -draw "circle 256,256 256,0" \) -compose DstIn -composite -resize "${scale}x${scale}" -background none -gravity center -extent "${canvas}x${canvas}" "${DIR}/ic_launcher_foreground.png"
   echo "  ✓ mipmap-${suffix} (foreground): ${canvas}x${canvas} (scaled to ${scale}x${scale})"
 done
 
