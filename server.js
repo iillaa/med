@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { indexPdfs, getIndexStatus, onIndexUpdated } = require('./index_pdfs');
+const { PROVIDERS: serverProviders, detectProvider } = require('./public/js/server-providers.cjs');
 
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
@@ -18,60 +19,7 @@ const app = express();
 const PORT = 3000;
 
 // ── Server Provider Abstraction ───────────────────────────
-// Loaded dynamically so the server can support any tunnel provider
-// without hardcoded ngrok references.
-async function loadServerProviders() {
-  const fallback = [
-    {
-      id: 'ngrok',
-      urlPattern: /(^|\.)ngrok(-free)?\.(app|dev|io)$/,
-      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
-      managementPort: 4040,
-      managementPath: '/api/tunnels',
-      isDevHostname: (h) => /(^|\.)ngrok(-free)?\.(app|dev|io)$/.test(h),
-      isTunnelOrigin: (o) => o.includes('ngrok'),
-      tunnelLabel: 'Tunnel',
-    },
-    {
-      id: 'direct',
-      urlPattern: null,
-      extraHeaders: {},
-      managementPort: null,
-      managementPath: null,
-      isDevHostname: () => false,
-      isTunnelOrigin: () => false,
-      tunnelLabel: 'Serveur direct',
-    }
-  ];
-
-  try {
-    const providerPath = path.join(__dirname, 'public', 'js', 'server-providers.js');
-    const content = await fs.promises.readFile(providerPath, 'utf-8');
-    // Extract PROVIDERS array by evaluating the module source
-    const match = content.match(/export const PROVIDERS = (\[[\s\S]*?\]);/);
-    if (match) {
-      try {
-        return (new Function('return ' + match[1]))();
-      } catch (_) {
-        return fallback;
-      }
-    }
-  } catch (err) {
-    console.warn('[Providers] Failed to load provider registry, using fallback:', err.message);
-  }
-  return fallback;
-}
-
-function detectProvider(url, providers) {
-  if (!url) return providers[providers.length - 1];
-  for (const provider of providers) {
-    if (provider.urlPattern && provider.urlPattern.test(url)) {
-      return provider;
-    }
-  }
-  return providers[providers.length - 1];
-}
-
+// Server providers config loaded from public/js/server-providers.cjs
 function getProviderHeaders(provider) {
   return provider.extraHeaders || {};
 }
@@ -94,7 +42,7 @@ function buildAllowedOrigins(providers, configuredUrls) {
   for (const url of configuredUrls) {
     if (!url) continue;
     origins.add(url);
-    const provider = detectProvider(url, providers);
+    const provider = detectProvider(url);
     if (provider.isTunnelOrigin) {
       // Allow all origins matching the provider’s tunnel pattern (e.g. any .ngrok-free.app)
       const pattern = provider.urlPattern;
@@ -151,12 +99,10 @@ app.use((err, req, res, next) => {
 });
 
 // CORS middleware — dynamically configured based on remote server URLs
-let serverProviders = [];
 let allowedOrigins = new Set();
 let configuredRemoteUrls = [];
 
 async function initializeProviders() {
-  serverProviders = await loadServerProviders();
   
   // Load configured remote URLs
   try {
@@ -1624,7 +1570,7 @@ app.get('/api/diagnostics/tunnel-info', async (req, res) => {
   
   // Return info about all configured tunnel providers
   const providerInfo = configuredRemoteUrls.map(url => {
-    const provider = detectProvider(url, serverProviders);
+    const provider = detectProvider(url);
     const mgmt = getManagementEndpoint(provider);
     return {
       url,

@@ -430,7 +430,7 @@ export async function fetchCats(since) {
               const customCatIds = new Set(customCats.map(cc => cc.id));
               currentCached = currentCached.filter(c => {
                 // Keep custom offline created cats
-                if (customCatIds.has(c.id) || c.id > 1000 || c.id.toString().startsWith('offline-')) return true;
+                if (customCatIds.has(c.id) || c.isOffline === true || c.source === 'offline' || c.id.toString().startsWith('offline-') || (typeof c.id === 'number' && c.id < 0)) return true;
                 return activeSet.has(c.id);
               });
             }

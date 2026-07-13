@@ -409,7 +409,8 @@ async function initApp() {
   let customCreatedCats = [];
   try {
     localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    const rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    customCreatedCats = rawCustom.map(c => ({ ...c, isOffline: true }));
   } catch (_) {}
 
   if (api.isOfflineApp) {
@@ -547,7 +548,7 @@ export async function runBackgroundSync() {
       let activeIdsSet = null;
       const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
       const customCatIds = new Set(customCats.map(c => c.id));
-      const isOfflineCat = (c) => customCatIds.has(c.id) || c.id > 1000 || c.id.toString().startsWith('offline-');
+      const isOfflineCat = (c) => customCatIds.has(c.id) || c.isOffline === true || c.source === 'offline' || c.id.toString().startsWith('offline-') || (typeof c.id === 'number' && c.id < 0);
 
       if (freshCats.activeIds) {
         activeIdsSet = new Set(freshCats.activeIds.split(',').map(id => parseInt(id)));
@@ -671,7 +672,7 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
     if (activeIdsSet) {
       const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
       const customCatIds = new Set(customCats.map(c => c.id));
-      const isOfflineCat = (c) => customCatIds.has(c.id) || c.id > 1000 || c.id.toString().startsWith('offline-');
+      const isOfflineCat = (c) => customCatIds.has(c.id) || c.isOffline === true || c.source === 'offline' || c.id.toString().startsWith('offline-') || (typeof c.id === 'number' && c.id < 0);
       state.allCats = state.allCats.filter(c => {
         // Keep custom offline created cats
         if (isOfflineCat(c)) return true;
@@ -683,7 +684,8 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
     // Full replacement merge
     const existingIds = new Set(freshCats.map(c => c.id));
     const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
-      .filter(c => !existingIds.has(c.id));
+      .filter(c => !existingIds.has(c.id))
+      .map(c => ({ ...c, isOffline: true }));
 
     state.allCats = [...freshCats, ...customCats].map(cat => {
       const localEntry = localProgress[cat.id] || {};
@@ -756,7 +758,8 @@ async function refreshCatsAndRender() {
   let customCreatedCats = [];
   try {
     localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    const rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    customCreatedCats = rawCustom.map(c => ({ ...c, isOffline: true }));
   } catch (_) {}
 
   if (api.isOfflineApp) {
