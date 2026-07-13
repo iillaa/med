@@ -476,7 +476,7 @@ export async function fetchCats(since) {
 export async function fetchPdfs() {
   if (isOfflineApp) {
     // Load only the list of filenames instead of the heavy index structure containing all parsed texts
-    const res = await fetchWithTimeout('data/pdf_list.json');
+    const res = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error("Failed to fetch PDFs list statically");
     return res.json();
   }
@@ -687,7 +687,7 @@ export async function searchPdfsContent(query) {
   if (isOfflineApp) {
     try {
       if (!offlinePdfIndexCache) {
-        const indexRes = await fetch('data/pdf_index.json');
+        const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
         if (!indexRes.ok) throw new Error("Failed to load PDF index");
         offlinePdfIndexCache = await indexRes.json();
       }
