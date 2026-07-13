@@ -2,14 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Lecteur PDF Clinique</title>
-  
+
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Outfit Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       --bg-app: #090d16;
@@ -143,17 +143,52 @@
       color: var(--text-secondary);
     }
 
+    /* Editable page input */
+    #page-input {
+      width: 34px;
+      height: 22px;
+      text-align: center;
+      font-size: 12px;
+      font-family: inherit;
+      background: #0b0f19;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 4px;
+      padding: 0;
+      -moz-appearance: textfield;
+    }
+    #page-input::-webkit-outer-spin-button,
+    #page-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .page-total {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding: 0 2px 0 1px;
+    }
+
+    /* Zoom level readout */
+    .zoom-level {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      min-width: 40px;
+      text-align: center;
+    }
+
     /* Viewer Container */
     .viewer-container {
       flex-grow: 1;
-      overflow: auto;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 12px 12px 30px 12px; /* Reduced bottom padding for a tighter, cleaner look */
+      overflow: auto;          /* scroll area for panning when zoomed */
+      display: block;          /* block + margin:auto centers small pages AND keeps zoomed pages fully scrollable (flex centering clipped overflow) */
+      padding: 12px 12px 30px 12px;
       background-color: #070a10;
       position: relative;
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
     }
 
     /* Canvas styling - NO max-width to allow zooming to overflow */
@@ -162,10 +197,27 @@
       background-color: #fff;
       border-radius: 4px;
       display: block;
-      margin: 0 auto;
+      margin: 0 auto;          /* horizontal centering when smaller than container */
     }
 
-    /* Loading Overlay */
+    /* Light spinner shown during page turns (does not cover the screen) */
+    #page-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(6, 182, 212, 0.2);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Loading Overlay (initial document load only) */
     .loading-overlay {
       position: absolute;
       top: 0;
@@ -200,17 +252,34 @@
       font-weight: 500;
     }
 
+    /* Retry button */
+    #retry-btn {
+      background: var(--color-primary);
+      color: #090d16;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: none;
+    }
+    #retry-btn:hover {
+      background: var(--color-primary-hover);
+    }
+
     /* Mobile Adaptations (Single Row Toolbar Layout) */
     @media (max-width: 768px) {
       .viewer-header {
         height: 48px;
         padding: 0 6px;
       }
-      
+
       .doc-title {
-        display: none; /* Hide document title on very small screens to save space */
+        display: none;
       }
-      
+
       .header-left {
         flex: 0 0 auto;
       }
@@ -233,7 +302,7 @@
     }
   </style>
 
-  <!-- Load PDF.js locally -->
+  <!-- Load PDF.js locally (offline-first: no CDN) -->
   <script src="js/pdf.min.js"></script>
 </head>
 <body>
@@ -244,20 +313,27 @@
       <a href="index.html" class="back-btn" title="Retour à l'application"><i class="fa-solid fa-arrow-left"></i></a>
       <span class="doc-title" id="doc-title">Chargement...</span>
     </div>
-    
+
     <div class="header-center">
       <!-- Navigation -->
       <div class="control-group">
         <button class="control-btn" id="prev-page-btn" disabled><i class="fa-solid fa-chevron-left"></i></button>
-        <span class="page-indicator" id="page-indicator">Page 0 / 0</span>
+        <input id="page-input" type="number" min="1" value="1" aria-label="Numéro de page">
+        <span class="page-total">/ <span id="page-total">0</span></span>
         <button class="control-btn" id="next-page-btn" disabled><i class="fa-solid fa-chevron-right"></i></button>
       </div>
 
       <!-- Zoom & Controls -->
       <div class="control-group">
         <button class="control-btn" id="zoom-out-btn" title="Zoom arrière"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+        <span class="zoom-level" id="zoom-level">100%</span>
         <button class="control-btn" id="zoom-fit-btn" title="Ajuster à la largeur"><i class="fa-solid fa-expand"></i></button>
         <button class="control-btn" id="zoom-in-btn" title="Zoom avant"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+      </div>
+
+      <!-- Open in external PDF app -->
+      <div class="control-group">
+        <button class="control-btn" id="open-external-btn" title="Ouvrir dans une autre application PDF"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
       </div>
 
       <div class="control-group">
@@ -271,13 +347,17 @@
     <div class="loading-overlay" id="loading-overlay">
       <div class="spinner"></div>
       <div class="loading-text" id="loading-text">Chargement du PDF...</div>
+      <button id="retry-btn">Réessayer</button>
     </div>
+    <div id="page-spinner"></div>
     <canvas id="pdf-canvas"></canvas>
   </main>
 
   <script>
-    // Set PDF.js worker source
+    // Set PDF.js worker source (offline-first: bundled, no CDN)
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdf.worker.min.js';
+
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
     // Parse URL parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -290,64 +370,117 @@
       throw new Error("No PDF file specified");
     }
 
-    // Clean display title
-    const displayTitle = pdfFileName.replace(/^\d+[\s_-]+/i, '')
-                                    .replace(/_/g, ' ')
-                                    .replace(/\.pdf$/i, '')
-                                    .trim();
+    // Clean display title (strip leading numeric / separator prefixes)
+    const displayTitle = pdfFileName
+      .replace(/^\d+[\s_-]+/i, '')
+      .replace(/_/g, ' ')
+      .replace(/\.pdf$/i, '')
+      .trim();
     document.getElementById('doc-title').textContent = displayTitle;
 
     const pdfUrl = `pdfs/${encodeURIComponent(pdfFileName)}`;
-    
+
     let pdfDoc = null;
     let pageRendering = false;
     let pageNumPending = null;
-    
+    let initialLoadDone = false;
+
+    const MAX_SCALE = 5.0;   // hard cap to avoid gigantic backing stores
+    const MIN_SCALE = 0.4;
+
     let currentScale = 1.0;
-    let currentFitMode = 'width'; // 'width' or 'value' (manual zoom scale)
-    
+    let currentFitMode = 'width'; // 'width' | 'page' | 'value' (manual)
+
     const canvas = document.getElementById('pdf-canvas');
     const ctx = canvas.getContext('2d');
     const loadingOverlay = document.getElementById('loading-overlay');
     const loadingText = document.getElementById('loading-text');
+    const retryBtn = document.getElementById('retry-btn');
+    const pageSpinner = document.getElementById('page-spinner');
     const container = document.getElementById('viewer-container');
 
     const prevBtn = document.getElementById('prev-page-btn');
     const nextBtn = document.getElementById('next-page-btn');
-    const pageIndicator = document.getElementById('page-indicator');
+    const pageInput = document.getElementById('page-input');
+    const pageTotal = document.getElementById('page-total');
+    const zoomLevel = document.getElementById('zoom-level');
 
     const zoomInBtn = document.getElementById('zoom-in-btn');
     const zoomOutBtn = document.getElementById('zoom-out-btn');
     const zoomFitBtn = document.getElementById('zoom-fit-btn');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const openExternalBtn = document.getElementById('open-external-btn');
 
     let renderTask = null;
+
+    // Optional: cap DPR on low-memory devices for better performance
+    function getDeviceDPR() {
+      const dpr = window.devicePixelRatio || 1;
+      const memory = navigator.deviceMemory || 4;
+      const cap = memory < 4 ? 1.5 : 2;
+      return Math.min(dpr, cap);
+    }
+
+    // Compute a safe internal render scale so the canvas backing store never
+    // exceeds the browser limit (~16k px). At extreme zoom we render slightly
+    // smaller internally and let CSS upscale (minor blur, but no crash/black canvas).
+    function getRenderScale(page, scale) {
+      const dpr = getDeviceDPR();
+      const unscaled = page.getViewport({ scale: 1 });
+      const maxDim = Math.max(unscaled.width, unscaled.height) * scale * dpr;
+      const CAP = 16000;
+      return maxDim > CAP ? scale * (CAP / maxDim) : scale;
+    }
+
+    function updateZoomReadout() {
+      zoomLevel.textContent = `${Math.round(currentScale * 100)}%`;
+    }
+
+    // Remember last page per document
+    function saveLastPage(pageNum) {
+      if (!pdfFileName) return;
+      try {
+        localStorage.setItem(`lastPage_${pdfFileName}`, String(pageNum));
+      } catch (_) {}
+    }
+
+    function restoreLastPage() {
+      if (!pdfFileName) return 1;
+      try {
+        const saved = localStorage.getItem(`lastPage_${pdfFileName}`);
+        if (saved) {
+          const num = parseInt(saved, 10);
+          if (!isNaN(num) && num > 0) return num;
+        }
+      } catch (_) {}
+      return 1;
+    }
 
     /**
      * Render PDF page onto high-DPI canvas
      */
     async function renderPage(num) {
       pageRendering = true;
-      loadingOverlay.style.display = 'flex';
-      loadingText.textContent = `Rendu de la page ${num}...`;
+      if (initialLoadDone) {
+        pageSpinner.style.display = 'block';
+      } else {
+        loadingOverlay.style.display = 'flex';
+      }
 
       if (renderTask) {
-        try {
-          renderTask.cancel();
-        } catch (_) {}
+        try { renderTask.cancel(); } catch (_) {}
       }
 
       try {
         const page = await pdfDoc.getPage(num);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
 
         // 1. Calculate dynamic scale for Fit-to-Width / Fit-to-Page modes
         if (currentFitMode === 'width') {
-          const unscaledViewport = page.getViewport({ scale: 1.0 });
           const containerWidth = container.clientWidth;
           const padding = window.innerWidth <= 768 ? 16 : 24;
           currentScale = (containerWidth - padding) / unscaledViewport.width;
         } else if (currentFitMode === 'page') {
-          const unscaledViewport = page.getViewport({ scale: 1.0 });
           const containerWidth = container.clientWidth;
           const containerHeight = container.clientHeight;
           const paddingX = window.innerWidth <= 768 ? 16 : 24;
@@ -356,37 +489,43 @@
           const scaleY = (containerHeight - paddingY) / unscaledViewport.height;
           currentScale = Math.min(scaleX, scaleY);
         }
+        currentScale = clamp(currentScale, MIN_SCALE, MAX_SCALE);
 
-        // 2. High-DPI (Retina) scaling
-        const dpr = window.devicePixelRatio || 1;
-        const viewport = page.getViewport({ scale: currentScale });
+        const renderScale = getRenderScale(page, currentScale);
+        const dpr = getDeviceDPR();
 
-        // Set backing store dimensions scaled by devicePixelRatio
-        canvas.width = viewport.width * dpr;
-        canvas.height = viewport.height * dpr;
+        // Display size uses the intended scale; internal render may be capped for safety
+        const displayViewport = page.getViewport({ scale: currentScale });
+        const renderViewport = page.getViewport({ scale: renderScale });
 
-        // Set CSS styling dimensions to match the logical layout viewport
-        canvas.style.width = `${viewport.width}px`;
-        canvas.style.height = `${viewport.height}px`;
+        canvas.style.width = `${displayViewport.width}px`;
+        canvas.style.height = `${displayViewport.height}px`;
+        canvas.width = renderViewport.width * dpr;
+        canvas.height = renderViewport.height * dpr;
 
-        // Reset transforms and apply devicePixelRatio scale factor
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         const renderContext = {
           canvasContext: ctx,
-          viewport: viewport
+          viewport: renderViewport
         };
-        
+
         renderTask = page.render(renderContext);
         await renderTask.promise;
-        
+
         pageRendering = false;
+        pageSpinner.style.display = 'none';
         loadingOverlay.style.display = 'none';
+        retryBtn.style.display = 'none';
+        initialLoadDone = true;
 
         // Update navigation UI
-        pageIndicator.textContent = `Page ${num} / ${pdfDoc.numPages}`;
+        pageInput.value = num;
+        pageTotal.textContent = pdfDoc.numPages;
         prevBtn.disabled = num <= 1;
         nextBtn.disabled = num >= pdfDoc.numPages;
+        updateZoomReadout();
+        saveLastPage(num);
 
         // Update browser URL silently
         const url = new URL(window.location);
@@ -399,10 +538,22 @@
         }
       } catch (err) {
         if (err.name === 'RenderingCancelledException') {
+          // Render was superseded — never leave pageRendering stuck, run the queued page
+          pageRendering = false;
+          if (pageNumPending !== null) {
+            const p = pageNumPending;
+            pageNumPending = null;
+            renderPage(p);
+          }
           return;
         }
+        // Real error: still release the lock so the app can recover / retry
+        pageRendering = false;
         console.error("Render error:", err);
+        pageSpinner.style.display = 'none';
         loadingText.textContent = "Erreur de rendu.";
+        loadingOverlay.style.display = 'flex';
+        retryBtn.style.display = 'inline-block';
       }
     }
 
@@ -430,27 +581,42 @@
     prevBtn.addEventListener('click', onPrevPage);
     nextBtn.addEventListener('click', onNextPage);
 
-    // Zoom Out
-    zoomOutBtn.addEventListener('click', () => {
-      // If we are currently in fit-to-width or fit-to-page, switch to absolute scaling
+    // Editable page input
+    pageInput.addEventListener('change', () => {
+      if (!pdfDoc) return;
+      let n = parseInt(pageInput.value, 10);
+      if (isNaN(n)) { pageInput.value = currentPageNum; return; }
+      n = clamp(n, 1, pdfDoc.numPages);
+      if (n !== currentPageNum) {
+        currentPageNum = n;
+        queueRenderPage(currentPageNum);
+      } else {
+        pageInput.value = currentPageNum;
+      }
+    });
+
+    // Switch to manual zoom mode (so +/- and fit toggle behave predictably)
+    function enterManualZoom() {
       if (currentFitMode === 'width' || currentFitMode === 'page') {
         currentFitMode = 'value';
         zoomFitBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
         zoomFitBtn.title = "Ajuster à la largeur";
       }
-      if (currentScale <= 0.4) return;
-      currentScale -= 0.15;
+    }
+
+    // Zoom Out
+    zoomOutBtn.addEventListener('click', () => {
+      enterManualZoom();
+      if (currentScale <= MIN_SCALE) return;
+      currentScale = clamp(currentScale - 0.15, MIN_SCALE, MAX_SCALE);
       queueRenderPage(currentPageNum);
     });
 
     // Zoom In
     zoomInBtn.addEventListener('click', () => {
-      if (currentFitMode === 'width' || currentFitMode === 'page') {
-        currentFitMode = 'value';
-        zoomFitBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
-        zoomFitBtn.title = "Ajuster à la largeur";
-      }
-      currentScale += 0.15;
+      enterManualZoom();
+      if (currentScale >= MAX_SCALE) return;
+      currentScale = clamp(currentScale + 0.15, MIN_SCALE, MAX_SCALE);
       queueRenderPage(currentPageNum);
     });
 
@@ -467,6 +633,33 @@
       }
       queueRenderPage(currentPageNum);
     });
+
+    // Double-click / double-tap on canvas toggles fit mode
+    canvas.addEventListener('dblclick', () => zoomFitBtn.click());
+
+    // Open in external PDF app:
+    //  - Android (app or website): system share sheet -> pick any PDF reader
+    //  - Everything else (PC web): open in a new browser tab (browser's own viewer)
+    async function openExternal() {
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const probe = new File([], pdfFileName, { type: 'application/pdf' });
+      if (isAndroid && navigator.canShare && navigator.canShare({ files: [probe] })) {
+        try {
+          const blob = await fetch(pdfUrl).then(r => r.blob());
+          await navigator.share({
+            title: displayTitle,
+            files: [new File([blob], pdfFileName, { type: 'application/pdf' })]
+          });
+          return;
+        } catch (e) {
+          if (e && e.name === 'AbortError') return; // user cancelled the share sheet
+          console.warn('Share failed, falling back to new tab:', e);
+        }
+      }
+      // Fallback / non-Android: open in a new browser tab (browser's own PDF viewer)
+      window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+    }
+    openExternalBtn.addEventListener('click', openExternal);
 
     // Fullscreen API implementation
     fullscreenBtn.addEventListener('click', () => {
@@ -502,40 +695,69 @@
       }
       // Re-render to adapt to full height/width changes
       setTimeout(() => {
-        queueRenderPage(currentPageNum);
+        if (!pageRendering) queueRenderPage(currentPageNum);
       }, 100);
     });
 
-    // Keyboards
+    // Reliable orientation/container resize handling (fires on observe too, so guard until loaded)
+    const resizeObserver = new ResizeObserver(() => {
+      if (!pdfDoc) return;
+      if (currentFitMode === 'width' || currentFitMode === 'page') {
+        queueRenderPage(currentPageNum);
+      }
+    });
+    resizeObserver.observe(container);
+
+    // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
       if (e.key === 'ArrowLeft') {
         onPrevPage();
       } else if (e.key === 'ArrowRight') {
         onNextPage();
+      } else if (e.key === '+' || e.key === '=') {
+        zoomInBtn.click();
+      } else if (e.key === '-' || e.key === '_') {
+        zoomOutBtn.click();
+      } else if (e.key === 'f' || e.key === 'F') {
+        zoomFitBtn.click();
       }
     });
 
-    // Auto-fit on window resize
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        if (currentFitMode === 'width') {
-          queueRenderPage(currentPageNum);
-        }
-      }, 150);
+    // Retry button
+    retryBtn.addEventListener('click', () => {
+      location.reload();
     });
 
     // Load PDF Document
     (async function() {
       try {
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
+
+        // Fetch progress indicator
+        loadingTask.onProgress = (progressData) => {
+          if (progressData.total && progressData.loaded !== undefined) {
+            const percent = Math.round((progressData.loaded / progressData.total) * 100);
+            loadingText.textContent = `Chargement... ${percent}%`;
+          } else {
+            loadingText.textContent = `Chargement... (${Math.round(progressData.loaded / 1024)} kB)`;
+          }
+        };
+
         pdfDoc = await loadingTask.promise;
+
+        // Resume at last page, but respect an explicit ?page= deep link
+        const explicitPage = parseInt(urlParams.get('page'));
+        currentPageNum = (explicitPage && explicitPage > 0)
+          ? clamp(explicitPage, 1, pdfDoc.numPages)
+          : clamp(restoreLastPage(), 1, pdfDoc.numPages);
+
         renderPage(currentPageNum);
       } catch (err) {
         console.error("Load error:", err);
         loadingText.textContent = "Erreur de chargement du PDF. Vérifiez le fichier.";
         document.getElementById('loading-overlay').querySelector('.spinner').style.display = 'none';
+        retryBtn.style.display = 'inline-block';
       }
     })();
   </script>
