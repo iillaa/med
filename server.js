@@ -241,14 +241,17 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
-// Guard the bundled CAT database: only serve data/cats_db.json to clients presenting
-// the app key. Soft deterrence (key is public) but stops casual scraping and stays
-// seamless for the official app and offline bundle.
-app.get('/data/cats_db.json', (req, res, next) => {
-  if (!isValidAppKey(req.headers['x-app-key'])) {
-    return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
-  }
-  next();
+// Guard the curated data files: only serve them to clients presenting the app key.
+// Soft deterrence (key is public) but stops casual scraping while staying seamless
+// for the official app and offline bundle.
+const GUARDED_DATA_FILES = ['/data/cats_db.json', '/data/pdf_index.json', '/data/pdf_list.json'];
+GUARDED_DATA_FILES.forEach((file) => {
+  app.get(file, (req, res, next) => {
+    if (!isValidAppKey(req.headers['x-app-key'])) {
+      return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
+    }
+    next();
+  });
 });
 
 app.use(express.static(path.join(__dirname, 'public'), {
