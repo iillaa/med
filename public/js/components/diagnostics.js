@@ -32,7 +32,8 @@ export function initDiagnostics() {
   document.getElementById('reset-remote-url-btn')?.addEventListener('click', resetRemoteServerUrl);
   document.getElementById('copy-logs-btn')?.addEventListener('click', copyTerminalLogs);
   document.getElementById('clear-logs-btn')?.addEventListener('click', clearTerminalLogs);
-  document.getElementById('run-auto-checkup-btn')?.addEventListener('click', runAutoCheckupSuite);}
+  document.getElementById('run-auto-checkup-btn')?.addEventListener('click', runAutoCheckupSuite);
+}
 
 function expandPanel() {
   const panel = document.getElementById('admin-pane-diagnostics');

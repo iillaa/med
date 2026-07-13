@@ -52,19 +52,30 @@ async function bootstrapApp() {
     catch (_) { return null; }
   };
 
-  // Global Error Interceptor for Verbose Console Logs & Toast Notifications
-  window.onerror = function(message, source, lineno, colno, error) {
-    const errorStr = `[Runtime Error] ${message} at ${source}:${lineno}:${colno}`;
-    console.error(errorStr, error);
-    showToast("Une erreur d'exécution est survenue. Détails enregistrés dans l'onglet Diagnostic.", "fa-triangle-exclamation", 7000);
-    return false; // Let browser default log run as well
+  // Protect all localStorage writes from crashing the app on quota limits
+  const origLocalStorageSetItem = Storage.prototype.setItem;
+  Storage.prototype.setItem = function(key, value) {
+    try {
+      return origLocalStorageSetItem.call(this, key, value);
+    } catch (e) {
+      if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+        console.warn('[storage] quota exceeded, evicting sync cache:', key);
+        try { this.removeItem('dr_cat_synced_database'); } catch (_) {}
+        try { return origLocalStorageSetItem.call(this, key, value); } catch (_) {}
+        return;
+      }
+      throw e;
+    }
   };
 
-  window.onunhandledrejection = function(event) {
-    const errorStr = `[Promise Rejection] ${event.reason}`;
-    console.error(errorStr, event.reason);
+  // Global Error Interceptor for Verbose Console Logs & Toast Notifications
+  window.addEventListener('error', (event) => {
+    showToast("Une erreur d'exécution est survenue. Détails enregistrés dans l'onglet Diagnostic.", "fa-triangle-exclamation", 7000);
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
     showToast("Erreur réseau ou réponse de base de données non reconnue.", "fa-circle-exclamation", 5000);
-  };
+  });
 
   // PWA Service Worker — disable in standalone Capacitor offline app to prevent logo freezes
   if ('serviceWorker' in navigator) {
@@ -334,6 +345,9 @@ if (document.readyState === 'loading') {
 } else {
   bootstrapApp();
 }
+
+let devUnlockListenerRegistered = false;
+let syncIntervalStarted = false;
  
 // App Initialization routine with robust fault-isolation boundaries
 async function initApp() {
@@ -459,15 +473,18 @@ async function initApp() {
   }, 100);
 
   // Listener to force UI re-render when developer mode is unlocked/toggled
-  document.addEventListener('dr-cat-dev-unlocked', () => {
-    try {
-      calculateStats();
-      dashboard.renderDashboard(selectCatWrapper);
-      updateEditButtonsVisibility();
-    } catch (err) {
-      console.error("[Dev Unlock UI Render Error]", err);
-    }
-  });
+  if (!devUnlockListenerRegistered) {
+    devUnlockListenerRegistered = true;
+    document.addEventListener('dr-cat-dev-unlocked', () => {
+      try {
+        calculateStats();
+        dashboard.renderDashboard(selectCatWrapper);
+        updateEditButtonsVisibility();
+      } catch (err) {
+        console.error("[Dev Unlock UI Render Error]", err);
+      }
+    });
+  }
 
   setLoadingProgress(100);
 
@@ -475,11 +492,14 @@ async function initApp() {
   // (Automatically handled by window.setLoaderProgress(100) above)
 
   // ── 9. 🔥 BACKGROUND SYNC FOR ANDROID (NO FREEZE + REMOTE SYNC) 🔥 ──
-  setTimeout(() => {
-    runBackgroundSync();
-    // Periodically run background sync every 30 seconds
-    setInterval(runBackgroundSync, 30000);
-  }, 1000);
+  if (!syncIntervalStarted) {
+    syncIntervalStarted = true;
+    setTimeout(() => {
+      runBackgroundSync();
+      // Periodically run background sync every 30 seconds
+      setInterval(runBackgroundSync, 30000);
+    }, 1000);
+  }
 }
 
 export async function runBackgroundSync() {
@@ -525,9 +545,13 @@ export async function runBackgroundSync() {
       // Check if any CATs were deleted on the server
       let hasDeletions = false;
       let activeIdsSet = null;
+      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      const customCatIds = new Set(customCats.map(c => c.id));
+      const isOfflineCat = (c) => customCatIds.has(c.id) || c.id > 1000 || c.id.toString().startsWith('offline-');
+
       if (freshCats.activeIds) {
         activeIdsSet = new Set(freshCats.activeIds.split(',').map(id => parseInt(id)));
-        const localServerCats = (state.allCats || []).filter(c => !c.id.toString().startsWith('offline-') && c.id <= 1000);
+        const localServerCats = (state.allCats || []).filter(c => !isOfflineCat(c));
         for (const local of localServerCats) {
           if (!activeIdsSet.has(local.id)) {
             hasDeletions = true;
@@ -546,7 +570,7 @@ export async function runBackgroundSync() {
       }
 
       // Check if this is a full list or an incremental update
-      const localServerCats = (state.allCats || []).filter(c => !c.id.toString().startsWith('offline-') && c.id <= 1000);
+      const localServerCats = (state.allCats || []).filter(c => !isOfflineCat(c));
       const isIncremental = freshCats.length < (localServerCats.length * 0.7);
 
       let isUpdated = hasDeletions;
@@ -645,9 +669,12 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
 
     // Handle deletions if we have the list of active IDs from the server
     if (activeIdsSet) {
+      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      const customCatIds = new Set(customCats.map(c => c.id));
+      const isOfflineCat = (c) => customCatIds.has(c.id) || c.id > 1000 || c.id.toString().startsWith('offline-');
       state.allCats = state.allCats.filter(c => {
-        // Keep custom offline created cats (IDs > 1000 or offline-)
-        if (c.id > 1000 || c.id.toString().startsWith('offline-')) return true;
+        // Keep custom offline created cats
+        if (isOfflineCat(c)) return true;
         // Only keep if the ID is active on the server
         return activeIdsSet.has(c.id);
       });
@@ -707,21 +734,82 @@ function onFilterTriggered(filteredCats) {
   sidebar.renderCatList(filteredCats, selectCatWrapper);
 }
 
+// Helper to perform hot refresh of CAT database and sync to sidebar/dashboard
+async function refreshCatsAndRender() {
+  let cats = [];
+  try {
+    cats = await api.fetchCats();
+  } catch (err) {
+    console.error("[Refresh Error] Fetch CATs failed, using emergency fallback.", err);
+    try {
+      const res = await fetch('data/cats_db.json');
+      if (!res.ok) throw new Error("Emergency fallback failed");
+      cats = await res.json();
+    } catch (fallbackErr) {
+      console.error("[Refresh Critical] No data available.", fallbackErr);
+      return;
+    }
+  }
+
+  const localProgress = getLocalProgress();
+  let localOverrides = {};
+  let customCreatedCats = [];
+  try {
+    localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+    customCreatedCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+  } catch (_) {}
+
+  if (api.isOfflineApp) {
+    cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
+    cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
+  }
+
+  state.allCats = cats.map(cat => {
+    const localEntry = localProgress[cat.id] || {};
+    const overrides = localOverrides[cat.id] || {};
+    return {
+      ...cat,
+      status: localEntry.status || 'todo',
+      notes: localEntry.notes || '',
+      summary: overrides.customSummary || cat.summary,
+      customSummary: overrides.customSummary || cat.summary,
+      ordonnance: overrides.customOrdonnance || cat.ordonnance,
+      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+    };
+  });
+
+  sidebar.populateCategoryFilter(state.allCats);
+  sidebar.renderCatList(state.allCats, selectCatWrapper);
+  calculateStats();
+  dashboard.renderDashboard(selectCatWrapper);
+  
+  // If the user has a fiche open, refresh it or go to dashboard if it was deleted
+  if (state.activeCat) {
+    const activeId = state.activeCat.id;
+    const updatedCat = state.allCats.find(c => c.id === activeId);
+    if (updatedCat) {
+      workspace.selectCat(updatedCat, true);
+    } else {
+      dashboard.showDashboard(selectCatWrapper);
+    }
+  }
+}
+
 // Side-effect callback when a CAT is deleted
 async function onCatDeleted() {
-  await initApp();
+  await refreshCatsAndRender();
   dashboard.showDashboard(selectCatWrapper);
 }
 
 // Side-effect callback when progress resets
 async function onProgressReset() {
-  await initApp();
+  await refreshCatsAndRender();
   dashboard.showDashboard(selectCatWrapper);
 }
 
 // Side-effect callback when a pending suggestion is approved or rejected
 async function onSuggestionHandled() {
-  await initApp();
+  await refreshCatsAndRender();
 }
 
 // Helper to compute counts and update overall progress bar UI elements

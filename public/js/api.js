@@ -33,6 +33,9 @@ window.fetch = async function(...args) {
   }
 };
 
+const APP_BUILD_VERSION = document.querySelector('meta[name="app-build-version"]')?.content || '0';
+const SYNC_CACHE_KEY = `dr_cat_synced_database_v${APP_BUILD_VERSION}`;
+
 
 
 export const isOfflineApp = 
@@ -318,7 +321,7 @@ export async function fetchCats(since) {
 
   // 2. ANDROID_OFFLINE: Load cached synced database or static fallback instantly
   if (mode === APP_MODES.ANDROID_OFFLINE) {
-    const cachedDb = localStorage.getItem('dr_cat_synced_database');
+    const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
       try {
         const parsed = JSON.parse(cachedDb);
@@ -365,7 +368,7 @@ export async function fetchCats(since) {
 
   if (!reachable) {
     console.log('[fetchCats] No remote server reachable within timeout — falling back to local bundle instantly.');
-    const cachedDb = localStorage.getItem('dr_cat_synced_database');
+    const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
       try {
         const parsed = JSON.parse(cachedDb);
@@ -397,11 +400,11 @@ export async function fetchCats(since) {
         try {
           if (since === undefined || since === null) {
             // Full database fetch: overwrite cache
-            localStorage.setItem('dr_cat_synced_database', JSON.stringify(data));
+            localStorage.setItem(SYNC_CACHE_KEY, JSON.stringify(data));
           } else {
             // Incremental fetch: merge with existing cache
             let currentCached = [];
-            const cachedDb = localStorage.getItem('dr_cat_synced_database');
+            const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
             if (cachedDb) {
               currentCached = JSON.parse(cachedDb);
             } else {
@@ -423,14 +426,16 @@ export async function fetchCats(since) {
             // Prune deleted items from the local cache
             if (activeIds) {
               const activeSet = new Set(activeIds.split(',').map(id => parseInt(id)));
+              const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+              const customCatIds = new Set(customCats.map(cc => cc.id));
               currentCached = currentCached.filter(c => {
                 // Keep custom offline created cats
-                if (c.id > 1000 || c.id.toString().startsWith('offline-')) return true;
+                if (customCatIds.has(c.id) || c.id > 1000 || c.id.toString().startsWith('offline-')) return true;
                 return activeSet.has(c.id);
               });
             }
             
-            localStorage.setItem('dr_cat_synced_database', JSON.stringify(currentCached));
+            localStorage.setItem(SYNC_CACHE_KEY, JSON.stringify(currentCached));
           }
         } catch (cacheErr) {
           console.error('[API] Failed to cache synced database:', cacheErr);
@@ -445,7 +450,7 @@ export async function fetchCats(since) {
 
   // Ultimate fallback
   console.warn('[API] fetchCats: all remote attempts failed, using local bundle.');
-  const cachedDb = localStorage.getItem('dr_cat_synced_database');
+  const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
   if (cachedDb && !queryParam) {
     try {
       const parsed = JSON.parse(cachedDb);
@@ -833,20 +838,24 @@ export async function checkRealConnection() {
     }
   }
 
-  // WAN connectivity fallback ping — use a simpler endpoint that doesn't require CORS
-  try {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 3000);
-    await fetchWithTimeout('https://httpbin.org/get', {
-      method: 'HEAD',
-      mode: 'no-cors',
-      signal: controller.signal
-    });
-    clearTimeout(id);
-    return true;
-  } catch (_) {
-    return false;
+  // WAN connectivity fallback ping — check multiple endpoints to verify internet access
+  const wanUrls = ['https://www.cloudflare.com/cdn-cgi/trace', 'https://httpbin.org/get'];
+  for (const url of wanUrls) {
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 3000);
+      await fetchWithTimeout(url, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      });
+      clearTimeout(id);
+      return true;
+    } catch (_) {
+      // try next URL
+    }
   }
+  return false;
 }
 
 export async function pingEndpoint(url, timeoutMs = 2500) {

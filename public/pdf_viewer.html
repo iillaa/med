@@ -291,11 +291,10 @@
     }
 
     // Clean display title
-    const displayTitle = pdfFileName.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
-                                    .replace(/^\d+锔忊儯/i, '')
-                                    .replace(/馃[A-Z0-9]/g, '')
+    const displayTitle = pdfFileName.replace(/^\d+[\s_-]+/i, '')
                                     .replace(/_/g, ' ')
-                                    .replace(/\.pdf$/i, '');
+                                    .replace(/\.pdf$/i, '')
+                                    .trim();
     document.getElementById('doc-title').textContent = displayTitle;
 
     const pdfUrl = `pdfs/${encodeURIComponent(pdfFileName)}`;

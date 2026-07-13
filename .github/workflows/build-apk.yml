@@ -41,7 +41,7 @@ jobs:
         env:
           REMOTE_SERVER_URL_SECRET: ${{ secrets.REMOTE_SERVER_URL }}
         run: |
-          echo '{"urls": ["${{ secrets.REMOTE_SERVER_URL }}"], "primaryProvider": "ngrok"}' > remote_server_config.json
+          printf '%s' "$REMOTE_SERVER_URL_SECRET" | python3 -c 'import sys, json; print(json.dumps({"urls":[sys.stdin.read().strip()], "primaryProvider":"ngrok"}))' > remote_server_config.json
 
       - name: Copy Databases (Build Step)
         run: npm run build

@@ -251,10 +251,14 @@ app.use((req, res, next) => {
       ...providerHeaders
     ]);
 
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', Array.from(uniqueHeaders).join(', '));
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
 
   // OPTIONS must always return after headers are set (or not — but never before)
@@ -321,13 +325,14 @@ class AsyncLock {
   }
   acquire(fn) {
     this.queueDepth++;
-    const next = this.promise.then(() => fn());
+    const next = this.promise.then(async () => {
+      try {
+        return await fn();
+      } finally {
+        this.queueDepth = Math.max(0, this.queueDepth - 1);
+      }
+    });
     this.promise = next.catch(() => {});
-    const originalThen = next.then.bind(next);
-    next.then = (onFulfilled, onRejected) => {
-      this.queueDepth = Math.max(0, this.queueDepth - 1);
-      return originalThen(onFulfilled, onRejected);
-    };
     return next;
   }
   getQueueDepth() {
