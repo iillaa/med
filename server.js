@@ -9,7 +9,14 @@ const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
 const DB_FILE = path.join(__dirname, 'cats_db.json');
 const PDF_DIR = path.join(__dirname, 'public', 'pdfs');
-const APP_DATA_KEY = process.env.APP_DATA_KEY || 'drcat_pub_2f7a91c4e8';
+// Soft deterrent only: this key is intentionally public (it is shipped in the client
+// bundle, public/js/api.js). It stops casual scraping, not determined attackers.
+// The client always sends this exact key, so APP_DATA_KEY must stay fixed.
+const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+// Optional EXTRA accepted key (additive only). It never replaces APP_DATA_KEY, so it
+// cannot break legitimate clients that always send the fixed key.
+const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
+const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
 const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
 const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 
@@ -234,11 +241,11 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
-// Guard the bundled CAT database: only serve data/cats_db.json to trusted clients
-// (those presenting the app key). This protects the curated DB from casual scraping
-// while remaining seamless for the official app and offline bundle.
+// Guard the bundled CAT database: only serve data/cats_db.json to clients presenting
+// the app key. Soft deterrence (key is public) but stops casual scraping and stays
+// seamless for the official app and offline bundle.
 app.get('/data/cats_db.json', (req, res, next) => {
-  if (req.headers['x-app-key'] !== APP_DATA_KEY) {
+  if (!isValidAppKey(req.headers['x-app-key'])) {
     return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
   }
   next();
@@ -732,7 +739,7 @@ app.post('/api/logout', (req, res) => {
 
 // Endpoint to get all CATs (served from memory cache)
 app.get('/api/cats', (req, res) => {
-  if (req.headers['x-app-key'] !== APP_DATA_KEY) {
+  if (!isValidAppKey(req.headers['x-app-key'])) {
     return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
   }
   const isAdmin = isAdminRequest(req);
