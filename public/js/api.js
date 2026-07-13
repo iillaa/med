@@ -464,7 +464,7 @@ export async function fetchCats(since) {
       }
     } catch (_) {}
   }
-  const res = await fetchWithTimeout('data/cats_db.json');
+  const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
   if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
   return res.json();
 }
