@@ -185,6 +185,9 @@ export function getConfiguredRemoteUrls() {
   return [];
 }
 
+export const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+const STATIC_DATA_HEADERS = { 'x-app-key': APP_DATA_KEY };
+
 export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
@@ -193,6 +196,7 @@ export function getHeaders(extraHeaders = {}) {
   const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
+    'x-app-key': APP_DATA_KEY,
     ...(token ? { 'x-admin-token': token } : {}),
     ...providerExtraHeaders,
     ...extraHeaders
@@ -333,7 +337,7 @@ export async function fetchCats(since) {
       } catch (_) {}
     }
     console.log('[fetchCats] Offline mode — loading bundled data instantly.');
-    const res = await fetchWithTimeout('data/cats_db.json');
+    const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs statically');
     return res.json();
   }
@@ -378,7 +382,7 @@ export async function fetchCats(since) {
         }
       } catch (_) {}
     }
-    const res = await fetchWithTimeout('data/cats_db.json');
+    const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
     return res.json();
   }
@@ -409,7 +413,7 @@ export async function fetchCats(since) {
               currentCached = JSON.parse(cachedDb);
             } else {
               // Load static bundled data as baseline if cache is empty
-              const fallbackRes = await fetchWithTimeout('data/cats_db.json');
+              const fallbackRes = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
               if (fallbackRes.ok) currentCached = await fallbackRes.json();
             }
             

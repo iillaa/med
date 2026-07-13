@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { PDFParse } = require('pdf-parse');
 
-const PDF_DIR = path.join(__dirname, '.cat-med', 'reference-pdfs');
+const PDF_DIR = path.join(__dirname, 'public', 'pdfs');
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 
 // Status object to track indexing state in memory
@@ -44,7 +44,7 @@ function getIndexStatus() {
 }
 
 /**
- * Indexes PDF files in reference-pdfs directory page by page.
+ * Indexes PDF files in public/pdfs directory page by page.
  * Caches results in pdf_index.json to avoid parsing unmodified PDFs.
  */
 async function indexPdfs(force = false) {

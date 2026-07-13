@@ -8,10 +8,8 @@ const { PROVIDERS: serverProviders, detectProvider } = require('./public/js/serv
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
 const DB_FILE = path.join(__dirname, 'cats_db.json');
-const LOCAL_PDF_DIR = '/storage/emulated/0/cat-med/CAT de Médecine Générale';
-const PDF_DIR = fs.existsSync(LOCAL_PDF_DIR)
-  ? LOCAL_PDF_DIR
-  : path.join(__dirname, 'cat-med', 'reference-pdfs');
+const PDF_DIR = path.join(__dirname, 'public', 'pdfs');
+const APP_DATA_KEY = process.env.APP_DATA_KEY || 'drcat_pub_2f7a91c4e8';
 const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
 const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 
@@ -193,6 +191,7 @@ app.use((req, res, next) => {
       'Content-Type',
       'Authorization',
       'x-admin-token',
+      'x-app-key',
       'ngrok-skip-browser-warning',  // always explicitly allowed
       ...providerHeaders
     ]);
@@ -235,6 +234,16 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
+// Guard the bundled CAT database: only serve data/cats_db.json to trusted clients
+// (those presenting the app key). This protects the curated DB from casual scraping
+// while remaining seamless for the official app and offline bundle.
+app.get('/data/cats_db.json', (req, res, next) => {
+  if (req.headers['x-app-key'] !== APP_DATA_KEY) {
+    return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   lastModified: false,
@@ -242,6 +251,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
     // Never cache HTML, JS, or CSS — always serve fresh
     if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    } else if (filePath.endsWith('.pdf')) {
+      // Aggressive 7-day caching to save mobile data on PDFs
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
     }
   }
 }));
@@ -624,11 +636,8 @@ function isAdminRequest(req) {
   return true;
 }
 
-// Serve PDFs statically with aggressive 7-day caching to save mobile data
-app.use('/pdfs', express.static(PDF_DIR, {
-  maxAge: '7d',
-  immutable: true
-}));
+// PDFs are served from public/pdfs via the main static middleware above (7-day cache).
+// PDF_DIR remains the authoritative source for uploads and the indexer.
 
 // GET /health - Check system status and health parameters
 app.get('/health', (req, res) => {
@@ -723,6 +732,9 @@ app.post('/api/logout', (req, res) => {
 
 // Endpoint to get all CATs (served from memory cache)
 app.get('/api/cats', (req, res) => {
+  if (req.headers['x-app-key'] !== APP_DATA_KEY) {
+    return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
+  }
   const isAdmin = isAdminRequest(req);
   const since = parseInt(req.query.since);
   

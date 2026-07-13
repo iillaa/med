@@ -43,6 +43,9 @@ jobs:
         run: |
           printf '%s' "$REMOTE_SERVER_URL_SECRET" | python3 -c 'import sys, json; print(json.dumps({"urls":[sys.stdin.read().strip()], "primaryProvider":"ngrok"}))' > remote_server_config.json
 
+      - name: Reindex PDFs
+        run: npm run reindex
+
       - name: Copy Databases (Build Step)
         run: npm run build
 
