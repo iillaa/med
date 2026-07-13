@@ -185,6 +185,9 @@ export function getConfiguredRemoteUrls() {
   return [];
 }
 
+// Soft deterrent only: this key ships in the public client bundle (devtools/curl can
+// read it), so it is NOT real access control — just friction against casual scraping.
+// Genuine protection would require a server-signed per-session token at login.
 export const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
 const STATIC_DATA_HEADERS = { 'x-app-key': APP_DATA_KEY };
 
