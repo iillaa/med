@@ -167,3 +167,11 @@ module.exports = {
   getIndexStatus,
   onIndexUpdated
 };
+
+// When run directly (npm run reindex), (re)build the PDF index.
+if (require.main === module) {
+  indexPdfs(true).catch(err => {
+    console.error('Reindex failed:', err);
+    process.exit(1);
+  });
+}

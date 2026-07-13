@@ -14,7 +14,7 @@ const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
 const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ── Server Provider Abstraction ───────────────────────────
 // Server providers config loaded from public/js/server-providers.cjs
@@ -1167,7 +1167,7 @@ app.post('/api/suggestions/:id/edit', async (req, res) => {
   }
 });
 
-// Endpoint to list all actual files in reference-pdfs directory
+// Endpoint to list all actual files in public/pdfs directory
 app.get('/api/pdfs', async (req, res) => {
   try {
     const exists = await fs.promises.access(PDF_DIR).then(() => true).catch(() => false);
@@ -1345,7 +1345,7 @@ app.post('/api/diagnostics/upload-pdf', async (req, res) => {
     const fileBuffer = Buffer.from(base64Data, 'base64');
 
     await fs.promises.writeFile(targetPath, fileBuffer);
-    console.log(`[PDF Upload] Saved ${cleanFilename} to reference-pdfs folder.`);
+    console.log(`[PDF Upload] Saved ${cleanFilename} to public/pdfs folder.`);
 
     // Trigger PDF indexing in the background
     indexPdfs(true).catch(err => console.error("Error in post-upload indexing:", err));
