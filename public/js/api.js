@@ -773,7 +773,7 @@ export async function triggerReindexing() {
 export async function fetchPdfIndexStatus() {
   if (isOfflineApp) {
     try {
-      const indexRes = await fetch('data/pdf_index.json');
+      const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
       if (!indexRes.ok) throw new Error("Failed to load PDF index for status calculation");
       const index = await indexRes.json();
       
