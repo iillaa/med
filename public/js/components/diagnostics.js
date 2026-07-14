@@ -417,7 +417,7 @@ async function saveRemoteServerUrl() {
 
     showToast(
       serverPersistenceFailed
-        ? `${urls.length} adresse(s) enregistrée(s) localement, mais la configuration serveur n'a pas été mise à jour.`
+        ? "Adresse enregistrée localement, mais la configuration serveur n'a pas été mise à jour."
         : `${urls.length} adresse(s) de serveur enregistrée(s) !`,
       serverPersistenceFailed ? "fa-triangle-exclamation" : "fa-circle-check",
       4000
