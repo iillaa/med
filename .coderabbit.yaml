@@ -1,3 +1,4 @@
-# Tell CodeRabbit to watch ALL branches
-branches:
-  - "*"
+reviews:
+  auto_review:
+    base_branches:
+      - ".*"
