@@ -637,13 +637,44 @@
     // Double-click / double-tap on canvas toggles fit mode
     canvas.addEventListener('dblclick', () => zoomFitBtn.click());
 
-    // Open in external PDF app:
-    //  - Android (app or website): system share sheet -> pick any PDF reader
+    // Open / share the PDF:
+    //  - Android Capacitor app: use @capacitor/share with the local bundled PDF
+    //    (pdfUrl is relative -> served by the app itself, so it's fast and offline)
+    //  - Android browser: Web Share API with files
     //  - Everything else (PC web): open in a new browser tab (browser's own viewer)
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(String(reader.result).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
     async function openExternal() {
       const isAndroid = /Android/i.test(navigator.userAgent);
-      const probe = new File([], pdfFileName, { type: 'application/pdf' });
-      if (isAndroid && navigator.canShare && navigator.canShare({ files: [probe] })) {
+      const cap = window.Capacitor;
+      const useCapacitor = !!(cap && cap.isNativePlatform && cap.isNativePlatform() &&
+        cap.Plugins && cap.Plugins.Share && cap.Plugins.Filesystem);
+
+      if (useCapacitor) {
+        try {
+          // pdfUrl is relative (pdfs/...) -> served by the app's own localhost (local, offline)
+          const blob = await fetch(pdfUrl).then(r => r.blob());
+          const base64 = await blobToBase64(blob);
+          const safeName = 'drcat_' + pdfFileName.replace(/[^\w.-]/g, '_');
+          const fs = cap.Plugins.Filesystem;
+          await fs.writeFile({ path: safeName, data: base64, directory: 'CACHE', recursive: true });
+          const { uri } = await fs.getUri({ path: safeName, directory: 'CACHE' });
+          await cap.Plugins.Share.share({ title: displayTitle || pdfFileName, files: [uri] });
+          return;
+        } catch (e) {
+          if (e && e.name === 'AbortError') return; // user cancelled the share sheet
+          console.warn('Capacitor share failed, falling back:', e);
+        }
+      }
+
+      if (isAndroid && navigator.canShare && navigator.canShare({ files: [new File([], pdfFileName, { type: 'application/pdf' })] })) {
         try {
           const blob = await fetch(pdfUrl).then(r => r.blob());
           await navigator.share({
