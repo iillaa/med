@@ -244,6 +244,8 @@ app.get('/capacitor.js', (req, res) => {
 // Guard the curated data files: only serve them to clients presenting the app key.
 // Soft deterrence (key is public) but stops casual scraping while staying seamless
 // for the official app and offline bundle.
+// NOTE: when adding a file here, also send `x-app-key` from every client fetch of it
+// (see STATIC_DATA_HEADERS in public/js/api.js), or the official app will get 403.
 const GUARDED_DATA_FILES = ['/data/cats_db.json', '/data/pdf_index.json', '/data/pdf_list.json'];
 GUARDED_DATA_FILES.forEach((file) => {
   app.get(file, (req, res, next) => {
