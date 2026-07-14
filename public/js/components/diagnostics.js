@@ -32,7 +32,8 @@ export function initDiagnostics() {
   document.getElementById('reset-remote-url-btn')?.addEventListener('click', resetRemoteServerUrl);
   document.getElementById('copy-logs-btn')?.addEventListener('click', copyTerminalLogs);
   document.getElementById('clear-logs-btn')?.addEventListener('click', clearTerminalLogs);
-  document.getElementById('run-auto-checkup-btn')?.addEventListener('click', runAutoCheckupSuite);}
+  document.getElementById('run-auto-checkup-btn')?.addEventListener('click', runAutoCheckupSuite);
+}
 
 function expandPanel() {
   const panel = document.getElementById('admin-pane-diagnostics');
@@ -118,6 +119,40 @@ async function refreshDiagnosticsData() {
 
   // Fetch Server-side Diagnostics
   if (!api.isOfflineApp || api.hasRemoteServer()) {
+    const hasAdminToken = !!localStorage.getItem('dr_cat_admin_token');
+    if (!hasAdminToken) {
+      document.getElementById('diag-node-version').textContent = '-- (Admin requis)';
+      document.getElementById('diag-server-os').textContent = '-- (Admin requis)';
+      document.getElementById('diag-server-uptime').textContent = '-- (Admin requis)';
+      document.getElementById('diag-server-mem').textContent = '-- (Admin requis)';
+      
+      const idxSpan = document.getElementById('diag-indexing-active');
+      if (idxSpan) {
+        idxSpan.textContent = 'Admin requis';
+        idxSpan.style.background = 'rgba(255,255,255,0.05)';
+        idxSpan.style.color = 'var(--text-muted)';
+      }
+      
+      document.getElementById('diag-db-cats').textContent = '-- (Admin requis)';
+      document.getElementById('diag-db-sugs').textContent = '-- (Admin requis)';
+      document.getElementById('diag-db-size-cats').textContent = '-- (Admin requis)';
+      document.getElementById('diag-db-size-sugs').textContent = '-- (Admin requis)';
+      document.getElementById('diag-db-size-index').textContent = '-- (Admin requis)';
+      
+      document.getElementById('diag-pdf-docs').textContent = '-- (Admin requis)';
+      document.getElementById('diag-pdf-pages').textContent = '-- (Admin requis)';
+      document.getElementById('diag-pdf-time').textContent = '-- (Admin requis)';
+      
+      const healthSpan = document.getElementById('diag-pdf-health');
+      if (healthSpan) healthSpan.innerHTML = '-- (Admin requis)';
+      
+      const limitsList = document.getElementById('diag-rate-limits-list');
+      if (limitsList) {
+        limitsList.innerHTML = '<p class="text-muted text-center" style="margin: 8px 0; font-style: italic;">Connexion admin requise.</p>';
+      }
+      return;
+    }
+
     try {
       const system = await api.fetchDiagnosticsSystem();
       document.getElementById('diag-node-version').textContent = system.nodeVersion || '--';
@@ -404,15 +439,23 @@ async function saveRemoteServerUrl() {
     localStorage.setItem('dr_cat_remote_server_url', urls[0]);
 
     // 2. Persist to server config ONLY if we are running in a web browser connected to the server
+    let serverPersistenceFailed = false;
     if (!api.isOfflineApp) {
       try {
         await api.updateDiagnosticsRemoteUrl(urls);
       } catch (serverErr) {
         console.warn("Could not save config to server file system:", serverErr);
+        serverPersistenceFailed = true;
       }
     }
 
-    showToast(`${urls.length} adresse(s) de serveur enregistrée(s) !`, "fa-circle-check", 3000);
+    showToast(
+      serverPersistenceFailed
+        ? "Adresse enregistrée localement, mais la configuration serveur n'a pas été mise à jour."
+        : `${urls.length} adresse(s) de serveur enregistrée(s) !`,
+      serverPersistenceFailed ? "fa-triangle-exclamation" : "fa-circle-check",
+      4000
+    );
     
     // Refresh stats and run connection test automatically to verify URL validity
     refreshDiagnosticsData();
@@ -535,7 +578,8 @@ async function runAutoCheckupSuite() {
 
   // 6. Pull server performance metrics
   let serverPerformanceMetrics = {};
-  if (!api.isOfflineApp || api.hasRemoteServer()) {
+  const hasAdminToken = !!localStorage.getItem('dr_cat_admin_token');
+  if ((!api.isOfflineApp || api.hasRemoteServer()) && hasAdminToken) {
     try {
       console.log("[Auto-Test] Récupération des latences des endpoints du serveur...");
       serverPerformanceMetrics = await api.fetchServerMetrics();

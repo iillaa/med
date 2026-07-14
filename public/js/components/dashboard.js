@@ -533,6 +533,10 @@ export function renderDashboard(onSelectCat) {
   });
 
   const total = state.allCats.length;
+  const totalCatsCountEl = document.getElementById('total-cats-count');
+  if (totalCatsCountEl) {
+    totalCatsCountEl.textContent = total;
+  }
   const percent = total > 0 ? Math.round((done / total) * 100) : 0;
 
   if (dashMasteryRate) {

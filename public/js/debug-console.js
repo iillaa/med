@@ -57,13 +57,12 @@ export function startDebugConsole() {
   };
 
   // Global errors & rejections
-  window.onerror = (message, source, lineno, colno, error) => {
-    addLog('ERROR', [`${message} at ${source}:${lineno}:${colno}`, error]);
-    return false;
-  };
-  window.onunhandledrejection = (event) => {
+  window.addEventListener('error', (event) => {
+    addLog('ERROR', [`${event.message} at ${event.filename}:${event.lineno}:${event.colno}`, event.error]);
+  });
+  window.addEventListener('unhandledrejection', (event) => {
     addLog('ERROR', [`Unhandled Promise Rejection: ${event.reason}`]);
-  };
+  });
 
   // Network interception (fetch)
   const originalFetch = window.fetch;
@@ -102,6 +101,16 @@ function getLogColor(level) {
   }
 }
 
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
 function renderLogs() {
   const container = document.getElementById('debug-console-content');
   if (!container) return;
@@ -114,9 +123,9 @@ function renderLogs() {
   container.innerHTML = logBuffer.map(log => {
     const levelClass = (log.level || 'info').toLowerCase();
     return `<div class="log-row ${levelClass}" style="padding: 4px 8px; font-family: monospace; font-size: 11px; line-height: 1.4; display: flex; gap: 8px;">
-      <span class="log-time" style="white-space: nowrap;">[${log.timestamp}]</span>
-      <span class="log-level" style="font-weight: bold; min-width: 50px;">${log.level}</span>
-      <span class="log-message" style="word-break: break-all;">${log.message}</span>
+      <span class="log-time" style="white-space: nowrap;">[${escapeHtml(log.timestamp)}]</span>
+      <span class="log-level" style="font-weight: bold; min-width: 50px;">${escapeHtml(log.level)}</span>
+      <span class="log-message" style="word-break: break-all;">${escapeHtml(log.message)}</span>
     </div>`;
   }).join('');
 
