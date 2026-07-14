@@ -872,7 +872,9 @@ export async function pingEndpoint(url, timeoutMs = 2500) {
     // Determine headers and mode depending on URL type
     const provider = detectProvider(url);
     const providerHeaders = getExtraHeaders(url);
-    const isCorsSafePing = url.includes('httpbin.org') || url.includes('localhost') || url.includes('127.0.0.1');
+    const configuredUrls = getConfiguredRemoteUrls();
+    const isRemoteUrl = configuredUrls.some(u => u && url.includes(u));
+    const isCorsSafePing = url.includes('httpbin.org') || url.includes('localhost') || url.includes('127.0.0.1') || isRemoteUrl;
     const fetchOpts = {
       method: 'GET',
       signal: controller.signal,
