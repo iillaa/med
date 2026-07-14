@@ -645,10 +645,20 @@
     function blobToBase64(blob) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(String(reader.result).split(',')[1]);
-        reader.onerror = reject;
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === 'string') resolve(result.split(',')[1]);
+          else reject(new Error('Failed to read PDF blob'));
+        };
+        reader.onerror = () => reject(reader.error || new Error('FileReader error'));
         reader.readAsDataURL(blob);
       });
+    }
+
+    async function fetchPdfBlob() {
+      const res = await fetch(pdfUrl);
+      if (!res.ok) throw new Error('PDF fetch failed (status ' + res.status + ')');
+      return res.blob();
     }
 
     async function openExternal() {
@@ -660,23 +670,24 @@
       if (useCapacitor) {
         try {
           // pdfUrl is relative (pdfs/...) -> served by the app's own localhost (local, offline)
-          const blob = await fetch(pdfUrl).then(r => r.blob());
+          const blob = await fetchPdfBlob();
           const base64 = await blobToBase64(blob);
           const safeName = 'drcat_' + pdfFileName.replace(/[^\w.-]/g, '_');
           const fs = cap.Plugins.Filesystem;
           await fs.writeFile({ path: safeName, data: base64, directory: 'CACHE', recursive: true });
           const { uri } = await fs.getUri({ path: safeName, directory: 'CACHE' });
           await cap.Plugins.Share.share({ title: displayTitle || pdfFileName, files: [uri] });
-          return;
         } catch (e) {
           if (e && e.name === 'AbortError') return; // user cancelled the share sheet
-          console.warn('Capacitor share failed, falling back:', e);
+          console.warn('Capacitor share failed:', e);
+          return; // no useful fallback inside the native WebView
         }
+        return;
       }
 
       if (isAndroid && navigator.canShare && navigator.canShare({ files: [new File([], pdfFileName, { type: 'application/pdf' })] })) {
         try {
-          const blob = await fetch(pdfUrl).then(r => r.blob());
+          const blob = await fetchPdfBlob();
           await navigator.share({
             title: displayTitle,
             files: [new File([blob], pdfFileName, { type: 'application/pdf' })]
