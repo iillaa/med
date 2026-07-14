@@ -763,14 +763,7 @@
     "pdf_keywords": [
       "N"
     ],
-    "updatedAt": 1783818643924,
-    "history": [
-      {
-        "timestamp": 1783818643924,
-        "action": "create",
-        "detail": "Créé via approbation d'une proposition de fiche"
-      }
-    ]
+    "updatedAt": 1783818643924
   },
   {
     "id": 57,
@@ -780,13 +773,6 @@
     "red_flags": "T",
     "ordonnance": "F",
     "pdf_keywords": [],
-    "updatedAt": 1783819337464,
-    "history": [
-      {
-        "timestamp": 1783819337464,
-        "action": "create",
-        "detail": "Créé via approbation d'une proposition de fiche"
-      }
-    ]
+    "updatedAt": 1783819337464
   }
 ]
