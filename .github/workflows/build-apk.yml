@@ -51,7 +51,9 @@ jobs:
 
       - name: Initialize Capacitor Android Platform
         run: |
-          npx cap add android || true
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
           npx cap sync
 
       - name: Set up JDK 17
@@ -77,11 +79,15 @@ jobs:
           echo "gradle_cmd=$GRADLE_CMD" >> $GITHUB_OUTPUT
           echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
 
+      - name: Clear Gradle Cache
+        run: |
+          rm -rf ~/.gradle/caches
+
       - name: Build Android App (Gradle)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew ${{ steps.build_config.outputs.gradle_cmd }}
+          ./gradlew clean ${{ steps.build_config.outputs.gradle_cmd }}
 
       - name: Sign Release APK
         if: steps.build_config.outputs.build_type == 'release' && env.SIGNING_KEY != ''
