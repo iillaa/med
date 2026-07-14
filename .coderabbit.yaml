@@ -1,1 +1,3 @@
-base_branches: ['*']
+# Tell CodeRabbit to watch ALL branches
+branches:
+  - "*"
