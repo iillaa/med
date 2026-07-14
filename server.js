@@ -3,75 +3,28 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { indexPdfs, getIndexStatus, onIndexUpdated } = require('./index_pdfs');
+const { PROVIDERS: serverProviders, detectProvider } = require('./public/js/server-providers.cjs');
 
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
 const DB_FILE = path.join(__dirname, 'cats_db.json');
-const LOCAL_PDF_DIR = '/storage/emulated/0/cat-med/CAT de Médecine Générale';
-const PDF_DIR = fs.existsSync(LOCAL_PDF_DIR)
-  ? LOCAL_PDF_DIR
-  : path.join(__dirname, 'cat-med', 'reference-pdfs');
+const PDF_DIR = path.join(__dirname, 'public', 'pdfs');
+// Soft deterrent only: this key is intentionally public (it is shipped in the client
+// bundle, public/js/api.js). It stops casual scraping, not determined attackers.
+// The client always sends this exact key, so APP_DATA_KEY must stay fixed.
+const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+// Optional EXTRA accepted key (additive only). It never replaces APP_DATA_KEY, so it
+// cannot break legitimate clients that always send the fixed key.
+const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
+const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
 const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
 const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ── Server Provider Abstraction ───────────────────────────
-// Loaded dynamically so the server can support any tunnel provider
-// without hardcoded ngrok references.
-async function loadServerProviders() {
-  const fallback = [
-    {
-      id: 'ngrok',
-      urlPattern: /(^|\.)ngrok(-free)?\.(app|dev|io)$/,
-      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
-      managementPort: 4040,
-      managementPath: '/api/tunnels',
-      isDevHostname: (h) => /(^|\.)ngrok(-free)?\.(app|dev|io)$/.test(h),
-      isTunnelOrigin: (o) => o.includes('ngrok'),
-      tunnelLabel: 'Tunnel',
-    },
-    {
-      id: 'direct',
-      urlPattern: null,
-      extraHeaders: {},
-      managementPort: null,
-      managementPath: null,
-      isDevHostname: () => false,
-      isTunnelOrigin: () => false,
-      tunnelLabel: 'Serveur direct',
-    }
-  ];
-
-  try {
-    const providerPath = path.join(__dirname, 'public', 'js', 'server-providers.js');
-    const content = await fs.promises.readFile(providerPath, 'utf-8');
-    // Extract PROVIDERS array by evaluating the module source
-    const match = content.match(/export const PROVIDERS = (\[[\s\S]*?\]);/);
-    if (match) {
-      try {
-        return (new Function('return ' + match[1]))();
-      } catch (_) {
-        return fallback;
-      }
-    }
-  } catch (err) {
-    console.warn('[Providers] Failed to load provider registry, using fallback:', err.message);
-  }
-  return fallback;
-}
-
-function detectProvider(url, providers) {
-  if (!url) return providers[providers.length - 1];
-  for (const provider of providers) {
-    if (provider.urlPattern && provider.urlPattern.test(url)) {
-      return provider;
-    }
-  }
-  return providers[providers.length - 1];
-}
-
+// Server providers config loaded from public/js/server-providers.cjs
 function getProviderHeaders(provider) {
   return provider.extraHeaders || {};
 }
@@ -94,7 +47,7 @@ function buildAllowedOrigins(providers, configuredUrls) {
   for (const url of configuredUrls) {
     if (!url) continue;
     origins.add(url);
-    const provider = detectProvider(url, providers);
+    const provider = detectProvider(url);
     if (provider.isTunnelOrigin) {
       // Allow all origins matching the provider’s tunnel pattern (e.g. any .ngrok-free.app)
       const pattern = provider.urlPattern;
@@ -151,12 +104,10 @@ app.use((err, req, res, next) => {
 });
 
 // CORS middleware — dynamically configured based on remote server URLs
-let serverProviders = [];
 let allowedOrigins = new Set();
 let configuredRemoteUrls = [];
 
 async function initializeProviders() {
-  serverProviders = await loadServerProviders();
   
   // Load configured remote URLs
   try {
@@ -247,14 +198,19 @@ app.use((req, res, next) => {
       'Content-Type',
       'Authorization',
       'x-admin-token',
+      'x-app-key',
       'ngrok-skip-browser-warning',  // always explicitly allowed
       ...providerHeaders
     ]);
 
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', Array.from(uniqueHeaders).join(', '));
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
 
   // OPTIONS must always return after headers are set (or not — but never before)
@@ -285,6 +241,21 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
+// Guard the curated data files: only serve them to clients presenting the app key.
+// Soft deterrence (key is public) but stops casual scraping while staying seamless
+// for the official app and offline bundle.
+// NOTE: when adding a file here, also send `x-app-key` from every client fetch of it
+// (see STATIC_DATA_HEADERS in public/js/api.js), or the official app will get 403.
+const GUARDED_DATA_FILES = ['/data/cats_db.json', '/data/pdf_index.json', '/data/pdf_list.json'];
+GUARDED_DATA_FILES.forEach((file) => {
+  app.get(file, (req, res, next) => {
+    if (!isValidAppKey(req.headers['x-app-key'])) {
+      return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
+    }
+    next();
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   lastModified: false,
@@ -292,6 +263,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
     // Never cache HTML, JS, or CSS — always serve fresh
     if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    } else if (filePath.endsWith('.pdf')) {
+      // Aggressive 7-day caching to save mobile data on PDFs
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
     }
   }
 }));
@@ -321,13 +295,14 @@ class AsyncLock {
   }
   acquire(fn) {
     this.queueDepth++;
-    const next = this.promise.then(() => fn());
+    const next = this.promise.then(async () => {
+      try {
+        return await fn();
+      } finally {
+        this.queueDepth = Math.max(0, this.queueDepth - 1);
+      }
+    });
     this.promise = next.catch(() => {});
-    const originalThen = next.then.bind(next);
-    next.then = (onFulfilled, onRejected) => {
-      this.queueDepth = Math.max(0, this.queueDepth - 1);
-      return originalThen(onFulfilled, onRejected);
-    };
     return next;
   }
   getQueueDepth() {
@@ -673,11 +648,8 @@ function isAdminRequest(req) {
   return true;
 }
 
-// Serve PDFs statically with aggressive 7-day caching to save mobile data
-app.use('/pdfs', express.static(PDF_DIR, {
-  maxAge: '7d',
-  immutable: true
-}));
+// PDFs are served from public/pdfs via the main static middleware above (7-day cache).
+// PDF_DIR remains the authoritative source for uploads and the indexer.
 
 // GET /health - Check system status and health parameters
 app.get('/health', (req, res) => {
@@ -772,12 +744,30 @@ app.post('/api/logout', (req, res) => {
 
 // Endpoint to get all CATs (served from memory cache)
 app.get('/api/cats', (req, res) => {
-  const since = parseInt(req.query.since);
-  if (!isNaN(since)) {
-    const filtered = catsCache.filter(c => (c.updatedAt || 0) > since);
-    return res.json(filtered);
+  if (!isValidAppKey(req.headers['x-app-key'])) {
+    return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
   }
-  res.json(catsCache);
+  const isAdmin = isAdminRequest(req);
+  const since = parseInt(req.query.since);
+  
+  // Expose active IDs for deletion sync
+  res.setHeader('Access-Control-Expose-Headers', 'X-Active-Cat-IDs');
+  res.setHeader('X-Active-Cat-IDs', catsCache.map(c => c.id).join(','));
+  
+  let result = catsCache;
+  if (!isNaN(since)) {
+    result = catsCache.filter(c => (c.updatedAt || 0) > since);
+  }
+
+  if (!isAdmin) {
+    // Strip history logs to save bandwidth for regular users
+    result = result.map(c => {
+      const { history, ...rest } = c;
+      return rest;
+    });
+  }
+
+  res.json(result);
 });
 
 // Endpoint to bulk-import fiches (Admin only)
@@ -866,6 +856,13 @@ app.post('/api/cats/:id', async (req, res) => {
         return { notFound: true };
       }
 
+      const previousState = {};
+      if (summary !== undefined && cat.summary !== summary) previousState.summary = cat.summary;
+      if (ordonnance !== undefined && cat.ordonnance !== ordonnance) previousState.ordonnance = cat.ordonnance;
+      if (category !== undefined && cat.category !== category) previousState.category = cat.category;
+      if (title !== undefined && cat.title !== title) previousState.title = cat.title;
+      if (red_flags !== undefined && cat.red_flags !== red_flags) previousState.red_flags = cat.red_flags;
+
       if (summary !== undefined) cat.summary = summary;
       if (ordonnance !== undefined) cat.ordonnance = ordonnance;
       if (category !== undefined) cat.category = category;
@@ -877,7 +874,8 @@ app.post('/api/cats/:id', async (req, res) => {
       cat.history.push({
         timestamp: Date.now(),
         action: 'edit',
-        detail: 'Modifié directement par l\'administrateur'
+        detail: 'Modifié directement par l\'administrateur',
+        previousState: Object.keys(previousState).length > 0 ? previousState : undefined
       });
 
       await safeWriteJsonAsync(DB_FILE, catsCache);
@@ -1067,6 +1065,13 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
       } else if (sug.type === 'edit') {
         const cat = catsCache.find(c => c.id === parseInt(sug.catId));
         if (cat) {
+          const previousState = {};
+          if (sug.data.summary !== undefined && cat.summary !== sug.data.summary) previousState.summary = cat.summary;
+          if (sug.data.ordonnance !== undefined && cat.ordonnance !== sug.data.ordonnance) previousState.ordonnance = cat.ordonnance;
+          if (sug.data.category !== undefined && cat.category !== sug.data.category) previousState.category = cat.category;
+          if (sug.data.title !== undefined && cat.title !== sug.data.title) previousState.title = cat.title;
+          if (sug.data.red_flags !== undefined && cat.red_flags !== sug.data.red_flags) previousState.red_flags = cat.red_flags;
+
           if (sug.data.summary !== undefined) cat.summary = sug.data.summary;
           if (sug.data.ordonnance !== undefined) cat.ordonnance = sug.data.ordonnance;
           if (sug.data.category !== undefined) cat.category = sug.data.category;
@@ -1078,7 +1083,8 @@ app.post('/api/suggestions/:id/approve', async (req, res) => {
           cat.history.push({
             timestamp: Date.now(),
             action: 'edit',
-            detail: 'Modifié via approbation d\'une proposition de modification'
+            detail: 'Modifié via approbation d\'une proposition de modification',
+            previousState: Object.keys(previousState).length > 0 ? previousState : undefined
           });
 
           await safeWriteJsonAsync(DB_FILE, catsCache);
@@ -1173,7 +1179,7 @@ app.post('/api/suggestions/:id/edit', async (req, res) => {
   }
 });
 
-// Endpoint to list all actual files in reference-pdfs directory
+// Endpoint to list all actual files in public/pdfs directory
 app.get('/api/pdfs', async (req, res) => {
   try {
     const exists = await fs.promises.access(PDF_DIR).then(() => true).catch(() => false);
@@ -1351,7 +1357,7 @@ app.post('/api/diagnostics/upload-pdf', async (req, res) => {
     const fileBuffer = Buffer.from(base64Data, 'base64');
 
     await fs.promises.writeFile(targetPath, fileBuffer);
-    console.log(`[PDF Upload] Saved ${cleanFilename} to reference-pdfs folder.`);
+    console.log(`[PDF Upload] Saved ${cleanFilename} to public/pdfs folder.`);
 
     // Trigger PDF indexing in the background
     indexPdfs(true).catch(err => console.error("Error in post-upload indexing:", err));
@@ -1588,7 +1594,7 @@ app.get('/api/diagnostics/tunnel-info', async (req, res) => {
   
   // Return info about all configured tunnel providers
   const providerInfo = configuredRemoteUrls.map(url => {
-    const provider = detectProvider(url, serverProviders);
+    const provider = detectProvider(url);
     const mgmt = getManagementEndpoint(provider);
     return {
       url,

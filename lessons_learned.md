@@ -95,5 +95,18 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Storing local server parameters (like private Ngrok links) in git-ignored config files (e.g. `remote_server_config.json`) is great for local security, but causes the remote build container (GitHub Actions) to compile the APK with empty configurations. This left the generated standalone APK stuck in local offline mode upon fresh install.
 * **Solution**: Modify the CI workflow file to check for a repository secret (e.g., `REMOTE_SERVER_URL`) and dynamically generate the required config files inside the runner's workspace before executing the build. This maintains credential confidentiality while ensuring builds boot up online out-of-the-box.
 
+### 19. GitHub Actions Release Signing SDK Build-Tools Deprecation
+* **Problem**: The `r0adkll/sign-android-release@v1` step fails on newer Ubuntu runner environments if it defaults to build-tools `29.0.3` because older Android SDK versions are regularly deprecated and purged from GitHub-hosted runner images to conserve space.
+* **Solution**: Always specify the `BUILD_TOOLS_VERSION` environment variable (e.g. `BUILD_TOOLS_VERSION: "34.0.0"`) to match the project target SDK version, ensuring the signing tool looks for a package guaranteed to be pre-installed on the runner.
+
+### 20. Android Adaptive Launcher Icons with Solid Backgrounds (JPEG)
+* **Problem**: Generating adaptive foreground layers directly from a JPEG logo containing a solid background creates a smaller opaque square in the center of the foreground layer. When launchers apply masks, this leaves an ugly colored "square inside a circle" shape instead of a seamless icon.
+* **Solution**: Clean the logo on-the-fly inside `generate_icons.sh` using ImageMagick keying (`-fuzz 5% -transparent "white"`) to make the background transparent before scaling and padding. This outputs a clean, transparent logo foreground that matches any adaptive shape beautifully.
+
+### 21. DB Revision History Bloat vs Sync Network Payload
+* **Problem**: Storing old field snapshots in each database item's `history` field builds a valuable change log, but loading this log on client apps wastes local memory and increases sync download size (causing network bloat for normal users).
+* **Solution**: Keep the history array inside the server's master `cats_db.json` but strip it dynamically in `server.js` when responding to public sync requests, and inside `build.js` when packaging the offline app resources. This keeps the client payloads lightweight while keeping server archives intact.
+
+
 
 

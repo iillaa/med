@@ -7,12 +7,23 @@ function rebuildClientAssets() {
     fs.mkdirSync(publicDataDir, { recursive: true });
   }
 
-  // Copy cats_db.json
-  fs.copyFileSync(
-    path.join(__dirname, 'cats_db.json'),
-    path.join(publicDataDir, 'cats_db.json')
-  );
-  console.log("Copied cats_db.json to public/data/");
+  // Copy cats_db.json (stripping version history to optimize PWA client asset size)
+  try {
+    const rawDb = fs.readFileSync(path.join(__dirname, 'cats_db.json'), 'utf-8');
+    const db = JSON.parse(rawDb);
+    const cleanDb = db.map(c => {
+      const { history, ...rest } = c;
+      return rest;
+    });
+    fs.writeFileSync(
+      path.join(publicDataDir, 'cats_db.json'),
+      JSON.stringify(cleanDb, null, 2),
+      'utf-8'
+    );
+    console.log("Copied cats_db.json (with history stripped) to public/data/");
+  } catch (err) {
+    console.error("Error packaging cats_db.json during build:", err);
+  }
 
   // Copy pdf_index.json and generate pdf_list.json
   const pdfIndexSource = path.join(__dirname, 'pdf_index.json');
@@ -74,6 +85,59 @@ function rebuildClientAssets() {
     console.log(`Generated public/js/remote_config.js with ${remoteServerUrls.length} URL(s): ${remoteServerUrls.join(', ') || '(none)'}`);
   } catch (err) {
     console.error("Error writing remote_config.js during build:", err);
+  }
+
+  // 1. Auto-bump app-build-version in public/index.html
+  try {
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(indexPath)) {
+      let indexContent = fs.readFileSync(indexPath, 'utf-8');
+      const now = new Date();
+      const pad = (num) => String(num).padStart(2, '0');
+      const versionString = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}.${pad(now.getHours())}.${pad(now.getMinutes())}`;
+      
+      const updatedIndexContent = indexContent.replace(
+        /<meta name="app-build-version" content="[^"]*">/,
+        `<meta name="app-build-version" content="${versionString}">`
+      );
+      
+      if (updatedIndexContent !== indexContent) {
+        fs.writeFileSync(indexPath, updatedIndexContent, 'utf-8');
+        console.log(`Auto-bumped app-build-version in public/index.html to: ${versionString}`);
+      }
+    }
+  } catch (err) {
+    console.error("Error auto-bumping app-build-version during build:", err);
+  }
+
+  // 2. Generate CommonJS version of server-providers.js for server.js to require() without eval
+  try {
+    const srcPath = path.join(__dirname, 'public', 'js', 'server-providers.js');
+    const destPath = path.join(__dirname, 'public', 'js', 'server-providers.cjs');
+    if (fs.existsSync(srcPath)) {
+      let content = fs.readFileSync(srcPath, 'utf-8');
+      // Replace exports
+      content = content.replace(/export\s+const\s+/g, 'const ');
+      content = content.replace(/export\s+function\s+/g, 'function ');
+      // Append module.exports
+      content += `\n\nmodule.exports = {
+  PROVIDERS,
+  detectProvider,
+  getProviderById,
+  isTunnelUrl,
+  getExtraHeaders,
+  isDevHostname,
+  isTunnelOrigin,
+  getTunnelProviderName,
+  getTunnelManagementInfo,
+  getPrimaryProviderId,
+  sortUrlsByProviderPriority
+};\n`;
+      fs.writeFileSync(destPath, content, 'utf-8');
+      console.log("Generated public/js/server-providers.cjs from server-providers.js");
+    }
+  } catch (err) {
+    console.error("Error generating server-providers.cjs during build:", err);
   }
 }
 

@@ -13,11 +13,11 @@ on:
       build_type:
         description: 'Build Type'
         required: true
-        default: 'debug'
+        default: 'release'
         type: choice
         options:
-          - debug
           - release
+          - debug
           
 jobs:
   build:
@@ -30,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: 'npm'
 
       - name: Install Dependencies
@@ -41,7 +41,10 @@ jobs:
         env:
           REMOTE_SERVER_URL_SECRET: ${{ secrets.REMOTE_SERVER_URL }}
         run: |
-          echo '{"urls": ["${{ secrets.REMOTE_SERVER_URL }}"], "primaryProvider": "ngrok"}' > remote_server_config.json
+          printf '%s' "$REMOTE_SERVER_URL_SECRET" | python3 -c 'import sys, json; print(json.dumps({"urls":[sys.stdin.read().strip()], "primaryProvider":"ngrok"}))' > remote_server_config.json
+
+      - name: Reindex PDFs
+        run: npm run reindex
 
       - name: Copy Databases (Build Step)
         run: npm run build
@@ -60,14 +63,14 @@ jobs:
       - name: Determine Build Type and Configuration
         id: build_config
         run: |
-          BUILD_TYPE="debug"
-          GRADLE_CMD="assembleDebug"
-          ARTIFACT_NAME="drcat-debug-apk"
+          BUILD_TYPE="release"
+          GRADLE_CMD="assembleRelease"
+          ARTIFACT_NAME="drcat-release-apk"
           
-          if [ "${{ github.event.inputs.build_type }}" = "release" ]; then
-            BUILD_TYPE="release"
-            GRADLE_CMD="assembleRelease"
-            ARTIFACT_NAME="drcat-release-apk"
+          if [ "${{ github.event.inputs.build_type }}" = "debug" ]; then
+            BUILD_TYPE="debug"
+            GRADLE_CMD="assembleDebug"
+            ARTIFACT_NAME="drcat-debug-apk"
           fi
           
           echo "build_type=$BUILD_TYPE" >> $GITHUB_OUTPUT
@@ -84,6 +87,7 @@ jobs:
         if: steps.build_config.outputs.build_type == 'release' && env.SIGNING_KEY != ''
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          BUILD_TOOLS_VERSION: "34.0.0"
         uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
@@ -93,13 +97,20 @@ jobs:
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
+      - name: Determine Artifact Path
+        id: artifact_path
+        run: |
+          PATH_TO_UPLOAD="android/app/build/outputs/apk/release/*-unsigned.apk"
+          if [ "${{ steps.build_config.outputs.build_type }}" = "debug" ]; then
+            PATH_TO_UPLOAD="android/app/build/outputs/apk/debug/app-debug.apk"
+          elif [ "${{ steps.sign_app.outputs.signedReleaseFile }}" != "" ]; then
+            PATH_TO_UPLOAD="${{ steps.sign_app.outputs.signedReleaseFile }}"
+          fi
+          echo "path=$PATH_TO_UPLOAD" >> $GITHUB_OUTPUT
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.build_config.outputs.artifact_name }}
-          path: |
-            android/app/build/outputs/apk/debug/app-debug.apk
-            android/app/build/outputs/apk/release/*-unsigned.apk
-            android/app/build/outputs/apk/release/*-signed.apk
-            android/app/build/outputs/apk/release/app-release.apk
+          path: ${{ steps.artifact_path.outputs.path }}
 

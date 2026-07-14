@@ -60,6 +60,12 @@ In offline Capacitor mode, data modifications cannot be saved to the read-only a
 * **Field Overrides**: Customized summaries, status badges, etc., are stored under `dr_cat_local_overrides`.
 * These overrides are deep-merged into the bundled clinical data at startup in `main.js`.
 
+### 4. Version History & Client-Side Pruning
+To keep track of modifications without overloading client devices:
+* **Change Log Archiving**: Whenever an admin directly edits a CAT or approves an edit suggestion, the server records the change type, timestamp, and a copy of the previous text values (`previousState`) inside a `history` array in `cats_db.json`.
+* **Non-Admin API Stripping**: To protect bandwidth during synchronization, the GET `/api/cats` API endpoint strips the `history` fields from responses unless the request is authenticated with an admin token.
+* **Offline Client Build Pruning**: During compilation (`npm run build` / `node build.js`), the build script parses the database and deletes the `history` property from all items before writing them to the web assets folder. This guarantees that the offline standalone APK package remains extremely lightweight.
+
 ---
 
 ## 📡 Provider-Agnostic Remote Sync

@@ -33,6 +33,9 @@ window.fetch = async function(...args) {
   }
 };
 
+const APP_BUILD_VERSION = document.querySelector('meta[name="app-build-version"]')?.content || '0';
+const SYNC_CACHE_KEY = `dr_cat_synced_database_v${APP_BUILD_VERSION}`;
+
 
 
 export const isOfflineApp = 
@@ -182,6 +185,12 @@ export function getConfiguredRemoteUrls() {
   return [];
 }
 
+// Soft deterrent only: this key ships in the public client bundle (devtools/curl can
+// read it), so it is NOT real access control — just friction against casual scraping.
+// Genuine protection would require a server-signed per-session token at login.
+export const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+const STATIC_DATA_HEADERS = { 'x-app-key': APP_DATA_KEY };
+
 export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
@@ -190,6 +199,7 @@ export function getHeaders(extraHeaders = {}) {
   const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
+    'x-app-key': APP_DATA_KEY,
     ...(token ? { 'x-admin-token': token } : {}),
     ...providerExtraHeaders,
     ...extraHeaders
@@ -310,20 +320,27 @@ export async function fetchCats(since) {
   if (mode === APP_MODES.ADMIN_LOCAL) {
     const res = await fetchWithTimeout(`/api/cats${queryParam}`, { headers: getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch CATs from local server');
-    return res.json();
+    const data = await res.json();
+    const activeIds = res.headers.get('X-Active-Cat-IDs');
+    if (activeIds) data.activeIds = activeIds;
+    return data;
   }
 
   // 2. ANDROID_OFFLINE: Load cached synced database or static fallback instantly
   if (mode === APP_MODES.ANDROID_OFFLINE) {
-    const cachedDb = localStorage.getItem('dr_cat_synced_database');
+    const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
-      console.log('[fetchCats] Offline mode — loading cached synced database.');
       try {
-        return JSON.parse(cachedDb);
+        const parsed = JSON.parse(cachedDb);
+        if (Array.isArray(parsed) && parsed.length >= 40) {
+          console.log('[fetchCats] Offline mode — loading cached synced database.');
+          return parsed;
+        }
+        console.warn('[fetchCats] Cached database looks corrupted or incomplete (length < 40). Falling back to static bundle.');
       } catch (_) {}
     }
     console.log('[fetchCats] Offline mode — loading bundled data instantly.');
-    const res = await fetchWithTimeout('data/cats_db.json');
+    const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs statically');
     return res.json();
   }
@@ -358,14 +375,17 @@ export async function fetchCats(since) {
 
   if (!reachable) {
     console.log('[fetchCats] No remote server reachable within timeout — falling back to local bundle instantly.');
-    const cachedDb = localStorage.getItem('dr_cat_synced_database');
+    const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
       try {
-        console.log('[fetchCats] Loaded cached synced database on unreachable remote.');
-        return JSON.parse(cachedDb);
+        const parsed = JSON.parse(cachedDb);
+        if (Array.isArray(parsed) && parsed.length >= 40) {
+          console.log('[fetchCats] Loaded cached synced database on unreachable remote.');
+          return parsed;
+        }
       } catch (_) {}
     }
-    const res = await fetchWithTimeout('data/cats_db.json');
+    const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
     return res.json();
   }
@@ -377,25 +397,29 @@ export async function fetchCats(since) {
       const res = await fetchWithTimeout(getApiUrl(`/api/cats${queryParam}`, remoteUrl), { headers: getHeaders() });
       if (res.ok) {
         const data = await res.json();
+        const activeIds = res.headers.get('X-Active-Cat-IDs');
+        if (activeIds) {
+          data.activeIds = activeIds;
+        }
         console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
         
         // Cache updates locally in localStorage for offline availability!
         try {
-          if (!since) {
+          if (since === undefined || since === null) {
             // Full database fetch: overwrite cache
-            localStorage.setItem('dr_cat_synced_database', JSON.stringify(data));
+            localStorage.setItem(SYNC_CACHE_KEY, JSON.stringify(data));
           } else {
             // Incremental fetch: merge with existing cache
             let currentCached = [];
-            const cachedDb = localStorage.getItem('dr_cat_synced_database');
+            const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
             if (cachedDb) {
               currentCached = JSON.parse(cachedDb);
             } else {
               // Load static bundled data as baseline if cache is empty
-              const fallbackRes = await fetchWithTimeout('data/cats_db.json');
+              const fallbackRes = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
               if (fallbackRes.ok) currentCached = await fallbackRes.json();
             }
-            
+
             // Merge updates
             data.forEach(remote => {
               const idx = currentCached.findIndex(c => c.id === remote.id);
@@ -405,7 +429,20 @@ export async function fetchCats(since) {
                 currentCached.push(remote);
               }
             });
-            localStorage.setItem('dr_cat_synced_database', JSON.stringify(currentCached));
+
+            // Prune deleted items from the local cache
+            if (activeIds) {
+              const activeSet = new Set(activeIds.split(',').map(id => parseInt(id)));
+              const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+              const customCatIds = new Set(customCats.map(cc => cc.id));
+              currentCached = currentCached.filter(c => {
+                // Keep custom offline created cats
+                if (customCatIds.has(c.id) || c.isOffline === true || c.source === 'offline' || c.id.toString().startsWith('offline-') || (typeof c.id === 'number' && c.id < 0)) return true;
+                return activeSet.has(c.id);
+              });
+            }
+
+            localStorage.setItem(SYNC_CACHE_KEY, JSON.stringify(currentCached));
           }
         } catch (cacheErr) {
           console.error('[API] Failed to cache synced database:', cacheErr);
@@ -420,14 +457,17 @@ export async function fetchCats(since) {
 
   // Ultimate fallback
   console.warn('[API] fetchCats: all remote attempts failed, using local bundle.');
-  const cachedDb = localStorage.getItem('dr_cat_synced_database');
+  const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
   if (cachedDb && !queryParam) {
     try {
-      console.log('[fetchCats] Loaded cached synced database on ultimate fallback.');
-      return JSON.parse(cachedDb);
+      const parsed = JSON.parse(cachedDb);
+      if (Array.isArray(parsed) && parsed.length >= 40) {
+        console.log('[fetchCats] Loaded cached synced database on ultimate fallback.');
+        return parsed;
+      }
     } catch (_) {}
   }
-  const res = await fetchWithTimeout('data/cats_db.json');
+  const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
   if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
   return res.json();
 }
@@ -436,7 +476,7 @@ export async function fetchCats(since) {
 export async function fetchPdfs() {
   if (isOfflineApp) {
     // Load only the list of filenames instead of the heavy index structure containing all parsed texts
-    const res = await fetchWithTimeout('data/pdf_list.json');
+    const res = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error("Failed to fetch PDFs list statically");
     return res.json();
   }
@@ -647,7 +687,7 @@ export async function searchPdfsContent(query) {
   if (isOfflineApp) {
     try {
       if (!offlinePdfIndexCache) {
-        const indexRes = await fetch('data/pdf_index.json');
+        const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
         if (!indexRes.ok) throw new Error("Failed to load PDF index");
         offlinePdfIndexCache = await indexRes.json();
       }
@@ -733,7 +773,7 @@ export async function triggerReindexing() {
 export async function fetchPdfIndexStatus() {
   if (isOfflineApp) {
     try {
-      const indexRes = await fetch('data/pdf_index.json');
+      const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
       if (!indexRes.ok) throw new Error("Failed to load PDF index for status calculation");
       const index = await indexRes.json();
       
@@ -805,20 +845,24 @@ export async function checkRealConnection() {
     }
   }
 
-  // WAN connectivity fallback ping — use a simpler endpoint that doesn't require CORS
-  try {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 3000);
-    await fetchWithTimeout('https://httpbin.org/get', {
-      method: 'HEAD',
-      mode: 'no-cors',
-      signal: controller.signal
-    });
-    clearTimeout(id);
-    return true;
-  } catch (_) {
-    return false;
+  // WAN connectivity fallback ping — check multiple endpoints to verify internet access
+  const wanUrls = ['https://www.cloudflare.com/cdn-cgi/trace', 'https://httpbin.org/get'];
+  for (const url of wanUrls) {
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 3000);
+      await fetchWithTimeout(url, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      });
+      clearTimeout(id);
+      return true;
+    } catch (_) {
+      // try next URL
+    }
   }
+  return false;
 }
 
 export async function pingEndpoint(url, timeoutMs = 2500) {
