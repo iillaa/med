@@ -36,9 +36,9 @@ for entry in "${legacy_sizes[@]}"; do
   mkdir -p "$DIR"
   
   # Generate standard legacy icon (Square)
-  magick convert "$LOGO" -resize "${size}x${size}" "${DIR}/ic_launcher.png"
+  magick "$LOGO" -resize "${size}x${size}" "${DIR}/ic_launcher.png"
   # Generate round legacy icon (Cropped into a perfect circle with transparent corners)
-  magick convert "$LOGO" -resize 512x512 -alpha on -background none \( +clone -channel A -evaluate set 0 +channel -fill white -draw "circle 256,256 256,0" \) -compose DstIn -composite -compose Over -resize "${size}x${size}" "${DIR}/ic_launcher_round.png"
+  magick "$LOGO" -resize 512x512 -alpha on -background none \( +clone -channel A -evaluate set 0 +channel -fill white -draw "circle 256,256 256,0" \) -compose DstIn -composite -compose Over -resize "${size}x${size}" "${DIR}/ic_launcher_round.png"
   echo "  ✓ mipmap-${suffix}: ${size}x${size}"
 done
 
@@ -50,7 +50,7 @@ for entry in "${adaptive_sizes[@]}"; do
   
   # Generate adaptive icon foreground (Padded to 66% safe zone, letting system shape mask handle the boundary)
   # We key out the white background with 5% fuzz to ensure the foreground is transparent around the logo.
-  magick convert "$LOGO" -fuzz 5% -transparent "white" -resize "${scale}x${scale}" -background none -gravity center -extent "${canvas}x${canvas}" "${DIR}/ic_launcher_foreground.png"
+  magick "$LOGO" -fuzz 5% -transparent "white" -resize "${scale}x${scale}" -background none -gravity center -extent "${canvas}x${canvas}" "${DIR}/ic_launcher_foreground.png"
   echo "  ✓ mipmap-${suffix} (foreground): ${canvas}x${canvas} (scaled to ${scale}x${scale})"
 done
 

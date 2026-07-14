@@ -14,6 +14,8 @@ let serverProcess = null;
 let passed = 0;
 let failed = 0;
 
+const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+
 function request(method, urlPath, body) {
   return new Promise((resolve, reject) => {
     const url = new URL(urlPath, BASE);
@@ -23,7 +25,8 @@ function request(method, urlPath, body) {
       path: url.pathname + url.search,
       method,
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'x-app-key': APP_DATA_KEY
       }
     };
     if (body) {

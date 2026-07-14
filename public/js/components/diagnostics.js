@@ -405,15 +405,23 @@ async function saveRemoteServerUrl() {
     localStorage.setItem('dr_cat_remote_server_url', urls[0]);
 
     // 2. Persist to server config ONLY if we are running in a web browser connected to the server
+    let serverPersistenceFailed = false;
     if (!api.isOfflineApp) {
       try {
         await api.updateDiagnosticsRemoteUrl(urls);
       } catch (serverErr) {
         console.warn("Could not save config to server file system:", serverErr);
+        serverPersistenceFailed = true;
       }
     }
 
-    showToast(`${urls.length} adresse(s) de serveur enregistrée(s) !`, "fa-circle-check", 3000);
+    showToast(
+      serverPersistenceFailed
+        ? "Adresse enregistrée localement, mais la configuration serveur n'a pas été mise à jour."
+        : `${urls.length} adresse(s) de serveur enregistrée(s) !`,
+      serverPersistenceFailed ? "fa-triangle-exclamation" : "fa-circle-check",
+      4000
+    );
     
     // Refresh stats and run connection test automatically to verify URL validity
     refreshDiagnosticsData();

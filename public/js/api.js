@@ -419,7 +419,7 @@ export async function fetchCats(since) {
               const fallbackRes = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
               if (fallbackRes.ok) currentCached = await fallbackRes.json();
             }
-            
+
             // Merge updates
             data.forEach(remote => {
               const idx = currentCached.findIndex(c => c.id === remote.id);
@@ -441,7 +441,7 @@ export async function fetchCats(since) {
                 return activeSet.has(c.id);
               });
             }
-            
+
             localStorage.setItem(SYNC_CACHE_KEY, JSON.stringify(currentCached));
           }
         } catch (cacheErr) {
