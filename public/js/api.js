@@ -185,6 +185,12 @@ export function getConfiguredRemoteUrls() {
   return [];
 }
 
+// Soft deterrent only: this key ships in the public client bundle (devtools/curl can
+// read it), so it is NOT real access control — just friction against casual scraping.
+// Genuine protection would require a server-signed per-session token at login.
+export const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+const STATIC_DATA_HEADERS = { 'x-app-key': APP_DATA_KEY };
+
 export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
@@ -193,6 +199,7 @@ export function getHeaders(extraHeaders = {}) {
   const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
+    'x-app-key': APP_DATA_KEY,
     ...(token ? { 'x-admin-token': token } : {}),
     ...providerExtraHeaders,
     ...extraHeaders
@@ -333,7 +340,7 @@ export async function fetchCats(since) {
       } catch (_) {}
     }
     console.log('[fetchCats] Offline mode — loading bundled data instantly.');
-    const res = await fetchWithTimeout('data/cats_db.json');
+    const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs statically');
     return res.json();
   }
@@ -378,7 +385,7 @@ export async function fetchCats(since) {
         }
       } catch (_) {}
     }
-    const res = await fetchWithTimeout('data/cats_db.json');
+    const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
     return res.json();
   }
@@ -409,7 +416,7 @@ export async function fetchCats(since) {
               currentCached = JSON.parse(cachedDb);
             } else {
               // Load static bundled data as baseline if cache is empty
-              const fallbackRes = await fetchWithTimeout('data/cats_db.json');
+              const fallbackRes = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
               if (fallbackRes.ok) currentCached = await fallbackRes.json();
             }
             
@@ -460,7 +467,7 @@ export async function fetchCats(since) {
       }
     } catch (_) {}
   }
-  const res = await fetchWithTimeout('data/cats_db.json');
+  const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
   if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
   return res.json();
 }
@@ -469,7 +476,7 @@ export async function fetchCats(since) {
 export async function fetchPdfs() {
   if (isOfflineApp) {
     // Load only the list of filenames instead of the heavy index structure containing all parsed texts
-    const res = await fetchWithTimeout('data/pdf_list.json');
+    const res = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error("Failed to fetch PDFs list statically");
     return res.json();
   }
@@ -680,7 +687,7 @@ export async function searchPdfsContent(query) {
   if (isOfflineApp) {
     try {
       if (!offlinePdfIndexCache) {
-        const indexRes = await fetch('data/pdf_index.json');
+        const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
         if (!indexRes.ok) throw new Error("Failed to load PDF index");
         offlinePdfIndexCache = await indexRes.json();
       }
@@ -766,7 +773,7 @@ export async function triggerReindexing() {
 export async function fetchPdfIndexStatus() {
   if (isOfflineApp) {
     try {
-      const indexRes = await fetch('data/pdf_index.json');
+      const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
       if (!indexRes.ok) throw new Error("Failed to load PDF index for status calculation");
       const index = await indexRes.json();
       

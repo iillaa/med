@@ -390,7 +390,7 @@ async function initApp() {
   } catch (err) {
     console.error("[Startup Error] Fetch CATs failed, using emergency fallback.", err);
     try {
-      const res = await fetch('data/cats_db.json');
+      const res = await fetch('data/cats_db.json', { headers: { 'x-app-key': api.APP_DATA_KEY } });
       if (!res.ok) throw new Error("Emergency fallback failed");
       cats = await res.json();
       showToast("Chargement de secours local.", "fa-triangle-exclamation", 4000);
@@ -744,7 +744,7 @@ async function refreshCatsAndRender() {
   } catch (err) {
     console.error("[Refresh Error] Fetch CATs failed, using emergency fallback.", err);
     try {
-      const res = await fetch('data/cats_db.json');
+      const res = await fetch('data/cats_db.json', { headers: { 'x-app-key': api.APP_DATA_KEY } });
       if (!res.ok) throw new Error("Emergency fallback failed");
       cats = await res.json();
     } catch (fallbackErr) {

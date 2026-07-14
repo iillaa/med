@@ -8,15 +8,20 @@ const { PROVIDERS: serverProviders, detectProvider } = require('./public/js/serv
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
 const DB_FILE = path.join(__dirname, 'cats_db.json');
-const LOCAL_PDF_DIR = '/storage/emulated/0/cat-med/CAT de Médecine Générale';
-const PDF_DIR = fs.existsSync(LOCAL_PDF_DIR)
-  ? LOCAL_PDF_DIR
-  : path.join(__dirname, 'cat-med', 'reference-pdfs');
+const PDF_DIR = path.join(__dirname, 'public', 'pdfs');
+// Soft deterrent only: this key is intentionally public (it is shipped in the client
+// bundle, public/js/api.js). It stops casual scraping, not determined attackers.
+// The client always sends this exact key, so APP_DATA_KEY must stay fixed.
+const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+// Optional EXTRA accepted key (additive only). It never replaces APP_DATA_KEY, so it
+// cannot break legitimate clients that always send the fixed key.
+const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
+const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
 const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
 const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ── Server Provider Abstraction ───────────────────────────
 // Server providers config loaded from public/js/server-providers.cjs
@@ -193,6 +198,7 @@ app.use((req, res, next) => {
       'Content-Type',
       'Authorization',
       'x-admin-token',
+      'x-app-key',
       'ngrok-skip-browser-warning',  // always explicitly allowed
       ...providerHeaders
     ]);
@@ -235,6 +241,21 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
+// Guard the curated data files: only serve them to clients presenting the app key.
+// Soft deterrence (key is public) but stops casual scraping while staying seamless
+// for the official app and offline bundle.
+// NOTE: when adding a file here, also send `x-app-key` from every client fetch of it
+// (see STATIC_DATA_HEADERS in public/js/api.js), or the official app will get 403.
+const GUARDED_DATA_FILES = ['/data/cats_db.json', '/data/pdf_index.json', '/data/pdf_list.json'];
+GUARDED_DATA_FILES.forEach((file) => {
+  app.get(file, (req, res, next) => {
+    if (!isValidAppKey(req.headers['x-app-key'])) {
+      return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
+    }
+    next();
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   lastModified: false,
@@ -242,6 +263,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
     // Never cache HTML, JS, or CSS — always serve fresh
     if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    } else if (filePath.endsWith('.pdf')) {
+      // Aggressive 7-day caching to save mobile data on PDFs
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
     }
   }
 }));
@@ -624,11 +648,8 @@ function isAdminRequest(req) {
   return true;
 }
 
-// Serve PDFs statically with aggressive 7-day caching to save mobile data
-app.use('/pdfs', express.static(PDF_DIR, {
-  maxAge: '7d',
-  immutable: true
-}));
+// PDFs are served from public/pdfs via the main static middleware above (7-day cache).
+// PDF_DIR remains the authoritative source for uploads and the indexer.
 
 // GET /health - Check system status and health parameters
 app.get('/health', (req, res) => {
@@ -723,6 +744,9 @@ app.post('/api/logout', (req, res) => {
 
 // Endpoint to get all CATs (served from memory cache)
 app.get('/api/cats', (req, res) => {
+  if (!isValidAppKey(req.headers['x-app-key'])) {
+    return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
+  }
   const isAdmin = isAdminRequest(req);
   const since = parseInt(req.query.since);
   
@@ -1155,7 +1179,7 @@ app.post('/api/suggestions/:id/edit', async (req, res) => {
   }
 });
 
-// Endpoint to list all actual files in reference-pdfs directory
+// Endpoint to list all actual files in public/pdfs directory
 app.get('/api/pdfs', async (req, res) => {
   try {
     const exists = await fs.promises.access(PDF_DIR).then(() => true).catch(() => false);
@@ -1333,7 +1357,7 @@ app.post('/api/diagnostics/upload-pdf', async (req, res) => {
     const fileBuffer = Buffer.from(base64Data, 'base64');
 
     await fs.promises.writeFile(targetPath, fileBuffer);
-    console.log(`[PDF Upload] Saved ${cleanFilename} to reference-pdfs folder.`);
+    console.log(`[PDF Upload] Saved ${cleanFilename} to public/pdfs folder.`);
 
     // Trigger PDF indexing in the background
     indexPdfs(true).catch(err => console.error("Error in post-upload indexing:", err));
