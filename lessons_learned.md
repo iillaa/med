@@ -107,6 +107,21 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Storing old field snapshots in each database item's `history` field builds a valuable change log, but loading this log on client apps wastes local memory and increases sync download size (causing network bloat for normal users).
 * **Solution**: Keep the history array inside the server's master `cats_db.json` but strip it dynamically in `server.js` when responding to public sync requests, and inside `build.js` when packaging the offline app resources. This keeps the client payloads lightweight while keeping server archives intact.
 
+### 22. Plain-Text Admin Password Storage
+* **Problem**: Storing admin passwords in plain text in `admin_password.txt` exposes credentials if the file is accidentally committed or accessed.
+* **Solution**: Migrated to PBKDF2 hashing with random salt using `set_admin_password.js`. The server auto-generates a strong random password on first run if no credentials exist, and developers can set custom passwords via the CLI tool.
 
+### 23. Inline Event Handlers in Static HTML
+* **Problem**: Inline `onclick=` attributes in `index.html` mix behavior with structure, making the code harder to maintain and audit.
+* **Solution**: Extracted all inline handlers into modular JavaScript components and removed them entirely from the HTML. Admin actions now use event delegation and `showToast()` instead of `alert()`.
 
+### 24. Duplicate State Calculations
+* **Problem**: `calculateStats()` was called redundantly in multiple places, causing unnecessary CPU work on low-end Android devices.
+* **Solution**: Centralized stats calculation and removed duplicate invocations.
+
+### 25. Memory Leaks in Diagnostics Panel
+* **Problem**: The diagnostics panel registered `beforeunload` and interval timers without cleanup, causing memory accumulation during long sessions.
+* **Solution**: Added explicit cleanup functions and `beforeunload` handlers to clear intervals and prevent leaks.
+
+---
 

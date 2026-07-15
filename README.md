@@ -82,12 +82,16 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 /data/data/com.termux/files/home/med/
 ├── server.js                    # Serveur Express.js (Backend, API, Auth, Cache)
 ├── index_pdfs.js                # Module d'indexation asynchrone du contenu des PDFs
+├── build.js                     # Compilation des assets statiques
+├── set_admin_password.js        # Script de définition du mot de passe admin
 ├── cats_db.json                 # Base de données des fiches CAT (JSON)
 ├── cats_db.json.bak             # Sauvegarde automatique (créée avant chaque écriture)
 ├── suggestions.json             # File d'attente des suggestions en attente de modération
 ├── pdf_index.json               # Index de recherche plein texte des PDFs (~1 MB)
-├── admin_password.txt           # Mot de passe admin (⚠️ hors git)
+├── admin_password.txt           # Mot de passe admin hashed (⚠️ hors git)
 ├── package.json                 # Dépendances Node.js
+├── .eslintrc.json               # Configuration ESLint
+├── .prettierrc                  # Configuration Prettier
 ├── cat-med/
 │   └── reference-pdfs/          # Vos fichiers PDF/DOCX de cours médicaux (78 fichiers)
 └── public/                      # Interface Frontend statique
@@ -95,6 +99,7 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
     ├── index.html               # Structure HTML5 de l'application
     ├── style.css                # Point d'entrée de style CSS
     ├── css/                     # Dossier des feuilles de style CSS modulaires
+    │   └── utilities.css        # Classes utilitaires extraites des inline styles
     ├── pdf_viewer.html          # Visionneuse PDF intégrée avec surbrillance
     ├── manifest.json            # Manifest PWA pour installation mobile
     ├── service-worker.js        # Service Worker gérant le cache offline du client web
@@ -107,6 +112,8 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
         ├── performance.js       # Module de télémétrie et de suivi de performance
         ├── server-providers.js  # Registre et détection des tunnels serveurs
         ├── remote_config.js     # Config générée avec les URLs distantes (⚠️ hors git)
+        ├── lib/                 # Modules partagés réutilisables
+        │   └── helpers.js       # Helpers partagés (isOfflineCat, mergeCatsWithLocalState)
         └── components/
             ├── sidebar.js       # Sidebar, recherche, filtres, liste des fiches
             ├── workspace.js     # Vue détaillée d'une fiche CAT (tabs, éditeurs)
@@ -114,7 +121,7 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
             ├── quiz.js          # Moteur du système de quiz (QCM + rédaction)
             ├── diagnostics.js   # Panneau d'outils de diagnostics cliniques
             └── performance.js   # Panneau de télémétrie et journal d'événements
-```
+    ```
 
 ---
 
@@ -124,7 +131,7 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 
 ```bash
 cd ~/med
-node server.js
+npm start
 ```
 
 Ouvrez ensuite [http://localhost:3000](http://localhost:3000) dans votre navigateur.

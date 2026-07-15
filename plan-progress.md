@@ -65,12 +65,12 @@ graph TD
 - `[x]` **Startup Freeze Fix**: Resolved all Android startup race conditions — fast-fail offline mode, no more frozen loading screens on APK boot.
 - `[x]` **CORS & Provider Sync Bug Fixes**: Fixed `no-cors` false positives in connectivity pings; migrated to provider-aware headers for real connection verification.
 
----
-
 ### Phase 5: Beta Test & Feedback Loop 🚀 ACTIVE
 *Goal: Ship the app to real clinical colleagues, collect feedback, iterate on bugs and missing features.*
 
 - `[x]` **Codebase Audit**: Full senior developer audit completed — security, performance, data integrity, and architecture verified.
+- `[x]` **Quick Fixes Applied**: 9 of 10 quick fixes implemented (CSS extraction, inline handler removal, alert() replacement, memory leak fix, failedQuestions state fix, duplicate stats removal, ESLint/Prettier config).
+- `[x]` **Admin Password Tool**: Created `set_admin_password.js` with PBKDF2 hashing; added `npm run set:password` script for easy custom password setup.
 - `[x]` **Documentation Sync**: All docs (README, codemap, developer_guide, technical_architecture, lessons_learned) updated to reflect current architecture.
 - `[ ]` **Beta APK Distribution**: Share compiled APK with beta testers.
 - `[ ]` **Bug Triage**: Collect and triage reported bugs from testers.

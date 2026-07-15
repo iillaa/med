@@ -23,9 +23,18 @@ To configure the workspace on a Termux instance or standard Linux terminal:
    npm install
    ```
 4. **Create Local Admin Credentials**:
-   ```bash
-   echo "your_secure_password" > admin_password.txt
-   ```
+    ```bash
+    # Option A: Set via environment variable (recommended for development)
+    echo 'export ADMIN_PASSWORD=admin123' >> ~/.bashrc
+    source ~/.bashrc
+    npm start
+    
+    # Option B: Use the interactive password setter script
+    node set_admin_password.js mypassword
+    
+    # Option C: Manual plain-text (will be auto-migrated to PBKDF2 hash on first run)
+    echo "your_secure_password" > admin_password.txt
+    ```
 5. **Add Reference PDFs**:
    Create the PDF directory and copy your study guides inside:
    ```bash
@@ -69,10 +78,25 @@ gitGraph
 ### 1. Launch local development server (Termux)
 Starts Express server on port 3000 and indexes PDFs.
 ```bash
-node server.js
+# Standard start (uses existing admin_password.txt or generates random password)
+npm start
+
+# Start with custom admin password via environment variable
+npm run start:admin
+# Or directly:
+ADMIN_PASSWORD=admin123 npm start
 ```
 
-### 2. Compile assets for offline standalone mode
+### 2. Set admin password manually
+```bash
+# Interactive mode
+node set_admin_password.js
+
+# Direct password
+node set_admin_password.js mypassword
+```
+
+### 3. Compile assets for offline standalone mode
 Generates offline JSON database clones and syncs resources to Capacitor's Android folder.
 ```bash
 # 1. Re-build index and cats clones into public/data/
@@ -80,6 +104,16 @@ node build.js
 
 # 2. Sync public folder with Capacitor android assets
 npx cap sync
+```
+
+### 4. Available npm scripts
+```bash
+npm start              # Start server (random password if none set)
+npm run start:admin    # Start server with ADMIN_PASSWORD=admin123
+npm run set:password   # Interactive password setter
+npm run build          # Compile static assets
+npm run reindex        # Re-index PDFs
+npm run cap:sync       # Sync Capacitor assets
 ```
 
 ---

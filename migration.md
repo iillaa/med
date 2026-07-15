@@ -74,6 +74,18 @@ The following critical bugs have been successfully audited and resolved in the c
 * **Problem**: The startup auto-builder in `server.js` tried to run `.catch()` on a synchronous function, throwing a `TypeError` and crashing server initialization.
 * **Fix**: Deployed the synchronous asset builder task inside a deferred `setImmediate()` container with standard try-catch blocks.
 
+### 12. Admin Password Hashing Migration
+* **Problem**: Admin passwords were stored in plain text in `admin_password.txt`, posing a security risk if the file was exposed.
+* **Fix**: Created `set_admin_password.js` using PBKDF2 hashing (100,000 iterations, random 16-byte salt) identical to server verification logic. Added `npm run set:password` script for easy setup. Existing plain-text passwords are auto-migrated on first server run.
+
+### 13. Code Quality Tooling
+* **Problem**: Inconsistent code style and lack of linting made maintenance harder.
+* **Fix**: Added `.eslintrc.json`, `.prettierrc`, and `.eslintignore` to enforce consistent code style across the project.
+
+### 14. Inline Handler & Alert Removal
+* **Problem**: `index.html` contained inline `onclick=` handlers and admin actions used `alert()` for user feedback.
+* **Fix**: Extracted 22 CSS utility classes into `public/css/utilities.css`, removed all inline `onclick=` handlers, replaced `alert()` with `showToast()` in admin code paths, and extracted shared helpers (`isOfflineCat()`, `mergeCatsWithLocalState()`) into `public/js/lib/helpers.js`.
+
 ---
 
 ## 🛠️ CLI Operations & Building
@@ -81,12 +93,17 @@ To perform local development or compile resources:
 
 ```bash
 # 1. Run local web server
-node server.js
+npm start
 
-# 2. Compile static assets (bundles databases & writes public/js/remote_config.js)
+# 2. Set admin password (optional)
+node set_admin_password.js mypassword
+# Or use npm script:
+npm run set:password
+
+# 3. Compile static assets (bundles databases & writes public/js/remote_config.js)
 npm run build
 
-# 3. Synchronize Capacitor assets to Android project files
+# 4. Synchronize Capacitor assets to Android project files
 npx cap sync
 ```
 *The debug APK is compiled automatically in the cloud on every push to the `light-android` branch via `.github/workflows/build-apk.yml`.*
@@ -104,3 +121,5 @@ When you begin the next session, you should focus on the following roadmap objec
 3. **Phase 2 Roadmap: Database Migration** (if the user decides to proceed):
    - Move from the local JSON files (`cats_db.json` / `suggestions.json`) to a hosted SQL/NoSQL cloud database (e.g., Supabase / MongoDB).
    - Configure cloud bucket storage (S3/Supabase Storage) for PDF directories.
+4. **Framework Migration Consideration**: Evaluate migrating to Vue 3 + Vite for better maintainability (SvelteKit was audited but Vue 3 recommended as more practical for solo dev medical apps).
+5. **Set Actual Admin Password**: Run `node set_admin_password.js <chosen-password>` to replace the auto-generated password with a memorable one, then restart the server.

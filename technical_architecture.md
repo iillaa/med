@@ -140,7 +140,13 @@ Each PDF is assigned a coverage badge:
 * Handles proxy layers (Ngrok/Cloudflare tunnels) by inspecting `X-Forwarded-For` header.
 * Remote users only see the app in read-only/suggestion mode.
 
-### 2. Dynamic Token Generation
+### 2. PBKDF2 Password Hashing
+* Admin passwords are never stored in plain text.
+* `set_admin_password.js` hashes passwords using PBKDF2 with a random 16-byte salt and 100,000 iterations, identical to the server's verification logic.
+* The resulting `salt:hash` pair is stored in `admin_password.txt` (Git-ignored).
+* On first run, if no password file exists, `server.js` auto-generates a long random password and writes the hashed credentials.
+
+### 3. Dynamic Token Generation
 * Logins yield a 32-character hex token from `crypto.randomBytes(16).toString('hex')`.
 * Stored in a server-side memory `Set`, verified on every administrative API call.
 * Cleared on logout or server restart.
