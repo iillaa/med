@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="app-build-version" content="2026.07.14.20.03">
+  <meta name="app-build-version" content="2026.07.15.00.54">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="drcat_logo.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -24,13 +24,14 @@
   <!-- FontAwesome Icons (non-blocking) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="style.css?v=18">
+  <link rel="stylesheet" href="css/utilities.css">
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
 </head>
 <body>
   <!-- APP LOADING OVERLAY - shown during init, hidden when ready -->
-  <div id="app-loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: rgba(9, 13, 22, 0.96); border-bottom: 2px solid var(--color-primary); z-index: 9999999; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 20px; box-sizing: border-box; transition: opacity 0.4s ease, visibility 0.4s ease; gap: 15px;">
-    <div style="display: flex; align-items: center; gap: 12px;">
+  <div id="app-loading-overlay" class="loading-overlay">
+    <div class="loading-overlay-brand">
       <img src="drcat_logo.png" alt="Dr.CAT" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; animation: pulse-glow 2s ease-in-out infinite;">
       <div>
         <h1 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Dr.CAT</h1>
@@ -38,15 +39,15 @@
       </div>
     </div>
     
-    <div style="flex-grow: 1; max-width: 300px; display: flex; flex-direction: column; gap: 4px;">
-      <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;">
-        <div id="app-loading-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--color-primary), #10b981); border-radius: 2px; transition: width 0.3s ease;"></div>
+    <div class="loading-overlay-progress">
+      <div class="loading-overlay-bar-bg">
+        <div id="app-loading-bar" class="loading-overlay-bar-fill" style="width: 0%;"></div>
       </div>
-      <div id="app-loading-msg" style="display: none; font-size: 9px; color: #f87171; overflow-y: auto; max-height: 30px; line-height: 1.2;"></div>
+      <div id="app-loading-msg" class="loading-overlay-msg"></div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <button onclick="if(window.setLoaderProgress) window.setLoaderProgress(100); else { var ov = document.getElementById('app-loading-overlay'); if(ov) { ov.style.opacity='0'; ov.style.visibility='hidden'; ov.classList.add('hidden'); } window.__drCatBooted=true; }" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: sans-serif; transition: all 0.2s;">✕ Ignorer</button>
+    <div class="loading-overlay-actions">
+      <button id="skip-loading-btn" class="btn-danger-ghost">✕ Ignorer</button>
     </div>
   </div>
 
@@ -57,7 +58,7 @@
       <!-- LEVEL 1: Compact Header Strip -->
       <div class="sidebar-header">
         <div class="brand" id="brand-logo" style="cursor: pointer;">
-          <img src="drcat_logo.png" alt="Dr.CAT Logo" class="brand-icon" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;">
+          <img src="drcat_logo.png" alt="Dr.CAT Logo" class="brand-icon">
           <div>
             <h1 style="display: flex; align-items: center; gap: 5px;">
               Dr.CAT
@@ -67,7 +68,7 @@
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button id="theme-toggle-btn" class="controls-toggle-btn" style="background:none; border:none; color:var(--text-secondary); width:28px; height:28px;" title="Changer le thème">
+          <button id="theme-toggle-btn" class="theme-toggle-btn" title="Changer le thème">
             <i class="fa-solid fa-moon" id="theme-toggle-icon"></i>
           </button>
           <button class="toggle-sidebar-btn" id="close-sidebar-btn">
@@ -184,13 +185,13 @@
         <button class="menu-btn" id="open-sidebar-btn">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <div class="mobile-brand" id="mobile-brand-logo" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
-          <img src="drcat_logo.png" alt="Dr.CAT" style="width:24px;height:24px;border-radius:6px;object-fit:cover;">
-          <span style="display: flex; align-items: center; gap: 4px;">
-            Dr.CAT
-            <span style="font-size: 7px; font-weight: 800; background: rgba(6, 182, 212, 0.15); color: var(--color-primary); padding: 1px 3px; border-radius: 3px; text-transform: uppercase; line-height: 1;">BETA</span>
-          </span>
-        </div>
+         <div class="mobile-brand" id="mobile-brand-logo">
+           <img src="drcat_logo.png" alt="Dr.CAT" class="mobile-brand-icon">
+           <span class="mobile-brand-text">
+             Dr.CAT
+             <span class="mobile-beta-badge">BETA</span>
+           </span>
+         </div>
         <div class="mobile-status-placeholder"></div>
       </header>
 
@@ -585,14 +586,12 @@
 
           <!-- About, Legal & Beta Disclaimer Block (Collapsible) -->
           <div class="dashboard-block about-legal-block animate-entrance delay-5" id="about-legal-block" style="margin-top: 20px; border-color: rgba(6, 182, 212, 0.15); background: rgba(30, 41, 59, 0.25); padding: 12px 16px; transition: all 0.3s ease; position: relative;">
-            <div id="about-legal-header" 
-                 onclick="const content = document.getElementById('about-legal-content'); const chevron = document.getElementById('about-legal-chevron'); const isExpanded = content.style.maxHeight === '500px'; content.style.maxHeight = isExpanded ? '0px' : '500px'; chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';"
-                 style="display: flex; align-items: center; justify-content: space-between; user-select: none; cursor: pointer;">
-              <h3 style="font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+             <div id="about-legal-header" class="about-legal-header">
+              <h3 class="about-legal-title">
                 <i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Informations & Mentions Légales
-                <span style="font-size: 10px; font-weight: 500; background: rgba(6,182,212,0.15); color: var(--color-primary); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Dr. K-Ali</span>
+                <span class="about-legal-badge">Dr. K-Ali</span>
               </h3>
-              <i class="fa-solid fa-chevron-down" id="about-legal-chevron" style="font-size: 12px; color: var(--text-muted); transition: transform 0.2s ease;"></i>
+              <i class="fa-solid fa-chevron-down" id="about-legal-chevron" class="about-legal-chevron"></i>
             </div>
             
             <div id="about-legal-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 0px;">
@@ -624,11 +623,11 @@
                   <i class="fa-solid fa-arrow-left-long"></i> Retour au Quiz
                 </button>
               </div>
-              <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="workspace-header-actions">
                 <button id="print-cat-btn" class="action-btn print-compact-btn" title="Imprimer la fiche">
                   <i class="fa-solid fa-print"></i>
                 </button>
-                <button id="delete-cat-btn" style="display: none; background: none; border: none; color: var(--color-danger); font-size: 12.5px; font-weight: 600; cursor: pointer; align-items: center; gap: 6px; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--color-danger)'">
+                <button id="delete-cat-btn" class="btn-delete-ghost">
                   <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
                 </button>
               </div>
@@ -1251,6 +1250,22 @@
     })();
   </script>
 
+  <!-- Skip loading button event listener (moved from inline onclick) -->
+  <script>
+    document.getElementById('skip-loading-btn')?.addEventListener('click', function() {
+      if (window.setLoaderProgress) {
+        window.setLoaderProgress(100);
+      } else {
+        var ov = document.getElementById('app-loading-overlay');
+        if (ov) {
+          ov.style.opacity = '0';
+          ov.style.visibility = 'hidden';
+          ov.classList.add('hidden');
+        }
+        window.__drCatBooted = true;
+      }
+    });
+  </script>
 
 </body>
 </html>

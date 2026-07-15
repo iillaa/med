@@ -299,7 +299,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             renderSummary(newSummary);
             showToast("Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
           } else {
-            alert("Erreur: " + result.error);
+            showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
           }
         } else {
           const confirmSave = confirm(
@@ -326,7 +326,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           restore();
           return;
         }
-        alert("Erreur lors de la sauvegarde.");
+        showToast("Erreur lors de la sauvegarde.", "fa-circle-exclamation", 4000);
       } finally {
         restore();
       }
@@ -399,7 +399,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             renderPrescription(newOrdonnance);
             showToast("Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
           } else {
-            alert("Erreur: " + result.error);
+            showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
           }
         } else {
           const confirmSave = confirm(
@@ -426,7 +426,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           restore();
           return;
         }
-        alert("Erreur lors de la sauvegarde.");
+        showToast("Erreur lors de la sauvegarde.", "fa-circle-exclamation", 4000);
       } finally {
         restore();
       }
@@ -475,28 +475,28 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     deleteCatBtn.addEventListener('click', async () => {
       if (!state.activeCat) return;
       if (state.activeCat.id <= 55) {
-        alert("Impossible de supprimer les fiches de base (IDs 1-55).");
+        showToast("Impossible de supprimer les fiches de base (IDs 1-55).", "fa-circle-exclamation", 4000);
         return;
       }
       if (!state.isAdmin) {
-        alert("Action refusée. Seul l'administrateur peut supprimer des fiches.");
+        showToast("Action refusée. Seul l'administrateur peut supprimer de fiches.", "fa-circle-exclamation", 4000);
         return;
       }
       if (confirm(`Voulez-vous vraiment supprimer la fiche "${state.activeCat.title}" ? Cette action est irréversible.`)) {
         try {
           const result = await api.deleteCatFromServer(state.activeCat.id);
           if (result.success) {
-            alert("Fiche supprimée avec succès !");
+            showToast("Fiche supprimée avec succès !", "fa-circle-check", 3000);
             if (onCatDeleted) await onCatDeleted();
           } else {
-            alert("Erreur: " + result.error);
+            showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
           }
         } catch (err) {
           console.error(err);
           if (window.handleAdminError && await window.handleAdminError(err)) {
             return;
           }
-          alert("Erreur lors de la suppression.");
+          showToast("Erreur lors de la suppression.", "fa-circle-exclamation", 4000);
         }
       }
     });
@@ -1068,7 +1068,7 @@ async function triggerPdfReindex() {
     if (window.handleAdminError && await window.handleAdminError(err)) {
       return;
     }
-    alert("Erreur lors de la réindexation.");
+    showToast("Erreur lors de la réindexation.", "fa-circle-exclamation", 4000);
   }
 }
 

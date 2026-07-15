@@ -4,6 +4,7 @@
 import { state } from './state.js';
 import { REMOTE_SERVER_URL, REMOTE_SERVER_URLS } from './remote_config.js';
 import { detectProvider, getExtraHeaders, isTunnelUrl, PROVIDERS, getTunnelLabel, sortUrlsByProviderPriority, getPrimaryProviderId } from './server-providers.js';
+import { isOfflineCat } from './lib/helpers.js';
 export { REMOTE_SERVER_URL };
 
 
@@ -437,7 +438,7 @@ export async function fetchCats(since) {
               const customCatIds = new Set(customCats.map(cc => cc.id));
               currentCached = currentCached.filter(c => {
                 // Keep custom offline created cats
-                if (customCatIds.has(c.id) || c.isOffline === true || c.source === 'offline' || c.id.toString().startsWith('offline-') || (typeof c.id === 'number' && c.id < 0)) return true;
+                if (isOfflineCat(c, customCatIds)) return true;
                 return activeSet.has(c.id);
               });
             }

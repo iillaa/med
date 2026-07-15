@@ -87,17 +87,17 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     try {
       const result = await api.approveSuggestionOnServer(id);
       if (result.success) {
-        alert("Proposition approuvée !");
+        showToast("Proposition approuvée !", "fa-circle-check", 3000);
         if (onSuggestionHandled) await onSuggestionHandled();
       } else {
-        alert("Erreur: " + result.error);
+        showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
       }
     } catch (err) {
       console.error(err);
       if (window.handleAdminError && await window.handleAdminError(err)) {
         return;
       }
-      alert("Erreur lors de la validation.");
+      showToast("Erreur lors de la validation.", "fa-circle-exclamation", 4000);
     }
   };
 
@@ -106,17 +106,17 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     try {
       const result = await api.rejectSuggestionOnServer(id);
       if (result.success) {
-        alert("Proposition rejetée.");
+        showToast("Proposition rejetée.", "fa-circle-xmark", 3000);
         if (onSuggestionHandled) await onSuggestionHandled();
       } else {
-        alert("Erreur: " + result.error);
+        showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
       }
     } catch (err) {
       console.error(err);
       if (window.handleAdminError && await window.handleAdminError(err)) {
         return;
       }
-      alert("Erreur lors du rejet.");
+      showToast("Erreur lors du rejet.", "fa-circle-exclamation", 4000);
     }
   };
 
@@ -126,7 +126,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       const list = await api.fetchSuggestions();
       const sug = list.find(s => s.id === id);
       if (!sug) {
-        alert("Proposition introuvable.");
+        showToast("Proposition introuvable.", "fa-circle-exclamation", 3000);
         return;
       }
 
@@ -224,16 +224,16 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
             modal.remove();
             await loadPendingSuggestions();
           } else {
-            alert("Erreur: " + result.error);
+            showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
           }
         } catch (err) {
           console.error(err);
-          alert("Erreur lors de l'enregistrement.");
+          showToast("Erreur lors de l'enregistrement.", "fa-circle-exclamation", 4000);
         }
       });
     } catch (err) {
       console.error(err);
-      alert("Impossible de charger les détails de cette proposition.");
+      showToast("Impossible de charger les détails de cette proposition.", "fa-circle-exclamation", 4000);
     }
   };
 
@@ -243,7 +243,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     exportBtn.addEventListener('click', () => {
       const progressData = localStorage.getItem('dr_cat_user_progress');
       if (!progressData || progressData === '{}') {
-        alert("Aucune progression enregistrée à exporter.");
+        showToast("Aucune progression enregistrée à exporter.", "fa-circle-exclamation", 3000);
         return;
       }
       
@@ -272,14 +272,14 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
           const keys = Object.keys(importedData);
           if (keys.length > 0 && typeof importedData[keys[0]] === 'object') {
             localStorage.setItem('dr_cat_user_progress', JSON.stringify(importedData));
-            alert("Progression importée avec succès ! L'application va se recharger.");
+            showToast("Progression importée avec succès ! L'application va se recharger.", "fa-circle-check", 4000);
             location.reload();
           } else {
-            alert("Format de fichier invalide.");
+            showToast("Format de fichier invalide.", "fa-circle-exclamation", 4000);
           }
         } catch (err) {
           console.error(err);
-          alert("Erreur lors de la lecture du fichier d'importation.");
+          showToast("Erreur lors de la lecture du fichier d'importation.", "fa-circle-exclamation", 4000);
         }
       };
       reader.readAsText(file);

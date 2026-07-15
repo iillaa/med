@@ -1,0 +1,6 @@
+node_modules/
+public/js/pdf.min.js
+public/js/pdf.worker.min.js
+backups/
+*.log
+.cat-med/

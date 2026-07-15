@@ -171,6 +171,9 @@ export function initQuiz(onOpenCatCard) {
 }
 
 export function showQuizSetup() {
+  // Reset failed questions from previous session
+  state.quizSession.failedQuestions = [];
+  
   if (timerIntervalId) clearInterval(timerIntervalId);
   if (workspaceView) workspaceView.style.display = 'none';
   if (welcomeScreen) welcomeScreen.style.display = 'none';

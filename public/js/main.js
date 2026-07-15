@@ -9,6 +9,7 @@ import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
 import { showToast, runSuggestionWithUI } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
+import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
 
 // Tracks app mode (set once on load via api.getAppMode())
 
@@ -21,15 +22,15 @@ window.handleAdminError = async function(err) {
       try {
         const res = await api.loginAdmin(password);
         if (res.success && res.token) {
-          alert("Connexion réussie ! L'action va être relancée.");
+          showToast("Connexion réussie ! L'action va être relancée.", "fa-circle-check", 3000);
           location.reload();
           return true;
         } else {
-          alert("Mot de passe incorrect.");
+          showToast("Mot de passe incorrect.", "fa-circle-exclamation", 3000);
         }
       } catch (loginErr) {
         console.error("Login failed:", loginErr);
-        alert("Erreur lors de la connexion.");
+        showToast("Erreur lors de la connexion.", "fa-circle-exclamation", 4000);
       }
     }
     return true; // request handled
@@ -131,7 +132,20 @@ async function bootstrapApp() {
       }
     });
   }
- 
+  
+  // About Legal Header toggle (moved from inline onclick)
+  const aboutLegalHeader = document.getElementById('about-legal-header');
+  if (aboutLegalHeader) {
+    aboutLegalHeader.addEventListener('click', () => {
+      const content = document.getElementById('about-legal-content');
+      const chevron = document.getElementById('about-legal-chevron');
+      if (!content || !chevron) return;
+      const isExpanded = content.style.maxHeight === '500px';
+      content.style.maxHeight = isExpanded ? '0px' : '500px';
+      chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+  }
+
   // Initialize Components
   sidebar.initSidebar(selectCatWrapper, onFilterTriggered);
   workspace.initWorkspace(onStatusChange, onCatDeleted, onProgressReset);
@@ -196,19 +210,19 @@ async function bootstrapApp() {
           const result = await api.createCatOnServer({ title, category, red_flags, summary, ordonnance, pdf_keywords });
           if (result.success) {
             closeModal();
-            alert(`La fiche CAT "${title}" a été ajoutée avec succès !`);
+            showToast(`La fiche CAT "${title}" a été ajoutée avec succès !`, "fa-circle-check", 3000);
             await initApp();
             const newCat = state.allCats.find(c => c.id === result.cat.id);
             if (newCat) selectCatWrapper(newCat);
           } else {
-            alert("Erreur : " + result.error);
+            showToast("Erreur : " + result.error, "fa-circle-exclamation", 4000);
           }
         } catch (err) {
           console.error(err);
           if (window.handleAdminError && await window.handleAdminError(err)) {
             return;
           }
-          alert("Erreur lors de l'enregistrement de la nouvelle CAT.");
+          showToast("Erreur lors de l'enregistrement de la nouvelle CAT.", "fa-circle-exclamation", 4000);
         }
       } else {
         // Confirmation dialog for suggestions
@@ -230,12 +244,12 @@ async function bootstrapApp() {
           }
         } catch (err) {
           console.error(err);
-          alert("Erreur lors de l'envoi de la proposition.");
+          showToast("Erreur lors de l'envoi de la proposition.", "fa-circle-exclamation", 4000);
         }
       }
     });
   }
- 
+  
   // Wire up Admin Login Button Event Listener
   let adminLoginBtn = document.getElementById('admin-login-btn');
   if (adminLoginBtn) {
@@ -243,7 +257,7 @@ async function bootstrapApp() {
       if (state.isAdmin) {
         if (confirm("Voulez-vous vous déconnecter du mode administrateur ?")) {
           await api.logoutAdmin();
-          alert("Déconnexion réussie.");
+          showToast("Déconnexion réussie.", "fa-circle-check", 3000);
           location.reload();
         }
       } else {
@@ -252,14 +266,14 @@ async function bootstrapApp() {
           try {
             const res = await api.loginAdmin(password);
             if (res.success && res.token) {
-              alert("Connexion réussie !");
+              showToast("Connexion réussie !", "fa-circle-check", 3000);
               location.reload();
             } else {
-              alert(res.error || "Mot de passe incorrect.");
+              showToast(res.error || "Mot de passe incorrect.", "fa-circle-exclamation", 3000);
             }
           } catch (err) {
             console.error("Login error:", err);
-            alert("Erreur lors de la connexion.");
+            showToast("Erreur lors de la connexion.", "fa-circle-exclamation", 4000);
           }
         }
       }
@@ -418,19 +432,7 @@ async function initApp() {
     cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
   }
 
-  state.allCats = cats.map(cat => {
-    const localEntry = localProgress[cat.id] || {};
-    const overrides = localOverrides[cat.id] || {};
-    return {
-      ...cat,
-      status: localEntry.status || 'todo',
-      notes: localEntry.notes || '',
-      summary: overrides.customSummary || cat.summary,
-      customSummary: overrides.customSummary || cat.summary,
-      ordonnance: overrides.customOrdonnance || cat.ordonnance,
-      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
-    };
-  });
+  state.allCats = mergeCatsWithLocalState(cats, localProgress, localOverrides);
   setLoadingProgress(75);
 
   // ── 5. Render UI ──
@@ -548,11 +550,10 @@ export async function runBackgroundSync() {
       let activeIdsSet = null;
       const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
       const customCatIds = new Set(customCats.map(c => c.id));
-      const isOfflineCat = (c) => customCatIds.has(c.id) || c.isOffline === true || c.source === 'offline' || c.id.toString().startsWith('offline-') || (typeof c.id === 'number' && c.id < 0);
 
       if (freshCats.activeIds) {
         activeIdsSet = new Set(freshCats.activeIds.split(',').map(id => parseInt(id)));
-        const localServerCats = (state.allCats || []).filter(c => !isOfflineCat(c));
+        const localServerCats = (state.allCats || []).filter(c => !isOfflineCat(c, customCatIds));
         for (const local of localServerCats) {
           if (!activeIdsSet.has(local.id)) {
             hasDeletions = true;
@@ -571,7 +572,7 @@ export async function runBackgroundSync() {
       }
 
       // Check if this is a full list or an incremental update
-      const localServerCats = (state.allCats || []).filter(c => !isOfflineCat(c));
+      const localServerCats = (state.allCats || []).filter(c => !isOfflineCat(c, customCatIds));
       const isIncremental = freshCats.length < (localServerCats.length * 0.7);
 
       let isUpdated = hasDeletions;
@@ -672,10 +673,9 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
     if (activeIdsSet) {
       const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
       const customCatIds = new Set(customCats.map(c => c.id));
-      const isOfflineCat = (c) => customCatIds.has(c.id) || c.isOffline === true || c.source === 'offline' || c.id.toString().startsWith('offline-') || (typeof c.id === 'number' && c.id < 0);
       state.allCats = state.allCats.filter(c => {
         // Keep custom offline created cats
-        if (isOfflineCat(c)) return true;
+        if (isOfflineCat(c, customCatIds)) return true;
         // Only keep if the ID is active on the server
         return activeIdsSet.has(c.id);
       });
@@ -687,19 +687,7 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
       .filter(c => !existingIds.has(c.id))
       .map(c => ({ ...c, isOffline: true }));
 
-    state.allCats = [...freshCats, ...customCats].map(cat => {
-      const localEntry = localProgress[cat.id] || {};
-      const overrides = localOverrides[cat.id] || {};
-      return {
-        ...cat,
-        status: localEntry.status || 'todo',
-        notes: localEntry.notes || '',
-        summary: overrides.customSummary || cat.summary,
-        customSummary: overrides.customSummary || cat.summary,
-        ordonnance: overrides.customOrdonnance || cat.ordonnance,
-        customOrdonnance: overrides.customOrdonnance || cat.ordonnance
-      };
-    });
+    state.allCats = mergeCatsWithLocalState([...freshCats, ...customCats], localProgress, localOverrides);
   }
 
   localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
@@ -767,19 +755,7 @@ async function refreshCatsAndRender() {
     cats = [...cats, ...customCreatedCats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted)];
   }
 
-  state.allCats = cats.map(cat => {
-    const localEntry = localProgress[cat.id] || {};
-    const overrides = localOverrides[cat.id] || {};
-    return {
-      ...cat,
-      status: localEntry.status || 'todo',
-      notes: localEntry.notes || '',
-      summary: overrides.customSummary || cat.summary,
-      customSummary: overrides.customSummary || cat.summary,
-      ordonnance: overrides.customOrdonnance || cat.ordonnance,
-      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
-    };
-  });
+  state.allCats = mergeCatsWithLocalState(cats, localProgress, localOverrides);
 
   sidebar.populateCategoryFilter(state.allCats);
   sidebar.renderCatList(state.allCats, selectCatWrapper);
@@ -840,9 +816,6 @@ export function calculateStats() {
   
   if (progressPercent) progressPercent.textContent = `${percent}%`;
   if (progressFill) progressFill.style.width = `${percent}%`;
-
-  // If dashboard is active, refresh stats displays inside dashboard
-  dashboard.renderDashboard(selectCatWrapper);
 }
 
 export function updateEditButtonsVisibility() {

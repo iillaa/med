@@ -22,6 +22,11 @@ export function initDiagnostics() {
     }
   });
 
+  // Clean up on page unload to prevent memory leaks
+  window.addEventListener('beforeunload', () => {
+    if (isOpen) collapsePanel();
+  });
+
   // Listen to CustomEvent for new console log added
   window.addEventListener('drcat-log-added', renderLogs);
 
