@@ -6,10 +6,12 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
+    "start:admin": "ADMIN_PASSWORD=admin123 node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node build.js",
     "reindex": "node index_pdfs.js",
-    "cap:sync": "npx cap sync"
+    "cap:sync": "npx cap sync",
+    "set:password": "node set_admin_password.js"
   },
   "keywords": [],
   "author": "",

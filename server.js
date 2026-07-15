@@ -467,7 +467,14 @@ async function initAdminPassword() {
         console.log(`[SECURITY] Migrated plain-text password in ${PASSWORD_FILE} to PBKDF2 hash.`);
       }
     } else {
-      const plainPassword = crypto.randomBytes(16).toString('hex'); // 32-character hex password
+      // Use environment variable if provided, otherwise generate random password
+      let plainPassword;
+      if (process.env.ADMIN_PASSWORD) {
+        plainPassword = process.env.ADMIN_PASSWORD;
+        console.log(`[SECURITY] Using ADMIN_PASSWORD from environment variable.`);
+      } else {
+        plainPassword = crypto.randomBytes(16).toString('hex'); // 32-character hex password
+      }
       adminPasswordSalt = crypto.randomBytes(16).toString('hex');
       adminPasswordHash = hashPassword(plainPassword, adminPasswordSalt);
       await fs.promises.writeFile(PASSWORD_FILE, `${adminPasswordSalt}:${adminPasswordHash}`, 'utf-8');
