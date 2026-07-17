@@ -14,12 +14,14 @@ export interface Cat {
   customOrdonnance?: string;
   isOffline?: boolean;
   source?: string;
+  lastRead?: number;
 }
 
 export interface LocalProgress {
   [catId: number]: {
     status?: CatStatus;
     notes?: string;
+    lastRead?: number;
   };
 }
 

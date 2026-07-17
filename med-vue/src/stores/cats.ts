@@ -3,6 +3,7 @@ import type { Cat, CatStatus, LocalProgress, LocalOverrides, LeitnerEntry } from
 import { fetchCats, saveCatDataToServer, updateCatOverrides, deleteCatFromServer, createCatOnServer, bulkImportCats } from '../api/client';
 import { getItem, setItem, STORAGE_KEYS } from '../utils/storage';
 import { hapticFeedback } from '../utils/haptics';
+import { useAppStore } from './app';
 
 export const useCatsStore = defineStore('cats', {
   state: (): {
@@ -40,7 +41,11 @@ export const useCatsStore = defineStore('cats', {
     filtered: (state): Cat[] => {
       let result = state.cats;
 
-      if (state.activeStatusFilter !== 'all') {
+      if (state.activeStatusFilter === 'redflags') {
+        result = result.filter(c => c.red_flags && c.red_flags.trim().length > 0 && 
+                        !c.red_flags.toLowerCase().includes("aucun signe de gravité") && 
+                        !c.red_flags.toLowerCase().includes("aucun"));
+      } else if (state.activeStatusFilter !== 'all') {
         result = result.filter(c => c.status === state.activeStatusFilter || (!c.status && state.activeStatusFilter === 'todo'));
       }
 
@@ -51,6 +56,7 @@ export const useCatsStore = defineStore('cats', {
       if (state.searchQuery.trim()) {
         const q = state.searchQuery.toLowerCase().trim();
         result = result.filter(c =>
+          c.id.toString() === q ||
           c.title.toLowerCase().includes(q) ||
           c.category.toLowerCase().includes(q) ||
           (c.summary && c.summary.toLowerCase().includes(q)) ||
@@ -74,8 +80,14 @@ export const useCatsStore = defineStore('cats', {
     async initialize(): Promise<void> {
       this.loading = true;
       this.error = null;
+      const appStore = useAppStore();
       try {
+        appStore.loadingMessage = "Récupération des fiches cliniques...";
+        appStore.loadingProgress = 60;
         const data = await fetchCats();
+        
+        appStore.loadingMessage = "Chargement de la progression locale...";
+        appStore.loadingProgress = 80;
         const localProgress = getItem<LocalProgress>(STORAGE_KEYS.USER_PROGRESS, {});
         const localOverrides = getItem<LocalOverrides>('dr_cat_local_overrides', {});
 
@@ -86,15 +98,23 @@ export const useCatsStore = defineStore('cats', {
             ...cat,
             status: localEntry.status || 'todo',
             notes: localEntry.notes || '',
+            lastRead: localEntry.lastRead || undefined,
             summary: overrides.customSummary || cat.summary,
             customSummary: overrides.customSummary || cat.summary,
             ordonnance: overrides.customOrdonnance || cat.ordonnance,
             customOrdonnance: overrides.customOrdonnance || cat.ordonnance
           };
         });
+
+        appStore.loadingProgress = 100;
+        appStore.loadingMessage = "Prêt !";
+        setTimeout(() => {
+          appStore.loading = false;
+        }, 300);
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to load CATs';
         console.error('[CatsStore] initialize failed:', err);
+        appStore.loading = false;
       } finally {
         this.loading = false;
       }
@@ -197,6 +217,19 @@ export const useCatsStore = defineStore('cats', {
       } catch (err) {
         console.error('[CatsStore] bulkImport failed:', err);
         throw err;
+      }
+    },
+
+    markAsRead(catId: number): void {
+      const cat = this.cats.find(c => c.id === catId);
+      if (cat) {
+        const now = Date.now();
+        cat.lastRead = now;
+
+        const progress = getItem<LocalProgress>(STORAGE_KEYS.USER_PROGRESS, {});
+        if (!progress[catId]) progress[catId] = {};
+        progress[catId].lastRead = now;
+        setItem(STORAGE_KEYS.USER_PROGRESS, progress);
       }
     },
 

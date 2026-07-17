@@ -11,6 +11,12 @@ export const useAppStore = defineStore('app', {
     isLocal: boolean;
     theme: 'light' | 'dark';
     appMode: AppModeType;
+    sidebarOpen: boolean;
+    loadingProgress: number;
+    loadingMessage: string;
+    toastMessage: string;
+    toastIcon: string;
+    toastVisible: boolean;
     searchStatus: any;
     diagnosticsSystem: any;
     diagnosticsDbStats: any;
@@ -26,6 +32,12 @@ export const useAppStore = defineStore('app', {
     isLocal: false,
     theme: getItem<'light' | 'dark'>(STORAGE_KEYS.THEME, 'light'),
     appMode: getAppMode(),
+    sidebarOpen: false,
+    loadingProgress: 0,
+    loadingMessage: '',
+    toastMessage: '',
+    toastIcon: 'fa-check',
+    toastVisible: false,
     searchStatus: null,
     diagnosticsSystem: null,
     diagnosticsDbStats: null,
@@ -39,16 +51,43 @@ export const useAppStore = defineStore('app', {
   actions: {
     async initializeApp(): Promise<void> {
       this.loading = true;
+      this.loadingProgress = 10;
+      this.loadingMessage = "Détection du mode d'application...";
       try {
         this.isOffline = isOfflineApp;
         this.appMode = getAppMode();
+        this.loadingProgress = 25;
+        
+        this.loadingMessage = "Vérification des droits administrateur...";
         this.isAdmin = await checkAdminStatus();
         this.isLocal = await checkIsLocal();
+        this.loadingProgress = 50;
       } catch (err) {
         console.error('[AppStore] initializeApp failed:', err);
-      } finally {
-        this.loading = false;
       }
+    },
+
+    toggleSidebar(): void {
+      this.sidebarOpen = !this.sidebarOpen;
+    },
+
+    setSidebarOpen(open: boolean): void {
+      this.sidebarOpen = open;
+    },
+
+    showToast(message: string, icon = 'fa-check', duration = 3500): void {
+      this.toastMessage = message;
+      this.toastIcon = icon;
+      this.toastVisible = true;
+      setTimeout(() => {
+        if (this.toastMessage === message) {
+          this.toastVisible = false;
+        }
+      }, duration);
+    },
+
+    hideToast(): void {
+      this.toastVisible = false;
     },
 
     setTheme(theme: 'light' | 'dark'): void {
