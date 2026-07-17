@@ -66,11 +66,13 @@ export function canEditDirectly(): boolean {
 }
 
 export function canSuggest(): boolean {
-  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
+  const mode = getAppMode();
+  return mode === APP_MODES.WEB_CLIENT || mode === APP_MODES.ANDROID_ONLINE;
 }
 
 export function canSync(): boolean {
-  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
+  const mode = getAppMode();
+  return mode === APP_MODES.WEB_CLIENT || mode === APP_MODES.ANDROID_ONLINE;
 }
 
 export function isAdminMode(): boolean {
@@ -100,7 +102,8 @@ function getRemoteServerUrl(): string | null {
     localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
   }
 
-  return storedOverride || REMOTE_SERVER_URL || null;
+  const result = storedOverride || REMOTE_SERVER_URL;
+  return result ?? null;
 }
 
 function getConfiguredRemoteUrls(): string[] {
@@ -120,7 +123,7 @@ function getConfiguredRemoteUrls(): string[] {
 
 function getPrimaryRemoteUrl(): string | null {
   const urls = getConfiguredRemoteUrls();
-  return urls.length > 0 ? urls[0] : null;
+  return urls.length > 0 ? (urls[0] as string) : null;
 }
 
 function getApiUrl(endpoint: string, overrideUrl?: string | null): string {

@@ -258,7 +258,7 @@ export function updateQuizStreak(): { count: number; lastDate: string } {
     streakInfo.count = 1;
   }
 
-  streakInfo.lastDate = todayStr;
+  streakInfo.lastDate = todayStr as string;
   saveStreakInfo(streakInfo);
   return streakInfo;
 }

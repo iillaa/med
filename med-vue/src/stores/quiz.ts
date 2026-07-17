@@ -20,7 +20,7 @@ export const useQuizStore = defineStore('quiz', {
   getters: {
     currentQuestion: (state): QuizQuestion | null => {
       if (state.currentIndex >= 0 && state.currentIndex < state.questions.length) {
-        return state.questions[state.currentIndex];
+        return state.questions[state.currentIndex] as QuizQuestion;
       }
       return null;
     },
@@ -169,7 +169,9 @@ export function shuffleArray<T>(array: T[]): T[] {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
+    const temp = result[i] as T;
+    result[i] = result[j] as T;
+    result[j] = temp;
   }
   return result;
 }

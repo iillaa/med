@@ -1,4 +1,4 @@
-export type CatStatus = 'todo' | 'done';
+export type CatStatus = 'todo' | 'doing' | 'done';
 
 export interface Cat {
   id: number;
