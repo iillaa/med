@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
-import type { Cat, LocalProgress, LocalOverrides, LeitnerEntry } from '../types/cat';
+import type { Cat, CatStatus, LocalProgress, LocalOverrides, LeitnerEntry } from '../types/cat';
 import { fetchCats, saveCatDataToServer, updateCatOverrides, deleteCatFromServer, createCatOnServer, bulkImportCats } from '../api/client';
 import { getItem, setItem, STORAGE_KEYS } from '../utils/storage';
+import { hapticFeedback } from '../utils/haptics';
 
 export const useCatsStore = defineStore('cats', {
   state: (): {
@@ -99,16 +100,22 @@ export const useCatsStore = defineStore('cats', {
       }
     },
 
-    async updateStatus(catId: number, status: 'todo' | 'done'): Promise<void> {
-      const cat = this.cats.find(c => c.id === catId);
+    async updateStatus(catId: number, status: CatStatus): Promise<void> {
+      const cat = this.cats.find(c => c.id === catId)
       if (cat) {
-        cat.status = status;
+        cat.status = status
       }
 
-      const progress = getItem<LocalProgress>(STORAGE_KEYS.USER_PROGRESS, {});
-      if (!progress[catId]) progress[catId] = {};
-      progress[catId].status = status;
-      setItem(STORAGE_KEYS.USER_PROGRESS, progress);
+      const progress = getItem<LocalProgress>(STORAGE_KEYS.USER_PROGRESS, {})
+      if (!progress[catId]) progress[catId] = {}
+      progress[catId].status = status
+      setItem(STORAGE_KEYS.USER_PROGRESS, progress)
+
+      if (status === 'done') {
+        hapticFeedback('success')
+      } else if (status === 'doing') {
+        hapticFeedback('medium')
+      }
     },
 
     updateNotes(catId: number, notes: string): void {

@@ -1,0 +1,18 @@
+{
+  "appId": "com.med.drcat",
+  "appName": "Dr.CAT",
+  "webDir": "../public",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#090d16",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    }
+  }
+}
