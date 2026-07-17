@@ -24,8 +24,8 @@
 
 | Metric | Value | Assessment |
 |--------|-------|------------|
-| Duplicated state merge logic | 4 copies | 🔴 Critical |
-| Duplicated isOfflineCat predicate | 4 copies | 🔴 Critical |
+| Duplicated state merge logic | 0 copies | 🟢 Fixed |
+| Duplicated isOfflineCat predicate | 0 copies | 🟢 Fixed |
 | Duplicated stats calculation | 2 copies | 🟡 High |
 | Duplicated HTML templates | Many | 🔴 High (via innerHTML) |
 
