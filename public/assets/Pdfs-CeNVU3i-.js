@@ -1,0 +1,1 @@
+import{p as e,s as t,t as n,u as r,y as i}from"./_plugin-vue_export-helper-BYWosFNT.js";import{a}from"./index-DZOuhGxt.js";var o={class:`pdfs-view`},s=n(e({__name:`Pdfs`,setup(e){return a(),(e,n)=>(i(),r(`div`,o,[...n[0]||=[t(`h1`,null,`PDFs`,-1),t(`p`,{class:`placeholder`},`PDF search and list — coming next.`,-1)]]))}}),[[`__scopeId`,`data-v-b913372d`]]);export{s as default};

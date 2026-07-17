@@ -1,0 +1,1 @@
+import{s as e,t,u as n,y as r}from"./_plugin-vue_export-helper-CKCKf-ui.js";var i={},a={class:`about`};function o(t,i){return r(),n(`div`,a,[...i[0]||=[e(`h1`,null,`This is an about page`,-1)]])}var s=t(i,[[`render`,o]]);export{s as default};
