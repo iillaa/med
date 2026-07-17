@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCatsStore } from '@/stores/cats'
+import { getStreakInfo } from '@/stores/cats'
 
 const router = useRouter()
 const catsStore = useCatsStore()
@@ -12,6 +13,8 @@ const resumeCats = computed(() =>
     .sort((a, b) => (b.lastRead || 0) - (a.lastRead || 0))
     .slice(0, 3)
 )
+
+const streakInfo = computed(() => getStreakInfo())
 
 const specialtyProgress = computed(() => {
   const map = new Map<string, { total: number; done: number }>()
@@ -59,6 +62,14 @@ async function updateStatus(id: number, status: 'todo' | 'done'): Promise<void> 
       <div class="stat-card">
         <span class="stat-label">Progression</span>
         <span class="stat-value">{{ catsStore.stats.masteryPercent }}%</span>
+      </div>
+    </div>
+
+    <div class="streak-card" v-if="streakInfo.count > 0">
+      <div class="streak-icon">🔥</div>
+      <div class="streak-content">
+        <span class="streak-label">Série actuelle</span>
+        <span class="streak-value">{{ streakInfo.count }} jour{{ streakInfo.count > 1 ? 's' : '' }}</span>
       </div>
     </div>
 
@@ -148,6 +159,36 @@ async function updateStatus(id: number, status: 'todo' | 'done'): Promise<void> 
   font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
+}
+.streak-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.08));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  margin-bottom: 28px;
+}
+.streak-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.streak-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.streak-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.streak-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-warning);
 }
 .dashboard-section {
   margin-bottom: 32px;
