@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCatsStore } from '@/stores/cats'
 import { getStreakInfo } from '@/stores/cats'
+import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 
 const router = useRouter()
 const catsStore = useCatsStore()
@@ -46,7 +47,10 @@ async function updateStatus(id: number, status: 'todo' | 'done'): Promise<void> 
   <div class="dashboard">
     <h1 class="dashboard-title">Dashboard</h1>
 
-    <div class="stats">
+    <div v-if="catsStore.loading" class="stats">
+      <SkeletonLoader type="stat-card" :count="4" />
+    </div>
+    <div v-else class="stats">
       <div class="stat-card">
         <span class="stat-label">Total CATs</span>
         <span class="stat-value">{{ catsStore.stats.total }}</span>
@@ -75,7 +79,10 @@ async function updateStatus(id: number, status: 'todo' | 'done'): Promise<void> 
 
     <section class="dashboard-section">
       <h2 class="section-title">Reprendre</h2>
-      <div v-if="resumeCats.length === 0" class="empty-state">
+      <div v-if="catsStore.loading" class="resume-list">
+        <SkeletonLoader type="resume-item" :count="3" />
+      </div>
+      <div v-else-if="resumeCats.length === 0" class="empty-state">
         Aucune CAT en cours. Sélectionnez une CAT dans la barre latérale pour commencer !
       </div>
       <ul v-else class="resume-list">

@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCatsStore } from '@/stores/cats'
 import { useAppStore } from '@/stores/app'
+import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -180,31 +181,36 @@ function toggleTheme() {
     <!-- LEVEL 3: CAT List -->
     <div class="cat-list-wrapper">
       <ul class="cat-list" id="cat-list">
-        <li
-          v-for="cat in filteredCats"
-          :key="cat.id"
-          class="cat-item"
-          :class="{ active: route.params.id === String(cat.id) }"
-          :data-id="cat.id"
-          @click="selectCat(cat.id)"
-        >
-          <div class="cat-indicator" :class="cat.status || 'todo'"></div>
-          <div class="cat-item-content">
-            <span class="cat-item-title">{{ cat.id }}. {{ cat.title }}</span>
-            <div class="cat-item-meta">
-              <span>{{ cat.category }}</span>
-              <span>
-                {{ cat.status === 'done' ? 'Maîtrisé' : cat.status === 'doing' ? 'En cours' : 'À faire' }}
-              </span>
+        <template v-if="catsStore.loading">
+          <SkeletonLoader type="cat-item" :count="6" />
+        </template>
+        <template v-else>
+          <li
+            v-for="cat in filteredCats"
+            :key="cat.id"
+            class="cat-item"
+            :class="{ active: route.params.id === String(cat.id) }"
+            :data-id="cat.id"
+            @click="selectCat(cat.id)"
+          >
+            <div class="cat-indicator" :class="cat.status || 'todo'"></div>
+            <div class="cat-item-content">
+              <span class="cat-item-title">{{ cat.id }}. {{ cat.title }}</span>
+              <div class="cat-item-meta">
+                <span>{{ cat.category }}</span>
+                <span>
+                  {{ cat.status === 'done' ? 'Maîtrisé' : cat.status === 'doing' ? 'En cours' : 'À faire' }}
+                </span>
+              </div>
             </div>
-          </div>
-        </li>
-        <li v-if="filteredCats.length === 0" class="empty-state">
-          <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
-            <i class="fa-solid fa-filter-circle-xmark" style="font-size: 28px; margin-bottom: 10px; display: block; opacity: 0.6;"></i>
-            <span style="font-size: 13px; line-height: 1.5;">Aucune fiche ne correspond à vos filtres actuels.</span>
-          </div>
-        </li>
+          </li>
+          <li v-if="filteredCats.length === 0" class="empty-state">
+            <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
+              <i class="fa-solid fa-filter-circle-xmark" style="font-size: 28px; margin-bottom: 10px; display: block; opacity: 0.6;"></i>
+              <span style="font-size: 13px; line-height: 1.5;">Aucune fiche ne correspond à vos filtres actuels.</span>
+            </div>
+          </li>
+        </template>
       </ul>
     </div>
   </aside>
