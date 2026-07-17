@@ -110,7 +110,7 @@ Migrating Dr. CAT frontend to Vue 3 + Pinia + TypeScript in `med-vue/`.
 
 ## Current Blockers
 
-_None._
+_None. Runtime `REMOTE_SERVER_URL` error fixed in `src/api/client.ts` by guarding globals with `typeof globalThis` checks._
 
 ## Notes
 
