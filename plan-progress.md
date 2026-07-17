@@ -30,6 +30,14 @@ graph TD
 - `[x]` **Export/Backup Progress**: Allow downloading progress as JSON locally.
 - `[x]` **PWA support & Persistence Warnings**: Linked manifest, service worker files, and context-aware storage warnings.
 
+### Phase 1: Frontend Refactor ✅ COMPLETE
+*Goal: Split large JS components into modular files for maintainability.*
+
+- `[x]` **Quiz Module Split**: `quiz.js` (1288 lines) → `quiz/state.js`, `quiz/generator.js`, `quiz/ui.js`, `quiz/scoring.js`
+- `[x]` **Workspace Module Split**: `workspace.js` (1143 lines) → `workspace/state.js`, `workspace/summary.js`, `workspace/prescription.js`, `workspace/pdfs.js`, `workspace/print.js`
+- `[x]` **ESLint Compliance**: All new modules pass `npx eslint --fix` with zero errors
+- `[x]` **Audit Report**: `PHASE1_AUDIT_REPORT.md` generated
+
 ---
 
 ### Phase 2: Cloud Web Deployment (Future)
