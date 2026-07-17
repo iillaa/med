@@ -45,14 +45,14 @@ Migrating Dr. CAT frontend to Vue 3 + Pinia + TypeScript in `med-vue/`.
 
 ---
 
-## Stage 3: Sidebar & Navigation 🔄 IN PROGRESS
-- [ ] **3.1 Router Views:** Define routes: `/` (Dashboard), `/cats`, `/quiz`, `/workspace/:id`, `/pdfs`, `/admin`
-- [ ] **3.2 Sidebar Component:** `med-vue/src/components/Sidebar/Sidebar.vue`
-  - [ ] Import `catsStore`
-  - [ ] Render `store.filtered` (search input binds to `store.searchQuery`)
-  - [ ] Click navigates to `/workspace/:id`
-  - [ ] Category filter dropdown
-- [ ] **3.3 Layout:** Move Sidebar to `App.vue` layout (outside `<RouterView>`)
+## Stage 3: Sidebar & Navigation ✅
+- [x] **3.1 Router Views:** Define routes: `/` (Dashboard), `/cats`, `/quiz`, `/workspace/:id`, `/pdfs`, `/admin`
+- [x] **3.2 Sidebar Component:** `med-vue/src/components/Sidebar/Sidebar.vue`
+  - [x] Import `catsStore`
+  - [x] Render `store.filtered` (search input binds to `store.searchQuery`)
+  - [x] Click navigates to `/workspace/:id`
+  - [x] Category filter dropdown
+- [x] **3.3 Layout:** Move Sidebar to `App.vue` layout (outside `<RouterView>`)
 - **Commit:** `feat(vue): sidebar and navigation`
 
 ---
