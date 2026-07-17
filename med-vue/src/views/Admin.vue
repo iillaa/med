@@ -14,6 +14,39 @@ const loadingSuggestions = ref(false)
 const diagnostics = ref<any>(null)
 const loadingDiagnostics = ref(false)
 
+const diagTitleMap: Record<string, string> = {
+  system: 'Système',
+  dbStats: 'Base de données',
+  indexDetail: 'Index PDF',
+  remoteUrl: 'URL distante',
+  tunnelInfo: 'Tunnel',
+  metrics: 'Performance',
+  rateLimits: 'Rate Limits'
+}
+
+function formatDiagTitle(key: string | number): string {
+  return diagTitleMap[String(key)] || String(key)
+}
+
+function isDiagObject(value: unknown): boolean {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function flattenObject(obj: Record<string, unknown>, prefix = ''): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [key, val] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key
+    if (isDiagObject(val as unknown)) {
+      Object.assign(result, flattenObject(val as Record<string, unknown>, fullKey))
+    } else if (Array.isArray(val)) {
+      result[fullKey] = JSON.stringify(val)
+    } else {
+      result[fullKey] = String(val ?? '')
+    }
+  }
+  return result
+}
+
 async function loadSuggestions(): Promise<void> {
   loadingSuggestions.value = true
   try {
@@ -128,29 +161,17 @@ onMounted(() => {
           Cliquez sur Diagnostics pour charger les données système.
         </div>
         <div v-else class="diagnostics-grid">
-          <div class="diag-card">
-            <h3>Système</h3>
-            <pre>{{ diagnostics.system }}</pre>
-          </div>
-          <div class="diag-card">
-            <h3>Base de données</h3>
-            <pre>{{ diagnostics.dbStats }}</pre>
-          </div>
-          <div class="diag-card">
-            <h3>Index PDF</h3>
-            <pre>{{ diagnostics.indexDetail }}</pre>
-          </div>
-          <div class="diag-card">
-            <h3>URL distante</h3>
-            <pre>{{ diagnostics.remoteUrl }}</pre>
-          </div>
-          <div class="diag-card">
-            <h3>Tunnel</h3>
-            <pre>{{ diagnostics.tunnelInfo }}</pre>
-          </div>
-          <div class="diag-card">
-            <h3>Performance</h3>
-            <pre>{{ diagnostics.metrics }}</pre>
+          <div v-for="(value, key) in diagnostics" :key="key" class="diag-card">
+            <h3>{{ formatDiagTitle(key) }}</h3>
+            <div class="diag-content">
+              <template v-if="isDiagObject(value)">
+                <div v-for="(subVal, subKey) in flattenObject(value)" :key="subKey" class="diag-row">
+                  <span class="diag-key">{{ subKey }}</span>
+                  <span class="diag-val">{{ subVal }}</span>
+                </div>
+              </template>
+              <pre v-else class="diag-pre">{{ value }}</pre>
+            </div>
           </div>
         </div>
       </div>
@@ -303,7 +324,36 @@ onMounted(() => {
   margin: 0 0 10px 0;
   color: var(--text-primary);
 }
-.diag-card pre {
+.diag-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.diag-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.diag-row:last-child {
+  border-bottom: none;
+}
+.diag-key {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  flex-shrink: 0;
+  max-width: 40%;
+}
+.diag-val {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: right;
+  word-break: break-word;
+}
+.diag-pre {
   font-size: 11px;
   color: var(--text-muted);
   margin: 0;
