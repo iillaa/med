@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { PDFParse } = require('pdf-parse');
 
-const PDF_DIR = path.join(__dirname, 'public', 'pdfs');
-const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
+const PDF_DIR = path.join(__dirname, '..', 'public', 'pdfs');
+const INDEX_FILE = path.join(__dirname, '..', 'data', 'pdf_index.json');
 
 // Status object to track indexing state in memory
 let indexState = {

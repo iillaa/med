@@ -1134,6 +1134,6 @@ const cats = [
 ];
 
 // Write file
-const outputPath = path.join(__dirname, 'cats_db.json');
+const outputPath = path.join(__dirname, '..', 'data', 'cats_db.json');
 fs.writeFileSync(outputPath, JSON.stringify(cats, null, 2), 'utf-8');
 console.log('Database successfully generated at: ' + outputPath);

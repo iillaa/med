@@ -26,7 +26,7 @@ function req(method, path, body, headers = {}) {
 
 (async () => {
   let serverProcess = null;
-  const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
+  const PASSWORD_FILE = path.join(__dirname, '..', 'admin_password.txt');
   let originalPasswordContent = '';
   
   if (fs.existsSync(PASSWORD_FILE)) {

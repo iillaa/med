@@ -13,7 +13,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const PASSWORD_FILE = path.join(__dirname, 'admin_password.txt');
+const PASSWORD_FILE = path.join(__dirname, '..', 'admin_password.txt');
 const PBKDF2_ITERATIONS = 100000;
 const HASH_LENGTH = 64; // bytes
 const SALT_LENGTH = 16; // bytes

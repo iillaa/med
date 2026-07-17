@@ -9,7 +9,7 @@ function rebuildClientAssets() {
 
   // Copy cats_db.json (stripping version history to optimize PWA client asset size)
   try {
-    const rawDb = fs.readFileSync(path.join(__dirname, 'cats_db.json'), 'utf-8');
+    const rawDb = fs.readFileSync(path.join(__dirname, 'data', 'cats_db.json'), 'utf-8');
     const db = JSON.parse(rawDb);
     const cleanDb = db.map(c => {
       const { history, ...rest } = c;
@@ -26,7 +26,7 @@ function rebuildClientAssets() {
   }
 
   // Copy pdf_index.json and generate pdf_list.json
-  const pdfIndexSource = path.join(__dirname, 'pdf_index.json');
+  const pdfIndexSource = path.join(__dirname, 'data', 'pdf_index.json');
   if (fs.existsSync(pdfIndexSource)) {
     fs.copyFileSync(
       pdfIndexSource,

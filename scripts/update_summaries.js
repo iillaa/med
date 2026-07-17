@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const DB_FILE = path.join(__dirname, 'cats_db.json');
+const DB_FILE = path.join(__dirname, '..', 'data', 'cats_db.json');
 
 if (!fs.existsSync(DB_FILE)) {
   console.error("Database file cats_db.json not found!");

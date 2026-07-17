@@ -2,7 +2,7 @@ const { state: cache } = require('../services/cache');
 const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { logAuditEvent, safeWriteTextAsync, dbLock } = require('../services/data-store');
-const { indexPdfs, getIndexStatus } = require('../../index_pdfs');
+const { indexPdfs, getIndexStatus } = require('../../scripts/index_pdfs');
 const path = require('path');
 const fs = require('fs');
 

@@ -3,8 +3,8 @@ const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
 
-const SUGGESTIONS_FILE = require('path').join(__dirname, '..', '..', 'suggestions.json');
-const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
+const SUGGESTIONS_FILE = require('path').join(__dirname, '..', '..', 'data', 'suggestions.json');
+const DB_FILE = require('path').join(__dirname, '..', '..', 'data', 'cats_db.json');
 
 function registerSuggestionRoutes(app) {
   app.get('/api/suggestions', (req, res) => {
