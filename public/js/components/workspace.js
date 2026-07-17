@@ -1,11 +1,11 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
 import { parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading, triggerHaptic } from '../utils.js';
-import { buildPrintableText } from './state.js';
-import { renderSummary } from './summary.js';
-import { renderPrescription } from './prescription.js';
-import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList } from './pdfs.js';
-import { saveAppStateBeforeNavigation } from './print.js';
+import { buildPrintableText } from './workspace/state.js';
+import { renderSummary } from './workspace/summary.js';
+import { renderPrescription } from './workspace/prescription.js';
+import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList } from './workspace/pdfs.js';
+import { saveAppStateBeforeNavigation } from './workspace/print.js';
 
 let workspace, welcomeScreen;
 let wsCategory, wsTitle, wsRedFlags, wsPrescription, notesInput;
