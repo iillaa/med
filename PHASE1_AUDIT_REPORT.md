@@ -26,7 +26,15 @@ Phase 1 of the reconstruction plan has been completed. The large `quiz.js` and `
 | `workspace/pdfs.js` | PDF list rendering, accordion, search, status dots |
 | `workspace/print.js` | Print button handler, app state save/restore |
 
-**Total files created: 9**
+#### Dashboard Module Split (`public/js/components/dashboard/`)
+| File | Purpose |
+|------|---------|
+| `dashboard/stats.js` | Statistics calculation, streak count |
+| `dashboard/resume.js` | Resume list rendering |
+| `dashboard/progress.js` | Category progress bars |
+| `dashboard/admin.js` | Suggestions moderation, review modal, admin tabs |
+
+**Total files created: 13**
 
 ---
 
@@ -35,9 +43,10 @@ Phase 1 of the reconstruction plan has been completed. The large `quiz.js` and `
 | Original File | Lines Before | Lines After | Lines Removed |
 |---------------|--------------|-------------|---------------|
 | `public/js/components/quiz.js` | 1288 | 0 | 1288 |
-| `public/js/components/workspace.js` | 1143 | ~508 | 417 |
+| `public/js/components/workspace.js` | 1143 | ~817 | 417 |
+| `public/js/components/dashboard.js` | 777 | ~494 | 283 |
 
-**Total lines removed: 1705**
+**Total lines removed: 1988**
 
 ---
 
@@ -58,6 +67,7 @@ $ npx eslint --fix public/js/components/quiz/ public/js/components/workspace/
 
 1. `27df0b3` - feat: split quiz.js into modules
 2. `df481da` - feat: split workspace.js into modules
+3. `d90b171` - feat: split dashboard.js into modules
 
 ---
 
@@ -76,8 +86,14 @@ public/js/components/
 │   ├── prescription.js  # Prescription variants
 │   ├── pdfs.js          # PDF list, search, accordion
 │   └── print.js         # Print handler, state restore
+├── dashboard/
+│   ├── stats.js         # Statistics calculation
+│   ├── resume.js        # Resume list rendering
+│   ├── progress.js      # Category progress bars
+│   └── admin.js         # Suggestions moderation
 ├── quiz.js              # Re-export barrel file
-└── workspace.js         # Orchestrator with imports
+├── workspace.js         # Orchestrator with imports
+└── dashboard.js         # Orchestrator with imports
 ```
 
 ---

@@ -35,6 +35,7 @@ graph TD
 
 - `[x]` **Quiz Module Split**: `quiz.js` (1288 lines) → `quiz/state.js`, `quiz/generator.js`, `quiz/ui.js`, `quiz/scoring.js`
 - `[x]` **Workspace Module Split**: `workspace.js` (1143 lines) → `workspace/state.js`, `workspace/summary.js`, `workspace/prescription.js`, `workspace/pdfs.js`, `workspace/print.js`
+- `[x]` **Dashboard Module Split**: `dashboard.js` (777 lines) → `dashboard/stats.js`, `dashboard/resume.js`, `dashboard/progress.js`, `dashboard/admin.js`
 - `[x]` **ESLint Compliance**: All new modules pass `npx eslint --fix` with zero errors
 - `[x]` **Audit Report**: `PHASE1_AUDIT_REPORT.md` generated
 
