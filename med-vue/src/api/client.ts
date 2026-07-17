@@ -8,8 +8,47 @@ const STATIC_DATA_HEADERS: Record<string, string> = { 'x-app-key': APP_DATA_KEY 
 const APP_BUILD_VERSION = (document.querySelector('meta[name="app-build-version"]')?.getAttribute('content') || '0') as string;
 const SYNC_CACHE_KEY = `dr_cat_synced_database_v${APP_BUILD_VERSION}`;
 
-declare const REMOTE_SERVER_URL: string | undefined;
-declare const REMOTE_SERVER_URLS: string[] | undefined;
+function getRemoteServerUrl(): string | null {
+  const storedOverride = localStorage.getItem('dr_cat_remote_server_url');
+  const lastCompiledUrl = localStorage.getItem('dr_cat_last_compiled_url');
+  const globalUrl = typeof globalThis !== 'undefined' ? (globalThis as any).REMOTE_SERVER_URL : undefined;
+  const builtUrl = typeof globalUrl === 'string' ? globalUrl : '';
+  const globalUrls = typeof globalThis !== 'undefined' ? (globalThis as any).REMOTE_SERVER_URLS : undefined;
+  const builtUrls = Array.isArray(globalUrls) ? globalUrls : [];
+
+  if (builtUrl && lastCompiledUrl !== builtUrl) {
+    localStorage.removeItem('dr_cat_remote_server_url');
+    localStorage.setItem('dr_cat_last_compiled_url', builtUrl);
+    return builtUrl;
+  }
+
+  if (builtUrl && !lastCompiledUrl) {
+    localStorage.setItem('dr_cat_last_compiled_url', builtUrl);
+  }
+
+  const result = storedOverride || builtUrl;
+  return result ?? null;
+}
+
+function getConfiguredRemoteUrls(): string[] {
+  const stored = localStorage.getItem('dr_cat_remote_server_url');
+  if (stored) return [stored];
+
+  const globalUrl = typeof globalThis !== 'undefined' ? (globalThis as any).REMOTE_SERVER_URL : undefined;
+  const builtUrl = typeof globalUrl === 'string' ? globalUrl : '';
+  const globalUrls = typeof globalThis !== 'undefined' ? (globalThis as any).REMOTE_SERVER_URLS : undefined;
+  const builtUrls = Array.isArray(globalUrls) ? globalUrls : [];
+
+  if (builtUrls.length > 0) {
+    return [...builtUrls];
+  }
+
+  if (builtUrl) {
+    return [builtUrl];
+  }
+
+  return [];
+}
 
 function detectCapacitor(): boolean {
   return !!window.Capacitor || navigator.userAgent.toLowerCase().includes('capacitor');
@@ -88,39 +127,6 @@ export function hasRemoteServerConfigured(): boolean {
   return typeof url === 'string' && url.trim().length > 0;
 }
 
-function getRemoteServerUrl(): string | null {
-  const storedOverride = localStorage.getItem('dr_cat_remote_server_url');
-  const lastCompiledUrl = localStorage.getItem('dr_cat_last_compiled_url');
-
-  if (REMOTE_SERVER_URL && lastCompiledUrl !== REMOTE_SERVER_URL) {
-    localStorage.removeItem('dr_cat_remote_server_url');
-    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
-    return REMOTE_SERVER_URL;
-  }
-
-  if (REMOTE_SERVER_URL && !lastCompiledUrl) {
-    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
-  }
-
-  const result = storedOverride || REMOTE_SERVER_URL;
-  return result ?? null;
-}
-
-function getConfiguredRemoteUrls(): string[] {
-  const stored = localStorage.getItem('dr_cat_remote_server_url');
-  if (stored) return [stored];
-
-  if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS) && REMOTE_SERVER_URLS.length > 0) {
-    return [...REMOTE_SERVER_URLS];
-  }
-
-  if (REMOTE_SERVER_URL) {
-    return [REMOTE_SERVER_URL];
-  }
-
-  return [];
-}
-
 function getPrimaryRemoteUrl(): string | null {
   const urls = getConfiguredRemoteUrls();
   return urls.length > 0 ? (urls[0] as string) : null;
@@ -138,7 +144,9 @@ function getApiUrl(endpoint: string, overrideUrl?: string | null): string {
 
 function getHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
   const token = localStorage.getItem('dr_cat_admin_token');
-  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL || '';
+  const globalUrl = typeof globalThis !== 'undefined' ? (globalThis as any).REMOTE_SERVER_URL : undefined;
+  const builtUrl = typeof globalUrl === 'string' ? globalUrl : '';
+  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || builtUrl || '';
   const isLocalWebBrowser = !isOfflineApp && isLocalhost();
   const providerExtraHeaders = isLocalWebBrowser ? {} : (typeof getExtraHeaders === 'function' ? getExtraHeaders(configuredUrl) : {});
   return {
