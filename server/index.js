@@ -16,12 +16,12 @@ const { registerDiagnosticRoutes } = require('./routes/diagnostics');
 const { registerPerformanceRoutes } = require('./routes/performance');
 
 const INDEX_FILE = path.join(__dirname, '..', 'pdf_index.json');
-const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
-const DB_FILE = path.join(__dirname, 'cats_db.json');
+const SUGGESTIONS_FILE = path.join(__dirname, '..', 'suggestions.json');
+const DB_FILE = path.join(__dirname, '..', 'cats_db.json');
 const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
 const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
 const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
-const CONFIG_FILE = path.join(__dirname, 'remote_server_config.json');
+const CONFIG_FILE = path.join(__dirname, '..', 'remote_server_config.json');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,7 +35,7 @@ async function initializeProviders() {
       const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
       const parsed = JSON.parse(content);
       configuredRemoteUrls = Array.isArray(parsed.urls) ? parsed.urls : (parsed.url ? [parsed.url] : []);
-      cache.state.remoteServerUrl = configuredRemoteUrls[0] || '';
+      cache.remoteServerUrl = configuredRemoteUrls[0] || '';
       if (parsed.primaryProvider && serverProviders.find(p => p.id === parsed.primaryProvider)) {
         console.log('[Providers] Primary provider:', parsed.primaryProvider);
       }
@@ -54,7 +54,7 @@ async function initializeData() {
   await initializeProviders();
   
   try {
-    const buildModule = require('./build.js');
+      const buildModule = require('../build.js');
     if (typeof buildModule.rebuildClientAssets === 'function') {
       setImmediate(() => {
         try {
@@ -83,7 +83,7 @@ async function initializeData() {
           throw new Error(`Invalid CAT structure for item ID: ${item.id}`);
         }
       }
-      cache.state.catsCache = parsed;
+      cache.catsCache = parsed;
     } else {
       console.warn(`Database file not found at: ${DB_FILE}`);
     }
@@ -96,7 +96,7 @@ async function initializeData() {
         const backupContent = await fs.promises.readFile(DB_FILE + '.bak', 'utf-8');
         const backupParsed = JSON.parse(backupContent);
         if (Array.isArray(backupParsed)) {
-          cache.state.catsCache = backupParsed;
+          cache.catsCache = backupParsed;
           console.log("[Backup] Successfully restored database cache from backup file.");
         }
       }
@@ -109,9 +109,9 @@ async function initializeData() {
     const exists = await fs.promises.access(SUGGESTIONS_FILE).then(() => true).catch(() => false);
     if (exists) {
       const content = await fs.promises.readFile(SUGGESTIONS_FILE, 'utf-8');
-      cache.state.suggestionsCache = JSON.parse(content);
+      cache.suggestionsCache = JSON.parse(content);
     } else {
-      cache.state.suggestionsCache = [];
+      cache.suggestionsCache = [];
       await safeWriteJsonAsync(SUGGESTIONS_FILE, []);
     }
   } catch (err) {
@@ -122,7 +122,7 @@ async function initializeData() {
     const exists = await fs.promises.access(INDEX_FILE).then(() => true).catch(() => false);
     if (exists) {
       const content = await fs.promises.readFile(INDEX_FILE, 'utf-8');
-      cache.state.pdfIndex = JSON.parse(content);
+      cache.pdfIndex = JSON.parse(content);
     }
   } catch (err) {
     console.error("Error loading pdf_index.json cache:", err);
@@ -133,11 +133,11 @@ async function initializeData() {
     if (exists) {
       const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
       const parsed = JSON.parse(content);
-      cache.state.remoteServerUrl = parsed.url || (Array.isArray(parsed.urls) ? parsed.urls[0] : '');
-      if (cache.state.remoteServerUrl) {
-        allowedOrigins.add(cache.state.remoteServerUrl);
+      cache.remoteServerUrl = parsed.url || (Array.isArray(parsed.urls) ? parsed.urls[0] : '');
+      if (cache.remoteServerUrl) {
+        allowedOrigins.add(cache.remoteServerUrl);
         try {
-          const urlObj = new URL(cache.state.remoteServerUrl);
+          const urlObj = new URL(cache.remoteServerUrl);
           allowedOrigins.add(`${urlObj.protocol}//${urlObj.host}`);
         } catch (_) { /* no-op */ }
       }
@@ -155,8 +155,8 @@ onIndexUpdated(async () => {
     const exists = await fs.promises.access(INDEX_FILE).then(() => true).catch(() => false);
     if (exists) {
       const content = await fs.promises.readFile(INDEX_FILE, 'utf-8');
-      cache.state.pdfIndex = JSON.parse(content);
-      cache.state.searchCache.clear();
+      cache.pdfIndex = JSON.parse(content);
+      cache.searchCache.clear();
       console.log("[Cache] PDF Index cache and search cache reloaded/cleared.");
     }
   } catch (err) {
@@ -204,10 +204,10 @@ GUARDED_DATA_FILES.forEach((file) => {
 });
 
 app.get('/favicon.ico', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'drcat_logo.png'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'drcat_logo.png'));
 });
 
-app.use(express.static(path.join(__dirname, 'public'), {
+app.use(express.static(path.join(__dirname, '..', 'public'), {
   etag: false,
   lastModified: false,
   setHeaders: (res, filePath) => {
@@ -226,8 +226,8 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
     database: {
-      loaded: cache.state.catsCache.length > 0,
-      records: cache.state.catsCache.length,
+      loaded: cache.catsCache.length > 0,
+      records: cache.catsCache.length,
     },
     system: {
       memoryUsage: {
@@ -290,22 +290,22 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 process.on('uncaughtException', (err) => {
   console.error('[CRITICAL] Uncaught Exception:', err);
   try {
-    fs.appendFileSync(path.join(__dirname, 'server.log'), `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`);
+    fs.appendFileSync(path.join(__dirname, '..', 'server.log'), `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`);
   } catch (_) { /* no-op */ }
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('[CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
   try {
-    fs.appendFileSync(path.join(__dirname, 'server.log'), `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`);
+    fs.appendFileSync(path.join(__dirname, '..', 'server.log'), `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`);
   } catch (_) { /* no-op */ }
 });
 
 setInterval(() => {
   const now = Date.now();
-  for (const [token, entry] of cache.state.activeTokens.entries()) {
+  for (const [token, entry] of cache.activeTokens.entries()) {
     if (now > entry.expiresAt) {
-      cache.state.activeTokens.delete(token);
+      cache.activeTokens.delete(token);
     }
   }
 }, 60 * 60 * 1000);

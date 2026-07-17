@@ -71,3 +71,46 @@ All modules pass ESLint with zero errors and zero warnings.
 - `server.js` retained as a 1-line backward-compatible wrapper
 - All route files import their own dependencies; `server/index.js` only imports what it directly uses
 - State mutations remain in `server/services/cache.js` via a shared `state` object to preserve runtime behavior
+
+---
+
+## Pre-Phase 3 Issues Found & Fixed
+
+During readiness review before Phase 3, the following issues were discovered and fixed:
+
+### Critical (Fixed)
+
+| Issue | File | Fix |
+|-------|------|-----|
+| Plaintext admin password logged to stdout | `server/services/auth-service.js:44` | Removed password from log output; now only logs file path |
+| `cache.state` used instead of `cache` after destructuring import | All `server/routes/*.js`, `server/services/*.js`, `server/index.js` | Replaced all `cache.state.xxx` with `cache.xxx` (101 occurrences) |
+| Wrong file paths in `server/index.js` | `server/index.js` | Fixed `SUGGESTIONS_FILE`, `DB_FILE`, `CONFIG_FILE`, `public/`, and `server.log` paths to use `path.join(__dirname, '..', ...)` since `__dirname` is now `server/` not project root |
+| Wrong build module path | `server/index.js:57` | Changed `require('./build.js')` to `require('../build.js')` |
+
+### Moderate (Deferred to Phase 3)
+
+| Issue | Impact | Recommendation |
+|-------|--------|----------------|
+| `global.perfServer` side-effect singleton | Crashes if `cache.js` not loaded first; impossible to test | Pass `perfServer` via DI or require `cache.js` first everywhere |
+| Shadowed `configuredRemoteUrls` in `diagnostics.js` | Returns empty tunnel info after restart | Fixed by reading config file directly in endpoint |
+| `loginAttempts` Map has no TTL | Memory grows unbounded under brute-force | Add periodic cleanup for entries older than `LOGIN_RATE_LIMIT_MS` |
+| Hardcoded duplicate paths | `INDEX_FILE`, `DB_FILE`, etc. defined in both `index.js` and `diagnostics.js` | Extract to `server/config/paths.js` |
+| Token cleanup runs every 60 min | Expired tokens remain valid up to 1 hour past TTL | Run cleanup every 5 minutes |
+
+### Minor (Deferred)
+
+| Issue | Recommendation |
+|-------|----------------|
+| Three route files exceed 200-line target | Split `search.js` (254), `suggestions.js` (208), `diagnostics.js` (204) during Phase 3 |
+| Search cache eviction is FIFO not LRU | Use proper LRU eviction for better cache hit rates |
+| `fs.statSync` inside async function in `data-store.js` | Use `fs.promises.stat` to avoid blocking event loop |
+| Pretty-printed JSON for data files | Use compact JSON for machine-read files to save disk space |
+
+## Runtime Verification
+
+```
+curl http://localhost:3000/health
+{"status":"healthy","timestamp":"2026-07-17T10:31:44.531Z","uptime":26,"database":{"loaded":true,"records":57},"system":{"memoryUsage":{"rss":"79 MB","heapUsed":"11 MB"}}}
+```
+
+Server starts cleanly, loads 57 database records, and responds to health checks.

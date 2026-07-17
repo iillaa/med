@@ -33,11 +33,11 @@ function registerSearchRoutes(app) {
 
       const cleanQuery = query.trim().toLowerCase();
       
-      if (!cache.state.pdfIndex || cache.state.pdfIndex.length === 0) {
+      if (!cache.pdfIndex || cache.pdfIndex.length === 0) {
         return res.status(503).json({ error: "PDF index not yet built. Please wait a few moments." });
       }
 
-      const cachedResults = cache.state.searchCache.get(cleanQuery);
+      const cachedResults = cache.searchCache.get(cleanQuery);
       if (cachedResults) {
         if (global.perfServer) global.perfServer.recordCacheHit();
         return res.json({ results: cachedResults });
@@ -46,7 +46,7 @@ function registerSearchRoutes(app) {
       if (global.perfServer) global.perfServer.recordCacheMiss();
       const results = [];
 
-      for (const doc of cache.state.pdfIndex) {
+      for (const doc of cache.pdfIndex) {
         if (doc.pdf.toLowerCase().includes(cleanQuery)) {
           results.push({
             pdf: doc.pdf,
@@ -56,7 +56,7 @@ function registerSearchRoutes(app) {
         }
       }
 
-      for (const doc of cache.state.pdfIndex) {
+      for (const doc of cache.pdfIndex) {
         if (!doc.pages) continue;
         for (const p of doc.pages) {
           if (!p.text) continue;
@@ -92,11 +92,11 @@ function registerSearchRoutes(app) {
         }
       }
 
-      if (cache.state.searchCache.size >= 100) {
-        const oldestKey = cache.state.searchCache.keys().next().value;
-        cache.state.searchCache.delete(oldestKey);
+      if (cache.searchCache.size >= 100) {
+        const oldestKey = cache.searchCache.keys().next().value;
+        cache.searchCache.delete(oldestKey);
       }
-      cache.state.searchCache.set(cleanQuery, results);
+      cache.searchCache.set(cleanQuery, results);
 
       res.json({ results });
     } catch (err) {
@@ -108,7 +108,7 @@ function registerSearchRoutes(app) {
   app.get('/api/pdf-index-status', (req, res) => {
     try {
       const statusMap = {};
-      for (const doc of cache.state.pdfIndex) {
+      for (const doc of cache.pdfIndex) {
         const totalPages = doc.pages ? doc.pages.length : 0;
         const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
         
@@ -144,7 +144,7 @@ function registerSearchRoutes(app) {
   });
 
   app.post('/api/reindex', (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
@@ -158,7 +158,7 @@ function registerSearchRoutes(app) {
   });
 
   app.post('/api/diagnostics/upload-pdf', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
@@ -189,7 +189,7 @@ function registerSearchRoutes(app) {
   });
 
   app.post('/api/save-css', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {

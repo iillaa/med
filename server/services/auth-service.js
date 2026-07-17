@@ -21,12 +21,12 @@ async function initAdminPassword() {
       const rawContent = (await fs.promises.readFile(PASSWORD_FILE, 'utf-8')).trim();
       if (rawContent.includes(':')) {
         const parts = rawContent.split(':');
-        cache.state.adminPasswordSalt = parts[0];
-        cache.state.adminPasswordHash = parts[1];
+        cache.adminPasswordSalt = parts[0];
+        cache.adminPasswordHash = parts[1];
       } else {
-        cache.state.adminPasswordSalt = crypto.randomBytes(16).toString('hex');
-        cache.state.adminPasswordHash = hashPassword(rawContent, cache.state.adminPasswordSalt);
-        await fs.promises.writeFile(PASSWORD_FILE, `${cache.state.adminPasswordSalt}:${cache.state.adminPasswordHash}`, 'utf-8');
+        cache.adminPasswordSalt = crypto.randomBytes(16).toString('hex');
+        cache.adminPasswordHash = hashPassword(rawContent, cache.adminPasswordSalt);
+        await fs.promises.writeFile(PASSWORD_FILE, `${cache.adminPasswordSalt}:${cache.adminPasswordHash}`, 'utf-8');
         console.log(`[SECURITY] Migrated plain-text password in ${PASSWORD_FILE} to PBKDF2 hash.`);
       }
     } else {
@@ -37,9 +37,9 @@ async function initAdminPassword() {
       } else {
         plainPassword = crypto.randomBytes(16).toString('hex');
       }
-      cache.state.adminPasswordSalt = crypto.randomBytes(16).toString('hex');
-      cache.state.adminPasswordHash = hashPassword(plainPassword, cache.state.adminPasswordSalt);
-      await fs.promises.writeFile(PASSWORD_FILE, `${cache.state.adminPasswordSalt}:${cache.state.adminPasswordHash}`, 'utf-8');
+      cache.adminPasswordSalt = crypto.randomBytes(16).toString('hex');
+      cache.adminPasswordHash = hashPassword(plainPassword, cache.adminPasswordSalt);
+      await fs.promises.writeFile(PASSWORD_FILE, `${cache.adminPasswordSalt}:${cache.adminPasswordHash}`, 'utf-8');
       console.log(`[SECURITY] Admin password generated and saved to: ${PASSWORD_FILE}`);
     }
   } catch (err) {

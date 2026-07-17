@@ -5,7 +5,7 @@ const { logAuditEvent } = require('../services/data-store');
 
 function registerAuthRoutes(app) {
   app.get('/api/is-admin', (req, res) => {
-    res.json({ isAdmin: checkIsAdmin(req, cache.state.activeTokens) });
+    res.json({ isAdmin: checkIsAdmin(req, cache.activeTokens) });
   });
 
   app.get('/api/is-local', (req, res) => {
@@ -28,10 +28,10 @@ function registerAuthRoutes(app) {
     const { password } = req.body;
 
     let isPasswordCorrect = false;
-    if (password && cache.state.adminPasswordHash && cache.state.adminPasswordSalt) {
-      const inputHash = hashPassword(password, cache.state.adminPasswordSalt);
+    if (password && cache.adminPasswordHash && cache.adminPasswordSalt) {
+      const inputHash = hashPassword(password, cache.adminPasswordSalt);
       const inputBuffer = Buffer.from(inputHash, 'hex');
-      const storedBuffer = Buffer.from(cache.state.adminPasswordHash, 'hex');
+      const storedBuffer = Buffer.from(cache.adminPasswordHash, 'hex');
       if (inputBuffer.length === storedBuffer.length && require('crypto').timingSafeEqual(inputBuffer, storedBuffer)) {
         isPasswordCorrect = true;
       }
@@ -50,7 +50,7 @@ function registerAuthRoutes(app) {
 
     loginAttempts.delete(ip);
     const token = createToken();
-    cache.state.activeTokens.set(token, { expiresAt: Date.now() + 12 * 60 * 60 * 1000 });
+    cache.activeTokens.set(token, { expiresAt: Date.now() + 12 * 60 * 60 * 1000 });
     logAuditEvent('login_success', {}, req);
     res.json({ success: true, token });
   });
@@ -58,7 +58,7 @@ function registerAuthRoutes(app) {
   app.post('/api/logout', (req, res) => {
     const token = req.headers['x-admin-token'];
     if (token) {
-      cache.state.activeTokens.delete(token);
+      cache.activeTokens.delete(token);
     }
     logAuditEvent('logout', {}, req);
     res.json({ success: true });

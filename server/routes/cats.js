@@ -7,7 +7,7 @@ const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
 
 function registerCatRoutes(app) {
   app.post('/api/cats/:id', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
     }
     try {
@@ -18,7 +18,7 @@ function registerCatRoutes(app) {
       const { summary, ordonnance, category, title, red_flags } = req.body;
 
       const result = await dbLock.acquire(async () => {
-        const cat = cache.state.catsCache.find(c => c.id === catId);
+        const cat = cache.catsCache.find(c => c.id === catId);
         if (!cat) {
           return { notFound: true };
         }
@@ -45,7 +45,7 @@ function registerCatRoutes(app) {
           previousState: Object.keys(previousState).length > 0 ? previousState : undefined
         });
 
-        await safeWriteJsonAsync(DB_FILE, cache.state.catsCache);
+        await safeWriteJsonAsync(DB_FILE, cache.catsCache);
         return { success: true, message: `CAT ${catId} mise à jour directement.` };
       });
 
@@ -61,7 +61,7 @@ function registerCatRoutes(app) {
   });
 
   app.post('/api/cats', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
     }
     try {
@@ -71,7 +71,7 @@ function registerCatRoutes(app) {
       }
 
       const result = await dbLock.acquire(async () => {
-        const nextId = cache.state.catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
+        const nextId = cache.catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
         const newCat = {
           id: nextId,
           category,
@@ -88,8 +88,8 @@ function registerCatRoutes(app) {
           }]
         };
 
-        cache.state.catsCache.push(newCat);
-        await safeWriteJsonAsync(DB_FILE, cache.state.catsCache);
+        cache.catsCache.push(newCat);
+        await safeWriteJsonAsync(DB_FILE, cache.catsCache);
         return { success: true, cat: newCat };
       });
 
@@ -102,7 +102,7 @@ function registerCatRoutes(app) {
   });
 
   app.delete('/api/cats/:id', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
     }
     try {
@@ -116,14 +116,14 @@ function registerCatRoutes(app) {
       }
 
       const result = await dbLock.acquire(async () => {
-        const initialLength = cache.state.catsCache.length;
-        cache.state.catsCache = cache.state.catsCache.filter(cat => cat.id !== catId);
+        const initialLength = cache.catsCache.length;
+        cache.catsCache = cache.catsCache.filter(cat => cat.id !== catId);
 
-        if (cache.state.catsCache.length === initialLength) {
+        if (cache.catsCache.length === initialLength) {
           return { notFound: true };
         }
 
-        await safeWriteJsonAsync(DB_FILE, cache.state.catsCache);
+        await safeWriteJsonAsync(DB_FILE, cache.catsCache);
         return { success: true, message: `CAT ${catId} successfully deleted` };
       });
 

@@ -26,7 +26,7 @@ async function readConfiguredRemoteUrls() {
 
 function registerDiagnosticRoutes(app) {
   app.get('/api/diagnostics/system', (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
     try {
@@ -52,7 +52,7 @@ function registerDiagnosticRoutes(app) {
   });
 
   app.get('/api/diagnostics/db-stats', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
     try {
@@ -69,14 +69,14 @@ function registerDiagnosticRoutes(app) {
       const suggestionsSize = await getFileSize(SUGGESTIONS_FILE);
       const indexSize = await getFileSize(INDEX_FILE);
 
-      const coreCats = cache.state.catsCache.filter(c => c.id <= 55).length;
-      const customCats = cache.state.catsCache.filter(c => c.id > 55).length;
+      const coreCats = cache.catsCache.filter(c => c.id <= 55).length;
+      const customCats = cache.catsCache.filter(c => c.id > 55).length;
 
       res.json({
-        totalCats: cache.state.catsCache.length,
+        totalCats: cache.catsCache.length,
         coreCats,
         customCats,
-        totalSuggestions: cache.state.suggestionsCache.length,
+        totalSuggestions: cache.suggestionsCache.length,
         catsDbSize,
         suggestionsSize,
         indexSize
@@ -88,15 +88,15 @@ function registerDiagnosticRoutes(app) {
   });
 
   app.get('/api/diagnostics/index-detail', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
     try {
-      const totalDocs = cache.state.pdfIndex.length;
+      const totalDocs = cache.pdfIndex.length;
       let totalPages = 0;
       const docs = [];
 
-      for (const doc of cache.state.pdfIndex) {
+      for (const doc of cache.pdfIndex) {
         const docPages = doc.pages ? doc.pages.length : 0;
         totalPages += docPages;
         const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
@@ -138,14 +138,14 @@ function registerDiagnosticRoutes(app) {
   });
 
   app.get('/api/diagnostics/remote-server-url', (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
-    res.json({ url: cache.state.remoteServerUrl });
+    res.json({ url: cache.remoteServerUrl });
   });
 
   app.post('/api/diagnostics/remote-server-url', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
     try {
@@ -158,13 +158,13 @@ function registerDiagnosticRoutes(app) {
         urlList = [urls.trim()];
       }
       
-      cache.state.remoteServerUrl = urlList[0] || '';
+      cache.remoteServerUrl = urlList[0] || '';
       
       await safeWriteJsonAsync(CONFIG_FILE, { urls: urlList });
 
       await fs.promises.writeFile(
         path.join(__dirname, '..', '..', 'public', 'js', 'remote_config.js'),
-        `export const REMOTE_SERVER_URL = ${JSON.stringify(cache.state.remoteServerUrl)};\nexport const REMOTE_SERVER_URLS = ${JSON.stringify(urlList)};\n`,
+        `export const REMOTE_SERVER_URL = ${JSON.stringify(cache.remoteServerUrl)};\nexport const REMOTE_SERVER_URLS = ${JSON.stringify(urlList)};\n`,
         'utf-8'
       );
 
@@ -176,7 +176,7 @@ function registerDiagnosticRoutes(app) {
   });
 
   app.get('/api/diagnostics/tunnel-info', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
     
@@ -200,7 +200,7 @@ function registerDiagnosticRoutes(app) {
   });
 
   app.get('/api/diagnostics/rate-limits', (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
     const limits = [];

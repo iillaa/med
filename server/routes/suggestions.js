@@ -8,10 +8,10 @@ const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
 
 function registerSuggestionRoutes(app) {
   app.get('/api/suggestions', (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
-    res.json(cache.state.suggestionsCache);
+    res.json(cache.suggestionsCache);
   });
 
   app.post('/api/suggestions', async (req, res) => {
@@ -23,7 +23,7 @@ function registerSuggestionRoutes(app) {
 
       const targetCatId = catId ? parseInt(catId) : null;
       
-      const duplicate = cache.state.suggestionsCache.find(s => 
+      const duplicate = cache.suggestionsCache.find(s => 
         s.type === type && 
         s.catId === targetCatId &&
         s.data.title === data.title &&
@@ -45,8 +45,8 @@ function registerSuggestionRoutes(app) {
           data
         };
 
-        cache.state.suggestionsCache.push(newSug);
-        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.state.suggestionsCache);
+        cache.suggestionsCache.push(newSug);
+        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.suggestionsCache);
         return { success: true, message: 'Proposition envoyée à l\'administrateur pour validation.', suggestion: newSug };
       });
 
@@ -58,22 +58,22 @@ function registerSuggestionRoutes(app) {
   });
 
   app.post('/api/suggestions/:id/approve', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
       const sugId = req.params.id;
 
       const result = await dbLock.acquire(async () => {
-        const index = cache.state.suggestionsCache.findIndex(s => s.id === sugId);
+        const index = cache.suggestionsCache.findIndex(s => s.id === sugId);
         if (index === -1) {
           return { notFound: true };
         }
 
-        const sug = cache.state.suggestionsCache[index];
+        const sug = cache.suggestionsCache[index];
 
         if (sug.type === 'add') {
-          const nextId = cache.state.catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
+          const nextId = cache.catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
           const newCat = {
             id: nextId,
             category: sug.data.category,
@@ -89,10 +89,10 @@ function registerSuggestionRoutes(app) {
               detail: 'Créé via approbation d\'une proposition de fiche'
             }]
           };
-          cache.state.catsCache.push(newCat);
-          await safeWriteJsonAsync(DB_FILE, cache.state.catsCache);
+          cache.catsCache.push(newCat);
+          await safeWriteJsonAsync(DB_FILE, cache.catsCache);
         } else if (sug.type === 'edit') {
-          const cat = cache.state.catsCache.find(c => c.id === parseInt(sug.catId));
+          const cat = cache.catsCache.find(c => c.id === parseInt(sug.catId));
           if (cat) {
             const previousState = {};
             if (sug.data.summary !== undefined && cat.summary !== sug.data.summary) previousState.summary = cat.summary;
@@ -116,14 +116,14 @@ function registerSuggestionRoutes(app) {
               previousState: Object.keys(previousState).length > 0 ? previousState : undefined
             });
 
-            await safeWriteJsonAsync(DB_FILE, cache.state.catsCache);
+            await safeWriteJsonAsync(DB_FILE, cache.catsCache);
           } else {
             return { notFound: true, message: 'Fiche CAT d\'origine introuvable.' };
           }
         }
 
-        cache.state.suggestionsCache.splice(index, 1);
-        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.state.suggestionsCache);
+        cache.suggestionsCache.splice(index, 1);
+        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.suggestionsCache);
         
         return { success: true, message: 'Proposition approuvée et intégrée à l\'application.' };
       });
@@ -140,20 +140,20 @@ function registerSuggestionRoutes(app) {
   });
 
   app.post('/api/suggestions/:id/reject', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
       const sugId = req.params.id;
 
       const result = await dbLock.acquire(async () => {
-        const index = cache.state.suggestionsCache.findIndex(s => s.id === sugId);
+        const index = cache.suggestionsCache.findIndex(s => s.id === sugId);
         if (index === -1) {
           return { notFound: true };
         }
 
-        cache.state.suggestionsCache.splice(index, 1);
-        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.state.suggestionsCache);
+        cache.suggestionsCache.splice(index, 1);
+        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.suggestionsCache);
         return { success: true, message: 'Proposition rejetée et supprimée.' };
       });
 
@@ -169,7 +169,7 @@ function registerSuggestionRoutes(app) {
   });
 
   app.post('/api/suggestions/:id/edit', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
@@ -181,15 +181,15 @@ function registerSuggestionRoutes(app) {
       }
 
       const result = await dbLock.acquire(async () => {
-        const index = cache.state.suggestionsCache.findIndex(s => s.id === sugId);
+        const index = cache.suggestionsCache.findIndex(s => s.id === sugId);
         if (index === -1) {
           return { notFound: true };
         }
 
-        const sug = cache.state.suggestionsCache[index];
+        const sug = cache.suggestionsCache[index];
         sug.data = { ...sug.data, ...data };
 
-        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.state.suggestionsCache);
+        await safeWriteJsonAsync(SUGGESTIONS_FILE, cache.suggestionsCache);
         return { success: true, message: 'Proposition mise à jour.', suggestion: sug };
       });
 

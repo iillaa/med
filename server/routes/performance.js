@@ -5,7 +5,7 @@ const { dbLock } = require('../services/data-store');
 
 function registerPerformanceRoutes(app) {
   app.get('/api/performance/server-metrics', (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.state.activeTokens)) {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de performance.' });
     }
     try {
@@ -25,7 +25,7 @@ function registerPerformanceRoutes(app) {
       const memory = process.memoryUsage();
       
       const endpoints = {};
-      for (const [key, data] of cache.state.endpointTimings.entries()) {
+      for (const [key, data] of cache.endpointTimings.entries()) {
         const samples = data.samples;
         const count = samples.length;
         if (count === 0) continue;
@@ -46,13 +46,13 @@ function registerPerformanceRoutes(app) {
         };
       }
 
-      const totalPdfFiles = cache.state.pdfParseTimes.length;
+      const totalPdfFiles = cache.pdfParseTimes.length;
       let avgParseMs = 0;
       let slowestPdf = '--';
       if (totalPdfFiles > 0) {
-        const sumParse = cache.state.pdfParseTimes.reduce((sum, item) => sum + item.duration, 0);
+        const sumParse = cache.pdfParseTimes.reduce((sum, item) => sum + item.duration, 0);
         avgParseMs = Math.round(sumParse / totalPdfFiles);
-        const sortedByDuration = [...cache.state.pdfParseTimes].sort((a, b) => b.duration - a.duration);
+        const sortedByDuration = [...cache.pdfParseTimes].sort((a, b) => b.duration - a.duration);
         slowestPdf = `${sortedByDuration[0].file}: ${sortedByDuration[0].duration}ms`;
       }
 
@@ -63,7 +63,7 @@ function registerPerformanceRoutes(app) {
       };
       const phases = ['backup', 'write', 'rename'];
       phases.forEach(phase => {
-        const samples = cache.state.writePhaseDurations[phase];
+        const samples = cache.writePhaseDurations[phase];
         if (samples.length > 0) {
           const sum = samples.reduce((a, b) => a + b, 0);
           writeStats[phase] = {
@@ -73,8 +73,8 @@ function registerPerformanceRoutes(app) {
         }
       });
 
-      const totalIndexerHits = cache.state.cacheHits + cache.state.cacheMisses;
-      const cacheHitRate = totalIndexerHits > 0 ? parseFloat((cache.state.cacheHits / totalIndexerHits).toFixed(4)) : 1.0;
+      const totalIndexerHits = cache.cacheHits + cache.cacheMisses;
+      const cacheHitRate = totalIndexerHits > 0 ? parseFloat((cache.cacheHits / totalIndexerHits).toFixed(4)) : 1.0;
 
       res.json({
         uptimeSeconds: Math.floor(process.uptime()),
