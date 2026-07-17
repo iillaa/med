@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { indexPdfs, getIndexStatus, onIndexUpdated } = require('./index_pdfs');
-const { PROVIDERS: serverProviders, detectProvider } = require('./public/js/server-providers.cjs');
+const { serverProviders, detectProvider, buildAllowedOrigins, isOriginAllowedDynamic, getManagementEndpoint } = require('./server/config/providers');
 
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, 'suggestions.json');
@@ -24,73 +24,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Server Provider Abstraction ───────────────────────────
-// Server providers config loaded from public/js/server-providers.cjs
-function getProviderHeaders(provider) {
-  return provider.extraHeaders || {};
-}
-
-function getManagementEndpoint(provider) {
-  if (provider.managementPort && provider.managementPath) {
-    return { hostname: '127.0.0.1', port: provider.managementPort, path: provider.managementPath };
-  }
-  return null;
-}
-
-// Dynamic CORS origin allowlist built from configured remote URLs + provider patterns
-function buildAllowedOrigins(providers, configuredUrls) {
-  const origins = new Set([
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:8080',
-    'http://127.0.0.1:8080',
-  ]);
-  for (const url of configuredUrls) {
-    if (!url) continue;
-    origins.add(url);
-    const provider = detectProvider(url);
-    if (provider.isTunnelOrigin) {
-      // Allow all origins matching the provider’s tunnel pattern (e.g. any .ngrok-free.app)
-      const pattern = provider.urlPattern;
-      if (pattern) {
-        // Extract the domain part from the URL
-        const urlObj = new URL(url);
-        const hostname = urlObj.hostname;
-        origins.add(hostname);
-      }
-    }
-  }
-  // Also add direct hostnames from configured URLs
-  for (const url of configuredUrls) {
-    if (!url) continue;
-    try {
-      const urlObj = new URL(url);
-      origins.add(`${urlObj.protocol}//${urlObj.hostname}`);
-    } catch (_) {}
-  }
-  return origins;
-}
-
-function isOriginAllowedDynamic(origin, allowedOrigins) {
-  if (!origin) return true;
-  // Always allow Capacitor app origins and local development hosts (both http and https)
-  if (
-    origin === 'http://localhost' || origin === 'https://localhost' ||
-    origin === 'capacitor://localhost' ||
-    origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:') ||
-    origin.startsWith('http://127.0.0.1:') || origin.startsWith('https://127.0.0.1:')
-  ) {
-    return true;
-  }
-  if (allowedOrigins.has(origin)) return true;
-  // Check if origin matches any provider pattern
-  for (const allowed of allowedOrigins) {
-    if (allowed.includes('*')) {
-      const regex = new RegExp('^' + allowed.replace(/\*/g, '.*') + '$');
-      if (regex.test(origin)) return true;
-    }
-  }
-  return false;
-}
+// Server providers config loaded from server/config/providers.js
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
