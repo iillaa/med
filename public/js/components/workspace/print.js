@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state } from '../../state.js';
 
 export function saveAppStateBeforeNavigation() {
   const activeTabBtn = document.querySelector('.tab-btn.active');

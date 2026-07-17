@@ -1,5 +1,5 @@
-import { state } from '../state.js';
-import { showToast, triggerHaptic } from '../utils.js';
+import { state } from '../../state.js';
+import { showToast, triggerHaptic } from '../../utils.js';
 import { shuffleArray, updateLeitnerStats, updateQuizStreak, requestWakeLock, releaseWakeLock } from './state.js';
 import {
   getOrientationText, cleanTextOfClues, cleanOrientationOfClues,

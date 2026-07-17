@@ -1,5 +1,5 @@
-import { state } from '../state.js';
-import { getCleanPdfName, showToast } from '../utils.js';
+import { state } from '../../state.js';
+import { getCleanPdfName, showToast } from '../../utils.js';
 
 export function createPdfCardElement(file, isGlobal = false) {
   const cleanName = getCleanPdfName(file);

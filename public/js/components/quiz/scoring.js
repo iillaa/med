@@ -1,5 +1,5 @@
-import { state } from '../state.js';
-import { setButtonLoading } from '../utils.js';
+import { state } from '../../state.js';
+import { setButtonLoading } from '../../utils.js';
 import { updateLeitnerStats } from './state.js';
 import { checkMatchedKeywords } from './generator.js';
 

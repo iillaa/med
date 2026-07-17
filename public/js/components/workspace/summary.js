@@ -1,5 +1,5 @@
-import { state } from '../state.js';
-import { parseSummaryMarkdown, escapeHTML } from '../utils.js';
+import { state } from '../../state.js';
+import { parseSummaryMarkdown, escapeHTML } from '../../utils.js';
 
 export function renderSummary(text, cat) {
   const summaryView = document.getElementById('summary-view');

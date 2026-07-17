@@ -1,5 +1,5 @@
-import { state } from '../state.js';
-import { parsePrescriptionText } from '../utils.js';
+import { state } from '../../state.js';
+import { parsePrescriptionText } from '../../utils.js';
 
 export function renderPrescription(text) {
   const wsPrescription = document.getElementById('prescription-text');
