@@ -24,7 +24,6 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - **Score final & historique détaillé** : Tableau de résultats par question avec bouton "Ouvrir la fiche de référence" directement depuis le quiz.
 - **Configuration flexible** : Choix de la spécialité, du nombre de questions (5/10/15/20), et des types de questions.
 
-
 ### 💊 Ordonnances Types Multiples & Adaptatives
 - Modèles d'ordonnances réalistes éditables.
 - Support des **variantes** via séparateurs `--- Nom de la Variante ---` (ex: `--- Adulte ---` / `--- Enfant ---`). Les boutons de navigation sont générés automatiquement.
@@ -35,9 +34,9 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - Idéal pour documenter vos protocoles locaux ou adaptations spécifiques.
 
 ### 📄 Intégration PDF de Référence
-- Association automatique des fichiers PDF de votre répertoire `reference-pdfs` avec la fiche active selon des mots-clés configurables.
+- Association automatique des fichiers PDF de votre répertoire `data/pdfs` avec la fiche active selon des mots-clés configurables.
 - Section *Manuels Généraux* pour un accès permanent à vos gros ouvrages (guides d'ordonnances, manuels).
-- **Recherche plein texte** dans le contenu des 78 PDFs indexés, avec affichage des extraits de contexte pertinents.
+- **Recherche plein texte** dans le contenu des PDFs indexés, avec affichage des extraits de contexte pertinents.
 
 ### 👤 Système Collaboratif (Admin / Utilisateurs)
 - Les **utilisateurs non-admin** peuvent proposer des modifications ou ajouts de fiches (via un système de suggestions).
@@ -78,74 +77,67 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 
 ## 📂 Architecture du Projet
 
-```text
-/data/data/com.termux/files/home/med/
-├── server.js                    # Serveur Express.js (Backend, API, Auth, Cache)
-├── index_pdfs.js                # Module d'indexation asynchrone du contenu des PDFs
-├── build.js                     # Compilation des assets statiques
-├── set_admin_password.js        # Script de définition du mot de passe admin
-├── cats_db.json                 # Base de données des fiches CAT (JSON)
-├── cats_db.json.bak             # Sauvegarde automatique (créée avant chaque écriture)
-├── suggestions.json             # File d'attente des suggestions en attente de modération
-├── pdf_index.json               # Index de recherche plein texte des PDFs (~1 MB)
-├── admin_password.txt           # Mot de passe admin hashed (⚠️ hors git)
-├── package.json                 # Dépendances Node.js
-├── .eslintrc.json               # Configuration ESLint
-├── .prettierrc                  # Configuration Prettier
-├── cat-med/
-│   └── reference-pdfs/          # Vos fichiers PDF/DOCX de cours médicaux (78 fichiers)
-└── public/                      # Interface Frontend statique
-    ├── drcat_logo.png           # Logo officiel (stéthoscope & croix médicale en C)
-    ├── index.html               # Structure HTML5 de l'application
-    ├── style.css                # Point d'entrée de style CSS
-    ├── css/                     # Dossier des feuilles de style CSS modulaires
-    │   └── utilities.css        # Classes utilitaires extraites des inline styles
-    ├── pdf_viewer.html          # Visionneuse PDF intégrée avec surbrillance
-    ├── manifest.json            # Manifest PWA pour installation mobile
-    ├── service-worker.js        # Service Worker gérant le cache offline du client web
-    └── js/
-        ├── main.js              # Point d'entrée, orchestration, admin auth
-        ├── api.js               # Couche de communication avec l'API serveur
-        ├── state.js             # État global de l'application
-        ├── utils.js             # Utilitaires globaux (escapes HTML, toasts, clipboard)
-        ├── debug-console.js     # Console de débogage mobile (l'icône insecte 🐛)
-        ├── performance.js       # Module de télémétrie et de suivi de performance
-        ├── server-providers.js  # Registre et détection des tunnels serveurs
-        ├── remote_config.js     # Config générée avec les URLs distantes (⚠️ hors git)
-        ├── lib/                 # Modules partagés réutilisables
-        │   └── helpers.js       # Helpers partagés (isOfflineCat, mergeCatsWithLocalState)
-        └── components/
-            ├── sidebar.js       # Sidebar, recherche, filtres, liste des fiches
-            ├── workspace.js     # Vue détaillée d'une fiche CAT (tabs, éditeurs)
-            ├── dashboard.js     # Tableau de bord, stats, modération admin
-            ├── quiz.js          # Moteur du système de quiz (QCM + rédaction)
-            ├── diagnostics.js   # Panneau d'outils de diagnostics cliniques
-            └── performance.js   # Panneau de télémétrie et journal d'événements
-    ```
+```
+med/
+├── frontend/                  # Vue 3 + Vite app (dev + build)
+│   ├── src/
+│   │   ├── views/             # Page-level Vue components
+│   │   ├── components/        # Reusable components
+│   │   ├── stores/            # Pinia state (cats, quiz, app)
+│   │   ├── router/            # Vue Router config
+│   │   ├── assets/css/        # Modular CSS
+│   │   └── utils/             # Storage, haptics, markdown
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── index.html
+├── backend/                   # Express.js server
+│   ├── index.js               # Entry point, middleware, routes
+│   ├── routes/                # API route handlers
+│   ├── services/              # Cache, auth, data-store
+│   ├── middleware/            # CORS, rate-limit
+│   └── utils/                 # Request helpers
+├── data/                      # Runtime data (git-tracked)
+│   ├── cats_db.json           # CAT database
+│   ├── cats_db.json.bak       # Auto-backup
+│   ├── pdf_index.json         # Full-text PDF index
+│   ├── suggestions.json       # Moderation queue
+│   └── pdfs/                  # Reference PDF files
+├── docs/                      # Reports, handoffs, architecture
+├── scripts/                   # DB generators, indexer, tests
+├── reference/                 # Vanilla backup, archives
+├── backups/                   # Rotating DB backups (runtime)
+├── public/                    # Build output (served by Express)
+├── static/                    # Logo, favicon (dev publicDir)
+├── server.js                  # Compatibility wrapper → backend/index.js
+├── build.js                   # Asset pipeline: data copy + remote_config
+└── package.json               # Root deps: express, pdf-parse, capacitor
+```
 
 ---
 
 ## 🛠️ Lancement
 
-### Manuel (Termux)
+### Développement (frontend + backend)
 
 ```bash
-cd ~/med
-npm start
+# Terminal 1 — Backend
+node server.js
+
+# Terminal 2 — Frontend dev server
+cd frontend
+npm run dev
 ```
 
-Ouvrez ensuite [http://localhost:3000](http://localhost:3000) dans votre navigateur.
+Ouvrez [http://localhost:5173](http://localhost:5173) pour le frontend, [http://localhost:3000](http://localhost:3000) pour l'API.
 
-### Raccourci Écran d'Accueil
+### Production build
 
-L'application est pré-configurée avec le widget Termux. Cliquez sur le widget **`start_med.sh`** pour démarrer le serveur et ouvrir automatiquement le navigateur.
+```bash
+cd frontend && npm run build
+node server.js
+```
 
----
-
-## 🔒 Intégrité des Données
-
-- **Sauvegarde automatique `.bak`** : Le fichier original est copié avant chaque écriture.
-- **Écriture atomique** : Les données transitent d'abord par un fichier `.tmp`, puis sont renommées — garantissant que le fichier principal n'est jamais corrompu en cas de coupure.
+Ouvrez [http://localhost:3000](http://localhost:3000).
 
 ---
 
@@ -159,10 +151,17 @@ For offline clinical usage without running the Termux server:
 
 ---
 
-## 📄 Documentation de Référence
+## 📄 Documentation
 
-Consultez les fichiers suivants pour plus de détails techniques :
-* [Architecture Technique](file:///data/data/com.termux/files/home/med/technical_architecture.md) — Choix techniques, sécurité et gestion des données hors-ligne.
-* [Guide du Développeur](file:///data/data/com.termux/files/home/med/developer_guide.md) — Workflow Git, commandes CLI et configuration.
-* [Plan du Code (Codemap)](file:///data/data/com.termux/files/home/med/codemap.md) — Organisation des fichiers et dossiers.
-* [Leçons Apprises](file:///data/data/com.termux/files/home/med/lessons_learned.md) — Erreurs évitées et astuces techniques de débogage.
+* `docs/ARCHITECTURE.md` — Technical choices, security, offline data management.
+* `docs/developer_guide.md` — Git workflow, CLI commands, configuration.
+* `docs/codemap.md` — File and folder organization.
+* `docs/lessons_learned.md` — Pitfalls avoided and debugging tips.
+* `docs/HANDOFF_FOR_KILO.md` — Latest handoff notes.
+
+---
+
+## 🔒 Intégrité des Données
+
+- **Sauvegarde automatique `.bak`** : Le fichier original est copié avant chaque écriture.
+- **Écriture atomique** : Les données transitent d'abord par un fichier `.tmp`, puis sont renommées — garantissant que le fichier principal n'est jamais corrompu en cas de coupure.

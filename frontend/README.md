@@ -1,48 +1,52 @@
-# med-vue
+# Dr. CAT — Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 + Vite frontend for the Dr. CAT clinical review app.
 
-## Recommended IDE Setup
+## Tech Stack
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Vue 3 (Composition API, `<script setup>`)
+- Vue Router 5
+- Pinia (state management)
+- TypeScript
+- Vite 8
+- Vue DevTools
 
-## Recommended Browser Setup
+## Project Structure
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+```
+frontend/
+├── src/
+│   ├── views/           # Page components (Workspace, Dashboard, Quiz, Cats, Admin, Pdfs)
+│   ├── components/      # Reusable Vue components
+│   ├── stores/          # Pinia stores (cats, quiz, app)
+│   ├── router/          # Vue Router routes
+│   ├── assets/css/      # Modular CSS (variables, sidebar, layout, workspace, dashboard)
+│   ├── utils/           # Storage, haptics, markdown helpers
+│   ├── api/             # HTTP client
+│   ├── types/           # TypeScript interfaces
+│   ├── composables/     # Shared composables (quiz generator)
+│   ├── App.vue
+│   └── main.ts
+├── index.html
+├── vite.config.ts
+└── package.json
 ```
 
-### Compile and Hot-Reload for Development
+## Scripts
 
 ```sh
-npm run dev
+npm install          # Install dependencies
+npm run dev          # Start dev server at http://localhost:5173
+npm run build        # Production build → ../public/
+npm run type-check   # vue-tsc type checking
+npm run lint         # ESLint + Oxlint + Prettier
 ```
 
-### Type-Check, Compile and Minify for Production
+## Environment
 
-```sh
-npm run build
-```
+- Node.js: `^22.18.0 || >=24.12.0`
+- Backend API: proxied to `http://localhost:3000` in dev via `vite.config.ts`
 
-### Lint with [ESLint](https://eslint.org/)
+## Build Output
 
-```sh
-npm run lint
-```
+`npm run build` outputs to `../public/`, which is served by the Express backend at `/`.
