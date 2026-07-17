@@ -86,6 +86,8 @@ During readiness review before Phase 3, the following issues were discovered and
 | `cache.state` used instead of `cache` after destructuring import | All `server/routes/*.js`, `server/services/*.js`, `server/index.js` | Replaced all `cache.state.xxx` with `cache.xxx` (101 occurrences) |
 | Wrong file paths in `server/index.js` | `server/index.js` | Fixed `SUGGESTIONS_FILE`, `DB_FILE`, `CONFIG_FILE`, `public/`, and `server.log` paths to use `path.join(__dirname, '..', ...)` since `__dirname` is now `server/` not project root |
 | Wrong build module path | `server/index.js:57` | Changed `require('./build.js')` to `require('../build.js')` |
+| Missing `GET /api/cats` route after refactor | `server/routes/cats.js` | Restored GET /api/cats and POST /api/cats/bulk-import routes that were accidentally dropped during split |
+| `checkIsAdmin` import alias missing in route files | All `server/routes/*.js` | Changed `const { checkIsAdmin }` to `const { isAdminRequest: checkIsAdmin }` to match actual export name from `auth-service.js` |
 
 ### Moderate (Deferred to Phase 3)
 
@@ -111,6 +113,9 @@ During readiness review before Phase 3, the following issues were discovered and
 ```
 curl http://localhost:3000/health
 {"status":"healthy","timestamp":"2026-07-17T10:31:44.531Z","uptime":26,"database":{"loaded":true,"records":57},"system":{"memoryUsage":{"rss":"79 MB","heapUsed":"11 MB"}}}
+
+curl http://localhost:3000/api/cats -H "x-app-key: drcat_pub_2f7a91c4e8"
+[{"id":1,"category":"Gastro-entérologie","title":"CAT devant intoxication alimentaire",...}]
 ```
 
-Server starts cleanly, loads 57 database records, and responds to health checks.
+Server starts cleanly, loads 57 database records, and responds to health checks and API routes.
