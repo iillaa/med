@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { indexPdfs, onIndexUpdated } = require('../index_pdfs');
+const { indexPdfs, onIndexUpdated } = require('../scripts/index_pdfs');
 const { serverProviders, buildAllowedOrigins } = require('./config/providers');
 const { state: cache } = require('./services/cache');
 const { initAdminPassword } = require('./services/auth-service');
@@ -15,9 +15,9 @@ const { registerSearchRoutes } = require('./routes/search');
 const { registerDiagnosticRoutes } = require('./routes/diagnostics');
 const { registerPerformanceRoutes } = require('./routes/performance');
 
-const INDEX_FILE = path.join(__dirname, '..', 'pdf_index.json');
-const SUGGESTIONS_FILE = path.join(__dirname, '..', 'suggestions.json');
-const DB_FILE = path.join(__dirname, '..', 'cats_db.json');
+const INDEX_FILE = path.join(__dirname, '..', 'data', 'pdf_index.json');
+const SUGGESTIONS_FILE = path.join(__dirname, '..', 'data', 'suggestions.json');
+const DB_FILE = path.join(__dirname, '..', 'data', 'cats_db.json');
 const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
 const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
 const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);

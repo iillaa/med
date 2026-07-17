@@ -2,14 +2,14 @@ const { state: cache } = require('../services/cache');
 const { checkIsAdmin, loginAttempts } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync } = require('../services/data-store');
-const { getIndexStatus } = require('../../index_pdfs');
+const { getIndexStatus } = require('../../scripts/index_pdfs');
 const { serverProviders, detectProvider, getManagementEndpoint } = require('../config/providers');
 const path = require('path');
 const fs = require('fs');
 
-const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
-const DB_FILE = path.join(__dirname, '..', '..', 'cats_db.json');
-const SUGGESTIONS_FILE = path.join(__dirname, '..', '..', 'suggestions.json');
+const INDEX_FILE = path.join(__dirname, '..', '..', 'data', 'pdf_index.json');
+const DB_FILE = path.join(__dirname, '..', '..', 'data', 'cats_db.json');
+const SUGGESTIONS_FILE = path.join(__dirname, '..', '..', 'data', 'suggestions.json');
 const CONFIG_FILE = path.join(__dirname, '..', '..', 'remote_server_config.json');
 
 async function readConfiguredRemoteUrls() {

@@ -2,7 +2,7 @@
   "name": "med",
   "version": "1.0.0",
   "description": "Dr.CAT — Clinical Review App",
-  "main": "server/index.js",
+  "main": "backend/index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
