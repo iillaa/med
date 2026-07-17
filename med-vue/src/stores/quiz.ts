@@ -4,6 +4,7 @@ import type { Cat } from '../types/cat';
 import { getLeitnerData, saveLeitnerData, updateLeitnerStats, updateQuizStreak, getStreakInfo } from './cats';
 import { fetchCats } from '../api/client';
 import { getItem, setItem, STORAGE_KEYS } from '../utils/storage';
+import { generateQuestions } from '../composables/useQuizGenerator';
 
 export const useQuizStore = defineStore('quiz', {
   state: (): QuizSession => ({
@@ -63,48 +64,10 @@ export const useQuizStore = defineStore('quiz', {
         return;
       }
 
-      const leitnerData = getLeitnerData();
       const shuffled = [...filteredCats].sort(() => Math.random() - 0.5);
       const limited = shuffled.slice(0, setup.count);
 
-      const questions: QuizQuestion[] = limited.flatMap(cat => {
-        return selectedTypes.map(type => {
-          let questionText = '';
-          let correctAnswer = '';
-          let points = 1;
-
-          switch (type) {
-            case 'clinical':
-              questionText = `Question clinique sur : ${cat.title}`;
-              correctAnswer = cat.summary;
-              points = 1;
-              break;
-            case 'posology':
-              questionText = `Posologie pour : ${cat.title}`;
-              correctAnswer = cat.ordonnance;
-              points = 1;
-              break;
-            case 'redflags':
-              questionText = `Signes d'alerte pour : ${cat.title}`;
-              correctAnswer = cat.red_flags;
-              points = 1;
-              break;
-            case 'prescription':
-              questionText = `Ordonnance pour : ${cat.title}`;
-              correctAnswer = cat.ordonnance;
-              points = 1;
-              break;
-          }
-
-          return {
-            type,
-            cat,
-            questionText,
-            correctAnswer,
-            points
-          };
-        });
-      });
+      const questions: QuizQuestion[] = limited.flatMap(cat => generateQuestions(cat, selectedTypes));
 
       this.questions = questions;
       this.currentIndex = 0;
@@ -189,3 +152,4 @@ export function getQuizSetupFromStorage(): QuizSetupConfig | null {
 export function saveQuizSetupToStorage(setup: QuizSetupConfig): void {
   localStorage.setItem('dr_cat_quiz_setup', JSON.stringify(setup));
 }
+
