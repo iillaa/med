@@ -57,56 +57,53 @@ Migrating Dr. CAT frontend to Vue 3 + Pinia + TypeScript in `med-vue/`.
 
 ---
 
-## Stage 4: Dashboard & Cats Views ⏳ PENDING
-- [ ] **4.1 Dashboard:** `med-vue/src/views/Dashboard.vue`
-  - [ ] Use `catsStore.stats` for mastery %, counters
-  - [ ] Render "Resume" list (cats with status 'doing'/'done')
-  - [ ] Render "Progress by Specialty" using `store.cats`
-- [ ] **4.2 Cats View:** `med-vue/src/views/Cats.vue` — full list with search/filter
-- [ ] **4.3 Status Updates:** Clicking status updates `catsStore.updateStatus()`
+## Stage 4: Dashboard & Cats Views ✅
+- [x] **4.1 Dashboard:** `med-vue/src/views/Dashboard.vue` — stats, resume list, specialty progress
+- [x] **4.2 Cats View:** `med-vue/src/views/Cats.vue` — full list with search/filter
+- [x] **4.3 Status Updates:** Clicking status updates `catsStore.updateStatus()`
 - **Commit:** `feat(vue): dashboard and cats views`
 
 ---
 
-## Stage 5: Workspace (CAT Details) ⏳ PENDING
-- [ ] **5.1 Workspace View:** `med-vue/src/views/Workspace.vue`
-- [ ] **5.2 Notes:** Bind textarea to `cat.notes`. Save via `catsStore.updateNotes()`
-- [ ] **5.3 Status Buttons:** Wire to `catsStore.updateStatus()`
+## Stage 5: Workspace (CAT Details) ✅
+- [x] **5.1 Workspace View:** `med-vue/src/views/Workspace.vue` — details, markdown rendering
+- [x] **5.2 Notes:** Bind textarea to `cat.notes`. Save via `catsStore.updateNotes()`
+- [x] **5.3 Status Buttons:** Wire to `catsStore.updateStatus()`
 - **Commit:** `feat(vue): workspace view`
 
 ---
 
-## Stage 6: Quiz Engine ⏳ PENDING
-- [ ] **6.1 Generator:** `med-vue/src/composables/useQuizGenerator.ts`
-- [ ] **6.2 Quiz View:** `med-vue/src/views/Quiz.vue`
-- [ ] **6.3 Leitner:** Update `quizStore` on correct/incorrect answers
+## Stage 6: Quiz Engine ✅
+- [x] **6.1 Generator:** `med-vue/src/composables/useQuizGenerator.ts` — ported quiz logic
+- [x] **6.2 Quiz View:** `med-vue/src/views/Quiz.vue` — setup, question, results screens
+- [x] **6.3 Leitner:** Update `quizStore` on correct/incorrect answers
 - **Commit:** `feat(vue): quiz engine`
 
 ---
 
-## Stage 7: PDF Search & Admin ⏳ PENDING
-- [ ] **7.1 PDF Search:** Add tab to Workspace or separate view
-- [ ] **7.2 Admin Panel:** `med-vue/src/views/Admin.vue`
-- [ ] **7.3 Performance:** Port metrics view
+## Stage 7: PDF Search & Admin ✅
+- [x] **7.1 PDF Search:** `med-vue/src/views/Pdfs.vue` — search with `/api/search-pdfs`
+- [x] **7.2 Admin Panel:** `med-vue/src/views/Admin.vue` — suggestions + diagnostics tabs
+- [x] **7.3 Performance:** Port metrics view in admin diagnostics
 - **Commit:** `feat(vue): pdf search and admin`
 
 ---
 
-## Stage 8: Capacitor Integration ⏳ PENDING
-- [ ] **8.1 Install:** `npm install @capacitor/android @capacitor/haptics @capacitor/share`
-- [ ] **8.2 Config:** `med-vue/capacitor.config.json` — point `webDir: '../public'`
-- [ ] **8.3 Plugins:** Add haptic feedback on status changes
-- [ ] **8.4 Build:** `npm run build` and verify `../public/index.html` is generated
+## Stage 8: Capacitor Integration ✅
+- [x] **8.1 Install:** `npm install @capacitor/android @capacitor/haptics @capacitor/share`
+- [x] **8.2 Config:** `med-vue/capacitor.config.json` — point `webDir: '../public'`
+- [x] **8.3 Plugins:** Add haptic feedback on status changes (use `window.Capacitor` checks)
+- [x] **8.4 Build:** `npm run build` and verify `../public/index.html` is generated
 - **Commit:** `feat(vue): capacitor integration`
 
 ---
 
-## Stage 9: Go-Live Swap ⏳ PENDING
-- [ ] **9.1 Backup:** Rename old `public/` to `public_vanilla_backup/`
-- [ ] **9.2 Build:** Run `npm run build` in `med-vue/`
-- [ ] **9.3 Smoke Test:** Restart server and browse `http://localhost:3000`
-- [ ] **9.4 Verify:** All CATs load, sidebar works, quiz runs, PDF search works
-- [ ] **9.5 Commit:** `git add public/ && git commit -m "feat(vue): go-live replacing vanilla JS"`
+## Stage 9: Go-Live Swap ✅
+- [x] **9.1 Backup:** Rename old `public/` to `public_vanilla_backup/`
+- [x] **9.2 Build:** Run `npm run build` in `med-vue/` (outputs to `../public`)
+- [x] **9.3 Smoke Test:** Restart server (`npm start`) and browse `http://localhost:3000`
+- [x] **9.4 Verify:** All CATs load, sidebar works, quiz runs, PDF search works
+- [x] **9.5 Commit:** `git add public/ && git commit -m "feat(vue): go-live replacing vanilla JS"`
 - **Commit:** `feat(vue): go-live`
 
 ---
