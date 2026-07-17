@@ -51,6 +51,21 @@ graph TD
 
 ---
 
+### Phase 2: Backend Refactor ✅ COMPLETE
+*Goal: Split server.js into proper modules for maintainability.*
+
+- `[x]` **Directory Structure**: Created `server/` with `index.js`, `routes/`, `middleware/`, `services/`, `utils/`, `config/`
+- `[x]` **Config Extraction**: `server/config/providers.js` — provider registry, CORS origin helpers
+- `[x]` **Middleware Extraction**: `middleware/cors.js`, `middleware/rate-limit.js`
+- `[x]` **Services Extraction**: `services/cache.js`, `services/auth-service.js`, `services/data-store.js`
+- `[x]` **Routes Extraction**: `routes/auth.js`, `routes/cats.js`, `routes/suggestions.js`, `routes/search.js`, `routes/diagnostics.js`, `routes/performance.js`
+- `[x]` **Utils Extraction**: `utils/request.js` — `isLocalhostConnection()` helper
+- `[x]` **Entry Point**: `server/index.js` created as main entry, `server.js` reduced to 1-line wrapper
+- `[x]` **ESLint Compliance**: All modules pass `npx eslint` with zero errors
+- `[x]` **Audit Report**: `PHASE2_AUDIT_REPORT.md` generated
+
+---
+
 ### Phase 3: True Offline Android App ✅ COMPLETE
 *Goal: Wrap the frontend into an offline-first Android app package (.apk) that caches files locally and syncs with the server when connected.*
 
