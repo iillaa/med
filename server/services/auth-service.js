@@ -40,10 +40,7 @@ async function initAdminPassword() {
       cache.state.adminPasswordSalt = crypto.randomBytes(16).toString('hex');
       cache.state.adminPasswordHash = hashPassword(plainPassword, cache.state.adminPasswordSalt);
       await fs.promises.writeFile(PASSWORD_FILE, `${cache.state.adminPasswordSalt}:${cache.state.adminPasswordHash}`, 'utf-8');
-      console.log(`\n=================================================`);
-      console.log(`[SECURITY] Generated Admin Password: ${plainPassword}`);
-      console.log(`Saved (hashed) to: ${PASSWORD_FILE}`);
-      console.log(`=================================================\n`);
+      console.log(`[SECURITY] Admin password generated and saved to: ${PASSWORD_FILE}`);
     }
   } catch (err) {
     console.error("Error loading or generating admin password:", err);

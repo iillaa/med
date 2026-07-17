@@ -12,7 +12,17 @@ const DB_FILE = path.join(__dirname, '..', '..', 'cats_db.json');
 const SUGGESTIONS_FILE = path.join(__dirname, '..', '..', 'suggestions.json');
 const CONFIG_FILE = path.join(__dirname, '..', '..', 'remote_server_config.json');
 
-let configuredRemoteUrls = [];
+async function readConfiguredRemoteUrls() {
+  try {
+    const exists = await fs.promises.access(CONFIG_FILE).then(() => true).catch(() => false);
+    if (!exists) return [];
+    const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
+    const parsed = JSON.parse(content);
+    return Array.isArray(parsed.urls) ? parsed.urls : (parsed.url ? [parsed.url] : []);
+  } catch (_) {
+    return [];
+  }
+}
 
 function registerDiagnosticRoutes(app) {
   app.get('/api/diagnostics/system', (req, res) => {
@@ -149,17 +159,16 @@ function registerDiagnosticRoutes(app) {
       }
       
       cache.state.remoteServerUrl = urlList[0] || '';
-      configuredRemoteUrls = urlList;
       
       await safeWriteJsonAsync(CONFIG_FILE, { urls: urlList });
 
       await fs.promises.writeFile(
         path.join(__dirname, '..', '..', 'public', 'js', 'remote_config.js'),
-        `export const REMOTE_SERVER_URL = ${JSON.stringify(cache.state.remoteServerUrl)};\nexport const REMOTE_SERVER_URLS = ${JSON.stringify(configuredRemoteUrls)};\n`,
+        `export const REMOTE_SERVER_URL = ${JSON.stringify(cache.state.remoteServerUrl)};\nexport const REMOTE_SERVER_URLS = ${JSON.stringify(urlList)};\n`,
         'utf-8'
       );
 
-      res.json({ success: true, urls: configuredRemoteUrls });
+      res.json({ success: true, urls: urlList });
     } catch (err) {
       console.error("Update remote URL error:", err);
       res.status(500).json({ error: "Failed to update remote server URL" });
@@ -171,6 +180,7 @@ function registerDiagnosticRoutes(app) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut accéder aux outils de diagnostic.' });
     }
     
+    const configuredRemoteUrls = await readConfiguredRemoteUrls();
     const providerInfo = configuredRemoteUrls.map(url => {
       const provider = detectProvider(url);
       const mgmt = getManagementEndpoint(provider);
