@@ -198,28 +198,33 @@ export function generateQuestions(cat: Cat, types: QuestionType[]): QuizQuestion
     let questionText = ''
     let correctAnswer = ''
     let points = 1
+    let options: string[] | undefined
 
     switch (type) {
-      case 'clinical':
+      case 'clinical': {
         questionText = `Question clinique sur : ${cat.title}`
-        correctAnswer = cat.summary
+        correctAnswer = cat.summary || ''
         points = 1
         break
-      case 'posology':
+      }
+      case 'posology': {
         questionText = `Posologie pour : ${cat.title}`
-        correctAnswer = cat.ordonnance
+        correctAnswer = cat.ordonnance || ''
         points = 1
         break
-      case 'redflags':
+      }
+      case 'redflags': {
         questionText = `Signes d'alerte pour : ${cat.title}`
-        correctAnswer = cat.red_flags
+        correctAnswer = cat.red_flags || ''
         points = 1
         break
-      case 'prescription':
+      }
+      case 'prescription': {
         questionText = `Ordonnance pour : ${cat.title}`
-        correctAnswer = cat.ordonnance
+        correctAnswer = cat.ordonnance || ''
         points = 1
         break
+      }
     }
 
     return {
@@ -227,7 +232,8 @@ export function generateQuestions(cat: Cat, types: QuestionType[]): QuizQuestion
       cat,
       questionText,
       correctAnswer,
-      points
+      points,
+      ...(options && options.length > 0 ? { options } : {})
     }
   })
 }

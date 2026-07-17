@@ -102,6 +102,59 @@ export const useQuizStore = defineStore('quiz', {
       return answer;
     },
 
+    submitQCMOption(option: string): QuizAnswer | null {
+      const q = this.currentQuestion;
+      if (!q) return null;
+
+      const isCorrect = option === q.correctAnswer;
+      const finalScore = isCorrect ? q.points : 0;
+      this.score += finalScore;
+
+      const answer: QuizAnswer = {
+        catId: q.cat.id,
+        catTitle: q.cat.title,
+        type: q.type,
+        userAnswer: option,
+        correctAnswer: q.correctAnswer,
+        score: finalScore
+      };
+
+      this.answers.push(answer);
+
+      if (!isCorrect && this.failedQuestions) {
+        this.failedQuestions.push(q);
+      }
+
+      updateLeitnerStats(q.cat.id, isCorrect);
+      updateQuizStreak();
+
+      this.currentIndex += 1;
+      return answer;
+    },
+
+    submitSelfGrade(score: number): QuizAnswer | null {
+      const q = this.currentQuestion;
+      if (!q) return null;
+
+      const finalScore = score * q.points;
+      this.score += finalScore;
+
+      const lastAnswer = this.answers[this.answers.length - 1];
+      if (lastAnswer) {
+        lastAnswer.score = finalScore;
+      }
+
+      if (finalScore < 1.0 && this.failedQuestions) {
+        this.failedQuestions.push(q);
+      }
+
+      updateLeitnerStats(q.cat.id, finalScore >= 1.0);
+      updateQuizStreak();
+
+      this.currentIndex += 1;
+      return lastAnswer || null;
+    },
+
     retryFailed(): void {
       if (!this.failedQuestions || this.failedQuestions.length === 0) return;
       this.questions = [...this.failedQuestions];
