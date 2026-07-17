@@ -6,11 +6,12 @@ import { useCatsStore } from '@/stores/cats'
 const router = useRouter()
 const catsStore = useCatsStore()
 
-const resumeCats = computed(() => {
-  return catsStore.cats
+const resumeCats = computed(() =>
+  catsStore.cats
     .filter(c => c.status === 'doing' || c.status === 'done')
+    .sort((a, b) => (b.lastRead || 0) - (a.lastRead || 0))
     .slice(0, 3)
-})
+)
 
 const specialtyProgress = computed(() => {
   const map = new Map<string, { total: number; done: number }>()
