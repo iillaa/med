@@ -326,15 +326,15 @@ export class DataStore {
 
 ---
 
-## Phase 3: SvelteKit Migration (Week 9-16) — "The Full Rewrite"
+## Phase 3: Vue 3 Migration (Week 9-16) — "The Full Rewrite"
 
-**Objective:** Migrate to modern framework for long-term maintainability.
+**Objective:** Migrate to Vue 3 for long-term maintainability.
 
 ### 3.1 Project Initialization
 
 ```bash
-npm create svelte@latest drcat
-# Select: Skeleton project, TypeScript, ESLint, Prettier, Playwright
+npm create vue@latest drcat
+# Select: Vue 3, TypeScript, ESLint, Prettier, Vitest
 cd drcat
 npm install
 ```
@@ -343,77 +343,65 @@ npm install
 ```
 drcat/
 ├── src/
-│   ├── lib/
-│   │   ├── components/
-│   │   │   ├── Sidebar/
-│   │   │   │   ├── Sidebar.svelte
-│   │   │   │   ├── CategoryFilter.svelte
-│   │   │   │   └── CatList.svelte
-│   │   │   ├── Workspace/
-│   │   │   │   ├── Workspace.svelte
-│   │   │   │   ├── Summary.svelte
-│   │   │   │   ├── Prescription.svelte
-│   │   │   │   └── PdfList.svelte
-│   │   │   ├── Quiz/
-│   │   │   │   ├── Quiz.svelte
-│   │   │   │   ├── QuizQuestion.svelte
-│   │   │   │   ├── QcmOptions.svelte
-│   │   │   │   └── WriteInAnswer.svelte
-│   │   │   ├── Dashboard.svelte
-│   │   │   └── Diagnostics.svelte
-│   │   ├── stores/
-│   │   │   ├── cats.ts
-│   │   │   ├── quiz.ts
-│   │   │   └── app.ts
-│   │   ├── api/
-│   │   │   ├── client.ts
-│   │   │   ├── cats.ts
-│   │   │   └── suggestions.ts
-│   │   └── types/
-│   │       ├── cat.ts
-│   │       ├── quiz.ts
-│   │       └── api.ts
-│   ├── routes/
-│   │   ├── +layout.svelte
-│   │   ├── +page.svelte
-│   │   ├── cats/
-│   │   │   └── +page.svelte
-│   │   ├── quiz/
-│   │   │   └── +page.svelte
-│   │   └── api/
-│   │       ├── cats/
-│   │       │   ├── +server.ts
-│   │       │   └── +server.ts
-│   │       └── suggestions/
-│   │           └── +server.ts
-│   └── app.html
-├── static/
+│   ├── components/
+│   │   ├── Sidebar/
+│   │   │   ├── CategoryFilter.vue
+│   │   │   └── CatList.vue
+│   │   ├── Workspace/
+│   │   │   ├── Workspace.vue
+│   │   │   ├── Summary.vue
+│   │   │   ├── Prescription.vue
+│   │   │   └── PdfList.vue
+│   │   ├── Quiz/
+│   │   │   ├── Quiz.vue
+│   │   │   ├── QuizQuestion.vue
+│   │   │   ├── QcmOptions.vue
+│   │   │   └── WriteInAnswer.vue
+│   │   ├── Dashboard.vue
+│   │   └── Diagnostics.vue
+│   ├── stores/
+│   │   ├── cats.ts
+│   │   ├── quiz.ts
+│   │   └── app.ts
+│   ├── api/
+│   │   ├── client.ts
+│   │   ├── cats.ts
+│   │   └── suggestions.ts
+│   ├── types/
+│   │   ├── cat.ts
+│   │   ├── quiz.ts
+│   │   └── api.ts
+│   ├── router/
+│   │   └── index.ts
+│   ├── App.vue
+│   └── main.ts
+├── public/
 │   ├── css/
 │   ├── pdfs/
 │   └── data/
 ├── package.json
-└── svelte.config.js
+└── vite.config.ts
 ```
 
-### 3.3 Key SvelteKit Equivalents
+### 3.3 Key Vue 3 Equivalents
 
-| Current | SvelteKit Equivalent |
-|---------|----------------------|
-| `index.html` (1256 lines) | `+layout.svelte` + component hierarchy |
-| `main.js` bootstrap | `+layout.ts` load functions |
-| `state.js` | `lib/stores/app.ts` (Svelte stores) |
-| `api.js` | `lib/api/client.ts` + `$app/navigation` |
-| `components/sidebar.js` | `lib/components/Sidebar/Sidebar.svelte` |
-| Inline view switching | SvelteKit routing (`/cats`, `/quiz`) |
-| `localStorage` reads | Svelte `$app/storage` or custom store |
-| PDF viewer page | `routes/pdf-viewer/+page.svelte` |
+| Current | Vue 3 Equivalent |
+|---------|------------------|
+| `index.html` (1256 lines) | `App.vue` + component hierarchy |
+| `main.js` bootstrap | `main.ts` + Vue app mount |
+| `state.js` | `stores/` (Pinia) |
+| `api.js` | `api/` (composable or service) |
+| `components/sidebar.js` | `components/Sidebar/CategoryFilter.vue`, `CatList.vue` |
+| Inline view switching | Vue Router (`/cats`, `/quiz`) |
+| `localStorage` reads | Pinia persisted state or composable |
+| PDF viewer page | `views/PdfViewer.vue` |
 
-### 3.4 State Management with Svelte Stores
+### 3.4 State Management with Pinia
 
 ```typescript
-// lib/stores/cats.ts
-import { writable, derived, get } from 'svelte/store';
-import type { Cat, LocalProgress, LocalOverrides } from '$lib/types/cat';
+// stores/cats.ts
+import { defineStore } from 'pinia';
+import type { Cat, LocalProgress, LocalOverrides } from '@/types/cat';
 
 export interface CatStore {
   all: Cat[];
@@ -424,56 +412,41 @@ export interface CatStore {
   error: string | null;
 }
 
-function createCatStore() {
-  const { subscribe, set, update } = writable<CatStore>({
+export const useCatStore = defineStore('cats', {
+  state: (): CatStore => ({
     all: [],
     active: null,
     filter: 'all',
     search: '',
     loading: false,
     error: null
-  });
-  
-  return {
-    subscribe,
-    setAll: (cats: Cat[]) => update(s => ({ ...s, all: cats })),
-    setActive: (cat: Cat | null) => update(s => ({ ...s, active: cat })),
-    setFilter: (filter: string) => update(s => ({ ...s, filter })),
-    setSearch: (search: string) => update(s => ({ ...s, search })),
-    // Derived stores
-    filtered: derived(
-      { subscribe: subscribe },
-      ($store) => {
-        // Filter logic here
-        return $store.all.filter(cat => {
-          // ...
-        });
-      }
-    ),
-    stats: derived(
-      { subscribe: subscribe },
-      ($store) => {
-        const done = $store.all.filter(c => c.status === 'done').length;
-        return { done, total: $store.all.length, percent: Math.round(done / $store.all.length * 100) };
-      }
-    )
-  };
-}
-
-export const cats = createCatStore();
+  }),
+  getters: {
+    filtered: (state): Cat[] => {
+      // filter logic
+      return state.all;
+    },
+    stats: (state) => {
+      const done = state.all.filter(c => c.status === 'done').length;
+      return { done, total: state.all.length, percent: Math.round(done / state.all.length * 100) };
+    }
+  },
+  actions: {
+    setAll(cats: Cat[]) { this.all = cats; },
+    setActive(cat: Cat | null) { this.active = cat; }
+  }
+});
 ```
 
-### 3.5 API Layer with SvelteKit
+### 3.5 API Layer with Vue 3
 
 ```typescript
-// lib/api/client.ts
-import { browser } from '$app/environment';
-
+// api/client.ts
 export class ApiClient {
   private baseUrl: string;
   
   constructor() {
-    this.baseUrl = browser ? '' : 'http://localhost:3000';
+    this.baseUrl = import.meta.env.DEV ? 'http://localhost:3000' : '';
   }
   
   async get<T>(endpoint: string): Promise<T> {
@@ -501,29 +474,24 @@ export class ApiClient {
 export const api = new ApiClient();
 ```
 
-### 3.6 SvelteKit API Routes (Server)
+### 3.6 Vue Router Setup
 
 ```typescript
-// src/routes/api/cats/+server.ts
-import { json } from '@sveltejs/kit';
-import { catsCache } from '$lib/server/services/cache';
-import { validateAppKey } from '$lib/server/middleware/app-key';
-import type { RequestHandler } from './$types';
+// router/index.ts
+import { createRouter, createWebHistory } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
-export const GET: RequestHandler = async ({ request }) => {
-  if (!validateAppKey(request.headers.get('x-app-key') ?? '')) {
-    return json({ error: 'Forbidden' }, { status: 403 });
-  }
-  
-  const isAdmin = validateAdminToken(request.headers.get('x-admin-token'));
-  let result = catsCache;
-  
-  if (!isAdmin) {
-    result = result.map(({ history, ...rest }) => rest);
-  }
-  
-  return json(result);
-};
+const routes: RouteRecordRaw[] = [
+  { path: '/', component: () => import('@/views/Dashboard.vue') },
+  { path: '/cats', component: () => import('@/views/Cats.vue') },
+  { path: '/quiz', component: () => import('@/views/Quiz.vue') },
+  { path: '/pdf-viewer', component: () => import('@/views/PdfViewer.vue') }
+];
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
 ```
 
 ---

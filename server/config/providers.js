@@ -36,7 +36,7 @@ function buildAllowedOrigins(providers, configuredUrls) {
     try {
       const urlObj = new URL(url);
       origins.add(`${urlObj.protocol}//${urlObj.hostname}`);
-    } catch (_) {}
+    } catch (_) { /* no-op */ }
   }
   return origins;
 }
