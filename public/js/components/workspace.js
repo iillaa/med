@@ -5,7 +5,7 @@ import { buildPrintableText } from './workspace/state.js';
 import { renderSummary } from './workspace/summary.js';
 import { renderPrescription } from './workspace/prescription.js';
 import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList } from './workspace/pdfs.js';
-import { saveAppStateBeforeNavigation } from './workspace/print.js';
+import { saveAppStateBeforeNavigation, restoreAppState } from './workspace/print.js';
 
 let workspace, welcomeScreen;
 let wsCategory, wsTitle, wsRedFlags, wsPrescription, notesInput;
@@ -815,3 +815,5 @@ function loadRelatedPdfs(cat) {
     });
   }
 }
+
+export { restoreAppState };
