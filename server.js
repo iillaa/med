@@ -256,6 +256,10 @@ GUARDED_DATA_FILES.forEach((file) => {
   });
 });
 
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'drcat_logo.png'));
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   lastModified: false,
@@ -1250,7 +1254,7 @@ app.get('/api/search-pdfs', (req, res) => {
 
         const textLower = p.text.toLowerCase();
         
-        let indexMatch = textLower.indexOf(cleanQuery);
+        const indexMatch = textLower.indexOf(cleanQuery);
         if (indexMatch !== -1) {
           const start = Math.max(0, indexMatch - 60);
           const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
@@ -1673,7 +1677,7 @@ app.get('/api/performance/server-metrics', (req, res) => {
     }
 
     // Calculate PDF parse statistics
-    let totalPdfFiles = pdfParseTimes.length;
+    const totalPdfFiles = pdfParseTimes.length;
     let avgParseMs = 0;
     let slowestPdf = '--';
     if (totalPdfFiles > 0) {
