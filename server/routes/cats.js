@@ -1,11 +1,105 @@
 const { state: cache } = require('../services/cache');
-const { checkIsAdmin } = require('../services/auth-service');
+const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
+
+const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
+const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
 
 const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
 
 function registerCatRoutes(app) {
+  app.get('/api/cats', (req, res) => {
+    if (!isValidAppKey(req.headers['x-app-key'])) {
+      return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
+    }
+    const isAdmin = checkIsAdmin(req, cache.activeTokens);
+    const since = parseInt(req.query.since);
+
+    res.setHeader('Access-Control-Expose-Headers', 'X-Active-Cat-IDs');
+    res.setHeader('X-Active-Cat-IDs', cache.catsCache.map(c => c.id).join(','));
+
+    let result = cache.catsCache;
+    if (!isNaN(since)) {
+      result = cache.catsCache.filter(c => (c.updatedAt || 0) > since);
+    }
+
+    if (!isAdmin) {
+      result = result.map(c => {
+        const { history: _history, ...rest } = c;
+        return rest;
+      });
+    }
+
+    res.json(result);
+  });
+
+  app.post('/api/cats/bulk-import', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const importList = req.body;
+      if (!Array.isArray(importList)) {
+        return res.status(400).json({ error: 'L\'importation doit être un tableau de fiches.' });
+      }
+
+      for (const item of importList) {
+        if (!item.title || !item.category) {
+          return res.status(400).json({ error: 'Chaque fiche doit contenir au moins un titre et une spécialité.' });
+        }
+      }
+
+      const result = await dbLock.acquire(async () => {
+        let importedCount = 0;
+        let skippedCount = 0;
+        const skippedTitles = [];
+        let nextId = cache.catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
+
+        for (const item of importList) {
+          const normTitle = item.title.trim().toLowerCase();
+          const normCat = item.category.trim().toLowerCase();
+          const exists = cache.catsCache.some(c => c.title.trim().toLowerCase() === normTitle && c.category.trim().toLowerCase() === normCat);
+
+          if (exists) {
+            skippedCount++;
+            skippedTitles.push(item.title);
+            continue;
+          }
+
+          const newCat = {
+            id: nextId++,
+            category: item.category.trim(),
+            title: item.title.trim(),
+            summary: item.summary || '',
+            red_flags: item.red_flags || '',
+            ordonnance: item.ordonnance || '',
+            pdf_keywords: item.pdf_keywords || [],
+            updatedAt: Date.now(),
+            history: [{
+              timestamp: Date.now(),
+              action: 'create',
+              detail: 'Importation groupée par l\'administrateur'
+            }]
+          };
+          cache.catsCache.push(newCat);
+          importedCount++;
+        }
+
+        if (importedCount > 0) {
+          await safeWriteJsonAsync(DB_FILE, cache.catsCache);
+        }
+        return { success: true, count: importedCount, skippedCount, skippedTitles };
+      });
+
+      logAuditEvent('cats_bulk_import', { count: result.count }, req);
+      res.json(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Erreur lors de l\'importation groupée.' });
+    }
+  });
   app.post('/api/cats/:id', async (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });

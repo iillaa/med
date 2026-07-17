@@ -1,5 +1,5 @@
 const { state: cache } = require('../services/cache');
-const { checkIsAdmin } = require('../services/auth-service');
+const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
 

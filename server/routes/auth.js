@@ -1,5 +1,5 @@
 const { state: cache } = require('../services/cache');
-const { checkIsAdmin, hashPassword, createToken, loginAttempts } = require('../services/auth-service');
+const { isAdminRequest: checkIsAdmin, hashPassword, createToken, loginAttempts } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { logAuditEvent } = require('../services/data-store');
 
