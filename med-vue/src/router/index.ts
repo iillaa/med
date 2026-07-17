@@ -7,7 +7,32 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/HomeView.vue'),
+      component: () => import('../views/Dashboard.vue'),
+    },
+    {
+      path: '/cats',
+      name: 'cats',
+      component: () => import('../views/Cats.vue'),
+    },
+    {
+      path: '/quiz',
+      name: 'quiz',
+      component: () => import('../views/Quiz.vue'),
+    },
+    {
+      path: '/workspace/:id',
+      name: 'workspace',
+      component: () => import('../views/Workspace.vue'),
+    },
+    {
+      path: '/pdfs',
+      name: 'pdfs',
+      component: () => import('../views/Pdfs.vue'),
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/Admin.vue'),
     },
     {
       path: '/about',
