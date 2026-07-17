@@ -285,7 +285,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const newSummary = summaryEditor.value;
 
       if (!newSummary.trim()) {
-        alert("La synthèse ne peut pas être vide.");
+        showToast("La synthèse ne peut pas être vide.", "fa-triangle-exclamation", 3000);
         return;
       }
 
@@ -385,7 +385,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const newOrdonnance = prescriptionEditor.value;
 
       if (!newOrdonnance.trim()) {
-        alert("L'ordonnance ne peut pas être vide.");
+        showToast("L'ordonnance ne peut pas être vide.", "fa-triangle-exclamation", 3000);
         return;
       }
 
@@ -463,7 +463,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     resetProgressBtn.addEventListener('click', async () => {
       if (confirm("Voulez-vous vraiment réinitialiser toute votre progression et vos notes ? Cette action est irréversible et n'affectera que ce navigateur.")) {
         localStorage.removeItem('dr_cat_user_progress');
-        alert("Progression réinitialisée avec succès !");
+        showToast("Progression réinitialisée avec succès !", "fa-circle-check", 3000);
         if (onProgressReset) await onProgressReset();
       }
     });
