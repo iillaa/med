@@ -13,11 +13,54 @@
     
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script type="module" crossorigin src="/assets/index-C1qfSJqF.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/_plugin-vue_export-helper-CM2mUuWB.js">
+    <script type="module" crossorigin src="/assets/index-j6A7QqtU.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/client-YnKACpNg.js">
+    <link rel="modulepreload" crossorigin href="/assets/_plugin-vue_export-helper-D5k8NBqr.js">
     <link rel="stylesheet" crossorigin href="/assets/index-OlK4ghwH.css">
   </head>
   <body>
     <div id="app"></div>
+    <div id="print-template-container">
+      <div class="print-header">
+        <img src="/drcat_logo.png" alt="Dr.CAT Logo" class="print-logo">
+        <div class="print-app-details">
+          <h1>Dr.CAT — Rappel Clinique</h1>
+          <p>Aide à la Décision Médicale Clinique & Protocoles Thérapeutiques</p>
+        </div>
+        <div class="print-date-stamp" id="print-date-stamp">Le: --/--/----</div>
+      </div>
+      <div class="print-divider"></div>
+      <div class="print-cat-badge-wrap">
+        <span class="print-category" id="print-val-category">Spécialité</span>
+      </div>
+      <h2 class="print-cat-title" id="print-val-title">Titre de la Conduite à Tenir</h2>
+      <div class="print-section print-red-flags" id="print-section-redflags">
+        <h3><i class="fa-solid fa-triangle-exclamation"></i> Signes de Gravité / Red Flags</h3>
+        <p id="print-val-redflags">Aucun signe de gravité spécifié.</p>
+      </div>
+      <div class="print-section">
+        <h3><i class="fa-solid fa-file-invoice-document"></i> Fiche de Synthèse Clinique</h3>
+        <div class="summary-view" id="print-val-summary">...</div>
+      </div>
+      <div class="print-section" id="print-section-prescription">
+        <h3><i class="fa-solid fa-prescription-bottle-medical"></i> Ordonnance Type / Traitement de Référence</h3>
+        <div class="prescription-container" style="background: #fff; color: #000; box-shadow: none; border: 1px solid #ddd; padding: 20px; border-radius: var(--radius-md);">
+          <div class="prescription-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-size: 11px;">
+            <strong>Ordonnance type recommandée</strong>
+          </div>
+          <div class="prescription-body" id="print-val-prescription" style="white-space: pre-wrap; font-family: var(--font-sans); font-size: 13px; line-height: 1.6;">
+            ...
+          </div>
+        </div>
+      </div>
+      <div class="print-section" id="print-section-notes">
+        <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations & Protocoles Locaux</h3>
+        <div class="summary-view" id="print-val-notes" style="font-style: italic; white-space: pre-wrap;">Aucune note personnelle enregistrée.</div>
+      </div>
+      <div class="print-footer">
+        <div class="print-quote">"Primum non nocere. L'art de la médecine consiste à divertir le patient pendant que la nature guérit la maladie."</div>
+        <div class="print-page-info">Généré via Dr.CAT Rappel Clinique</div>
+      </div>
+    </div>
   </body>
 </html>

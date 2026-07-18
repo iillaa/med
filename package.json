@@ -23,7 +23,8 @@
     "@capacitor/haptics": "8.0.2",
     "@capacitor/share": "8.0.1",
     "express": "^5.2.1",
-    "pdf-parse": "2.4.5"
+    "pdf-parse": "2.4.5",
+    "vite": "^8.1.5"
   },
   "devDependencies": {
     "@capacitor/cli": "8.4.1",

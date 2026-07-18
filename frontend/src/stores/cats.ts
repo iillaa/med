@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Cat, CatStatus, LocalProgress, LocalOverrides, LeitnerEntry } from '../types/cat';
-import { fetchCats, saveCatDataToServer, updateCatOverrides, deleteCatFromServer, createCatOnServer, bulkImportCats } from '../api/client';
+import { fetchCats, saveCatDataToServer, updateCatOverrides, deleteCatFromServer, createCatOnServer, bulkImportCats, fetchPdfs, fetchPdfIndexStatus } from '../api/client';
 import { getItem, setItem, STORAGE_KEYS } from '../utils/storage';
 import { hapticFeedback } from '../utils/haptics';
 import { useAppStore } from './app';
@@ -13,13 +13,17 @@ export const useCatsStore = defineStore('cats', {
     searchQuery: string;
     activeStatusFilter: string;
     activeCategoryFilter: string;
+    allPdfs: string[];
+    pdfIndexStatus: Record<string, any>;
   } => ({
     cats: [],
     loading: false,
     error: null,
     searchQuery: '',
     activeStatusFilter: 'all',
-    activeCategoryFilter: 'all'
+    activeCategoryFilter: 'all',
+    allPdfs: [],
+    pdfIndexStatus: {}
   }),
 
   getters: {
@@ -85,7 +89,16 @@ export const useCatsStore = defineStore('cats', {
         appStore.loadingMessage = "Récupération des fiches cliniques...";
         appStore.loadingProgress = 60;
         const data = await fetchCats();
-        
+
+        appStore.loadingMessage = "Chargement des PDFs de référence...";
+        appStore.loadingProgress = 70;
+        try {
+          this.allPdfs = await fetchPdfs();
+        } catch (pdfErr) {
+          console.warn('[CatsStore] Failed to fetch PDFs:', pdfErr);
+          this.allPdfs = [];
+        }
+
         appStore.loadingMessage = "Chargement de la progression locale...";
         appStore.loadingProgress = 80;
         const localProgress = getItem<LocalProgress>(STORAGE_KEYS.USER_PROGRESS, {});
@@ -243,6 +256,14 @@ export const useCatsStore = defineStore('cats', {
 
     setActiveCategoryFilter(filter: string): void {
       this.activeCategoryFilter = filter;
+    },
+
+    async updatePdfIndexStatus(): Promise<void> {
+      try {
+        this.pdfIndexStatus = await fetchPdfIndexStatus();
+      } catch (err) {
+        console.error('[CatsStore] updatePdfIndexStatus failed:', err);
+      }
     }
   }
 });
