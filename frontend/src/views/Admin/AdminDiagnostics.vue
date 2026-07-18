@@ -2,13 +2,49 @@
 import { ref, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useDiagnostics } from '@/composables/useDiagnostics'
+import { uploadPdf } from '@/api/client'
 
 const appStore = useAppStore()
-const { diagnosticsData, consoleLogs, refreshDiagnosticsData, runConnectivityTest, checkProviderTunnel, saveRemoteServerUrl, resetRemoteServerUrl, runAutoCheckupSuite, clearDiagnosticsLogs } = useDiagnostics()
+const { diagnosticsData, consoleLogs, refreshDiagnosticsData, runConnectivityTest, checkProviderTunnel, saveRemoteServerUrl, resetRemoteServerUrl, runAutoCheckupSuite, clearDiagnosticsLogs, getDiagnosticsLogs } = useDiagnostics()
 
 const remoteUrlInput = ref('')
 const remoteUrlSaving = ref(false)
 const autoCheckupRunning = ref(false)
+const pdfUploading = ref(false)
+const pdfUploadName = ref('')
+
+async function onPdfUpload(event: Event): Promise<void> {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  pdfUploadName.value = file.name
+  pdfUploading.value = true
+  try {
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(',')[1] || ''
+      try {
+        const result = await uploadPdf(file.name, base64)
+        if (result.success) {
+          appStore.showToast(`PDF "${file.name}" uploadé avec succès !`, 'fa-circle-check', 4000)
+          pdfUploadName.value = ''
+        } else {
+          appStore.showToast('Erreur: ' + result.error, 'fa-circle-exclamation', 4000)
+        }
+      } catch {
+        appStore.showToast("Échec de l'upload du PDF.", 'fa-circle-exclamation', 4000)
+      } finally {
+        pdfUploading.value = false
+        target.value = ''
+      }
+    }
+    reader.readAsDataURL(file)
+  } catch {
+    pdfUploading.value = false
+    appStore.showToast("Erreur lors de la lecture du fichier.", 'fa-circle-exclamation', 4000)
+  }
+}
 
 onMounted(() => {
   refreshDiagnosticsData()
@@ -177,6 +213,19 @@ function onClearDiagLogs(): void {
           <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> {{ diagnosticsData.pdfHealth.green }} sains</span>
           <span style="color: #fbbf24;"><i class="fa-solid fa-circle-exclamation"></i> {{ diagnosticsData.pdfHealth.orange }} partiels</span>
           <span style="color: #f87171;"><i class="fa-solid fa-triangle-exclamation"></i> {{ diagnosticsData.pdfHealth.red }} vides</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF Upload -->
+    <div class="diag-card" style="margin-bottom: 12px;">
+      <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF</h4>
+      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-muted);">
+        <div>Envoyer un nouveau fichier PDF vers le serveur pour indexing.</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="file" accept=".pdf,.docx" @change="onPdfUpload" :disabled="pdfUploading" style="font-size: 12px;" />
+          <span v-if="pdfUploading" style="color: var(--color-primary);">Upload en cours...</span>
+          <span v-if="pdfUploadName" style="color: var(--text-secondary);">{{ pdfUploadName }}</span>
         </div>
       </div>
     </div>

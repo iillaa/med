@@ -30,7 +30,7 @@ function getRemoteServerUrl(): string | null {
   return result ?? null;
 }
 
-function getConfiguredRemoteUrls(): string[] {
+export function getConfiguredRemoteUrls(): string[] {
   const stored = localStorage.getItem('dr_cat_remote_server_url');
   if (stored) return [stored];
 

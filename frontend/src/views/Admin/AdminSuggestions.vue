@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
-import { fetchSuggestions, approveSuggestionOnServer, rejectSuggestionOnServer } from '@/api/client'
+import { fetchSuggestions, approveSuggestionOnServer, rejectSuggestionOnServer, updateSuggestionOnServer } from '@/api/client'
 
 const appStore = useAppStore()
 const suggestions = ref<any[]>([])
@@ -11,6 +11,9 @@ const loadingSuggestions = ref(false)
 const showReviewModal = ref(false)
 const reviewingSuggestion = ref<any>(null)
 const reviewDiffHtml = ref('')
+const editedSummary = ref('')
+const editedOrdonnance = ref('')
+const savingReview = ref(false)
 
 async function loadSuggestions(): Promise<void> {
   loadingSuggestions.value = true
@@ -50,6 +53,8 @@ async function rejectSuggestion(id: string): Promise<void> {
 function openReviewModal(sug: any): void {
   reviewingSuggestion.value = sug
   reviewDiffHtml.value = generateDiffHtml(sug)
+  editedSummary.value = sug.data?.summary || ''
+  editedOrdonnance.value = sug.data?.ordonnance || ''
   showReviewModal.value = true
 }
 
@@ -57,6 +62,41 @@ function closeReviewModal(): void {
   showReviewModal.value = false
   reviewingSuggestion.value = null
   reviewDiffHtml.value = ''
+  editedSummary.value = ''
+  editedOrdonnance.value = ''
+}
+
+async function updateSuggestion(id: string): Promise<void> {
+  if (!reviewingSuggestion.value) return
+  savingReview.value = true
+  try {
+    const updatedData: any = {}
+    if (editedSummary.value !== reviewingSuggestion.value.data?.summary) {
+      updatedData.summary = editedSummary.value
+    }
+    if (editedOrdonnance.value !== reviewingSuggestion.value.data?.ordonnance) {
+      updatedData.ordonnance = editedOrdonnance.value
+    }
+
+    if (Object.keys(updatedData).length === 0) {
+      appStore.showToast('Aucune modification détectée.', 'fa-triangle-exclamation', 3000)
+      return
+    }
+
+    const result = await updateSuggestionOnServer(id, updatedData)
+    if (result.success) {
+      appStore.showToast('Corrections enregistrées avec succès !', 'fa-circle-check', 3000)
+      closeReviewModal()
+      await loadSuggestions()
+    } else {
+      appStore.showToast('Erreur: ' + result.error, 'fa-circle-exclamation', 4000)
+    }
+  } catch (err) {
+    console.error('[AdminSuggestions] updateSuggestion failed:', err)
+    appStore.showToast('Erreur lors de la mise à jour.', 'fa-circle-exclamation', 4000)
+  } finally {
+    savingReview.value = false
+  }
 }
 
 function generateDiffHtml(sug: any): string {
@@ -140,7 +180,15 @@ defineExpose({ loadSuggestions })
                   Par: {{ reviewingSuggestion.author || 'Anonyme' }} | {{ new Date(reviewingSuggestion.createdAt || reviewingSuggestion.timestamp || Date.now()).toLocaleDateString('fr-FR') }}
                 </span>
               </div>
-              <div style="font-size: 13px; color: var(--text-secondary); background: var(--bg-body); padding: 12px; border-radius: 8px; line-height: 1.6;" v-html="reviewDiffHtml"></div>
+              <div style="font-size: 13px; color: var(--text-secondary); background: var(--bg-body); padding: 12px; border-radius: 8px; line-height: 1.6; margin-bottom: 12px;" v-html="reviewDiffHtml"></div>
+            </div>
+            <div v-if="reviewingSuggestion.data?.summary !== undefined" style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Synthèse</label>
+              <textarea v-model="editedSummary" rows="6" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: var(--text-primary); font-size: 12px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+            </div>
+            <div v-if="reviewingSuggestion.data?.ordonnance !== undefined" style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Ordonnance</label>
+              <textarea v-model="editedOrdonnance" rows="6" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: var(--text-primary); font-size: 12px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
             </div>
             <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
               <button class="cancel-btn" @click="closeReviewModal">Annuler</button>
@@ -149,6 +197,9 @@ defineExpose({ loadSuggestions })
               </button>
               <button class="approve-btn" @click="approveSuggestion(reviewingSuggestion.id)" style="padding: 8px 16px;">
                 <i class="fa-solid fa-check"></i> Accepter
+              </button>
+              <button class="action-btn" @click="updateSuggestion(reviewingSuggestion.id)" :disabled="savingReview" style="padding: 8px 16px;">
+                <i class="fa-solid fa-floppy-disk"></i> {{ savingReview ? 'Enregistrement...' : 'Enregistrer corrections' }}
               </button>
             </div>
           </div>

@@ -27,6 +27,7 @@ export const useAppStore = defineStore('app', {
     serverMetrics: any;
     rateLimits: any;
     suggestions: any[];
+    isOnlineAtStartup: boolean;
   } => ({
     loading: true,
     isOffline: false,
@@ -49,7 +50,8 @@ export const useAppStore = defineStore('app', {
     tunnelInfo: null,
     serverMetrics: null,
     rateLimits: null,
-    suggestions: []
+    suggestions: [],
+    isOnlineAtStartup: false
   }),
 
   actions: {

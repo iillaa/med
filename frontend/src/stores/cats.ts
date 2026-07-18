@@ -264,6 +264,19 @@ export const useCatsStore = defineStore('cats', {
       } catch (err) {
         console.error('[CatsStore] updatePdfIndexStatus failed:', err);
       }
+    },
+
+    async fetchCatsFromApi(since?: number): Promise<Cat[]> {
+      const data = await fetchCats(since)
+      return Array.isArray(data) ? data : []
+    },
+
+    refreshSidebar(): void {
+      window.dispatchEvent(new CustomEvent('drcat-cats-updated'))
+    },
+
+    refreshDashboard(): void {
+      window.dispatchEvent(new CustomEvent('drcat-cats-updated'))
     }
   }
 });
