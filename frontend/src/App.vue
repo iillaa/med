@@ -11,8 +11,7 @@ const route = useRoute()
 
 const loading = computed(() => appStore.loading)
 const showSidebar = computed(() => {
-  const noSidebarRoutes = ['/about']
-  return !noSidebarRoutes.includes(route.path)
+  return true
 })
 
 // Sync theme class to document body
