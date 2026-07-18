@@ -1,5 +1,5 @@
 const { state: cache } = require('../services/cache');
-const { checkIsAdmin, loginAttempts } = require('../services/auth-service');
+const { isAdminRequest: checkIsAdmin, loginAttempts } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync } = require('../services/data-store');
 const { getIndexStatus } = require('../../index_pdfs');
