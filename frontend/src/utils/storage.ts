@@ -28,8 +28,20 @@ export function getItem<T>(key: string, fallback: T): T {
 export function setItem<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    console.warn(`[Storage] Failed to save ${key}: quota exceeded or unavailable.`);
+  } catch (e) {
+    if (e instanceof Error && (e.name === 'QuotaExceededError' || e.code === 22)) {
+      console.warn(`[Storage] Quota exceeded for ${key}, attempting to evict sync cache...`);
+      try {
+        localStorage.removeItem(STORAGE_KEYS.SYNCED_DATABASE('1'));
+      } catch (_) {}
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (_) {
+        console.warn(`[Storage] Failed to save ${key} even after eviction.`);
+      }
+    } else {
+      console.warn(`[Storage] Failed to save ${key}:`, e);
+    }
   }
 }
 

@@ -39,9 +39,14 @@ const specialtyProgress = computed(() => {
 const isAdmin = computed(() => appStore.isAdmin)
 const suggestions = computed(() => appStore.suggestions)
 const categories = computed(() => catsStore.categories)
+const isLocalhost = computed(() => window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const hasStarted = computed(() => catsStore.cats.some(c => c.status !== 'todo' || c.notes))
 
 const activeAdminTab = ref<'suggestions' | 'diagnostics' | 'performance'>('suggestions')
 const isAboutExpanded = ref(false)
+const masteryPercent = computed(() => catsStore.stats.masteryPercent)
+const circumference = 2 * Math.PI * 22
+const masteryOffset = computed(() => circumference - (masteryPercent.value / 100) * circumference)
 
 // Bulk import state
 const bulkImportFile = ref<File | null>(null)
@@ -54,6 +59,7 @@ onMounted(async () => {
   if (isAdmin.value) {
     await appStore.loadSuggestions()
   }
+  restoreNavigationState()
 })
 
 function goToWorkspace(id: number): void {
@@ -174,11 +180,55 @@ async function rejectSuggestion(id: string): Promise<void> {
 function toggleAboutLegal(): void {
   isAboutExpanded.value = !isAboutExpanded.value
 }
+
+async function handleAdminLogin(): Promise<void> {
+  const password = prompt("Veuillez saisir le mot de passe administrateur :")
+  if (!password) return
+  const success = await appStore.loginAdmin(password)
+  if (success) {
+    await appStore.loadSuggestions()
+  }
+}
+
+async function handleAdminLogout(): Promise<void> {
+  if (!confirm("Voulez-vous vous déconnecter du mode administrateur ?")) return
+  await appStore.logoutAdmin()
+}
+
+function restoreNavigationState(): void {
+  const saved = appStore.getNavigationState<{ activeCatId?: number; activeTab?: string }>()
+  if (!saved || !saved.activeCatId) return
+  
+  appStore.clearNavigationState()
+  
+  if (saved.activeCatId) {
+    const cat = catsStore.cats.find(c => c.id === saved.activeCatId)
+    if (cat) {
+      setTimeout(() => {
+        router.push(`/workspace/${cat.id}`)
+      }, 500)
+    }
+  }
+}
 </script>
 
 <template>
   <div class="dashboard">
     <h1 class="dashboard-title">Dashboard</h1>
+
+    <!-- First-Run Welcome Banner -->
+    <div v-if="!hasStarted" class="first-run-banner" style="display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.07), rgba(16,185,129,0.05)); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 20px; flex-wrap: wrap;">
+      <div style="font-size: 52px; line-height: 1; flex-shrink: 0;">🩺</div>
+      <div style="flex: 1; min-width: 200px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Bienvenue sur Dr.CAT !</h3>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">Sélectionnez une <strong>Conduite à Tenir</strong> dans la liste à gauche pour commencer. Marquez-la <em>En cours</em> pour qu'elle apparaisse ici lors de vos prochaines sessions.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+        <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> 78 livres de référence indexés</span>
+        <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> Quiz clinique intégré</span>
+        <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> Notes & ordonnances personnalisables</span>
+      </div>
+    </div>
 
     <!-- Header actions -->
     <div class="dashboard-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
@@ -208,12 +258,36 @@ function toggleAboutLegal(): void {
       <button v-if="bulkImportFile" class="save-btn" @click="submitBulkImport" :disabled="bulkImportLoading" style="font-size: 12px; padding: 6px 12px;">
         {{ bulkImportLoading ? 'Importation...' : 'Importer JSON' }}
       </button>
+
+      <!-- Admin Login/Logout Button (localhost only) -->
+      <button v-if="isLocalhost && !isAdmin" class="action-btn" @click="handleAdminLogin" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+        <i class="fa-solid fa-lock"></i> Connexion Admin
+      </button>
+      <button v-if="isLocalhost && isAdmin" class="action-btn" @click="handleAdminLogout" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: rgba(16, 185, 129, 0.15); border-color: var(--color-success); color: var(--color-success);">
+        <i class="fa-solid fa-lock-open"></i> Déconnexion Admin
+      </button>
+
+      <button class="cancel-btn" @click="appStore.resetProgress" style="border-color: rgba(239, 68, 68, 0.4); color: var(--color-danger); font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-trash-can"></i> Réinitialiser la progression
+      </button>
     </div>
 
-    <div v-if="catsStore.loading" class="stats">
-      <SkeletonLoader type="stat-card" :count="4" />
-    </div>
-    <div v-else class="stats">
+    <!-- Circular Mastery Progress Ring -->
+    <div class="stats" style="display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;">
+      <div class="stat-card mastery-card" style="display: flex; align-items: center; gap: 14px;">
+        <div class="mastery-circular-container">
+          <svg class="progress-ring" width="52" height="52">
+            <circle class="progress-ring-circle-bg" stroke="var(--border-color)" stroke-width="3.5" fill="transparent" r="22" cx="26" cy="26"/>
+            <circle class="progress-ring-circle" :style="{ strokeDashoffset: masteryOffset }" stroke="var(--color-primary)" stroke-width="3.5" stroke-linecap="round" fill="transparent" r="22" cx="26" cy="26" :stroke-dasharray="circumference" />
+          </svg>
+          <div class="mastery-value">{{ masteryPercent }}%</div>
+        </div>
+        <div class="dash-card-info">
+          <span class="dash-card-label">Taux de Maîtrise</span>
+          <span class="dash-card-desc">Progression globale</span>
+        </div>
+      </div>
+
       <div class="stat-card">
         <span class="stat-label">Total CATs</span>
         <span class="stat-value">{{ catsStore.stats.total }}</span>
@@ -225,10 +299,6 @@ function toggleAboutLegal(): void {
       <div class="stat-card">
         <span class="stat-label">À faire</span>
         <span class="stat-value">{{ catsStore.stats.todo }}</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Progression</span>
-        <span class="stat-value">{{ catsStore.stats.masteryPercent }}%</span>
       </div>
     </div>
 
@@ -447,5 +517,50 @@ function toggleAboutLegal(): void {
   font-size: 13px;
   color: var(--text-secondary);
   margin-bottom: 12px;
+}
+
+/* Circular Mastery Ring */
+.mastery-circular-container {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+.progress-ring {
+  transform: rotate(-90deg);
+}
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+.mastery-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.dash-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dash-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.dash-card-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* First Run Banner */
+.first-run-banner {
+  animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

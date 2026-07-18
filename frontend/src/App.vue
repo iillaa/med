@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import { useAppStore } from './stores/app'
 import AppLoadingOverlay from './components/Common/AppLoadingOverlay.vue'
@@ -26,6 +26,76 @@ watch(() => appStore.theme, (newTheme) => {
 function onSkip() {
   appStore.loading = false
 }
+
+// Keyboard shortcuts
+function handleKeydown(e: KeyboardEvent) {
+  const isEditing = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA'
+  
+  // S: focus search
+  if (e.key.toLowerCase() === 's' && !isEditing) {
+    e.preventDefault()
+    const searchBox = document.getElementById('search-input')
+    if (searchBox) {
+      searchBox.focus()
+      searchBox.select()
+    }
+  }
+
+  // Escape: close modal
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('add-cat-modal')
+    if (modal && modal.style.display !== 'none') {
+      modal.style.display = 'none'
+      const form = document.getElementById('add-cat-form')
+      if (form) form.reset()
+    }
+  }
+
+  // ArrowDown/ArrowUp: navigate CATs
+  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !isEditing) {
+    e.preventDefault()
+    const activeItem = document.querySelector('.cat-item.active')
+    const items = Array.from(document.querySelectorAll('.cat-item'))
+    if (items.length === 0) return
+
+    let nextIndex = 0
+    if (activeItem) {
+      const currentIndex = items.indexOf(activeItem)
+      if (e.key === 'ArrowDown') {
+        nextIndex = (currentIndex + 1) % items.length
+      } else {
+        nextIndex = (currentIndex - 1 + items.length) % items.length
+      }
+    }
+
+    const targetItem = items[nextIndex]
+    if (targetItem) {
+      targetItem.click()
+      targetItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }
+}
+
+// Online/offline handlers
+function handleOnline() {
+  appStore.showToast("Connexion réseau détectée. Synchronisation...", "fa-wifi", 4000)
+}
+
+function handleOffline() {
+  appStore.showToast("Connexion perdue. Mode hors-ligne activé.", "fa-circle-xmark", 6000)
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('online', handleOnline)
+  window.addEventListener('offline', handleOffline)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('online', handleOnline)
+  window.removeEventListener('offline', handleOffline)
+})
 </script>
 
 <template>

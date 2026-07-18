@@ -14,6 +14,11 @@ const loadingSuggestions = ref(false)
 const diagnostics = ref<any>(null)
 const loadingDiagnostics = ref(false)
 
+// Review modal state
+const showReviewModal = ref(false)
+const reviewingSuggestion = ref<any>(null)
+const reviewDiffHtml = ref('')
+
 const diagTitleMap: Record<string, string> = {
   system: 'Système',
   dbStats: 'Base de données',
@@ -90,6 +95,9 @@ async function approveSuggestion(id: string): Promise<void> {
   try {
     await approveSuggestionOnServer(id)
     suggestions.value = suggestions.value.filter(s => s.id !== id)
+    if (reviewingSuggestion.value && reviewingSuggestion.value.id === id) {
+      closeReviewModal()
+    }
   } catch (err) {
     console.error('[Admin] approveSuggestion failed:', err)
   }
@@ -99,9 +107,46 @@ async function rejectSuggestion(id: string): Promise<void> {
   try {
     await rejectSuggestionOnServer(id)
     suggestions.value = suggestions.value.filter(s => s.id !== id)
+    if (reviewingSuggestion.value && reviewingSuggestion.value.id === id) {
+      closeReviewModal()
+    }
   } catch (err) {
     console.error('[Admin] rejectSuggestion failed:', err)
   }
+}
+
+function openReviewModal(sug: any): void {
+  reviewingSuggestion.value = sug
+  reviewDiffHtml.value = generateDiffHtml(sug)
+  showReviewModal.value = true
+}
+
+function closeReviewModal(): void {
+  showReviewModal.value = false
+  reviewingSuggestion.value = null
+  reviewDiffHtml.value = ''
+}
+
+function generateDiffHtml(sug: any): string {
+  if (sug.type === 'add') {
+    return `
+      <strong>Titre :</strong> ${sug.data?.title || 'N/A'}<br>
+      <strong>Spécialité :</strong> ${sug.data?.category || 'N/A'}<br>
+      <strong>Red Flags :</strong> ${sug.data?.red_flags || 'Aucun'}<br>
+      <strong>Synthèse (extrait) :</strong> ${sug.data?.summary ? sug.data.summary.substring(0, 200) + (sug.data.summary.length > 200 ? '...' : '') : 'Aucune'}<br>
+      <strong>Ordonnance (extrait) :</strong> ${sug.data?.ordonnance ? sug.data.ordonnance.substring(0, 150) + (sug.data.ordonnance.length > 150 ? '...' : '') : 'Aucune'}
+    `
+  } else if (sug.type === 'edit') {
+    let html = `<strong>Fiche ciblée :</strong> ID ${sug.catId}<br>`
+    if (sug.data?.summary) {
+      html += `<strong>Proposition Synthèse :</strong><div style="max-height: 120px; overflow: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${sug.data.summary}</div>`
+    }
+    if (sug.data?.ordonnance) {
+      html += `<strong>Proposition Ordonnance :</strong><div style="max-height: 120px; overflow: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${sug.data.ordonnance}</div>`
+    }
+    return html
+  }
+  return 'Contenu non disponible'
 }
 
 onMounted(() => {
@@ -143,13 +188,25 @@ onMounted(() => {
         <div v-else class="suggestions-list">
           <div v-for="s in suggestions" :key="s.id" class="suggestion-card">
             <div class="suggestion-header">
-              <span class="suggestion-cat">{{ s.catTitle || s.cat_id }}</span>
+              <span class="suggestion-cat">{{ s.type === 'add' ? 'Nouvelle fiche' : 'Modification fiche #' + (s.catId || s.cat_id) }}</span>
               <span class="suggestion-type">{{ s.type }}</span>
             </div>
-            <p class="suggestion-text">{{ s.suggestion }}</p>
+            <div class="suggestion-body" style="margin-bottom: 12px;">
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
+                Par: {{ s.author || 'Anonyme' }} | {{ new Date(s.createdAt || s.timestamp || Date.now()).toLocaleDateString('fr-FR') }}
+              </div>
+              <div style="font-size: 13px; color: var(--text-secondary); background: var(--bg-body); padding: 8px; border-radius: 6px; line-height: 1.5;" v-html="generateDiffHtml(s)"></div>
+            </div>
             <div class="suggestion-actions">
-              <button class="approve-btn" @click="approveSuggestion(s.id)">Approuver</button>
-              <button class="reject-btn" @click="rejectSuggestion(s.id)">Rejeter</button>
+              <button class="reject-btn" @click="rejectSuggestion(s.id)">
+                <i class="fa-solid fa-xmark"></i> Rejeter
+              </button>
+              <button class="review-btn" @click="openReviewModal(s)" style="flex: 1; padding: 6px 12px; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 6px; background: rgba(99, 102, 241, 0.15); color: #a5b4fc; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit;">
+                <i class="fa-solid fa-pen-to-square"></i> Réviser
+              </button>
+              <button class="approve-btn" @click="approveSuggestion(s.id)">
+                <i class="fa-solid fa-check"></i> Accepter
+              </button>
             </div>
           </div>
         </div>
@@ -177,6 +234,42 @@ onMounted(() => {
       </div>
     </template>
   </div>
+
+  <!-- Suggestion Review Modal -->
+  <Transition name="fade">
+    <div v-if="showReviewModal && reviewingSuggestion" class="modal-overlay" @click.self="closeReviewModal">
+      <div class="modal-card" style="max-width: 700px; width: 90%;">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-pen-to-square"></i> Réviser la proposition</h3>
+          <button class="close-modal-btn" @click="closeReviewModal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+              <span class="suggestion-type" style="font-size: 11px; padding: 3px 8px; border-radius: 6px;">
+                {{ reviewingSuggestion.type === 'add' ? 'Ajout de fiche' : 'Modification' }}
+              </span>
+              <span style="font-size: 12px; color: var(--text-muted);">
+                Par: {{ reviewingSuggestion.author || 'Anonyme' }} | {{ new Date(reviewingSuggestion.createdAt || reviewingSuggestion.timestamp || Date.now()).toLocaleDateString('fr-FR') }}
+              </span>
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary); background: var(--bg-body); padding: 12px; border-radius: 8px; line-height: 1.6;" v-html="reviewDiffHtml"></div>
+          </div>
+          <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="cancel-btn" @click="closeReviewModal">Annuler</button>
+            <button class="reject-btn" @click="rejectSuggestion(reviewingSuggestion.id)" style="padding: 8px 16px;">
+              <i class="fa-solid fa-xmark"></i> Rejeter
+            </button>
+            <button class="approve-btn" @click="approveSuggestion(reviewingSuggestion.id)" style="padding: 8px 16px;">
+              <i class="fa-solid fa-check"></i> Accepter
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <style scoped>
@@ -360,5 +453,18 @@ onMounted(() => {
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.4;
+}
+
+/* Review Modal */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.review-btn:hover {
+  background: rgba(99, 102, 241, 0.25);
 }
 </style>

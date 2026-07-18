@@ -241,6 +241,83 @@ export const useAppStore = defineStore('app', {
         this.showToast("Échec de l'importation.", 'fa-circle-exclamation', 4000);
         throw err;
       }
+    },
+
+    async loginAdmin(password: string): Promise<boolean> {
+      try {
+        const res = await import('../api/client').then(m => m.loginAdmin(password));
+        if (res.success) {
+          this.isAdmin = true;
+          this.showToast('Connexion administrateur réussie !', 'fa-circle-check', 3000);
+          return true;
+        } else {
+          this.showToast(res.error || 'Mot de passe incorrect.', 'fa-circle-exclamation', 4000);
+          return false;
+        }
+      } catch (err) {
+        console.error('[AppStore] loginAdmin failed:', err);
+        this.showToast('Erreur lors de la connexion.', 'fa-circle-exclamation', 4000);
+        return false;
+      }
+    },
+
+    async logoutAdmin(): Promise<void> {
+      try {
+        await import('../api/client').then(m => m.logoutAdmin());
+        this.isAdmin = false;
+        this.showToast('Déconnexion réussie.', 'fa-circle-check', 3000);
+      } catch (err) {
+        console.error('[AppStore] logoutAdmin failed:', err);
+      }
+    },
+
+    resetProgress(): void {
+      if (!confirm('Voulez-vous vraiment réinitialiser toute votre progression ? Cette action est irréversible.')) {
+        return;
+      }
+      localStorage.removeItem('dr_cat_user_progress');
+      localStorage.removeItem('dr_cat_local_overrides');
+      localStorage.removeItem('dr_cat_leitner');
+      localStorage.removeItem('dr_cat_streak');
+      this.showToast('Progression réinitialisée avec succès. L\'application va se recharger.', 'fa-circle-check', 4000);
+      setTimeout(() => window.location.reload(), 1500);
+    },
+
+    saveNavigationState(state: Record<string, any>): void {
+      try {
+        setItem(STORAGE_KEYS.NAVIGATION_STATE, state);
+      } catch (err) {
+        console.error('[AppStore] saveNavigationState failed:', err);
+      }
+    },
+
+    getNavigationState<T>(): T | null {
+      return getItem<T>(STORAGE_KEYS.NAVIGATION_STATE, null);
+    },
+
+    clearNavigationState(): void {
+      localStorage.removeItem(STORAGE_KEYS.NAVIGATION_STATE);
+    },
+
+    async handleAdminError(err: any): Promise<boolean> {
+      if (err && (err.message === "403 Forbidden" || err.message === "401 Unauthorized")) {
+        const password = prompt("Action réservée aux administrateurs. Saisissez le mot de passe admin pour déverrouiller :");
+        if (password) {
+          try {
+            const success = await this.loginAdmin(password);
+            if (success) {
+              this.showToast("Connexion réussie ! L'action va être relancée.", "fa-circle-check", 3000);
+              window.location.reload();
+              return true;
+            }
+          } catch (loginErr) {
+            console.error("Login failed:", loginErr);
+            this.showToast("Erreur lors de la connexion.", "fa-circle-exclamation", 4000);
+          }
+        }
+        return true;
+      }
+      return false;
     }
   }
 });

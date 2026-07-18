@@ -17,6 +17,11 @@ app.use(router)
 const appStore = useAppStore(pinia)
 const catsStore = useCatsStore(pinia)
 
+// Global admin error handler for compatibility
+;(window as any).handleAdminError = async (err: any): Promise<boolean> => {
+  return appStore.handleAdminError(err)
+}
+
 appStore.initializeApp().then(() => {
   catsStore.initialize().then(() => {
     app.mount('#app')
