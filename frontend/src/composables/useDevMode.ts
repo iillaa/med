@@ -37,8 +37,10 @@ function addLog(level: string, args: any[], meta: any = {}) {
   if (logBuffer.value.length > MAX_LOGS) logBuffer.value.shift()
 }
 
+let consoleIntercepted = false
+
 function interceptConsole() {
-  if (originalConsole.log) return
+  if (consoleIntercepted) return
 
   originalConsole = {
     log: console.log,
@@ -60,6 +62,8 @@ function interceptConsole() {
   console.warn = intercept('warn')
   console.error = intercept('error')
   console.info = intercept('info')
+
+  consoleIntercepted = true
 
   window.addEventListener('error', (event: ErrorEvent) => {
     addLog('ERROR', [`${event.message} at ${event.filename}:${event.lineno}:${event.colno}`, event.error])
@@ -98,6 +102,7 @@ function restoreConsole() {
     console.error = originalConsole.error!
     console.info = originalConsole.info!
   }
+  consoleIntercepted = false
 }
 
 function createStyles() {

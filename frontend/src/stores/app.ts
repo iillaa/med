@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { AppModeType } from '../types/cat';
-import { getAppMode, setAppMode, isOfflineApp, checkAdminStatus, checkIsLocal, hasRemoteServerConfigured, fetchSearchStatus, fetchDiagnosticsSystem, fetchDiagnosticsDbStats, fetchDiagnosticsIndexDetail, fetchDiagnosticsRemoteUrl, updateDiagnosticsRemoteUrl, fetchTunnelInfo, fetchServerMetrics, fetchRateLimits, fetchSuggestions, approveSuggestionOnServer, rejectSuggestionOnServer, bulkImportCats } from '../api/client';
+import { getAppMode, setAppMode, isOfflineApp, checkAdminStatus, checkIsLocal, hasRemoteServerConfigured, fetchSearchStatus, fetchDiagnosticsSystem, fetchDiagnosticsDbStats, fetchDiagnosticsIndexDetail, fetchDiagnosticsRemoteUrl, updateDiagnosticsRemoteUrl, fetchTunnelInfo, fetchServerMetrics, fetchRateLimits, fetchSuggestions, approveSuggestionOnServer, rejectSuggestionOnServer, bulkImportCats, loginAdmin, logoutAdmin } from '../api/client';
 import { getItem, setItem, STORAGE_KEYS } from '../utils/storage';
 
 export const useAppStore = defineStore('app', {
@@ -247,7 +247,7 @@ export const useAppStore = defineStore('app', {
 
     async loginAdmin(password: string): Promise<boolean> {
       try {
-        const res = await import('../api/client').then(m => m.loginAdmin(password));
+        const res = await loginAdmin(password);
         if (res.success) {
           this.isAdmin = true;
           this.showToast('Connexion administrateur réussie !', 'fa-circle-check', 3000);
@@ -265,7 +265,7 @@ export const useAppStore = defineStore('app', {
 
     async logoutAdmin(): Promise<void> {
       try {
-        await import('../api/client').then(m => m.logoutAdmin());
+        await logoutAdmin();
         this.isAdmin = false;
         this.showToast('Déconnexion réussie.', 'fa-circle-check', 3000);
       } catch (err) {
@@ -317,7 +317,7 @@ export const useAppStore = defineStore('app', {
             this.showToast("Erreur lors de la connexion.", "fa-circle-exclamation", 4000);
           }
         }
-        return true;
+        return false;
       }
       return false;
     }

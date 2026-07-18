@@ -5,13 +5,19 @@ export function setupSwipeGestures(sidebarElement: HTMLElement, onOpen?: () => v
   let touchEndY = 0
 
   document.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX
-    touchStartY = e.changedTouches[0].screenY
+    const touch = e.changedTouches[0]
+    if (touch) {
+      touchStartX = touch.screenX
+      touchStartY = touch.screenY
+    }
   }, { passive: true })
 
   document.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX
-    touchEndY = e.changedTouches[0].screenY
+    const touch = e.changedTouches[0]
+    if (touch) {
+      touchEndX = touch.screenX
+      touchEndY = touch.screenY
+    }
 
     const diffX = touchEndX - touchStartX
     const diffY = touchEndY - touchStartY

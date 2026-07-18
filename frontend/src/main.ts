@@ -10,7 +10,6 @@ import { useCatsStore } from './stores/cats'
 import { useDevMode } from './composables/useDevMode'
 import { useBackgroundSync } from './composables/useBackgroundSync'
 import { isOfflineApp } from './api/client'
-import { getItem, setItem, STORAGE_KEYS } from './utils/storage'
 
 const app = createApp(App)
 

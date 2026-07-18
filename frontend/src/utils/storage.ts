@@ -1,3 +1,5 @@
+const APP_BUILD_VERSION = (document.querySelector('meta[name="app-build-version"]')?.getAttribute('content') || '0') as string;
+
 const STORAGE_KEYS = {
   SYNCED_DATABASE: (buildVersion: string) => `dr_cat_synced_database_v${buildVersion}`,
   USER_PROGRESS: 'dr_cat_user_progress',
@@ -32,7 +34,7 @@ export function setItem<T>(key: string, value: T): void {
     if (e instanceof Error && (e.name === 'QuotaExceededError' || e.code === 22)) {
       console.warn(`[Storage] Quota exceeded for ${key}, attempting to evict sync cache...`);
       try {
-        localStorage.removeItem(STORAGE_KEYS.SYNCED_DATABASE('1'));
+        localStorage.removeItem(STORAGE_KEYS.SYNCED_DATABASE(APP_BUILD_VERSION));
       } catch (_) {}
       try {
         localStorage.setItem(key, JSON.stringify(value));

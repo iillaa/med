@@ -13,7 +13,7 @@ export const useCatsStore = defineStore('cats', {
     searchQuery: string;
     activeStatusFilter: string;
     activeCategoryFilter: string;
-    allPdfs: string[];
+    allPdfs: any[];
     pdfIndexStatus: Record<string, any>;
   } => ({
     cats: [],

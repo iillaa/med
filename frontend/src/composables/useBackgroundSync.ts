@@ -4,7 +4,7 @@
  */
 
 import { onMounted, onUnmounted } from 'vue'
-import { isOfflineApp, hasRemoteServerConfigured, getConfiguredRemoteUrls, getAppMode, setAppMode, fetchCats } from '@/api/client'
+import { isOfflineApp, hasRemoteServerConfigured, getConfiguredRemoteUrls, getAppMode, setAppMode, fetchCats, APP_DATA_KEY } from '@/api/client'
 import { APP_MODES } from '@/types/cat'
 import { useAppStore } from '@/stores/app'
 import { useCatsStore } from '@/stores/cats'
@@ -21,7 +21,7 @@ async function checkRemoteReachable(url: string, timeoutMs = 1500): Promise<bool
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        'x-app-key': 'drcat_pub_2f7a91c4e8'
+        'x-app-key': APP_DATA_KEY
       }
     })
     clearTimeout(timeoutId)

@@ -161,7 +161,7 @@ function onClearDiagLogs(): void {
         <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wifi"></i> Statut & Connectivité</h4>
         <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
           <div>Navigator.onLine : <span class="badge" :style="{ background: diagnosticsData.online ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)', color: diagnosticsData.online ? 'var(--color-success)' : '#f87171', padding: '2px 6px', borderRadius: '4px' }">{{ diagnosticsData.online ? 'En ligne' : 'Hors ligne' }}</span></div>
-          <div>Mode détecté : <span class="badge" style="background: rgba(6,182,212,0.2); color: var(--color-primary); padding: '2px 6px', borderRadius: '4px';">{{ diagnosticsData.appMode }}</span></div>
+          <div>Mode détecté : <span class="badge" :style="{ background: 'rgba(6,182,212,0.2)', color: 'var(--color-primary)', padding: '2px 6px', borderRadius: '4px' }">{{ diagnosticsData.appMode }}</span></div>
           <div>Token Admin : <span class="badge" :style="{ background: diagnosticsData.adminTokenPresent ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)', color: diagnosticsData.adminTokenPresent ? 'var(--color-success)' : '#f87171', padding: '2px 6px', borderRadius: '4px' }">{{ diagnosticsData.adminTokenPresent ? 'Présent & Actif' : 'Absent' }}</span></div>
           <div>URL Distante : <span :style="{ color: diagnosticsData.remoteUrl ? 'var(--text-primary)' : 'var(--text-muted)' }">{{ diagnosticsData.remoteUrl || '(Aucun)' }}</span></div>
         </div>

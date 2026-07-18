@@ -99,22 +99,35 @@ async function updateSuggestion(id: string): Promise<void> {
   }
 }
 
+function escapeHtml(s: string): string {
+  return String(s || '').replace(/[&<>"']/g, (c) => {
+    switch (c) {
+      case '&': return '&amp;'
+      case '<': return '&lt;'
+      case '>': return '&gt;'
+      case '"': return '&quot;'
+      case "'": return '&#39;'
+      default: return c
+    }
+  })
+}
+
 function generateDiffHtml(sug: any): string {
   if (sug.type === 'add') {
     return `
-      <strong>Titre :</strong> ${sug.data?.title || 'N/A'}<br>
-      <strong>Spécialité :</strong> ${sug.data?.category || 'N/A'}<br>
-      <strong>Red Flags :</strong> ${sug.data?.red_flags || 'Aucun'}<br>
-      <strong>Synthèse (extrait) :</strong> ${sug.data?.summary ? sug.data.summary.substring(0, 200) + (sug.data.summary.length > 200 ? '...' : '') : 'Aucune'}<br>
-      <strong>Ordonnance (extrait) :</strong> ${sug.data?.ordonnance ? sug.data.ordonnance.substring(0, 150) + (sug.data.ordonnance.length > 150 ? '...' : '') : 'Aucune'}
+      <strong>Titre :</strong> ${escapeHtml(sug.data?.title || 'N/A')}<br>
+      <strong>Spécialité :</strong> ${escapeHtml(sug.data?.category || 'N/A')}<br>
+      <strong>Red Flags :</strong> ${escapeHtml(sug.data?.red_flags || 'Aucun')}<br>
+      <strong>Synthèse (extrait) :</strong> ${escapeHtml(sug.data?.summary ? sug.data.summary.substring(0, 200) + (sug.data.summary.length > 200 ? '...' : '') : 'Aucune')}<br>
+      <strong>Ordonnance (extrait) :</strong> ${escapeHtml(sug.data?.ordonnance ? sug.data.ordonnance.substring(0, 150) + (sug.data.ordonnance.length > 150 ? '...' : '') : 'Aucune')}
     `
   } else if (sug.type === 'edit') {
-    let html = `<strong>Fiche ciblée :</strong> ID ${sug.catId}<br>`
+    let html = `<strong>Fiche ciblée :</strong> ID ${escapeHtml(String(sug.catId || ''))}<br>`
     if (sug.data?.summary) {
-      html += `<strong>Proposition Synthèse :</strong><div style="max-height: 120px; overflow: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${sug.data.summary}</div>`
+      html += `<strong>Proposition Synthèse :</strong><div style="max-height: 120px; overflow: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${escapeHtml(sug.data.summary)}</div>`
     }
     if (sug.data?.ordonnance) {
-      html += `<strong>Proposition Ordonnance :</strong><div style="max-height: 120px; overflow: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${sug.data.ordonnance}</div>`
+      html += `<strong>Proposition Ordonnance :</strong><div style="max-height: 120px; overflow: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${escapeHtml(sug.data.ordonnance)}</div>`
     }
     return html
   }

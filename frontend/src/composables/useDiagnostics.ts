@@ -144,12 +144,12 @@ async function refreshDiagnosticsData() {
   try {
     const system = await fetchDiagnosticsSystem()
     diagnosticsData.nodeVersion = system.nodeVersion || '--'
-    diagnosticsData.serverOs = `${system.platform} / ${system.arch}` || '--'
+    diagnosticsData.serverOs = system.platform && system.arch ? `${system.platform} / ${system.arch}` : '--'
     
     const up = system.uptimeSeconds
     const h = Math.floor(up / 3600)
     const m = Math.floor((up % 3600) / 60)
-    diagnosticsData.serverUptime = `${h}h ${m}m` || '--'
+    diagnosticsData.serverUptime = up ? `${h}h ${m}m` : '--'
     diagnosticsData.serverMem = system.memoryUsage ? formatBytes(system.memoryUsage.rss) : '--'
     diagnosticsData.indexingActive = !!system.indexingActive
   } catch (err) {

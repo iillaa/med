@@ -38,6 +38,7 @@ function addPerfLog(msg: string) {
   if (perfLogBuffer.length > MAX_PERF_LOGS) {
     perfLogBuffer.shift()
   }
+  perfLogs.value = [...perfLogBuffer]
   window.dispatchEvent(new CustomEvent('drcat-perf-log-added'))
 }
 
