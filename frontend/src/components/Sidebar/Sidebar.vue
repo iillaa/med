@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCatsStore } from '@/stores/cats'
 import { useAppStore } from '@/stores/app'
+import { setupSwipeGestures } from '@/utils/swipe'
 import SkeletonLoader from '@/components/Common/SkeletonLoader.vue'
 
 const router = useRouter()
@@ -12,12 +13,20 @@ const appStore = useAppStore()
 
 const categories = computed(() => catsStore.categories)
 const filteredCats = computed(() => catsStore.filtered)
+const isAdmin = computed(() => appStore.isAdmin)
 
 // Controls panel collapse state with localStorage persistence
 const isControlsCollapsed = ref(false)
 
 onMounted(() => {
   isControlsCollapsed.value = localStorage.getItem('sidebar_controls_collapsed') === 'true'
+  const sidebarEl = document.querySelector('.sidebar')
+  if (sidebarEl) {
+    setupSwipeGestures(sidebarEl as HTMLElement,
+      () => appStore.setSidebarOpen(true),
+      () => appStore.setSidebarOpen(false)
+    )
+  }
 })
 
 function toggleControls() {
@@ -37,6 +46,13 @@ function navigateToDashboard() {
 
 function toggleTheme() {
   appStore.setTheme(appStore.theme === 'light' ? 'dark' : 'light')
+}
+
+function openAddCatModal() {
+  // Will be emitted to parent or handled via event bus in future
+  // For now, navigate to admin page where the modal is accessible
+  router.push('/admin')
+  appStore.setSidebarOpen(false)
 }
 </script>
 
@@ -146,11 +162,11 @@ function toggleTheme() {
             <i class="fa-solid fa-brain"></i> Quiz
           </button>
           <button 
-            v-if="appStore.isAdmin" 
+            v-if="isAdmin" 
             class="action-btn sidebar-btn-add" 
-            @click="router.push('/admin')"
+            @click="openAddCatModal"
           >
-            <i class="fa-solid fa-gears"></i> Admin
+            <i class="fa-solid fa-plus"></i> CAT
           </button>
         </div>
 

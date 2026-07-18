@@ -12,6 +12,7 @@ export const useAppStore = defineStore('app', {
     theme: 'light' | 'dark';
     appMode: AppModeType;
     sidebarOpen: boolean;
+    showAddCatModal: boolean;
     loadingProgress: number;
     loadingMessage: string;
     toastMessage: string;
@@ -33,6 +34,7 @@ export const useAppStore = defineStore('app', {
     theme: getItem<'light' | 'dark'>(STORAGE_KEYS.THEME, 'light'),
     appMode: getAppMode(),
     sidebarOpen: false,
+    showAddCatModal: false,
     loadingProgress: 0,
     loadingMessage: '',
     toastMessage: '',

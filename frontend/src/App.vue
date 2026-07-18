@@ -4,6 +4,7 @@ import { RouterView, useRoute } from 'vue-router'
 import { useAppStore } from './stores/app'
 import AppLoadingOverlay from './components/Common/AppLoadingOverlay.vue'
 import Sidebar from './components/Sidebar/Sidebar.vue'
+import AddCatModal from './components/Modals/AddCatModal.vue'
 
 const appStore = useAppStore()
 const route = useRoute()
@@ -66,6 +67,8 @@ function onSkip() {
       <span class="drcat-toast-msg" v-html="appStore.toastMessage"></span>
       <button class="drcat-toast-close" @click="appStore.hideToast()">×</button>
     </div>
+
+    <AddCatModal />
   </div>
 </template>
 
