@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { AppModeType } from '../types/cat';
-import { getAppMode, setAppMode, isOfflineApp, checkAdminStatus, checkIsLocal, hasRemoteServerConfigured, fetchSearchStatus, fetchDiagnosticsSystem, fetchDiagnosticsDbStats, fetchDiagnosticsIndexDetail, fetchDiagnosticsRemoteUrl, updateDiagnosticsRemoteUrl, fetchTunnelInfo, fetchServerMetrics, fetchRateLimits } from '../api/client';
+import { getAppMode, setAppMode, isOfflineApp, checkAdminStatus, checkIsLocal, hasRemoteServerConfigured, fetchSearchStatus, fetchDiagnosticsSystem, fetchDiagnosticsDbStats, fetchDiagnosticsIndexDetail, fetchDiagnosticsRemoteUrl, updateDiagnosticsRemoteUrl, fetchTunnelInfo, fetchServerMetrics, fetchRateLimits, fetchSuggestions, approveSuggestionOnServer, rejectSuggestionOnServer, bulkImportCats } from '../api/client';
 import { getItem, setItem, STORAGE_KEYS } from '../utils/storage';
 
 export const useAppStore = defineStore('app', {
@@ -26,6 +26,7 @@ export const useAppStore = defineStore('app', {
     tunnelInfo: any;
     serverMetrics: any;
     rateLimits: any;
+    suggestions: any[];
   } => ({
     loading: true,
     isOffline: false,
@@ -47,7 +48,8 @@ export const useAppStore = defineStore('app', {
     diagnosticsRemoteUrl: null,
     tunnelInfo: null,
     serverMetrics: null,
-    rateLimits: null
+    rateLimits: null,
+    suggestions: []
   }),
 
   actions: {
@@ -183,6 +185,60 @@ export const useAppStore = defineStore('app', {
         this.rateLimits = await fetchRateLimits();
       } catch (err) {
         console.error('[AppStore] loadRateLimits failed:', err);
+        throw err;
+      }
+    },
+
+    async loadSuggestions(): Promise<void> {
+      try {
+        this.suggestions = await fetchSuggestions();
+      } catch (err) {
+        console.error('[AppStore] loadSuggestions failed:', err);
+        this.suggestions = [];
+      }
+    },
+
+    async approveSuggestion(id: string): Promise<void> {
+      try {
+        const result = await approveSuggestionOnServer(id);
+        if (result.success) {
+          this.showToast('Proposition approuvée !', 'fa-circle-check', 3000);
+          await this.loadSuggestions();
+        } else {
+          this.showToast('Erreur: ' + result.error, 'fa-circle-exclamation', 4000);
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Erreur lors de la validation.', 'fa-circle-exclamation', 4000);
+      }
+    },
+
+    async rejectSuggestion(id: string): Promise<void> {
+      try {
+        const result = await rejectSuggestionOnServer(id);
+        if (result.success) {
+          this.showToast('Proposition rejetée.', 'fa-circle-xmark', 3000);
+          await this.loadSuggestions();
+        } else {
+          this.showToast('Erreur: ' + result.error, 'fa-circle-exclamation', 4000);
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Erreur lors du rejet.', 'fa-circle-exclamation', 4000);
+      }
+    },
+
+    async performBulkImport(importList: any[]): Promise<void> {
+      try {
+        const result = await bulkImportCats(importList);
+        if (result.count > 0) {
+          this.showToast(`${result.count} fiches importées avec succès !`, 'fa-circle-check', 4000);
+        } else {
+          this.showToast('Aucune nouvelle fiche importée.', 'fa-circle-exclamation', 4000);
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast("Échec de l'importation.", 'fa-circle-exclamation', 4000);
         throw err;
       }
     }
