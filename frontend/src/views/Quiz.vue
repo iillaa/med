@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useQuizStore } from '@/stores/quiz'
 import { useCatsStore } from '@/stores/cats'
-import { getKeywordHints } from '@/composables/useQuizGenerator'
+import { getKeywordHints, checkMatchedKeywords, extractKeywords } from '@/composables/useQuizGenerator'
 import { updateLeitnerStats, updateQuizStreak } from '@/stores/cats'
 import type { QuizSetupConfig, QuestionType } from '@/types/quiz'
 
 const quizStore = useQuizStore()
 const catsStore = useCatsStore()
+const router = useRouter()
 
 const screen = ref<'setup' | 'question' | 'results'>('setup')
 const userAnswer = ref('')
@@ -22,16 +24,16 @@ const categories = computed(() => catsStore.categories)
 
 const setupForm = ref<QuizSetupConfig>({
   category: 'all',
-  count: 5,
+  count: 10,
   types: {
     clinical: true,
     posology: true,
     redflags: true,
     prescription: true
   },
-  spacedRepetition: false,
+  spacedRepetition: true,
   timedMode: false,
-  timerSeconds: 60
+  timerSeconds: 30
 })
 
 const currentQuestion = computed(() => quizStore.currentQuestion)
@@ -50,10 +52,14 @@ const enabledTypes = computed((): QuestionType[] => {
 
 const hintText = ref('')
 const showHintBox = ref(false)
+const hintUsed = ref(false)
+const questionMaxPoints = ref(1.0)
 
 const timeLeft = ref(0)
 const timerActive = ref(false)
+const timerFillWidth = ref('100%')
 let timerInterval: ReturnType<typeof setInterval> | null = null
+let wakeLock = null
 
 const categoryStats = computed(() => {
   const stats: Record<string, { total: number; max: number }> = {}
@@ -79,6 +85,15 @@ const weakCategories = computed(() => {
     .sort((a, b) => a.percent - b.percent)
 })
 
+const matchedKeywords = computed(() => {
+  if (!currentQuestion.value || feedback.value !== 'self-grade') return []
+  const lastAnswer = quizStore.answers[quizStore.answers.length - 1]
+  if (!lastAnswer) return []
+  return checkMatchedKeywords(lastAnswer.userAnswer, currentQuestion.value.correctAnswer)
+})
+
+const showNextBtn = ref(false)
+
 async function startQuiz(): Promise<void> {
   await quizStore.startQuiz(setupForm.value, catsStore.cats)
   if (quizStore.questions.length > 0) {
@@ -87,20 +102,48 @@ async function startQuiz(): Promise<void> {
     selectedQCM.value = null
     showHintBox.value = false
     hintText.value = ''
+    hintUsed.value = false
+    questionMaxPoints.value = 1.0
+    showNextBtn.value = false
     if (quizStore.isTimed) {
       startTimer()
+      acquireWakeLock()
     }
+  }
+}
+
+async function acquireWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen')
+      console.log('[Wake Lock] Screen Wake Lock acquired.')
+    }
+  } catch (err) {
+    console.warn(`[Wake Lock] Failed to acquire screen wake lock: ${err}`)
+  }
+}
+
+function releaseWakeLock() {
+  if (wakeLock !== null) {
+    wakeLock.release().then(() => {
+      console.log('[Wake Lock] Screen Wake Lock released.')
+    }).catch(() => {})
+    wakeLock = null
   }
 }
 
 function startTimer(): void {
   stopTimer()
-  timeLeft.value = quizStore.timerSeconds || 60
+  timeLeft.value = quizStore.timerSeconds || 30
   timerActive.value = true
+  timerFillWidth.value = '100%'
   timerInterval = setInterval(() => {
     timeLeft.value--
+    const total = quizStore.timerSeconds || 30
+    timerFillWidth.value = `${Math.max(0, (timeLeft.value / total) * 100)}%`
     if (timeLeft.value <= 0) {
       stopTimer()
+      releaseWakeLock()
       handleTimeUp()
     }
   }, 1000)
@@ -119,7 +162,7 @@ function handleTimeUp(): void {
   if (!q) return
 
   if (q.type === 'clinical' || q.type === 'posology') {
-    quizStore.submitQCMOption('')
+    submitQCM('')
   } else {
     const answer = {
       catId: q.cat.id,
@@ -133,7 +176,7 @@ function handleTimeUp(): void {
     if (quizStore.failedQuestions) quizStore.failedQuestions.push(q)
     updateLeitnerStats(q.cat.id, false)
     updateQuizStreak()
-    quizStore.currentIndex++
+    advanceQuestion()
   }
 }
 
@@ -146,6 +189,7 @@ function submitQCM(option: string): void {
     quizStore.submitQCMOption(option)
     if (quizStore.isFinished) {
       stopTimer()
+      releaseWakeLock()
       screen.value = 'results'
     }
   }, 1200)
@@ -154,32 +198,57 @@ function submitQCM(option: string): void {
 function submitWriteIn(): void {
   if (!userAnswer.value.trim()) return
   feedback.value = 'self-grade'
+  showNextBtn.value = false
 
   const q = quizStore.currentQuestion!
-  quizStore.answers.push({
+  const answer = {
     catId: q.cat.id,
     catTitle: q.cat.title,
     type: q.type,
     userAnswer: userAnswer.value.trim(),
     correctAnswer: q.correctAnswer,
     score: 0
-  })
+  }
+  quizStore.answers.push(answer)
 }
 
 function applyGrade(score: number): void {
-  quizStore.submitSelfGrade(score)
+  const finalScore = score * questionMaxPoints.value
+  quizStore.submitSelfGrade(finalScore)
   feedback.value = 'none'
+  showNextBtn.value = true
+}
+
+function advanceQuestion(): void {
+  quizStore.currentIndex++
   if (quizStore.isFinished) {
     stopTimer()
+    releaseWakeLock()
     screen.value = 'results'
+  } else {
+    feedback.value = 'none'
+    selectedQCM.value = null
+    showHintBox.value = false
+    hintText.value = ''
+    hintUsed.value = false
+    questionMaxPoints.value = 1.0
+    showNextBtn.value = false
+    userAnswer.value = ''
+    if (quizStore.isTimed) {
+      startTimer()
+    }
   }
 }
 
 function showHint(): void {
   const q = quizStore.currentQuestion
-  if (!q) return
+  if (!q || showHintBox.value) return
   hintText.value = getKeywordHints(q.correctAnswer)
   showHintBox.value = true
+  if (!hintUsed.value) {
+    hintUsed.value = true
+    questionMaxPoints.value = 0.5
+  }
 }
 
 function retryFailed(): void {
@@ -188,16 +257,27 @@ function retryFailed(): void {
   feedback.value = 'none'
   selectedQCM.value = null
   showHintBox.value = false
+  hintText.value = ''
+  hintUsed.value = false
+  questionMaxPoints.value = 1.0
+  showNextBtn.value = false
+  userAnswer.value = ''
   if (quizStore.isTimed) startTimer()
 }
 
 function resetQuiz(): void {
   stopTimer()
+  releaseWakeLock()
   quizStore.reset()
   screen.value = 'setup'
   feedback.value = 'none'
   selectedQCM.value = null
   showHintBox.value = false
+  hintText.value = ''
+  hintUsed.value = false
+  questionMaxPoints.value = 1.0
+  showNextBtn.value = false
+  userAnswer.value = ''
 }
 
 function toggleType(type: QuestionType): void {
@@ -212,7 +292,15 @@ const typeMeta: Record<QuestionType, { label: string; className: string }> = {
 }
 
 function goToCat(catId: number): void {
-  window.location.hash = `#/workspace/${catId}`
+  router.push(`/workspace/${catId}`)
+}
+
+function viewRef() {
+  const q = quizStore.currentQuestion
+  if (q && q.cat) {
+    quizStore.setQuizViewingCatId(q.cat.id)
+    router.push(`/workspace/${q.cat.id}`)
+  }
 }
 </script>
 
@@ -222,43 +310,80 @@ function goToCat(catId: number): void {
 
     <!-- SETUP -->
     <div v-if="screen === 'setup'" class="quiz-setup">
-      <div class="form-group">
-        <label class="form-label">Catégorie</label>
-        <select v-model="setupForm.category" class="form-select">
-          <option value="all">Toutes les spécialités</option>
-          <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-        </select>
+      <div style="text-align: center; margin-bottom: 10px;">
+        <i class="fa-solid fa-brain" style="font-size: 48px; color: var(--color-primary); margin-bottom: 16px;"></i>
+        <h2 style="color: var(--text-primary);">Mode Entraînement & Quiz 🧠</h2>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Simulez des cas cliniques et révisez les Red Flags et Ordonnances types de vos fiches médicales.</p>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Nombre de questions</label>
-        <input v-model.number="setupForm.count" type="number" min="1" max="20" class="form-input" />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Types de questions</label>
-        <div class="type-toggles">
-          <button
-            v-for="type in ['clinical', 'posology', 'redflags', 'prescription']"
-            :key="type"
-            :class="['type-btn', { active: setupForm.types[type] }]"
-            @click="toggleType(type as QuestionType)"
-          >
-            {{ type === 'clinical' ? 'Clinique' : type === 'posology' ? 'Posologie' : type === 'redflags' ? 'Red Flags' : 'Ordonnance' }}
-          </button>
+      <div class="dashboard-block" style="gap: 16px;">
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="quiz-category" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-filter"></i> Sélectionner une Spécialité :</label>
+          <select id="quiz-category" v-model="setupForm.category" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+            <option value="all">Toutes les spécialités</option>
+            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input v-model="setupForm.timedMode" type="checkbox" />
-          <span>Mode chronométré ({{ setupForm.timerSeconds }}s/question)</span>
-        </label>
-      </div>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="quiz-count" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-list-ol"></i> Nombre de Questions :</label>
+          <select id="quiz-count" v-model.number="setupForm.count" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+            <option value="5">5 questions</option>
+            <option value="10">10 questions</option>
+            <option value="15">15 questions</option>
+            <option value="20">20 questions</option>
+            <option value="30">30 questions</option>
+            <option value="50">50 questions</option>
+          </select>
+        </div>
 
-      <button class="primary-btn" @click="startQuiz" :disabled="enabledTypes.length === 0">
-        Commencer le quiz
-      </button>
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</div>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+              <input type="checkbox" v-model="setupForm.types.clinical" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+              <span>Cas Clinique & Orientation (QCM 🩺)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+              <input type="checkbox" v-model="setupForm.types.posology" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+              <span>Ordonnance & Posologie (QCM 💊)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+              <input type="checkbox" v-model="setupForm.types.redflags" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+              <span>Red Flags / Signes de Gravité (Écrire la réponse ✍️)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+              <input type="checkbox" v-model="setupForm.types.prescription" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+              <span>Ordonnance Type / Traitement (Écrire la réponse ✍️)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+          <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-graduation-cap"></i> Mode d'apprentissage :</div>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; margin-top: 4px;">
+            <input type="checkbox" v-model="setupForm.spacedRepetition" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+            <span>Priorité répétition espacée (Leitner 📅)</span>
+          </label>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+          <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-clock"></i> Limite de temps :</div>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; margin-top: 4px;">
+            <input type="checkbox" v-model="setupForm.timedMode" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+            <span>Activer le chronomètre par question</span>
+          </label>
+          <select v-if="setupForm.timedMode" v-model.number="setupForm.timerSeconds" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); margin-top: 4px;">
+            <option value="15">15 secondes</option>
+            <option value="30">30 secondes</option>
+            <option value="60">60 secondes</option>
+          </select>
+        </div>
+
+        <button class="action-btn" id="start-quiz-btn" style="width: 100%; font-weight: 700; margin-top: 10px; justify-content: center; display: flex; gap: 8px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; padding: 12px; font-size: 14px; border-radius: var(--radius-md);" @click="startQuiz">
+          <i class="fa-solid fa-play"></i> Commencer le Quiz
+        </button>
+      </div>
     </div>
 
     <!-- QUESTION -->
@@ -275,13 +400,18 @@ function goToCat(catId: number): void {
         </div>
       </div>
 
+      <!-- Timer Bar Fill -->
+      <div v-if="quizStore.isTimed && timerActive" class="timer-bar-wrapper" style="height: 6px; background: rgba(239, 68, 68, 0.1); border-radius: 3px; overflow: hidden; width: 100%; margin-bottom: 10px;">
+        <div class="timer-bar-fill" :style="{ width: timerFillWidth, background: 'var(--color-danger)', height: '100%', transition: 'width 0.1s linear', borderRadius: '3px' }"></div>
+      </div>
+
       <div v-if="currentQuestion" class="question-card">
         <div class="question-header">
           <span :class="['question-type-badge', typeMeta[currentQuestion.type]?.className]">
             {{ typeMeta[currentQuestion.type]?.label }}
           </span>
           <span class="question-cat">{{ currentQuestion.cat.category }}</span>
-          <span class="question-points">Valeur : {{ currentQuestion.points }} pt</span>
+          <span class="question-points">Valeur : {{ questionMaxPoints.toFixed(1) }} pt</span>
         </div>
 
         <h2 class="question-text" v-html="currentQuestion.questionText"></h2>
@@ -289,7 +419,7 @@ function goToCat(catId: number): void {
         <!-- HINT (redflags / prescription) -->
         <div v-if="isWriteIn" class="hint-area">
           <button class="hint-btn" @click="showHint" :disabled="showHintBox">
-            <i class="fa-regular fa-lightbulb"></i> Indice
+            <i class="fa-regular fa-lightbulb"></i> Obtenir un indice (-0.5 pt)
           </button>
           <Transition name="fade">
             <div v-if="showHintBox && hintText" class="hint-box">
@@ -318,19 +448,23 @@ function goToCat(catId: number): void {
 
         <!-- WRITE-IN (redflags / prescription) -->
         <div v-else-if="isWriteIn" class="writein-area">
+          <label for="quiz-user-text" style="font-size: 13px; color: var(--text-secondary);">Saisissez votre conduite à tenir ou traitement ci-dessous :</label>
           <textarea
+            id="quiz-user-text"
             v-model="userAnswer"
             class="answer-input"
-            placeholder="Saisissez votre réponse..."
+            placeholder="Écrivez votre réponse ici. Essayez de mentionner les médicaments clés, les posologies, ou les critères d'urgence précis..."
             rows="5"
             :disabled="feedback !== 'none'"
           ></textarea>
           <button
-            class="submit-btn"
+            class="action-btn"
+            id="quiz-submit-text-btn"
+            style="width: 100%; font-weight: 700; justify-content: center; display: flex; gap: 8px;"
             @click="submitWriteIn"
             :disabled="feedback !== 'none'"
           >
-            Valider ma réponse
+            <i class="fa-solid fa-circle-check"></i> Valider ma réponse
           </button>
         </div>
 
@@ -357,16 +491,37 @@ function goToCat(catId: number): void {
                 <div class="comparison-text">{{ currentQuestion.correctAnswer }}</div>
               </div>
             </div>
+
+            <!-- Keyword matched tags -->
+            <div class="keywords-matched-panel" style="display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;"><i class="fa-solid fa-key"></i> Mots-clés identifiés dans votre réponse :</span>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <span v-for="kw in matchedKeywords" :key="kw.word" :class="['keyword-pill', { 'keyword-matched': kw.matched, 'keyword-missed': !kw.matched }]" style="font-size: 11.5px; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                  <i :class="kw.matched ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'"></i>
+                  {{ kw.word }}
+                </span>
+              </div>
+            </div>
+
             <p class="grade-prompt">Évaluez votre réponse :</p>
             <div class="grade-btns">
               <button class="grade-btn grade-full" @click="applyGrade(1.0)">
-                <i class="fa-solid fa-circle-check"></i> Complet (1.0 pt)
+                <i class="fa-solid fa-circle-check"></i> 100% ({{ questionMaxPoints.toFixed(1) }} pt)
               </button>
               <button class="grade-btn grade-partial" @click="applyGrade(0.5)">
-                <i class="fa-solid fa-circle-half-stroke"></i> Partiel (0.5 pt)
+                <i class="fa-solid fa-circle-half-stroke"></i> Partiel ({{ (questionMaxPoints.value * 0.5).toFixed(1) }} pt)
               </button>
               <button class="grade-btn grade-zero" @click="applyGrade(0.0)">
-                <i class="fa-solid fa-circle-xmark"></i> Aucun (0 pt)
+                <i class="fa-solid fa-circle-xmark"></i> Revoir (0 pt)
+              </button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
+              <button class="cancel-btn" style="padding: 8px 14px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;" @click="viewRef">
+                <i class="fa-solid fa-eye"></i> Ouvrir la Fiche Référence
+              </button>
+              <button v-if="showNextBtn" class="action-btn" style="padding: 10px 20px; font-weight: 700; display: flex; align-items: center; gap: 6px; font-size: 13.5px;" @click="advanceQuestion">
+                Suivant <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
           </div>
@@ -1037,5 +1192,36 @@ function goToCat(catId: number): void {
 }
 .secondary-btn:hover {
   background: var(--color-surface);
+}
+
+/* Timer bar fill */
+.timer-bar-wrapper {
+  flex-shrink: 0;
+}
+
+.timer-bar-fill {
+  border-radius: 3px;
+}
+
+/* Keyword matching pills */
+.keywords-matched-panel {
+  margin-top: 8px;
+}
+
+.keyword-pill {
+  border: 1px solid;
+}
+
+.keyword-matched {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--color-success);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.keyword-missed {
+  border-color: rgba(100, 116, 139, 0.2);
+  color: var(--text-muted);
+  text-decoration: line-through;
+  background: transparent;
 }
 </style>
