@@ -22,7 +22,7 @@ import {
   hasRemoteServerConfigured
 } from '@/api/client'
 import { getItem, setItem, STORAGE_KEYS } from '@/utils/storage'
-import { formatBytes, formatPercent, escapeHTML } from '@/utils/markdown'
+import { formatBytes, formatPercent } from '@/utils/markdown'
 import { useAppStore } from '@/stores/app'
 
 // Export modal helper
@@ -106,7 +106,7 @@ const diagnosticsData = reactive({
     remote: { status: 'pending' as 'pending' | 'success' | 'error', message: '' },
     wan: { status: 'pending' as 'pending' | 'success' | 'error', message: '' }
   },
-  autoAnalysis: { text: ''; style: {} as Record<string, string> }
+  autoAnalysis: { text: '', style: {} as Record<string, string> }
 })
 
 const isRefreshing = ref(false)

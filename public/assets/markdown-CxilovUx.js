@@ -1,0 +1,9 @@
+function e(e){return e.replace(/&/g,`&amp;`).replace(/</g,`&lt;`).replace(/>/g,`&gt;`).replace(/"/g,`&quot;`).replace(/'/g,`&#039;`)}function t(t){if(!t)return`<p class="text-muted">Aucune synthèse disponible.</p>`;let n=e(t);if(n=n.replace(/\*\*(.*?)\*\*/g,`<strong>$1</strong>`),n.includes(`|`)){let e=n.split(`
+`),t=!1,r=`<table>`,i=!0;for(let n=0;n<e.length;n++){let a=e[n]?.trim()??``;if(a.startsWith(`|`)&&a.endsWith(`|`)){if(t||(t=!0,i=!0),a.includes(`---`))continue;let e=a.split(`|`).slice(1,-1).map(e=>e.trim()),n=i?`th`:`td`;r+=`<tr>`,e.forEach(e=>{r+=`<${n}>${e}</${n}>`}),r+=`</tr>`,i=!1}else t&&(t=!1,r+=`</table>`,e[n]=r+`
+`+e[n],r=`<table>`)}t&&(r+=`</table>`,e.push(r)),n=e.join(`
+`)}return n=n.split(`
+`).filter(e=>{let t=e.trim();return!(t.startsWith(`|`)&&t.endsWith(`|`))}).join(`
+`),n=n.split(`
+`).map(e=>{let t=e.trim();return t.startsWith(`- `)?`<li>${t.substring(2)}</li>`:e}).join(`
+`),n=n.replace(/(<li>.*?<\/li>\s*)+/gs,e=>`<ul>${e}</ul>`),n=n.replace(/\n\n/g,`</p><p>`).replace(/\n/g,`<br>`),n=`<p>${n}</p>`,n=n.replace(/<p>\s*<\/p>/g,``).replace(/<p>\s*<ul>/g,`<ul>`).replace(/<\/ul>\s*<\/p>/g,`</ul>`),n}function n(e){let t=[`Dr.CAT — ${e.id}. ${e.title}`,`Catégorie : ${e.category}`,`-------------------------------------------`];e.red_flags&&e.red_flags.trim()&&t.push(`\nRED FLAGS:\n${e.red_flags}`);let n=e.customSummary||e.summary;n&&n.trim()&&t.push(`\nCONDUCTE À TENIR:\n${n}`);let r=e.customOrdonnance||e.ordonnance;return r&&r.trim()&&t.push(`\nORDONNANCE TYPE:\n${r}`),e.notes&&e.notes.trim()&&t.push(`\nNOTES:\n${e.notes}`),t.push(`\nLe : ${new Date().toLocaleDateString(`fr-FR`)}`),t.join(`
+`)}function r(e,t=2){if(e===0)return`0 Bytes`;let n=1024,r=t<0?0:t,i=[`Bytes`,`KB`,`MB`,`GB`],a=Math.floor(Math.log(e)/Math.log(n));return parseFloat((e/n**a).toFixed(r))+` `+i[a]}export{r as n,t as r,n as t};
