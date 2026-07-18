@@ -3,7 +3,7 @@
     "id": 1,
     "category": "Gastro-entérologie",
     "title": "CAT devant intoxication alimentaire",
-    "summary": "updated 1784416746850",
+    "summary": "updated 1784417364096",
     "red_flags": "Fièvre > 38.5°C, syndrome dysentérique (sang/glaires dans les selles), déshydratation clinique (perte de poids > 5%), terrain à risque (nourrisson, sujet âgé, immunodéprimé).",
     "ordonnance": "1. SRO (Solutés de Réhydratation Orale) : 1 sachet dans 1L d'eau minérale, à boire par petites gorgées.\n2. Tiorfan (Racécadotril) 100mg : 1 gélule 3 fois par jour, max 7 jours.\n3. Spasfon (Phloroglucinol) 80mg : 2 comprimés en cas de douleur abdominale, max 3 fois par jour.",
     "pdf_keywords": [
@@ -12,7 +12,7 @@
       "Urgences",
       "ioniques"
     ],
-    "updatedAt": 1784416746887,
+    "updatedAt": 1784417364138,
     "history": [
       {
         "timestamp": 1784416649503,
@@ -40,6 +40,22 @@
       },
       {
         "timestamp": 1784416746887,
+        "action": "edit",
+        "detail": "Modifié via approbation d'une proposition de modification",
+        "previousState": {
+          "summary": "auth test"
+        }
+      },
+      {
+        "timestamp": 1784417362800,
+        "action": "edit",
+        "detail": "Modifié directement par l'administrateur",
+        "previousState": {
+          "summary": "updated 1784416746850"
+        }
+      },
+      {
+        "timestamp": 1784417364138,
         "action": "edit",
         "detail": "Modifié via approbation d'une proposition de modification",
         "previousState": {

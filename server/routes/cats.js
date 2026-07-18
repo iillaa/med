@@ -27,7 +27,8 @@ function registerCatRoutes(app) {
 
     if (!isAdmin) {
       result = result.map(c => {
-        const { history: _history, ...rest } = c;
+        const rest = { ...c };
+        delete rest.history;
         return rest;
       });
     }
