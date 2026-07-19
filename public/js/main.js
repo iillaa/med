@@ -14,6 +14,42 @@ import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
 // Tracks app mode (set once on load via api.getAppMode())
 
 
+// Theme background colors — keep in sync with --bg-app in css/variables.css
+const THEME_BG = { light: '#f1f5f9', dark: '#090d16' };
+
+/**
+ * Sync browser/PWA chrome and the native Android status bar to the active theme.
+ * - Updates the runtime <meta name="theme-color"> so the toolbar/URL bar matches.
+ * - If running under Capacitor with the StatusBar plugin available, recolors the
+ *   native status bar and picks a legible icon style. Loaded dynamically with a
+ *   graceful fallback so the web build (and installs without the plugin) never break.
+ */
+function applyThemeChrome(isLight) {
+  const bg = isLight ? THEME_BG.light : THEME_BG.dark;
+
+  // Runtime theme-color meta (single tag the browser reads live).
+  let meta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', bg);
+
+  // Optional native status bar (Capacitor Android). No-op on web.
+  try {
+    const StatusBar = window.Capacitor?.Plugins?.StatusBar;
+    if (StatusBar) {
+      StatusBar.setBackgroundColor?.({ color: bg });
+      // Capacitor StatusBar.Style semantics (from plugin definitions):
+      //   'DARK'  = light text for dark backgrounds
+      //   'LIGHT' = dark text for light backgrounds
+      StatusBar.setStyle?.({ style: isLight ? 'LIGHT' : 'DARK' });
+    }
+  } catch (_) { /* StatusBar unavailable — web or plugin not installed */ }
+}
+
+
 // Global administrative error interceptor
 window.handleAdminError = async function(err) {
   if (err && (err.message === "403 Forbidden" || err.message === "401 Unauthorized")) {
@@ -105,31 +141,48 @@ async function bootstrapApp() {
   // Theme Toggle Initialization
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const themeToggleIcon = document.getElementById('theme-toggle-icon');
-  
-  const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  if (currentTheme === 'light') {
-    document.body.classList.add('light-theme');
-    if (themeToggleIcon) {
-      themeToggleIcon.classList.remove('fa-moon');
-      themeToggleIcon.classList.add('fa-sun');
-    }
+  const rootEl = document.documentElement;
+
+  // The anti-FOUC head script already applied the correct theme class before
+  // paint. Here we just sync the toggle icon + native chrome to that state.
+  const bootIsLight = rootEl.classList.contains('light-theme');
+  // Ensure the native status bar sits above the web content (not overlapping)
+  // before applying the theme color. No-op on web / if plugin missing.
+  try {
+    const StatusBar = window.Capacitor?.Plugins?.StatusBar;
+    StatusBar?.setOverlaysWebView?.({ overlay: false });
+  } catch (_) { /* StatusBar unavailable */ }
+  applyThemeChrome(bootIsLight);
+  if (themeToggleIcon) {
+    themeToggleIcon.classList.toggle('fa-sun', bootIsLight);
+    themeToggleIcon.classList.toggle('fa-moon', !bootIsLight);
   }
- 
+  // Remove the boot transition-suppression once the first frame has settled,
+  // so subsequent interactions animate normally.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => rootEl.classList.remove('theme-booting'));
+  });
+
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('light-theme');
-      const isLight = document.body.classList.contains('light-theme');
+      // Atomic swap: kill all transitions for one frame so the whole UI
+      // repaints in the new theme at once (no staggered wipe), then re-enable.
+      rootEl.classList.add('theme-switching');
+
+      const isLight = rootEl.classList.toggle('light-theme');
       localStorage.setItem('theme', isLight ? 'light' : 'dark');
-      
+      rootEl.style.colorScheme = isLight ? 'light' : 'dark';
+
       if (themeToggleIcon) {
-        if (isLight) {
-          themeToggleIcon.classList.remove('fa-moon');
-          themeToggleIcon.classList.add('fa-sun');
-        } else {
-          themeToggleIcon.classList.remove('fa-sun');
-          themeToggleIcon.classList.add('fa-moon');
-        }
+        themeToggleIcon.classList.toggle('fa-sun', isLight);
+        themeToggleIcon.classList.toggle('fa-moon', !isLight);
       }
+      applyThemeChrome(isLight);
+
+      // Re-enable transitions after the swap frame has painted.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => rootEl.classList.remove('theme-switching'));
+      });
     });
   }
   

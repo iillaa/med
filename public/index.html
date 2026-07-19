@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="app-build-version" content="2026.07.19.21.17">
+  <meta name="app-build-version" content="2026.07.19.23.11">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -14,13 +14,36 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Dr.CAT">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="theme-color" content="#090d16">
+  <!-- Dual theme-color: browser/PWA chrome matches active theme -->
+  <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#090d16" media="(prefers-color-scheme: dark)">
+  <!--
+    Anti-FOUC (flash of unstyled/wrong theme): apply the saved theme to the
+    document BEFORE any CSS paints. Runs synchronously in <head>, so the very
+    first frame is already correct — no dark->light flash on launch.
+  -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        var root = document.documentElement;
+        if (theme === 'light') root.classList.add('light-theme');
+        // Native color-scheme hint (form controls, scrollbars) matches theme.
+        root.style.colorScheme = theme;
+        // Suppress transitions until first paint settles (prevents load-time animation).
+        root.classList.add('theme-booting');
+      } catch (e) { /* localStorage unavailable — fall back to default dark */ }
+    })();
+  </script>
   <!-- Preload critical assets -->
   <link rel="preload" href="style.css?v=18" as="style">
   <link rel="preload" href="drcat_logo.png" as="image" type="image/png">
-  <!-- Google Fonts: Outfit with swap -->
+  <!-- Google Fonts: Outfit — preconnect + preload the CSS so text paints with the brand font sooner -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons (non-blocking) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">

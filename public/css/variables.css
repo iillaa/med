@@ -1,5 +1,6 @@
 /* Global Reset & Variables */
 :root {
+  color-scheme: dark; /* default; head script + toggle override via style.colorScheme */
   --bg-app: #090d16;
   --bg-sidebar: #0f172a;
   --bg-card: #1e293b;
@@ -23,12 +24,46 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
-  
+  --radius-full: 9999px;
+
+  /* ── Spacing scale (4px base) — use instead of magic pixel values ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* ── Typography scale ── */
+  --text-xs: 11px;
+  --text-sm: 12.5px;
+  --text-base: 15px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ── Z-index scale — single source so overlays never fight ── */
+  --z-sidebar: 100;
+  --z-sticky: 500;
+  --z-overlay: 1000;
+  --z-modal: 2000;
+  --z-toast: 9999;
+
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --transition-smooth: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Light Mode Variables Override */
+/* Light Mode Variables Override
+   Applied on <html> (documentElement) by the anti-FOUC head script, and
+   toggled at runtime. As an ancestor of everything, its CSS variables cascade
+   to the whole tree and its descendant selectors (.light-theme .foo) match. */
 .light-theme {
   --bg-app: #f1f5f9;
   --bg-sidebar: #ffffff;
@@ -51,6 +86,40 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
+/* ── Theme-switch flicker control ─────────────────────────────
+   Premium apps make the theme swap feel *atomic* (everything changes at
+   once) instead of a staggered wipe where some elements animate over 0.2s
+   and others snap. We do that by hard-disabling every transition/animation
+   for one frame while the .light-theme class flips, then re-enabling.
+   - .theme-booting: set in <head> before first paint, removed after load,
+     so the initial render never animates.
+   - .theme-switching: set by the toggle handler for a single frame. */
+html.theme-booting *,
+html.theme-booting *::before,
+html.theme-booting *::after,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ── Respect the OS "Reduce Motion" accessibility setting ─────
+   Premium/native apps honor this: users who get motion sickness or prefer
+   calm UIs (Android: Settings > Accessibility > Remove animations) get near-
+   instant transitions instead of movement. We keep opacity fades subtle but
+   strip transforms/long animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 
 * {
   box-sizing: border-box;
@@ -67,16 +136,41 @@
 html {
   height: 100dvh;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%; /* stop WebView/mobile from auto-inflating text */
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased; /* crisper text on WebKit/Android WebView */
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none; /* kill the rubber-band/glow so it feels app-native */
 }
 
 body {
   height: 100dvh;
   overflow: visible; /* allow position:fixed children (toasts) to escape */
   font-family: var(--font-sans);
-  font-size: 15px; /* Standardize font size scaling in WebView */
+  font-size: var(--text-base);
   background-color: var(--bg-app);
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: var(--leading-normal);
+}
+
+/* ── Themed scrollbars (match active theme, not default OS dark) ───── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: var(--radius-full);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
 }
 
 /* ── Toast Notification ───────────────────────────────── */
