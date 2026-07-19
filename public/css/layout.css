@@ -186,7 +186,7 @@
     top: 8px;
     font-size: 11px;
     color: var(--color-danger);
-    transition: transform 0.2s ease;
+    transition: var(--transition-fast);
   }
 
   .red-flags-banner.expanded::after {
@@ -206,7 +206,7 @@
     margin-top: 8px;
     opacity: 0;
     transform: translateY(-5px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: var(--transition-fast);
     pointer-events: none;
   }
 

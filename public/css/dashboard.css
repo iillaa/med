@@ -414,7 +414,7 @@
   height: 100%;
   background: linear-gradient(90deg, var(--color-primary), var(--color-success));
   border-radius: 3px;
-  transition: width 0.5s ease;
+  transition: width var(--motion-slow) var(--ease-standard);
 }
 
 /* Tablet: tighten spacing to fit without scroll (≈ 90% zoom equivalent) */
@@ -497,7 +497,7 @@
   flex-direction: column;
   gap: 12px;
   box-shadow: var(--shadow-sm);
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn var(--motion-base) ease;
 }
 
 .suggestion-header {

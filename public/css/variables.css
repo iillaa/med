@@ -56,8 +56,25 @@
   --z-modal: 2000;
   --z-toast: 9999;
 
+  /* ── Motion tokens ─────────────────────────────────────────
+     Single source of truth for timing & easing so animation feels
+     consistent across the whole app. Animate transform/opacity only. */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --motion-slower: 450ms;
+  /* Standard eases */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);     /* material standard */
+  --ease-decelerate: cubic-bezier(0.16, 1, 0.3, 1);  /* entrance/overshoot settle */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);     /* emphasized in */
+  --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);   /* subtle pop */
+  /* Ready-made transition shorthands (transform/opacity/colors only) */
+  --transition-smooth: opacity var(--motion-base) ease, transform var(--motion-base) ease, background-color var(--motion-base) ease, border-color var(--motion-base) ease, box-shadow var(--motion-base) ease;
+  --transition-color: background-color var(--motion-base) ease, border-color var(--motion-base) ease, color var(--motion-base) ease, box-shadow var(--motion-base) ease;
+  --transition-fast: transform var(--motion-fast) ease, opacity var(--motion-fast) ease;
+  --transition-emphasized: transform var(--motion-slow) var(--ease-emphasized), opacity var(--motion-slow) ease;
+
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --transition-smooth: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 /* Light Mode Variables Override
