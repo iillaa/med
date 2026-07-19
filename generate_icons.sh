@@ -51,7 +51,18 @@ for entry in "${adaptive_sizes[@]}"; do
   # Generate adaptive icon foreground (Padded to 66% safe zone, letting system shape mask handle the boundary)
   # We key out the white background with 5% fuzz to ensure the foreground is transparent around the logo.
   magick "$LOGO" -fuzz 5% -transparent "white" -resize "${scale}x${scale}" -background none -gravity center -extent "${canvas}x${canvas}" "${DIR}/ic_launcher_foreground.png"
-  echo "  ✓ mipmap-${suffix} (foreground): ${canvas}x${canvas} (scaled to ${scale}x${scale})"
+  
+  # Generate adaptive icon round foreground (Cropped to a circle, transparent background, and scaled down to leave a white border)
+  round_scale=$(( scale * 85 / 100 ))
+  magick "$LOGO" -alpha on -background none \
+    \( +clone -channel A -evaluate set 0 +channel -fill white -draw "circle 512,512 512,102" \) \
+    -compose DstIn -composite -compose Over \
+    -fuzz 5% -transparent "white" \
+    -resize "${round_scale}x${round_scale}" \
+    -background none -gravity center -extent "${canvas}x${canvas}" \
+    "${DIR}/ic_launcher_foreground_round.png"
+    
+  echo "  ✓ mipmap-${suffix} (foreground): ${canvas}x${canvas} (scaled to ${scale}x${scale} / round to ${round_scale}x${round_scale})"
 done
 
 echo "🎉 Launcher icons generated successfully!"

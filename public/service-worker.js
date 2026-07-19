@@ -1,9 +1,11 @@
-const CACHE_NAME = 'dr-cat-v4';
+const CACHE_NAME = 'dr-cat-v5';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css',
   '/drcat_logo.png',
+  '/favicon.png',
+  '/icon-192.png',
   '/css/dashboard.css',
   '/css/sidebar.css',
   '/css/workspace.css',
