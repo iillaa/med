@@ -513,9 +513,9 @@ function renderLogs() {
   }).join('');
 
   // Auto-scroll to bottom of terminal without forced reflow
-  requestAnimationFrame(() => {
+  setTimeout(() => {
     term.scrollTop = term.scrollHeight;
-  });
+  }, 0);
 }
 
 function escapeHtmlLogs(str) {

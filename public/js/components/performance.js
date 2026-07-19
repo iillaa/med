@@ -355,9 +355,9 @@ function renderPerfLogs() {
   }).join('');
 
   // Auto-scroll to bottom without forced reflow
-  requestAnimationFrame(() => {
+  setTimeout(() => {
     container.scrollTop = container.scrollHeight;
-  });
+  }, 0);
 }
 
 function copyPerformanceLogs() {
