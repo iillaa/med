@@ -753,27 +753,5 @@
       "Certificats_",
       "Certificats"
     ]
-  },
-  {
-    "id": 56,
-    "category": "Njejrjrjrj",
-    "title": "Hbdjjdjeej",
-    "summary": "Nhsjdjdj",
-    "red_flags": "N",
-    "ordonnance": "N",
-    "pdf_keywords": [
-      "N"
-    ],
-    "updatedAt": 1783818643924
-  },
-  {
-    "id": 57,
-    "category": "T",
-    "title": "F",
-    "summary": "F",
-    "red_flags": "T",
-    "ordonnance": "F",
-    "pdf_keywords": [],
-    "updatedAt": 1783819337464
   }
 ]
