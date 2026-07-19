@@ -87,27 +87,66 @@ function rebuildClientAssets() {
     console.error("Error writing remote_config.js during build:", err);
   }
 
-  // 1. Auto-bump app-build-version in public/index.html
+  // 1. Auto-bump app-build-version in public/index.html AND auto-stamp every
+  //    local CSS/JS asset with a cache-buster derived from the build version.
+  //    This guarantees returning users (and the Android WebView) always fetch
+  //    the freshest assets after a build — no manual ?v= edits, nothing missed.
+  const now = new Date();
+  const pad = (num) => String(num).padStart(2, '0');
+  const versionString = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}.${pad(now.getHours())}.${pad(now.getMinutes())}`;
+  // Compact numeric token (YYMMDDHHmm) used as ?v= — stable within a build,
+  // changes every build. e.g. 2026.07.19.23.30 -> 2607192330
+  const assetVersion = versionString.slice(2).replace(/\./g, '');
+
+  // Rewrite ?v=... on a local asset URL (or append one if missing).
+  // Only touches relative paths (css/…, js/…, style.css) — never CDN/https URLs.
+  // Excludes assets that must NOT carry a query string:
+  //   - capacitor.js: injected/served by the native bridge; a ?v= can break it.
+  //   - pdf.min.js / pdf.worker.min.js: pdf.js resolves its worker by URL.
+  const NO_STAMP = /(?:^|\/)(capacitor\.js|pdf\.min\.js|pdf\.worker\.min\.js)$/;
+  const stampAsset = (content) =>
+    content
+      // Already-versioned local assets: replace the token.
+      .replace(/(["'(])((?:\.\/)?(?:css\/|js\/)?[a-zA-Z0-9_\-./]+\.(?:css|js))\?v=[^"')]*/g,
+        (m, pre, url) => (NO_STAMP.test(url) ? m : `${pre}${url}?v=${assetVersion}`))
+      // Un-versioned local css/js links & imports: add ?v=.
+      .replace(/((?:href|src)=["']|@import\s+["'])((?:\.\/)?(?:css\/|js\/)?[a-zA-Z0-9_\-./]+\.(?:css|js))(["'])/g,
+        (m, pre, url, post) => (m.includes('?v=') || NO_STAMP.test(url) ? m : `${pre}${url}?v=${assetVersion}${post}`));
+
+  // 1a. index.html: bump meta version + stamp all local asset links.
   try {
     const indexPath = path.join(__dirname, 'public', 'index.html');
     if (fs.existsSync(indexPath)) {
       let indexContent = fs.readFileSync(indexPath, 'utf-8');
-      const now = new Date();
-      const pad = (num) => String(num).padStart(2, '0');
-      const versionString = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}.${pad(now.getHours())}.${pad(now.getMinutes())}`;
-      
-      const updatedIndexContent = indexContent.replace(
+
+      let updatedIndexContent = indexContent.replace(
         /<meta name="app-build-version" content="[^"]*">/,
         `<meta name="app-build-version" content="${versionString}">`
       );
-      
+      updatedIndexContent = stampAsset(updatedIndexContent);
+
       if (updatedIndexContent !== indexContent) {
         fs.writeFileSync(indexPath, updatedIndexContent, 'utf-8');
-        console.log(`Auto-bumped app-build-version in public/index.html to: ${versionString}`);
+        console.log(`Auto-bumped app-build-version to ${versionString} and stamped assets with ?v=${assetVersion}`);
       }
     }
   } catch (err) {
     console.error("Error auto-bumping app-build-version during build:", err);
+  }
+
+  // 1b. style.css: stamp the @import'd CSS files so they bust too.
+  try {
+    const stylePath = path.join(__dirname, 'public', 'style.css');
+    if (fs.existsSync(stylePath)) {
+      const styleContent = fs.readFileSync(stylePath, 'utf-8');
+      const updatedStyle = stampAsset(styleContent);
+      if (updatedStyle !== styleContent) {
+        fs.writeFileSync(stylePath, updatedStyle, 'utf-8');
+        console.log(`Stamped style.css @imports with ?v=${assetVersion}`);
+      }
+    }
+  } catch (err) {
+    console.error("Error stamping style.css imports during build:", err);
   }
 
   // 2. Generate CommonJS version of server-providers.js for server.js to require() without eval
