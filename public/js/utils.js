@@ -28,9 +28,11 @@ export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
         border-left: 3px solid #06b6d4 !important;
         border-radius: 10px !important;
         box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-        opacity: 0 !important;
-        transform: translateX(30px) !important;
-        transition: opacity 0.3s ease, transform 0.3s ease !important;
+         opacity: 0 !important;
+         transform: translateX(30px) !important;
+         transition: opacity 0.3s ease, transform 0.3s ease !important;
+         /* Respect reduced motion: drop the slide/opacity tween when requested */
+         ${window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'transition: none !important; transform: none !important;' : ''}
         pointer-events: auto !important;
         font-family: inherit !important;
       }
@@ -803,6 +805,22 @@ export function triggerHaptic(success) {
     }
   } catch (e) {
     console.warn("Web Vibrate API failed:", e);
+  }
+}
+
+/**
+ * True when the user has requested reduced motion at the OS level
+ * (Android: Settings > Accessibility > Remove animations; macOS: Reduce motion).
+ * Use it to skip JS-driven animations (smooth scroll, entrance tweens, etc.)
+ * that the CSS `prefers-reduced-motion` media rule cannot control (e.g. inline
+ * styles or programmatic `scrollIntoView({behavior:'smooth'})`).
+ * @returns {boolean}
+ */
+export function prefersReducedMotion() {
+  try {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch (e) {
+    return false;
   }
 }
 

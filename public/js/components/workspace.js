@@ -1,6 +1,6 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
-import { parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading, triggerHaptic } from '../utils.js';
+import { parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading, triggerHaptic, prefersReducedMotion } from '../utils.js';
 import { buildPrintableText } from './workspace/state.js';
 import { renderSummary } from './workspace/summary.js';
 import { renderPrescription } from './workspace/prescription.js';
@@ -536,7 +536,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const targetItem = items[nextIndex];
       if (targetItem) {
         targetItem.click();
-        targetItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        targetItem.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 
         triggerHaptic(true);
       }

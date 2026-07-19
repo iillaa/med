@@ -7,7 +7,7 @@ import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
 import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
-import { showToast, runSuggestionWithUI } from './utils.js';
+import { showToast, runSuggestionWithUI, prefersReducedMotion } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
 
@@ -395,7 +395,7 @@ async function bootstrapApp() {
       const targetItem = items[nextIndex];
       if (targetItem) {
         targetItem.click();
-        targetItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        targetItem.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
       }
     }
   });
