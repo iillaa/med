@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="app-build-version" content="2026.07.19.23.32">
+  <meta name="app-build-version" content="2026.07.19.23.50">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -38,7 +38,7 @@
     })();
   </script>
   <!-- Preload critical assets -->
-  <link rel="preload" href="style.css?v=2607192332" as="style">
+  <link rel="preload" href="style.css?v=2607192350" as="style">
   <link rel="preload" href="drcat_logo.png" as="image" type="image/png">
   <!-- Google Fonts: Outfit — preconnect + preload the CSS so text paints with the brand font sooner -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,26 +47,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons (non-blocking) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="style.css?v=2607192332">
-  <link rel="stylesheet" href="css/utilities.css?v=2607192332">
+  <link rel="stylesheet" href="style.css?v=2607192350">
+  <link rel="stylesheet" href="css/utilities.css?v=2607192350">
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
 </head>
 <body>
-  <!-- APP LOADING OVERLAY - shown during init, hidden when ready -->
+  <!-- APP LOADING OVERLAY - full-screen boot splash, hidden when ready -->
   <div id="app-loading-overlay" class="loading-overlay">
     <div class="loading-overlay-brand">
-      <img src="drcat_logo.png" alt="Dr.CAT" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; animation: pulse-glow 2s ease-in-out infinite;">
+      <img src="drcat_logo.png" alt="Dr.CAT"
+           style="width: 88px; height: 88px; border-radius: 20px; object-fit: cover; box-shadow: var(--shadow-lg); animation: pulse-glow 2s ease-in-out infinite;">
       <div>
-        <h1 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Dr.CAT</h1>
-        <p style="font-size: 10px; color: var(--text-muted); margin: 0;">Chargement en cours...</p>
+        <h1 style="font-size: var(--text-2xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin: 0; letter-spacing: -0.02em;">Dr.CAT</h1>
+        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: var(--space-1) 0 0;">Rappel Clinique</p>
       </div>
     </div>
-    
+
     <div class="loading-overlay-progress">
       <div class="loading-overlay-bar-bg">
         <div id="app-loading-bar" class="loading-overlay-bar-fill" style="width: 0%;"></div>
       </div>
+      <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;">Chargement en cours…</p>
       <div id="app-loading-msg" class="loading-overlay-msg"></div>
     </div>
 
@@ -1174,7 +1176,7 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js?v=2607192332"></script>
+  <script type="module" src="js/main.js?v=2607192350"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
