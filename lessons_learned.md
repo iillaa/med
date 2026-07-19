@@ -123,5 +123,12 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: The diagnostics panel registered `beforeunload` and interval timers without cleanup, causing memory accumulation during long sessions.
 * **Solution**: Added explicit cleanup functions and `beforeunload` handlers to clear intervals and prevent leaks.
 
+### 26. Forced Reflow & Layout Thrashing (Browser Performance Violations)
+* **Problem**: Modifying the DOM (e.g., updating `.innerHTML` or toggling CSS classes) followed immediately by reading a layout property (like `scrollHeight`, `offsetHeight`, or `offsetWidth`) forced the browser to run synchronous layout reflow calculations, causing performance stutters and browser console warnings.
+* **Solution**: 
+  1. For scroll containers, wrapped the `scrollTop = scrollHeight` assignment in a `requestAnimationFrame` to defer the layout read-write cycle until after the browser naturally paints the DOM changes.
+  2. For animation resets, replaced the synchronous `offsetWidth` read trick with a double `requestAnimationFrame` wrapper, allowing the browser to render the class removal frame first, and then add the animation class back cleanly in the next frame.
+
 ---
+
 

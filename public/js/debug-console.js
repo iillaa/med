@@ -129,8 +129,10 @@ function renderLogs() {
     </div>`;
   }).join('');
 
-  // Auto-scroll to bottom
-  container.scrollTop = container.scrollHeight;
+  // Auto-scroll to bottom without forced reflow
+  requestAnimationFrame(() => {
+    container.scrollTop = container.scrollHeight;
+  });
 }
 
 function toggleViewer() {

@@ -512,8 +512,10 @@ function renderLogs() {
     return `<div style="margin-bottom: 4px;"><span style="color: var(--text-muted);">[${l.time}]</span> <span style="color: ${color}; font-weight: bold;">[${l.severity}]</span> ${escapeHtmlLogs(l.message)}</div>`;
   }).join('');
 
-  // Auto-scroll to bottom of terminal
-  term.scrollTop = term.scrollHeight;
+  // Auto-scroll to bottom of terminal without forced reflow
+  requestAnimationFrame(() => {
+    term.scrollTop = term.scrollHeight;
+  });
 }
 
 function escapeHtmlLogs(str) {

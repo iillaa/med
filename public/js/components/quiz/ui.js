@@ -453,8 +453,11 @@ export function renderQuestion() {
   const questionCard = document.getElementById('quiz-question-card');
   if (questionCard) {
     questionCard.classList.remove('animate-entrance');
-    void questionCard.offsetWidth;
-    questionCard.classList.add('animate-entrance');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        questionCard.classList.add('animate-entrance');
+      });
+    });
   }
 
   if (window.perf) window.perf.endMeasure('quiz.renderQuestion');
