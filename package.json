@@ -27,6 +27,8 @@
   },
   "devDependencies": {
     "@capacitor/cli": "8.4.1",
-    "eslint": "^8.57.1"
+    "eslint": "^8.57.1",
+    "jscpd": "^5.0.12",
+    "knip": "^6.27.0"
   }
 }

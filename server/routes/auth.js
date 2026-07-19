@@ -1,5 +1,5 @@
 const { state: cache } = require('../services/cache');
-const { isAdminRequest: checkIsAdmin, hashPassword, createToken, loginAttempts } = require('../services/auth-service');
+const { isAdminRequest: checkIsAdmin, hashPassword, createToken, loginAttempts, MAX_LOGIN_ATTEMPTS, LOGIN_RATE_LIMIT_MS, ADMIN_TOKEN_TTL } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { logAuditEvent } = require('../services/data-store');
 
@@ -21,7 +21,7 @@ function registerAuthRoutes(app) {
     const now = Date.now();
     const attempt = loginAttempts.get(ip);
 
-    if (attempt && attempt.count >= 5 && (now - attempt.lastAttempt) < 5 * 60 * 1000) {
+    if (attempt && attempt.count >= MAX_LOGIN_ATTEMPTS && (now - attempt.lastAttempt) < LOGIN_RATE_LIMIT_MS) {
       return res.status(429).json({ error: "Trop de tentatives. Réessayez dans 5 minutes." });
     }
 
@@ -50,7 +50,7 @@ function registerAuthRoutes(app) {
 
     loginAttempts.delete(ip);
     const token = createToken();
-    cache.activeTokens.set(token, { expiresAt: Date.now() + 12 * 60 * 60 * 1000 });
+    cache.activeTokens.set(token, { expiresAt: Date.now() + ADMIN_TOKEN_TTL });
     logAuditEvent('login_success', {}, req);
     res.json({ success: true, token });
   });

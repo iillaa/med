@@ -1,9 +1,5 @@
 const { PROVIDERS: serverProviders, detectProvider } = require('../../public/js/server-providers.cjs');
 
-function getProviderHeaders(provider) {
-  return provider.extraHeaders || {};
-}
-
 function getManagementEndpoint(provider) {
   if (provider.managementPort && provider.managementPath) {
     return { hostname: '127.0.0.1', port: provider.managementPort, path: provider.managementPath };
@@ -64,7 +60,6 @@ function isOriginAllowedDynamic(origin, allowedOrigins) {
 module.exports = {
   serverProviders,
   detectProvider,
-  getProviderHeaders,
   getManagementEndpoint,
   buildAllowedOrigins,
   isOriginAllowedDynamic

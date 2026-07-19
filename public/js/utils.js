@@ -634,7 +634,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
  * @param {string} initialMessage - The text to display.
  * @returns {object} Controller containing updateMessage(msg) and hide() functions.
  */
-export function showLoadingOverlay(initialMessage) {
+function showLoadingOverlay(initialMessage) {
   if (!document.getElementById('drcat-loading-styles')) {
     const style = document.createElement('style');
     style.id = 'drcat-loading-styles';

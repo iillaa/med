@@ -163,7 +163,7 @@ export function initQuiz(onOpenCatCard) {
   }
 }
 
-export function showQuizSetup() {
+function showQuizSetup() {
   state.quizSession.failedQuestions = [];
 
   if (timerIntervalId) clearInterval(timerIntervalId);
@@ -187,7 +187,7 @@ export function showQuizSetup() {
   }
 }
 
-export function startQuizSession() {
+function startQuizSession() {
   const selectedCategory = quizCategorySelect ? quizCategorySelect.value : 'all';
   const questionCount = quizCountSelect ? parseInt(quizCountSelect.value) : 10;
   const includeClinical = checkboxSpecialty ? checkboxSpecialty.checked : false;
@@ -358,7 +358,7 @@ export function startQuizSession() {
   renderQuestion();
 }
 
-export function renderQuestion() {
+function renderQuestion() {
   if (window.perf) window.perf.startMeasure('quiz.renderQuestion');
   const session = state.quizSession;
   if (!session || !session.questions || session.questions.length === 0) {
@@ -463,7 +463,7 @@ export function renderQuestion() {
   if (window.perf) window.perf.endMeasure('quiz.renderQuestion');
 }
 
-export function generateQCMOptions(question) {
+function generateQCMOptions(question) {
   qcmContainer.innerHTML = '';
 
   let options = [];
@@ -532,7 +532,7 @@ export function generateQCMOptions(question) {
   });
 }
 
-export function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
+function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
   if (!feedbackPanel) return;
 
   feedbackPanel.style.display = 'flex';
@@ -566,7 +566,7 @@ export function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
   if (nextBtn) nextBtn.style.display = 'block';
 }
 
-export function startQuestionTimer() {
+function startQuestionTimer() {
   if (timerIntervalId) clearInterval(timerIntervalId);
 
   const session = state.quizSession;
@@ -586,7 +586,7 @@ export function startQuestionTimer() {
   }, 1000);
 }
 
-export function updateTimerUI() {
+function updateTimerUI() {
   if (timerCount) timerCount.textContent = `${timeLeft}s`;
   if (timerFill && state.quizSession) {
     const percent = (timeLeft / state.quizSession.timerSeconds) * 100;
@@ -600,7 +600,7 @@ export function updateTimerUI() {
   }
 }
 
-export function handleTimerExpiration() {
+function handleTimerExpiration() {
   const session = state.quizSession;
   const q = session.questions[session.currentIndex];
 
@@ -661,7 +661,7 @@ export function handleTimerExpiration() {
   }
 }
 
-export function showHint() {
+function showHint() {
   const session = state.quizSession;
   const q = session.questions[session.currentIndex];
   if (!q) return;
@@ -679,7 +679,7 @@ export function showHint() {
   showToast("Indice révélé ! Valeur max de la question : 0.5 pt", "fa-lightbulb", 3000);
 }
 
-export function showResults() {
+function showResults() {
   if (timerIntervalId) clearInterval(timerIntervalId);
   releaseWakeLock(wakeLock);
   if (quizSetupView) quizSetupView.style.display = 'none';
@@ -809,7 +809,7 @@ export function showResults() {
   }
 }
 
-export function advanceQuestion() {
+function advanceQuestion() {
   const session = state.quizSession;
   session.currentIndex++;
 
@@ -820,7 +820,7 @@ export function advanceQuestion() {
   }
 }
 
-export function retryFailedQuestions() {
+function retryFailedQuestions() {
   const session = state.quizSession;
   if (!session.failedQuestions || session.failedQuestions.length === 0) return;
 

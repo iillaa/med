@@ -71,10 +71,6 @@ export function detectProvider(url) {
   return PROVIDERS[3]; // direct
 }
 
-export function getProviderById(id) {
-  return PROVIDERS.find(p => p.id === id) || PROVIDERS[3];
-}
-
 export function isTunnelUrl(url) {
   return detectProvider(url).id !== 'direct';
 }
@@ -89,18 +85,6 @@ export function isDevHostname(hostname) {
 
 export function isTunnelOrigin(origin) {
   return PROVIDERS.some(p => p.isTunnelOrigin(origin));
-}
-
-export function getTunnelProviderName(url) {
-  return detectProvider(url).name;
-}
-
-export function getTunnelManagementInfo(url) {
-  const provider = detectProvider(url);
-  if (provider.managementPort && provider.managementPath) {
-    return { hostname: '127.0.0.1', port: provider.managementPort, path: provider.managementPath };
-  }
-  return null;
 }
 
 export function getTunnelLabel(url) {
@@ -133,20 +117,4 @@ export function getPrimaryProviderId(rawConfig) {
     return detectProvider(rawConfig.urls[0]).id;
   }
   return null;
-}
-
-// ── CORS Origin Matching ───────────────────────────────────
-export function isOriginAllowedByProvider(origin, configuredUrls = []) {
-  if (!origin) return true; // same-origin
-  // Always allow localhost
-  if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return true;
-  // Check configured URLs and their provider patterns
-  for (const url of configuredUrls) {
-    const provider = detectProvider(url);
-    if (provider.urlPattern && provider.urlPattern.test(origin)) {
-      return true;
-    }
-    if (origin === url) return true;
-  }
-  return false;
 }

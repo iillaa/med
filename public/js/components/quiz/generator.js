@@ -70,7 +70,7 @@ export function cleanOrientationOfClues(text, title, category) {
   return result;
 }
 
-export function parseClinicalSigns(cat) {
+function parseClinicalSigns(cat) {
   if (!cat || !cat.summary) return '';
   const sec1Match = cat.summary.match(/\*\*1\.[^*]+\*\*([\s\S]+?)(?=\*\*2\.|\*\*3\.|\*\*4\.|\*\*5\.|\n\n|$)/);
   if (!sec1Match) return '';
@@ -139,7 +139,7 @@ export function generateClinicalVignette(cat) {
   return text;
 }
 
-export function extractKeywords(text) {
+function extractKeywords(text) {
   if (!text) return [];
   const words = text.split(/[^a-zA-ZÀ-ÿ0-9]+/);
   const seenNormalized = new Set();

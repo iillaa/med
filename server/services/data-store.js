@@ -112,13 +112,9 @@ async function runDatabaseBackup(dbFile) {
 }
 
 module.exports = {
-  AsyncLock,
   dbLock,
-  safeWriteAsync,
   safeWriteJsonAsync,
   safeWriteTextAsync,
   logAuditEvent,
-  runDatabaseBackup,
-  AUDIT_LOG_FILE,
-  BACKUPS_DIR
+  runDatabaseBackup
 };

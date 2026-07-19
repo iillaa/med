@@ -10,7 +10,7 @@ export function autoSelectDevTab() {
   disableAdminTabsForDev();
 }
 
-export function disableAdminTabsForDev() {
+function disableAdminTabsForDev() {
   const sugTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-suggestions"]');
   if (sugTab) {
     sugTab.style.opacity = '0.4';

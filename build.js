@@ -123,13 +123,10 @@ function rebuildClientAssets() {
       content += `\n\nmodule.exports = {
   PROVIDERS,
   detectProvider,
-  getProviderById,
   isTunnelUrl,
   getExtraHeaders,
   isDevHostname,
   isTunnelOrigin,
-  getTunnelProviderName,
-  getTunnelManagementInfo,
   getPrimaryProviderId,
   sortUrlsByProviderPriority
 };\n`;

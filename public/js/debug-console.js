@@ -28,7 +28,7 @@ function addLog(level, args, meta = {}) {
 }
 
 // ── Override Console Methods ─────────────────────────────────
-export function startDebugConsole() {
+function startDebugConsole() {
   if (originalConsole.log) return; // Already initialized
 
   // Save originals

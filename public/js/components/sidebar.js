@@ -4,7 +4,7 @@ import { setupSwipeGestures } from '../utils.js';
 // DOM Elements
 let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
 
-export function getStatusLabel(status) {
+function getStatusLabel(status) {
   switch(status) {
     case 'done': return 'Maîtrisé';
     case 'doing': return 'En cours';
@@ -167,7 +167,7 @@ export function updateSidebarItemUI(cat) {
 }
 
 // Filter CAT list based on search, category, and quick status filter selections
-export function filterCats(onFilterTriggered) {
+function filterCats(onFilterTriggered) {
   const query = searchInput.value.toLowerCase().trim();
   const selectedCat = categoryFilter.value;
 

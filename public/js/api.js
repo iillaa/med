@@ -97,21 +97,6 @@ export function setAppMode(mode) {
 
 
 
-// Permission helpers
-export function canEditDirectly() {
-  return getAppMode() === APP_MODES.ADMIN_LOCAL;
-}
-export function canSuggest() {
-  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
-}
-export function canSync() {
-  return [APP_MODES.WEB_CLIENT, APP_MODES.ANDROID_ONLINE].includes(getAppMode());
-}
-export function isAdminMode() {
-  return getAppMode() === APP_MODES.ADMIN_LOCAL;
-}
-
-
 // Module cache for client-side search in offline mode
 let offlinePdfIndexCache = null;
 
@@ -119,7 +104,7 @@ let offlinePdfIndexCache = null;
  * Returns the configured remote server URL (tunnel or otherwise) if one is set.
  * When this returns a URL, all API calls should go through the server even in Capacitor/offline mode.
  */
-export function getRemoteServerUrl() {
+function getRemoteServerUrl() {
   const storedOverride = localStorage.getItem('dr_cat_remote_server_url');
   const lastCompiledUrl = localStorage.getItem('dr_cat_last_compiled_url');
 
@@ -150,7 +135,7 @@ export function hasRemoteServer() {
  * Returns the primary remote server URL (the one configured as highest priority).
  * Use this for quick "should we sync?" checks.
  */
-export function getPrimaryRemoteUrl() {
+function getPrimaryRemoteUrl() {
   const urls = getConfiguredRemoteUrls();
   return urls.length > 0 ? urls[0] : null;
 }
@@ -258,23 +243,6 @@ export async function checkAdminStatus() {
   }
 }
  
-export async function checkIsLocal() {
-  if (isOfflineApp) {
-    return true; // Standalone app is always "local" to the device
-  }
-  
-  try {
-    const res = await fetchWithTimeout('/api/is-local', { headers: getHeaders() });
-    const data = await res.json();
-    return !!data.isLocal;
-  } catch (err) {
-    console.error("Failed to check local status:", err);
-    // Fallback: check hostname client-side as well
-    const host = window.location.hostname;
-    return host === 'localhost' || host === '127.0.0.1' || host === '::1';
-  }
-}
-
 // Fast-fail fetch with a short timeout for connectivity tests
 async function quickPing(url, timeoutMs = 1500) {
   const controller = new AbortController();
@@ -563,16 +531,6 @@ export async function bulkImportCats(importList) {
 }
 
 
-export async function updateCatOverrides(id, data) {
-  // Fallback: save to local overrides (persisted to localStorage)
-  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-  if (!localOverrides[id]) localOverrides[id] = {};
-  if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
-  if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
-  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
-  return { success: true, message: "Modifications enregistrées localement." };
-}
-
 export async function submitSuggestion(suggestionData, onAttempt) {
   const mode = getAppMode();
 
@@ -816,56 +774,6 @@ export async function fetchPdfIndexStatus() {
   }
 }
 
-export function hasRemoteServerConfigured() {
-  return typeof REMOTE_SERVER_URL === 'string' && REMOTE_SERVER_URL.trim().length > 0;
-}
-
-export async function checkRealConnection() {
-  // On localhost, skip remote URL ping to avoid unnecessary cross-origin noise
-  const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
-  if (isLocalWebBrowser) {
-    return navigator.onLine;
-  }
-
-  const configuredUrls = getConfiguredRemoteUrls();
-  
-  for (const configuredUrl of configuredUrls) {
-    try {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 3000);
-      const providerHeaders = getExtraHeaders(configuredUrl);
-      const res = await fetch(`${configuredUrl}/api/search-status`, {
-        signal: controller.signal,
-        headers: { ...getHeaders(), ...providerHeaders }
-      });
-      clearTimeout(id);
-      if (res.ok) return true;
-      // If we got a response but not ok (e.g. tunnel HTML challenge page) fall through to WAN check
-    } catch (_) {
-      // Connection failed, try next configured URL
-    }
-  }
-
-  // WAN connectivity fallback ping — check multiple endpoints to verify internet access
-  const wanUrls = ['https://www.cloudflare.com/cdn-cgi/trace', 'https://httpbin.org/get'];
-  for (const url of wanUrls) {
-    try {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 3000);
-      await fetchWithTimeout(url, {
-        method: 'HEAD',
-        mode: 'no-cors',
-        signal: controller.signal
-      });
-      clearTimeout(id);
-      return true;
-    } catch (_) {
-      // try next URL
-    }
-  }
-  return false;
-}
-
 export async function pingEndpoint(url, timeoutMs = 2500) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -928,12 +836,6 @@ export async function fetchDiagnosticsDbStats() {
 export async function fetchDiagnosticsIndexDetail() {
   const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/index-detail'), { headers: getHeaders() });
   if (!res.ok) throw new Error("Failed to fetch index details");
-  return res.json();
-}
-
-export async function fetchDiagnosticsRemoteUrl() {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/remote-server-url'), { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch remote server URL");
   return res.json();
 }
 

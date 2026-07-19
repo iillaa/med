@@ -58,40 +58,11 @@ function isAdminRequest(req, activeTokens) {
   return true;
 }
 
-function checkLoginRateLimit(ip) {
-  const now = Date.now();
-  const attempt = loginAttempts.get(ip);
-  if (attempt && attempt.count >= MAX_LOGIN_ATTEMPTS && (now - attempt.lastAttempt) < LOGIN_RATE_LIMIT_MS) {
-    return { allowed: false, retryAfter: Math.ceil((LOGIN_RATE_LIMIT_MS - (now - attempt.lastAttempt)) / 1000) };
-  }
-  return { allowed: true };
-}
-
-function recordLoginAttempt(ip, success) {
-  const now = Date.now();
-  if (success) {
-    loginAttempts.delete(ip);
-  } else {
-    if (loginAttempts.has(ip)) {
-      const attempt = loginAttempts.get(ip);
-      attempt.count++;
-      attempt.lastAttempt = now;
-    } else {
-      loginAttempts.set(ip, { count: 1, lastAttempt: now });
-    }
-  }
-}
-
 function createToken() {
   return crypto.randomBytes(16).toString('hex');
 }
 
-function createTokenEntry() {
-  return { expiresAt: Date.now() + ADMIN_TOKEN_TTL };
-}
-
 module.exports = {
-  PASSWORD_FILE,
   ADMIN_TOKEN_TTL,
   MAX_LOGIN_ATTEMPTS,
   LOGIN_RATE_LIMIT_MS,
@@ -99,8 +70,5 @@ module.exports = {
   hashPassword,
   initAdminPassword,
   isAdminRequest,
-  checkLoginRateLimit,
-  recordLoginAttempt,
-  createToken,
-  createTokenEntry
+  createToken
 };
