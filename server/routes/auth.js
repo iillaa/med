@@ -22,7 +22,8 @@ function registerAuthRoutes(app) {
     const attempt = loginAttempts.get(ip);
 
     if (attempt && attempt.count >= MAX_LOGIN_ATTEMPTS && (now - attempt.lastAttempt) < LOGIN_RATE_LIMIT_MS) {
-      return res.status(429).json({ error: "Trop de tentatives. Réessayez dans 5 minutes." });
+      const retryMinutes = Math.ceil(LOGIN_RATE_LIMIT_MS / 60000);
+      return res.status(429).json({ error: `Trop de tentatives. Réessayez dans ${retryMinutes} minutes.` });
     }
 
     const { password } = req.body;
