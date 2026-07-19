@@ -109,13 +109,18 @@ function req(method, path, body, headers = {}) {
     // Token grants access
     console.log('\n3. Authenticated access control:');
     check('GET  /api/is-admin → true', (await req('GET', '/api/is-admin', null, { 'x-admin-token': token })).body.isAdmin === true);
-    check('POST /api/cats/:id → 200', (await req('POST', '/api/cats/1', { summary: 'auth test' }, { 'x-admin-token': token })).status === 200);
+
+    const newCat = await req('POST', '/api/cats', { title: 'Test CAT ' + Date.now(), category: 'Test', summary: 'original summary', red_flags: '', ordonnance: '', pdf_keywords: [] }, { 'x-admin-token': token });
+    check('POST /api/cats → 200', newCat.status === 200 && newCat.body.success === true);
+    const testCatId = newCat.body.cat.id;
+
+    check('POST /api/cats/:id → 200', (await req('POST', '/api/cats/' + testCatId, { summary: 'auth test' }, { 'x-admin-token': token })).status === 200);
     check('POST /api/reindex → 200', (await req('POST', '/api/reindex', {}, { 'x-admin-token': token })).status === 200);
     check('GET  /api/diagnostics/system → 200', (await req('GET', '/api/diagnostics/system', null, { 'x-admin-token': token })).status === 200);
 
     // Suggestion lifecycle
     console.log('\n4. Suggestion lifecycle:');
-    const sug = await req('POST', '/api/suggestions', { type: 'edit', catId: 1, data: { summary: 'sug ' + Date.now() } });
+    const sug = await req('POST', '/api/suggestions', { type: 'edit', catId: testCatId, data: { summary: 'sug ' + Date.now() } });
     check('POST /api/suggestions → created', sug.status === 200 && sug.body.success === true);
     const sugId = sug.body.suggestion.id;
 
@@ -127,6 +132,9 @@ function req(method, path, body, headers = {}) {
 
     const after = await req('GET', '/api/suggestions', null, { 'x-admin-token': token });
     check('Suggestion removed after approve', !after.body.find(s => s.id === sugId));
+
+    // Cleanup test cat
+    await req('DELETE', '/api/cats/' + testCatId, {}, { 'x-admin-token': token });
 
     // Logout
     console.log('\n5. Logout:');

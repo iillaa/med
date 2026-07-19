@@ -3,7 +3,7 @@
     "id": 1,
     "category": "Gastro-entérologie",
     "title": "CAT devant intoxication alimentaire",
-    "summary": "updated 1784417364096",
+    "summary": "**1. Évaluation initiale & Diagnostic :**\n- Interrogatoire : Notion de cas similaires (repas commun), délai d'apparition (court pour Staph. aureus, long pour Salmonella), nature des aliments.\n- Clinique : Douleurs abdominales, vomissements, diarrhée, fièvre, signes de déshydratation.\n\n**2. Conduite à tenir :**\n- Évaluer l'état d'hydratation (pli cutané, soif, tension, diurèse).\n- Repos digestif initial puis réalimentation progressive (éviter lait, graisses, fibres).\n- Réhydratation orale (SRO) prioritaire.\n\n**3. Traitement :**\n- Anti-sécrétoire : Racécadotril (Tiorfan) 100mg, 1 gélule 3x/jour (max 7 jours).\n- Antispasmodique : Phloroglucinol (Spasfon) 80mg, 2 cp au moment de la crise.\n- Antibiotiques : Généralement contre-indiqués (sauf cas sévères avec fièvre élevée, syndrome dysentérique : Ciprofloxacine 500mg 2x/j pendant 3-5 jours).\n\n**4. Examens complémentaires :**\n- Biologie : Ionogramme sanguin, urée, créatinine (uniquement si signes de déshydratation clinique ou terrain fragile).\n- Bactériologie : Coproculture avec recherche de Salmonella, Shigella, Campylobacter (si diarrhée glaireuse/sanglante ou fièvre élevée).\n\n**5. Orientation / Avis Spécialisé :**\n- Avis Gastro-entérologue si symptômes prolongés (>48h), suspicion de germe invasif (Salmonella/Shigella) ou terrain fragile. Hospitalisation urgente si déshydratation sévère ou choc septique.",
     "red_flags": "Fièvre > 38.5°C, syndrome dysentérique (sang/glaires dans les selles), déshydratation clinique (perte de poids > 5%), terrain à risque (nourrisson, sujet âgé, immunodéprimé).",
     "ordonnance": "1. SRO (Solutés de Réhydratation Orale) : 1 sachet dans 1L d'eau minérale, à boire par petites gorgées.\n2. Tiorfan (Racécadotril) 100mg : 1 gélule 3 fois par jour, max 7 jours.\n3. Spasfon (Phloroglucinol) 80mg : 2 comprimés en cas de douleur abdominale, max 3 fois par jour.",
     "pdf_keywords": [
@@ -12,57 +12,7 @@
       "Urgences",
       "ioniques"
     ],
-    "updatedAt": 1784417364138,
-    "history": [
-      {
-        "timestamp": 1784416649503,
-        "action": "edit",
-        "detail": "Modifié directement par l'administrateur",
-        "previousState": {
-          "summary": "**1. Évaluation initiale & Diagnostic :**\n- Interrogatoire : Notion de cas similaires (repas commun), délai d'apparition (court pour Staph. aureus, long pour Salmonella), nature des aliments.\n- Clinique : Douleurs abdominales, vomissements, diarrhée, fièvre, signes de déshydratation.\n\n**2. Conduite à tenir :**\n- Évaluer l'état d'hydratation (pli cutané, soif, tension, diurèse).\n- Repos digestif initial puis réalimentation progressive (éviter lait, graisses, fibres).\n- Réhydratation orale (SRO) prioritaire.\n\n**3. Traitement :**\n- Anti-sécrétoire : Racécadotril (Tiorfan) 100mg, 1 gélule 3x/jour (max 7 jours).\n- Antispasmodique : Phloroglucinol (Spasfon) 80mg, 2 cp au moment de la crise.\n- Antibiotiques : Généralement contre-indiqués (sauf cas sévères avec fièvre élevée, syndrome dysentérique : Ciprofloxacine 500mg 2x/j pendant 3-5 jours).\n\n**4. Examens complémentaires :**\n- Biologie : Ionogramme sanguin, urée, créatinine (uniquement si signes de déshydratation clinique ou terrain fragile).\n- Bactériologie : Coproculture avec recherche de Salmonella, Shigella, Campylobacter (si diarrhée glaireuse/sanglante ou fièvre élevée).\n\n**5. Orientation / Avis Spécialisé :**\n- Avis Gastro-entérologue si symptômes prolongés (>48h), suspicion de germe invasif (Salmonella/Shigella) ou terrain fragile. Hospitalisation urgente si déshydratation sévère ou choc septique."
-        }
-      },
-      {
-        "timestamp": 1784416650900,
-        "action": "edit",
-        "detail": "Modifié via approbation d'une proposition de modification",
-        "previousState": {
-          "summary": "auth test"
-        }
-      },
-      {
-        "timestamp": 1784416745412,
-        "action": "edit",
-        "detail": "Modifié directement par l'administrateur",
-        "previousState": {
-          "summary": "updated 1784416650464"
-        }
-      },
-      {
-        "timestamp": 1784416746887,
-        "action": "edit",
-        "detail": "Modifié via approbation d'une proposition de modification",
-        "previousState": {
-          "summary": "auth test"
-        }
-      },
-      {
-        "timestamp": 1784417362800,
-        "action": "edit",
-        "detail": "Modifié directement par l'administrateur",
-        "previousState": {
-          "summary": "updated 1784416746850"
-        }
-      },
-      {
-        "timestamp": 1784417364138,
-        "action": "edit",
-        "detail": "Modifié via approbation d'une proposition de modification",
-        "previousState": {
-          "summary": "auth test"
-        }
-      }
-    ]
+    "updatedAt": 1784417364138
   },
   {
     "id": 2,
@@ -814,14 +764,7 @@
     "pdf_keywords": [
       "N"
     ],
-    "updatedAt": 1783818643924,
-    "history": [
-      {
-        "timestamp": 1783818643924,
-        "action": "create",
-        "detail": "Créé via approbation d'une proposition de fiche"
-      }
-    ]
+    "updatedAt": 1783818643924
   },
   {
     "id": 57,
@@ -831,13 +774,6 @@
     "red_flags": "T",
     "ordonnance": "F",
     "pdf_keywords": [],
-    "updatedAt": 1783819337464,
-    "history": [
-      {
-        "timestamp": 1783819337464,
-        "action": "create",
-        "detail": "Créé via approbation d'une proposition de fiche"
-      }
-    ]
+    "updatedAt": 1783819337464
   }
 ]
