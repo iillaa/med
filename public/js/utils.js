@@ -809,6 +809,21 @@ export function triggerHaptic(success) {
 }
 
 /**
+ * Returns a debounced wrapper that delays `fn` until `wait` ms have elapsed
+ * since the last call. Used to keep typing in search/filter inputs smooth.
+ * @param {Function} fn
+ * @param {number} wait ms
+ * @returns {Function}
+ */
+export function debounce(fn, wait = 150) {
+  let t;
+  return function (...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+/**
  * True when the user has requested reduced motion at the OS level
  * (Android: Settings > Accessibility > Remove animations; macOS: Reduce motion).
  * Use it to skip JS-driven animations (smooth scroll, entrance tweens, etc.)

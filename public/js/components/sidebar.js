@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { setupSwipeGestures } from '../utils.js';
+import { setupSwipeGestures, debounce } from '../utils.js';
 
 // DOM Elements
 let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
@@ -22,8 +22,10 @@ export function initSidebar(onSelectCat, onFilterTriggered) {
   const openSidebarBtn = document.getElementById('open-sidebar-btn');
   const closeSidebarBtn = document.getElementById('close-sidebar-btn');
 
-  // Search and Category input listeners
-  if (searchInput) searchInput.addEventListener('input', () => filterCats(onFilterTriggered));
+  // Search and Category input listeners.
+  // Debounce keystrokes (150ms) so the (full) list re-render only fires after
+  // the user pauses — smooth typing instead of a re-render per character.
+  if (searchInput) searchInput.addEventListener('input', debounce(() => filterCats(onFilterTriggered), 150));
   if (categoryFilter) categoryFilter.addEventListener('change', () => filterCats(onFilterTriggered));
 
   // Quick status filter pills

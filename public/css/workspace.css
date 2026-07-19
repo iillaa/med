@@ -766,6 +766,36 @@
   to { transform: rotate(360deg); }
 }
 
+/* Skeleton results shown during PDF content search (reuses .skeleton-line shimmer) */
+.pdf-search-loading-label {
+  font-size: var(--text-sm, 12.5px);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-search-skeleton {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.pdf-search-result-card.skeleton {
+  pointer-events: none;
+}
+
+/* Make skeleton lines theme-aware (light bg needs a lighter shimmer base) */
+.light-theme .skeleton-line {
+  background: linear-gradient(90deg,
+    var(--border-color) 25%,
+    rgba(15, 23, 42, 0.06) 50%,
+    var(--border-color) 75%);
+  background-size: 200% 100%;
+}
+
 .pdf-search-results {
   display: flex;
   flex-direction: column;
