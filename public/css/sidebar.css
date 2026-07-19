@@ -16,6 +16,7 @@
   z-index: 100;
   transition: var(--transition-smooth);
   overflow: hidden;
+  will-change: transform;
 }
 
 /* ── LEVEL 1: Header strip ── */
@@ -371,6 +372,10 @@
   cursor: pointer;
   transition: var(--transition-smooth);
   border: 1px solid transparent;
+  /* Skip rendering off-screen list items (cheap win for long lists). The
+     intrinsic size keeps the scrollbar stable so there's no jump on scroll. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 52px;
 }
 
 .cat-item:hover {
