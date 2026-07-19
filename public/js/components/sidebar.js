@@ -99,24 +99,63 @@ export function populateCategoryFilter(cats) {
   });
 }
 
+// Keep a stable cat.id -> <li> map so re-renders (filtering/search) update
+// existing nodes in place instead of tearing down the whole list. This makes
+// list updates O(changes) instead of O(all) and preserves attached listeners.
+const catItemNodes = new Map();
+
+function buildCatItem(cat, onSelectCat) {
+  const li = document.createElement('li');
+  li.className = 'cat-item';
+  li.setAttribute('data-id', cat.id);
+  li.innerHTML = `
+    <div class="cat-indicator ${cat.status}"></div>
+    <div class="cat-item-content">
+      <span class="cat-item-title">${cat.id}. ${cat.title}</span>
+      <div class="cat-item-meta">
+        <span class="cat-item-cat">${cat.category}</span>
+        <span class="cat-item-status">${getStatusLabel(cat.status)}</span>
+      </div>
+    </div>
+  `;
+  li.addEventListener('click', () => {
+    onSelectCat(cat);
+    if (window.innerWidth <= 850 && sidebar) {
+      sidebar.classList.remove('open');
+    }
+  });
+  return li;
+}
+
+function paintCatItem(li, cat) {
+  li.className = `cat-item ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;
+  li.setAttribute('data-id', cat.id);
+  const title = li.querySelector('.cat-item-title');
+  if (title) title.textContent = `${cat.id}. ${cat.title}`;
+  const catEl = li.querySelector('.cat-item-cat');
+  if (catEl) catEl.textContent = cat.category;
+  const statusEl = li.querySelector('.cat-item-status');
+  if (statusEl) statusEl.textContent = getStatusLabel(cat.status);
+  const indicator = li.querySelector('.cat-indicator');
+  if (indicator) indicator.className = `cat-indicator ${cat.status}`;
+}
+
 // Render CATs list
 export function renderCatList(cats, onSelectCat) {
   if (window.perf) window.perf.startMeasure('sidebar.renderCatList');
   if (!catList) catList = document.getElementById('cat-list');
   if (!catList) return;
 
-  catList.innerHTML = '';
-  
+  // Empty state: clear everything and show the placeholder.
   if (cats.length === 0) {
-    const emptyLi = document.createElement('li');
-    emptyLi.className = 'empty-state';
-    emptyLi.innerHTML = `
-      <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
-        <i class="fa-solid fa-filter-circle-xmark" style="font-size: 28px; margin-bottom: 10px; display: block; opacity: 0.6;"></i>
-        <span style="font-size: 13px; line-height: 1.5;">Aucune fiche ne correspond à vos filtres actuels.</span>
-      </div>
-    `;
-    catList.appendChild(emptyLi);
+    catItemNodes.clear();
+    catList.innerHTML = `
+      <li class="empty-state">
+        <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
+          <i class="fa-solid fa-filter-circle-xmark" style="font-size: 28px; margin-bottom: 10px; display: block; opacity: 0.6;"></i>
+          <span style="font-size: 13px; line-height: 1.5;">Aucune fiche ne correspond à vos filtres actuels.</span>
+        </div>
+      </li>`;
     if (window.perf) {
       window.perf.endMeasure('sidebar.renderCatList');
       window.perf.recordMilestone('sidebarRendered');
@@ -124,32 +163,40 @@ export function renderCatList(cats, onSelectCat) {
     return;
   }
 
-  cats.forEach(cat => {
-    const li = document.createElement('li');
-    li.className = `cat-item ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;
-    li.setAttribute('data-id', cat.id);
-    
-    li.innerHTML = `
-      <div class="cat-indicator ${cat.status}"></div>
-      <div class="cat-item-content">
-        <span class="cat-item-title">${cat.id}. ${cat.title}</span>
-        <div class="cat-item-meta">
-          <span>${cat.category}</span>
-          <span>${getStatusLabel(cat.status)}</span>
-        </div>
-      </div>
-    `;
+  const incoming = new Set(cats.map(c => c.id));
+  // Remove nodes no longer present.
+  for (const [id, li] of catItemNodes) {
+    if (!incoming.has(id)) {
+      li.remove();
+      catItemNodes.delete(id);
+    }
+  }
 
-    li.addEventListener('click', () => {
-      onSelectCat(cat);
-      // Close sidebar on mobile after selection
-      if (window.innerWidth <= 850 && sidebar) {
-        sidebar.classList.remove('open');
-      }
-    });
-
-    catList.appendChild(li);
+  const fragment = document.createDocumentFragment();
+  let attached = false;
+  let prev = null;
+  cats.forEach((cat) => {
+    let li = catItemNodes.get(cat.id);
+    if (!li) {
+      li = buildCatItem(cat, onSelectCat);
+      catItemNodes.set(cat.id, li);
+      fragment.appendChild(li);
+      attached = true;
+    } else {
+      paintCatItem(li, cat); // update in place (text + active + status dot)
+    }
+    // Re-establish correct visual order by moving each node after the previous
+    // one. Only moves nodes; never tears down the list (preserves listeners).
+    if (prev) {
+      if (li !== prev.nextSibling) catList.insertBefore(li, prev.nextSibling);
+    } else if (li !== catList.firstChild) {
+      catList.insertBefore(li, catList.firstChild);
+    }
+    prev = li;
   });
+
+  if (attached) catList.appendChild(fragment);
+
   if (window.perf) {
     window.perf.endMeasure('sidebar.renderCatList');
     window.perf.recordMilestone('sidebarRendered');
