@@ -8,7 +8,24 @@ try {
 } catch (_) {
   console.warn('[build] esbuild bundler not available; skipping app bundle.');
 }
+
+// Phase 5.4: inline critical (above-the-fold) CSS into index.html.
+let inlineCriticalCss = () => {};
+try {
+  ({ inlineIntoIndex } = require('./build-inline-critical-css.js'));
+  inlineCriticalCss = inlineIntoIndex;
+} catch (_) {
+  console.warn('[build] critical-css inliner not available; skipping.');
+}
 function rebuildClientAssets() {
+  // Phase 5.4: inline critical CSS into index.html (before version-bump
+  // stamping so the inlined <style> is preserved). No-op if unavailable.
+  try {
+    inlineCriticalCss();
+  } catch (err) {
+    console.error("Error inlining critical CSS during build:", err);
+  }
+
   const publicDataDir = path.join(__dirname, 'public', 'data');
   if (!fs.existsSync(publicDataDir)) {
     fs.mkdirSync(publicDataDir, { recursive: true });

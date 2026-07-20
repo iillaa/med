@@ -138,7 +138,7 @@
   *Why:* first screen ships less JS = faster TTI. **Effort M · Risk Med.**
 - [x] **5.3 Defer heavy libs** — load `pdf.min.js`/worker only when a PDF opens.
   *Why:* pdf.js is large; most sessions may never open a PDF. **Effort S · Risk Low.**
-- [ ] **5.4 Critical CSS inline + defer rest** — inline above-the-fold CSS in `<head>`, lazy-load the rest.
+- [x] **5.4 Critical CSS inline + defer rest** — inline above-the-fold CSS in `<head>`, lazy-load the rest.
   *Why:* faster first paint. **Effort M · Risk Med.**
 - [ ] **5.5 Self-host fonts + subset** — bundle Outfit locally (WOFF2, subset to used weights/glyphs) instead of Google Fonts CDN.
   *Why:* removes a render-blocking third-party request; works fully offline. **Effort M · Risk Low.**

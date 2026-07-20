@@ -3,7 +3,334 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="app-build-version" content="2026.07.20.13.16">
+  <style>
+/* Critical CSS (Phase 5.4) — inlined for instant first paint */
+:root {
+  color-scheme: dark; /* default; head script + toggle override via style.colorScheme */
+  /* Native soft-keyboard height, set by setupKeyboardHandling() (Phase 4.6). */
+  --capacitor-keyboard-height: 0px;
+  --bg-app: #090d16;
+  --bg-sidebar: #0f172a;
+  --bg-card: #1e293b;
+  --bg-input: #1e293b;
+  --border-color: #334155;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --color-primary: #06b6d4; /* Neon Cyan */
+  --color-primary-hover: #0891b2;
+  --color-success: #10b981; /* Emerald */
+  --color-warning: #f59e0b; /* Amber */
+  --color-danger: #ef4444;  /* Rose */
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* ── Spacing scale (4px base) — use instead of magic pixel values ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* ── Typography scale ── */
+  --text-xs: 11px;
+  --text-sm: 12.5px;
+  --text-base: 15px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ── Z-index scale — single source so overlays never fight ── */
+  --z-sidebar: 100;
+  --z-sticky: 500;
+  --z-overlay: 1000;
+  --z-modal: 2000;
+  --z-toast: 9999;
+
+  /* ── Motion tokens ─────────────────────────────────────────
+     Single source of truth for timing & easing so animation feels
+     consistent across the whole app. Animate transform/opacity only. */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --motion-slower: 450ms;
+  /* Standard eases */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);     /* material standard */
+  --ease-decelerate: cubic-bezier(0.16, 1, 0.3, 1);  /* entrance/overshoot settle */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);     /* emphasized in */
+  --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);   /* subtle pop */
+  /* Ready-made transition shorthands (transform/opacity/colors only) */
+  --transition-smooth: opacity var(--motion-base) ease, transform var(--motion-base) ease, background-color var(--motion-base) ease, border-color var(--motion-base) ease, box-shadow var(--motion-base) ease;
+  --transition-color: background-color var(--motion-base) ease, border-color var(--motion-base) ease, color var(--motion-base) ease, box-shadow var(--motion-base) ease;
+  --transition-fast: transform var(--motion-fast) ease, opacity var(--motion-fast) ease;
+  --transition-emphasized: transform var(--motion-slow) var(--ease-emphasized), opacity var(--motion-slow) ease;
+
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Light Mode Variables Override
+   Applied on <html> (documentElement) by the anti-FOUC head script, and
+   toggled at runtime. As an ancestor of everything, its CSS variables cascade
+   to the whole tree and its descendant selectors (.light-theme .foo) match. */
+.light-theme {
+  --bg-app: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  --bg-card: #f8fafc;
+  --bg-input: #ffffff;
+  --border-color: #cbd5e1;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --color-primary: #0891b2; /* Cyan Primary */
+  --color-primary-hover: #0e7490;
+  --color-success: #059669; /* Darker Emerald */
+  --color-warning: #d97706; /* Darker Amber */
+  --color-danger: #dc2626;  /* Darker Rose */
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* ── Theme-switch flicker control ─────────────────────────────
+   Premium apps make the theme swap feel *atomic* (everything changes at
+   once) instead of a staggered wipe where some elements animate over 0.2s
+   and others snap. We do that by hard-disabling every transition/animation
+   for one frame while the .light-theme class flips, then re-enabling.
+   - .theme-booting: set in <head> before first paint, removed after load,
+     so the initial render never animates.
+   - .theme-switching: set by the toggle handler for a single frame. */
+html.theme-booting *,
+html.theme-booting *::before,
+html.theme-booting *::after,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ── Respect the OS "Reduce Motion" accessibility setting ─────
+   Premium/native apps honor this: users who get motion sickness or prefer
+   calm UIs (Android: Settings > Accessibility > Remove animations) get near-
+   instant transitions instead of movement. We keep opacity fades subtle but
+   strip transforms/long animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Theme-toggle circular reveal (Phase 3.5, View Transitions API) ──
+   The new theme is revealed via a clip-path circle from the toggle button
+   (keyframes injected in main.js). The old snapshot is hidden instantly so
+   only the circular reveal of the new theme is visible. */
+::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+html {
+  height: 100dvh;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%; /* stop WebView/mobile from auto-inflating text */
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased; /* crisper text on WebKit/Android WebView */
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none; /* kill the rubber-band/glow so it feels app-native */
+}
+
+body {
+  height: 100dvh;
+  overflow: visible; /* allow position:fixed children (toasts) to escape */
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: var(--leading-normal);
+}
+
+.light-theme {
+  --bg-app: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  --bg-card: #f8fafc;
+  --bg-input: #ffffff;
+  --border-color: #cbd5e1;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --color-primary: #0891b2; /* Cyan Primary */
+  --color-primary-hover: #0e7490;
+  --color-success: #059669; /* Darker Emerald */
+  --color-warning: #d97706; /* Darker Amber */
+  --color-danger: #dc2626;  /* Darker Rose */
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+html.theme-booting *,
+html.theme-booting *::before,
+html.theme-booting *::after,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ── Respect the OS "Reduce Motion" accessibility setting ─────
+   Premium/native apps honor this: users who get motion sickness or prefer
+   calm UIs (Android: Settings > Accessibility > Remove animations) get near-
+   instant transitions instead of movement. We keep opacity fades subtle but
+   strip transforms/long animations. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  height: 100dvh;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%; /* stop WebView/mobile from auto-inflating text */
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased; /* crisper text on WebKit/Android WebView */
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none; /* kill the rubber-band/glow so it feels app-native */
+}
+
+body {
+  height: 100dvh;
+  overflow: visible; /* allow position:fixed children (toasts) to escape */
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: var(--leading-normal);
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  /* Theme-aware: matches app background in light & dark. Subtle radial glow
+     behind the brand for depth. Fallback first for pre-Chrome-111 WebViews. */
+  background: var(--bg-app);
+  background:
+    radial-gradient(120% 80% at 50% 38%, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 70%),
+    var(--bg-app);
+  z-index: var(--z-overlay, 9999999);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8, 32px);
+  padding: var(--space-6, 24px);
+  padding-top: max(var(--space-6, 24px), env(safe-area-inset-top));
+  padding-bottom: max(var(--space-6, 24px), env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  transition: opacity var(--motion-slower) ease, visibility var(--motion-slower) ease;
+}
+
+.loading-overlay-bar-bg {
+  width: 100%;
+  height: 5px;
+  background: var(--border-color);
+  background: color-mix(in srgb, var(--text-muted) 22%, transparent);
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+}
+
+.loading-overlay-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  border-radius: var(--radius-full, 9999px);
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.45);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+.loading-overlay-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4, 16px);
+  text-align: center;
+}
+
+#app-loading-overlay {
+  opacity: 1;
+  visibility: visible;
+  /* Premium splash handoff: fade out smoothly into the app (Phase 4.3). */
+  transition: opacity var(--motion-slow) var(--ease-standard), visibility 0s linear var(--motion-slow);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(6,182,212,0.3); }
+  50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
+}
+</style>
+  <meta name="app-build-version" content="2026.07.20.13.24">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -38,7 +365,6 @@
     })();
   </script>
   <!-- Preload critical assets -->
-  <link rel="preload" href="style.css?v=2607201316" as="style">
   <link rel="preload" href="drcat_logo.png" as="image" type="image/png">
   <!-- Google Fonts: Outfit — preconnect + preload the CSS so text paints with the brand font sooner -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,8 +373,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons (non-blocking) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="style.css?v=2607201316">
-  <link rel="stylesheet" href="css/utilities.css?v=2607201316">
+  <!-- Full app stylesheet: loaded non-render-blocking so first paint
+       (critical CSS is inlined above) never waits on this network request.
+       The media="print" onload swap flips it to all once fetched. -->
+  <link rel="stylesheet" href="style.css?v=2607201324" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607201324" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="style.css?v=2607201324">
+    <link rel="stylesheet" href="css/utilities.css?v=2607201324">
+  </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
 </head>
