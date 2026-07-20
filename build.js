@@ -1,6 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
+// Phase 5.1: esbuild bundler for the browser app entry.
+let buildBundle = () => {};
+try {
+  ({ buildBundle } = require('./build-bundle.js'));
+} catch (_) {
+  console.warn('[build] esbuild bundler not available; skipping app bundle.');
+}
 function rebuildClientAssets() {
   const publicDataDir = path.join(__dirname, 'public', 'data');
   if (!fs.existsSync(publicDataDir)) {
@@ -174,6 +181,14 @@ function rebuildClientAssets() {
     }
   } catch (err) {
     console.error("Error generating server-providers.cjs during build:", err);
+  }
+
+  // Phase 5.1: bundle the browser app (js/main.js) into a hashed, minified
+  // dist file and rewire index.html to load it. No-op if esbuild is missing.
+  try {
+    buildBundle();
+  } catch (err) {
+    console.error("Error bundling app during build:", err);
   }
 }
 

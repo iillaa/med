@@ -12,6 +12,7 @@
     "test:console": "node tests/headless/harness.mjs console",
     "test:theme": "node tests/headless/harness.mjs themeReveal",
     "build": "node build.js",
+    "build:bundle": "node build-bundle.js",
     "reindex": "node index_pdfs.js",
     "cap:sync": "npx cap sync",
     "set:password": "node set_admin_password.js"
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "8.4.1",
+    "esbuild": "^0.28.1",
     "eslint": "^8.57.1",
     "jscpd": "^5.0.12",
     "knip": "^6.27.0",

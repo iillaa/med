@@ -132,7 +132,7 @@
 # PHASE 5 — Load Time & Bundle (throttling / low-end devices)
 *Goal: fast cold start on cheap Androids and slow networks.*
 
-- [ ] **5.1 Introduce a bundler (esbuild or Vite)** — minify + tree-shake + hash the JS/CSS. Keep output in `public/` so Capacitor/Express serve it unchanged.
+- [x] **5.1 Introduce a bundler (esbuild or Vite)** — minify + tree-shake + hash the JS/CSS. Keep output in `public/` so Capacitor/Express serve it unchanged.
   *Why:* 26 raw modules → a few minified chunks = far fewer requests, smaller payload. **Effort L · Risk Med · Done-when:** production build emits hashed, minified bundles; app runs identically.
 - [ ] **5.2 Route-based code-splitting** — lazy-load quiz, diagnostics, admin dashboard, PDF viewer only when opened (`import()`).
   *Why:* first screen ships less JS = faster TTI. **Effort M · Risk Med.**
