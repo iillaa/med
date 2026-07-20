@@ -1070,3 +1070,40 @@
     transform: translateY(0);
   }
 }
+
+/* ── Quiz feedback polish (Phase 3.4) ─────────────────────
+   GPU-only transforms/opacity; all honor reduced-motion via the global rule. */
+.quiz-score-pop {
+  animation: quizScorePop var(--motion-slow) var(--ease-spring) both;
+}
+@keyframes quizScorePop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+#quiz-feedback-status {
+  transition: color var(--motion-base) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+}
+.quiz-feedback-pop {
+  animation: quizFeedbackPop var(--motion-base) var(--ease-spring) both;
+}
+@keyframes quizFeedbackPop {
+  0% { transform: scale(0.9); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Progress bar fill: eased, spring-like settle (replaces inline 0.3s ease). */
+#quiz-progress-fill {
+  transition: width var(--motion-slow) var(--ease-decelerate);
+}
+
+/* Tasteful success moment on a perfect / strong result. */
+.quiz-success-pulse {
+  animation: quizSuccessPulse var(--motion-slower) var(--ease-standard) both;
+}
+@keyframes quizSuccessPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}

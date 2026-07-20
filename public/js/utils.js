@@ -909,4 +909,28 @@ export function prefersReducedMotion() {
   }
 }
 
+/**
+ * Animate a numeric count-up on a DOM element (Phase 3.4).
+ * Renders one decimal place to match the quiz score format (e.g. "8.5").
+ * Respects reduced-motion (jumps straight to the final value).
+ * @param {HTMLElement} el - target element.
+ * @param {number} to - final value.
+ * @param {number} [duration=700] ms.
+ * @param {(v:number)=>string} [format] - custom formatter (defaults to `v.toFixed(1)`).
+ */
+export function countUp(el, to, duration = 700, format = (v) => v.toFixed(1)) {
+  if (!el) return;
+  if (prefersReducedMotion()) { el.textContent = format(to); return; }
+  const start = performance.now();
+  const from = 0;
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+    el.textContent = format(from + (to - from) * eased);
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = format(to);
+  };
+  requestAnimationFrame(step);
+}
+
 

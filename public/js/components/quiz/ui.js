@@ -1,5 +1,5 @@
 import { state } from '../../state.js';
-import { showToast, triggerHaptic } from '../../utils.js';
+import { showToast, triggerHaptic, countUp } from '../../utils.js';
 import { shuffleArray, updateLeitnerStats, updateQuizStreak, requestWakeLock, releaseWakeLock } from './state.js';
 import {
   getOrientationText, cleanTextOfClues, cleanOrientationOfClues,
@@ -567,15 +567,23 @@ function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
     });
   }
 
+  if (feedbackStatus) {
+    if (isCorrect) {
+      feedbackStatus.textContent = "Bonne réponse ! (+1.0 point)";
+    } else {
+      feedbackStatus.textContent = "Incorrect. Voir le comparatif ci-dessous :";
+    }
+    feedbackStatus.classList.remove('quiz-feedback-pop');
+    void feedbackStatus.offsetWidth; // restart animation
+    feedbackStatus.classList.add('quiz-feedback-pop');
+  }
   if (isCorrect) {
-    if (feedbackStatus) feedbackStatus.textContent = "Bonne réponse ! (+1.0 point)";
     if (feedbackHeader) {
       feedbackHeader.style.color = "var(--color-success)";
       const icon = feedbackHeader.querySelector('i');
       if (icon) icon.className = "fa-solid fa-circle-check";
     }
   } else {
-    if (feedbackStatus) feedbackStatus.textContent = "Incorrect. Voir le comparatif ci-dessous :";
     if (feedbackHeader) {
       feedbackHeader.style.color = "var(--color-danger)";
       const icon = feedbackHeader.querySelector('i');
@@ -710,7 +718,11 @@ function showResults() {
   const percent = Math.round((session.score / session.questions.length) * 100);
 
   if (resultsScore) {
-    resultsScore.textContent = `${session.score.toFixed(1)} / ${session.questions.length}`;
+    resultsScore.textContent = `0.0 / ${session.questions.length}`;
+    countUp(resultsScore, session.score, 700, (v) => `${v.toFixed(1)} / ${session.questions.length}`);
+    resultsScore.classList.remove('quiz-score-pop');
+    void resultsScore.offsetWidth; // restart animation
+    resultsScore.classList.add('quiz-score-pop');
   }
 
   if (resultsFeedback) {
@@ -726,6 +738,11 @@ function showResults() {
     } else {
       resultsFeedback.textContent = "Attention, la mémorisation est insuffisante pour une pratique sereine. Prenez le temps de relire vos fiches de référence.";
       resultsScore.style.color = "var(--color-danger)";
+    }
+    if (percent >= 80) {
+      resultsScore.classList.add('quiz-success-pulse');
+    } else {
+      resultsScore.classList.remove('quiz-success-pulse');
     }
   }
 
