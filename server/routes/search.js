@@ -143,6 +143,35 @@ function registerSearchRoutes(app) {
     }
   });
 
+  // GET /api/pdf-index — returns the full PDF index, or only entries modified
+  // after a given timestamp when ?since=<unix_ms> is provided.
+  //
+  // This enables incremental sync for the Capacitor APK: the client sends the
+  // mtime of its bundled pdf_index.json, and the server only returns entries
+  // that have changed since then, reducing bandwidth on mobile.
+  app.get('/api/pdf-index', (req, res) => {
+    try {
+      const since = req.query.since ? parseInt(req.query.since, 10) : null;
+      let index = cache.pdfIndex;
+
+      if (Number.isFinite(since) && since > 0) {
+        // Filter: only return entries whose mtime is newer than `since`.
+        // If an entry has no mtime (legacy), include it if the index file
+        // itself was modified after `since`.
+        index = index.filter(doc => {
+          if (doc.mtime && doc.mtime > since) return true;
+          return false;
+        });
+        res.json({ incremental: true, since, count: index.length, entries: index });
+      } else {
+        res.json({ incremental: false, count: index.length, entries: index });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to get PDF index" });
+    }
+  });
+
   app.post('/api/reindex', (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });

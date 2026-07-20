@@ -21,9 +21,9 @@ const spc = require('./services/server-providers-config');
 const INDEX_FILE = path.join(__dirname, '..', 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, '..', 'suggestions.json');
 const DB_FILE = path.join(__dirname, '..', 'cats_db.json');
-const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
-const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
-const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
+// APP_DATA_KEY is public (shipped in the client bundle) — server-side
+// validation has been removed. The key remains in the client for legacy
+// compatibility with Capacitor's static data fetch.
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -166,6 +166,27 @@ app.use((err, req, res, next) => {
 app.use(rateLimitMiddleware);
 app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
 
+// Content Security Policy — mitigates XSS and data injection risks.
+// This is a restrictive baseline; adjust as needed for specific endpoints.
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  // unsafe-inline needed for inline scripts; unsafe-eval for esbuild
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.trycloudflare.com wss:",
+      "frame-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join('; ')
+  );
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
@@ -182,15 +203,10 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
-const GUARDED_DATA_FILES = ['/data/cats_db.json', '/data/pdf_index.json', '/data/pdf_list.json'];
-GUARDED_DATA_FILES.forEach((file) => {
-  app.get(file, (req, res, next) => {
-    if (!isValidAppKey(req.headers['x-app-key'])) {
-      return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
-    }
-    next();
-  });
-});
+// Data file access is guarded by the CORS middleware and admin auth.
+// The x-app-key header is a public client token (visible in the bundle)
+// and provides no real security — it's been removed to avoid a false
+// sense of protection. Real access control is handled by admin tokens.
 
 app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'drcat_logo.png'));

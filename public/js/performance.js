@@ -73,35 +73,8 @@ if (!_isAndroidPerfSafeMode) {
   }
 }
 
-// Wrap localStorage if not in safe mode
-if (!_isAndroidPerfSafeMode) {
-  try {
-    const originalGetItem = Storage.prototype.getItem;
-    Storage.prototype.getItem = function(key) {
-      const start = performance.now();
-      const val = originalGetItem.call(this, key);
-      const dur = performance.now() - start;
-      if (this === localStorage) {
-        localStorageReadCount++;
-        localStorageReadTotalMs += dur;
-      }
-      return val;
-    };
-
-    const originalSetItem = Storage.prototype.setItem;
-    Storage.prototype.setItem = function(key, value) {
-      const start = performance.now();
-      originalSetItem.call(this, key, value);
-      const dur = performance.now() - start;
-      if (this === localStorage) {
-        localStorageWriteCount++;
-        localStorageWriteTotalMs += dur;
-      }
-    };
-  } catch (err) {
-    console.warn('[Perf] LocalStorage interception disabled:', err.message);
-  }
-}
+// Storage timing is measured via safeGetItem/safeSetItem wrappers from safeStorage.js
+// No prototype patching needed.
 
 let memoryIntervalId = null;
 function startMemorySnapshotLoop() {

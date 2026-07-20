@@ -9,6 +9,17 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_RATE_LIMIT_MS = 5 * 60 * 1000;
 
 const loginAttempts = new Map();
+const LOGIN_ATTEMPT_TTL_MS = 24 * 60 * 60 * 1000; // 24h — prune stale entries
+
+// Periodic cleanup of stale login-attempt entries to prevent unbounded Map growth.
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of loginAttempts.entries()) {
+    if (now - entry.lastAttempt > LOGIN_ATTEMPT_TTL_MS) {
+      loginAttempts.delete(ip);
+    }
+  }
+}, 60 * 60 * 1000); // Run every hour
 
 function hashPassword(password, salt) {
   return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');

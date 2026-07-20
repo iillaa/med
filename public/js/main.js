@@ -10,6 +10,7 @@ import { setupKeyboardHandling } from './components/native.js';
 import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback, closeModalAnimated } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
+import { safeGetItem, safeSetItem, safeRemoveItem, safeParseJSON } from './lib/safeStorage.js';
 
 // ── Phase 5.2: lazy-loaded feature modules ──
 // quiz / diagnostics / performance are route/feature-scoped and not needed
@@ -93,32 +94,8 @@ async function bootstrapApp() {
   // ── START DEBUG CONSOLE (catches everything from the beginning) ──
   initDebugConsole();
   
-  // Protect all localStorage reads from crashing the app
-  const origLocalStorageGetItem = Storage.prototype.getItem;
-  Storage.prototype.getItem = function(key) {
-    try { return origLocalStorageGetItem.call(this, key); }
-    catch (_) { return null; }
-  };
-
-  // Protect all localStorage writes from crashing the app on quota limits
-  const origLocalStorageSetItem = Storage.prototype.setItem;
-  Storage.prototype.setItem = function(key, value) {
-    try {
-      return origLocalStorageSetItem.call(this, key, value);
-    } catch (e) {
-      if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
-        console.warn('[storage] quota exceeded, evicting sync cache:', key);
-        try { this.removeItem('dr_cat_synced_database'); } catch (_) {
-          // no-op: quota eviction failure is non-critical
-        }
-        try { return origLocalStorageSetItem.call(this, key, value); } catch (_) {
-          // no-op: retry failure falls through to throw below
-        }
-        return;
-      }
-      throw e;
-    }
-  };
+  // Storage safety is provided by safeGetItem/safeSetItem from safeStorage.js
+  // No prototype patching needed — just use the wrapper functions directly.
 
   // Global Error Interceptor for Verbose Console Logs & Toast Notifications
   window.addEventListener('error', (_event) => {

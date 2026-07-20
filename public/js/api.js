@@ -4,31 +4,40 @@
 import { REMOTE_SERVER_URL, REMOTE_SERVER_URLS } from './remote_config.js';
 import { getExtraHeaders } from './server-providers.js';
 import { isOfflineCat } from './lib/helpers.js';
+import { FETCH_TIMEOUT_MS, PING_TIMEOUT_MS, SYNC_MAX_RETRIES, SYNC_RETRY_DELAY_MS, DEBUG } from './config.js';
 export { REMOTE_SERVER_URL };
 
 
-// Transparent wrapper to log API latencies
+// Transparent wrapper to log API latencies and dispatch debug events
 const originalFetch = window.fetch;
 window.fetch = async function(...args) {
   const start = performance.now();
+  const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+  const method = (args[1]?.method || 'GET').toUpperCase();
   try {
     const res = await originalFetch(...args);
     const duration = performance.now() - start;
     if (window.perf && window.perf.recordApiCall) {
-      const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
       if (!urlStr.includes('/api/performance/server-metrics') && !urlStr.includes('/api/search-status')) {
         window.perf.recordApiCall(urlStr, res.status, duration);
       }
     }
+    // Dispatch event for debug console (avoids double-patching window.fetch)
+    window.dispatchEvent(new CustomEvent('drcat-fetch-event', {
+      detail: { url: urlStr, method, status: res.status, duration: Math.round(duration) }
+    }));
     return res;
   } catch (err) {
     const duration = performance.now() - start;
     if (window.perf && window.perf.recordApiCall) {
-      const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
       if (!urlStr.includes('/api/performance/server-metrics') && !urlStr.includes('/api/search-status')) {
         window.perf.recordApiCall(urlStr, 0, duration);
       }
     }
+    // Dispatch event for debug console with error info
+    window.dispatchEvent(new CustomEvent('drcat-fetch-event', {
+      detail: { url: urlStr, method, status: 0, duration: Math.round(duration), error: err.message }
+    }));
     throw err;
   }
 };
@@ -241,9 +250,7 @@ export async function checkAdminStatus() {
 }
  
 // Shared fetch helper with strict timeout to prevent indefinite hangs
-// For Android, we want very fast timeouts to avoid freezing
-const isCapacitorForTimeout = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
-const FETCH_TIMEOUT_MS = isCapacitorForTimeout ? 3000 : 8000;
+// Timeout is configured in config.js (FETCH_TIMEOUT_MS)
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -298,17 +305,13 @@ export async function fetchCats(since) {
   // 3. ANDROID_ONLINE or WEB_CLIENT: remote try, but bounded tightly to avoid logo freeze
   const remoteUrls = getConfiguredRemoteUrls();
 
-  // In Capacitor/Android: never block UI for more than ~1.5s.
-  const isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
-  const remoteTimeout = isCapacitor ? 1500 : 3000;
-
-  // Quick ping test (HEAD) with short timeout.
+  // Quick ping test (HEAD) with short timeout (PING_TIMEOUT_MS from config).
   // If ping doesn't succeed quickly, fall back immediately to local bundle.
   let reachable = false;
   for (const url of remoteUrls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), remoteTimeout);
+      const timeoutId = setTimeout(() => controller.abort(), PING_TIMEOUT_MS);
       // For fast check we only care about whether the network path accepts the request.
       await fetch(`${url}/api/search-status`, {
         method: 'HEAD',
@@ -316,11 +319,11 @@ export async function fetchCats(since) {
         mode: 'no-cors'
       });
       clearTimeout(timeoutId);
-      recordServerHealth(url, true, remoteTimeout);
+      recordServerHealth(url, true, PING_TIMEOUT_MS);
       reachable = true;
       break;
     } catch (_) {
-      recordServerHealth(url, false, remoteTimeout);
+      recordServerHealth(url, false, PING_TIMEOUT_MS);
       // keep trying other URLs
     }
   }
@@ -541,10 +544,7 @@ export async function submitSuggestion(suggestionData, onAttempt) {
 
   // WEB_CLIENT or ANDROID_ONLINE: Try to send to remote server with retries
   let attempts = 0;
-  const maxAttempts = 3;
-  const delayBetweenAttempts = 1200;
-
-  while (attempts < maxAttempts) {
+  while (attempts < SYNC_MAX_RETRIES) {
     attempts++;
     if (onAttempt) onAttempt(attempts);
 
@@ -563,8 +563,8 @@ export async function submitSuggestion(suggestionData, onAttempt) {
       console.warn(`[API] submitSuggestion: attempt ${attempts} failed.`, err.message);
     }
 
-    if (attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
+    if (attempts < SYNC_MAX_RETRIES) {
+      await new Promise(resolve => setTimeout(resolve, SYNC_RETRY_DELAY_MS));
     }
   }
 

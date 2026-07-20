@@ -23,9 +23,20 @@ function addLog(level, args, meta = {}) {
   if (isViewerOpen) renderLogs();
 }
 
-// ── Override Console Methods ─────────────────────────────────
+// ── Console Capture via Wrapper ──────────────────────────────
+// Instead of mutating the global console object (which breaks other
+// libraries that also wrap it), we provide a captureConsole() helper
+// that patches once and restores on cleanup.
+
+let _captureActive = false;
+
+function captureLog(level, args) {
+  addLog(level, args);
+}
+
 export function startDebugConsole() {
-  if (originalConsole.log) return; // Already initialized
+  if (_captureActive) return;
+  _captureActive = true;
 
   // Save originals
   originalConsole = {
@@ -35,22 +46,21 @@ export function startDebugConsole() {
     info: console.info
   };
 
-  console.log = (...args) => {
-    addLog('LOG', args);
-    originalConsole.log.apply(console, args);
+  const handler = {
+    apply(target, thisArg, args) {
+      const level = (target === originalConsole.error) ? 'ERROR'
+                   : (target === originalConsole.warn) ? 'WARN'
+                   : (target === originalConsole.info) ? 'INFO'
+                   : 'LOG';
+      captureLog(level, args);
+      return Reflect.apply(target, thisArg, args);
+    }
   };
-  console.warn = (...args) => {
-    addLog('WARN', args);
-    originalConsole.warn.apply(console, args);
-  };
-  console.error = (...args) => {
-    addLog('ERROR', args);
-    originalConsole.error.apply(console, args);
-  };
-  console.info = (...args) => {
-    addLog('INFO', args);
-    originalConsole.info.apply(console, args);
-  };
+
+  console.log = new Proxy(originalConsole.log, handler);
+  console.warn = new Proxy(originalConsole.warn, handler);
+  console.error = new Proxy(originalConsole.error, handler);
+  console.info = new Proxy(originalConsole.info, handler);
 
   // Global errors & rejections
   window.addEventListener('error', (event) => {
@@ -60,27 +70,20 @@ export function startDebugConsole() {
     addLog('ERROR', [`Unhandled Promise Rejection: ${event.reason}`]);
   });
 
-  // Network interception (fetch)
-  const originalFetch = window.fetch;
-  window.fetch = async (...args) => {
-    const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
-    const method = (args[1]?.method || 'GET').toUpperCase();
-    const start = performance.now();
-    try {
-      const res = await originalFetch(...args);
-      const duration = Math.round(performance.now() - start);
-      addLog('NETWORK', [`${method} ${url} → ${res.status} (${duration}ms)`], {
-        network: { url, method, status: res.status, duration }
-      });
-      return res;
-    } catch (err) {
-      const duration = Math.round(performance.now() - start);
-      addLog('ERROR', [`${method} ${url} → FAILED (${duration}ms): ${err.message}`], {
+  // Network interception: listen for fetch events dispatched by api.js
+  // instead of overriding window.fetch ourselves (avoids double-patching).
+  window.addEventListener('drcat-fetch-event', (e) => {
+    const { url, method, status, duration, error } = e.detail;
+    if (error) {
+      addLog('ERROR', [`${method} ${url} → FAILED (${duration}ms): ${error}`], {
         network: { url, method, status: 0, duration }
       });
-      throw err;
+    } else {
+      addLog('NETWORK', [`${method} ${url} → ${status} (${duration}ms)`], {
+        network: { url, method, status, duration }
+      });
     }
-  };
+  });
 
   // Startup breadcrumbs
   addLog('INFO', ['🚀 Debug Console initialized.']);

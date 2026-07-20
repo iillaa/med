@@ -14,7 +14,7 @@ const state = {
   cacheMisses: 0
 };
 
-global.perfServer = {
+globalThis.perfServer = {
   recordRequest(path, method, duration, status) {
     const key = `${method} ${path}`;
     if (!state.endpointTimings.has(key)) {

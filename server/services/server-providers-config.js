@@ -20,8 +20,53 @@ let config = { primaryProvider: null, servers: [] };
 // url -> { ok, latencyMs, lastCheck }  (populated by Phase 2 health tracking)
 const health = new Map();
 
+// ── Config shape schema ────────────────────────────────────
+// Validates the runtime server config structure and logs warmings if
+// required fields are missing or have unexpected types.
+function validateConfig(raw) {
+  const errors = [];
+  if (raw === null || typeof raw !== 'object') {
+    errors.push('Config must be an object.');
+    return errors;
+  }
+  if (raw.primaryProvider !== undefined && typeof raw.primaryProvider !== 'string') {
+    errors.push('primaryProvider must be a string.');
+  }
+  if (raw.servers !== undefined && !Array.isArray(raw.servers)) {
+    errors.push('servers must be an array.');
+  } else if (Array.isArray(raw.servers)) {
+    for (let i = 0; i < raw.servers.length; i++) {
+      const s = raw.servers[i];
+      if (typeof s === 'object' && s !== null) {
+        if (s.url !== undefined && typeof s.url !== 'string') {
+          errors.push(`servers[${i}].url must be a string.`);
+        }
+        if (s.provider !== undefined && typeof s.provider !== 'string') {
+          errors.push(`servers[${i}].provider must be a string.`);
+        }
+        if (s.priority !== undefined && !Number.isFinite(s.priority)) {
+          errors.push(`servers[${i}].priority must be a number.`);
+        }
+      } else if (typeof s !== 'string') {
+        errors.push(`servers[${i}] must be a string (URL) or object.`);
+      }
+    }
+  }
+  if (raw.urls !== undefined && !Array.isArray(raw.urls)) {
+    errors.push('urls must be an array.');
+  }
+  if (raw.url !== undefined && typeof raw.url !== 'string') {
+    errors.push('url must be a string.');
+  }
+  return errors;
+}
+
 function normalize(raw) {
   raw = raw || {};
+  const validationErrors = validateConfig(raw);
+  if (validationErrors.length) {
+    console.warn('[ServerProviders] Config validation warnings:', validationErrors.join(' '));
+  }
   const out = { primaryProvider: raw.primaryProvider || null, servers: [] };
 
   if (Array.isArray(raw.servers) && raw.servers.length) {
@@ -60,6 +105,12 @@ function loadConfig() {
 }
 
 function saveConfig(next) {
+  // Validate before persisting — reject malformed payloads.
+  const validationErrors = validateConfig(next);
+  if (validationErrors.length) {
+    console.error('[ServerProviders] Rejecting config update — validation errors:', validationErrors.join(' '));
+    throw new Error('Invalid config: ' + validationErrors.join('; '));
+  }
   config = normalize(next);
   const payload = {
     primaryProvider: config.primaryProvider,

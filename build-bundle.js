@@ -22,10 +22,12 @@ const INDEX_HTML = path.join(PUBLIC_DIR, 'index.html');
 
 function ensureDist() {
   if (!fs.existsSync(DIST_DIR)) fs.mkdirSync(DIST_DIR, { recursive: true });
-  // Remove previously emitted app bundles so dist/ never accumulates stale
+  // Remove previously emitted bundles so dist/ never accumulates stale
   // hashed files (the filename changes only when content changes).
+  // This covers both the main app bundle (app-*.js) and code-split chunks
+  // (chunk-*.js) emitted by esbuild's splitting feature.
   for (const f of fs.readdirSync(DIST_DIR)) {
-    if (/^app-.*\.js$/.test(f)) fs.unlinkSync(path.join(DIST_DIR, f));
+    if (/^(?:app|chunk)-.*\.js$/.test(f)) fs.unlinkSync(path.join(DIST_DIR, f));
   }
 }
 
