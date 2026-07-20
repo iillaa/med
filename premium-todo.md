@@ -158,7 +158,7 @@
   *Why:* users get fixes without confusion or hard cache clears. **Effort M · Risk Med.**
 - [x] **6.3 Offline indicator** — subtle, honest online/offline badge; disable actions that need network.
   *Why:* sets expectations, avoids dead taps. **Effort S · Risk Low.**
-- [ ] **6.4 Error/empty states** — designed empty states (no CATs, no results, load failed) with a retry, not blank screens.
+- [x] **6.4 Error/empty states** — designed empty states (no CATs, no results, load failed) with a retry, not blank screens.
   *Why:* premium apps never show a void. **Effort M · Risk Low.**
 
 ---

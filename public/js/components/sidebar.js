@@ -228,16 +228,22 @@ export function renderCatList(cats, onSelectCat) {
   if (!catList) catList = document.getElementById('cat-list');
   if (!catList) return;
 
-  // Empty state: clear everything and show the placeholder.
+  // Empty state: clear everything and show a tailored placeholder.
   if (cats.length === 0) {
     catItemNodes.clear();
+    const dbEmpty = !state.allCats || state.allCats.length === 0;
     catList.innerHTML = `
       <li class="empty-state">
         <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
-          <i class="fa-solid fa-filter-circle-xmark" style="font-size: 28px; margin-bottom: 10px; display: block; opacity: 0.6;"></i>
-          <span style="font-size: 13px; line-height: 1.5;">Aucune fiche ne correspond à vos filtres actuels.</span>
+          <i class="fa-solid ${dbEmpty ? 'fa-folder-open' : 'fa-filter-circle-xmark'}" style="font-size: 28px; margin-bottom: 10px; display: block; opacity: 0.6;"></i>
+          <span style="font-size: 13px; line-height: 1.5;">${dbEmpty ? "Aucune fiche disponible pour le moment." : "Aucune fiche ne correspond à vos filtres actuels."}</span>
+          ${dbEmpty ? '<button id="sidebar-retry-btn" class="btn-secondary" style="margin-top: 12px; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px;">Recharger</button>' : ''}
         </div>
       </li>`;
+    if (dbEmpty) {
+      const retry = catList.querySelector('#sidebar-retry-btn');
+      if (retry) retry.addEventListener('click', () => location.reload());
+    }
     if (window.perf) {
       window.perf.endMeasure('sidebar.renderCatList');
       window.perf.recordMilestone('sidebarRendered');

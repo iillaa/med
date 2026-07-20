@@ -432,3 +432,17 @@
   transform: translateX(-50%) translateY(0);
 }
 .offline-badge i { color: var(--color-warning); }
+
+/* Secondary button (empty-state retry, etc.) */
+.btn-secondary {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm, 6px);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold, 600);
+  cursor: pointer;
+  transition: var(--transition-color);
+}
+.btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
