@@ -324,7 +324,55 @@ function createUI() {
     btn.style.display = isVisible ? 'flex' : 'none';
     
     document.body.appendChild(btn);
-    btn.addEventListener('click', () => {
+    
+    // 5-tap toggle on debug console button to show/hide diagnostics & performance
+    let debugTapCount = 0;
+    let debugTapTimeout = null;
+    const DEBUG_TAP_THRESHOLD = 5;
+    const DEBUG_TAP_WINDOW = 3000;
+    
+    btn.addEventListener('click', (e) => {
+      debugTapCount++;
+      
+      if (debugTapTimeout) clearTimeout(debugTapTimeout);
+      debugTapTimeout = setTimeout(() => {
+        debugTapCount = 0;
+      }, DEBUG_TAP_WINDOW);
+      
+      if (debugTapCount >= DEBUG_TAP_THRESHOLD) {
+        debugTapCount = 0;
+        clearTimeout(debugTapTimeout);
+        
+        // Toggle diagnostics and performance tab visibility
+        const diagTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-diagnostics"]');
+        const perfTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-performance"]');
+        const diagPane = document.getElementById('admin-pane-diagnostics');
+        const perfPane = document.getElementById('admin-pane-performance');
+        
+        const currentlyHidden = (!diagTab || diagTab.style.display === 'none') && 
+                                (!perfTab || perfTab.style.display === 'none');
+        
+        if (currentlyHidden) {
+          // Show both
+          if (diagTab) { diagTab.style.display = 'flex'; diagTab.style.opacity = '1'; diagTab.style.pointerEvents = 'auto'; diagTab.style.filter = 'none'; }
+          if (perfTab) { perfTab.style.display = 'flex'; perfTab.style.opacity = '1'; perfTab.style.pointerEvents = 'auto'; perfTab.style.filter = 'none'; }
+          if (diagPane) diagPane.style.display = 'none';
+          if (perfPane) perfPane.style.display = 'none';
+          showToast("📊 Diagnostics & Performance activés.", "fa-eye", 2000);
+        } else {
+          // Hide both
+          if (diagTab) { diagTab.style.display = 'none'; }
+          if (perfTab) { perfTab.style.display = 'none'; }
+          if (diagPane) diagPane.style.display = 'none';
+          if (perfPane) perfPane.style.display = 'none';
+          showToast("📊 Diagnostics & Performance masqués.", "fa-eye-slash", 2000);
+        }
+        
+        e.preventDefault();
+        return;
+      }
+      
+      // Not enough taps yet, normal toggle
       toggleViewer();
     });
   }

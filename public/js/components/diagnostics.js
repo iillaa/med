@@ -21,17 +21,6 @@ export function initDiagnostics() {
     }
   });
 
-  // Listen to 5-tap toggle event (independent of normal tab switching)
-  window.addEventListener('drcat-admin-pane-toggled', (e) => {
-    if (e.detail.paneId === 'admin-pane-diagnostics') {
-      if (e.detail.visible) {
-        expandPanel();
-      } else if (isOpen) {
-        collapsePanel();
-      }
-    }
-  });
-
   // Clean up on page unload to prevent memory leaks
   window.addEventListener('beforeunload', () => {
     if (isOpen) collapsePanel();

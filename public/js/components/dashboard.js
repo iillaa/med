@@ -368,6 +368,19 @@ export async function renderDashboard(onSelectCat) {
 
   if (adminPanel) {
     adminPanel.style.display = state.isAdmin ? 'block' : 'none';
+    
+    // Hide diagnostics and performance tabs by default; they require
+    // 5 taps on the debug console button to reveal.
+    if (state.isAdmin) {
+      const diagTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-diagnostics"]');
+      const perfTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-performance"]');
+      const diagPane = document.getElementById('admin-pane-diagnostics');
+      const perfPane = document.getElementById('admin-pane-performance');
+      if (diagTab) diagTab.style.display = 'none';
+      if (perfTab) perfTab.style.display = 'none';
+      if (diagPane) diagPane.style.display = 'none';
+      if (perfPane) perfPane.style.display = 'none';
+    }
   }
 
   if (state.isAdmin) {

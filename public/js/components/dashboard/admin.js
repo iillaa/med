@@ -2,79 +2,12 @@ import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 
-// ── 5-tap toggle helpers ─────────────────────────────────────
-// Each target pane gets its own independent tap counter. Taps must be
-// consecutive (within TAP_WINDOW ms) on the SAME button; they do not
-// accumulate across different buttons or across time gaps.
-
-const TAP_THRESHOLD = 5;
-const TAP_WINDOW = 3000; // 3 seconds
-
-const tapState = new Map(); // btnEl -> { count, timeout }
-
-function handleTapToggle(btn, paneId) {
-  const key = btn;
-  const entry = tapState.get(key) || { count: 0, timeout: null };
-
-  entry.count++;
-  if (entry.timeout) clearTimeout(entry.timeout);
-
-  entry.timeout = setTimeout(() => {
-    entry.count = 0;
-    tapState.delete(key);
-  }, TAP_WINDOW);
-
-  tapState.set(key, entry);
-
-    if (entry.count >= TAP_THRESHOLD) {
-    entry.count = 0;
-    if (entry.timeout) clearTimeout(entry.timeout);
-    tapState.delete(key);
-
-    const pane = document.getElementById(paneId);
-    if (!pane) return;
-
-    const isVisible = pane.style.display !== 'none';
-    pane.style.display = isVisible ? 'none' : 'block';
-
-    // Update tab button active state to match
-    btn.classList.toggle('active', !isVisible);
-    btn.setAttribute('aria-selected', String(!isVisible));
-    btn.style.color = !isVisible ? 'var(--color-primary)' : 'var(--text-secondary)';
-    btn.style.backgroundColor = !isVisible ? 'rgba(6, 182, 212, 0.1)' : 'transparent';
-
-    // Dispatch pane-toggled event so diagnostics/performance components
-    // can expand/collapse their internal state.
-    window.dispatchEvent(new CustomEvent('drcat-admin-pane-toggled', {
-      detail: { paneId, visible: !isVisible }
-    }));
-
-    showToast(
-      isVisible ? `📊 ${paneId === 'admin-pane-diagnostics' ? 'Diagnostics' : 'Performance'} masqué.` : `📊 ${paneId === 'admin-pane-diagnostics' ? 'Diagnostics' : 'Performance'} affiché.`,
-      isVisible ? 'fa-eye-slash' : 'fa-eye',
-      2000
-    );
-  }
-}
-
 export function initAdminTabListeners(onSuggestionHandled) {
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
   adminTabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.getAttribute('data-target');
       if (!targetId) return;
-
-      // 5-tap toggle for diagnostics and performance panes
-      if (targetId === 'admin-pane-diagnostics' || targetId === 'admin-pane-performance') {
-        handleTapToggle(btn, targetId);
-        // If the tap count hasn't reached threshold yet, still allow normal tab switching
-        const entry = tapState.get(btn);
-        if (entry && entry.count > 0 && entry.count < TAP_THRESHOLD) {
-          // Fall through to normal tab switch below
-        } else if (entry && entry.count >= TAP_THRESHOLD) {
-          return; // Toggle handled above, don't switch tabs
-        }
-      }
 
       adminTabBtns.forEach(b => {
         b.classList.remove('active');
