@@ -257,7 +257,7 @@
 
 .sidebar-btn-quiz {
   background: linear-gradient(135deg, var(--color-primary), #10b981) !important;
-  color: #000 !important;
+  color: #fff !important;
   border: none !important;
 }
 

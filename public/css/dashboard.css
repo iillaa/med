@@ -582,7 +582,7 @@
 
 .suggestion-btn.btn-approve {
   background-color: var(--color-success);
-  color: #000;
+  color: #fff;
   border: none;
 }
 

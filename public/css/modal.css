@@ -75,7 +75,7 @@
 }
 
 .close-modal-btn:hover {
-  color: #fff;
+  color: var(--color-primary);
 }
 
 .modal-body {

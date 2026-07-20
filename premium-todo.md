@@ -174,7 +174,7 @@
   *Why:* legibility + fewer mis-taps. **Effort S · Risk Low.**
 - [x] **7.4 Consistent iconography & spacing pass** — migrate remaining hardcoded px to spacing/type tokens; align icon sizes.
   *Why:* visual consistency is subconscious "premium." **Effort M · Risk Low.**
-- [ ] **7.5 Dark/light parity review** — every screen checked in both themes for stuck colors/contrast.
+- [x] **7.5 Dark/light parity review** — every screen checked in both themes for stuck colors/contrast.
   *Why:* one broken screen undoes the whole theme system. **Effort S · Risk Low.**
 
 ---

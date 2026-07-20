@@ -159,6 +159,42 @@ async function tapTargets() {
 }
 
 
+async function parity() {
+  const browser = await connect();
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 800 });
+  const sample = (theme) => page.evaluate((t) => {
+    if (t === 'light') document.documentElement.classList.add('light-theme');
+    else document.documentElement.classList.remove('light-theme');
+    const pick = (sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      return {
+        color: cs.color,
+        bg: cs.backgroundColor,
+      };
+    };
+    return {
+      theme: t,
+      body: pick('body'),
+      sidebar: pick('.sidebar'),
+      card: pick('.dashboard-block'),
+      tabActive: pick('.tab-btn.active'),
+      saveBtn: pick('.save-btn'),
+      quizBtn: pick('.sidebar-btn-quiz'),
+      approveBtn: pick('.suggestion-btn.btn-approve'),
+      closeBtn: pick('.close-modal-btn'),
+    };
+  }, theme);
+  await page.goto(BASE, { waitUntil: 'networkidle2', timeout: 25000 });
+  const dark = await sample('dark');
+  const light = await sample('light');
+  await browser.disconnect();
+  return { dark, light };
+}
+
+
 async function ariaTabs() {
   const browser = await connect();
   const page = await browser.newPage();
@@ -195,6 +231,7 @@ try {
   else if (cmd === 'themeReveal') result = await themeReveal();
   else if (cmd === 'ariaTabs') result = await ariaTabs();
   else if (cmd === 'tapTargets') result = await tapTargets();
+  else if (cmd === 'parity') result = await parity();
   else { console.error('unknown command:', cmd); process.exitCode = 1; }
   console.log(JSON.stringify(result, null, 2));
 } catch (e) {

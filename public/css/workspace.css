@@ -352,7 +352,7 @@
 .save-btn {
   background-color: var(--color-primary);
   border: none;
-  color: #000;
+  color: #fff;
   padding: 8px 16px;
   border-radius: var(--radius-md);
   font-family: var(--font-sans);
@@ -864,7 +864,7 @@
 
 .pdf-search-result-snippet mark {
   background: rgba(251, 192, 45, 0.25);
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
   padding: 0 2px;
   border-radius: 2px;
