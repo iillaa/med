@@ -4,6 +4,72 @@ import { setupSwipeGestures, debounce, prefersReducedMotion } from '../utils.js'
 // DOM Elements
 let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
 
+/**
+ * Pull-to-refresh for the CAT list (Phase 3.6).
+ * Triggers `onRefresh` only when the list is scrolled to the very top and the
+ * user drags downward past a threshold. A spinner indicator is shown while
+ * refreshing. Pointer/touch only; ignores the gesture once content isn't at top
+ * or while already refreshing. Honors reduced-motion (no transform drag).
+ * @param {HTMLElement} listEl - the <ul id="cat-list"> element.
+ * @param {() => Promise<void>|void} onRefresh - refresh callback.
+ */
+function setupPullToRefresh(listEl, onRefresh) {
+  const container = listEl.parentElement; // .cat-list-wrapper (scroll container)
+  if (!container) return;
+
+  const indicator = document.createElement('div');
+  indicator.className = 'ptr-indicator';
+  indicator.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+  container.insertBefore(indicator, listEl);
+
+  const THRESHOLD = 64;
+  let startY = 0, dragging = false, refreshing = false;
+
+  const onStart = (e) => {
+    if (refreshing) return;
+    if (container.scrollTop > 0) return;
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragging = true;
+  };
+  const onMove = (e) => {
+    if (!dragging || refreshing) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const delta = y - startY;
+    if (delta <= 0) { container.style.transform = ''; indicator.classList.remove('visible'); return; }
+    if (container.scrollTop > 0) { dragging = false; return; }
+    e.preventDefault();
+    if (prefersReducedMotion()) return;
+    const pull = Math.min(delta * 0.5, THRESHOLD + 24);
+    container.style.transform = `translateY(${pull}px)`;
+    indicator.classList.add('visible');
+    indicator.style.opacity = String(Math.min(pull / THRESHOLD, 1));
+  };
+  const onEnd = async () => {
+    if (!dragging || refreshing) { dragging = false; return; }
+    dragging = false;
+    const pulled = parseFloat((container.style.transform.match(/translateY\(([\d.]+)px\)/) || [])[1] || '0');
+    container.style.transform = '';
+    indicator.style.opacity = '';
+    indicator.classList.remove('visible');
+    if (pulled >= THRESHOLD) {
+      refreshing = true;
+      indicator.classList.add('spinning');
+      try { await onRefresh(); } finally {
+        indicator.classList.remove('spinning');
+        refreshing = false;
+      }
+    }
+  };
+
+  container.addEventListener('touchstart', onStart, { passive: true });
+  container.addEventListener('touchmove', onMove, { passive: false });
+  container.addEventListener('touchend', onEnd);
+  // Mouse fallback (desktop dev): drag from top with button held.
+  container.addEventListener('mousedown', onStart);
+  container.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onEnd);
+}
+
 function getStatusLabel(status) {
   switch(status) {
     case 'done': return 'Maîtrisé';
@@ -12,7 +78,7 @@ function getStatusLabel(status) {
   }
 }
 
-export function initSidebar(onSelectCat, onFilterTriggered) {
+export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
   catList = document.getElementById('cat-list');
   searchInput = document.getElementById('search-input');
   categoryFilter = document.getElementById('category-filter');
@@ -82,6 +148,9 @@ export function initSidebar(onSelectCat, onFilterTriggered) {
       sidebar.classList.remove('open');
     });
   }
+
+  // Phase 3.6: Pull-to-refresh on the CAT list (native feel).
+  if (catList && onRefresh) setupPullToRefresh(catList, onRefresh);
 }
 
 // Populate Category dropdown dynamically

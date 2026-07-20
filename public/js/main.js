@@ -228,7 +228,7 @@ async function bootstrapApp() {
   }
 
   // Initialize Components
-  sidebar.initSidebar(selectCatWrapper, onFilterTriggered);
+  sidebar.initSidebar(selectCatWrapper, onFilterTriggered, refreshCatsAndRender);
   workspace.initWorkspace(onStatusChange, onCatDeleted, onProgressReset);
   dashboard.initDashboard(selectCatWrapper, onSuggestionHandled);
   quiz.initQuiz(selectCatWrapper);

@@ -339,7 +339,34 @@
   flex: 1;          /* Grow to fill whatever is left */
   min-height: 0;    /* Critical: lets flex-child shrink below content size */
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 6px 8px 16px;
+  position: relative; /* anchor the pull-to-refresh indicator */
+}
+
+/* Pull-to-refresh spinner (Phase 3.6). Sits above the list, hidden until the
+   user drags; transform/opacity only, honors reduced-motion. */
+.ptr-indicator {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translate(-50%, -100%) rotate(0deg);
+  color: var(--color-primary);
+  font-size: 18px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease-standard);
+  z-index: 5;
+}
+.ptr-indicator.visible {
+  transform: translate(-50%, 0) rotate(0deg);
+}
+.ptr-indicator.spinning {
+  animation: ptrSpin 0.8s linear infinite;
+  opacity: 1;
+}
+@keyframes ptrSpin {
+  to { transform: translate(-50%, 0) rotate(360deg); }
 }
 
 /* Custom scrollbar */
