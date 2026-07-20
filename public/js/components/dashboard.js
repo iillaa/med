@@ -9,6 +9,15 @@ import { initAdminTabListeners, autoSelectDevTab, loadPendingSuggestions } from 
 let welcomeScreen, workspace, sidebar;
 let dashMasteryRate, dashCountDone, dashCountDoing, dashCountTodo;
 let resumeList, categoriesDiv, adminPanel, suggestionsList;
+let lastDashSignature = null;
+
+function computeDashSignature() {
+  const total = state.allCats.length;
+  const done = state.allCats.filter(c => c.status === 'done').length;
+  const doing = state.allCats.filter(c => c.status === 'doing').length;
+  const admin = state.isAdmin ? 1 : 0;
+  return `${total}|${done}|${doing}|${admin}`;
+}
 
 export function initDashboard(onSelectCat, onSuggestionHandled) {
   welcomeScreen = document.getElementById('welcome-screen');
@@ -290,6 +299,14 @@ export function showDashboard(onSelectCat) {
     sidebar.classList.remove('open');
   }
 
+  // 1.3 Instant tab transitions: skip re-render when returning to a dashboard
+  // that is already visible with unchanged data — avoids innerHTML flash/re-init.
+  const sig = computeDashSignature();
+  if (lastDashSignature === sig && welcomeScreen && welcomeScreen.dataset.rendered === 'true') {
+    return;
+  }
+  lastDashSignature = sig;
+
   renderDashboard(onSelectCat);
 }
 
@@ -359,6 +376,9 @@ export async function renderDashboard(onSelectCat) {
   } else if (devUnlocked) {
     autoSelectDevTab();
   }
+
+  lastDashSignature = computeDashSignature();
+  if (welcomeScreen) welcomeScreen.dataset.rendered = 'true';
 
   if (window.perf) {
     window.perf.endMeasure('dashboard.renderDashboard');

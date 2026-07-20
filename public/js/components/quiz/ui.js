@@ -490,7 +490,19 @@ function generateQCMOptions(question) {
     btn.style.border = '1px solid var(--border-color)';
     btn.style.borderRadius = 'var(--radius-sm)';
     btn.dataset.option = opt;
-    btn.innerHTML = `<span style="font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.4; display:block; text-align:left;">${opt.replace(/\n/g, '<br>')}</span>`;
+    // Build label without innerHTML to avoid re-parsing HTML / injection surface.
+    const labelSpan = document.createElement('span');
+    labelSpan.style.fontSize = '13px';
+    labelSpan.style.fontWeight = '600';
+    labelSpan.style.color = 'var(--text-primary)';
+    labelSpan.style.lineHeight = '1.4';
+    labelSpan.style.display = 'block';
+    labelSpan.style.textAlign = 'left';
+    opt.split('\n').forEach((line, i) => {
+      if (i > 0) labelSpan.appendChild(document.createElement('br'));
+      labelSpan.appendChild(document.createTextNode(line));
+    });
+    btn.appendChild(labelSpan);
 
     btn.addEventListener('click', () => {
       if (timerIntervalId) clearInterval(timerIntervalId);
@@ -541,10 +553,18 @@ function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
   if (selfGradingPanel) selfGradingPanel.style.display = 'none';
 
   if (displayUserAnswer) {
-    displayUserAnswer.innerHTML = `<span style="font-size:13px; line-height:1.4; display:block;">${userAnswer.replace(/\n/g, '<br>')}</span>`;
+    displayUserAnswer.textContent = '';
+    userAnswer.split('\n').forEach((line, i) => {
+      if (i > 0) displayUserAnswer.appendChild(document.createElement('br'));
+      displayUserAnswer.appendChild(document.createTextNode(line));
+    });
   }
   if (displayCorrectAnswer) {
-    displayCorrectAnswer.innerHTML = `<span style="font-size:13px; line-height:1.4; display:block;">${correctAnswer.replace(/\n/g, '<br>')}</span>`;
+    displayCorrectAnswer.textContent = '';
+    correctAnswer.split('\n').forEach((line, i) => {
+      if (i > 0) displayCorrectAnswer.appendChild(document.createElement('br'));
+      displayCorrectAnswer.appendChild(document.createTextNode(line));
+    });
   }
 
   if (isCorrect) {

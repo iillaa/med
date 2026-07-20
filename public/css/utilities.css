@@ -174,7 +174,7 @@
   height: 100%;
   background: linear-gradient(90deg, var(--color-primary), #10b981);
   border-radius: 3px;
-  transition: width 0.3s ease;
+  transition: width var(--motion-slow) var(--ease-standard);
 }
 
 /* About legal header */
@@ -349,7 +349,7 @@
 .about-legal-chevron {
   font-size: 12px;
   color: var(--text-muted);
-  transition: transform 0.2s ease;
+  transition: transform var(--motion-fast) var(--ease-standard);
 }
 
 /* Responsive helpers */
@@ -357,4 +357,30 @@
   .hide-on-mobile {
     display: none !important;
   }
+}
+
+/* ── Tactile tap feedback (Phase 3.2) ───────────────────────
+   Subtle press-scale on interactive controls so taps feel physical.
+   Honors reduced-motion via the global media rule (transitions disabled). */
+.cat-item,
+.tab-btn,
+.status-pill,
+.suggestion-btn,
+.btn-danger-ghost,
+.btn-delete-ghost,
+.admin-tab-btn,
+.close-modal-btn,
+.theme-toggle-btn {
+  transition: transform var(--motion-fast) var(--ease-standard), background-color var(--transition-color);
+}
+.cat-item:active,
+.tab-btn:active,
+.status-pill:active,
+.suggestion-btn:active,
+.btn-danger-ghost:active,
+.btn-delete-ghost:active,
+.admin-tab-btn:active,
+.close-modal-btn:active,
+.theme-toggle-btn:active {
+  transform: scale(0.97);
 }

@@ -226,6 +226,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 220px;
 }
 
 .dashboard-block h3 {

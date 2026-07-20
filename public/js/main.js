@@ -233,13 +233,31 @@ async function bootstrapApp() {
           }
         };
       }
-      if (addCatModal) addCatModal.style.display = 'flex';
+      if (addCatModal) {
+        if (window.innerWidth <= 600) addCatModal.classList.add('modal-overlay--sheet');
+        else addCatModal.classList.remove('modal-overlay--sheet');
+        addCatModal.style.display = 'flex';
+      }
     });
   }
  
   const closeModal = () => {
-    if (addCatModal) addCatModal.style.display = 'none';
-    if (addCatForm) addCatForm.reset();
+    if (!addCatModal) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      addCatModal.style.display = 'none';
+      if (addCatForm) addCatForm.reset();
+      return;
+    }
+    addCatModal.classList.add('modal-closing');
+    const onEnd = (e) => {
+      if (e.target !== addCatModal && e.target !== addCatModal.querySelector('.modal-card')) return;
+      addCatModal.removeEventListener('animationend', onEnd);
+      addCatModal.classList.remove('modal-closing');
+      addCatModal.style.display = 'none';
+      if (addCatForm) addCatForm.reset();
+    };
+    addCatModal.addEventListener('animationend', onEnd);
+    setTimeout(() => onEnd({ target: addCatModal }), 600);
   };
  
   if (closeAddCatModalBtn) closeAddCatModalBtn.addEventListener('click', closeModal);

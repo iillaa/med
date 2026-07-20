@@ -1,6 +1,6 @@
 import { state } from '../../state.js';
 import * as api from '../../api.js';
-import { escapeHTML, showToast } from '../../utils.js';
+import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 
 export function autoSelectDevTab() {
   const diagTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-diagnostics"]');
@@ -110,12 +110,9 @@ export function initAdminTabListeners(onSuggestionHandled) {
 
       const modal = document.createElement('div');
       modal.id = 'suggestion-review-modal';
-      modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.85); z-index: 99999;
-        display: flex; align-items: center; justify-content: center;
-        padding: 20px; box-sizing: border-box;
-      `;
+      modal.className = 'modal-overlay modal-overlay--sheet';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
 
       let fieldsHtml = '';
       if (sug.type === 'add') {
@@ -147,7 +144,7 @@ export function initAdminTabListeners(onSuggestionHandled) {
       `;
 
       modal.innerHTML = `
-        <div style="background: var(--bg-card); border: 1px solid var(--color-primary); border-radius: 12px; padding: 22px; max-width: 650px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: var(--shadow-xl); font-family: inherit;">
+        <div class="modal-card" style="border-color: var(--color-primary); max-width: 650px; box-shadow: var(--shadow-xl);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-shrink: 0;">
             <h3 style="color: var(--color-primary); margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; font-weight: 600;">
               <i class="fa-solid fa-pen-to-square"></i> Réviser & Éditer la proposition
@@ -174,7 +171,7 @@ export function initAdminTabListeners(onSuggestionHandled) {
 
       document.body.appendChild(modal);
 
-      const closeModal = () => modal.remove();
+      const closeModal = () => closeModalAnimated(modal);
       document.getElementById('review-modal-close').addEventListener('click', closeModal);
       document.getElementById('review-btn-cancel').addEventListener('click', closeModal);
 
@@ -196,7 +193,7 @@ export function initAdminTabListeners(onSuggestionHandled) {
           const result = await api.updateSuggestionOnServer(id, updatedData);
           if (result.success) {
             showToast("Corrections enregistrées avec succès !", "fa-circle-check", 3000);
-            modal.remove();
+            closeModalAnimated(modal);
             await loadPendingSuggestions();
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);

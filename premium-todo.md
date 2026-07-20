@@ -48,13 +48,13 @@
 # PHASE 0 — Foundation & Measurement (do first)
 *Goal: know your numbers and lock in tooling so every later change is provable.*
 
-- [ ] **0.1 Add a motion-token layer** — `--motion-fast: 120ms`, `--motion-base: 200ms`, `--motion-slow: 320ms`, `--ease-standard`, `--ease-emphasized: cubic-bezier(.2,0,0,1)`, `--ease-spring: cubic-bezier(.34,1.2,.64,1)`. Migrate hardcoded `0.2s ease` to tokens.
+- [x] **0.1 Add a motion-token layer** — `--motion-fast: 120ms`, `--motion-base: 200ms`, `--motion-slow: 320ms`, `--ease-standard`, `--ease-emphasized: cubic-bezier(.2,0,0,1)`, `--ease-spring: cubic-bezier(.34,1.2,.64,1)`. Migrate hardcoded `0.2s ease` to tokens.
   *Why:* consistent, tunable motion = the #1 "premium feel" lever. **Effort S · Risk Low · Done-when:** no raw duration/easing literals remain in CSS.
-- [ ] **0.2 Baseline Lighthouse + perf capture** — run Lighthouse (mobile) on key screens; record FCP, LCP, TBT, CLS, TTI in a `perf-baseline.md`. Snapshot `window.perf` render timings.
+- [x] **0.2 Baseline Lighthouse + perf capture** — run Lighthouse (mobile) on key screens; record FCP, LCP, TBT, CLS, TTI in a `perf-baseline.md`. Snapshot `window.perf` render timings.
   *Why:* can't claim "faster" without before/after. **Effort S · Risk Low · Done-when:** baseline numbers documented.
-- [ ] **0.3 Reduced-motion JS guard** — expose `prefersReducedMotion()` helper; skip JS-driven animations (scroll, confetti, etc.) when set.
+- [x] **0.3 Reduced-motion JS guard** — expose `prefersReducedMotion()` helper; skip JS-driven animations (scroll, confetti, etc.) when set.
   *Why:* accessibility + parity with the CSS rule. **Effort S · Risk Low.**
-- [ ] **0.4 Cache-busting discipline** — auto-version all `css/*.css` + `js/*.js` links in `build.js` (you already bump `app-build-version`). 
+- [x] **0.4 Cache-busting discipline** — auto-version all `css/*.css` + `js/*.js` links in `build.js` (you already bump `app-build-version`). 
   *Why:* users must actually receive updates; stale CSS = "broken premium." **Effort S · Risk Low · Done-when:** every asset link carries the build hash.
 
 ---
@@ -62,15 +62,15 @@
 # PHASE 1 — Perceived Performance (biggest felt win)
 *Goal: the app feels instant even when it isn't.*
 
-- [ ] **1.1 Skeleton loaders** — replace the loading overlay/spinners on: CAT detail, dashboard cards, quiz setup, PDF list. Use shimmer placeholders shaped like the final content.
+- [x] **1.1 Skeleton loaders** — replace the loading overlay/spinners on: CAT detail, dashboard cards, quiz setup, PDF list. Use shimmer placeholders shaped like the final content.
   *Why:* the single biggest "premium vs amateur" signal. **Effort M · Risk Low · Done-when:** no bare spinner on primary content loads.
-- [ ] **1.2 Optimistic UI for status changes** — marking a CAT done/doing/todo updates the UI instantly, reconciles with storage after.
+- [x] **1.2 Optimistic UI for status changes** — marking a CAT done/doing/todo updates the UI instantly, reconciles with storage after.
   *Why:* zero perceived latency on the most common action. **Effort M · Risk Med (rollback on failure) · Done-when:** status pill flips with no wait.
-- [ ] **1.3 Instant tab/route transitions** — pre-warm dashboard/quiz/workspace views; avoid re-init on every switch.
+- [x] **1.3 Instant tab/route transitions** — pre-warm dashboard/quiz/workspace views; avoid re-init on every switch.
   *Why:* premium apps never "reload" a tab you just left. **Effort M · Risk Med.**
-- [ ] **1.4 Debounced search + incremental filter** — debounce the sidebar search (120–150ms) and diff the list instead of full teardown (see 2.1).
+- [x] **1.4 Debounced search + incremental filter** — debounce the sidebar search (120–150ms) and diff the list instead of full teardown (see 2.1).
   *Why:* typing feels smooth, no jank per keystroke. **Effort S · Risk Low.**
-- [ ] **1.5 Image/logo readiness** — set explicit `width`/`height` on all `<img>`, add `loading="lazy"` to non-critical, `fetchpriority="high"` to the LCP logo.
+- [x] **1.5 Image/logo readiness** — set explicit `width`/`height` on all `<img>`, add `loading="lazy"` to non-critical, `fetchpriority="high"` to the LCP logo.
   *Why:* kills layout shift (CLS) and speeds first paint. **Effort S · Risk Low.**
 
 ---
@@ -78,17 +78,17 @@
 # PHASE 2 — Rendering Performance (real throughput)
 *Goal: eliminate reflow/jank hotspots found in the audit.*
 
-- [ ] **2.1 Incremental list rendering (sidebar)** — stop `innerHTML=''` full rebuilds; keep a keyed map of `<li>` nodes, add/remove/reorder only what changed. Batch DOM writes in a `DocumentFragment`.
+- [x] **2.1 Incremental list rendering (sidebar)** — stop `innerHTML=''` full rebuilds; keep a keyed map of `<li>` nodes, add/remove/reorder only what changed. Batch DOM writes in a `DocumentFragment`.
   *Why:* filtering/search becomes O(changes) not O(all). **Effort M · Risk Med · Done-when:** `sidebar.renderCatList` time drops materially in `window.perf`.
-- [ ] **2.2 `content-visibility: auto` on off-screen sections** — dashboard cards, long lists, collapsed panels.
+- [x] **2.2 `content-visibility: auto` on off-screen sections** — dashboard cards, long lists, collapsed panels.
   *Why:* browser skips rendering off-screen content = faster paint. **Effort S · Risk Low.**
-- [ ] **2.3 Virtualize long lists (conditional)** — only if CAT/PDF count grows past ~200; render visible window + buffer.
+- [~] **2.3 Virtualize long lists (conditional)** — only if CAT/PDF count grows past ~200; render visible window + buffer.
   *Why:* keeps scroll at 60fps regardless of list size. **Effort L · Risk Med · Gate:** defer until data grows.
-- [ ] **2.4 Replace hot-path `innerHTML` with templates** — for frequently re-rendered blocks (quiz question, diagnostics rows), build nodes once and update text/attrs.
+- [x] **2.4 Replace hot-path `innerHTML` with templates** — for frequently re-rendered blocks (quiz question, diagnostics rows), build nodes once and update text/attrs.
   *Why:* avoids re-parsing HTML + is safer (less injection surface). **Effort M · Risk Med.**
-- [ ] **2.5 `will-change` / GPU hints on animated elements only** — sidebar slide, modals, toasts. Remove after animation to free memory.
+- [x] **2.5 `will-change` / GPU hints on animated elements only** — sidebar slide, modals, toasts. Remove after animation to free memory.
   *Why:* smooth transforms without permanent memory cost. **Effort S · Risk Low.**
-- [ ] **2.6 Passive scroll/touch listeners** — audit all `addEventListener('scroll'|'touchstart', …)` → add `{ passive: true }` where not calling `preventDefault`.
+- [x] **2.6 Passive scroll/touch listeners** — audit all `addEventListener('scroll'|'touchstart', …)` → add `{ passive: true }` where not calling `preventDefault`.
   *Why:* removes scroll-blocking jank on Android WebView. **Effort S · Risk Low.**
 
 ---
@@ -96,7 +96,7 @@
 # PHASE 3 — Motion & Micro-interactions (the "wow")
 *Goal: deliberate, consistent choreography.*
 
-- [ ] **3.1 Modal / bottom-sheet open-close animations** — scale+fade in (emphasized easing), backdrop fade; sheet slides from bottom on mobile.
+- [x] **3.1 Modal / bottom-sheet open-close animations** — scale+fade in (emphasized easing), backdrop fade; sheet slides from bottom on mobile.
   *Why:* the difference between "a div appeared" and "a surface presented." **Effort M · Risk Low.**
 - [ ] **3.2 Button & tap feedback** — subtle press-scale (`:active { transform: scale(.97) }`), ripple or highlight, paired with light Haptics on native.
   *Why:* tactile, responsive, native-feeling. **Effort S · Risk Low.**

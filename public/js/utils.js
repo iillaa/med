@@ -433,6 +433,36 @@ export function formatPercent(val) {
 }
 
 /**
+ * Animate a modal out, then remove it from the DOM.
+ * Adds `.modal-closing` (defined in modal.css) so the card scales/fades and the
+ * backdrop fades; the node is removed on animationend (or immediately under
+ * reduced-motion / if the browser doesn't fire animationend).
+ * @param {HTMLElement} modal - the overlay element to dismiss.
+ */
+export function closeModalAnimated(modal) {
+  if (!modal || !modal.isConnected) return;
+  const card = modal.querySelector('.modal-card') || modal.firstElementChild;
+  const finish = () => modal.remove();
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !card) {
+    finish();
+    return;
+  }
+  modal.classList.add('modal-closing');
+  let done = false;
+  const onEnd = (e) => {
+    if (e.target !== card && e.target !== modal) return;
+    if (done) return;
+    done = true;
+    modal.removeEventListener('animationend', onEnd);
+    finish();
+  };
+  modal.addEventListener('animationend', onEnd);
+  // Safety net in case animationend doesn't fire.
+  setTimeout(() => { if (!done) { done = true; finish(); } }, 600);
+}
+
+/**
  * Universal export dialog modal for text/JSON files.
  * Handles native sharing, downloading (using Capacitor Filesystem or web download), and copy to clipboard.
  * 
@@ -450,15 +480,11 @@ export function exportDataFile(fileName, dataTitle, payload) {
 
   const modal = document.createElement('div');
   modal.id = 'universal-export-modal';
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.85); z-index: 99999; 
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px; box-sizing: border-box;
-  `;
-  
+  modal.className = 'modal-overlay modal-overlay--sheet';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
   modal.innerHTML = `
-    <div style="background: var(--bg-card); border: 1px solid var(--color-primary); border-radius: 12px; padding: 20px; max-width: 420px; width: 100%; max-height: 85vh; overflow-y: auto; font-family: sans-serif; box-shadow: var(--shadow-xl);">
+    <div class="modal-card" style="border-color: var(--color-primary); max-width: 420px; box-shadow: var(--shadow-xl);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <h3 style="color: var(--color-success); margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
           <i class="fa-solid fa-circle-check"></i> ${dataTitle} Prêt
@@ -500,8 +526,8 @@ export function exportDataFile(fileName, dataTitle, payload) {
   document.body.appendChild(modal);
 
   // Close actions
-  document.getElementById('univ-modal-close').addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+  document.getElementById('univ-modal-close').addEventListener('click', () => closeModalAnimated(modal));
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModalAnimated(modal); });
 
   // Share action (native or browser)
   const shareBtn = document.getElementById('univ-btn-share');
@@ -540,7 +566,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
               dialogTitle: `Partager - ${dataTitle}`
             });
             showToast("Partage initié avec succès !", "fa-share-nodes", 3000);
-            modal.remove();
+            closeModalAnimated(modal);
             return;
           }
         }
@@ -563,7 +589,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
           });
           showToast("Texte partagé !", "fa-share-nodes", 3000);
         }
-        modal.remove();
+        closeModalAnimated(modal);
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error("Partage échoué:", err);
@@ -596,7 +622,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
           });
 
           showToast("Enregistré dans Documents/drcat/ !", "fa-floppy-disk", 5000);
-          modal.remove();
+          closeModalAnimated(modal);
           return;
         }
       }
@@ -612,7 +638,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       showToast("Téléchargement lancé !", "fa-download", 3000);
-      modal.remove();
+      closeModalAnimated(modal);
     } catch (err) {
       console.error("Téléchargement échoué:", err);
       showToast("Impossible de télécharger.", "fa-triangle-exclamation", 3000);
@@ -624,7 +650,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
     const success = await copyToClipboard(jsonStr);
     if (success) {
       showToast("Copié dans le presse-papiers !", "fa-copy", 4000);
-      modal.remove();
+      closeModalAnimated(modal);
     } else {
       showToast("Échec de la copie automatique.", "fa-circle-xmark", 3000);
     }
