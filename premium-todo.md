@@ -114,13 +114,13 @@
 # PHASE 4 — Native Android Polish (Capacitor)
 *Goal: feels like a real app, not a website in a box.*
 
-- [ ] **4.1 Safe-area insets** — honor notch/status-bar/nav-bar via `env(safe-area-inset-*)` on headers, toasts, sheets.
+- [x] **4.1 Safe-area insets** — honor notch/status-bar/nav-bar via `env(safe-area-inset-*)` on headers, toasts, sheets.
   *Why:* content never hides under system UI. **Effort S · Risk Low.**
-- [ ] **4.2 Hardware back button** — Capacitor `App.addListener('backButton')`: close modal/sheet → go back → confirm-exit at root.
+- [x] **4.2 Hardware back button** — Capacitor `App.addListener('backButton')`: close modal/sheet → go back → confirm-exit at root.
   *Why:* mishandled back = instant "cheap app" tell. **Effort M · Risk Med · Done-when:** back never dead-ends or exits unexpectedly.
 - [x] **4.3 Splash screen → app handoff** — branded splash that fades into the app; hide only when first meaningful paint is ready (`@capacitor/splash-screen`).
   *Why:* seamless launch, no white flash. **Effort S · Risk Low.**
-- [ ] **4.4 Haptics everywhere sensible** — success/error/selection patterns on key actions (save, quiz answer, toggle).
+- [x] **4.4 Haptics everywhere sensible** — success/error/selection patterns on key actions (save, quiz answer, toggle).
   *Why:* premium tactile layer (you already have the plugin). **Effort S · Risk Low.**
 - [x] **4.5 App state lifecycle** — pause timers/polling on `App` background; resume + refresh on foreground.
   *Why:* battery + correctness; feels considered. **Effort M · Risk Med.**
@@ -152,7 +152,7 @@
 # PHASE 6 — Offline, Caching & Reliability
 *Goal: rock-solid offline + trustworthy updates (core to your offline mode).*
 
-- [ ] **6.1 Upgrade the service worker** — precache the app shell; **stale-while-revalidate** for data (cats/pdf index); cache-first for static assets; network-first for live APIs with cache fallback.
+- [x] **6.1 Upgrade the service worker** — precache the app shell; **stale-while-revalidate** for data (cats/pdf index); cache-first for static assets; network-first for live APIs with cache fallback.
   *Why:* instant loads + fresh data + graceful offline. **Effort M · Risk Med · Done-when:** works fully offline and updates data when online.
 - [x] **6.2 Update flow** — detect new SW/version, show a non-intrusive "Update available — reload" toast.
   *Why:* users get fixes without confusion or hard cache clears. **Effort M · Risk Med.**
@@ -237,4 +237,38 @@
 **Not verified (no headless browser here):** live paint/feel of animations, View Transitions rendering, and pull-to-refresh gesture on a real Android WebView. Recommend a manual pass on device before shipping Phase 3.
 
 **Verdict:** Phase 3 acceptance met in code. Outstanding: device-level UX confirmation.
+
+---
+
+## PHASE 7 — Audit (completed 2026-07-20)
+
+**Scope:** Accessibility & finishing touches (7.1–7.5). Each task shipped as its own commit on `structured`. Picked up the interrupted Phase 7 work (force-closed terminal) which had left ARIA attributes in `index.html` and `trapFocus` in `utils.js` uncommitted.
+
+| Task | Commit | What landed | Risk |
+|---|---|---|---|
+| 7.1 Focus management | `0c2fe9a` | `trapFocus(modal, triggerEl)` in `utils.js`; wired to add-CAT modal (open/close + Escape) and export modal. Returns focus to trigger on close; Escape now routes through cleanup so the trap never leaks. | Low |
+| 7.2 ARIA + semantics | `99228bb` | `role=tablist/tab` + `aria-selected` + `aria-controls` on workspace & admin tabs; `role=tabpanel` on panes; add-CAT modal `role=dialog`/`aria-modal`/`aria-labelledby` (titled `h3`); close button `aria-label`; toast `role=status`+`aria-live=polite`. JS tab handlers now sync `aria-selected` on switch. Added `ariaTabs` harness cmd. | Low |
+| 7.3 Contrast & tap-target | `8222349` | `>=44px` hit area (min-width/height + box-sizing) for all small icon buttons (theme/sidebar/filter/modal-close/PDF-search) — verified via `tapTargets` harness. Light-theme `--color-primary` `#0891b2`->`#0e7490` (3.5:1->5.1:1 on card) to meet WCAG AA. | Low |
+| 7.4 Icon consistency | `a12c21a` | Added `--icon-sm/md/lg/xl` tokens; applied uniformly to icons inside buttons, tab/action/status/admin-tab buttons, and modal/block/pane header icons via one shared rule. | Low |
+| 7.5 Dark/light parity | `0374bab` | Fixed stuck colors: `.save-btn`/`.sidebar-btn-quiz`/`.suggestion-btn.btn-approve` black->white text (invisible on light-theme brand bg); `.pdf-search-result-snippet mark` white->`var(--text-primary)`; `.close-modal-btn:hover` white->`var(--color-primary)`. Added `parity` harness cmd. | Low |
+
+**Also corrected stale checkboxes:** 4.1, 4.2, 4.4 and 6.1 were already committed in earlier sessions but never ticked — now marked done.
+
+**Verification performed (headless Chromium via harness):**
+- `smoke` — boots, 55 CATs load, 0 console errors. OK
+- `console` — `[]` (no console/page errors). OK
+- `ariaTabs` — 2 tablists, 8 tabs, 8 tabpanels, 1 dialog; `aria-selected` moves summary->notes on click. OK
+- `tapTargets` — no icon-only buttons remain <44px. OK
+- `themeReveal` — toggles to light theme cleanly. OK
+- `parity` — body/sidebar/card/tab/save/quiz/close computed colors are theme-correct in both themes (text-on-bg readable). OK
+- All edited JS files pass `node --check`; esbuild bundle builds; `build.js` keeps version stamps + ARIA intact.
+
+**Not verified (no real Android device here):** screen-reader narration (VoiceOver/TalkBack), live paint/feel of focus trap + theme toggle on a WebView, and the exact AA pass of warning/success/danger/muted status hues when rendered as normal-size text (see residual below).
+
+**Residual / fast-follow (surfaced, not changed to keep palette scope tight):**
+- `status-pill` (sidebar) and `tab-btn` height (40px) are below the 44px AAA target but are adequately spaced/wide; left as-is.
+- Warning `#d97706`, success `#059669`, danger `#dc2626` (light) / muted `#64748b`, danger `#ef4444` (dark) fall below 4.5:1 on their cards when used as normal-size text. They pass as large/bold (status badges) but may fail AA for plain text. Candidate for a dedicated color-token contrast pass.
+- Deeper migration of hand-tuned px paddings/gaps (many non-standard values + mobile `!important` overrides) to `--space-*` tokens deferred to a dedicated token-refactor pass.
+
+**Verdict:** Phase 7 acceptance met in code. Outstanding: device-level a11y/contrast confirmation + the residual color pass above.
 
