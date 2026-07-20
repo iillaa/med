@@ -17,7 +17,6 @@ const measurements = new Map();
 const apiTimings = new Map(); // path -> Array of last 50 durations
 const interactionTimings = new Map(); // type -> Array of last 50 durations
 const memorySnapshots = []; // Array of last 20 usedJSHeapSize readings
-let startupTimeOrigin = performance.timeOrigin || Date.now();
 
 // Initial load milestones
 const milestones = {
@@ -175,7 +174,9 @@ export const perf = _isAndroidPerfSafeMode ? {
     try {
       const parsed = new URL(url, window.location.origin);
       cleanUrl = parsed.pathname;
-    } catch (_) {}
+    } catch (_) {
+      // no-op: URL parse failure is non-critical; keep original url as fallback
+    }
 
     if (!apiTimings.has(cleanUrl)) {
       apiTimings.set(cleanUrl, []);
@@ -300,9 +301,9 @@ export const perf = _isAndroidPerfSafeMode ? {
       };
     }
 
-    let initialHeap = memorySnapshots[0]?.heapSize || 0;
-    let currentHeap = memorySnapshots[memorySnapshots.length - 1]?.heapSize || 0;
-    let growth = currentHeap - initialHeap;
+    const initialHeap = memorySnapshots[0]?.heapSize || 0;
+    const currentHeap = memorySnapshots[memorySnapshots.length - 1]?.heapSize || 0;
+    const growth = currentHeap - initialHeap;
 
     return {
       frame: this.getFrameStats(),

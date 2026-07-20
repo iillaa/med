@@ -321,7 +321,9 @@ export async function copyToClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
       return true;
-    } catch (_) {}
+    } catch (_) {
+      // no-op: clipboard API failure falls through to textarea fallback below
+    }
   }
   
   try {
@@ -542,7 +544,9 @@ export function exportDataFile(fileName, dataTitle, payload) {
           const Share = Plugins.Share;
 
           if (Filesystem && Share) {
-            try { await Filesystem.requestPermissions(); } catch (_) {}
+          try { await Filesystem.requestPermissions(); } catch (_) {
+            // no-op: permission request is best-effort; proceed regardless
+          }
             
             // Ensure folder exists
             try {
@@ -609,7 +613,9 @@ export function exportDataFile(fileName, dataTitle, payload) {
         const Filesystem = Plugins.Filesystem;
 
         if (Filesystem) {
-          try { await Filesystem.requestPermissions(); } catch (_) {}
+          try { await Filesystem.requestPermissions(); } catch (_) {
+            // no-op: permission request is best-effort; proceed regardless
+          }
           try {
             await Filesystem.stat({ path: 'drcat', directory: 'DOCUMENTS' });
           } catch {
@@ -852,7 +858,9 @@ export function attachTapFeedback(el, opts = {}) {
     if (prefersReducedMotion()) return;
     if (opts.haptic && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
       const H = window.Capacitor.Plugins.Haptics;
-      try { if (typeof H.impact === 'function') H.impact({ style: 'light' }); } catch (_) {}
+      try { if (typeof H.impact === 'function') H.impact({ style: 'light' }); } catch (_) {
+        // no-op: haptics are non-critical; tap feedback degrades gracefully
+      }
     }
     const rect = el.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
