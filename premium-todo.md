@@ -166,7 +166,7 @@
 # PHASE 7 — Accessibility & Finishing Touches
 *Goal: inclusive, robust, App-Store-grade.*
 
-- [ ] **7.1 Focus management** — trap focus in modals, return focus on close, logical tab order.
+- [x] **7.1 Focus management** — trap focus in modals, return focus on close, logical tab order.
   *Why:* keyboard/switch users + polish. **Effort M · Risk Med.**
 - [ ] **7.2 ARIA + semantics** — roles/labels on custom controls (tabs, toggles, dialogs), live regions for toasts.
   *Why:* screen-reader support; also improves quality perception. **Effort M · Risk Low.**
