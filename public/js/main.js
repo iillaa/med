@@ -167,6 +167,25 @@ async function bootstrapApp() {
   }
 
  
+  // ── Phase 6.3: offline indicator ──
+  // Honest, subtle badge when the device loses connectivity. The app already
+  // works offline (PWA + local data), so this only sets expectations.
+  (function setupOfflineIndicator() {
+    try {
+      const badge = document.createElement('div');
+      badge.className = 'offline-badge';
+      badge.setAttribute('role', 'status');
+      badge.setAttribute('aria-live', 'polite');
+      badge.innerHTML = '<i class="fa-solid fa-wifi" style="transform: rotate(45deg);"></i> Mode hors-ligne';
+      document.body.appendChild(badge);
+      // Note: navigator.onLine is unreliable in Capacitor/Android WebView, so we
+      // drive the badge from the online/offline events (which fire reliably)
+      // rather than the initial onLine value — avoids false "offline" flashes.
+      window.addEventListener('offline', () => badge.classList.add('show'));
+      window.addEventListener('online', () => badge.classList.remove('show'));
+    } catch (_) { /* indicator is best-effort */ }
+  })();
+
   // Theme Toggle Initialization
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const themeToggleIcon = document.getElementById('theme-toggle-icon');
