@@ -1,0 +1,53 @@
+name: Lighthouse CI (Premium acceptance gate)
+
+# Manual only — run on demand from the Actions tab (matches build-apk.yml).
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL to audit. Leave default to serve the in-repo app locally.'
+        required: false
+        default: 'http://localhost:3000'
+        type: string
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build (bundle + asset stamping + copy data)
+        run: npm run build
+
+      - name: Start App Server
+        run: node server.js &
+        env:
+          PORT: '3000'
+
+      # Wait for the server to bind before Lighthouse probes it.
+      - name: Wait for server
+        run: npx --yes wait-on@7 http://localhost:3000 --timeout 30000
+
+      # lighthouserc.js holds the mobile profile + score assertions
+      # (perf >= 0.90, a11y >= 0.95, best-practices >= 0.95).
+      - name: Run Lighthouse CI
+        run: npx --yes @lhci/cli@0.13 autorun --collect.url="${{ github.event.inputs.url }}"
+
+      - name: Upload Lighthouse Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 30

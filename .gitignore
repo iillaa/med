@@ -44,3 +44,6 @@ public/js/server-providers.cjs
 # Backups and audit logs
 backups/
 audit.log
+
+# Lighthouse CI local reports (also produced by CI artifact upload)
+.lighthouseci/

@@ -203,7 +203,7 @@
 - [x] Scroll and animations hold ~60fps; `transform`/`opacity` only. *(Phase 3 + audit: all anims transform/opacity, passive listeners, will-change cleaned up.)*
 - [x] Full offline usability; clear, non-destructive update flow. *(Phase 6: tiered SW + SWR, update toast, offline indicator, empty states.)*
 - [x] Both themes pixel-consistent; reduced-motion honored; back button correct. *(Phase 7.5 parity verified both themes; reduced-motion guard; hardware back button Phase 4.2.)*
-- [ ] Lighthouse (mobile): Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95. *(Not run here — no Lighthouse CLI / desktop Chrome in this env. Evidence proxy: CLS≈0, 0 console errors, full self-host, ARIA roles, AA contrast. Run `npx lighthouse http://localhost:3000` on desktop Chrome to confirm before shipping.)*
+- [ ] Lighthouse (mobile): Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95. *(Now automatable: `.github/workflows/lighthouse.yml` (manual dispatch) runs `@lhci/cli` against the locally-served app with mobile emulation + 4× CPU throttle, asserting these exact thresholds; report uploaded as an artifact. Not yet run — trigger the workflow (or `npx @lhci/cli autorun` locally with Chrome) to confirm before shipping. Evidence proxy so far: CLS≈0, 0 console errors, full self-host, ARIA roles, AA contrast.)*
 
 ---
 
