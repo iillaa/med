@@ -45,6 +45,11 @@ function buildBundle() {
     logLevel: 'warning',
     outdir: DIST_DIR,
     entryNames: 'app-[hash]',
+    // Enable code-splitting so dynamic import() calls become separate chunks
+    // (Phase 5.2 route/feature-based lazy loading).
+    splitting: true,
+    // Shared chunks get stable names; feature chunks derive from their module.
+    chunkNames: 'chunk-[hash]',
     legalComments: 'none',
   });
 
@@ -65,18 +70,20 @@ function buildBundle() {
 }
 
 /**
- * Replace the module script tag in index.html so it loads the hashed bundle
- * instead of js/main.js. Preserves the surrounding markup and the existing
- * ?v= cache-buster that build.js manages.
+ * Replace the module script tag in index.html so it loads the hashed bundle.
+ * Handles both the original dev reference (js/main.js) and a previously
+ * rewired dist/app-*.js reference (so repeated builds always point at the
+ * current hash). Preserves the ?v= cache-buster that build.js manages.
  */
 function rewriteIndexScript(bundleName) {
   if (!fs.existsSync(INDEX_HTML)) return;
   let html = fs.readFileSync(INDEX_HTML, 'utf-8');
 
-  // Match: <script type="module" src="js/main.js?v=XXXX"></script>
-  const pattern = /<script\s+type="module"\s+src="js\/main\.js[^"]*"><\/script>/;
+  // Match either <script type="module" src="js/main.js..."> or an existing
+  // <script type="module" src="dist/app-*.js..."> tag.
+  const pattern = /<script\s+type="module"\s+src="(?:js\/main\.js|dist\/app-[^"]*)\.js[^"]*"><\/script>/;
   if (!pattern.test(html)) {
-    console.warn('[bundle] Could not find js/main.js module script tag in index.html; skipping rewrite.');
+    console.warn('[bundle] Could not find app module script tag in index.html; skipping rewrite.');
     return;
   }
 

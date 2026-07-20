@@ -4,15 +4,23 @@ import { initDebugConsole } from './debug-console.js';
 import * as sidebar from './components/sidebar.js';
 import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
-import * as quiz from './components/quiz.js';
-import * as diagnostics from './components/diagnostics.js';
-import * as performanceComponent from './components/performance.js';
 import { setupHardwareBackButton } from './components/native.js';
 import { setupAppLifecycle } from './components/native.js';
 import { setupKeyboardHandling } from './components/native.js';
 import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback, closeModalAnimated } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
+
+// ── Phase 5.2: lazy-loaded feature modules ──
+// quiz / diagnostics / performance are route/feature-scoped and not needed
+// for first paint, so they're dynamically imported on boot (non-blocking) and
+// cached. esbuild emits them as separate chunks via code-splitting.
+let _quizMod = null;
+let _diagMod = null;
+let _perfMod = null;
+const loadQuiz = () => (_quizMod || (_quizMod = import('./components/quiz.js')));
+const loadDiagnostics = () => (_diagMod || (_diagMod = import('./components/diagnostics.js')));
+const loadPerformance = () => (_perfMod || (_perfMod = import('./components/performance.js')));
 
 // Tracks app mode (set once on load via api.getAppMode())
 
@@ -234,9 +242,10 @@ async function bootstrapApp() {
   sidebar.initSidebar(selectCatWrapper, onFilterTriggered, refreshCatsAndRender);
   workspace.initWorkspace(onStatusChange, onCatDeleted, onProgressReset);
   dashboard.initDashboard(selectCatWrapper, onSuggestionHandled);
-  quiz.initQuiz(selectCatWrapper);
-  diagnostics.initDiagnostics();
-  performanceComponent.initPerformance();
+  // Lazy, non-blocking init of route/feature-scoped modules (Phase 5.2).
+  loadQuiz().then((m) => m.initQuiz(selectCatWrapper)).catch((e) => console.warn('[lazy] quiz init failed', e));
+  loadDiagnostics().then((m) => m.initDiagnostics()).catch((e) => console.warn('[lazy] diagnostics init failed', e));
+  loadPerformance().then((m) => m.initPerformance()).catch((e) => console.warn('[lazy] performance init failed', e));
  
   // Modal DOM Elements
   addCatBtn = document.getElementById('add-cat-btn');
@@ -1072,8 +1081,8 @@ export function updateEditButtonsVisibility() {
     if (deleteBtn) deleteBtn.style.display = 'none';
   }
 
-  diagnostics.updateDiagnosticsButtonVisibility();
-  performanceComponent.updatePerformanceButtonVisibility();
+  if (_diagMod) _diagMod.then((m) => m.updateDiagnosticsButtonVisibility()).catch(() => {});
+  if (_perfMod) _perfMod.then((m) => m.updatePerformanceButtonVisibility()).catch(() => {});
 
   // ── Specialty Export Container: ONLY for Admin ──
   const specialtyExportContainer = document.querySelector('.specialty-export-container');
