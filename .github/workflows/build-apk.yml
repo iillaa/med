@@ -6,6 +6,7 @@ on:
       - android-app
       - light-android
       - audit-project
+      - structured
 
   # Enable manual triggering
   workflow_dispatch:

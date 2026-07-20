@@ -1,0 +1,79 @@
+my question :use branche structured ;;;;;I have app logo in my lenovo show good , square with rounded edges but when i install app in poco phone that use round app logos my app logo is broken , i want the logo when the app icon logo is round  to be white circle border and inside it the dark blue with the slogan ,, for example now in lenovo the logo is square white and inside it is the dark blue with slogan since the android app icon logo is square with rounded edges
+ai reply  : I'll help you fix your app logo to work with both square and round app icon formats. Let me first understand your current project structure.Let me search for your app's logo and Android configuration files:Now let me check the mipmap folder structure:Perfect! Now I understand your issue. Your app has **Adaptive Icons** (used on Android 8+), but you need different designs for **square devices** vs **round mask devices** (like your Poco phone).
+
+Here's the solution:
+
+## Problem Summary
+- **Lenovo (square masks)**: Your current white square with dark blue logo inside works fine
+- **Poco (round mask)**: The white background gets clipped by the circular mask, leaving only the dark blue visible in the center
+- **Current setup**: `ic_launcher_background.xml` = white (#FFFFFF), foreground = your logo
+
+## Solution: Update the Round Icon Design
+
+You need to create **separate definitions** for round icons on devices that support it. Here's what to do:
+
+### Step 1: Update the Round Icon XML (for devices that support round icons)
+
+Create a new design structure that works better with circular masks:
+
+```bash
+# Create branch for this change
+branchName: fix/adaptive-icons-round-support
+```
+
+**File:** `android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml`
+
+Replace with:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background_round"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>
+```
+
+### Step 2: Add New Color for Round Background
+
+**File:** `android/app/src/main/res/values/ic_launcher_background.xml`
+
+Update to:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="ic_launcher_background_round">#FFFFFF</color>
+</resources>
+```
+
+### Step 3: Create New Round PNG Icons with White Border
+
+The key is updating your PNG files. For each density folder, you need to modify `ic_launcher_round.png` to have:
+- **White circular border** 
+- **Dark blue background inside** the circle
+- **Your slogan/logo** in the center
+
+You'll need to update these files (using design software like Photoshop, Figma, or online tools):
+- `android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png`
+- `android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png`
+- `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png`
+- `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png`
+
+### What the new design should look like:
+```
+┌─────────────────┐
+│  (white border) │
+│  ┌───────────┐  │
+│  │ dark blue │  │  <-- When clipped to circle by Android,
+│  │  + slogan │  │      you get: white border + dark blue center
+│  │           │  │
+│  └───────────┘  │
+└─────────────────┘
+```
+
+### Why this works:
+1. The white border **extends beyond the safe zone** that gets clipped
+2. When Poco's circular mask clips it, the white border remains visible around the edge
+3. Your dark blue logo stays prominent in the center
+4. Square devices (Lenovo) show the full design unchanged
+
+Would you like me to create a branch with the XML changes ready, or do you need help generating the new round PNG images with this design?
