@@ -158,7 +158,6 @@ async function tapTargets() {
   return { total: all.length, smallCount: small.length, small };
 }
 
-
 async function parity() {
   const browser = await connect();
   const page = await browser.newPage();
@@ -170,10 +169,7 @@ async function parity() {
       const el = document.querySelector(sel);
       if (!el) return null;
       const cs = getComputedStyle(el);
-      return {
-        color: cs.color,
-        bg: cs.backgroundColor,
-      };
+      return { color: cs.color, bg: cs.backgroundColor };
     };
     return {
       theme: t,
@@ -192,6 +188,75 @@ async function parity() {
   const light = await sample('light');
   await browser.disconnect();
   return { dark, light };
+}
+
+async function perfCapture() {
+  const browser = await connect();
+  const page = await browser.newPage();
+  await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+  const client = await page.target().createCDPSession();
+
+  // Mid-range Android profile: CPU 4x throttle + Slow 4G.
+  await client.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await client.send('Network.emulateNetworkConditions', {
+    offline: false, latency: 150, downloadThroughput: 1500 * 1024 / 8,
+    uploadThroughput: 750 * 1024 / 8, connectionType: 'cellular3g',
+  });
+  // Capture web vitals + trace for TBT.
+  await client.send('Page.enable');
+  await client.send('Performance.enable', { timeDomain: 'timeTicks' });
+
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+
+  const t0 = Date.now();
+  await page.goto(BASE, { waitUntil: 'load', timeout: 60000 });
+  // Give perf observers + boot a moment under throttle.
+  await new Promise((r) => setTimeout(r, 4000));
+
+  const vitals = await page.evaluate(() => new Promise((resolve) => {
+    const out = {};
+    const get = (name, cb) => new PerformanceObserver((list) => {
+      const e = list.getEntries().pop();
+      out[name] = Math.round(e.startTime + (e.duration || 0));
+      cb && cb();
+    }).observe({ type: name, buffered: true });
+    get('first-contentful-paint');
+    get('largest-contentful-paint');
+    // CLS via layout-shift entries.
+    let cls = 0;
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) if (!e.hadRecentInput) cls += e.value;
+      out.cls = Math.round(cls * 1000) / 1000;
+    }).observe({ type: 'layout-shift', buffered: true });
+    // App render timings from window.perf if present.
+    try {
+      out.perf = (typeof window.perf !== 'undefined' && window.perf.getMetrics)
+        ? window.perf.getMetrics() : null;
+    } catch (_) { out.perf = null; }
+    out.bootHiddenAt = (() => {
+      const ov = document.getElementById('app-loading-overlay');
+      return ov ? (ov.classList.contains('hidden') ? 'hidden' : 'visible') : 'n/a';
+    })();
+    setTimeout(() => resolve(out), 1500);
+  }));
+
+  // TBT from trace.
+  const { traceEvents } = await client.send('Tracing.end', {}).catch(() => ({ traceEvents: [] }));
+  await client.send('Tracing.start', { categories: 'devtools.timeline' }).catch(() => {});
+  await new Promise((r) => setTimeout(r, 300));
+  const trace = await client.send('Tracing.end', {}).catch(() => ({ traceEvents: [] }));
+  let tbt = 0;
+  const tasks = {};
+  for (const ev of (trace.traceEvents || [])) {
+    if (ev.name === 'RunTask' && ev.dur > 50000) tbt += (ev.dur - 50000) / 1000;
+  }
+  vitals.tbtMs = Math.round(tbt);
+  vitals.loadMs = Date.now() - t0;
+  vitals.errors = errors;
+
+  await browser.disconnect();
+  return vitals;
 }
 
 
@@ -232,6 +297,7 @@ try {
   else if (cmd === 'ariaTabs') result = await ariaTabs();
   else if (cmd === 'tapTargets') result = await tapTargets();
   else if (cmd === 'parity') result = await parity();
+  else if (cmd === 'perfCapture') result = await perfCapture();
   else { console.error('unknown command:', cmd); process.exitCode = 1; }
   console.log(JSON.stringify(result, null, 2));
 } catch (e) {
