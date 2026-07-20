@@ -7,7 +7,8 @@ import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
 import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
-import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback } from './utils.js';
+import { setupHardwareBackButton } from './components/native.js';
+import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback, closeModalAnimated } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
 
@@ -269,7 +270,7 @@ async function bootstrapApp() {
     });
   }
  
-  const closeModal = () => {
+  function closeAddCatModal() {
     if (!addCatModal) return;
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       addCatModal.style.display = 'none';
@@ -286,10 +287,10 @@ async function bootstrapApp() {
     };
     addCatModal.addEventListener('animationend', onEnd);
     setTimeout(() => onEnd({ target: addCatModal }), 600);
-  };
- 
-  if (closeAddCatModalBtn) closeAddCatModalBtn.addEventListener('click', closeModal);
-  if (cancelAddCatBtn) cancelAddCatBtn.addEventListener('click', closeModal);
+  }
+  
+  if (closeAddCatModalBtn) closeAddCatModalBtn.addEventListener('click', closeAddCatModal);
+  if (cancelAddCatBtn) cancelAddCatBtn.addEventListener('click', closeAddCatModal);
  
   if (addCatForm) {
     addCatForm.addEventListener('submit', async (e) => {
@@ -592,6 +593,44 @@ async function initApp() {
 
   // ── 8b. Tactile tap feedback (Phase 3.2) ──
   initTapFeedback();
+
+  // ── 8c. Hardware back button (Phase 4.2, native Android) ──
+  setupHardwareBackButton({
+    isModalOpen: () => !!document.querySelector('.modal-overlay:not([style*="display: none"])'),
+    closeModal: () => {
+      const open = document.querySelector('.modal-overlay:not([style*="display: none"])');
+      if (open) {
+        if (open.id === 'add-cat-modal') closeAddCatModal();
+        else closeModalAnimated(open);
+      }
+    },
+    isDrawerOpen: () => {
+      const sb = document.querySelector('.sidebar');
+      return !!sb && sb.classList.contains('open');
+    },
+    closeDrawer: () => {
+      const sb = document.querySelector('.sidebar');
+      if (sb) sb.classList.remove('open');
+    },
+    isDeepView: () => {
+      const ws = document.getElementById('workspace');
+      const qs = document.getElementById('quiz-screen');
+      return (ws && ws.style.display !== 'none') || (qs && qs.style.display !== 'none');
+    },
+    goToDashboard: () => dashboard.showDashboard(selectCatWrapper),
+    confirmExit: () => {
+      // Already at the root; let the native shell handle exit. Show a toast as
+      // a gentle hint on first press; a second press within 2s exits.
+      if (window.__drCatExitArmed) {
+        const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+        if (App && typeof App.exitApp === 'function') App.exitApp();
+        return;
+      }
+      window.__drCatExitArmed = true;
+      showToast("Appuyez encore sur Retour pour quitter.", 'fa-right-from-bracket', 2000);
+      setTimeout(() => { window.__drCatExitArmed = false; }, 2000);
+    },
+  });
 
   // ── 8. Hide Overlay ──
   // (Automatically handled by window.setLoaderProgress(100) above)
