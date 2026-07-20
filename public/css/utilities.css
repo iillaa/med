@@ -467,9 +467,19 @@ button i,
 .toggle-sidebar-btn,
 .close-modal-btn,
 .close-sidebar-btn,
-.controls-toggle-btn,
 #pdf-content-search-btn {
   min-width: 44px;
   min-height: 44px;
   box-sizing: border-box;
+}
+
+/* The sidebar filter toggle stays visually compact (30px) but keeps a
+   comfortable tap target via an invisible expanded hit area. */
+.controls-toggle-btn {
+  position: relative;
+}
+.controls-toggle-btn::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
 }
