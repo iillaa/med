@@ -5,13 +5,21 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   padding: 16px;
-  animation: fadeIn 0.2s ease;
+  animation: modalBackdropIn var(--motion-fast) ease;
+  will-change: opacity;
+}
+
+@keyframes modalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-card {
@@ -24,12 +32,14 @@
   display: flex;
   flex-direction: column;
   max-height: 90dvh;
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  animation: modalCardIn var(--motion-base) var(--ease-decelerate);
+  will-change: transform, opacity;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+@keyframes modalCardIn {
+  from { transform: scale(0.96) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .modal-header {
