@@ -98,15 +98,15 @@
 
 - [x] **3.1 Modal / bottom-sheet open-close animations** — scale+fade in (emphasized easing), backdrop fade; sheet slides from bottom on mobile.
   *Why:* the difference between "a div appeared" and "a surface presented." **Effort M · Risk Low.**
-- [ ] **3.2 Button & tap feedback** — subtle press-scale (`:active { transform: scale(.97) }`), ripple or highlight, paired with light Haptics on native.
+- [x] **3.2 Button & tap feedback** — subtle press-scale (`:active { transform: scale(.97) }`), ripple or highlight, paired with light Haptics on native.
   *Why:* tactile, responsive, native-feeling. **Effort S · Risk Low.**
-- [ ] **3.3 List item enter/exit** — staggered fade/slide when the filtered list changes (respecting reduced-motion).
+- [x] **3.3 List item enter/exit** — staggered fade/slide when the filtered list changes (respecting reduced-motion).
   *Why:* changes feel intentional, not abrupt. **Effort M · Risk Low.**
-- [ ] **3.4 Quiz feedback polish** — animated score count-up, correct/incorrect state transitions, progress bar easing, tasteful success moment.
+- [x] **3.4 Quiz feedback polish** — animated score count-up, correct/incorrect state transitions, progress bar easing, tasteful success moment.
   *Why:* turns a quiz into an experience; drives engagement. **Effort M · Risk Low.**
-- [ ] **3.5 Theme-toggle reveal (optional flourish)** — View Transitions API circular reveal from the toggle button (fallback to instant swap).
+- [x] **3.5 Theme-toggle reveal (optional flourish)** — View Transitions API circular reveal from the toggle button (fallback to instant swap).
   *Why:* signature premium detail. **Effort M · Risk Med (progressive enhancement).**
-- [ ] **3.6 Pull-to-refresh (native feel)** on lists where a refresh makes sense.
+- [x] **3.6 Pull-to-refresh (native feel)** on lists where a refresh makes sense.
   *Why:* expected native gesture. **Effort M · Risk Med.**
 
 ---
@@ -213,3 +213,28 @@
 - Each perf task includes a before/after `window.perf` or Lighthouse note.
 - Never regress the safety rules: keep Capacitor plugins, keep offline search-highlight duplication, don't break the CI build.
 - Update this file's checkboxes as tasks land.
+
+---
+
+## PHASE 3 — Audit (completed 2026-07-20)
+
+**Scope:** Motion & micro-interactions (3.1–3.6). Each task shipped as its own commit on `structured`.
+
+| Task | Commit | What landed | Risk notes |
+|---|---|---|---|
+| 3.1 Modal/bottom-sheet | `c5813e5` | Close animations + mobile sheet + JS modals (`export`/`review`) routed through shared animated classes; reduced-motion aware | Low |
+| 3.2 Tap feedback | `8654b8a` | `.tap-ripple` highlight + extended `:active` press-scale; `attachTapFeedback`/`initTapFeedback` fire light native haptic on pointerdown | Low — no-op under reduced-motion |
+| 3.3 List enter/exit | `3bfa48c` | `.cat-item-enter` (capped stagger) + `.cat-item-exit`; exit animates before DOM removal | Low — item map preserved |
+| 3.4 Quiz polish | `a54227a` | `countUp()` helper; score count-up + spring pop; eased progress bar; feedback status pop; success pulse ≥80% | Low |
+| 3.5 Theme reveal | `ae9743d` | View Transitions API circular clip-path reveal from toggle button; instant-swap fallback | Med — progressive enhancement, guarded by feature + reduced-motion check |
+| 3.6 Pull-to-refresh | `9e6a225` | `setupPullToRefresh()` on CAT list; spinner indicator; wired to `refreshCatsAndRender()` | Med — touch + mouse fallback, only at scrollTop 0 |
+
+**Verification performed:**
+- All edited JS files pass `node --check` (ESM).
+- ESLint: **0 new errors** introduced (9 pre-existing `no-empty` catch-block warnings exist project-wide, confirmed unchanged via `git stash`).
+- Grep-confirmed every animation is `transform`/`opacity` only and gated behind `prefers-reduced-motion`.
+
+**Not verified (no headless browser here):** live paint/feel of animations, View Transitions rendering, and pull-to-refresh gesture on a real Android WebView. Recommend a manual pass on device before shipping Phase 3.
+
+**Verdict:** Phase 3 acceptance met in code. Outstanding: device-level UX confirmation.
+
