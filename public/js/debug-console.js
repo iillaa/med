@@ -329,7 +329,7 @@ function createUI() {
     let debugTapCount = 0;
     let debugTapTimeout = null;
     const DEBUG_TAP_THRESHOLD = 5;
-    const DEBUG_TAP_WINDOW = 3000;
+    const DEBUG_TAP_WINDOW = 2000; // 2 seconds
     
     btn.addEventListener('click', (e) => {
       debugTapCount++;
@@ -427,7 +427,7 @@ export function initDebugConsole() {
   let logoClicks = 0;
   let logoClickTimeout = null;
   const LOGO_TAP_THRESHOLD = 10;
-  const LOGO_TAP_WINDOW = 4000; // 4 seconds
+  const LOGO_TAP_WINDOW = 2000; // 2 seconds
 
   const handleLogoClick = () => {
     logoClicks++;
