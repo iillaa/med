@@ -330,7 +330,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.20.13.24">
+  <meta name="app-build-version" content="2026.07.20.13.27">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -366,21 +366,21 @@ body {
   </script>
   <!-- Preload critical assets -->
   <link rel="preload" href="drcat_logo.png" as="image" type="image/png">
-  <!-- Google Fonts: Outfit — preconnect + preload the CSS so text paints with the brand font sooner -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
+       works fully offline. Loaded non-render-blocking. -->
+  <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css?v=2607201327" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607201327"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607201324" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607201324" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607201327" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607201327" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607201324">
-    <link rel="stylesheet" href="css/utilities.css?v=2607201324">
+    <link rel="stylesheet" href="style.css?v=2607201327">
+    <link rel="stylesheet" href="css/utilities.css?v=2607201327">
   </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>

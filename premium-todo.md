@@ -140,7 +140,7 @@
   *Why:* pdf.js is large; most sessions may never open a PDF. **Effort S · Risk Low.**
 - [x] **5.4 Critical CSS inline + defer rest** — inline above-the-fold CSS in `<head>`, lazy-load the rest.
   *Why:* faster first paint. **Effort M · Risk Med.**
-- [ ] **5.5 Self-host fonts + subset** — bundle Outfit locally (WOFF2, subset to used weights/glyphs) instead of Google Fonts CDN.
+- [x] **5.5 Self-host fonts + subset** — bundle Outfit locally (WOFF2, subset to used weights/glyphs) instead of Google Fonts CDN.
   *Why:* removes a render-blocking third-party request; works fully offline. **Effort M · Risk Low.**
 - [ ] **5.6 Image optimization** — convert PNGs to WebP/AVIF with PNG fallback; compress; correct sizes.
   *Why:* smaller downloads, faster LCP. **Effort S · Risk Low.**
