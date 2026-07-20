@@ -378,6 +378,25 @@
   contain-intrinsic-size: auto 52px;
 }
 
+/* Staggered enter when the filtered list grows (Phase 3.3). */
+.cat-item.cat-item-enter {
+  animation: catItemEnter var(--motion-base) var(--ease-decelerate) both;
+}
+@keyframes catItemEnter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Graceful exit before the node is removed from the DOM. */
+.cat-item.cat-item-exit {
+  animation: catItemExit var(--motion-fast) var(--ease-standard) forwards;
+  pointer-events: none;
+}
+@keyframes catItemExit {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-12px); }
+}
+
 .cat-item:hover {
   background-color: rgba(255, 255, 255, 0.03);
 }

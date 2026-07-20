@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { setupSwipeGestures, debounce } from '../utils.js';
+import { setupSwipeGestures, debounce, prefersReducedMotion } from '../utils.js';
 
 // DOM Elements
 let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
@@ -140,6 +140,19 @@ function paintCatItem(li, cat) {
   if (indicator) indicator.className = `cat-indicator ${cat.status}`;
 }
 
+// Animate a list item out, then remove it from the DOM (Phase 3.3).
+// Falls back to immediate removal under reduced-motion or if animation
+// doesn't fire.
+function animateListItemExit(li) {
+  if (!li || !li.isConnected) return;
+  if (prefersReducedMotion()) { li.remove(); return; }
+  li.classList.add('cat-item-exit');
+  let done = false;
+  const finish = () => { if (!done) { done = true; li.remove(); } };
+  li.addEventListener('animationend', finish, { once: true });
+  setTimeout(finish, 250);
+}
+
 // Render CATs list
 export function renderCatList(cats, onSelectCat) {
   if (window.perf) window.perf.startMeasure('sidebar.renderCatList');
@@ -164,16 +177,17 @@ export function renderCatList(cats, onSelectCat) {
   }
 
   const incoming = new Set(cats.map(c => c.id));
-  // Remove nodes no longer present.
+  // Remove nodes no longer present (animate out first, then drop).
   for (const [id, li] of catItemNodes) {
     if (!incoming.has(id)) {
-      li.remove();
       catItemNodes.delete(id);
+      animateListItemExit(li);
     }
   }
 
   const fragment = document.createDocumentFragment();
   let attached = false;
+  let enterIndex = 0;
   let prev = null;
   cats.forEach((cat) => {
     let li = catItemNodes.get(cat.id);
@@ -182,6 +196,16 @@ export function renderCatList(cats, onSelectCat) {
       catItemNodes.set(cat.id, li);
       fragment.appendChild(li);
       attached = true;
+      // Staggered enter for items that just appeared (Phase 3.3).
+      if (!prefersReducedMotion()) {
+        li.classList.add('cat-item-enter');
+        li.style.animationDelay = `${Math.min(enterIndex, 8) * 30}ms`;
+        li.addEventListener('animationend', () => {
+          li.classList.remove('cat-item-enter');
+          li.style.animationDelay = '';
+        }, { once: true });
+        enterIndex++;
+      }
     } else {
       paintCatItem(li, cat); // update in place (text + active + status dot)
     }
