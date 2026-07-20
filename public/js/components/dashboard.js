@@ -4,7 +4,7 @@ import { exportDataFile, showToast } from '../utils.js';
 import { calculateStats, getStreakCount } from './dashboard/stats.js';
 import { renderResumeList } from './dashboard/resume.js';
 import { renderCategoryProgress } from './dashboard/progress.js';
-import { initAdminTabListeners, autoSelectDevTab, loadPendingSuggestions } from './dashboard/admin.js';
+import { initAdminTabListeners, loadPendingSuggestions } from './dashboard/admin.js';
 
 let welcomeScreen, workspace, sidebar;
 let dashMasteryRate, dashCountDone, dashCountDoing, dashCountTodo;
@@ -366,15 +366,12 @@ export async function renderDashboard(onSelectCat) {
     firstRunBanner.style.display = hasStarted ? 'none' : 'flex';
   }
 
-  const devUnlocked = !!window.__drCatDevDiagnosticsUnlocked;
   if (adminPanel) {
-    adminPanel.style.display = (state.isAdmin || devUnlocked) ? 'block' : 'none';
+    adminPanel.style.display = state.isAdmin ? 'block' : 'none';
   }
 
   if (state.isAdmin) {
     await loadPendingSuggestions(suggestionsList);
-  } else if (devUnlocked) {
-    autoSelectDevTab();
   }
 
   lastDashSignature = computeDashSignature();

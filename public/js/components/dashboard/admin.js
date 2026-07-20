@@ -2,20 +2,58 @@ import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 
-export function autoSelectDevTab() {
-  const diagTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-diagnostics"]');
-  if (diagTab) {
-    diagTab.click();
-  }
-  disableAdminTabsForDev();
-}
+// ── 5-tap toggle helpers ─────────────────────────────────────
+// Each target pane gets its own independent tap counter. Taps must be
+// consecutive (within TAP_WINDOW ms) on the SAME button; they do not
+// accumulate across different buttons or across time gaps.
 
-function disableAdminTabsForDev() {
-  const sugTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-suggestions"]');
-  if (sugTab) {
-    sugTab.style.opacity = '0.4';
-    sugTab.style.pointerEvents = 'none';
-    sugTab.style.filter = 'grayscale(1)';
+const TAP_THRESHOLD = 5;
+const TAP_WINDOW = 3000; // 3 seconds
+
+const tapState = new Map(); // btnEl -> { count, timeout }
+
+function handleTapToggle(btn, paneId) {
+  const key = btn;
+  const entry = tapState.get(key) || { count: 0, timeout: null };
+
+  entry.count++;
+  if (entry.timeout) clearTimeout(entry.timeout);
+
+  entry.timeout = setTimeout(() => {
+    entry.count = 0;
+    tapState.delete(key);
+  }, TAP_WINDOW);
+
+  tapState.set(key, entry);
+
+    if (entry.count >= TAP_THRESHOLD) {
+    entry.count = 0;
+    if (entry.timeout) clearTimeout(entry.timeout);
+    tapState.delete(key);
+
+    const pane = document.getElementById(paneId);
+    if (!pane) return;
+
+    const isVisible = pane.style.display !== 'none';
+    pane.style.display = isVisible ? 'none' : 'block';
+
+    // Update tab button active state to match
+    btn.classList.toggle('active', !isVisible);
+    btn.setAttribute('aria-selected', String(!isVisible));
+    btn.style.color = !isVisible ? 'var(--color-primary)' : 'var(--text-secondary)';
+    btn.style.backgroundColor = !isVisible ? 'rgba(6, 182, 212, 0.1)' : 'transparent';
+
+    // Dispatch pane-toggled event so diagnostics/performance components
+    // can expand/collapse their internal state.
+    window.dispatchEvent(new CustomEvent('drcat-admin-pane-toggled', {
+      detail: { paneId, visible: !isVisible }
+    }));
+
+    showToast(
+      isVisible ? `📊 ${paneId === 'admin-pane-diagnostics' ? 'Diagnostics' : 'Performance'} masqué.` : `📊 ${paneId === 'admin-pane-diagnostics' ? 'Diagnostics' : 'Performance'} affiché.`,
+      isVisible ? 'fa-eye-slash' : 'fa-eye',
+      2000
+    );
   }
 }
 
@@ -26,8 +64,16 @@ export function initAdminTabListeners(onSuggestionHandled) {
       const targetId = btn.getAttribute('data-target');
       if (!targetId) return;
 
-      if (targetId === 'admin-pane-suggestions' && window.__drCatDevDiagnosticsUnlocked) {
-        return;
+      // 5-tap toggle for diagnostics and performance panes
+      if (targetId === 'admin-pane-diagnostics' || targetId === 'admin-pane-performance') {
+        handleTapToggle(btn, targetId);
+        // If the tap count hasn't reached threshold yet, still allow normal tab switching
+        const entry = tapState.get(btn);
+        if (entry && entry.count > 0 && entry.count < TAP_THRESHOLD) {
+          // Fall through to normal tab switch below
+        } else if (entry && entry.count >= TAP_THRESHOLD) {
+          return; // Toggle handled above, don't switch tabs
+        }
       }
 
       adminTabBtns.forEach(b => {
@@ -129,7 +175,7 @@ export function initAdminTabListeners(onSuggestionHandled) {
           </div>
           <div style="margin-bottom: 14px;">
             <label for="review-sug-redflags" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Red Flags (signes de gravité)</label>
-            <textarea id="review-sug-redflags" rows="3" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:13px; font-family:inherit; resize:vertical; outline:none;">${escapeHTML(sug.data.red_flags || '')}</textarea>
+            <textarea id="review-sug-redflags" rows="3" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:inherit; resize:vertical; outline:none;">${escapeHTML(sug.data.red_flags || '')}</textarea>
           </div>
         `;
       }
@@ -159,7 +205,6 @@ export function initAdminTabListeners(onSuggestionHandled) {
           <div style="flex-grow: 1; overflow-y: auto; padding-right: 6px; margin-bottom: 18px;">
             ${fieldsHtml}
           </div>
-
           <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0;">
             <button id="review-btn-cancel" style="padding: 10px 18px; background: none; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 13px; font-weight: 500;">
               Annuler
@@ -196,7 +241,8 @@ export function initAdminTabListeners(onSuggestionHandled) {
           if (result.success) {
             showToast("Corrections enregistrées avec succès !", "fa-circle-check", 3000);
             closeModalAnimated(modal);
-            await loadPendingSuggestions();
+            /* eslint-disable-next-line no-undef */
+            await loadPendingSuggestions(suggestionsList);
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
           }
@@ -231,9 +277,9 @@ export async function loadPendingSuggestions(suggestionsList) {
 
       let diffHtml = '';
       if (sug.type === 'add') {
-        diffHtml = `<strong>Titre :</strong> ${escapeHTML(sug.data.title)}<br>
-                    <strong>Spécialité :</strong> ${escapeHTML(sug.data.category)}<br>
-                    <strong>Red Flags :</strong> ${escapeHTML(sug.data.red_flags) || 'Aucun'}<br>
+        diffHtml = `<strong>Titre :</strong> ${escapeHTML(sug.data.title || '')}<br>
+                    <strong>Spécialité :</strong> ${escapeHTML(sug.data.category || '')}<br>
+                    <strong>Red Flags :</strong> ${escapeHTML(sug.data.red_flags || '') || 'Aucun'}<br>
                     <strong>Synthèse (extrait) :</strong> ${sug.data.summary ? escapeHTML(sug.data.summary.substring(0, 150)) + '...' : 'Aucune'}<br>
                     <strong>Ordonnance (extrait) :</strong> ${sug.data.ordonnance ? escapeHTML(sug.data.ordonnance.substring(0, 100)) + '...' : 'Aucune'}`;
       } else if (sug.type === 'edit') {
@@ -243,11 +289,11 @@ export async function loadPendingSuggestions(suggestionsList) {
         diffHtml = `<strong>Fiche ciblée :</strong> ${escapeHTML(originalTitle)}<br>`;
         if (sug.data.summary) {
           const previewText = sug.data.summary.length > 200 ? escapeHTML(sug.data.summary.substring(0, 200)) + '...' : escapeHTML(sug.data.summary);
-          diffHtml += `<strong>Proposition Synthèse (extrait) :</strong><div class="suggestion-diff-container" style="max-height: 90px; overflow: hidden; text-overflow: ellipsis; white-space: pre-wrap; font-family: monospace; font-size:12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin-top: 4px;">${previewText}</div>`;
+          diffHtml += `<strong>Proposition Synthèse (extrait) :</strong><div class="suggestion-diff-container" style="max-height: 90px; overflow: hidden; text-overflow: ellipsis; white-space: pre-wrap; font-family: monospace; font-size:12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; margin-top: 4px;">${previewText}</div>`;
         }
         if (sug.data.ordonnance) {
           const previewText = sug.data.ordonnance.length > 150 ? escapeHTML(sug.data.ordonnance.substring(0, 150)) + '...' : escapeHTML(sug.data.ordonnance);
-          diffHtml += `<strong>Proposition Ordonnance (extrait) :</strong><div class="suggestion-diff-container" style="max-height: 80px; overflow: hidden; text-overflow: ellipsis; white-space: pre-wrap; font-family: monospace; font-size:12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 4px; margin-top: 4px;">${previewText}</div>`;
+          diffHtml += `<strong>Proposition Ordonnance (extrait) :</strong><div class="suggestion-diff-container" style="max-height: 80px; overflow: hidden; text-overflow: ellipsis; white-space: pre-wrap; font-family: monospace; font-size:12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; margin-top: 4px;">${previewText}</div>`;
         }
       }
 

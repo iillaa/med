@@ -4,9 +4,6 @@ let logBuffer = [];
 const MAX_LOGS = 200;
 let isViewerOpen = false;
 let originalConsole = {};
-let devUnlockClickCount = 0;
-const DEV_UNLOCK_THRESHOLD = 3;
-let devUnlockCooldown = false;
 
 // ── Capture Helpers ──────────────────────────────────────────
 function addLog(level, args, meta = {}) {
@@ -27,7 +24,7 @@ function addLog(level, args, meta = {}) {
 }
 
 // ── Override Console Methods ─────────────────────────────────
-function startDebugConsole() {
+export function startDebugConsole() {
   if (originalConsole.log) return; // Already initialized
 
   // Save originals
@@ -130,29 +127,6 @@ function toggleViewer() {
   isViewerOpen = !isViewerOpen;
   panel.style.display = isViewerOpen ? 'flex' : 'none';
   if (isViewerOpen) renderLogs();
-}
-
-function attemptDevUnlock() {
-  if (devUnlockCooldown) return;
-
-  devUnlockClickCount++;
-  if (devUnlockClickCount >= DEV_UNLOCK_THRESHOLD) {
-    devUnlockClickCount = 0;
-    devUnlockCooldown = true;
-    window.__drCatDevDiagnosticsUnlocked = true;
-    localStorage.setItem('drCatDevDiagnosticsUnlocked', 'true');
-    showToast("🔓 Diagnostics/Performance déverrouillés !", "fa-unlock", 4000);
-    
-    // Automatically close the log viewer overlay so the user sees the dashboard
-    const panel = document.getElementById('debug-console-panel');
-    if (panel) {
-      panel.style.display = 'none';
-      isViewerOpen = false;
-    }
-
-    document.dispatchEvent(new CustomEvent('dr-cat-dev-unlocked'));
-    setTimeout(() => { devUnlockCooldown = false; }, 5000);
-  }
 }
 
 function createUI() {
@@ -351,7 +325,6 @@ function createUI() {
     
     document.body.appendChild(btn);
     btn.addEventListener('click', () => {
-      attemptDevUnlock();
       toggleViewer();
     });
   }
@@ -399,15 +372,14 @@ function createUI() {
 
 // ── Init ──────────────────────────────────────────────────────
 export function initDebugConsole() {
-  // Read saved diagnostic unlock status
-  window.__drCatDevDiagnosticsUnlocked = localStorage.getItem('drCatDevDiagnosticsUnlocked') === 'true';
-
   startDebugConsole();
   createUI();
 
-  // 10 click Easter Egg on brand logo to toggle debug console button visibility
+  // 10 consecutive taps on brand logo to toggle debug console button visibility
   let logoClicks = 0;
   let logoClickTimeout = null;
+  const LOGO_TAP_THRESHOLD = 10;
+  const LOGO_TAP_WINDOW = 4000; // 4 seconds
 
   const handleLogoClick = () => {
     logoClicks++;
@@ -415,9 +387,9 @@ export function initDebugConsole() {
     if (logoClickTimeout) clearTimeout(logoClickTimeout);
     logoClickTimeout = setTimeout(() => {
       logoClicks = 0;
-    }, 4000); // reset count if inactive for 4 seconds
+    }, LOGO_TAP_WINDOW);
 
-    if (logoClicks >= 10) {
+    if (logoClicks >= LOGO_TAP_THRESHOLD) {
       logoClicks = 0;
       clearTimeout(logoClickTimeout);
       
@@ -428,15 +400,11 @@ export function initDebugConsole() {
         if (currentlyVisible) {
           btn.style.display = 'none';
           localStorage.removeItem('drCatDebugConsoleVisible');
-          // Also lock diagnostics when hiding
-          localStorage.removeItem('drCatDevDiagnosticsUnlocked');
-          window.__drCatDevDiagnosticsUnlocked = false;
-          document.dispatchEvent(new CustomEvent('dr-cat-dev-unlocked'));
           showToast("🐛 Mode Débogage désactivé.", "fa-bug", 3000);
         } else {
           btn.style.setProperty('display', 'flex', 'important');
           localStorage.setItem('drCatDebugConsoleVisible', 'true');
-          showToast("🐛 Mode Débogage activé ! Tapotez 3 fois sur l'icône 🐛 pour déverrouiller les diagnostics.", "fa-bug", 5000);
+          showToast("🐛 Mode Débogage activé !", "fa-bug", 5000);
         }
       }
     }
@@ -463,4 +431,3 @@ export function initDebugConsole() {
   // Log startup info
   console.log('📱 Dr.CAT Debug Console active.');
 }
-

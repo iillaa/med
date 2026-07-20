@@ -512,7 +512,6 @@ if (document.readyState === 'loading') {
   bootstrapApp();
 }
 
-let devUnlockListenerRegistered = false;
 let syncIntervalStarted = false;
 let syncIntervalId = null;
 let syncPaused = false;
@@ -634,20 +633,6 @@ async function initApp() {
       console.log("[Background] PDFs loaded.");
     }).catch(err => console.error("[Background] PDF load failed:", err));
   }, 100);
-
-  // Listener to force UI re-render when developer mode is unlocked/toggled
-  if (!devUnlockListenerRegistered) {
-    devUnlockListenerRegistered = true;
-    document.addEventListener('dr-cat-dev-unlocked', () => {
-      try {
-        calculateStats();
-        dashboard.renderDashboard(selectCatWrapper);
-        updateEditButtonsVisibility();
-      } catch (err) {
-        console.error("[Dev Unlock UI Render Error]", err);
-      }
-    });
-  }
 
   setLoadingProgress(100);
 

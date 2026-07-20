@@ -25,6 +25,17 @@ export function initPerformance() {
     }
   });
 
+  // Listen to 5-tap toggle event (independent of normal tab switching)
+  window.addEventListener('drcat-admin-pane-toggled', (e) => {
+    if (e.detail.paneId === 'admin-pane-performance') {
+      if (e.detail.visible) {
+        expandPanel();
+      } else if (isOpen) {
+        collapsePanel();
+      }
+    }
+  });
+
   // Listen for performance log changes
   window.addEventListener('drcat-perf-log-added', renderPerfLogs);
 
