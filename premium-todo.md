@@ -170,9 +170,9 @@
   *Why:* keyboard/switch users + polish. **Effort M · Risk Med.**
 - [x] **7.2 ARIA + semantics** — roles/labels on custom controls (tabs, toggles, dialogs), live regions for toasts.
   *Why:* screen-reader support; also improves quality perception. **Effort M · Risk Low.**
-- [ ] **7.3 Contrast & tap-target audit** — verify WCAG AA contrast (both themes) and ≥44px tap targets.
+- [x] **7.3 Contrast & tap-target audit** — verify WCAG AA contrast (both themes) and ≥44px tap targets.
   *Why:* legibility + fewer mis-taps. **Effort S · Risk Low.**
-- [ ] **7.4 Consistent iconography & spacing pass** — migrate remaining hardcoded px to spacing/type tokens; align icon sizes.
+- [x] **7.4 Consistent iconography & spacing pass** — migrate remaining hardcoded px to spacing/type tokens; align icon sizes.
   *Why:* visual consistency is subconscious "premium." **Effort M · Risk Low.**
 - [ ] **7.5 Dark/light parity review** — every screen checked in both themes for stuck colors/contrast.
   *Why:* one broken screen undoes the whole theme system. **Effort S · Risk Low.**

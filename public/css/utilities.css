@@ -2,6 +2,20 @@
    UTILITIES CSS — Extracted from inline styles
    ============================================ */
 
+/* Phase 7.4: consistent icon sizing across interactive controls so icons
+   read at a uniform optical size (single source via --icon-* tokens). */
+button i,
+.tab-btn i,
+.action-btn i,
+.status-pill i,
+.admin-tab-btn i,
+.close-modal-btn i,
+.theme-toggle-btn i,
+.toggle-sidebar-btn i,
+.controls-toggle-btn i {
+  font-size: var(--icon-md);
+}
+
 /* Loading overlay — full-screen, theme-aware app boot splash */
 .loading-overlay {
   position: fixed;

@@ -51,6 +51,12 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
+  /* ── Icon sizing — single source so icons read consistently ── */
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 18px;
+  --icon-xl: 22px;
+
   /* ── Z-index scale — single source so overlays never fight ── */
   --z-sidebar: 100;
   --z-sticky: 500;

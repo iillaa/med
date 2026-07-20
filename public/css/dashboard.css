@@ -241,6 +241,7 @@
 
 .dashboard-block h3 i {
   color: var(--color-primary);
+  font-size: var(--icon-lg);
 }
 
 .block-desc {
