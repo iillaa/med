@@ -7,7 +7,7 @@ import * as dashboard from './components/dashboard.js';
 import * as quiz from './components/quiz.js';
 import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
-import { showToast, runSuggestionWithUI, prefersReducedMotion } from './utils.js';
+import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
 
@@ -561,6 +561,9 @@ async function initApp() {
   }
 
   setLoadingProgress(100);
+
+  // ── 8b. Tactile tap feedback (Phase 3.2) ──
+  initTapFeedback();
 
   // ── 8. Hide Overlay ──
   // (Automatically handled by window.setLoaderProgress(100) above)

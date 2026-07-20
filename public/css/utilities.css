@@ -370,7 +370,9 @@
 .btn-delete-ghost,
 .admin-tab-btn,
 .close-modal-btn,
-.theme-toggle-btn {
+.theme-toggle-btn,
+.action-btn,
+.cancel-btn {
   transition: transform var(--motion-fast) var(--ease-standard), background-color var(--transition-color);
 }
 .cat-item:active,
@@ -381,6 +383,25 @@
 .btn-delete-ghost:active,
 .admin-tab-btn:active,
 .close-modal-btn:active,
-.theme-toggle-btn:active {
+.theme-toggle-btn:active,
+.action-btn:active,
+.cancel-btn:active {
   transform: scale(0.97);
+}
+
+/* Ripple highlight spawned by attachTapFeedback() on pointerdown.
+   Pure opacity/transform so it stays GPU-cheap. */
+.tap-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.18;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  animation: tapRipple var(--motion-slow) var(--ease-standard) forwards;
+  will-change: transform, opacity;
+}
+@keyframes tapRipple {
+  from { transform: translate(-50%, -50%) scale(0); opacity: 0.22; }
+  to { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
 }

@@ -835,6 +835,50 @@ export function triggerHaptic(success) {
 }
 
 /**
+ * Attach tactile tap feedback (ripple highlight + light native haptic) to an
+ * element. Spawns a `.tap-ripple` at the pointer position on pointerdown and
+ * fires a light haptic on native platforms. No-op under reduced-motion.
+ * @param {HTMLElement} el - target element (should be position:relative).
+ * @param {{ haptic?: boolean }} [opts]
+ */
+export function attachTapFeedback(el, opts = {}) {
+  if (!el) return;
+  if (!el.style.position || el.style.position === 'static') el.style.position = 'relative';
+  if (getComputedStyle(el).overflow === 'visible') el.style.overflow = 'hidden';
+
+  el.addEventListener('pointerdown', (e) => {
+    if (prefersReducedMotion()) return;
+    if (opts.haptic && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+      const H = window.Capacitor.Plugins.Haptics;
+      try { if (typeof H.impact === 'function') H.impact({ style: 'light' }); } catch (_) {}
+    }
+    const rect = el.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement('span');
+    ripple.className = 'tap-ripple';
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${e.clientX - rect.left}px`;
+    ripple.style.top = `${e.clientY - rect.top}px`;
+    el.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+    setTimeout(() => ripple.remove(), 500);
+  });
+}
+
+/**
+ * Wire tap feedback to the common interactive controls app-wide.
+ * Call once after the DOM is ready.
+ */
+export function initTapFeedback() {
+  const selectors = [
+    '.tab-btn', '.status-pill', '.suggestion-btn', '.theme-toggle-btn',
+    '.admin-tab-btn', '.action-btn', '.cancel-btn', '.cat-item', '.close-modal-btn'
+  ];
+  document.querySelectorAll(selectors.join(','))
+    .forEach(el => attachTapFeedback(el, { haptic: true }));
+}
+
+/**
  * Returns a debounced wrapper that delays `fn` until `wait` ms have elapsed
  * since the last call. Used to keep typing in search/filter inputs smooth.
  * @param {Function} fn
