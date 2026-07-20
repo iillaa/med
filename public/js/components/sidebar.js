@@ -228,6 +228,11 @@ export function renderCatList(cats, onSelectCat) {
   if (!catList) catList = document.getElementById('cat-list');
   if (!catList) return;
 
+  // Drop the boot-time shimmer skeletons once real data is present. They are
+  // static placeholder <li>s (not in catItemNodes), so the incremental path
+  // below would otherwise leave them lingering under the real CATs.
+  catList.querySelectorAll('.cat-item-skeleton').forEach((el) => el.remove());
+
   // Empty state: clear everything and show a tailored placeholder.
   if (cats.length === 0) {
     catItemNodes.clear();
