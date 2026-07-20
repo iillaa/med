@@ -154,7 +154,7 @@ L'application est pré-configurée avec le widget Termux. Cliquez sur le widget 
 For offline clinical usage without running the Termux server:
 1. Switch to the `light-android` branch.
 2. Build assets: `node build.js && npx cap sync`.
-   * **Note on Server URL**: During the build, the compiler reads the target server URL from `remote_server_config.json` and automatically bakes it into the app via `public/js/remote_config.js`. This allows the offline APK to fetch updates and send suggestions to your server when online.
+   * **Note on Server URL**: During the build, the compiler reads the target server URL from `remote_server_config.json` and bakes it into the app via `public/js/remote_config.js`, so the offline APK can fetch updates and send suggestions when online. At runtime the server is the single source of truth for the provider list: configure it once with `node set_server_provider.js "https://your-tunnel.ngrok-free.dev"` (or the `REMOTE_SERVER_URL` CI secret), and the app learns the authoritative list from `GET /api/server-providers` with automatic failover/load-balancing across servers.
 3. The standalone APK is built automatically on push to the `light-android` branch via GitHub Actions workflows and can be downloaded from the Actions Run page.
 
 ---

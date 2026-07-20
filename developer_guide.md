@@ -120,31 +120,53 @@ npm run cap:sync       # Sync Capacitor assets
 
 ## ⚙️ Configuring Server URLs & Syncing
 
-Dr. CAT allows standalone offline APK builds to communicate with a central server (e.g., tunnel or a custom hosted domain) to fetch updates and send suggestions.
+Dr. CAT lets standalone offline APK builds talk to a central server (tunnel or custom domain) to fetch updates and send suggestions.
 
-### 1. How the Server URL is Managed
-* **Server Side**: The backend stores the remote server URL in `remote_server_config.json` (which is gitignored in the root folder). You can update it via the Admin Diagnostics panel in the web interface, or edit the file manually:
-  ```json
-  {
-    "url": "https://rendition-duchess-dry.tunnel-free.dev"
-  }
-  ```
-* **Client App Bundle**: At compile/build time, the build script reads `remote_server_config.json` and dynamically generates the client-side configuration file at `public/js/remote_config.js` (gitignored). This ensures the server URL is baked directly into the APK.
+### 1. Single Source of Truth
+The **server** owns the list of remote servers. It lives in `remote_server_config.json` (git-ignored, project root) and is loaded once at startup. The client never authors this list — it *learns* it from the server via the public `GET /api/server-providers` endpoint, and seeds from the build-baked `public/js/remote_config.js` for the offline APK before first contact.
 
-### 2. Changing/Updating the Server
-* **Using a Permanent Domain (e.g., `https://med.iillaa.com`)**:
-  1. Add your production domain to `remote_server_config.json` (or set it via the Admin Web Panel).
-  2. Run `npm run build && npx cap sync` and compile your APK.
-  3. **You never need to rebuild the APK again.** Even if you change your backend host, IP, or provider in the future, as long as your domain redirects to the new server, all installed client apps will automatically connect.
-* **Using a Temporary Tunnel (e.g., `tunnel`)**:
-  1. If you restart your tunnel server, the URL changes.
-  2. Update the new URL on the server (using the Admin Web Panel, or editing `remote_server_config.json` directly).
-  3. Recompile the app assets and sync Capacitor:
-     ```bash
-     npm run build
-     npx cap sync
-     ```
-  4. Rebuild the APK (e.g., via GitHub Actions) to bake the new URL into the client code.
+Config shape (backward-compatible with the old `{ "url" }` / `{ "urls": [...] }`):
+```json
+{
+  "primaryProvider": "ngrok",
+  "servers": [
+    { "url": "https://a.ngrok-free.dev", "provider": "ngrok", "priority": 1 },
+    { "url": "https://b.cloudflare.dev", "provider": "cloudflare", "priority": 2 }
+  ]
+}
+```
+* `priority` = primary → failover ordering.
+* Equal `priority` = load-balanced siblings (your cross-provider resilience layer on top of a single ngrok pool URL).
+
+### 2. Setting the Server List (like the admin password)
+Use the dedicated setup script — no hand-editing JSON or web panel required:
+```bash
+# Interactive: paste URLs (comma/newline separated), in priority order
+node set_server_provider.js
+
+# One-shot (comma-separated)
+node set_server_provider.js "https://a.ngrok-free.dev, https://b.cloudflare.dev"
+```
+Or via npm:
+```bash
+npm run set:provider -- "https://a.ngrok-free.dev, https://b.cloudflare.dev"
+```
+This writes `remote_server_config.json` and prints a restart hint.
+> Changing the list **refreshes CORS live** (the allowlist is recomputed in place), so a remote client connecting through a newly added tunnel is accepted immediately — no server restart needed for already-running servers.
+
+### 3. Client Behavior (failover + load-balancing)
+* The client pings every configured server and records per-server health (latency / ok).
+* Requests are ordered by `priority`, then by health: the primary is tried first; if it is slow or down, the next healthy server is used; healthy siblings at the same priority share the load.
+* A background health re-ping (every 60s) promotes a recovered server automatically.
+
+### 4. Android APK Build (the baked secret)
+The APK still needs a URL baked in at build time, because the offline bundle cannot fetch it from a server it has not contacted yet:
+* CI reads the `REMOTE_SERVER_URL` repository secret and writes `remote_server_config.json` before building (the same file the server uses).
+* `build.js` bakes the URL(s) into `public/js/remote_config.js`, which the app uses as its initial seed.
+* On first successful reach to any server, the app adopts the server's authoritative list — so you can add/remove servers at runtime without rebuilding the APK.
+
+### 5. Diagnostics Panel
+The Admin Diagnostics **"Serveurs Distants Configurés"** card is now **read-only** — it displays the authoritative list fetched from the server. To change the list, use `set_server_provider.js` (or `POST /api/server-providers` as admin).
 
 ---
 

@@ -89,14 +89,10 @@ Show PDF indexing health:
 - How many are fully indexed (green), partially indexed (orange), or empty (red)
 - Last index timestamp
 
-### 3.7 Remote Server URL Config
-Allow the admin to change the `REMOTE_SERVER_URL` at runtime:
-- Input field to enter a new URL
-- "Save" button that persists the URL to `localStorage`
-- Immediate test of the new URL after saving
-- Show success/error toast
+### 3.7 Server Provider List (read-only in the panel)
+The authoritative server list is owned by the server (`remote_server_config.json`) and is configured out-of-band via `node set_server_provider.js` (mirrors the admin-password setup) or the CI `REMOTE_SERVER_URL` secret — **not** from the Diagnostics panel.
 
-The URL should survive page reloads (stored in localStorage). Optionally, persist to a server-side config file so it survives server restarts too.
+The Diagnostics "Serveurs Distants Configurés" card is therefore **read-only**: it displays the list the client learned from `GET /api/server-providers`, and the connectivity test pings every configured server. To change the list, run `set_server_provider.js` (or `POST /api/server-providers` as admin); CORS is refreshed live so no restart is needed for already-running servers. The client additionally records per-server health and orders requests by priority then health (failover + load-balancing).
 
 ### 3.8 Console Log Capture and Copy
 Capture `console.warn`, `console.error`, and `console.info` messages into an in-memory buffer while the panel is open:
@@ -171,30 +167,38 @@ These are the contracts the backend must fulfill. The agent implementing the bac
 Status values: `"green"` (≥90% pages have text), `"orange"` (≥5%), `"red"` (<5%)  
 **Error response**: `{ "error": "Failed to get index details" }` with HTTP 500
 
-### 4.4 `GET /api/diagnostics/remote-server-url`
-**Auth**: Admin only  
-**Returns**:
+### 4.4 `GET /api/server-providers`
+**Auth**: Public (no admin required — the client needs it to learn the list)  
+**Returns** the authoritative server list:
 ```json
-{ "url": "https://xxxx.tunnel-provider.com" }
+{
+  "primaryProvider": "ngrok",
+  "servers": [
+    { "url": "https://xxxx.tunnel-provider.com", "provider": "ngrok", "priority": 1 }
+  ]
+}
 ```
-If no URL is configured, returns `{ "url": "" }`
+If nothing is configured, returns `{ "primaryProvider": null, "servers": [] }`.
 
-### 4.5 `POST /api/diagnostics/remote-server-url`
-**Auth**: Admin only  
-**Request body**:
+### 4.5 `POST /api/server-providers`
+**Auth**: Admin only (localhost + admin token)  
+**Request body** (either shape is accepted):
 ```json
-{ "url": "https://xxxx.tunnel-provider.com" }
+{ "servers": [ { "url": "https://xxxx.tunnel-provider.com", "priority": 1 } ] }
 ```
-**Validation**: URL must start with `http://` or `https://`  
+or, for convenience:
+```json
+{ "urls": [ "https://xxxx.tunnel-provider.com" ] }
+```
+**Validation**: each URL must start with `http://` or `https://`.  
+**Side effects**: persists to `remote_server_config.json` (git-ignored) and recomputes the CORS allowlist live.  
 **Returns**:
 ```json
-{ "success": true, "url": "https://xxxx.tunnel-provider.com" }
+{ "success": true, "primaryProvider": "ngrok", "servers": [ { "url": "https://xxxx.tunnel-provider.com", "provider": "ngrok", "priority": 1 } ] }
 ```
 **Error responses**:
-- `400`: `{ "error": "URL must start with http:// or https://" }`
-- `500`: `{ "error": "Failed to update remote server URL" }`
-
-**Persistence**: The URL should be saved to a local config file (e.g., `remote_server_config.json` in project root, gitignored) so it survives server restarts. The file format is `{ "url": "..." }`.
+- `400`: `{ "error": "Provide \"servers\" (array) or \"urls\" (array)." }`
+- `500`: `{ "error": "Failed to update server providers" }`
 
 ### 4.6 `GET /api/diagnostics/tunnel-info`
 **Auth**: Admin only  
@@ -241,8 +245,8 @@ If no URL is configured, returns `{ "url": "" }`
 | `fetchDiagnosticsSystem()` | `GET /api/diagnostics/system` |
 | `fetchDiagnosticsDbStats()` | `GET /api/diagnostics/db-stats` |
 | `fetchDiagnosticsIndexDetail()` | `GET /api/diagnostics/index-detail` |
-| `fetchDiagnosticsRemoteUrl()` | `GET /api/diagnostics/remote-server-url` |
-| `updateDiagnosticsRemoteUrl(url)` | `POST /api/diagnostics/remote-server-url` |
+| `fetchDiagnosticsRemoteUrl()` | `GET /api/server-providers` |
+| `updateServerProviders(payload)` | `POST /api/server-providers` |
 
 The existing `checkRealConnection()` function (in `api.js`) should be considered for refactoring to reuse `pingEndpoint()` internally, but **do not break the existing WAN/LAN ping behavior** that the main app depends on.
 
@@ -404,7 +408,7 @@ The panel should look like this when expanded:
 - Do not modify the existing `checkRealConnection()` flow in `api.js` — it is used by the main app's startup sequence and periodic network checks. Extract shared logic into `pingEndpoint()` instead.
 - Do not make the panel visible to non-admin users. This is a debugging tool for the doctor who owns the server.
 - Do not store logs to disk. The buffer is in-memory only and cleared when the panel is closed or the page is reloaded.
-- Do not auto-submit suggestions or modify database state. The panel is read-only except for the REMOTE_SERVER_URL setting.
+- Do not auto-submit suggestions or modify database state. The panel is read-only, including the server-provider list (configure it via `node set_server_provider.js`, which mirrors the admin-password setup).
 - Do not replace the existing admin moderation panel. Add diagnostics as a separate section below it.
 
 ---
@@ -418,7 +422,7 @@ When this feature is complete, the user should be able to:
 3. Click "Tester la connexion" and see exactly which step fails (localhost, remote server, or WAN)
 4. See a human-readable diagnosis like "CORS bloqué" or "Tunnel expiré"
 5. Click "Copier" on the logs section and paste the full log into a chat with their AI agent
-6. Change the remote server URL in the panel, save it, and see the app immediately use the new URL without reloading
+6. Configure the server-provider list with `node set_server_provider.js` (mirrors the admin-password setup), restart the server, and confirm the panel's read-only "Serveurs Distants Configurés" card shows the new list and the connectivity test pings every server.
 7. Confirm via the tunnel section that the tunnel is still alive on the host machine
 
 If all 7 are true, the feature is done.

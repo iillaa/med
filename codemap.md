@@ -12,6 +12,7 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── index_pdfs.js                # PDF parser & text indexer script (pdf-parse wrapper)
 ├── build.js                     # Static site compilation: copies DBs + generates remote_config.js
 ├── set_admin_password.js        # Admin password setter (PBKDF2 hash, replaces plain-text setup)
+├── set_server_provider.js       # Server-provider list setter (mirrors set_admin_password; writes remote_server_config.json)
 ├── test_api.js                  # Smoke test suite for all server API routes
 ├── cats_db.json                 # JSON database of clinical fiches (CATs)
 ├── cats_db.json.bak             # Automatic database backup (created before writes)
@@ -96,14 +97,14 @@ Parses reference clinical documents in Termux's `.cat-med/reference-pdfs/` direc
 The core communication layer that abstracts local server and offline Capacitor calls.
 * **Mode Detection**: Checks host/protocol at startup to detect `android_offline`, `android_online`, `browser_local`, or `browser_remote` mode and routes all calls accordingly.
 * **Offline Mocks**: Mocks CRUD and login endpoints by writing overrides directly to the device's `localStorage` and `sessionStorage`.
-* **Provider-Based Sync**: Background sync loop reads the active tunnel URL from `server-providers.js` and uses provider-specific HTTP headers (e.g. Ngrok skip-browser-warning) for accurate real-fetch connectivity checks.
+* **Provider-Based Sync**: Reads the server-authoritative provider list (from `GET /api/server-providers`) and uses provider-specific HTTP headers (e.g. Ngrok skip-browser-warning) for accurate real-fetch connectivity checks, ordered by priority with health-based failover/load-balancing.
 * **Dynamic Mode Switching**: Exposes `api.setAppMode()` which fires a `drcat-app-mode-changed` event so all UI components react live when a server connection is (re)established.
 
 ### 4. Server Providers Registry (`public/js/server-providers.js`)
 Provider-agnostic tunnel URL registry. Replaces the old hardcoded Ngrok constant.
 * **Provider Detection**: Inspects loaded URLs from `remote_config.js` and identifies provider type (Ngrok, Cloudflare, or custom domain).
 * **Header Injection**: Returns the correct provider-bypass headers needed for clean CORS fetches per provider (e.g., `ngrok-skip-browser-warning: true`).
-* **Runtime Updates**: URL list is driven by `remote_server_config.json` on the server and baked into the client via `build.js`, requiring no code changes when switching providers.
+* **Runtime Updates**: URL list is driven by `remote_server_config.json` on the server (the single source of truth), exposed via the public `GET /api/server-providers` endpoint. The client learns it at runtime (with priority-based failover and health-based load-balancing); it is also baked into the client via `build.js` as the APK seed, so no code changes are needed when switching providers.
 
 ### 5. Telemetry Engine (`public/js/performance.js`)
 Global performance profiler that captures metrics without polluting the main debug console.

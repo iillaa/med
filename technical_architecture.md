@@ -72,26 +72,34 @@ To keep track of modifications without overloading client devices:
 
 The sync architecture was redesigned from a single hardcoded URL constant to a **provider-agnostic registry**.
 
-### 1. `remote_server_config.json` (Server-Side)
-The server owner stores all active tunnel URLs here. This file is Git-ignored and updated via the Admin Diagnostics Panel or manual edit:
+### 1. `remote_server_config.json` (Server-Side — Single Source of Truth)
+The server owns the list of remote servers here. This file is Git-ignored (the tunnel URL must never be committed) and is the single source of truth, loaded once at startup. It is set via `node set_server_provider.js` (like the admin password) or the CI `REMOTE_SERVER_URL` secret, and can list multiple servers with priorities:
 ```json
 {
   "primaryProvider": "ngrok",
-  "urls": ["https://your-active-tunnel.ngrok-free.dev"]
+  "servers": [
+    { "url": "https://your-active-tunnel.ngrok-free.dev", "provider": "ngrok", "priority": 1 },
+    { "url": "https://backup.cloudflare.dev", "provider": "cloudflare", "priority": 2 }
+  ]
 }
 ```
+The server exposes the list via the public `GET /api/server-providers` endpoint, and derives its CORS allowlist from it (recomputed live on every change, so no restart is needed).
 
-### 2. `build.js` Compilation
-At build time, `build.js` reads `remote_server_config.json` and generates `public/js/remote_config.js` (Git-ignored), baking the URLs directly into the APK bundle:
+### 2. `build.js` Compilation (APK seed)
+At build time, `build.js` reads `remote_server_config.json` and generates `public/js/remote_config.js` (Git-ignored), baking the URL(s) directly into the APK bundle as its initial seed:
 ```js
 window.REMOTE_SERVER_URLS = ["https://your-active-tunnel.ngrok-free.dev"];
 ```
+On first successful reach to any server, the client adopts the server's authoritative list from `GET /api/server-providers` (so servers can be added/removed at runtime without rebuilding the APK).
 
 ### 3. `server-providers.js` (Client-Side)
 The provider registry detects which tunnel type each URL belongs to (Ngrok, Cloudflare, or custom domain) and returns the correct bypass headers needed for clean CORS fetches:
 * **Ngrok**: injects `ngrok-skip-browser-warning: true` header.
 * **Cloudflare**: standard fetch, no bypass needed.
 * **Custom domain**: standard fetch.
+
+### 4. Client Failover & Load-Balancing
+The client records per-server health and orders requests by `priority` then health: the primary is tried first; if slow/down, the next healthy server is used; equal-priority siblings share load. A 60s health re-ping promotes recovered servers automatically. This provides primary→failover plus cross-provider resilience (e.g. ngrok + cloudflare) on top of a single ngrok pool URL.
 
 ### 4. Background Sync Loop
 `api.js` runs a background `setInterval` loop every ~30 seconds that:

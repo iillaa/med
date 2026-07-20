@@ -15,7 +15,8 @@
     "build:bundle": "node build-bundle.js",
     "reindex": "node index_pdfs.js",
     "cap:sync": "npx cap sync",
-    "set:password": "node set_admin_password.js"
+    "set:password": "node set_admin_password.js",
+    "set:provider": "node set_server_provider.js"
   },
   "keywords": [],
   "author": "",

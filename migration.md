@@ -25,9 +25,9 @@ The following critical bugs have been successfully audited and resolved in the c
 ### 1. Zero-Setup Mobile/Tablet Server Connectivity (tunnel)
 * **Problem**: In Capacitor/APK standalone mode, the app was entirely isolated. It couldn't fetch server updates or send suggestions because `REMOTE_SERVER_URL` was empty. Setting it manually via the Admin Diagnostics panel was impossible on mobile because the admin button was hidden for security.
 * **Fix**: 
-  - **Dynamic Compiler Injection**: The build script `build.js` now reads the target URL from the tracked `remote_server_config.json` and bakes it directly into the static bundle at `public/js/remote_config.js` during compilation.
-  - **Tracked Configuration**: `remote_server_config.json` was removed from `.gitignore` so that GitHub Actions cloud builds can read it and compile the APK with the active tunnel URL.
-  - **Auto-Invalidation of Local Storage**: In `public/js/api.js` (`getRemoteServerUrl()`), if a new APK build is pushed with a new server URL, the client automatically detects the change, invalidates the stale URL in the device's `localStorage`, and connects to the new server instantly.
+  - **Dynamic Compiler Injection**: The build script `build.js` reads the target URL from `remote_server_config.json` and bakes it directly into the static bundle at `public/js/remote_config.js` during compilation.
+  - **Git-ignored config (no secret leak)**: `remote_server_config.json` stays git-ignored so the live tunnel URL is never committed. In CI, the `REMOTE_SERVER_URL` repository secret is written to that file just before the build runs, so cloud builds still compile the APK with the active URL. The server is the single source of truth at runtime; the client learns the list via `GET /api/server-providers` and the APK seeds from the baked `remote_config.js`.
+  - **No stale localStorage override**: the client no longer keeps a device `localStorage` copy of the server URL that could diverge from the server — it uses the server-authoritative list (with priority-based failover and health-based load-balancing).
 
 ### 2. Website/App Silent Crashes
 * **Problem**: AJAX network syntax errors (e.g. tunnel HTML warnings parsed as JSON) would silently freeze the app and show blank lists.
