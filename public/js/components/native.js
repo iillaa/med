@@ -47,3 +47,33 @@ export function setupHardwareBackButton(handlers = {}) {
 
   return true;
 }
+
+/**
+ * Native app foreground/background lifecycle (Phase 4.5).
+ *
+ * Wires Capacitor's App `pause` / `resume` events when running inside the
+ * native Android shell. Used to stop periodic polling (battery + correctness)
+ * when backgrounded and to refresh + restart it on return to the foreground.
+ *
+ * On the web (no Capacitor App plugin) this is a no-op.
+ *
+ * @param {{ onPause?: () => void, onResume?: () => void }} handlers
+ * @returns {boolean} true if listeners were registered.
+ */
+export function setupAppLifecycle(handlers = {}) {
+  const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  if (!App || typeof App.addListener !== 'function') return false;
+
+  if (typeof handlers.onPause === 'function') {
+    App.addListener('pause', () => {
+      try { handlers.onPause(); } catch (e) { console.warn('[Lifecycle] pause error:', e); }
+    });
+  }
+  if (typeof handlers.onResume === 'function') {
+    App.addListener('resume', () => {
+      try { handlers.onResume(); } catch (e) { console.warn('[Lifecycle] resume error:', e); }
+    });
+  }
+
+  return true;
+}

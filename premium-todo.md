@@ -122,7 +122,7 @@
   *Why:* seamless launch, no white flash. **Effort S · Risk Low.**
 - [ ] **4.4 Haptics everywhere sensible** — success/error/selection patterns on key actions (save, quiz answer, toggle).
   *Why:* premium tactile layer (you already have the plugin). **Effort S · Risk Low.**
-- [ ] **4.5 App state lifecycle** — pause timers/polling on `App` background; resume + refresh on foreground.
+- [x] **4.5 App state lifecycle** — pause timers/polling on `App` background; resume + refresh on foreground.
   *Why:* battery + correctness; feels considered. **Effort M · Risk Med.**
 - [ ] **4.6 Keyboard handling** — `@capacitor/keyboard`: resize/scroll inputs into view, dismiss on scroll.
   *Why:* forms that don't fight the keyboard. **Effort M · Risk Med.**

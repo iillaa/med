@@ -8,6 +8,7 @@ import * as quiz from './components/quiz.js';
 import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
 import { setupHardwareBackButton } from './components/native.js';
+import { setupAppLifecycle } from './components/native.js';
 import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback, closeModalAnimated } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
@@ -462,6 +463,8 @@ if (document.readyState === 'loading') {
 
 let devUnlockListenerRegistered = false;
 let syncIntervalStarted = false;
+let syncIntervalId = null;
+let syncPaused = false;
  
 // App Initialization routine with robust fault-isolation boundaries
 async function initApp() {
@@ -652,9 +655,29 @@ async function initApp() {
     setTimeout(() => {
       runBackgroundSync();
       // Periodically run background sync every 30 seconds
-      setInterval(runBackgroundSync, 30000);
+      syncIntervalId = setInterval(runBackgroundSync, 30000);
     }, 1000);
   }
+
+  // ── 10. App lifecycle (Phase 4.5) ──
+  // Pause periodic polling when the app is backgrounded; resume + refresh on
+  // return to the foreground. No-op on web where the App plugin is absent.
+  setupAppLifecycle({
+    onPause: () => {
+      if (syncIntervalId) {
+        clearInterval(syncIntervalId);
+        syncIntervalId = null;
+        syncPaused = true;
+      }
+    },
+    onResume: () => {
+      if (syncPaused && !syncIntervalId) {
+        syncPaused = false;
+        runBackgroundSync();
+        syncIntervalId = setInterval(runBackgroundSync, 30000);
+      }
+    },
+  });
 }
 
 export async function runBackgroundSync() {
