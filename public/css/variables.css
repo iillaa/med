@@ -1,6 +1,8 @@
 /* Global Reset & Variables */
 :root {
   color-scheme: dark; /* default; head script + toggle override via style.colorScheme */
+  /* Native soft-keyboard height, set by setupKeyboardHandling() (Phase 4.6). */
+  --capacitor-keyboard-height: 0px;
   --bg-app: #090d16;
   --bg-sidebar: #0f172a;
   --bg-card: #1e293b;

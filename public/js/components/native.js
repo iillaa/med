@@ -49,6 +49,52 @@ export function setupHardwareBackButton(handlers = {}) {
 }
 
 /**
+ * Native keyboard handling (Phase 4.6).
+ *
+ * Wires Capacitor's Keyboard plugin when running inside the native Android
+ * shell. On show it exposes the keyboard height as `--capacitor-keyboard-height`
+ * (so fixed/floating UI can avoid being hidden) and smoothly scrolls the
+ * focused input into view. On hide it clears the offset. Dismissing the
+ * keyboard when the user scrolls is handled natively by the WebView; this
+ * only keeps layout honest.
+ *
+ * On the web (no Capacitor Keyboard plugin) this is a no-op.
+ *
+ * @returns {boolean} true if listeners were registered.
+ */
+export function setupKeyboardHandling() {
+  const Keyboard = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Keyboard;
+  if (!Keyboard || typeof Keyboard.addListener !== 'function') return false;
+
+  const setOffset = (px) => {
+    document.documentElement.style.setProperty('--capacitor-keyboard-height', `${px}px`);
+  };
+
+  Keyboard.addListener('keyboardWillShow', (info) => {
+    try {
+      const h = (info && typeof info.keyboardHeight === 'number') ? info.keyboardHeight : 0;
+      setOffset(h);
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+        active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    } catch (e) {
+      console.warn('[Keyboard] show error:', e);
+    }
+  });
+
+  Keyboard.addListener('keyboardWillHide', () => {
+    try {
+      setOffset(0);
+    } catch (e) {
+      console.warn('[Keyboard] hide error:', e);
+    }
+  });
+
+  return true;
+}
+
+/**
  * Native app foreground/background lifecycle (Phase 4.5).
  *
  * Wires Capacitor's App `pause` / `resume` events when running inside the

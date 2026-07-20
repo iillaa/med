@@ -9,6 +9,7 @@ import * as diagnostics from './components/diagnostics.js';
 import * as performanceComponent from './components/performance.js';
 import { setupHardwareBackButton } from './components/native.js';
 import { setupAppLifecycle } from './components/native.js';
+import { setupKeyboardHandling } from './components/native.js';
 import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback, closeModalAnimated } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
@@ -678,6 +679,11 @@ async function initApp() {
       }
     },
   });
+
+  // ── 11. Keyboard handling (Phase 4.6) ──
+  // Keep focused inputs visible above the soft keyboard on native Android.
+  // No-op on web where the Keyboard plugin is absent.
+  setupKeyboardHandling();
 }
 
 export async function runBackgroundSync() {
