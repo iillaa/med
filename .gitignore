@@ -25,6 +25,9 @@ node_modules/
 # Local ngrok binary
 ngrok
 
+# Runtime server-provider link (gitignored so the tunnel URL is never committed)
+remote_server_config.json
+
 # Logs
 *.log
 nohup.out

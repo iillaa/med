@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { indexPdfs, onIndexUpdated } = require('../index_pdfs');
-const { serverProviders, buildAllowedOrigins } = require('./config/providers');
+const { serverProviders } = require('./config/providers');
 const { state: cache } = require('./services/cache');
 const { initAdminPassword } = require('./services/auth-service');
 const { safeWriteJsonAsync, runDatabaseBackup, dbLock } = require('./services/data-store');
@@ -13,7 +13,10 @@ const { registerCatRoutes } = require('./routes/cats');
 const { registerSuggestionRoutes } = require('./routes/suggestions');
 const { registerSearchRoutes } = require('./routes/search');
 const { registerDiagnosticRoutes } = require('./routes/diagnostics');
+const { registerServerProviderRoutes } = require('./routes/server-providers');
 const { registerPerformanceRoutes } = require('./routes/performance');
+const allowedOriginsSvc = require('./services/allowed-origins');
+const spc = require('./services/server-providers-config');
 
 const INDEX_FILE = path.join(__dirname, '..', 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, '..', 'suggestions.json');
@@ -25,28 +28,24 @@ const CONFIG_FILE = path.join(__dirname, '..', 'remote_server_config.json');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-let allowedOrigins = new Set();
-let configuredRemoteUrls = [];
+const configuredRemoteUrls = [];
 
 async function initializeProviders() {
-  try {
-    const exists = await fs.promises.access(CONFIG_FILE).then(() => true).catch(() => false);
-    if (exists) {
-      const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
-      const parsed = JSON.parse(content);
-      configuredRemoteUrls = Array.isArray(parsed.urls) ? parsed.urls : (parsed.url ? [parsed.url] : []);
-      cache.remoteServerUrl = configuredRemoteUrls[0] || '';
-      if (parsed.primaryProvider && serverProviders.find(p => p.id === parsed.primaryProvider)) {
-        console.log('[Providers] Primary provider:', parsed.primaryProvider);
-      }
-    }
-  } catch (err) {
-    console.error("Error loading remote_server_config.json:", err);
+  // Single source of truth: remote_server_config.json (loaded once here).
+  spc.loadConfig();
+  configuredRemoteUrls.push(...spc.getConfiguredUrls());
+  cache.remoteServerUrl = spc.getConfiguredUrls()[0] || '';
+  if (spc.getPrimaryProviderId()) {
+    console.log('[Providers] Primary provider:', spc.getPrimaryProviderId());
   }
-  
-  allowedOrigins = buildAllowedOrigins(serverProviders, configuredRemoteUrls);
+
+  allowedOriginsSvc.recompute(spc.getConfiguredUrls());
   console.log('[Providers] Loaded', serverProviders.length, 'providers:', serverProviders.map(p => p.id).join(', '));
   console.log('[Providers] Configured URLs:', configuredRemoteUrls.length > 0 ? configuredRemoteUrls : '(none)');
+
+  if (configuredRemoteUrls.length === 0 && process.stdout.isTTY) {
+    console.log('[Providers] No remote server configured. Set one with: node set_server_provider.js');
+  }
 }
 
 async function initializeData() {
@@ -129,21 +128,12 @@ async function initializeData() {
   }
 
   try {
-    const exists = await fs.promises.access(CONFIG_FILE).then(() => true).catch(() => false);
-    if (exists) {
-      const content = await fs.promises.readFile(CONFIG_FILE, 'utf-8');
-      const parsed = JSON.parse(content);
-      cache.remoteServerUrl = parsed.url || (Array.isArray(parsed.urls) ? parsed.urls[0] : '');
-      if (cache.remoteServerUrl) {
-        allowedOrigins.add(cache.remoteServerUrl);
-        try {
-          const urlObj = new URL(cache.remoteServerUrl);
-          allowedOrigins.add(`${urlObj.protocol}//${urlObj.host}`);
-        } catch (_) { /* no-op */ }
-      }
-    }
+    // Config is already loaded by initializeProviders(); keep CORS + cache in
+    // sync with the authoritative list (handles the {url}/{urls} legacy shapes).
+    cache.remoteServerUrl = spc.getConfiguredUrls()[0] || '';
+    allowedOriginsSvc.recompute(spc.getConfiguredUrls());
   } catch (err) {
-    console.error("Error loading remote_server_config.json:", err);
+    console.error("Error syncing remote_server_config.json:", err);
   }
   
   await runDatabaseBackup(DB_FILE);
@@ -175,7 +165,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use(rateLimitMiddleware);
-app.use(corsMiddleware(allowedOrigins, serverProviders));
+app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -243,6 +233,7 @@ registerCatRoutes(app);
 registerSuggestionRoutes(app);
 registerSearchRoutes(app);
 registerDiagnosticRoutes(app);
+registerServerProviderRoutes(app);
 registerPerformanceRoutes(app);
 
 let serverInstance = null;

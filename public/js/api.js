@@ -104,40 +104,62 @@ let offlinePdfIndexCache = null;
  * Returns the configured remote server URL (tunnel or otherwise) if one is set.
  * When this returns a URL, all API calls should go through the server even in Capacitor/offline mode.
  */
+// Authoritative server list, learned from the backend via GET /api/server-providers.
+// Seeded from the build-baked remote_config.js so the offline APK has a fallback
+// before it can reach any server. Never persisted to localStorage (single source of truth).
+let serverListCache = null;
+// url -> { ok, latencyMs, last }  (health, for failover + load-balancing)
+const serverHealth = new Map();
+
+function healthRank(url) {
+  const h = serverHealth.get(url);
+  if (!h) return 0; // unknown = neutral
+  return h.ok ? (1 - Math.min(h.latencyMs || 0, 5000) / 10000) : -1;
+}
+
+export function recordServerHealth(url, ok, latencyMs) {
+  if (!url) return;
+  serverHealth.set(url, { ok, latencyMs: latencyMs || 0, last: Date.now() });
+}
+
+export function getConfiguredRemoteUrls() {
+  if (serverListCache && serverListCache.servers.length) {
+    // Priority first; among equal priority, healthy + low-latency servers win
+    // (this is what gives failover + cross-provider load-balancing).
+    return serverListCache.servers
+      .slice()
+      .sort((a, b) => (a.priority - b.priority) || (healthRank(b.url) - healthRank(a.url)))
+      .map(s => s.url);
+  }
+  if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS) && REMOTE_SERVER_URLS.length > 0) {
+    return REMOTE_SERVER_URLS.slice();
+  }
+  if (REMOTE_SERVER_URL) return [REMOTE_SERVER_URL];
+  return [];
+}
+
 function getRemoteServerUrl() {
-  const storedOverride = localStorage.getItem('dr_cat_remote_server_url');
-  const lastCompiledUrl = localStorage.getItem('dr_cat_last_compiled_url');
-
-  if (REMOTE_SERVER_URL && lastCompiledUrl !== REMOTE_SERVER_URL) {
-    // New build has a new target server URL! Clear the stale override.
-    localStorage.removeItem('dr_cat_remote_server_url');
-    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
-    return REMOTE_SERVER_URL;
-  }
-
-  // Ensure last compiled URL is tracked if we don't have it yet
-  if (REMOTE_SERVER_URL && !lastCompiledUrl) {
-    localStorage.setItem('dr_cat_last_compiled_url', REMOTE_SERVER_URL);
-  }
-
-  return storedOverride || REMOTE_SERVER_URL || null;
-}
-
-/**
- * True when a remote server URL is configured — meaning the app should try to
- * sync with the server even if it is running as a Capacitor/standalone app.
- */
-export function hasRemoteServer() {
-  return !!getPrimaryRemoteUrl();
-}
-
-/**
- * Returns the primary remote server URL (the one configured as highest priority).
- * Use this for quick "should we sync?" checks.
- */
-function getPrimaryRemoteUrl() {
   const urls = getConfiguredRemoteUrls();
-  return urls.length > 0 ? urls[0] : null;
+  return urls.length ? urls[0] : null;
+}
+
+export function hasRemoteServer() {
+  return !!getRemoteServerUrl();
+}
+
+function getPrimaryRemoteUrl() {
+  return getRemoteServerUrl();
+}
+
+export async function fetchServerList() {
+  try {
+    const res = await fetchWithTimeout('/api/server-providers', { headers: getHeaders() });
+    if (res.ok) {
+      const data = await res.json();
+      serverListCache = { servers: data.servers || [], primaryProvider: data.primaryProvider || null };
+    }
+  } catch (_) { /* offline / localhost: keep seed */ }
+  return serverListCache;
 }
 
 function getApiUrl(endpoint, overrideUrl) {
@@ -151,26 +173,6 @@ function getApiUrl(endpoint, overrideUrl) {
   return endpoint;
 }
 
-export function getConfiguredRemoteUrls() {
-  const stored = localStorage.getItem('dr_cat_remote_server_url');
-  if (stored) return [stored];
-  
-  // Load from server-generated config if available
-  let config = null;
-  if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS) && REMOTE_SERVER_URLS.length > 0) {
-    config = { urls: REMOTE_SERVER_URLS };
-  } else if (REMOTE_SERVER_URL) {
-    config = { urls: [REMOTE_SERVER_URL] };
-  }
-  
-  if (config && config.urls && config.urls.length > 0) {
-    const primaryId = getPrimaryProviderId(config);
-    return sortUrlsByProviderPriority(config.urls, primaryId);
-  }
-  
-  return [];
-}
-
 // Soft deterrent only: this key ships in the public client bundle (devtools/curl can
 // read it), so it is NOT real access control — just friction against casual scraping.
 // Genuine protection would require a server-signed per-session token at login.
@@ -179,7 +181,7 @@ const STATIC_DATA_HEADERS = { 'x-app-key': APP_DATA_KEY };
 
 export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
-  const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || REMOTE_SERVER_URL;
+  const configuredUrl = getRemoteServerUrl() || REMOTE_SERVER_URL;
   // Only add provider headers if we are not on localhost or if explicitly hitting a remote URL
   const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
   const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
@@ -335,9 +337,11 @@ export async function fetchCats(since) {
         mode: 'no-cors'
       });
       clearTimeout(timeoutId);
+      recordServerHealth(url, true, remoteTimeout);
       reachable = true;
       break;
     } catch (_) {
+      recordServerHealth(url, false, remoteTimeout);
       // keep trying other URLs
     }
   }
@@ -365,6 +369,7 @@ export async function fetchCats(since) {
     try {
       const res = await fetchWithTimeout(getApiUrl(`/api/cats${queryParam}`, remoteUrl), { headers: getHeaders() });
       if (res.ok) {
+        recordServerHealth(remoteUrl, true);
         const data = await res.json();
         const activeIds = res.headers.get('X-Active-Cat-IDs');
         if (activeIds) {
@@ -420,6 +425,7 @@ export async function fetchCats(since) {
         return data;
       }
     } catch (err) {
+      recordServerHealth(remoteUrl, false);
       console.warn('[API] fetchCats: remote server', remoteUrl, 'unreachable');
     }
   }
@@ -800,8 +806,11 @@ export async function pingEndpoint(url, timeoutMs = 2500) {
 
     const res = await fetch(url, fetchOpts);
     clearTimeout(timeoutId);
+    const ok = res.ok;
+    // Only track health for our own configured servers (ignore WAN/httpbin pings).
+    if (getConfiguredRemoteUrls().includes(url)) recordServerHealth(url, ok);
     return {
-      ok: res.ok,
+      ok,
       status: res.status,
       statusText: res.statusText
     };
@@ -839,17 +848,49 @@ export async function fetchDiagnosticsIndexDetail() {
   return res.json();
 }
 
-export async function updateDiagnosticsRemoteUrl(url) {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/remote-server-url'), {
+export async function updateServerProviders(payload) {
+  const res = await fetchWithTimeout(getApiUrl('/api/server-providers'), {
     method: 'POST',
     headers: getHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ url })
+    body: JSON.stringify(payload)
   });
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || "Failed to update remote server URL");
+    throw new Error(errData.error || "Failed to update server providers");
   }
   return res.json();
+}
+
+// Learn the authoritative server list from the backend. Safe to call anywhere:
+// on localhost it returns the same-origin list; on the offline APK it fails
+// silently and the build-baked seed remains in use.
+if (typeof window !== 'undefined') {
+  fetchServerList().catch(() => {});
+  window.addEventListener('online', () => { fetchServerList().catch(() => {}); });
+
+  // Periodic health re-ping so a recovered/slow server is promoted/demoted
+  // without a full app reload (drives failover + load-balancing).
+  setInterval(() => {
+    const urls = getConfiguredRemoteUrls();
+    for (const url of urls) {
+      api_pingHealth(url).catch(() => {});
+    }
+  }, 60000);
+}
+
+// Lightweight health probe (separate from the diagnostics pingEndpoint so it
+// can't be clobbered by WAN/httpbin bookkeeping).
+async function api_pingHealth(url) {
+  try {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 4000);
+    const start = performance.now();
+    await fetch(`${url}/api/search-status`, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' });
+    clearTimeout(t);
+    recordServerHealth(url, true, performance.now() - start);
+  } catch (_) {
+    recordServerHealth(url, false);
+  }
 }
 
 export async function fetchTunnelInfo() {

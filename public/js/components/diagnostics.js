@@ -33,8 +33,6 @@ export function initDiagnostics() {
   // Wire up action buttons
   document.getElementById('run-conn-test-btn')?.addEventListener('click', runConnectivityTest);
   document.getElementById('check-tunnel-btn')?.addEventListener('click', checkProviderTunnel);
-  document.getElementById('save-remote-url-btn')?.addEventListener('click', saveRemoteServerUrl);
-  document.getElementById('reset-remote-url-btn')?.addEventListener('click', resetRemoteServerUrl);
   document.getElementById('copy-logs-btn')?.addEventListener('click', copyTerminalLogs);
   document.getElementById('clear-logs-btn')?.addEventListener('click', clearTerminalLogs);
   document.getElementById('run-auto-checkup-btn')?.addEventListener('click', runAutoCheckupSuite);
@@ -110,16 +108,16 @@ async function refreshDiagnosticsData() {
     tokenSpan.style.borderRadius = '4px';
   }
 
-  const configuredRemoteUrl = localStorage.getItem('dr_cat_remote_server_url') || api.REMOTE_SERVER_URL || '';
-  const remoteUrlSpan = document.getElementById('diag-remote-url');
-  if (remoteUrlSpan) {
-    remoteUrlSpan.textContent = configuredRemoteUrl || '(Aucun)';
-    remoteUrlSpan.style.color = configuredRemoteUrl ? 'var(--text-primary)' : 'var(--text-muted)';
-  }
-
-  const remoteInput = document.getElementById('diag-remote-url-input');
-  if (remoteInput && !remoteInput.value && configuredRemoteUrl) {
-    remoteInput.value = configuredRemoteUrl;
+  const serverListEl = document.getElementById('diag-server-list');
+  if (serverListEl) {
+    const servers = api.getConfiguredRemoteUrls();
+    if (!servers.length) {
+      serverListEl.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">Aucun serveur configuré.</span>';
+    } else {
+      serverListEl.innerHTML = servers.map((u, i) =>
+        `<div style="display:flex; gap:6px; align-items:center;"><span style="color:var(--color-success);">${i + 1}.</span><span style="word-break:break-all;">${escapeHtmlLogs(u)}</span></div>`
+      ).join('');
+    }
   }
 
   // Fetch Server-side Diagnostics
@@ -308,28 +306,37 @@ async function runConnectivityTest() {
     if (stepLocal) stepLocal.innerHTML = `1. Local (localhost:3000) : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Échec (${localRes.message || 'CORS/Refusé'})</span>`;
   }
 
-  // 2. Test remote server endpoint ping
-  const configuredRemoteUrl = localStorage.getItem('dr_cat_remote_server_url') || api.REMOTE_SERVER_URL || '';
+  // 2. Test configured remote server(s) — ping every server in the list (failover/pool aware)
+  const configuredServers = api.getConfiguredRemoteUrls();
   let isRemoteSuccess = false;
   let remoteErrorMessage = '';
-  
-  if (stepRemote) stepRemote.innerHTML = '2. Distant (URL configurée) : <span style="color: #fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Ping...</span>';
-  
-  if (configuredRemoteUrl) {
-    console.log(`[Connectivity] Test 2: Ping distant ${configuredRemoteUrl}...`);
-    const remoteRes = await api.pingEndpoint(`${configuredRemoteUrl}/api/search-status`);
-    if (remoteRes.ok) {
-      isRemoteSuccess = true;
-      console.log("[Connectivity] distant URL OK");
-      if (stepRemote) stepRemote.innerHTML = `2. Distant (URL configurée) : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Accessible (${configuredRemoteUrl})</span>`;
-    } else {
-      remoteErrorMessage = remoteRes.message || 'CORS ou Timeout';
-      console.warn(`[Connectivity] Distant URL FAILED: ${remoteErrorMessage}`);
-      if (stepRemote) stepRemote.innerHTML = `2. Distant (URL configurée) : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Échec (${remoteErrorMessage})</span>`;
+  const reachableServers = [];
+
+  if (stepRemote) stepRemote.innerHTML = '2. Distant (serveurs configurés) : <span style="color: #fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Ping...</span>';
+
+  if (configuredServers.length) {
+    for (const url of configuredServers) {
+      console.log(`[Connectivity] Test 2: Ping distant ${url}...`);
+      const remoteRes = await api.pingEndpoint(`${url}/api/search-status`);
+      if (remoteRes.ok) {
+        isRemoteSuccess = true;
+        reachableServers.push(url);
+        console.log(`[Connectivity] distant ${url} OK`);
+      } else {
+        remoteErrorMessage = remoteRes.message || 'CORS ou Timeout';
+        console.warn(`[Connectivity] Distant ${url} FAILED: ${remoteErrorMessage}`);
+      }
+    }
+    if (stepRemote) {
+      if (isRemoteSuccess) {
+        stepRemote.innerHTML = `2. Distant : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> ${reachableServers.length}/${configuredServers.length} joignable(s)</span>`;
+      } else {
+        stepRemote.innerHTML = `2. Distant : <span style="color: #f87171;"><i class="fa-solid fa-circle-xmark"></i> Aucun serveur joignable (${remoteErrorMessage})</span>`;
+      }
     }
   } else {
-    console.log("[Connectivity] Test 2: Distant non configuré");
-    if (stepRemote) stepRemote.innerHTML = '2. Distant (URL configurée) : <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-exclamation"></i> Non configuré</span>';
+    console.log("[Connectivity] Test 2: Aucun serveur distant configuré");
+    if (stepRemote) stepRemote.innerHTML = '2. Distant : <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-exclamation"></i> Non configuré</span>';
   }
 
   // 3. Test WAN internet access ping
@@ -357,7 +364,7 @@ async function runConnectivityTest() {
       analysisDiv.style.border = '1px solid rgba(239, 68, 68, 0.3)';
       analysisDiv.style.color = '#fca5a5';
       analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> L\'appareil n\'a pas d\'accès à Internet. Vérifiez le Wi-Fi ou les données mobiles.';
-    } else if (configuredRemoteUrl && !isRemoteSuccess) {
+    } else if (configuredServers.length && !isRemoteSuccess) {
       analysisDiv.style.background = 'rgba(245, 158, 11, 0.15)';
       analysisDiv.style.border = '1px solid rgba(245, 158, 11, 0.3)';
       analysisDiv.style.color = '#fde047';
@@ -367,7 +374,7 @@ async function runConnectivityTest() {
       } else {
         analysisDiv.innerHTML = '<strong>🔍 Diagnostic :</strong> Échec CORS suspecté. Assurez-vous que le serveur Node autorise les requêtes provenant de l\'appareil client.';
       }
-    } else if (!configuredRemoteUrl) {
+    } else if (!configuredServers.length) {
       analysisDiv.style.background = 'rgba(6, 182, 212, 0.15)';
       analysisDiv.style.border = '1px solid rgba(6, 182, 212, 0.3)';
       analysisDiv.style.color = '#99f6e4';
@@ -417,79 +424,6 @@ async function checkProviderTunnel() {
     }
     if (urlSpan) urlSpan.textContent = 'Erreur de connexion';
     if (connsSpan) connsSpan.textContent = '—';
-  }
-}
-
-async function saveRemoteServerUrl() {
-  const input = document.getElementById('diag-remote-url-input');
-  if (!input) return;
-
-  const raw = input.value.trim();
-  // Support multiple URLs separated by commas or newlines
-  const urls = raw.split(/[,\n]/).map(u => u.trim()).filter(u => u.length > 0);
-  
-  if (urls.length === 0) {
-    showToast("Veuillez saisir au moins une URL.", "fa-triangle-exclamation", 4000);
-    return;
-  }
-
-  const invalid = urls.find(u => !u.startsWith('http://') && !u.startsWith('https://'));
-  if (invalid) {
-    showToast("Toutes les URLs doivent commencer par http:// ou https://", "fa-triangle-exclamation", 4000);
-    return;
-  }
-
-  try {
-    // 1. Save locally in local storage for instant Capacitor/offline mode use
-    localStorage.setItem('dr_cat_remote_server_url', urls[0]);
-
-    // 2. Persist to server config ONLY if we are running in a web browser connected to the server
-    let serverPersistenceFailed = false;
-    if (!api.isOfflineApp) {
-      try {
-        await api.updateDiagnosticsRemoteUrl(urls);
-      } catch (serverErr) {
-        console.warn("Could not save config to server file system:", serverErr);
-        serverPersistenceFailed = true;
-      }
-    }
-
-    showToast(
-      serverPersistenceFailed
-        ? "Adresse enregistrée localement, mais la configuration serveur n'a pas été mise à jour."
-        : `${urls.length} adresse(s) de serveur enregistrée(s) !`,
-      serverPersistenceFailed ? "fa-triangle-exclamation" : "fa-circle-check",
-      4000
-    );
-    
-    // Refresh stats and run connection test automatically to verify URL validity
-    refreshDiagnosticsData();
-    runConnectivityTest();
-  } catch (err) {
-    console.error(err);
-    showToast(`Erreur d'enregistrement : ${err.message}`, "fa-circle-xmark", 5000);
-  }
-}
-
-function resetRemoteServerUrl() {
-  try {
-    // 1. Remove user overrides from localStorage
-    localStorage.removeItem('dr_cat_remote_server_url');
-
-    // 2. Reset input value to default compiled server URL
-    const input = document.getElementById('diag-remote-url-input');
-    if (input) {
-      input.value = api.REMOTE_SERVER_URL || '';
-    }
-
-    showToast("Adresse de serveur réinitialisée à celle d'origine !", "fa-arrow-rotate-left", 3000);
-
-    // Refresh stats and run connection test automatically to verify URL validity
-    refreshDiagnosticsData();
-    runConnectivityTest();
-  } catch (err) {
-    console.error(err);
-    showToast(`Erreur de réinitialisation : ${err.message}`, "fa-circle-xmark", 5000);
   }
 }
 
@@ -607,7 +541,7 @@ async function runAutoCheckupSuite() {
     connectionStatus: navigator.onLine ? "Online" : "Offline",
     diagnosticsPanelStats: {
       navigatorOnline: navigator.onLine,
-      remoteServerUrl: localStorage.getItem('dr_cat_remote_server_url') || api.REMOTE_SERVER_URL || '',
+      remoteServerUrl: api.getConfiguredRemoteUrls().join(', ') || '(Aucun)',
       adminTokenPresent: !!localStorage.getItem('dr_cat_admin_token')
     },
     clientPerformanceMetrics,
