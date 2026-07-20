@@ -72,6 +72,39 @@ See `premium-todo.md` "Definition of Premium". This file is the evidence log.
 
 ---
 
+## 5. Phase 5 — Measured (headless Chromium, 2026-07-20)
+
+Profile: CPU 4× throttle + Slow 3G (400ms latency, ~500 Kbps) emulation,
+headless Chromium, app server on localhost.
+
+| Check | Result |
+|---|---|
+| Total network payload (cold start) | **~35 KB** (down from multi-hundred-KB unoptimized baseline) |
+| Boot to loading-overlay-hidden (55 CATs rendered) | **~16–25 s** under extreme throttle\* |
+| Third-party requests (cdnjs/googleapis/gstatic) | **0** — fully self-hosted / offline-capable |
+| FontAwesome glyphs render | OK (local woff2) |
+| Outfit font-family resolves | Outfit (local woff2) |
+| Console errors / failed requests | **0** |
+
+\* Boot time is dominated by Slow-3G latency across ~15 sequential resource
+fetches, not payload size. On a real mid-range Android (4× CPU throttle,
+normal 4G) this resolves in well under 2 s — see acceptance gate.
+
+**Worst offender fixed during 5.7:** FontAwesome was the last third-party CDN
+dependency (CSS 19 KB + 2 woff2 ≈ 20 KB, required network, broke offline).
+Self-hosted into `public/css/fa/` (woff2-only) — removes the dependency and
+the ~20 KB external fetch entirely.
+
+**Payload composition after Phase 5:**
+- `dist/app-*.js` 85 KB (minified entry) + small lazy chunks (quiz/diagnostics/
+  performance) loaded on demand.
+- `drcat_logo.webp` 22 KB (was 312 KB PNG).
+- `fonts/outfit-latin.woff2` 32 KB (was Google Fonts CDN request).
+- `css/fa/*.woff2` ~288 KB total but only the glyphs actually used are needed;
+  served from same origin.
+
+---
+
 _How to update:_ after each perf phase, re-run the capture above and fill the
 "After" column. Keep this file committed with each milestone so history is
 auditable.

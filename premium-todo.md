@@ -144,7 +144,7 @@
   *Why:* removes a render-blocking third-party request; works fully offline. **Effort M · Risk Low.**
 - [x] **5.6 Image optimization** — convert PNGs to WebP/AVIF with PNG fallback; compress; correct sizes.
   *Why:* smaller downloads, faster LCP. **Effort S · Risk Low.**
-- [ ] **5.7 Low-end profiling** — test with CPU 4× throttle + "Slow 3G"; fix the worst offenders.
+- [x] **5.7 Low-end profiling** — test with CPU 4× throttle + "Slow 3G"; fix the worst offenders.
   *Why:* your users aren't all on flagships. **Effort M · Risk Low.**
 
 ---
