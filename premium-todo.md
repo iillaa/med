@@ -154,7 +154,7 @@
 
 - [ ] **6.1 Upgrade the service worker** — precache the app shell; **stale-while-revalidate** for data (cats/pdf index); cache-first for static assets; network-first for live APIs with cache fallback.
   *Why:* instant loads + fresh data + graceful offline. **Effort M · Risk Med · Done-when:** works fully offline and updates data when online.
-- [ ] **6.2 Update flow** — detect new SW/version, show a non-intrusive "Update available — reload" toast.
+- [x] **6.2 Update flow** — detect new SW/version, show a non-intrusive "Update available — reload" toast.
   *Why:* users get fixes without confusion or hard cache clears. **Effort M · Risk Med.**
 - [ ] **6.3 Offline indicator** — subtle, honest online/offline badge; disable actions that need network.
   *Why:* sets expectations, avoids dead taps. **Effort S · Risk Low.**

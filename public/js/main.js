@@ -141,7 +141,25 @@ async function bootstrapApp() {
       if (!isDev) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js')
-            .then(reg => console.log('PWA SW registered:', reg.scope))
+            .then((reg) => {
+              console.log('PWA SW registered:', reg.scope);
+              // Phase 6.2: update flow — when a new SW is waiting, offer a
+              // non-intrusive reload toast instead of a hard cache clear.
+              if (!reg) return;
+              reg.addEventListener('updatefound', () => {
+                const installing = reg.installing;
+                if (!installing) return;
+                installing.addEventListener('statechange', () => {
+                  if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                    showToast(
+                      'Mise à jour disponible. Rechargez pour l\'appliquer.',
+                      'fa-rotate',
+                      8000
+                    );
+                  }
+                });
+              });
+            })
             .catch(err => console.error('PWA SW failed:', err));
         });
       }
