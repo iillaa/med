@@ -132,6 +132,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         saveIndicator.classList.remove('show');
       }, 2500);
 
+      triggerHaptic(true);
+
       setTimeout(() => {
         restore();
         showToast(
@@ -255,8 +257,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             state.activeCat.summary = newSummary;
             renderSummary(newSummary, state.activeCat);
             showToast("Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
+            triggerHaptic(true);
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
+            triggerHaptic(false);
           }
         } else {
           const confirmSave = confirm(
@@ -284,6 +288,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           return;
         }
         showToast("Erreur lors de la sauvegarde.", "fa-circle-exclamation", 4000);
+        triggerHaptic(false);
       } finally {
         restore();
       }
@@ -353,8 +358,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             state.activeCat.ordonnance = newOrdonnance;
             renderPrescription(newOrdonnance);
             showToast("Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
+            triggerHaptic(true);
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
+            triggerHaptic(false);
           }
         } else {
           const confirmSave = confirm(
