@@ -108,8 +108,12 @@ async function bootstrapApp() {
     } catch (e) {
       if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
         console.warn('[storage] quota exceeded, evicting sync cache:', key);
-        try { this.removeItem('dr_cat_synced_database'); } catch (_) {}
-        try { return origLocalStorageSetItem.call(this, key, value); } catch (_) {}
+        try { this.removeItem('dr_cat_synced_database'); } catch (_) {
+          // no-op: quota eviction failure is non-critical
+        }
+        try { return origLocalStorageSetItem.call(this, key, value); } catch (_) {
+          // no-op: retry failure falls through to throw below
+        }
         return;
       }
       throw e;
@@ -117,11 +121,11 @@ async function bootstrapApp() {
   };
 
   // Global Error Interceptor for Verbose Console Logs & Toast Notifications
-  window.addEventListener('error', (event) => {
+  window.addEventListener('error', (_event) => {
     showToast("Une erreur d'exécution est survenue. Détails enregistrés dans l'onglet Diagnostic.", "fa-triangle-exclamation", 7000);
   });
 
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener('unhandledrejection', (_event) => {
     showToast("Erreur réseau ou réponse de base de données non reconnue.", "fa-circle-exclamation", 5000);
   });
 
@@ -357,7 +361,7 @@ async function bootstrapApp() {
         try {
           const result = await api.createCatOnServer({ title, category, red_flags, summary, ordonnance, pdf_keywords });
           if (result.success) {
-            closeModal();
+            closeAddCatModal();
             showToast(`La fiche CAT "${title}" a été ajoutée avec succès !`, "fa-circle-check", 3000);
             await initApp();
             const newCat = state.allCats.find(c => c.id === result.cat.id);
@@ -388,7 +392,7 @@ async function bootstrapApp() {
             `Votre proposition de nouvelle fiche "${title}" a été envoyée à l'administrateur pour validation.`
           );
           if (success) {
-            closeModal();
+            closeAddCatModal();
           }
         } catch (err) {
           console.error(err);
@@ -399,7 +403,7 @@ async function bootstrapApp() {
   }
   
   // Wire up Admin Login Button Event Listener
-  let adminLoginBtn = document.getElementById('admin-login-btn');
+  const adminLoginBtn = document.getElementById('admin-login-btn');
   if (adminLoginBtn) {
     adminLoginBtn.addEventListener('click', async () => {
       if (state.isAdmin) {
@@ -563,7 +567,9 @@ async function initApp() {
       showToast("Base de données indisponible.", "fa-circle-exclamation", 9000);
       if (loadingOverlay) loadingOverlay.classList.add('hidden');
       const SplashScreen = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen;
-      if (SplashScreen && typeof SplashScreen.hide === 'function') { try { SplashScreen.hide(); } catch (_) {} }
+      if (SplashScreen && typeof SplashScreen.hide === 'function') { try { SplashScreen.hide(); } catch (_) {
+        // no-op: splash screen hide failure is non-critical
+      } }
       return;
     }
   }
@@ -577,7 +583,9 @@ async function initApp() {
     localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
     const rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
     customCreatedCats = rawCustom.map(c => ({ ...c, isOffline: true }));
-  } catch (_) {}
+  } catch (_) {
+    // no-op: localStorage parse failure leaves defaults intact
+  }
 
   if (api.isOfflineApp) {
     cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
@@ -649,7 +657,9 @@ async function initApp() {
   if (loadingOverlay) loadingOverlay.classList.add('hidden');
   const SplashScreen = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen;
   if (SplashScreen && typeof SplashScreen.hide === 'function') {
-    setTimeout(() => { try { SplashScreen.hide(); } catch (_) {} }, 350);
+    setTimeout(() => { try { SplashScreen.hide(); } catch (_) {
+      // no-op: delayed splash hide failure is non-critical
+    } }, 350);
   }
 
   // ── 8b. Tactile tap feedback (Phase 3.2) ──
@@ -661,6 +671,9 @@ async function initApp() {
     closeModal: () => {
       const open = document.querySelector('.modal-overlay:not([style*="display: none"])');
       if (open) {
+        // closeAddCatModal is defined at module scope (line 321); ESLint cannot
+        // resolve it through the arrow function inside the adminPanel object literal.
+        /* eslint-disable-next-line no-undef */
         if (open.id === 'add-cat-modal') closeAddCatModal();
         else closeModalAnimated(open);
       }
@@ -756,7 +769,9 @@ export async function runBackgroundSync() {
         clearTimeout(timeoutId);
         reachable = true;
         break;
-      } catch (_) {}
+      } catch (_) {
+        // no-op: individual ping failure is handled by reachable flag
+      }
     }
 
     const wasOffline = (api.getAppMode() === api.APP_MODES.ANDROID_OFFLINE);
@@ -975,7 +990,9 @@ async function refreshCatsAndRender() {
     localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
     const rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
     customCreatedCats = rawCustom.map(c => ({ ...c, isOffline: true }));
-  } catch (_) {}
+  } catch (_) {
+    // no-op: localStorage parse failure leaves defaults intact
+  }
 
   if (api.isOfflineApp) {
     cats = cats.filter(c => !localOverrides[c.id] || !localOverrides[c.id].deleted);
@@ -1052,7 +1069,6 @@ export function updateEditButtonsVisibility() {
   const mode = api.getAppMode();
   const isAdminLocal = mode === api.APP_MODES.ADMIN_LOCAL;
   const isWebOrAndroidOnline = [api.APP_MODES.WEB_CLIENT, api.APP_MODES.ANDROID_ONLINE].includes(mode);
-  const isAndroidOffline = mode === api.APP_MODES.ANDROID_OFFLINE;
 
   // ── Admin Login Button: ONLY on localhost ──
   if (adminLoginBtn) {

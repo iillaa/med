@@ -1,7 +1,6 @@
-import { state } from '../state.js';
 import * as api from '../api.js';
 import { perf } from '../performance.js';
-import { formatBytes, formatDuration, formatPercent, getDiagnosticsLogs, showToast, exportDataFile, copyToClipboard } from '../utils.js';
+import { formatBytes, formatPercent, getDiagnosticsLogs, showToast, exportDataFile, copyToClipboard } from '../utils.js';
 
 let isOpen = false;
 let renderIntervalId = null;
@@ -316,7 +315,9 @@ async function exportPerformanceReport() {
   if (!api.isOfflineApp) {
     try {
       serverMetrics = await api.fetchServerMetrics();
-    } catch (_) {}
+    } catch (_) {
+      // no-op: metrics fetch failure leaves report with client-side data only
+    }
   }
 
   const report = {

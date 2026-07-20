@@ -1,9 +1,8 @@
 // Server communication routines for Dr. CAT
 // Support for both online (server-backed) mode and offline standalone (Capacitor/static) mode
 
-import { state } from './state.js';
 import { REMOTE_SERVER_URL, REMOTE_SERVER_URLS } from './remote_config.js';
-import { detectProvider, getExtraHeaders, isTunnelUrl, PROVIDERS, getTunnelLabel, sortUrlsByProviderPriority, getPrimaryProviderId } from './server-providers.js';
+import { getExtraHeaders } from './server-providers.js';
 import { isOfflineCat } from './lib/helpers.js';
 export { REMOTE_SERVER_URL };
 
@@ -147,10 +146,6 @@ export function hasRemoteServer() {
   return !!getRemoteServerUrl();
 }
 
-function getPrimaryRemoteUrl() {
-  return getRemoteServerUrl();
-}
-
 export async function fetchServerList() {
   try {
     const res = await fetchWithTimeout('/api/server-providers', { headers: getHeaders() });
@@ -245,24 +240,6 @@ export async function checkAdminStatus() {
   }
 }
  
-// Fast-fail fetch with a short timeout for connectivity tests
-async function quickPing(url, timeoutMs = 1500) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, {
-      method: 'HEAD',
-      signal: controller.signal,
-      mode: 'no-cors'
-    });
-    clearTimeout(timeoutId);
-    return !!res;
-  } catch (_) {
-    clearTimeout(timeoutId);
-    return false;
-  }
-}
-
 // Shared fetch helper with strict timeout to prevent indefinite hangs
 // For Android, we want very fast timeouts to avoid freezing
 const isCapacitorForTimeout = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
@@ -308,7 +285,9 @@ export async function fetchCats(since) {
           return parsed;
         }
         console.warn('[fetchCats] Cached database looks corrupted or incomplete (length < 40). Falling back to static bundle.');
-      } catch (_) {}
+      } catch (_) {
+        // no-op: JSON.parse failure on cached DB falls through to static bundle
+      }
     }
     console.log('[fetchCats] Offline mode — loading bundled data instantly.');
     const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
@@ -356,7 +335,9 @@ export async function fetchCats(since) {
           console.log('[fetchCats] Loaded cached synced database on unreachable remote.');
           return parsed;
         }
-      } catch (_) {}
+      } catch (_) {
+        // no-op: JSON.parse failure on cached DB falls through to static bundle
+      }
     }
     const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
@@ -440,7 +421,9 @@ export async function fetchCats(since) {
         console.log('[fetchCats] Loaded cached synced database on ultimate fallback.');
         return parsed;
       }
-    } catch (_) {}
+    } catch (_) {
+      // no-op: JSON.parse failure on cached DB falls through to static bundle
+    }
   }
   const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
   if (!res.ok) throw new Error('Failed to fetch CATs from fallback');
@@ -636,7 +619,9 @@ export async function fetchSearchStatus() {
     try {
       const res = await fetchWithTimeout(getApiUrl('/api/search-status'), { headers: getHeaders() });
       if (res.ok) return res.json();
-    } catch (_) {}
+    } catch (_) {
+      // no-op: search-status fetch failure falls through to offline default
+    }
   }
 
   if (isOfflineApp) {
@@ -683,7 +668,7 @@ export async function searchPdfsContent(query) {
           }
 
           const textLower = p.text.toLowerCase();
-          let indexMatch = textLower.indexOf(cleanQuery);
+          const indexMatch = textLower.indexOf(cleanQuery);
           if (indexMatch !== -1) {
             const start = Math.max(0, indexMatch - 60);
             const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
@@ -785,7 +770,6 @@ export async function pingEndpoint(url, timeoutMs = 2500) {
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
     // Determine headers and mode depending on URL type
-    const provider = detectProvider(url);
     const providerHeaders = getExtraHeaders(url);
     const configuredUrls = getConfiguredRemoteUrls();
     const isRemoteUrl = configuredUrls.some(u => u && url.includes(u));

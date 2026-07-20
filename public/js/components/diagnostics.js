@@ -1,4 +1,3 @@
-import { state } from '../state.js';
 import * as api from '../api.js';
 import { formatBytes, copyToClipboard, captureConsoleWarnings, getDiagnosticsLogs, clearDiagnosticsLogs, showToast, exportDataFile } from '../utils.js';
 
@@ -296,9 +295,7 @@ async function runConnectivityTest() {
   // 1. Test local server endpoint ping
   console.log("[Connectivity] Test 1: Ping local (localhost:3000)...");
   const localRes = await api.pingEndpoint('http://localhost:3000/api/search-status');
-  let isLocalSuccess = false;
   if (localRes.ok) {
-    isLocalSuccess = true;
     console.log("[Connectivity] Local OK (200 OK)");
     if (stepLocal) stepLocal.innerHTML = '1. Local (localhost:3000) : <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Accessible (200 OK)</span>';
   } else {
@@ -550,7 +547,6 @@ async function runAutoCheckupSuite() {
   };
 
   // 8. Export report - smart strategy based on platform
-  const jsonStr = JSON.stringify(report, null, 2);
   const d = new Date();
   const timestampStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}`;
   const fileName = `drcat-diagnostic-complete-${timestampStr}.json`;

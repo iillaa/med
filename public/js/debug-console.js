@@ -1,5 +1,4 @@
 // Debug Console — automatic capture & floating UI for Android/mobile
-import { isOfflineApp } from './api.js';
 import { showToast } from './utils.js';
 let logBuffer = [];
 const MAX_LOGS = 200;
@@ -91,15 +90,6 @@ function startDebugConsole() {
 }
 
 // ── UI ───────────────────────────────────────────────────────
-function getLogColor(level) {
-  switch(level) {
-    case 'ERROR': return '#f87171';
-    case 'WARN': return '#fbbf24';
-    case 'INFO': return '#38bdf8';
-    case 'NETWORK': return '#a78bfa';
-    default: return '#94a3b8';
-  }
-}
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
