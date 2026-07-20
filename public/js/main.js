@@ -512,6 +512,8 @@ async function initApp() {
       console.error("[Startup Critical] No data available.", fallbackErr);
       showToast("Base de données indisponible.", "fa-circle-exclamation", 9000);
       if (loadingOverlay) loadingOverlay.classList.add('hidden');
+      const SplashScreen = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen;
+      if (SplashScreen && typeof SplashScreen.hide === 'function') { try { SplashScreen.hide(); } catch (_) {} }
       return;
     }
   }
@@ -590,6 +592,15 @@ async function initApp() {
   }
 
   setLoadingProgress(100);
+
+  // ── 8a. Splash handoff (Phase 4.3) ──
+  // Fade the web loading overlay out, then dismiss the native Capacitor
+  // splash screen (if present) once first meaningful paint is ready.
+  if (loadingOverlay) loadingOverlay.classList.add('hidden');
+  const SplashScreen = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen;
+  if (SplashScreen && typeof SplashScreen.hide === 'function') {
+    setTimeout(() => { try { SplashScreen.hide(); } catch (_) {} }, 350);
+  }
 
   // ── 8b. Tactile tap feedback (Phase 3.2) ──
   initTapFeedback();

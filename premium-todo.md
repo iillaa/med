@@ -118,7 +118,7 @@
   *Why:* content never hides under system UI. **Effort S · Risk Low.**
 - [ ] **4.2 Hardware back button** — Capacitor `App.addListener('backButton')`: close modal/sheet → go back → confirm-exit at root.
   *Why:* mishandled back = instant "cheap app" tell. **Effort M · Risk Med · Done-when:** back never dead-ends or exits unexpectedly.
-- [ ] **4.3 Splash screen → app handoff** — branded splash that fades into the app; hide only when first meaningful paint is ready (`@capacitor/splash-screen`).
+- [x] **4.3 Splash screen → app handoff** — branded splash that fades into the app; hide only when first meaningful paint is ready (`@capacitor/splash-screen`).
   *Why:* seamless launch, no white flash. **Effort S · Risk Low.**
 - [ ] **4.4 Haptics everywhere sensible** — success/error/selection patterns on key actions (save, quiz answer, toggle).
   *Why:* premium tactile layer (you already have the plugin). **Effort S · Risk Low.**

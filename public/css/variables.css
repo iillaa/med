@@ -274,6 +274,8 @@ body {
 #app-loading-overlay {
   opacity: 1;
   visibility: visible;
+  /* Premium splash handoff: fade out smoothly into the app (Phase 4.3). */
+  transition: opacity var(--motion-slow) var(--ease-standard), visibility 0s linear var(--motion-slow);
 }
 #app-loading-overlay.hidden {
   opacity: 0;
