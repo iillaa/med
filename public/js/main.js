@@ -165,24 +165,52 @@ async function bootstrapApp() {
 
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
-      // Atomic swap: kill all transitions for one frame so the whole UI
-      // repaints in the new theme at once (no staggered wipe), then re-enable.
-      rootEl.classList.add('theme-switching');
+      const swap = () => {
+        // Atomic swap: kill all transitions for one frame so the whole UI
+        // repaints in the new theme at once (no staggered wipe), then re-enable.
+        rootEl.classList.add('theme-switching');
 
-      const isLight = rootEl.classList.toggle('light-theme');
-      localStorage.setItem('theme', isLight ? 'light' : 'dark');
-      rootEl.style.colorScheme = isLight ? 'light' : 'dark';
+        const isLight = rootEl.classList.toggle('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        rootEl.style.colorScheme = isLight ? 'light' : 'dark';
 
-      if (themeToggleIcon) {
-        themeToggleIcon.classList.toggle('fa-sun', isLight);
-        themeToggleIcon.classList.toggle('fa-moon', !isLight);
+        if (themeToggleIcon) {
+          themeToggleIcon.classList.toggle('fa-sun', isLight);
+          themeToggleIcon.classList.toggle('fa-moon', !isLight);
+        }
+        applyThemeChrome(isLight);
+
+        // Re-enable transitions after the swap frame has painted.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => rootEl.classList.remove('theme-switching'));
+        });
+      };
+
+      // Phase 3.5: circular reveal from the toggle button via View Transitions
+      // API, with graceful fallback to the instant atomic swap.
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const vt = document.startViewTransition && !reduce ? document.startViewTransition : null;
+      if (vt) {
+        const rect = themeToggleBtn.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+        const style = document.createElement('style');
+        style.textContent = `
+          ::view-transition-new(root) {
+            animation: themeReveal var(--motion-slow) var(--ease-emphasized);
+          }
+          @keyframes themeReveal {
+            from { clip-path: circle(0px at ${x}px ${y}px); }
+            to { clip-path: circle(${endRadius}px at ${x}px ${y}px); }
+          }
+        `;
+        document.head.appendChild(style);
+        vt.call(document, swap);
+        setTimeout(() => style.remove(), 400);
+      } else {
+        swap();
       }
-      applyThemeChrome(isLight);
-
-      // Re-enable transitions after the swap frame has painted.
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => rootEl.classList.remove('theme-switching'));
-      });
     });
   }
   

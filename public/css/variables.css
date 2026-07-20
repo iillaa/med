@@ -137,6 +137,19 @@ html.theme-switching *::after {
   }
 }
 
+/* ── Theme-toggle circular reveal (Phase 3.5, View Transitions API) ──
+   The new theme is revealed via a clip-path circle from the toggle button
+   (keyframes injected in main.js). The old snapshot is hidden instantly so
+   only the circular reveal of the new theme is visible. */
+::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 
 * {
   box-sizing: border-box;
