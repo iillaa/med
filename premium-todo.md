@@ -168,7 +168,7 @@
 
 - [x] **7.1 Focus management** — trap focus in modals, return focus on close, logical tab order.
   *Why:* keyboard/switch users + polish. **Effort M · Risk Med.**
-- [ ] **7.2 ARIA + semantics** — roles/labels on custom controls (tabs, toggles, dialogs), live regions for toasts.
+- [x] **7.2 ARIA + semantics** — roles/labels on custom controls (tabs, toggles, dialogs), live regions for toasts.
   *Why:* screen-reader support; also improves quality perception. **Effort M · Risk Low.**
 - [ ] **7.3 Contrast & tap-target audit** — verify WCAG AA contrast (both themes) and ≥44px tap targets.
   *Why:* legibility + fewer mis-taps. **Effort S · Risk Low.**

@@ -330,7 +330,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.20.13.36">
+  <meta name="app-build-version" content="2026.07.20.15.43">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -369,19 +369,19 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607201336" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607201336"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607201543" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607201543"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607201336" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607201336"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607201543" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607201543"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607201336" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607201336" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607201543" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607201543" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607201336">
-    <link rel="stylesheet" href="css/utilities.css?v=2607201336">
+    <link rel="stylesheet" href="style.css?v=2607201543">
+    <link rel="stylesheet" href="css/utilities.css?v=2607201543">
   </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
@@ -655,14 +655,14 @@ body {
           <!-- Admin Control Center (Visible only to Admin) -->
           <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px; padding: 0; overflow: hidden; background: var(--bg-sidebar); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
             <!-- Admin Tabs Header -->
-            <div class="admin-tabs-header" style="display: flex; background: rgba(0,0,0,0.25); border-bottom: 1px solid var(--border-color); padding: 4px; gap: 4px;">
-              <button class="admin-tab-btn active" data-target="admin-pane-suggestions" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+            <div class="admin-tabs-header" role="tablist" style="display: flex; background: rgba(0,0,0,0.25); border-bottom: 1px solid var(--border-color); padding: 4px; gap: 4px;">
+              <button class="admin-tab-btn active" data-target="admin-pane-suggestions" role="tab" aria-selected="true" aria-controls="admin-pane-suggestions" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
                 <i class="fa-solid fa-inbox"></i> Propositions
               </button>
-              <button class="admin-tab-btn" data-target="admin-pane-diagnostics" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+              <button class="admin-tab-btn" data-target="admin-pane-diagnostics" role="tab" aria-selected="false" aria-controls="admin-pane-diagnostics" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
                 <i class="fa-solid fa-stethoscope"></i> Diagnostic
               </button>
-              <button class="admin-tab-btn" data-target="admin-pane-performance" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+              <button class="admin-tab-btn" data-target="admin-pane-performance" role="tab" aria-selected="false" aria-controls="admin-pane-performance" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
                 <i class="fa-solid fa-gauge-high"></i> Performance
               </button>
             </div>
@@ -671,7 +671,7 @@ body {
             <div class="admin-panes-container" style="padding: 20px;">
               
               <!-- PANE 1: Suggestions Moderation -->
-              <div class="admin-pane-content" id="admin-pane-suggestions" style="display: block;">
+              <div class="admin-pane-content" id="admin-pane-suggestions" role="tabpanel" style="display: block;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-user-shield"></i> Propositions en attente</h4>
                 </div>
@@ -715,7 +715,7 @@ body {
               </div>
 
               <!-- PANE 2: Diagnostics -->
-              <div class="admin-pane-content" id="admin-pane-diagnostics" style="display: none;">
+              <div class="admin-pane-content" id="admin-pane-diagnostics" role="tabpanel" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-stethoscope"></i> Outils de Diagnostic</h4>
                 </div>
@@ -828,7 +828,7 @@ body {
               </div>
 
               <!-- PANE 3: Performance -->
-              <div class="admin-pane-content" id="admin-pane-performance" style="display: none;">
+              <div class="admin-pane-content" id="admin-pane-performance" role="tabpanel" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-gauge-high"></i> Tableau de Performance</h4>
                 </div>
@@ -1030,20 +1030,20 @@ body {
         </div>
 
         <!-- Navigation Tabs -->
-        <nav class="tabs-nav">
-          <button class="tab-btn active" data-tab="tab-summary">
+        <nav class="tabs-nav" role="tablist">
+          <button class="tab-btn active" data-tab="tab-summary" role="tab" aria-selected="true" aria-controls="tab-summary">
             <i class="fa-solid fa-file-invoice-document"></i> Fiche de Synthèse
           </button>
-          <button class="tab-btn" data-tab="tab-notes">
+          <button class="tab-btn" data-tab="tab-notes" role="tab" aria-selected="false" aria-controls="tab-notes">
             <i class="fa-solid fa-clipboard-question"></i> Notes Personnelles
           </button>
-          <button class="tab-btn" data-tab="tab-prescription">
+          <button class="tab-btn" data-tab="tab-prescription" role="tab" aria-selected="false" aria-controls="tab-prescription">
             <i class="fa-solid fa-prescription-bottle-medical"></i> Ordonnance Type
           </button>
-          <button class="tab-btn" data-tab="tab-pdfs">
+          <button class="tab-btn" data-tab="tab-pdfs" role="tab" aria-selected="false" aria-controls="tab-pdfs">
             <i class="fa-solid fa-folder-open"></i> PDFs de Référence
           </button>
-          <button class="tab-btn" data-tab="tab-search-pdf">
+          <button class="tab-btn" data-tab="tab-search-pdf" role="tab" aria-selected="false" aria-controls="tab-search-pdf">
             <i class="fa-solid fa-magnifying-glass"></i> Recherche PDF
           </button>
         </nav>
@@ -1051,7 +1051,7 @@ body {
         <!-- Tabs Content -->
         <div class="tab-content-container">
           <!-- Summary Tab -->
-          <div class="tab-pane active" id="tab-summary">
+          <div class="tab-pane active" id="tab-summary" role="tabpanel">
             <div class="pane-header">
               <h3><i class="fa-solid fa-shield-halved"></i> Conduite Pratique<span class="desktop-only-inline"> Recommandée</span></h3>
               <button class="action-btn edit-summary-btn" id="edit-summary-btn">
@@ -1073,7 +1073,7 @@ body {
           </div>
 
           <!-- Notes Tab -->
-          <div class="tab-pane" id="tab-notes">
+          <div class="tab-pane" id="tab-notes" role="tabpanel">
             <div class="pane-header">
               <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations<span class="desktop-only-inline"> & Protocoles Locaux</span></h3>
             </div>
@@ -1089,7 +1089,7 @@ body {
           </div>
 
           <!-- Prescription Tab -->
-          <div class="tab-pane" id="tab-prescription">
+          <div class="tab-pane" id="tab-prescription" role="tabpanel">
             <div class="pane-header" style="margin-bottom: 12px;">
               <h3><i class="fa-solid fa-file-prescription"></i> <span class="desktop-only-inline">Exemple d'</span>Ordonnance Type</h3>
               <div style="display: flex; gap: 8px;">
@@ -1131,7 +1131,7 @@ body {
           </div>
 
           <!-- PDFs Tab -->
-          <div class="tab-pane" id="tab-pdfs">
+          <div class="tab-pane" id="tab-pdfs" role="tabpanel">
             <div class="pane-header">
               <h3><i class="fa-solid fa-file-pdf"></i> Documents<span class="desktop-only-inline"> Médicaux</span> de Référence</h3>
             </div>
@@ -1155,7 +1155,7 @@ body {
           </div>
 
           <!-- PDF Search Tab -->
-          <div class="tab-pane" id="tab-search-pdf">
+          <div class="tab-pane" id="tab-search-pdf" role="tabpanel">
             <div class="pane-header">
               <h3><i class="fa-solid fa-magnifying-glass"></i> Recherche Globale<span class="desktop-only-inline"> dans le texte des PDFs</span></h3>
             </div>
@@ -1437,11 +1437,11 @@ body {
   </div>
 
   <!-- Add CAT Modal -->
-  <div class="modal-overlay" id="add-cat-modal" style="display: none;">
+  <div class="modal-overlay" id="add-cat-modal" role="dialog" aria-modal="true" aria-labelledby="add-cat-modal-title" style="display: none;">
     <div class="modal-card">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-plus-circle"></i> Ajouter une nouvelle CAT</h3>
-        <button class="close-modal-btn" id="close-add-cat-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+        <h3 id="add-cat-modal-title"><i class="fa-solid fa-plus-circle"></i> Ajouter une nouvelle CAT</h3>
+        <button class="close-modal-btn" id="close-add-cat-modal-btn" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
         <form id="add-cat-form" onsubmit="return false;">
@@ -1538,7 +1538,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-3P7CAG5H.js"></script>
+  <script type="module" src="dist/app-NTXUCDAW.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

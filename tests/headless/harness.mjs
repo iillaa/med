@@ -127,6 +127,32 @@ async function themeReveal() {
   return { supportsViewTransitions: supportsVT, toggledToLight: isLight, errors };
 }
 
+async function ariaTabs() {
+  const browser = await connect();
+  const page = await browser.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.setViewport({ width: 1280, height: 800 });
+  await page.goto(BASE, { waitUntil: 'networkidle2', timeout: 25000 });
+  // Open first CAT so the workspace tabs render.
+  await page.$eval('#cat-list .cat-item', (el) => el.click()).catch(() => {});
+  await new Promise((r) => setTimeout(r, 800));
+  const roles = await page.evaluate(() => ({
+    tablist: document.querySelectorAll('[role="tablist"]').length,
+    tab: document.querySelectorAll('[role="tab"]').length,
+    tabpanel: document.querySelectorAll('[role="tabpanel"]').length,
+    dialog: document.querySelectorAll('[role="dialog"]').length,
+  }));
+  const before = await page.$$eval('.tab-btn', (b) =>
+    b.map((x) => ({ tab: x.dataset.tab, sel: x.getAttribute('aria-selected') })));
+  await page.$eval('.tab-btn[data-tab="tab-notes"]', (el) => el.click()).catch(() => {});
+  await new Promise((r) => setTimeout(r, 300));
+  const after = await page.$$eval('.tab-btn', (b) =>
+    b.map((x) => ({ tab: x.dataset.tab, sel: x.getAttribute('aria-selected') })));
+  await browser.disconnect();
+  return { roles, before, after, errors };
+}
+
 const cmd = process.argv[2] || 'smoke';
 await ensureServer();
 let result;
@@ -135,6 +161,7 @@ try {
   else if (cmd === 'safeAreas') result = await safeAreas();
   else if (cmd === 'console') result = await consoleErrors();
   else if (cmd === 'themeReveal') result = await themeReveal();
+  else if (cmd === 'ariaTabs') result = await ariaTabs();
   else { console.error('unknown command:', cmd); process.exitCode = 1; }
   console.log(JSON.stringify(result, null, 2));
 } catch (e) {

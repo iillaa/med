@@ -32,10 +32,12 @@ export function initAdminTabListeners(onSuggestionHandled) {
 
       adminTabBtns.forEach(b => {
         b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
         b.style.color = 'var(--text-secondary)';
         b.style.backgroundColor = 'transparent';
       });
       btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
       btn.style.color = 'var(--color-primary)';
       btn.style.backgroundColor = 'rgba(6, 182, 212, 0.1)';
 

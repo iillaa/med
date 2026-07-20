@@ -82,6 +82,8 @@ export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
 
   const toast = document.createElement('div');
   toast.id = 'drcat-toast';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
   toast.innerHTML = `
     <i class="fa-solid ${icon} t-icon"></i>
     <span class="t-msg">${message}</span>

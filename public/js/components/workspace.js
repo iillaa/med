@@ -66,10 +66,11 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      tabButtons.forEach(b => b.classList.remove('active'));
+      tabButtons.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
 
       btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
       const paneId = btn.getAttribute('data-tab');
       const pane = document.getElementById(paneId);
       if (pane) pane.classList.add('active');
@@ -614,11 +615,11 @@ export function selectCat(cat, preserveTab = false) {
   loadRelatedPdfs(cat);
 
   if (!preserveTab) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     const firstTabBtn = document.querySelector('.tab-btn[data-tab="tab-summary"]');
     const firstTabPane = document.getElementById('tab-summary');
-    if (firstTabBtn) firstTabBtn.classList.add('active');
+    if (firstTabBtn) { firstTabBtn.classList.add('active'); firstTabBtn.setAttribute('aria-selected', 'true'); }
     if (firstTabPane) firstTabPane.classList.add('active');
   }
 
