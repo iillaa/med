@@ -204,10 +204,13 @@ body {
 }
 
 /* ── Toast Notification ───────────────────────────────── */
-.drcat-toast {
+ .drcat-toast {
   position: fixed;
   top: 20px;
   right: 20px;
+  /* Keep clear of the status bar / notch on mobile. */
+  top: max(20px, env(safe-area-inset-top));
+  right: max(20px, env(safe-area-inset-right));
   z-index: 9999;
   display: flex;
   align-items: flex-start;
