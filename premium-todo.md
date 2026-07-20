@@ -136,7 +136,7 @@
   *Why:* 26 raw modules → a few minified chunks = far fewer requests, smaller payload. **Effort L · Risk Med · Done-when:** production build emits hashed, minified bundles; app runs identically.
 - [x] **5.2 Route-based code-splitting** — lazy-load quiz, diagnostics, admin dashboard, PDF viewer only when opened (`import()`).
   *Why:* first screen ships less JS = faster TTI. **Effort M · Risk Med.**
-- [ ] **5.3 Defer heavy libs** — load `pdf.min.js`/worker only when a PDF opens.
+- [x] **5.3 Defer heavy libs** — load `pdf.min.js`/worker only when a PDF opens.
   *Why:* pdf.js is large; most sessions may never open a PDF. **Effort S · Risk Low.**
 - [ ] **5.4 Critical CSS inline + defer rest** — inline above-the-fold CSS in `<head>`, lazy-load the rest.
   *Why:* faster first paint. **Effort M · Risk Med.**

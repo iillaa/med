@@ -302,8 +302,6 @@
     }
   </style>
 
-  <!-- Load PDF.js locally (offline-first: no CDN) -->
-  <script src="js/pdf.min.js"></script>
 </head>
 <body>
 
@@ -353,9 +351,11 @@
     <canvas id="pdf-canvas"></canvas>
   </main>
 
+  <script src="js/pdf.min.js"></script>
   <script>
-    // Set PDF.js worker source (offline-first: bundled, no CDN)
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdf.worker.min.js';
+    // Set PDF.js worker source lazily (Phase 5.3): only fetch the worker when
+    // a PDF actually starts loading, not on every viewer-page open.
+    // (workerSrc is assigned just before getDocument below.)
 
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
@@ -774,6 +774,10 @@
     // Load PDF Document
     (async function() {
       try {
+        // Phase 5.3: defer the pdf.js worker fetch until a PDF actually loads.
+        if (window.pdfjsLib) {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdf.worker.min.js';
+        }
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
 
         // Fetch progress indicator
