@@ -142,7 +142,7 @@
   *Why:* faster first paint. **Effort M · Risk Med.**
 - [x] **5.5 Self-host fonts + subset** — bundle Outfit locally (WOFF2, subset to used weights/glyphs) instead of Google Fonts CDN.
   *Why:* removes a render-blocking third-party request; works fully offline. **Effort M · Risk Low.**
-- [ ] **5.6 Image optimization** — convert PNGs to WebP/AVIF with PNG fallback; compress; correct sizes.
+- [x] **5.6 Image optimization** — convert PNGs to WebP/AVIF with PNG fallback; compress; correct sizes.
   *Why:* smaller downloads, faster LCP. **Effort S · Risk Low.**
 - [ ] **5.7 Low-end profiling** — test with CPU 4× throttle + "Slow 3G"; fix the worst offenders.
   *Why:* your users aren't all on flagships. **Effort M · Risk Low.**
