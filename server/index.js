@@ -24,7 +24,6 @@ const DB_FILE = path.join(__dirname, '..', 'cats_db.json');
 const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
 const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
 const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
-const CONFIG_FILE = path.join(__dirname, '..', 'remote_server_config.json');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

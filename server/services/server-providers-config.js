@@ -12,7 +12,7 @@
 // { "url": "..." } shapes.
 const fs = require('fs');
 const path = require('path');
-const { serverProviders, detectProvider } = require('../config/providers');
+const { detectProvider } = require('../config/providers');
 
 const CONFIG_FILE = path.join(__dirname, '..', '..', 'remote_server_config.json');
 

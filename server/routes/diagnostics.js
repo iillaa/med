@@ -5,6 +5,7 @@ const { getIndexStatus } = require('../../index_pdfs');
 const { serverProviders, detectProvider, getManagementEndpoint } = require('../config/providers');
 const spc = require('../services/server-providers-config');
 const path = require('path');
+const fs = require('fs');
 
 const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
 const DB_FILE = path.join(__dirname, '..', '..', 'cats_db.json');

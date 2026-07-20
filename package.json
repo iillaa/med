@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "start:admin": "ADMIN_PASSWORD=admin123 node server.js",
+    "start:admin": "node server.js",
     "test": "node tests/headless/harness.mjs smoke",
     "test:safe": "node tests/headless/harness.mjs safeAreas",
     "test:console": "node tests/headless/harness.mjs console",
