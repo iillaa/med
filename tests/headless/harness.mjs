@@ -127,6 +127,38 @@ async function themeReveal() {
   return { supportsViewTransitions: supportsVT, toggledToLight: isLight, errors };
 }
 
+async function tapTargets() {
+  const browser = await connect();
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 800 });
+  await page.goto(BASE, { waitUntil: 'networkidle2', timeout: 25000 });
+  await page.$eval('#cat-list .cat-item', (el) => el.click()).catch(() => {});
+  await new Promise((r) => setTimeout(r, 800));
+  const measure = () => page.evaluate(() => {
+    const out = [];
+    const els = document.querySelectorAll('button, a, [role="button"], input[type="checkbox"], input[type="radio"]');
+    els.forEach((el) => {
+      const cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) return;
+      out.push({
+        tag: el.tagName.toLowerCase(),
+        cls: (el.className && el.className.baseVal !== undefined ? el.className.baseVal : el.className || '').toString().slice(0, 40),
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        small: Math.round(r.width) < 44 || Math.round(r.height) < 44,
+      });
+    });
+    return out;
+  });
+  const all = await measure();
+  await browser.disconnect();
+  const small = all.filter((e) => e.small);
+  return { total: all.length, smallCount: small.length, small };
+}
+
+
 async function ariaTabs() {
   const browser = await connect();
   const page = await browser.newPage();
@@ -162,6 +194,7 @@ try {
   else if (cmd === 'console') result = await consoleErrors();
   else if (cmd === 'themeReveal') result = await themeReveal();
   else if (cmd === 'ariaTabs') result = await ariaTabs();
+  else if (cmd === 'tapTargets') result = await tapTargets();
   else { console.error('unknown command:', cmd); process.exitCode = 1; }
   console.log(JSON.stringify(result, null, 2));
 } catch (e) {

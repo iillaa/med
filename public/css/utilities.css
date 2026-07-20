@@ -446,3 +446,16 @@
   transition: var(--transition-color);
 }
 .btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+/* Phase 7.3: ensure small icon buttons meet >=44px tap-target guideline
+   (expands the *hit area* only; visual size unchanged, content centered). */
+.theme-toggle-btn,
+.toggle-sidebar-btn,
+.close-modal-btn,
+.close-sidebar-btn,
+.controls-toggle-btn,
+#pdf-content-search-btn {
+  min-width: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
