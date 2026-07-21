@@ -85,111 +85,119 @@ async function runTests() {
 
   console.log('\n💡 Dr. CAT — Full Suggestion Lifecycle Audit\n');
 
-  try {
-    // 1. Admin login
-    const login = await req('POST', '/api/login', { password: tempPassword });
-    const token = login.body && (login.body.token || login.body.sessionToken);
-    check('Admin login token received', typeof token === 'string');
+    let tempCatId = null;
+    let createdCat = null;
+    let token = null;
 
-    // Create a temporary test CAT specifically for testing edit suggestions (never touch real CAT 1!)
-    const tempCatRes = await req('POST', '/api/cats', {
-      title: 'Temp Test CAT ' + Date.now(),
-      category: 'TestSpecialty',
-      summary: 'Original temp summary',
-      ordonnance: 'Original temp ordonnance',
-      red_flags: 'Temp red flags',
-      pdf_keywords: []
-    }, { 'x-admin-token': token });
-    const tempCatId = tempCatRes.body.cat.id;
+    try {
+      // 1. Admin login
+      const login = await req('POST', '/api/login', { password: tempPassword });
+      token = login.body && (login.body.token || login.body.sessionToken);
+      check('Admin login token received', typeof token === 'string');
 
-    // 2. Submit suggestions (as user)
-    console.log('1. User submits suggestions on temporary test CAT:');
-    const sugAdd = await req('POST', '/api/suggestions', {
-      type: 'add',
-      data: {
-        title: 'Test New CAT ' + Date.now(),
-        category: 'Cardiologie',
-        summary: 'Initial summary for new CAT',
-        ordonnance: 'Initial ordonnance',
-        red_flags: 'Chest pain'
-      }
-    });
-    check('POST /api/suggestions (add) → 200', sugAdd.status === 200 && sugAdd.body.success === true);
-    const addSugId = sugAdd.body.suggestion ? sugAdd.body.suggestion.id : null;
-    check('Suggestion ID returned', typeof addSugId === 'string');
+      // Create a temporary test CAT specifically for testing edit suggestions (never touch real CAT 1!)
+      const tempCatRes = await req('POST', '/api/cats', {
+        title: 'Temp Test CAT ' + Date.now(),
+        category: 'TestSpecialty',
+        summary: 'Original temp summary',
+        ordonnance: 'Original temp ordonnance',
+        red_flags: 'Temp red flags',
+        pdf_keywords: []
+      }, { 'x-admin-token': token });
+      tempCatId = tempCatRes.body.cat ? tempCatRes.body.cat.id : null;
 
-    const sugEdit = await req('POST', '/api/suggestions', {
-      type: 'edit',
-      catId: tempCatId,
-      data: {
-        summary: 'Proposed update for temp CAT summary',
-        ordonnance: 'Proposed update for temp CAT ordonnance'
-      }
-    });
-    check('POST /api/suggestions (edit) → 200', sugEdit.status === 200 && sugEdit.body.success === true);
-    const editSugId = sugEdit.body.suggestion ? sugEdit.body.suggestion.id : null;
+      // 2. Submit suggestions (as user)
+      console.log('1. User submits suggestions on temporary test CAT:');
+      const sugAdd = await req('POST', '/api/suggestions', {
+        type: 'add',
+        data: {
+          title: 'Test New CAT ' + Date.now(),
+          category: 'Cardiologie',
+          summary: 'Initial summary for new CAT',
+          ordonnance: 'Initial ordonnance',
+          red_flags: 'Chest pain'
+        }
+      });
+      check('POST /api/suggestions (add) → 200', sugAdd.status === 200 && sugAdd.body.success === true);
+      const addSugId = sugAdd.body.suggestion ? sugAdd.body.suggestion.id : null;
+      check('Suggestion ID returned', typeof addSugId === 'string');
 
-    // 3. Admin fetches pending suggestions
-    console.log('\n2. Admin fetches pending suggestions:');
-    const listRes = await req('GET', '/api/suggestions', null, { 'x-admin-token': token });
-    check('GET /api/suggestions → 200', listRes.status === 200 && Array.isArray(listRes.body));
-    check('Contains add suggestion', listRes.body.some(s => s.id === addSugId));
-    check('Contains edit suggestion', listRes.body.some(s => s.id === editSugId));
+      const sugEdit = await req('POST', '/api/suggestions', {
+        type: 'edit',
+        catId: tempCatId,
+        data: {
+          summary: 'Proposed update for temp CAT summary',
+          ordonnance: 'Proposed update for temp CAT ordonnance'
+        }
+      });
+      check('POST /api/suggestions (edit) → 200', sugEdit.status === 200 && sugEdit.body.success === true);
+      const editSugId = sugEdit.body.suggestion ? sugEdit.body.suggestion.id : null;
 
-    // 4. Admin reviews & edits suggestion
-    console.log('\n3. Admin reviews & edits suggestion:');
-    const editReviewRes = await req('POST', `/api/suggestions/${addSugId}/edit`, {
-      data: {
-        summary: 'Corrected summary after admin review',
-        ordonnance: 'Corrected ordonnance after admin review'
-      }
-    }, { 'x-admin-token': token });
-    check('POST /api/suggestions/:id/edit → 200', editReviewRes.status === 200 && editReviewRes.body.success === true);
-    check('Updated suggestion data persisted', editReviewRes.body.suggestion.data.summary === 'Corrected summary after admin review');
+      // 3. Admin fetches pending suggestions
+      console.log('\n2. Admin fetches pending suggestions:');
+      const listRes = await req('GET', '/api/suggestions', null, { 'x-admin-token': token });
+      check('GET /api/suggestions → 200', listRes.status === 200 && Array.isArray(listRes.body));
+      check('Contains add suggestion', listRes.body.some(s => s.id === addSugId));
+      check('Contains edit suggestion', listRes.body.some(s => s.id === editSugId));
 
-    // 5. Admin approves 'add' suggestion
-    console.log('\n4. Admin approves "add" suggestion:');
-    const approveAddRes = await req('POST', `/api/suggestions/${addSugId}/approve`, {}, { 'x-admin-token': token });
-    check('POST /api/suggestions/:id/approve (add) → 200', approveAddRes.status === 200 && approveAddRes.body.success === true);
+      // 4. Admin reviews & edits suggestion
+      console.log('\n3. Admin reviews & edits suggestion:');
+      const editReviewRes = await req('POST', `/api/suggestions/${addSugId}/edit`, {
+        data: {
+          summary: 'Corrected summary after admin review',
+          ordonnance: 'Corrected ordonnance after admin review'
+        }
+      }, { 'x-admin-token': token });
+      check('POST /api/suggestions/:id/edit → 200', editReviewRes.status === 200 && editReviewRes.body.success === true);
+      check('Updated suggestion data persisted', editReviewRes.body.suggestion.data.summary === 'Corrected summary after admin review');
 
-    const catsRes = await req('GET', '/api/cats');
-    const createdCat = catsRes.body.find(c => c.summary === 'Corrected summary after admin review');
-    check('New CAT created in cats_db.json', createdCat !== undefined && createdCat.category === 'Cardiologie');
+      // 5. Admin approves 'add' suggestion
+      console.log('\n4. Admin approves "add" suggestion:');
+      const approveAddRes = await req('POST', `/api/suggestions/${addSugId}/approve`, {}, { 'x-admin-token': token });
+      check('POST /api/suggestions/:id/approve (add) → 200', approveAddRes.status === 200 && approveAddRes.body.success === true);
 
-    // 6. Admin approves 'edit' suggestion on temporary test CAT
-    console.log('\n5. Admin approves "edit" suggestion on temp CAT:');
-    const approveEditRes = await req('POST', `/api/suggestions/${editSugId}/approve`, {}, { 'x-admin-token': token });
-    check('POST /api/suggestions/:id/approve (edit) → 200', approveEditRes.status === 200 && approveEditRes.body.success === true);
+      const catsRes = await req('GET', '/api/cats');
+      createdCat = catsRes.body.find(c => c.summary === 'Corrected summary after admin review');
+      check('New CAT created in cats_db.json', createdCat !== undefined && createdCat.category === 'Cardiologie');
 
-    const updatedCatsRes = await req('GET', '/api/cats');
-    const targetTempCat = updatedCatsRes.body.find(c => c.id === tempCatId);
-    check('Temp CAT updated in cats_db.json (Real CATs untouched)', targetTempCat && targetTempCat.summary === 'Proposed update for temp CAT summary');
+      // 6. Admin approves 'edit' suggestion on temporary test CAT
+      console.log('\n5. Admin approves "edit" suggestion on temp CAT:');
+      const approveEditRes = await req('POST', `/api/suggestions/${editSugId}/approve`, {}, { 'x-admin-token': token });
+      check('POST /api/suggestions/:id/approve (edit) → 200', approveEditRes.status === 200 && approveEditRes.body.success === true);
 
-    // 7. Admin rejects suggestion
-    console.log('\n6. Admin rejects suggestion:');
-    const sugReject = await req('POST', '/api/suggestions', {
-      type: 'edit',
-      catId: tempCatId,
-      data: { summary: 'Invalid edit suggestion' }
-    });
-    const rejectSugId = sugReject.body.suggestion.id;
+      const updatedCatsRes = await req('GET', '/api/cats');
+      const targetTempCat = updatedCatsRes.body.find(c => c.id === tempCatId);
+      check('Temp CAT updated in cats_db.json (Real CATs untouched)', targetTempCat && targetTempCat.summary === 'Proposed update for temp CAT summary');
 
-    const rejectRes = await req('POST', `/api/suggestions/${rejectSugId}/reject`, {}, { 'x-admin-token': token });
-    check('POST /api/suggestions/:id/reject → 200', rejectRes.status === 200 && rejectRes.body.success === true);
+      // 7. Admin rejects suggestion
+      console.log('\n6. Admin rejects suggestion:');
+      const sugReject = await req('POST', '/api/suggestions', {
+        type: 'edit',
+        catId: tempCatId,
+        data: { summary: 'Invalid edit suggestion' }
+      });
+      const rejectSugId = sugReject.body.suggestion.id;
 
-    const listAfterReject = await req('GET', '/api/suggestions', null, { 'x-admin-token': token });
-    check('Rejected suggestion removed from list', !listAfterReject.body.some(s => s.id === rejectSugId));
+      const rejectRes = await req('POST', `/api/suggestions/${rejectSugId}/reject`, {}, { 'x-admin-token': token });
+      check('POST /api/suggestions/:id/reject → 200', rejectRes.status === 200 && rejectRes.body.success === true);
 
-    // Clean up temporary test CATs created during test
-    await req('DELETE', `/api/cats/${tempCatId}`, {}, { 'x-admin-token': token });
-    if (createdCat) {
-      await req('DELETE', `/api/cats/${createdCat.id}`, {}, { 'x-admin-token': token });
+      const listAfterReject = await req('GET', '/api/suggestions', null, { 'x-admin-token': token });
+      check('Rejected suggestion removed from list', !listAfterReject.body.some(s => s.id === rejectSugId));
+
+    } catch (err) {
+      console.error('Test error:', err);
+      failed++;
+    } finally {
+      // Clean up temporary test CATs created during test regardless of pass/fail
+      try {
+        if (tempCatId && token) {
+          await req('DELETE', `/api/cats/${tempCatId}`, {}, { 'x-admin-token': token });
+        }
+        if (createdCat && createdCat.id && token) {
+          await req('DELETE', `/api/cats/${createdCat.id}`, {}, { 'x-admin-token': token });
+        }
+      } catch (_) {}
     }
-
-  } catch (err) {
-    console.error('Test error:', err);
-    failed++;
-  }
 
   console.log(`\n==================================================`);
   console.log(`Results: ${passed} passed, ${failed} failed`);
