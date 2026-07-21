@@ -169,7 +169,7 @@ app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
 // Content Security Policy — mitigates XSS and data injection risks.
 // This is a restrictive baseline; adjust as needed for specific endpoints.
 app.use((req, res, next) => {
-  res.setHeader(
+  res.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",

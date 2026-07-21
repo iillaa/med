@@ -1,10 +1,11 @@
 #!/bin/bash
+set -e
 export PATH=/data/data/com.termux/files/usr/bin:$PATH
 cd /data/data/com.termux/files/home/med
 
 # Kill existing instances if any to avoid port conflicts
-pkill -f "node server.js"
-pkill -f "ngrok http"
+pkill -f "node server.js" 2>/dev/null || true
+sleep 1
 
 echo "=================================================="
 echo "      CLINICAL CAT APP - ACCÈS LOCAL UNIQUEMENT   "
@@ -24,5 +25,3 @@ termux-open http://localhost:3000
 
 # Run Node in the foreground so the terminal remains open and logs are visible
 node server.js
-
-

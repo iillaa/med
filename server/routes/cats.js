@@ -3,17 +3,10 @@ const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
 
-const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
-const APP_DATA_KEY_ALT = process.env.APP_DATA_KEY;
-const isValidAppKey = (k) => k === APP_DATA_KEY || (!!APP_DATA_KEY_ALT && k === APP_DATA_KEY_ALT);
-
 const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
 
 function registerCatRoutes(app) {
   app.get('/api/cats', (req, res) => {
-    if (!isValidAppKey(req.headers['x-app-key'])) {
-      return res.status(403).json({ error: 'Accès interdit: clé applicative manquante.' });
-    }
     const isAdmin = checkIsAdmin(req, cache.activeTokens);
     const since = parseInt(req.query.since);
 

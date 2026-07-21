@@ -56,8 +56,25 @@ function rateLimitMiddleware(req, res, next) {
     req.socket.remoteAddress || ''
   ).replace(/^::ffff:/, '') || 'unknown';
 
+  // Determine endpoint category and limit first (for header values)
+  let limitType = 'static';
+  let limit = LIMITS.static;
+  if (req.path.startsWith('/api/')) {
+    limitType = 'api';
+    limit = LIMITS.api;
+    if (req.path.includes('/auth') || req.path.includes('/search') || req.path.includes('/diagnostics')) {
+      limitType = 'critical';
+      limit = LIMITS.critical;
+    }
+  }
+
+  // Set standard rate limit headers before any early return
+  res.setHeader('X-RateLimit-Limit', String(limit));
+  res.setHeader('X-RateLimit-Reset', String(Math.ceil((now + RATE_LIMIT_WINDOW_MS) / 1000)));
+
   // 1. Skip checks for whitelisted local IPs
   if (LOCAL_IPS.has(ip)) {
+    res.setHeader('X-RateLimit-Remaining', String(limit));
     return next();
   }
 
@@ -102,22 +119,7 @@ function rateLimitMiddleware(req, res, next) {
     return res.status(403).json({ error: "Accès interdit." });
   }
 
-  // 6. Rate Limiting: Determine endpoint category and limit
-  let limitType = 'static';
-  let limit = LIMITS.static;
-
-  if (req.path.startsWith('/api/')) {
-    limitType = 'api';
-    limit = LIMITS.api;
-    
-    // Stricter limits for resource-intensive APIs
-    if (req.path.includes('/auth') || req.path.includes('/search') || req.path.includes('/diagnostics')) {
-      limitType = 'critical';
-      limit = LIMITS.critical;
-    }
-  }
-
-  // Get or initialize rate limit entry
+  // 6. Rate Limiting: Get or initialize rate limit entry
   let clientLimit = rateLimitMap.get(ip);
   if (!clientLimit || (now - clientLimit.windowStart) > RATE_LIMIT_WINDOW_MS) {
     clientLimit = {
@@ -140,6 +142,9 @@ function rateLimitMiddleware(req, res, next) {
   }
 
   const currentCount = clientLimit[`${limitType}Count`];
+
+  // Set the remaining count
+  res.setHeader('X-RateLimit-Remaining', String(Math.max(0, limit - currentCount)));
 
   // 7. Handle Rate Limit Exceeded
   if (currentCount > limit) {

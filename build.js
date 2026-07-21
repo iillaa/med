@@ -87,7 +87,10 @@ function rebuildClientAssets() {
     try {
       const content = fs.readFileSync(configFile, 'utf-8');
       const parsed = JSON.parse(content);
-      if (Array.isArray(parsed.urls)) {
+      if (Array.isArray(parsed.servers)) {
+        remoteServerUrls = parsed.servers.map(s => s.url).filter(Boolean);
+        remoteServerUrl = remoteServerUrls[0] || '';
+      } else if (Array.isArray(parsed.urls)) {
         remoteServerUrls = parsed.urls;
         remoteServerUrl = remoteServerUrls[0] || '';
       } else if (parsed.url) {
