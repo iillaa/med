@@ -821,49 +821,71 @@ async function triggerPdfReindex() {
   }
 }
 
-function loadRelatedPdfs(cat) {
+export function loadRelatedPdfs(cat) {
   if (!pdfListContainer) return;
   pdfListContainer.innerHTML = '';
 
-  const keywords = cat.pdf_keywords || [];
+  const keywords = Array.isArray(cat?.pdf_keywords) ? cat.pdf_keywords : [];
 
+  // Specific PDFs matching keywords
   const matchedFiles = state.allPdfs.filter(filename => {
+    if (!filename) return false;
     const lowerName = filename.toLowerCase();
-    const isGlobal = ["abouimed", "kacem", "boughoufala", "150 ordonnances", "pathognomoniques", "autres cat", "formes d_administration", "je\u00FBne"].some(g => lowerName.includes(g));
+    const isGlobal = ["abouimed", "kacem", "boughoufala", "150 ordonnances", "pathognomoniques", "autres cat", "formes d_administration", "jeûne"].some(g => lowerName.includes(g));
     if (isGlobal) return false;
-    return keywords.some(kw => lowerName.includes(kw.toLowerCase()));
+    return keywords.some(kw => kw && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
   });
 
+  // Global PDFs (Manuals, general guides)
   const globalFiles = state.allPdfs.filter(filename => {
+    if (!filename) return false;
     const lowerName = filename.toLowerCase();
-    return ["abouimed", "kacem", "boughoufala", "150 ordonnances", "pathognomoniques", "autres cat", "formes d_administration", "je\u00FBne"].some(g => lowerName.includes(g));
+    return ["abouimed", "kacem", "boughoufala", "150 ordonnances", "pathognomoniques", "autres cat", "formes d_administration", "jeûne"].some(g => lowerName.includes(g));
   });
 
-  if (matchedFiles.length > 0) {
-    const specificHeader = document.createElement('h4');
-    specificHeader.style.gridColumn = '1 / -1';
-    specificHeader.style.color = 'var(--color-primary)';
-    specificHeader.style.margin = '10px 0 5px';
-    specificHeader.style.fontSize = '14px';
-    specificHeader.style.fontWeight = '600';
-    specificHeader.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> Cours & Références Spécifiques';
-    pdfListContainer.appendChild(specificHeader);
+  // Render Specific section
+  const specificHeader = document.createElement('h4');
+  specificHeader.style.gridColumn = '1 / -1';
+  specificHeader.style.color = 'var(--color-primary)';
+  specificHeader.style.margin = '10px 0 5px';
+  specificHeader.style.fontSize = '14px';
+  specificHeader.style.fontWeight = '600';
+  specificHeader.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> Cours & Références Spécifiques';
+  pdfListContainer.appendChild(specificHeader);
 
+  if (matchedFiles.length === 0) {
+    const emptyP = document.createElement('p');
+    emptyP.className = 'text-muted';
+    emptyP.style.gridColumn = '1 / -1';
+    emptyP.style.fontSize = '13px';
+    emptyP.style.margin = '5px 0 15px';
+    emptyP.textContent = 'Aucun PDF de spécialité spécifique trouvé pour ce sujet dans vos fichiers.';
+    pdfListContainer.appendChild(emptyP);
+  } else {
     matchedFiles.forEach(file => {
       pdfListContainer.appendChild(createPdfCardElement(file, false));
     });
   }
 
-  if (globalFiles.length > 0) {
-    const globalHeader = document.createElement('h4');
-    globalHeader.style.gridColumn = '1 / -1';
-    globalHeader.style.color = 'var(--color-success)';
-    globalHeader.style.margin = '20px 0 5px';
-    globalHeader.style.fontSize = '14px';
-    globalHeader.style.fontWeight = '600';
-    globalHeader.innerHTML = '<i class="fa-solid fa-book-medical"></i> Manuels & Guides Généraux (Tous sujets)';
-    pdfListContainer.appendChild(globalHeader);
+  // Render Global section
+  const globalHeader = document.createElement('h4');
+  globalHeader.style.gridColumn = '1 / -1';
+  globalHeader.style.color = 'var(--color-success)';
+  globalHeader.style.margin = '20px 0 5px';
+  globalHeader.style.fontSize = '14px';
+  globalHeader.style.fontWeight = '600';
+  globalHeader.innerHTML = '<i class="fa-solid fa-book-medical"></i> Manuels & Guides Généraux (Tous sujets)';
+  pdfListContainer.appendChild(globalHeader);
 
+  if (globalFiles.length === 0) {
+    const emptyG = document.createElement('p');
+    emptyG.className = 'text-muted';
+    emptyG.style.gridColumn = '1 / -1';
+    emptyG.style.fontSize = '13px';
+    emptyG.style.margin = '5px 0 15px';
+    emptyG.textContent = 'Aucun manuel général trouvé dans vos fichiers.';
+    pdfListContainer.appendChild(emptyG);
+  } else {
     globalFiles.forEach(file => {
       pdfListContainer.appendChild(createPdfCardElement(file, true));
     });
