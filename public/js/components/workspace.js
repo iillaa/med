@@ -75,6 +75,13 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const pane = document.getElementById(paneId);
       if (pane) pane.classList.add('active');
 
+      if (paneId === 'tab-pdfs') {
+        renderAllPdfsList(state.allPdfs);
+        if (state.activeCat) loadRelatedPdfs(state.activeCat);
+      } else if (paneId === 'tab-search-pdf') {
+        if (pdfContentSearchInput) pdfContentSearchInput.focus();
+      }
+
       const tabContentContainer = document.querySelector('.tab-content-container');
       if (tabContentContainer) {
         tabContentContainer.scrollTop = 0;
@@ -92,11 +99,13 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       btn.classList.add('active');
 
       state.activeCat.status = status;
+      state.activeCat.lastRead = Date.now();
 
       const progress = getLocalProgress();
       if (!progress[state.activeCat.id]) progress[state.activeCat.id] = {};
       progress[state.activeCat.id].status = status;
       progress[state.activeCat.id].notes = state.activeCat.notes || '';
+      progress[state.activeCat.id].lastRead = Date.now();
       saveLocalProgress(progress);
 
       onStatusChange(state.activeCat);
@@ -121,11 +130,13 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const restore = setButtonLoading(saveNotesBtn, '<i class="fa-solid fa-floppy-disk"></i> Sauvegarder');
 
       state.activeCat.notes = notesInput.value;
+      state.activeCat.lastRead = Date.now();
 
       const progress = getLocalProgress();
       if (!progress[state.activeCat.id]) progress[state.activeCat.id] = {};
       progress[state.activeCat.id].status = state.activeCat.status || 'todo';
       progress[state.activeCat.id].notes = state.activeCat.notes;
+      progress[state.activeCat.id].lastRead = Date.now();
       saveLocalProgress(progress);
 
       saveIndicator.classList.add('show');
@@ -186,7 +197,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       }
 
       if (summaryVal) {
-        const rawText = state.activeCat.customSummary || state.activeCat.summary;
+        const rawText = state.activeCat.summary;
         summaryVal.innerHTML = parseSummaryMarkdown(rawText);
       }
 
@@ -228,7 +239,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     editSummaryBtn.addEventListener('click', () => {
       summaryView.style.display = 'none';
       summaryEditorWrapper.style.display = 'flex';
-      summaryEditor.value = state.activeCat.customSummary || state.activeCat.summary;
+      summaryEditor.value = state.activeCat.summary;
     });
   }
 
@@ -256,6 +267,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           const result = await api.saveCatDataToServer(state.activeCat.id, { summary: newSummary });
           if (result.success) {
             state.activeCat.summary = newSummary;
+            const itemInAll = (state.allCats || []).find(c => c.id === state.activeCat.id);
+            if (itemInAll) {
+              itemInAll.summary = newSummary;
+            }
             renderSummary(newSummary, state.activeCat);
             showToast("Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
             triggerHaptic(true);
@@ -328,7 +343,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       wsPrescription.style.display = 'none';
       prescriptionEditor.style.display = 'block';
       prescriptionEditorActions.style.display = 'flex';
-      prescriptionEditor.value = state.activeCat.customOrdonnance || state.activeCat.ordonnance;
+      prescriptionEditor.value = state.activeCat.ordonnance;
     });
   }
 
@@ -357,6 +372,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           const result = await api.saveCatDataToServer(state.activeCat.id, { ordonnance: newOrdonnance });
           if (result.success) {
             state.activeCat.ordonnance = newOrdonnance;
+            const itemInAll = (state.allCats || []).find(c => c.id === state.activeCat.id);
+            if (itemInAll) {
+              itemInAll.ordonnance = newOrdonnance;
+            }
             renderPrescription(newOrdonnance);
             showToast("Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
             triggerHaptic(true);
@@ -423,6 +442,30 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     resetProgressBtn.addEventListener('click', async () => {
       if (confirm("Voulez-vous vraiment réinitialiser toute votre progression et vos notes ? Cette action est irréversible et n'affectera que ce navigateur.")) {
         localStorage.removeItem('dr_cat_user_progress');
+        localStorage.removeItem('dr_cat_leitner');
+        localStorage.removeItem('dr_cat_streak');
+        localStorage.removeItem('dr_cat_local_overrides');
+
+        state.allCats.forEach(c => {
+          c.status = 'todo';
+          c.notes = '';
+          c.lastRead = 0;
+        });
+
+        if (state.activeCat) {
+          state.activeCat.status = 'todo';
+          state.activeCat.notes = '';
+          state.activeCat.lastRead = 0;
+          if (notesInput) notesInput.value = '';
+          const statusBtns = document.querySelectorAll('.status-btn');
+          statusBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-status') === 'todo') {
+              btn.classList.add('active');
+            }
+          });
+        }
+
         showToast("Progression réinitialisée avec succès !", "fa-circle-check", 3000);
         if (onProgressReset) await onProgressReset();
       }
@@ -556,6 +599,16 @@ export function selectCat(cat, preserveTab = false) {
   if (window.perf) window.perf.startMeasure('workspace.selectCat');
   state.activeCat = cat;
   state.activePrescriptionVariantIndex = 0;
+
+  if (!preserveTab) {
+    cat.lastRead = Date.now();
+    const progress = getLocalProgress();
+    if (!progress[cat.id]) progress[cat.id] = {};
+    progress[cat.id].lastRead = Date.now();
+    progress[cat.id].status = cat.status || 'todo';
+    progress[cat.id].notes = cat.notes || '';
+    saveLocalProgress(progress);
+  }
 
   document.querySelectorAll('.cat-item').forEach(item => {
     item.classList.remove('active');
@@ -777,50 +830,59 @@ function loadRelatedPdfs(cat) {
     return ["abouimed", "kacem", "boughoufala", "150 ordonnances", "pathognomoniques", "autres cat", "formes d_administration", "je\u00FBne"].some(g => lowerName.includes(g));
   });
 
-  const specificHeader = document.createElement('h4');
-  specificHeader.style.gridColumn = '1 / -1';
-  specificHeader.style.color = 'var(--color-primary)';
-  specificHeader.style.margin = '10px 0 5px';
-  specificHeader.style.fontSize = '14px';
-  specificHeader.style.fontWeight = '600';
-  specificHeader.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> Cours & Références Spécifiques';
-  pdfListContainer.appendChild(specificHeader);
+  if (matchedFiles.length > 0) {
+    const specificHeader = document.createElement('h4');
+    specificHeader.style.gridColumn = '1 / -1';
+    specificHeader.style.color = 'var(--color-primary)';
+    specificHeader.style.margin = '10px 0 5px';
+    specificHeader.style.fontSize = '14px';
+    specificHeader.style.fontWeight = '600';
+    specificHeader.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> Cours & Références Spécifiques';
+    pdfListContainer.appendChild(specificHeader);
 
-  if (matchedFiles.length === 0) {
-    const emptyP = document.createElement('p');
-    emptyP.className = 'text-muted';
-    emptyP.style.gridColumn = '1 / -1';
-    emptyP.style.fontSize = '13px';
-    emptyP.style.margin = '5px 0 15px';
-    emptyP.textContent = 'Aucun PDF de spécialité spécifique trouvé pour ce sujet dans vos fichiers.';
-    pdfListContainer.appendChild(emptyP);
-  } else {
     matchedFiles.forEach(file => {
       pdfListContainer.appendChild(createPdfCardElement(file, false));
     });
   }
 
-  const globalHeader = document.createElement('h4');
-  globalHeader.style.gridColumn = '1 / -1';
-  globalHeader.style.color = 'var(--color-success)';
-  globalHeader.style.margin = '20px 0 5px';
-  globalHeader.style.fontSize = '14px';
-  globalHeader.style.fontWeight = '600';
-  globalHeader.innerHTML = '<i class="fa-solid fa-book-medical"></i> Manuels & Guides Généraux (Tous sujets)';
-  pdfListContainer.appendChild(globalHeader);
+  if (globalFiles.length > 0) {
+    const globalHeader = document.createElement('h4');
+    globalHeader.style.gridColumn = '1 / -1';
+    globalHeader.style.color = 'var(--color-success)';
+    globalHeader.style.margin = '20px 0 5px';
+    globalHeader.style.fontSize = '14px';
+    globalHeader.style.fontWeight = '600';
+    globalHeader.innerHTML = '<i class="fa-solid fa-book-medical"></i> Manuels & Guides Généraux (Tous sujets)';
+    pdfListContainer.appendChild(globalHeader);
 
-  if (globalFiles.length === 0) {
-    const emptyG = document.createElement('p');
-    emptyG.className = 'text-muted';
-    emptyG.style.gridColumn = '1 / -1';
-    emptyG.style.fontSize = '13px';
-    emptyG.style.margin = '5px 0 15px';
-    emptyG.textContent = 'Aucun manuel général trouvé dans vos fichiers.';
-    pdfListContainer.appendChild(emptyG);
-  } else {
     globalFiles.forEach(file => {
       pdfListContainer.appendChild(createPdfCardElement(file, true));
     });
+  }
+
+  // Fallback: If no matched or global files found, display all available PDFs directly
+  if (matchedFiles.length === 0 && globalFiles.length === 0) {
+    const allHeader = document.createElement('h4');
+    allHeader.style.gridColumn = '1 / -1';
+    allHeader.style.color = 'var(--color-primary)';
+    allHeader.style.margin = '10px 0 5px';
+    allHeader.style.fontSize = '14px';
+    allHeader.style.fontWeight = '600';
+    allHeader.innerHTML = '<i class="fa-solid fa-folder-open"></i> Documents Médicaux Disponibles';
+    pdfListContainer.appendChild(allHeader);
+
+    if (state.allPdfs.length > 0) {
+      state.allPdfs.forEach(file => {
+        pdfListContainer.appendChild(createPdfCardElement(file, false));
+      });
+    } else {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.style.gridColumn = '1 / -1';
+      emptyDiv.className = 'empty-state';
+      emptyDiv.style.padding = '20px';
+      emptyDiv.textContent = 'Aucun document PDF disponible pour le moment.';
+      pdfListContainer.appendChild(emptyDiv);
+    }
   }
 }
 

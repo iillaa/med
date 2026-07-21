@@ -9,12 +9,13 @@ export function renderResumeList(resumeList, activeCats, onSelectCat) {
     return;
   }
 
-  sorted.slice(0, 3).forEach(cat => {
+  sorted.slice(0, 5).forEach(cat => {
     const li = document.createElement('li');
+    li.style.cursor = 'pointer';
     li.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div>
-          <span class="resume-title" style="font-weight: 500; cursor: pointer; color: var(--color-primary);">${cat.id}. ${cat.title}</span>
+          <span class="resume-title" style="font-weight: 600; color: var(--color-primary);">${cat.id}. ${cat.title}</span>
           <span style="font-size: 11px; color: var(--text-muted); display: block;">Spécialité : ${cat.category}</span>
         </div>
         <span class="badge ${cat.status === 'done' ? 'badge-success' : 'badge-warning'}" style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">
@@ -22,7 +23,7 @@ export function renderResumeList(resumeList, activeCats, onSelectCat) {
         </span>
       </div>
     `;
-    li.querySelector('.resume-title').addEventListener('click', () => onSelectCat(cat));
+    li.addEventListener('click', () => onSelectCat(cat));
     resumeList.appendChild(li);
   });
 }

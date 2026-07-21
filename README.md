@@ -152,8 +152,7 @@ L'application est pré-configurée avec le widget Termux. Cliquez sur le widget 
 ## 📱 Standalone Android App (Offline Mobile Mode)
 
 For offline clinical usage without running the Termux server:
-1. Switch to the `light-android` branch.
-2. Build assets: `node build.js && npx cap sync`.
+1. Build assets on the active branch: `node build.js && npx cap sync`.
     * **Note on Server URL**: During the build, the compiler reads the target server URL from `remote_server_config.json` and bakes it into the app via `public/js/remote_config.js`, so the offline APK can fetch updates and send suggestions when online. At runtime the server is the single source of truth for the provider list: configure it once with `node set_server_provider.js "https://your-tunnel.ngrok-free.dev"` (or the `REMOTE_SERVER_URL` CI secret), and the app learns the authoritative list from `GET /api/server-providers` with automatic failover/load-balancing across servers.
 
 ---
@@ -211,7 +210,7 @@ shortcuts/stop_med.sh     # Clean shutdown
 ## 📄 Documentation de Référence
 
 Consultez les fichiers suivants pour plus de détails techniques :
-* [Architecture Technique](file:///data/data/com.termux/files/home/med/technical_architecture.md) — Choix techniques, sécurité et gestion des données hors-ligne.
-* [Guide du Développeur](file:///data/data/com.termux/files/home/med/developer_guide.md) — Workflow Git, commandes CLI et configuration.
-* [Plan du Code (Codemap)](file:///data/data/com.termux/files/home/med/codemap.md) — Organisation des fichiers et dossiers.
-* [Leçons Apprises](file:///data/data/com.termux/files/home/med/lessons_learned.md) — Erreurs évitées et astuces techniques de débogage.
+* [Architecture Technique](file:///data/data/com.termux/files/home/med/docs/technical_architecture.md) — Choix techniques, sécurité et gestion des données hors-ligne.
+* [Guide du Développeur](file:///data/data/com.termux/files/home/med/docs/developer_guide.md) — Workflow Git, commandes CLI et configuration.
+* [Plan du Code (Codemap)](file:///data/data/com.termux/files/home/med/docs/codemap.md) — Organisation des fichiers et dossiers.
+* [Leçons Apprises](file:///data/data/com.termux/files/home/med/docs/lessons_learned.md) — Erreurs évitées et astuces techniques de débogage.

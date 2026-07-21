@@ -336,7 +336,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.21.03.01">
+  <meta name="app-build-version" content="2026.07.21.21.57">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -375,19 +375,19 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607210301" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607210301"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607212157" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607212157"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607210301" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607210301"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607212157" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607212157"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607210301" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607210301" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607212157" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607212157" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607210301">
-    <link rel="stylesheet" href="css/utilities.css?v=2607210301">
+    <link rel="stylesheet" href="style.css?v=2607212157">
+    <link rel="stylesheet" href="css/utilities.css?v=2607212157">
   </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
@@ -665,12 +665,6 @@ body {
               <button class="admin-tab-btn active" data-target="admin-pane-suggestions" role="tab" aria-selected="true" aria-controls="admin-pane-suggestions" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
                 <i class="fa-solid fa-inbox"></i> Propositions
               </button>
-              <button class="admin-tab-btn" data-target="admin-pane-diagnostics" role="tab" aria-selected="false" aria-controls="admin-pane-diagnostics" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
-                <i class="fa-solid fa-stethoscope"></i> Diagnostic
-              </button>
-              <button class="admin-tab-btn" data-target="admin-pane-performance" role="tab" aria-selected="false" aria-controls="admin-pane-performance" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
-                <i class="fa-solid fa-gauge-high"></i> Performance
-              </button>
             </div>
 
             <!-- Admin Tab Panes -->
@@ -703,237 +697,7 @@ body {
                   </div>
                 </div>
 
-                <!-- PDF Upload Box -->
-                <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
-                  <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 13.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-file-pdf"></i> Ajouter un Document PDF de Référence</h4>
-                  <p class="block-desc" style="margin: 0 0 10px 0;">Déposez ou sélectionnez un document PDF médical de référence. Il sera automatiquement indexé pour les recherches de termes.</p>
-                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <input type="file" id="diag-pdf-upload-input" accept=".pdf" style="display: none;">
-                    <button class="action-btn" id="diag-pdf-upload-trigger-btn" style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: rgba(6,182,212,0.1); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
-                      <i class="fa-solid fa-file-arrow-up"></i> Choisir le fichier PDF
-                    </button>
-                    <span id="diag-pdf-upload-filename" class="text-muted" style="font-size: 11.5px;">Aucun fichier sélectionné</span>
-                    <button class="action-btn" id="diag-pdf-upload-submit-btn" disabled style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: var(--color-success); border: 1px solid var(--color-success); color: #fff; border-radius: 4px; cursor: not-allowed; opacity: 0.5; transition: all 0.2s;">
-                      <i class="fa-solid fa-cloud-arrow-up"></i> Uploader
-                    </button>
-                  </div>
-                </div>
               </div>
-
-              <!-- PANE 2: Diagnostics -->
-              <div class="admin-pane-content" id="admin-pane-diagnostics" role="tabpanel" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-stethoscope"></i> Outils de Diagnostic</h4>
-                </div>
-                <p class="block-desc" style="margin: 0 0 12px 0;">Informations système, logs de la console et tests de connectivité en temps réel.</p>
-                <button class="action-btn" id="run-auto-checkup-btn" style="width: 100%; font-size: 13px; padding: 10px; margin-bottom: 12px; border-color: var(--color-success); background: rgba(16, 185, 129, 0.1); color: var(--color-success); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px;"><i class="fa-solid fa-microscope"></i> Lancer le Check-up Complet (Auto-Test)</button>
-                
-                <div class="diag-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                  
-                  <!-- Section 1: Connexion & Connectivity Test -->
-                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-wifi"></i> Statut & Connectivité</h4>
-                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                      <div>Navigator.onLine : <span id="diag-navigator-online" class="badge">--</span></div>
-                      <div>Mode détecté : <span id="diag-app-mode" class="badge">--</span></div>
-                      <div>URL distant : <span id="diag-remote-url" style="word-break: break-all;">--</span></div>
-                      <div>Token admin : <span id="diag-admin-token" class="badge">--</span></div>
-                    </div>
-                    <button class="action-btn" id="run-conn-test-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-bolt"></i> Tester la connexion</button>
-                    
-                    <div id="conn-test-results" style="margin-top: 12px; display: none; font-size: 12px; flex-direction: column; gap: 6px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px;">
-                      <div style="font-weight: 600; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; margin-bottom: 4px;">Résultats des tests :</div>
-                      <div id="test-step-local">1. Local (localhost:3000) : <span class="status">--</span></div>
-                       <div id="test-step-remote">2. Distant (URL configurée) : <span class="status">--</span></div>
-                      <div id="test-step-wan">3. WAN (internet ping) : <span class="status">--</span></div>
-                      <div id="diag-auto-analysis" style="margin-top: 6px; font-weight: 500; font-size: 11px; padding: 4px; border-radius: 4px; line-height: 1.4;"></div>
-                    </div>
-                  </div>
-                  
-                  <!-- Section 2: Tunnel Info -->
-                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cloud-arrow-down"></i> Serveur Distant</h4>
-                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                    <div>Tunnel actif : <span id="diag-tunnel-active" class="badge">--</span></div>
-                    <div>URL publique : <span id="diag-tunnel-url" style="word-break: break-all;">--</span></div>
-                    <div>Connexions : <span id="diag-tunnel-conns">--</span></div>
-                    </div>
-                    <button class="action-btn" id="check-tunnel-btn" style="margin-top: 12px; width: 100%; font-size: 12px; padding: 6px 12px;"><i class="fa-solid fa-arrows-rotate"></i> Vérifier le tunnel</button>
-                  </div>
-
-                  <!-- Section 3: Server & OS Info -->
-                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Serveur Local</h4>
-                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                      <div>Node : <span id="diag-node-version">--</span></div>
-                      <div>OS : <span id="diag-server-os">--</span></div>
-                      <div>Uptime : <span id="diag-server-uptime">--</span></div>
-                      <div>Mémoire : <span id="diag-server-mem">--</span></div>
-                      <div>Indexation : <span id="diag-indexing-active" class="badge">--</span></div>
-                    </div>
-                  </div>
-
-                  <!-- Section 4: Database & PDF Index Stats -->
-                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-database"></i> Bases & Fichiers</h4>
-                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                      <div>CATs : <span id="diag-db-cats">--</span></div>
-                      <div>Suggestions : <span id="diag-db-sugs">--</span></div>
-                      <div>cats_db.json : <span id="diag-db-size-cats">--</span></div>
-                      <div>suggestions.json : <span id="diag-db-size-sugs">--</span></div>
-                      <div>pdf_index.json : <span id="diag-db-size-index">--</span></div>
-                    </div>
-                  </div>
-
-                  <!-- Section 5: Configured Server List (read-only; set via set_server_provider.js) -->
-                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Serveurs Distants Configurés</h4>
-                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">Liste autoritaire (source : serveur). Modifiable via <code>node set_server_provider.js</code>.</div>
-                    <div id="diag-server-list" style="display: flex; flex-direction: column; gap: 4px; font-size: 12px;"></div>
-                  </div>
-
-
-                  <!-- Section 6: Index PDF Status details -->
-                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-file-pdf"></i> Statut Index PDF</h4>
-                    <div class="diag-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
-                      <div>Total PDFs : <span id="diag-pdf-docs">--</span></div>
-                      <div>Total Pages : <span id="diag-pdf-pages">--</span></div>
-                      <div>Indexé le : <span id="diag-pdf-time">--</span></div>
-                      <div>Santé de l'index : <span id="diag-pdf-health" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">--</span></div>
-                    </div>
-                  </div>
-
-                  <!-- Section 8: Rate Limiting / Failed Logins -->
-                  <div class="diag-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-user-lock"></i> Tentatives de Connexion</h4>
-                    <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px;">IP bloquées ou sous surveillance :</div>
-                    <div id="diag-rate-limits-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; max-height: 120px; overflow-y: auto;">
-                      <p class="text-muted text-center" style="margin: 8px 0; font-style: italic;">Aucune IP bloquée.</p>
-                    </div>
-                  </div>
-
-                </div>
-
-                <!-- Section 7: Console Logs Window -->
-                <div class="diag-logs-section" style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <h4 style="font-size: 13.5px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-terminal"></i> Journal de la Console</h4>
-                    <div style="display: flex; gap: 8px;">
-                      <button class="action-btn" id="copy-logs-btn" style="padding: 4px 10px; font-size: 11px;"><i class="fa-solid fa-copy"></i> Copier</button>
-                      <button class="cancel-btn" id="clear-logs-btn" style="padding: 4px 10px; font-size: 11px; background: transparent; border-color: rgba(239, 68, 68, 0.3); color: #ef4444;"><i class="fa-solid fa-trash-can"></i> Vider</button>
-                    </div>
-                  </div>
-                  <div id="diag-logs-terminal" style="height: 150px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11.5px; overflow-y: auto; color: #a3e635; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">
-                    Aucune entrée de journal disponible. Ouvrez l'onglet Diagnostic pour commencer la capture.
-                  </div>
-                </div>
-              </div>
-
-              <!-- PANE 3: Performance -->
-              <div class="admin-pane-content" id="admin-pane-performance" role="tabpanel" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-gauge-high"></i> Tableau de Performance</h4>
-                </div>
-                <p class="block-desc" style="margin: 0 0 12px 0;">Mesure du framerate, temps de rendu des composants, latence réseau et snapshots mémoire.</p>
-
-                <div class="perf-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                  
-                  <!-- Section 1: Frame Rate (FPS) -->
-                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-film"></i> Taux de Rafraîchissement</h4>
-                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                      <div>FPS Actuel : <span id="perf-fps-val" style="font-weight: bold; font-size: 14px;">--</span></div>
-                      <div>Pertes de frames (Jank) : <span id="perf-drops-val" class="badge">--</span></div>
-                      <div>Saccades majeures (>50ms) : <span id="perf-major-drops-val" class="badge">--</span></div>
-                      <div style="margin-top: 6px; font-weight: 500; font-size: 11px;">Stabilité globale :</div>
-                      <div id="perf-fps-status-msg" style="padding: 4px; border-radius: 4px; font-weight: 500; text-align: center;">--</div>
-                    </div>
-                  </div>
-
-                  <!-- Section 2: Component Render Times -->
-                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-cube"></i> Rendu des Composants</h4>
-                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-muted);">
-                      <div style="display: flex; justify-content: space-between;"><span>Sidebar List :</span> <span id="perf-render-sidebar" style="font-weight: 500;">--</span></div>
-                      <div style="display: flex; justify-content: space-between;"><span>Workspace Fiche :</span> <span id="perf-render-workspace" style="font-weight: 500;">--</span></div>
-                      <div style="display: flex; justify-content: space-between;"><span>Dashboard :</span> <span id="perf-render-dashboard" style="font-weight: 500;">--</span></div>
-                      <div style="display: flex; justify-content: space-between;"><span>Quiz Question :</span> <span id="perf-render-quiz" style="font-weight: 500;">--</span></div>
-                    </div>
-                  </div>
-
-                  <!-- Section 3: API Timing Latency -->
-                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-network-wired"></i> Latence des API Client</h4>
-                    <div id="perf-api-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; color: var(--text-muted); max-height: 150px; overflow-y: auto;">
-                      <span style="font-style: italic;">Aucune requête API capturée.</span>
-                    </div>
-                  </div>
-
-                  <!-- Section 4: Interaction Latency -->
-                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-hand-pointer"></i> Latence d'Interaction</h4>
-                    <div id="perf-interactions-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; color: var(--text-muted); max-height: 150px; overflow-y: auto;">
-                      <span style="font-style: italic;">Touchez des éléments pour mesurer...</span>
-                    </div>
-                  </div>
-
-                  <!-- Section 5: Local Memory Heap & I/O -->
-                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-microchip"></i> Mémoire & I/O Local</h4>
-                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                      <div>JS Heap : <span id="perf-heap-val">--</span></div>
-                      <div>Croissance : <span id="perf-heap-growth" style="font-weight: 500;">--</span></div>
-                      <div style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 4px; padding-top: 4px;">Lectures LocalStorage : <span id="perf-io-reads">--</span></div>
-                      <div>Écritures LocalStorage : <span id="perf-io-writes">--</span></div>
-                    </div>
-                  </div>
-
-                  <!-- Section 6: Server timings (Node) -->
-                  <div class="perf-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px;">
-                    <h4 style="font-size: 13.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-server"></i> Timings Serveur (Node.js)</h4>
-                    <div class="perf-info-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted);">
-                      <div>Uptime Serveur : <span id="perf-server-uptime">--</span></div>
-                      <div>Rendement écritures DB : <span id="perf-server-writes">--</span></div>
-                      <div>Indexation PDF (moyenne) : <span id="perf-server-pdf">--</span></div>
-                      <div>Hit rate cache index : <span id="perf-server-cache">--</span></div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Telemetry & Performance Event Logs Console -->
-                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <h4 style="font-size: 13px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-receipt"></i> Journal de Télémétrie & Performance</h4>
-                    <div style="display: flex; gap: 8px;">
-                      <button class="action-btn" id="copy-perf-logs-btn" style="padding: 2px 8px; font-size: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-copy"></i> Copier</button>
-                      <button class="cancel-btn" id="clear-perf-logs-btn" style="padding: 2px 8px; font-size: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;"><i class="fa-solid fa-trash"></i> Vider</button>
-                    </div>
-                  </div>
-                  <div id="perf-console-logs" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 6px; font-family: monospace; font-size: 10px; color: #38bdf8; height: 120px; overflow-y: auto; line-height: 1.4; white-space: pre-wrap; word-break: break-all;">
-                    <span style="font-style: italic; color: var(--text-muted);">En attente d'événements de performance...</span>
-                  </div>
-                </div>
-
-                <!-- Dashboard Boot Milestones -->
-                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
-                  <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--text-primary);"><i class="fa-solid fa-clock"></i> Jalons de Démarrage</h4>
-                  <div id="perf-boot-milestones" style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 11.5px; color: var(--text-muted);">
-                    <div>DOM Ready: <span id="milestone-dom" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-                    <div>CATs Fetched: <span id="milestone-cats" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-                    <div>Sidebar List: <span id="milestone-sidebar" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-                    <div>Dashboard: <span id="milestone-dashboard" style="color: var(--text-primary); font-weight: 500;">--</span></div>
-                  </div>
-                </div>
-
-                <!-- Bottom Actions -->
-                <div style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
-                  <button class="cancel-btn" id="reset-perf-btn" style="padding: 6px 14px; font-size: 12px; background: transparent; border-color: rgba(255,255,255,0.15); color: var(--text-muted);"><i class="fa-solid fa-trash-can"></i> Réinitialiser</button>
-                  <button class="action-btn" id="export-perf-btn" style="padding: 6px 14px; font-size: 12px; border-color: rgba(6, 182, 212, 0.4);"><i class="fa-solid fa-file-export"></i> Exporter le Rapport JSON</button>
-                </div>
-
-              </div>
-
             </div>
           </div>
 
@@ -1128,7 +892,18 @@ body {
                 </div>
               </div>
               <div class="prescription-footer">
-                <span>Signature et Cachet</span>
+                <div class="stamp-container">
+                  <div class="official-red-stamp" title="Cachet Officiel Dr. CAT">
+                    <span class="stamp-top">CABINET MÉDICAL</span>
+                    <div class="stamp-center">
+                      <i class="fa-solid fa-stethoscope"></i>
+                      <strong>Dr. CAT</strong>
+                    </div>
+                    <span class="stamp-sub">MÉDECINE GÉNÉRALE</span>
+                    <span class="stamp-code" id="stamp-code">N° 01/CAT-2026</span>
+                  </div>
+                  <span class="signature-label">Signature et Cachet</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1172,7 +947,7 @@ body {
               
               <div class="index-status-indicator" id="pdf-index-status">
                 <span class="status-text"><i class="fa-solid fa-circle-notch fa-spin"></i> Chargement du statut d'indexation...</span>
-                <button id="pdf-reindex-btn" class="btn-text" title="Forcer la ré-indexation de tous les PDFs"><i class="fa-solid fa-rotate"></i> Ré-indexer</button>
+                <button id="pdf-reindex-btn" class="btn-text" title="Forcer la ré-indexation de tous les PDFs" style="display: none;"><i class="fa-solid fa-rotate"></i> Ré-indexer</button>
               </div>
             </div>
 
@@ -1541,7 +1316,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-IPR372XC.js"></script>
+  <script type="module" src="dist/app-M6E3H3EU.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

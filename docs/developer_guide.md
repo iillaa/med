@@ -46,30 +46,15 @@ To configure the workspace on a Termux instance or standard Linux terminal:
 
 ## 🌿 Git Branching Strategy
 
-The repository contains two primary branches that serve different architectures:
+The codebase is unified on the **`structured`** branch, which handles both execution models without requiring branching:
 
-```mermaid
-gitGraph
-    commit id: "Init"
-    branch light-android
-    checkout master
-    commit id: "Server Features"
-    checkout light-android
-    commit id: "Capacitor Config"
-    checkout master
-    commit id: "Bug Fix"
-    checkout light-android
-    merge master id: "Merge updates"
-```
+1. **Local Server Mode**:
+   - Runs the Express server, provides indexing of reference PDFs, serves web-based revision screens, and manages client suggestions.
+2. **Capacitor Android Compilation**:
+   - Uses the unified code to build the offline standalone Android APK. Capacitor configuration matches the same static output folder.
 
-1. **`master` branch**:
-   * **Target**: The Node.js/Express server and client-side web application.
-   * **Use Case**: Running the local Termux server, local browser interface, network device connections, and administering/indexing PDFs.
-2. **`light-android` branch**:
-   * **Target**: Standalone offline-first Android wrapper.
-   * **Use Case**: Compiles client-side static code using Capacitor. Hides admin-specific tools when offline, runs local JSON/localStorage mock backups, and hosts the GitHub CI/CD Actions build configuration.
+There is no longer any need to switch or synchronize between multiple active feature branches (such as `light-android`). All updates are committed directly to `structured`.
 
-⚠️ **Important Workflow**: Keep both branches aligned. When bug-fixes or styling adjustments are made, commit them to your active branch and cherry-pick them to the alternate branch (`git cherry-pick <commit-hash>`) to prevent code divergence.
 
 ---
 

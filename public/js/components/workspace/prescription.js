@@ -2,8 +2,16 @@ import { state } from '../../state.js';
 import { parsePrescriptionText } from '../../utils.js';
 
 export function renderPrescription(text) {
-  const wsPrescription = document.getElementById('prescription-text');
+  const wsPrescription = document.getElementById('workspace-prescription');
   const selector = document.getElementById('prescription-variants-selector');
+  const stampCodeEl = document.getElementById('stamp-code');
+
+  if (stampCodeEl) {
+    const catId = state.activeCat && state.activeCat.id !== undefined ? String(state.activeCat.id).padStart(2, '0') : '01';
+    const year = new Date().getFullYear();
+    stampCodeEl.textContent = `N° ${catId}/CAT-${year}`;
+  }
+
   if (!wsPrescription) return;
 
   if (!text) {

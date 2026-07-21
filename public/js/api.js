@@ -4,7 +4,7 @@
 import { REMOTE_SERVER_URL, REMOTE_SERVER_URLS } from './remote_config.js';
 import { getExtraHeaders } from './server-providers.js';
 import { isOfflineCat } from './lib/helpers.js';
-import { FETCH_TIMEOUT_MS, PING_TIMEOUT_MS, SYNC_MAX_RETRIES, SYNC_RETRY_DELAY_MS, DEBUG } from './config.js';
+import { FETCH_TIMEOUT_MS, PING_TIMEOUT_MS, SYNC_MAX_RETRIES, SYNC_RETRY_DELAY_MS } from './config.js';
 export { REMOTE_SERVER_URL };
 
 
@@ -455,7 +455,19 @@ export async function saveCatDataToServer(id, data) {
       headers: getHeaders(),
       body: JSON.stringify(data)
     });
-    if (res.ok) return res.json();
+    if (res.ok) {
+      // Clear any stale local overrides since server now holds authoritative data
+      try {
+        const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+        if (localOverrides[id]) {
+          delete localOverrides[id];
+          localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+        }
+      } catch (_) {
+        /* ignore local override purge failure */
+      }
+      return res.json();
+    }
   } catch (err) {
     console.warn('[API] saveCatDataToServer failed:', err.message);
   }
@@ -465,6 +477,7 @@ export async function saveCatDataToServer(id, data) {
   if (!localOverrides[id]) localOverrides[id] = {};
   if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
   if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
+  localOverrides[id].updatedAt = Date.now();
   localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
   return { success: true, message: "Modifications enregistrées localement." };
 }
@@ -590,7 +603,19 @@ export async function approveSuggestionOnServer(id) {
   });
   if (res.status === 403) throw new Error('403 Forbidden');
   if (!res.ok) throw new Error('Failed to approve suggestion');
-  return res.json();
+  const result = await res.json();
+  if (result.success && result.cat) {
+    try {
+      const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+      if (localOverrides[result.cat.id]) {
+        delete localOverrides[result.cat.id];
+        localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+      }
+    } catch (_) {
+      /* ignore local override purge failure */
+    }
+  }
+  return result;
 }
 
 export async function rejectSuggestionOnServer(id) {
@@ -634,76 +659,83 @@ export async function fetchSearchStatus() {
 }
 
 export async function searchPdfsContent(query) {
-  if (isOfflineApp) {
+  const cleanQuery = query.trim().toLowerCase();
+
+  if (!isOfflineApp) {
     try {
-      if (!offlinePdfIndexCache) {
-        const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
-        if (!indexRes.ok) throw new Error("Failed to load PDF index");
-        offlinePdfIndexCache = await indexRes.json();
-      }
-      
-      const cleanQuery = query.trim().toLowerCase();
-      const results = [];
-
-      // 1. Filename matches first (High Relevance)
-      for (const doc of offlinePdfIndexCache) {
-        if (doc.pdf.toLowerCase().includes(cleanQuery)) {
-          results.push({
-            pdf: doc.pdf,
-            page: 1,
-            snippet: "[Titre du fichier correspond] Document de référence disponible."
-          });
-        }
-      }
-      
-      // 2. Text page content matches
-      for (const doc of offlinePdfIndexCache) {
-        if (!doc.pages) continue;
-        for (const p of doc.pages) {
-          if (!p.text) continue;
-          
-          // Avoid duplicate results for the same page (e.g. if page 1 matched filename)
-          if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
-            continue;
-          }
-
-          const textLower = p.text.toLowerCase();
-          const indexMatch = textLower.indexOf(cleanQuery);
-          if (indexMatch !== -1) {
-            const start = Math.max(0, indexMatch - 60);
-            const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
-            let snippet = p.text.substring(start, end);
-            if (start > 0) snippet = '...' + snippet;
-            if (end < p.text.length) snippet = snippet + '...';
-            
-            results.push({
-              pdf: doc.pdf,
-              page: p.page,
-              snippet: snippet
-            });
-            if (results.length >= 100) break;
-          }
-        }
-        if (results.length >= 100) break;
-      }
-      
-      return {
-        ok: true,
-        json: async () => ({ results })
-      };
+      const res = await fetchWithTimeout(`/api/search-pdfs?q=${encodeURIComponent(query)}`, {
+        headers: getHeaders()
+      });
+      if (res.ok) return res;
     } catch (err) {
-      console.error("Offline search error:", err);
-      return {
-        ok: false,
-        json: async () => ({ error: "Failed to search offline", results: [] })
-      };
+      console.warn("[Search] Server PDF search failed or offline, using static index fallback.", err);
     }
   }
 
-  const res = await fetchWithTimeout(`/api/search-pdfs?q=${encodeURIComponent(query)}`, {
-    headers: getHeaders()
-  });
-  return res;
+  // Static Index Search Fallback (Offline, Standalone, or Server Unavailable)
+  try {
+    if (!offlinePdfIndexCache) {
+      const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
+      if (!indexRes.ok) throw new Error("Failed to load PDF index");
+      offlinePdfIndexCache = await indexRes.json();
+    }
+
+    const results = [];
+
+    // 1. Filename matches first (High Relevance)
+    for (const doc of offlinePdfIndexCache) {
+      if (doc.pdf.toLowerCase().includes(cleanQuery)) {
+        results.push({
+          pdf: doc.pdf,
+          page: 1,
+          snippet: "[Titre du fichier correspond] Document de référence disponible."
+        });
+      }
+    }
+
+    // 2. Text page content matches
+    for (const doc of offlinePdfIndexCache) {
+      if (!doc.pages) continue;
+      for (const p of doc.pages) {
+        if (!p.text) continue;
+
+        if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
+          continue;
+        }
+
+        const textLower = p.text.toLowerCase();
+        const indexMatch = textLower.indexOf(cleanQuery);
+        if (indexMatch !== -1) {
+          const start = Math.max(0, indexMatch - 60);
+          const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
+          let snippet = p.text.substring(start, end);
+          if (start > 0) snippet = '...' + snippet;
+          if (end < p.text.length) snippet = snippet + '...';
+
+          results.push({
+            pdf: doc.pdf,
+            page: p.page,
+            snippet: snippet
+          });
+          if (results.length >= 100) break;
+        }
+      }
+      if (results.length >= 100) break;
+    }
+
+    return {
+      status: 200,
+      ok: true,
+      json: async () => ({ results })
+    };
+  } catch (err) {
+    console.error("PDF index search error:", err);
+    return {
+      status: 500,
+      ok: false,
+      json: async () => ({ error: "Impossible d'effectuer la recherche dans les PDFs.", results: [] })
+    };
+  }
 }
 
 export async function triggerReindexing() {
@@ -814,23 +846,7 @@ export async function pingEndpoint(url, timeoutMs = 2500) {
   }
 }
 
-export async function fetchDiagnosticsSystem() {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/system'), { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch system diagnostics");
-  return res.json();
-}
 
-export async function fetchDiagnosticsDbStats() {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/db-stats'), { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch DB stats");
-  return res.json();
-}
-
-export async function fetchDiagnosticsIndexDetail() {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/index-detail'), { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch index details");
-  return res.json();
-}
 
 export async function updateServerProviders(payload) {
   const res = await fetchWithTimeout(getApiUrl('/api/server-providers'), {
@@ -877,44 +893,6 @@ async function api_pingHealth(url) {
   }
 }
 
-export async function fetchTunnelInfo() {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/tunnel-info'), { headers: getHeaders() });
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || "Failed to fetch tunnel info");
-  }
-  return res.json();
-}
 
-export async function fetchServerMetrics() {
-  const res = await fetchWithTimeout(getApiUrl('/api/performance/server-metrics'), { headers: getHeaders() });
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || "Failed to fetch server metrics");
-  }
-  return res.json();
-}
-
-export async function fetchRateLimits() {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/rate-limits'), { headers: getHeaders() });
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || "Failed to fetch rate limits");
-  }
-  return res.json();
-}
-
-export async function uploadPdf(filename, base64Data) {
-  const res = await fetchWithTimeout(getApiUrl('/api/diagnostics/upload-pdf'), {
-    method: 'POST',
-    headers: getHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ filename, base64Data })
-  });
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || "Failed to upload PDF file");
-  }
-  return res.json();
-}
 
 

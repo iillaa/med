@@ -27,18 +27,14 @@ export function isOfflineCat(c, customCatIds = new Set()) {
  * @param {Object} localOverrides - User customizations from localStorage
  * @returns {Array} Merged CAT objects with local state applied
  */
-export function mergeCatsWithLocalState(serverCats, localProgress, localOverrides) {
+export function mergeCatsWithLocalState(serverCats, localProgress = {}) {
   return serverCats.map(cat => {
     const localEntry = localProgress[cat.id] || {};
-    const overrides = localOverrides[cat.id] || {};
     return {
       ...cat,
       status: localEntry.status || 'todo',
       notes: localEntry.notes || '',
-      summary: overrides.customSummary || cat.summary,
-      customSummary: overrides.customSummary || cat.summary,
-      ordonnance: overrides.customOrdonnance || cat.ordonnance,
-      customOrdonnance: overrides.customOrdonnance || cat.ordonnance
+      lastRead: localEntry.lastRead || 0
     };
   });
 }

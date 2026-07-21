@@ -8,6 +8,7 @@
     "start": "node server.js",
     "start:admin": "node server.js",
     "test": "node tests/headless/harness.mjs smoke",
+    "test:suite": "node tests/run_all_tests.js",
     "test:safe": "node tests/headless/harness.mjs safeAreas",
     "test:console": "node tests/headless/harness.mjs console",
     "test:theme": "node tests/headless/harness.mjs themeReveal",

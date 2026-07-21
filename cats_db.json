@@ -753,5 +753,24 @@
       "Certificats_",
       "Certificats"
     ]
+  },
+  {
+    "id": 56,
+    "category": "Test",
+    "title": "Testtttt",
+    "summary": "Tets",
+    "red_flags": "Test",
+    "ordonnance": "Tetstttttttt",
+    "pdf_keywords": [
+      "Asp"
+    ],
+    "updatedAt": 1784631667958,
+    "history": [
+      {
+        "timestamp": 1784631667958,
+        "action": "create",
+        "detail": "Créé via approbation d'une proposition de fiche"
+      }
+    ]
   }
 ]

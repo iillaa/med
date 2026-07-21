@@ -10,18 +10,13 @@ import { setupKeyboardHandling } from './components/native.js';
 import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback, closeModalAnimated } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
-import { safeGetItem, safeSetItem, safeRemoveItem, safeParseJSON } from './lib/safeStorage.js';
 
 // ── Phase 5.2: lazy-loaded feature modules ──
 // quiz / diagnostics / performance are route/feature-scoped and not needed
 // for first paint, so they're dynamically imported on boot (non-blocking) and
 // cached. esbuild emits them as separate chunks via code-splitting.
 let _quizMod = null;
-let _diagMod = null;
-let _perfMod = null;
 const loadQuiz = () => (_quizMod || (_quizMod = import('./components/quiz.js')));
-const loadDiagnostics = () => (_diagMod || (_diagMod = import('./components/diagnostics.js')));
-const loadPerformance = () => (_perfMod || (_perfMod = import('./components/performance.js')));
 
 // Tracks app mode (set once on load via api.getAppMode())
 
@@ -262,8 +257,6 @@ async function bootstrapApp() {
   dashboard.initDashboard(selectCatWrapper, onSuggestionHandled);
   // Lazy, non-blocking init of route/feature-scoped modules (Phase 5.2).
   loadQuiz().then((m) => m.initQuiz(selectCatWrapper)).catch((e) => console.warn('[lazy] quiz init failed', e));
-  loadDiagnostics().then((m) => m.initDiagnostics()).catch((e) => console.warn('[lazy] diagnostics init failed', e));
-  loadPerformance().then((m) => m.initPerformance()).catch((e) => console.warn('[lazy] performance init failed', e));
  
   // Modal DOM Elements
   addCatBtn = document.getElementById('add-cat-btn');
@@ -339,8 +332,18 @@ async function bootstrapApp() {
           const result = await api.createCatOnServer({ title, category, red_flags, summary, ordonnance, pdf_keywords });
           if (result.success) {
             closeAddCatModal();
+            // Clear any stale local overrides for the new CAT ID
+            try {
+              const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+              if (localOverrides[result.cat.id]) {
+                delete localOverrides[result.cat.id];
+                localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+              }
+            } catch (_) {
+              /* ignore local override purge failure */
+            }
             showToast(`La fiche CAT "${title}" a été ajoutée avec succès !`, "fa-circle-check", 3000);
-            await initApp();
+            await refreshCatsAndRender();
             const newCat = state.allCats.find(c => c.id === result.cat.id);
             if (newCat) selectCatWrapper(newCat);
           } else {
@@ -1096,9 +1099,6 @@ export function updateEditButtonsVisibility() {
     if (deleteBtn) deleteBtn.style.display = 'none';
   }
 
-  if (_diagMod) _diagMod.then((m) => m.updateDiagnosticsButtonVisibility()).catch(() => {});
-  if (_perfMod) _perfMod.then((m) => m.updatePerformanceButtonVisibility()).catch(() => {});
-
   // ── Specialty Export Container: ONLY for Admin ──
   const specialtyExportContainer = document.querySelector('.specialty-export-container');
   if (specialtyExportContainer) {
@@ -1107,6 +1107,12 @@ export function updateEditButtonsVisibility() {
     } else {
       specialtyExportContainer.style.display = 'none';
     }
+  }
+
+  // ── PDF Reindex Button: ONLY for Admin ──
+  const pdfReindexBtn = document.getElementById('pdf-reindex-btn');
+  if (pdfReindexBtn) {
+    pdfReindexBtn.style.display = (isAdminLocal && state.isAdmin) ? 'inline-flex' : 'none';
   }
 }
 

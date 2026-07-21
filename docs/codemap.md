@@ -25,11 +25,35 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── .eslintrc.json               # ESLint configuration
 ├── .prettierrc                  # Prettier code formatting configuration
 ├── README.md                    # Project landing, features, security and performance overview
-├── AUDIT_REPORT_2.md            # Senior developer codebase audit and ship checklist
-├── codemap.md                   # This file — structural map for developers and AI agents
-├── developer_guide.md           # Workflow guide: setup, branching, compiling, CI/CD
-├── lessons_learned.md           # Engineering log: pitfalls, bugs avoided and best practices
 ├── TODO.md                      # Developer technical debt and backlog
+│
+├── docs/                        # Active Project Documentation
+│   ├── codemap.md               # This file — structural map for developers and AI agents
+│   ├── developer_guide.md       # Workflow guide: setup, branching, compiling, CI/CD
+│   ├── technical_architecture.md# Technical architecture details
+│   ├── lessons_learned.md       # Engineering log: pitfalls, bugs avoided and best practices
+│   ├── perf-baseline.md         # Lighthouse and telemetry performance baselines
+│   ├── plan-progress.md         # Multi-stage roadmap and progress tracker
+│   ├── premium-todo.md          # Active premium roadmap and tasks status
+│   ├── DIAGNOSTICS_PANEL_SPEC.md# Diagnostics panel specification
+│   └── PERFORMANCE_MONITORING_SPEC.md # Performance telemetry monitoring specification
+│
+├── archive/                     # Obsolete audit reports and historic scripts (archived)
+│   ├── AUDIT_PROMPTS_REPORT.md  # Historic prompt audits
+│   ├── AUDIT_REPORT.md          # Historic audit reports (1, 2, 3)
+│   ├── AUDIT_REPORT_2.md
+│   ├── AUDIT_REPORT_3.md
+│   ├── AUDIT_REVIEW_55_COMMITS.md # Commit audit review
+│   ├── AUDIT_STATIC_ANALYSIS_REPORT.md # Static analysis audit
+│   ├── PHASE1_AUDIT_REPORT.md
+│   ├── PHASE2_AUDIT_REPORT.md
+│   ├── TODO-AUDIT-FIXES.md      # Record of completed audit fixes
+│   ├── analysis_results.md      # Historic analysis results
+│   ├── SESSION_2026-07-04.md    # Past session handoff
+│   ├── migration.md             # Past migration handoff guide
+│   ├── generate_db.js           # Obsolete initial database generator script
+│   ├── update_examens.js        # Obsolete data correction script
+│   └── update_summaries.js      # Obsolete data correction script
 │
 ├── .github/
 │   └── workflows/

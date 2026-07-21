@@ -2,7 +2,11 @@ import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 
+let onSuggestionHandledCallback = null;
+
 export function initAdminTabListeners(onSuggestionHandled) {
+  onSuggestionHandledCallback = onSuggestionHandled;
+
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
   adminTabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -47,9 +51,13 @@ export function initAdminTabListeners(onSuggestionHandled) {
       const result = await api.approveSuggestionOnServer(id);
       if (result.success) {
         showToast("Proposition approuvée !", "fa-circle-check", 3000);
-        if (onSuggestionHandled) await onSuggestionHandled();
+        if (onSuggestionHandledCallback) {
+          await onSuggestionHandledCallback();
+        } else {
+          await loadPendingSuggestions();
+        }
       } else {
-        showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
+        showToast("Erreur: " + (result.error || result.message), "fa-circle-exclamation", 4000);
       }
     } catch (err) {
       console.error(err);
@@ -66,9 +74,13 @@ export function initAdminTabListeners(onSuggestionHandled) {
       const result = await api.rejectSuggestionOnServer(id);
       if (result.success) {
         showToast("Proposition rejetée.", "fa-circle-xmark", 3000);
-        if (onSuggestionHandled) await onSuggestionHandled();
+        if (onSuggestionHandledCallback) {
+          await onSuggestionHandledCallback();
+        } else {
+          await loadPendingSuggestions();
+        }
       } else {
-        showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
+        showToast("Erreur: " + (result.error || result.message), "fa-circle-exclamation", 4000);
       }
     } catch (err) {
       console.error(err);
@@ -174,10 +186,13 @@ export function initAdminTabListeners(onSuggestionHandled) {
           if (result.success) {
             showToast("Corrections enregistrées avec succès !", "fa-circle-check", 3000);
             closeModalAnimated(modal);
-            /* eslint-disable-next-line no-undef */
-            await loadPendingSuggestions(suggestionsList);
+            if (onSuggestionHandledCallback) {
+              await onSuggestionHandledCallback();
+            } else {
+              await loadPendingSuggestions();
+            }
           } else {
-            showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
+            showToast("Erreur: " + (result.error || result.message), "fa-circle-exclamation", 4000);
           }
         } catch (err) {
           console.error(err);
@@ -191,7 +206,8 @@ export function initAdminTabListeners(onSuggestionHandled) {
   };
 }
 
-export async function loadPendingSuggestions(suggestionsList) {
+export async function loadPendingSuggestions(targetListEl) {
+  const suggestionsList = targetListEl || document.getElementById('suggestions-list');
   if (!state.isAdmin || !suggestionsList) return;
 
   try {

@@ -12,9 +12,7 @@ const { registerAuthRoutes } = require('./routes/auth');
 const { registerCatRoutes } = require('./routes/cats');
 const { registerSuggestionRoutes } = require('./routes/suggestions');
 const { registerSearchRoutes } = require('./routes/search');
-const { registerDiagnosticRoutes } = require('./routes/diagnostics');
 const { registerServerProviderRoutes } = require('./routes/server-providers');
-const { registerPerformanceRoutes } = require('./routes/performance');
 const allowedOriginsSvc = require('./services/allowed-origins');
 const spc = require('./services/server-providers-config');
 
@@ -247,9 +245,7 @@ registerAuthRoutes(app);
 registerCatRoutes(app);
 registerSuggestionRoutes(app);
 registerSearchRoutes(app);
-registerDiagnosticRoutes(app);
 registerServerProviderRoutes(app);
-registerPerformanceRoutes(app);
 
 let serverInstance = null;
 

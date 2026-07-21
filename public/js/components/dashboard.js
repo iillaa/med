@@ -206,84 +206,6 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       showToast(`Exportation réussie de ${list.length} fiches !`, "fa-circle-check", 3000);
     });
   }
-
-  const pdfInput = document.getElementById('diag-pdf-upload-input');
-  const pdfTriggerBtn = document.getElementById('diag-pdf-upload-trigger-btn');
-  const pdfFilename = document.getElementById('diag-pdf-upload-filename');
-  const pdfSubmitBtn = document.getElementById('diag-pdf-upload-submit-btn');
-
-  let pdfBase64Data = null;
-  let pdfFileObject = null;
-
-  if (pdfTriggerBtn && pdfInput) {
-    pdfTriggerBtn.addEventListener('click', () => pdfInput.click());
-  }
-
-  if (pdfInput) {
-    pdfInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) {
-        if (pdfFilename) pdfFilename.textContent = 'Aucun fichier sélectionné';
-        if (pdfSubmitBtn) {
-          pdfSubmitBtn.disabled = true;
-          pdfSubmitBtn.style.opacity = '0.5';
-          pdfSubmitBtn.style.cursor = 'not-allowed';
-        }
-        pdfBase64Data = null;
-        pdfFileObject = null;
-        return;
-      }
-
-      if (pdfFilename) pdfFilename.textContent = file.name;
-      pdfFileObject = file;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        pdfBase64Data = event.target.result.split(',')[1];
-        if (pdfSubmitBtn) {
-          pdfSubmitBtn.disabled = false;
-          pdfSubmitBtn.style.opacity = '1';
-          pdfSubmitBtn.style.cursor = 'pointer';
-        }
-      };
-      reader.onerror = () => {
-        showToast("Erreur lors de la lecture du fichier PDF", "fa-triangle-exclamation", 4000);
-        if (pdfFilename) pdfFilename.textContent = 'Erreur';
-        pdfBase64Data = null;
-        pdfFileObject = null;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  if (pdfSubmitBtn) {
-    pdfSubmitBtn.addEventListener('click', async () => {
-      if (!pdfBase64Data || !pdfFileObject) return;
-
-      try {
-        pdfSubmitBtn.disabled = true;
-        pdfSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploader';
-
-        await api.uploadPdf(pdfFileObject.name, pdfBase64Data);
-        showToast("Fichier PDF uploadé ! Indexation lancée.", "fa-circle-check", 3000);
-
-        pdfBase64Data = null;
-        pdfFileObject = null;
-        if (pdfInput) pdfInput.value = '';
-        if (pdfFilename) pdfFilename.textContent = 'Aucun fichier sélectionné';
-        pdfSubmitBtn.disabled = true;
-        pdfSubmitBtn.style.opacity = '0.5';
-        pdfSubmitBtn.style.cursor = 'not-allowed';
-        pdfSubmitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Uploader';
-
-        if (onSuggestionHandled) await onSuggestionHandled();
-      } catch (err) {
-        showToast(`Échec de l'upload: ${err.message}`, "fa-triangle-exclamation", 4000);
-        pdfSubmitBtn.disabled = false;
-        pdfSubmitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Uploader';
-      }
-    });
-  }
 }
 
 export function showDashboard(onSelectCat) {
@@ -368,19 +290,6 @@ export async function renderDashboard(onSelectCat) {
 
   if (adminPanel) {
     adminPanel.style.display = state.isAdmin ? 'block' : 'none';
-    
-    // Hide diagnostics and performance tabs by default; they require
-    // 5 taps on the debug console button to reveal.
-    if (state.isAdmin) {
-      const diagTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-diagnostics"]');
-      const perfTab = document.querySelector('.admin-tab-btn[data-target="admin-pane-performance"]');
-      const diagPane = document.getElementById('admin-pane-diagnostics');
-      const perfPane = document.getElementById('admin-pane-performance');
-      if (diagTab) diagTab.style.display = 'none';
-      if (perfTab) perfTab.style.display = 'none';
-      if (diagPane) diagPane.style.display = 'none';
-      if (perfPane) perfPane.style.display = 'none';
-    }
   }
 
   if (state.isAdmin) {
