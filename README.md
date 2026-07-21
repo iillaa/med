@@ -154,8 +154,57 @@ L'application est pré-configurée avec le widget Termux. Cliquez sur le widget 
 For offline clinical usage without running the Termux server:
 1. Switch to the `light-android` branch.
 2. Build assets: `node build.js && npx cap sync`.
-   * **Note on Server URL**: During the build, the compiler reads the target server URL from `remote_server_config.json` and bakes it into the app via `public/js/remote_config.js`, so the offline APK can fetch updates and send suggestions when online. At runtime the server is the single source of truth for the provider list: configure it once with `node set_server_provider.js "https://your-tunnel.ngrok-free.dev"` (or the `REMOTE_SERVER_URL` CI secret), and the app learns the authoritative list from `GET /api/server-providers` with automatic failover/load-balancing across servers.
-3. The standalone APK is built automatically on push to the `light-android` branch via GitHub Actions workflows and can be downloaded from the Actions Run page.
+    * **Note on Server URL**: During the build, the compiler reads the target server URL from `remote_server_config.json` and bakes it into the app via `public/js/remote_config.js`, so the offline APK can fetch updates and send suggestions when online. At runtime the server is the single source of truth for the provider list: configure it once with `node set_server_provider.js "https://your-tunnel.ngrok-free.dev"` (or the `REMOTE_SERVER_URL` CI secret), and the app learns the authoritative list from `GET /api/server-providers` with automatic failover/load-balancing across servers.
+
+---
+
+## 🚀 Server Providers & Shortcuts
+
+### Managing remote server URLs
+
+The app supports multiple remote server URLs for failover and load balancing. The single source of truth is `remote_server_config.json`.
+
+**Add URLs (merge — keeps existing):**
+```bash
+node set_server_provider.js "https://new-tunnel.ngrok-free.dev"
+```
+
+**Replace all URLs (reset):**
+```bash
+node set_server_provider.js --reset "https://only.ngrok-free.dev"
+```
+
+**Multiple URLs (comma-separated):**
+```bash
+node set_server_provider.js "https://a.ngrok-free.dev,https://b.trycloudflare.com"
+```
+
+**Interactive mode:**
+```bash
+node set_server_provider.js
+# Paste URLs (comma or newline separated)
+```
+
+> ⚠️ After changing URLs, rebuild with `node build.js` so the client-side config (`public/js/remote_config.js`) is updated.
+
+### Shortcut scripts (`shortcuts/`)
+
+| Script | Purpose |
+|--------|---------|
+| `shortcuts/start_med.sh` | Start ngrok + server. Auto-detects ngrok (PATH or `./ngrok`), syncs new tunnel URL to config, then starts server. |
+| `shortcuts/stop_med.sh` | Stop server and ngrok tunnel. |
+| `shortcuts/status_med.sh` | Show running status and public URL. |
+| `shortcuts/open_app.sh` | Start server locally only (no tunnel). |
+| `shortcuts/inspect_med.sh` | Open ngrok inspect UI (requires ngrok running). |
+
+**Recommended workflow:**
+```bash
+shortcuts/start_med.sh   # Start everything (ngrok + server + open browser)
+# ... use the app ...
+shortcuts/stop_med.sh     # Clean shutdown
+```
+
+> The `start_med.sh` script automatically updates `remote_server_config.json` with the ngrok-assigned URL each time it runs. No manual config editing needed.
 
 ---
 
