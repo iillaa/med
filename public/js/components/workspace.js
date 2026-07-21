@@ -71,6 +71,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
 
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
+      try { btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (_) {}
       const paneId = btn.getAttribute('data-tab');
       const pane = document.getElementById(paneId);
       if (pane) pane.classList.add('active');
@@ -472,37 +473,45 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     });
   }
 
-  const deleteCatBtn = document.getElementById('delete-cat-btn');
-  if (deleteCatBtn) {
-    deleteCatBtn.addEventListener('click', async () => {
-      if (!state.activeCat) return;
-      if (state.activeCat.id <= 55) {
-        showToast("Impossible de supprimer les fiches de base (IDs 1-55).", "fa-circle-exclamation", 4000);
-        return;
-      }
-      if (!state.isAdmin) {
-        showToast("Action refusée. Seul l'administrateur peut supprimer de fiches.", "fa-circle-exclamation", 4000);
-        return;
-      }
-      if (confirm(`Voulez-vous vraiment supprimer la fiche "${state.activeCat.title}" ? Cette action est irréversible.`)) {
-        try {
-          const result = await api.deleteCatFromServer(state.activeCat.id);
-          if (result.success) {
-            showToast("Fiche supprimée avec succès !", "fa-circle-check", 3000);
-            if (onCatDeleted) await onCatDeleted();
-          } else {
-            showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
-          }
-        } catch (err) {
-          console.error(err);
-          if (window.handleAdminError && await window.handleAdminError(err)) {
-            return;
-          }
-          showToast("Erreur lors de la suppression.", "fa-circle-exclamation", 4000);
-        }
-      }
+  const readerModeBtn = document.getElementById('reader-mode-btn');
+  const summaryReaderModal = document.getElementById('summary-reader-modal');
+  const closeReaderModalBtn = document.getElementById('close-reader-modal-btn');
+  const readerCatCategory = document.getElementById('reader-cat-category');
+  const readerCatTitle = document.getElementById('reader-cat-title');
+  const readerSummaryView = document.getElementById('reader-summary-view');
+
+  function openReaderMode() {
+    if (!state.activeCat || !summaryReaderModal) return;
+    if (readerCatCategory) readerCatCategory.textContent = state.activeCat.category;
+    if (readerCatTitle) readerCatTitle.textContent = `${state.activeCat.id}. ${state.activeCat.title}`;
+    const summaryText = state.activeCat.customSummary || state.activeCat.summary || '';
+    if (readerSummaryView) readerSummaryView.innerHTML = parseSummaryMarkdown(summaryText);
+    summaryReaderModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeReaderMode() {
+    if (!summaryReaderModal) return;
+    summaryReaderModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  if (readerModeBtn) {
+    readerModeBtn.addEventListener('click', openReaderMode);
+  }
+  if (closeReaderModalBtn) {
+    closeReaderModalBtn.addEventListener('click', closeReaderMode);
+  }
+  if (summaryReaderModal) {
+    summaryReaderModal.addEventListener('click', (e) => {
+      if (e.target === summaryReaderModal) closeReaderMode();
     });
   }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && summaryReaderModal && summaryReaderModal.style.display === 'flex') {
+      closeReaderMode();
+    }
+  });
 
   if (pdfContentSearchBtn) {
     pdfContentSearchBtn.addEventListener('click', performPdfSearch);
