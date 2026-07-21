@@ -11,10 +11,12 @@
  *   node set_server_provider.js
  *     -> interactive: paste URLs (comma or newline separated), ordered by priority
  *   node set_server_provider.js "https://a.ngrok.dev,https://b.cloudflare.dev"
- *     -> non-interactive
+ *     -> non-interactive, MERGES with existing URLs (no duplicates)
+ *   node set_server_provider.js --reset "https://new-only.ngrok.dev"
+ *     -> replaces all existing URLs with the new list
  *
- * Multi-server / failover / pools: list as many URLs as you like. The first is
- * the primary; clients try them in order and load-balance among healthy ones.
+ * Default behavior is MERGE: existing URLs are preserved, new ones are appended.
+ * This makes the config portable across machines.
  */
 const readline = require('readline');
 const spc = require('./server/services/server-providers-config');
@@ -27,12 +29,31 @@ function parseUrls(raw) {
     .filter(u => /^https?:\/\//.test(u));
 }
 
-function persist(urls) {
-  if (!urls.length) {
+function persist(urls, reset) {
+  if (!urls.length && !reset) {
     console.error('No valid http(s) URLs provided. Exiting.');
     process.exit(1);
   }
-  const saved = spc.saveConfig({ servers: urls });
+
+  spc.loadConfig();
+
+  let nextServers;
+  if (reset) {
+    nextServers = urls;
+  } else {
+    const existing = spc.getServers().map(s => s.url);
+    const seen = new Set(existing);
+    const merged = [...existing];
+    for (const u of urls) {
+      if (!seen.has(u)) {
+        merged.push(u);
+        seen.add(u);
+      }
+    }
+    nextServers = merged;
+  }
+
+  const saved = spc.saveConfig({ servers: nextServers });
   console.log('\n=================================================');
   console.log('[SUCCESS] Server provider list updated!');
   console.log('Servers (by priority):');
@@ -44,15 +65,21 @@ function persist(urls) {
   process.exit(0);
 }
 
-if (process.argv[2]) {
-  persist(parseUrls(process.argv[2]));
+const argv = process.argv.slice(2);
+const resetFlag = argv.includes('--reset');
+const urlsArg = argv.find(a => !a.startsWith('--'));
+
+if (urlsArg) {
+  persist(parseUrls(urlsArg), resetFlag);
 } else {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   console.log('Configure Dr. CAT remote server(s).');
   console.log('Paste URLs (comma or newline separated), in priority order.');
+  console.log('New URLs will be MERGED with existing ones (no duplicates).');
+  console.log('Use --reset flag to replace all existing URLs.');
   console.log('Example: https://a.ngrok.dev, https://b.cloudflare.dev\n');
   rl.question('Server URLs: ', (answer) => {
     rl.close();
-    persist(parseUrls(answer || ''));
+    persist(parseUrls(answer || ''), resetFlag);
   });
 }
