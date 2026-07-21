@@ -108,10 +108,11 @@ async function runTests() {
 
       // 2. Submit suggestions (as user)
       console.log('1. User submits suggestions on temporary test CAT:');
+      const newCatTitle = 'Test New CAT ' + Date.now();
       const sugAdd = await req('POST', '/api/suggestions', {
         type: 'add',
         data: {
-          title: 'Test New CAT ' + Date.now(),
+          title: newCatTitle,
           category: 'Cardiologie',
           summary: 'Initial summary for new CAT',
           ordonnance: 'Initial ordonnance',
@@ -157,7 +158,7 @@ async function runTests() {
       check('POST /api/suggestions/:id/approve (add) → 200', approveAddRes.status === 200 && approveAddRes.body.success === true);
 
       const catsRes = await req('GET', '/api/cats');
-      createdCat = catsRes.body.find(c => c.summary === 'Corrected summary after admin review');
+      createdCat = catsRes.body.find(c => c.title === newCatTitle || c.summary === 'Corrected summary after admin review');
       check('New CAT created in cats_db.json', createdCat !== undefined && createdCat.category === 'Cardiologie');
 
       // 6. Admin approves 'edit' suggestion on temporary test CAT
@@ -196,7 +197,9 @@ async function runTests() {
         if (createdCat && createdCat.id && token) {
           await req('DELETE', `/api/cats/${createdCat.id}`, {}, { 'x-admin-token': token });
         }
-      } catch (_) {}
+      } catch (_err) {
+        // Teardown errors are swallowed so they do not mask test execution failures
+      }
     }
 
   console.log(`\n==================================================`);
