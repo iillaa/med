@@ -371,11 +371,6 @@
       <div class="control-group">
         <button class="control-btn" id="fullscreen-btn" title="Plein écran"><i class="fa-solid fa-expand"></i></button>
       </div>
-
-      <!-- Theme Toggle -->
-      <div class="control-group">
-        <button class="control-btn" id="pdf-theme-toggle-btn" title="Changer de thème (Clair / Sombre)"><i class="fa-solid fa-moon" id="pdf-theme-icon"></i></button>
-      </div>
     </div>
   </header>
 
@@ -741,26 +736,6 @@
       window.open(pdfUrl, '_blank', 'noopener,noreferrer');
     }
     openExternalBtn.addEventListener('click', openExternal);
-
-    // Theme Switcher Logic
-    const pdfThemeToggleBtn = document.getElementById('pdf-theme-toggle-btn');
-    const pdfThemeIcon = document.getElementById('pdf-theme-icon');
-
-    function syncThemeIcon() {
-      const isLight = document.documentElement.classList.contains('light-theme');
-      if (pdfThemeIcon) {
-        pdfThemeIcon.className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-      }
-    }
-    syncThemeIcon();
-
-    if (pdfThemeToggleBtn) {
-      pdfThemeToggleBtn.addEventListener('click', () => {
-        const isLight = document.documentElement.classList.toggle('light-theme');
-        try { localStorage.setItem('theme', isLight ? 'light' : 'dark'); } catch (_) {}
-        syncThemeIcon();
-      });
-    }
 
     // Fullscreen API implementation
     fullscreenBtn.addEventListener('click', () => {
