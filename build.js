@@ -87,16 +87,9 @@ function rebuildClientAssets() {
     try {
       const content = fs.readFileSync(configFile, 'utf-8');
       const parsed = JSON.parse(content);
-      if (Array.isArray(parsed.servers)) {
-        remoteServerUrls = parsed.servers.map(s => s.url).filter(Boolean);
-        remoteServerUrl = remoteServerUrls[0] || '';
-      } else if (Array.isArray(parsed.urls)) {
-        remoteServerUrls = parsed.urls;
-        remoteServerUrl = remoteServerUrls[0] || '';
-      } else if (parsed.url) {
-        remoteServerUrls = [parsed.url];
-        remoteServerUrl = parsed.url;
-      }
+      const rawList = Array.isArray(parsed.servers) ? parsed.servers.map(s => s.url) : (Array.isArray(parsed.urls) ? parsed.urls : [parsed.url]);
+      remoteServerUrls = rawList.filter(Boolean).map(u => String(u).replace(/\/+$/, ''));
+      remoteServerUrl = remoteServerUrls[0] || '';
       primaryProvider = parsed.primaryProvider || null;
     } catch (err) {
       console.error("Error reading remote_server_config.json during build:", err);
