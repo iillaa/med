@@ -20,8 +20,8 @@ function compressPdf(filePath) {
   try {
     const originalSize = fs.statSync(filePath).size;
     
-    // Ghostscript command for high-quality mobile PDF compression (/ebook = 150 DPI)
-    const cmd = `gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${tempPath}" "${filePath}"`;
+    // Ghostscript command for ultra mobile PDF compression (96 DPI + JPEGQ 60)
+    const cmd = `gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dColorImageResolution=96 -dGrayImageResolution=96 -dMonoImageResolution=96 -dColorImageDownsampleType=/Bicubic -dGrayImageDownsampleType=/Bicubic -dAutoFilterColorImages=false -dColorImageFilter=/DCTEncode -dJPEGQ=60 -dSubsetFonts=true -dCompressFonts=true -dDetectDuplicateImages=true -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${tempPath}" "${filePath}"`;
     execSync(cmd);
 
     if (fs.existsSync(tempPath)) {
