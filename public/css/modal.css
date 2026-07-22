@@ -235,7 +235,7 @@
 
 .reader-modal-header {
   padding: 8px 16px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -262,11 +262,17 @@
   text-overflow: ellipsis;
 }
 
+.reader-cat-meta .badge {
+  background: rgba(6, 182, 212, 0.12) !important;
+  color: var(--color-primary) !important;
+  border: 1px solid rgba(6, 182, 212, 0.25) !important;
+}
+
 .reader-close-btn {
-  background: var(--color-primary);
-  color: #000;
-  font-weight: 700;
-  border: none;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  font-weight: 600;
   padding: 5px 12px;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -275,12 +281,13 @@
   gap: 6px;
   font-size: 12px;
   flex-shrink: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .reader-close-btn:hover {
-  transform: scale(1.02);
-  opacity: 0.95;
+  background: rgba(6, 182, 212, 0.2);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .reader-modal-body {
