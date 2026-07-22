@@ -54,7 +54,7 @@ function registerPdfRoutes(app, cache) {
     }
   });
 
-  // GET /api/admin/pdf-lab-parse
+  // POST /api/admin/pdf-lab-parse
   // Used purely by the isolated lab tool to test parsing and get immediate JSON response
   app.post('/api/admin/pdf-lab-parse', async (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
@@ -68,16 +68,17 @@ function registerPdfRoutes(app, cache) {
       const tempPath = path.join(__dirname, '..', '..', 'tmp_' + Date.now() + '.pdf');
       await fs.promises.writeFile(tempPath, Buffer.from(base64Data, 'base64'));
 
-      // Process it completely and await the result (so lab can view it)
-      const parseResult = await extractPdfData(tempPath);
-      
-      // Clean up temp PDF file
-      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-      // Also clean up the orphan cache entry that was created for the temp path
-      const tempCachePath = path.join(__dirname, '..', '..', 'data', 'pdf_cache', path.basename(tempPath) + '.json');
-      if (fs.existsSync(tempCachePath)) fs.unlinkSync(tempCachePath);
-
-      res.json({ success: true, result: parseResult });
+      try {
+        // Process it completely and await the result (so lab can view it)
+        const parseResult = await extractPdfData(tempPath);
+        res.json({ success: true, result: parseResult });
+      } finally {
+        // Clean up temp PDF file
+        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+        // Also clean up the orphan cache entry that was created for the temp path
+        const tempCachePath = path.join(__dirname, '..', '..', 'data', 'pdf_cache', path.basename(tempPath) + '.json');
+        if (fs.existsSync(tempCachePath)) fs.unlinkSync(tempCachePath);
+      }
     } catch(err) {
       console.error('[Lab Error]', err);
       res.status(500).json({ error: err.message || "Failed to parse PDF in lab" });
@@ -115,7 +116,9 @@ function registerPdfRoutes(app, cache) {
       const { filename } = req.body;
       if (!filename) return res.status(400).json({ error: 'Filename required' });
 
-      const targetPath = path.join(PDF_DIR, filename);
+      // Guard against path traversal attacks
+      const cleanFilename = path.basename(filename);
+      const targetPath = path.join(PDF_DIR, cleanFilename);
       if (!fs.existsSync(targetPath)) {
         return res.status(404).json({ error: 'File not found on server' });
       }

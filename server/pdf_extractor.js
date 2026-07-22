@@ -93,7 +93,16 @@ async function extractPdfData(filePath, force = false) {
 
   if (!result) {
     console.log(`[Extractor] Falling back to Offline parser for ${fileName}...`);
-    result = await extractWithOffline(filePath);
+    try {
+      result = await extractWithOffline(filePath);
+    } catch (err) {
+      console.error(`[Extractor] Offline parser failed for ${fileName}.`, err.message);
+    }
+  }
+
+  // 4. Guard against all extractors failing
+  if (!result || !result.quality) {
+    throw new Error(`All PDF extractors (LlamaParse, Google, Offline) failed to parse ${fileName}.`);
   }
   
   // 4. Save to Cache

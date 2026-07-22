@@ -87,8 +87,6 @@ async function indexPdfs(force = false) {
     for (const file of pdfFiles) {
       const filePath = path.join(PDF_DIR, file);
       const stats = await fs.promises.stat(filePath);
-      const mtime = stats.mtimeMs;
-      const size = stats.size;
 
       indexState.currentFile = file;
 
