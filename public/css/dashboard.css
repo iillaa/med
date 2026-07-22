@@ -1,9 +1,9 @@
 /* Dashboard Container & Grid */
 .dashboard-container {
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 24px 48px 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -468,7 +468,7 @@
 /* Mobile Dashboard Adjustments */
 @media (max-width: 680px) {
   .dashboard-container {
-    padding: 16px;
+    padding: 16px 16px max(48px, env(safe-area-inset-bottom)) 16px;
     gap: 16px;
   }
 

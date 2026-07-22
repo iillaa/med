@@ -1,93 +1,765 @@
 [
   {
-    "pdf": "ASP.pdf",
-    "size": 182090,
-    "mtime": 1783818968232.6113,
+    "pdf": "150 Ordonnances types.pdf",
+    "hash": "5e251828591cbdf2e49141d331ba9f5a2f1ac740ae346412d8b216f72f40c133",
+    "quality": "online",
+    "timestamp": 1784734701395,
     "pages": [
       {
         "page": 1,
-        "text": "ASP\nDr.KHERBA_N"
+        "content": "# COLLECTION\n\n# 50\n\n# Ordonnances types\n\n# 2017-2018\n\n« Boutelis Bilal\n\nB.Bilal Collection 150 Ordonnances Types » Page 1\n\nInterne en Médecine"
       },
       {
         "page": 2,
-        "text": "🔴Femme de 29ans\nDouleur épigastrique et au niveau de\nl'hypochondre gauche\nMétéorisme abdominal\nArrêt des matières et des gaz depuis ce matin\n⚠️\t\nASP: Aérocolie\n✅️\t\nTraitement symptomatique"
+        "content": "Avant propos\n\nC’est juste une collection des ordonnances types correspondant à des situations cliniques les plus courantes, rédigées de façon précise, avec les posologies ..\n\nElles constituent un aide-mémoire précieux pour les internes, les jeunes médecins et tous ceux qui sont amenés à prescrire, pour leur offrir une aide pratique immédiate ..\n\nB.Bilal « Collection 150 Ordonnances Types » Page 2"
       },
       {
         "page": 3,
-        "text": "🔴Patient 48ans consulte pour arrêt des\nmatières et des gaz depuis 2jours\n⚠️\t\nASP: Aspect en grains de café ☕️\n=> Occlusion intestinale (Volvulus de\nsigmoïde)\n ➡️\t\nÉvacuation: Chirurgie en Urgence"
+        "content": "Sommaire\n\n# A\n\n- Abcès péri-anal* ………………………………………………………………………………………………………………………... 07\n- Abcès collecté* ………………………………………………………………………………………………………………………..... 08\n- Adénome de la prostate …………………………………….……………………………………………………………………... 09\n- Allergie ……………………………………………………………………………….……………………………………………………... 10\n- Angine bactérienne (IDEM Rhinopharyngite) ……………………………………………………………………………. 11\n- Angine virale ……………………………………………………………………………………………………………………………... 12\n- Anite ……………………………………………………………………………………………………………………..…………………... 13\n- Anthrax ……………………………………………………………………………………………………………………………………... 14\n- Appendicite* ……………………………………………………………………………………………………………………………... 15\n- Asthénie ………………………………………………………………………………………………………..…………………………... 16\n- Asthme (IDEM Bronchiolite) ……………………………………………………………………………………………………... 17\n\n# B\n\n- Balanite ……………………………………………………………………………………………………………………………………... 18\n- Blépharite ………………………………………………………………………………..………………………………………………... 19\n- Bouchon de cérumen ………………………………………………………………………………………………………………... 20\n- Bouffée de chaleur chez une femme ménopausée* ………………………………………….……………………... 21\n- Bronchite aigue* ……………………………………………………………………………………..………………………………... 22\n- Bronchite aigue …………………………………………………………………………………………….…………………………... 23\n- Bronchite aigue ……………………………………………………………………………………………….………………………... 24\n- Brulure* ……………………………………………………………………………………………………………………...……………... 25\n\n# C\n\n- Candidose cutanée* ………………………………………………………………………………………..………………………... 27\n- Candidose ………………………………………………………………………………………………."
       },
       {
         "page": 4,
-        "text": "🔴Patient aux ATCD d’occlusion opéré en 2010\nconsulte pour une douleur abdominal intense\navec vomissements\nabdomen légèrement distendu\narrêt des matières et des gaz depuis 2h du\nmatin\n⚠️\t\nASP: NHA plus large que haut et central\n=> Occlusion grélique\nTDM AP + Ionogramme en urgence"
+        "content": "Collection 150 Ordonnances Types\n\n# Crise ulcéro-hémorragique*\n\n46\n\n# Crise ulcéreuse hyperalgique*\n\n47\n\n# Cystite*\n\n48\n\n# D\n\n# Dermite de siège\n\n49\n\n# Diarrhée aigue (Shigellose)*\n\n50\n\n# Diarrhée aqueuse d’origine virale*\n\n51\n\n# Diarrhée glairo-sanglante d’origine bactérienne*\n\n52\n\n# Diarrhée parasitaire (Amibiase)*\n\n53\n\n# Diarrhée sanglante*\n\n54\n\n# Douleur abdominale*\n\n55\n\n# Douleur cancéreuse*\n\n56\n\n# Douleur lombosciatique (Lombosciatalgie)*\n\n57\n\n# Douleur thoracique*\n\n58\n\n# Dysménorrhée chez une jeune fille*\n\n59\n\n# Dystonie neurovégétative (DNV)*\n\n60\n\n# E\n\n# Eczéma atopique\n\n61\n\n# Embolie pulmonaire\n\n62\n\n# Entorse\n\n63\n\n# Enurésie\n\n64\n\n# Epistaxis*\n\n65\n\n# Eruption\n\n66\n\n# Erysipèle\n\n67\n\n# Erythème fessier, Engelure, Gerçure, Crevasse des seins\n\n68\n\n# F\n\n# Furoncle\n\n69\n\n# Folliculite\n\n70\n\n# G\n\n# Gale\n\n71\n\n# GNA\n\n72\n\n# Grippe\n\n73\n\n# H\n\n# Hématurie*\n\n74\n\n# Hémorroïdes*\n\n75\n\n# Hémorroïdes externes*\n\n76\n\n# Hémorroïdes + Constipation*\n\n77\n\n# Herpes\n\n78\n\n# Hypercholestérolémie\n\n79\n\n# Hyperglycémie avec acétonurie\n\n80\n\n# Hyper Tension Artérielle (HTA)\n\n81\n\n# Hypertrophie Bénigne de la Prostate (HBP)*\n\n82\n\n# Hypotension orthostatique*\n\n83\n\nB.Bilal"
       },
       {
         "page": 5,
-        "text": ""
+        "content": "# Table des matières\n\n# I\n\n- Impétigo ………………………………………………………………….………………………………………………………………… 84\n- Ingestion d’un caustique …………………………………………………………………………………………………………… 85\n- Infection broncho-pulmonaire ………………………………………………………………………………………………….. 86\n- Infection génitale chez la femme ……………………………………………………………………………………………… 87\n- Infection urinaire* ……………………………………………………………………………………………………………………… 89\n- Insomnie …………………………………………………………………………….……………………………………………………… 90\n- Insomnie occasionnelle ……………………………………………………………………………..……………………………… 91\n- Intertrigo inter-orteil ……………………………………………………………………….………………………………………… 92\n- Intertrigo à Candida Albicans ………………………………………………………………………….………………………… 93\n- Intoxication alimentaire* …………………………………………………………………………………………………………… 94\n\n# K\n\n- Kératodermie …………………………………………………………………………………………………………………………….. 95\n\n# L\n\n- Laryngite …………………………………………………………………………………………………………………………………… 96\n- Leishmaniose ………………………………………………………..…………………………………………………………………… 97\n- Leucorrhée blanchâtre = Mycosique* …………………………………..…………………………………………………… 98\n- Leucorrhée jaunâtre + écoulement urinaire (Gonocoque / Chlamydia / Germes banaux)* ……… 99\n- Leucorrhée verdâtre nauséabonde = Trichomonas Vaginalis* ………………………….…………………… 100\n- Lombago aigue* ……………………………………………………………………………………………………………………… 101\n\n# M\n\n- Maladies thromboemboliques des MI …………….……………………………………………………………………… 102\n- Migraine* ………………………………………………………………………………………………………………………………… 103\n- Migraine ………………………………………………………………………………………………………………………….……… 104\n- Migraine*"
+      },
+      {
+        "page": 6,
+        "content": "B.Bilal « Collection 150 Ordonnances Types » Page 6\n\n# Pédiculose de cuir chevelu « poux de tète »*\n\n…………………………………………………………………………………………..………………………………... 122\n\n# Phlébite\n\n…………………………………………………………………………………………..…………………………………... 123\n\n# Piqure d’insecte\n\n…………………………………………………………………………………………………………………... 124\n\n# Plaie par arme blanche*\n\n………………………………………………………………………………………………………………………... 125\n\n# Plaie infecté*\n\n……………………………………………………………………………………………………………………………... 126\n\n# Plaie surinfectée\n\n……………………………………………………………………………………………………………………………... 127\n\n# Prostatite*\n\n………………………………………………………………………………………………………………………... 128\n\n# Prurit\n\n…………………………………………………………………………………………………………….……………………... 129\n\n# PNA*\n\n………………………………………………………………………………………………………….....……………………... 130\n\n# PNA (IDEM Prostatite)\n\n…………………………………………………………………………………………………………………………... 131\n\n# R\n\n# RGO*\n\n………………………………………………………………………………………………….………………………………... 132\n\n# RGO*\n\n…………………………………………………………………………………………………………………………... 133\n\n# Rhinite aigue\n\n……………………………………………………………………………………………………………………………... 134\n\n# Rhinite allergique saisonnière\n\n……………………………………………………………………………………………………………………………... 135\n\n# Rhume\n\n……………………………………………………………………………………………………………………………... 136\n\n# Rougeole\n\n……………………………………………………………………………………………………………………………... 137\n\n# S\n\n# Scarlatine\n\n……………………………………………………………………………………………………………………………... 138\n\n# Sciatique*\n\n…………………………………………………………………………………………………………………………... 139\n\n# Sinusite maxillaire aigue*\n\n………………………………………………………………………………………………………………………... 140\n\n# Suite de couche*\n\n…"
+      },
+      {
+        "page": 7,
+        "content": "# Abcès péri-anal*\n\n- Flagyl cp 500mg ……………………………………………….....………..QSP 10j\n- 01cp x 03/j\n- Oxacilline gel 500mg ……………..……………………………….……..QSP 10j\n- 02gel x 02/j\n- Voltarene cp 75Lp …………………...………………………………...……..01Bte\n- 01gel /j\n- Lomac gel 20mg ………………………....……………………………….…..01Bte\n- 01gel /j\n- Permanganate de K+ ………………………..……………………………...01Bte\n- 01L d’eau tiède après chaque selle\n\nB.Bilal « Collection 150 Ordonnances Types » Page 7"
+      },
+      {
+        "page": 8,
+        "content": "# Abcès collecté*\n\n- Drainage chirurgicale :\n- Perfusion de 1000cc de SSI 9%\n- Oxacilline 01g x 4/j en IVD\n- Flagyl inj 0.5 x 3/j en IVL\n- Genta 80 mg inj x 2/j en IM\n- (Claforan)\n\nB.Bilal « Collection 150 Ordonnances Types » Page 8"
+      },
+      {
+        "page": 9,
+        "content": "# Adénome de la prostate\n\n| -Cardular cp 02mg                   | QSP 03moi |\n| ----------------------------------- | --------- |\n| ½ cp /j la 1ère sem                 |           |\n| ½ cp x 02/j la 2ème sem             |           |\n| 01cp x 02/j à partir de la 3ème sem |           |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 9"
+      },
+      {
+        "page": 10,
+        "content": "# Allergie\n\n- -HHC 05mg/kg/j (urgence)\n- -Clarityne srp …………..............……………………………….………………. 01flc\n- 01CM/j ( ‹ 30kg )\n- 01CM/j ( › 30kg )\n- Ou:\n- -Polaramine srp ………………….......………………………………………… 01flc\n- 01 càc x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 10"
+      },
+      {
+        "page": 11,
+        "content": "# Angine bactérienne\n\n# (IDEM Rhinopharyngite)\n\n- Amoxil gel 500mg / srp 125/250mg …………………….….…… QSP10j\n- 02gel x 02/j / 50mg/kg/j\n- Maxilase srp ………………………….……………..…………………………… 01flc\n- 01CM x 03/j\n- Paracétamol cp 500mg/srp/supp ………………………… 01Bte / 01flc\n- 01cp x 03/j / 30mg/kg/j\n- Ou:\n- Aspégic st 500/250/100mg ……………………..……………………..… 01Bte\n- 01st x 03/j / 50mg/kg/j\n- Denoral srp……………………………………………………….……………..... 01flc\n- 01-03 càc /j\n- Ou:\n- Rhinathiol srp………………………………………………………….………… 01flc\n- 01-03 càc /j\n- Soufrane (rhinorrhée claire) sol ……………………………………..…. 01flc\n- 01 pulv/N x 03/j\n- Ou:\n- Souframycine (rhinorrhée verte) sol ………................................… 01flc\n- 01 pulv/N x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 11"
+      },
+      {
+        "page": 12,
+        "content": "# Angine virale\n\n| -Paracétamol cp 500mg/srp/supp | 01Bte / 01flc | 01cp x 03/j / 30mg/kg/j |\n| ------------------------------ | ------------- | ----------------------- |\n| -Physiol sol                   | 01flc         | 02Gttes/N x 04/j        |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 12"
+      },
+      {
+        "page": 13,
+        "content": "Anite\n\n# Ordonnances Types\n\n| -Fungizone sol 500mg                | QSP 10j | 01CM x 03/j           |\n| ----------------------------------- | ------- | --------------------- |\n| -Nystatine cp 500.000UI/sol 100.000 | QSP 10j | 03cp x 03/j / 02MUI/j |\n| -Eau oxygénée sol                   | 01flc   | 01app x 02/j          |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 13"
+      },
+      {
+        "page": 14,
+        "content": "# Anthrax\n\n| -Bristopen amp inj 01g | N°10    | 01inj /j en IM |\n| ---------------------- | ------- | -------------- |\n| -Bristopen gel 500mg   | QSP 10j | 01gel x 02/j   |\n| -Hexomedine sol        | 01flc   | 01app x 02/j   |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 14"
+      },
+      {
+        "page": 15,
+        "content": "# Appendicite\n\nFNS + Echo\n\nAdmission + AVS + BPO + Cefacidal 01g x 04/j .. 100mg//kg + Gentamycine 03mg/kg + Flagyl 30/40mg/kg + Perfelgan …. 15mg/kg x 04 en IV …. 01g x 04/j\n\n1000cc SGI 05% enfant - 1500cc adulte\n\nDans chaque 500cc: 03g Nacl + 02g Kcl + 01g Mg + 0.5g Ca\n\nCefacidal 01g x 03/j\n\nFlagyl 500mg x 03/j\n\nGentamycine 80mg x 02/j\n\nPerforation: Azantac 150mg x 03/j en IVD\n\nOcclusion:\n- Sonde gastrique\n- O2\n- Lavement rectale\n- Correction des troubles ioniques\n\nColique hépatique:\nEn urgence =› Spasfon en IV\n\nSi vésicule palpable =› Ampi + Genta\n\nA la sortie : Spasfon cp 80 mg …….……. 01Bte\n\n02cp x 02-3/j\n\nNalgésic cp 500mg ………... 01Bte\n\n01cp x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 15"
+      },
+      {
+        "page": 16,
+        "content": "# Asthénie\n\n| -Sargenor amp            | 01Bte | 01amp x 02/j                    |\n| ------------------------ | ----- | ------------------------------- |\n| -Sargenor à la Vit-C amp | 01Bte | 01amp x 02/j                    |\n| -Gelphore amp            | 01Bte | 01amp x 02/j                    |\n| -Gelée royale amp        | 01Bte | 01amp x 02/j                    |\n| -Tonic amp               | 01Bte | 02amp A+B x 02/j / 02amp A+B /j |\n| -Alvityl srp             | 01flc | 01càc x 02/j / 01càs x 02/j     |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 16"
+      },
+      {
+        "page": 17,
+        "content": "# Asthme (IDEM Bronchiolite)\n\n# Crise légère :\n\n- 02 bouffées de Salbutamol / Bricanyl toutes les 20mn\n- Ou: Salbutamol 0.03cc/kg/04cc de SSI / Bricanyl 0.04cc/kg/04cc de SSI\n- Ou: Salbutamol 07ug/kg en S/C / Bricanyl 0.56UI/kg en S/C\n\n# Crise modérée :\n\n- 02 bouffées de Salbutamol / Bricanyl toutes les 20mn\n- Ou: Salbutamol 0.03cc/kg/04cc de SSI / Bricanyl 0.04cc/kg/04cc de SSI\n- Ou: Salbutamol 07ug/kg en S/C / Bricanyl 0.56UI/kg en S/C\n- HHC 05ug/kg/j\n\n# Crise sévère :\n\n- Oxygénothérapie\n- Salbutamol toutes les 20mn\n- Bricanyl en S/C toutes les 4 heures\n- Théophylline 05mg/kg/04heures\n\n# A LA SORTIE (pour les trois types de crise) :\n\n- Salbutamol srp/cp 02mg …………………….…………………. 01flc/01Bte\n- 01cp x 3/j / 0.2mg/kg/j\n- Celestene sol …………………………………………………………………… 01flc\n- 10 Gttes/kg/j / 5j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 17"
+      },
+      {
+        "page": 18,
+        "content": "B.Bilal     « Collection 150 Ordonnances Types »    Page 18\n\n# Balanite\n\n# Prescriptions\n\n| Bleu de méthylène sol | 01flc | 01app x 02/j |\n| --------------------- | ----- | ------------ |\n| Pevaryl crème         | 01Tbe | 01app x 02/j |"
+      },
+      {
+        "page": 19,
+        "content": "# Blépharite\n\n| -Tobrex collyre  | 01flc | 01 gtte x 04/j |\n| ---------------- | ----- | -------------- |\n| -Fucithalmic gel | 01Tbe | 01app x 02/j   |\n\nB.Bilal   « Collection 150 Ordonnances Types »   Page 19"
+      },
+      {
+        "page": 20,
+        "content": "Bouchon de cérumen\n\n# 1. Cerulyse sol\n\n01flc\n\n01 lavage d’oreille x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 20"
+      },
+      {
+        "page": 21,
+        "content": "# Bouffée de chaleur chez une femme ménopausée*\n\n| Abufene cp 400   | QSP 10j | 01cp x 02/j |\n| ---------------- | ------- | ----------- |\n| Doliprane cp 01g | 02Bte   | 01cp x 03/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 21"
+      },
+      {
+        "page": 22,
+        "content": "Bronchite aigue*\n\n- Augmentin sachet 01g ………………………………………………. QSP 10j\n- 01 sachet x 02/j\n- Rhinathiol sirop ………………………………………………………………… 01flc\n- 01 càc x 03/j\n- Solupred cp 20 …………………………………………………………….. QSP 05j\n- 02 cp /j le matin\n- Codoliprane cp ……………………………………………………………….. 02Bte\n- 02 cp x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 22"
+      },
+      {
+        "page": 23,
+        "content": "# Bronchite aigue\n\n- Amoxil gel 500mg/srp 125/250mg ……………………………. QSP 10j\n\n01gel x 02/j / 50mg/kg/j\n- Fluimicil st ……………………………………………………………………… 01Bte\n\n01st x 03/j\n- Paracétamol cp 500mg/srp/supp ……….……….……… 01Bte / 01flc\n\n01cp x 03/j / 30mg/kg/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 23"
+      },
+      {
+        "page": 24,
+        "content": "# Bronchite aigue\n\n- Augmentin cp 500mg/srp 125/250mg …………..……………. QSP 10j\n\n01cp x 02/j / 50mg/kg/j\n- Fluimicil st ………………………………………………………………..……… 01Bte\n\n01st x 03/j\n- Becotide spray …………………………….………….…………….………… 01Bte\n\n01pulv x 02/j\n- Théophylline LP cp ………………………………………………….………. 01Bte\n\n01cp x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 24"
+      },
+      {
+        "page": 25,
+        "content": "# Brulure\n\n- - Péni V (Orapen) ……………………….…………….…………………… QSP 10j\n- 01cp x 03/j\n- - Flammazine pmd …………………………….………………………….. 01Tube\n- 01app x 03/j (anti bact + anti staph local)\n- - Paracétamol cp 01g …………………………….…..……………………… 01Bte\n- 01cp x 03/j\n\nèmé ou ème\n\n- Si 02 03 degré=› Réa\n\n- Si ère 01 degré et S ›10%:\n\n- - Péni M (Oxacilline) inj 01g …………………………………………..…. N°10\n- 01inj /j en IM\n- - Oxacilline gel 500mg ………….…………...………………………..…. QSP 10j\n- 02gel x 02/j\n- - Flammazine pmd ……………………….……………………………..… 01tube\n- 01app x 03/j\n- - Biofen pmd ……………………………………...……………………………. 01tube\n- 01app x 02/j (détersion + émulsion)\n- - Paracétamol cp 01g ………………………………....……….…..………… 01Bte\n- 01cp x 03/j\n- - Mébo crème ………………………………………………………….….… 01lotion\n- 01app x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 25"
+      },
+      {
+        "page": 26,
+        "content": "- Si ‹ 05%\n\n- Oxacilline sirop 250mg\n- Doliprane 50mg/kg/j\n- Flammazine\n\n- Si › 05% =› Réa\n\n- 2-4cc SSI/kg/ 2 C\n\n- iono + urée + créa + FNS\n- TRT parentéral : Oxacilline 01 x 04/j en IVD\n- Gentamycine 80mg x 02/j en IM\n- Flagyl 500mg x 03/j en IVL\n\n- Réhydratation : 4cc SSI/kg/SC/j\n\n*½ dans les 8 premiers heures  *½ dose dans les 16 heures\n\n# Brulure 01 ère degré\n\n- Oxacilline gel 500mg ………………………..………….………..…….. QSP 10j\n- 02 gel x 02/j\n- Flagyl cp 500mg ………………………..………..…………………….…. QSP 10j\n- 01 cp x 03/j\n- Doliprane cp 500mg ……………………..………………………………… 01 Bte\n- 01 cp x 03/j\n- Ou Nifluril supp 700mg ……………………..……………………………. 01 Bte\n- 01 supp/j le soir pdt 05j\n- Mébo crème ……………………………………….……………….….… 01 lotion\n- 01 app x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 26"
+      },
+      {
+        "page": 27,
+        "content": "# Candidose cutanée*\n\n| Ketoderm sachet | QSP 01 mois | 02 app /sem |\n| --------------- | ----------- | ----------- |\n\n1. Mouiller la zone atteinte\n2. Application\n3. Moussez\n4. Laissez 05 min\n5. Rincer\n\nB.Bilal « Collection 150 Ordonnances Types » Page 27"
+      },
+      {
+        "page": 28,
+        "content": "Candidose\n\n| -Fungizone cp 250mg/susp bvb         | 01Bte/01flc | 02cp x 03/j  | 01càc/10kg/j  |\n| ------------------------------------ | ----------- | ------------ | ------------- |\n| -Mycostatine cp 500.000/susp 100.000 | 01Bte/01flc | 02cp x 03/j  | 01dose x 05/j |\n| -Hextril sol                         | 01flc       | 01app x 02/j |               |\n| -Bicarbonate sol                     | 01flc       | 01app x 02/j |               |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 28"
+      },
+      {
+        "page": 29,
+        "content": "# Cellulite\n\n| -Fucidine cp 250mg / srp 100,250mg | QSP 10j | 02cp x 04/j / 50mg/kg/j |\n| ---------------------------------- | ------- | ----------------------- |\n| -Voltarene suppo 100mg/25mg        | 01Bte   | 01suppo le soir         |\n| -Bétadine sol                      | 01flc   | 01app x 02/j            |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 29"
+      },
+      {
+        "page": 30,
+        "content": "# Chalazion\n\n-Stedrex pmd ophtalmique …………………………………………..QSP 07j\n\n01app x 03/j (dans le cul de sac conjonctival)\n\n+\n\nMassage de la paupière avec une compresse stérile et eau tiède\n\nSi échec =› TRT chirurgical\n\nB.Bilal « Collection 150 Ordonnances Types » Page 30"
+      },
+      {
+        "page": 31,
+        "content": "# Cholécystite\n\n- Clamoxyl cp 01g …………………………………………………………..QSP 10j\n- 01cp x 03/j\n- Flagyl cp 500mg ……………………………………………..……………..QSP 10j\n- 01cp x 03/j\n- Spasfon 10mg …………………………………………………...……………. 01Bte\n- 01lyoc x 02-03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 31"
+      },
+      {
+        "page": 32,
+        "content": "Cocktail antalgique\n\n# 1\n\n01 amp de Spasfon\n\n01 amp de Viscéralgine\n\nDans 150cc de SSI à flot\n\nB.Bilal « Collection 150 Ordonnances Types » Page 32"
+      },
+      {
+        "page": 33,
+        "content": "# Colique néphrétique*\n\n- 01amp Azantac en IM\n- 01amp Spasfon en IM ou IV\n- 01amp Voltarene en IM ou 01amp Profénid en IV\n\nSi persiste: 80mg Solumedrol + 01amp Spasfon\n\nHDJ : 500cc SGI + 03amp Spasfon + 1/2amp Tamgésic en s/c\n\nCI: TA‹11, Asthme, DR.\n\nValium\n\nB.Bilal « Collection 150 Ordonnances Types » Page 33"
+      },
+      {
+        "page": 34,
+        "content": "# Colique néphrétique*\n\nCU …. si (+) .... ECBU - ASP - Echo - Urée Ŕ Créa.\n\n# Prescriptions\n\n- Profénid supp 100mg\n01Bte\n01supp /j le soir pdt 15j\n- Ou cp 200mg\n01Bte\n01cp /j au cours des repas\n- Spasfon lyoc 80mg\n01Bte\n02lyoc x 03/j\n- Ou Riabal cp 300mg\n01Bte\n02lyoc x 03/j\n- Efferalgan 05mg\n01Bte\n01cp x 02/j\n- +/-Josir gel 0.4mg\nQSP 01mois (01gel /j)\n(alpha bloquant)\n- Lomac gel 20mg\n01Bte\n(01gel /j)\n\nB.Bilal « Collection 150 Ordonnances Types » Page 34"
+      },
+      {
+        "page": 35,
+        "content": "# Colopathie*\n\n- Duspatalin gel ……………………………………….. 01Bte (antispasmodique)\n- 01gel x 03/j\n- Spasfon ………………………………………………………………………..…. 01Bte\n- 01lyoc x 02/j\n- Normacol …………………………………………………………………. Lavement\n- (Regulax) 01app /j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 35"
+      },
+      {
+        "page": 36,
+        "content": "# Colopathie fonctionnelle*\n\n| -Meteospasmyl gel  | 01Bte  | 01gel x 03/j avant repas     |\n| ------------------ | ------ | ---------------------------- |\n| -Bedelix sachet    | 01Bte  | 01sacchet x 03/j avant repas |\n| -Eucarbon cp       | 01mois | 01cp x 03/j avant repas      |\n| -Cibetaine amp buv | 02Bte  | 01AB x 03/j                  |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 36"
+      },
+      {
+        "page": 37,
+        "content": "# Conjonctivite bactérienne*\n\n- Cebemyxine collyre ……………………………………………………… QSP 07j\n\n01gtt x 04/j\n- Cebemyxine pmd ………………………………………………………… QSP 07j\n\n01app le soir\n\nOu :\n- Rifamycine collyre ……………………………………………………….. QSP 07j\n\n01gtt x 04/j\n- Rifamycine pmd ……………………………………………...…………… QSP 07j\n\n01app le soir\n\nB.Bilal « Collection 150 Ordonnances Types » Page 37"
+      },
+      {
+        "page": 38,
+        "content": "# Conjonctivite bactérienne\n\n# (Sécrétions abondantes et purulente)\n\n| Dacryoserium sol | 01flc           | 01app x 03/j  |              |\n| ---------------- | --------------- | ------------- | ------------ |\n| Tobrex collyre   | 01flc           | 01gtte x 03/j |              |\n| Ou:              | Fucithalmic gel | 01tbe         | 01app x 02/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 38"
+      },
+      {
+        "page": 39,
+        "content": "# Conjonctivite virale\n\n(Sécrétions claires + notion d’épidémie)\n\n| Indocollyre collyre | 01flc | 01gtte x 03/j |\n| ------------------- | ----- | ------------- |\n| Vitabact collyre    | 01flc | 01gtte x 03/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 39"
+      },
+      {
+        "page": 40,
+        "content": "# Conjonctivite allergique (Sécrétions claires avec prurit)\n\n- Naaxia collyre ……………………………………..……………………………. 01flc\n\n01gtte x 03/j\n- Ou:\n\nLevophta sol 0.05% …………………..…………………………………….…. 01flc\n\n01gtte x 03/j\n- -Hismanal sol ……………………………………………………………………. 01flc\n\n01CM/10kg/j (monoprise)\n\nB.Bilal « Collection 150 Ordonnances Types » Page 40"
+      },
+      {
+        "page": 41,
+        "content": "# Constipation*\n\n- Débridat …………………………………………………………………………… 01flc\n- 01godet (01càc) de 15cc (01càc) x 03/j\n- Ou :\n- Débridat cp 100mg …………………………...…………………………….. 01Bte\n- 01cp x 03/j\n- Duphalac ………………………………….……………………………………… 01Bte\n- 01sac x 03/j\n- Ou :\n- Forlax 10g ………………………………….…………………………..………… 01Bte\n- 01sac x 02/j\n- Ou :\n- Microlax ………………………………….……………………………………… 01Bte\n- 01microlavement (tube) /j\n- Huile de paraffine …….………………………………………….…………… 01flc\n- 02càc 02/j\n- Normacol tube lavement …………………………………………………. N°03\n- 01tube /j\n- Spasfon lyoc 80mg ………………………………….……………………… 01Bte\n- 01cp x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 41"
+      },
+      {
+        "page": 42,
+        "content": "# Coqueluche\n\n- -Rovamycine ou Josacine cp 1.5 et 03MUI / srp250mg ……. 01flc\n- 03MUI x 02/j / 50mg/kg/j\n- -Toplexil (avant 30mois) srp ………………………….…………………. 01flc\n- 01càc x 03/j\n- -Trophires (après 30mois) srp …………………………………………… 01flc\n- ½ càc x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 42"
+      },
+      {
+        "page": 43,
+        "content": "Cors\n\n# Vericide-Coricide / Kerafilm / Vaseline salicylée Pde\n\n| 01Tbe | 01app | 02/j |\n| ----- | ----- | ---- |\n\nB. Bilal « Collection 150 Ordonnances Types » Page 43"
+      },
+      {
+        "page": 44,
+        "content": "# Crise d’asthme modérée*\n\n# - En urgence :\n\nAVS + semi-assise + oxygène à forte débit\n\n100-200mg d’HHC lente SOIT 40-80mg de Solumedrol en IVL\n\nNébulisation (20min) de 01cc de Salbutamol dans 04cc de SSI\n\nréévaluation 20min\n\n03 séances de Salbutamol à 20min d’intervalle si pas de réponse\n\nhospitalisation\n\n# - Ordonnance de sortie :\n\n| Salbutamol spray    | 01flc      | 01bouffée x 03/j                |\n| ------------------- | ---------- | ------------------------------- |\n| Solupred cp 20      | QSP 05j    | 03cp /j le matin non à jeun     |\n| Amoxicilline cp 01g | QSP 01-10j | 01cp x 02/j (à titre préventif) |\n| Loratadine cp 10    | 01Bte      | 01cp /j le soir                 |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 44"
+      },
+      {
+        "page": 45,
+        "content": "Crise hémorroïdaire*\n\n# Veinotonique :\n\n| QSP               | 10j                 |\n| ----------------- | ------------------- |\n| Diovenor cp 600mg | 01-03cp /j          |\n| Ciclo 3 fort gel  | 02-03gel /j         |\n| Dalfon cp500mg    | 03cp x 02/j pdt 04j |\n| Veinosmil gel     | 01-02 x 03/j        |\n|                   | 02cp x02/j pdt 03j  |\n|                   | 01cp x 02/j pdt 03j |\n\n# CI:\n\ngrss Ŕ allaitement\n\n# Anti hémorroïdaire :\n\n| Sprogtolog pmd      | 03cp /j   |\n| ------------------- | --------- |\n| Supp                | 01supp /j |\n| Actamdreine crème   | 02app /j  |\n| Supp                | 02supp /j |\n| Giakor fort gel/sac |           |\n\n# Antalgique :\n\nEfferalgan codéine ou Voltarene ou Profénid\n\n# Régulateur du transit :\n\n| Duphalac sac | 01sac x 03/j |\n| ------------ | ------------ |\n\n# Bain de siège :\n\nPermanganate de k+ ……….. 01cp dilué dans 01-03l d’eau tiède\n\n# Durant la crise :\n\n=› CTC / Profénid inj ou en IM\n\n# Hygiène de :\n\n=› Sport Ŕ fruits Ŕ légumes\n\n# Si thrombose :\n\n=› incision locale Ŕ anesthésie\n\nB.Bilal « Collection 150 Ordonnances Types » Page 45"
+      },
+      {
+        "page": 46,
+        "content": "# Crise ulcéro-hémorragique*\n\nAprès avoir éliminer une perforation : absence de croissant gazeux à l’hémicoupole diaphragmatique droite de l’ASP.\n\n- Perfusion de 1000cc de SSI 9%.\n- + 02amp Spasfon\n- + 02amp Azantac en IVL\n- + 02amp de Procaïne\n- Sonde gastrique d’aspiration.\n- Si nécessaire : oxygénothérapie.\n\nB.Bilal « Collection 150 Ordonnances Types » Page 46"
+      },
+      {
+        "page": 47,
+        "content": "# Crise ulcéreuse hyperalgique*\n\n- Eliminer une perforation gastrique (croissant ASP)\n- Perfusion de 1000cc de SSI 9%.\n- - 02amp Spasfon\n- 02amp Azantac en IVL (Antiulcéreux anti-H2)\n- 02amp de Procaïne\n\nSonde gastrique d’aspiration.\n\nB.Bilal « Collection 150 Ordonnances Types » Page 47"
+      },
+      {
+        "page": 48,
+        "content": "# Cystite*\n\nFemme ‹65ans - Lombalgie - Grossesse Ŕ Diabète\n\nCU Ŕ ECBU Ŕ Echo Ŕ Boissons abondantes\n\n| -Nifluril supp 400mg | 01Bte | 01supp/j    |\n| -------------------- | ----- | ----------- |\n| -Efferalgan cp 500mg | 01Bte | 01cp x 03/j |\n| -Nibiol cp 100mg     | 01Bte |             |\n\nAntiseptique › 300mg/j ---›› ATB\n\nChez la femme:\n\n| Urobacid cp 400mg   | QSP 10j | 01cp x 02/j |\n| ------------------- | ------- | ----------- |\n| Ou Céfacet cp 200mg | QSP 10j | 01cp x 03/j |\n| Ou Ciprolon 500mg   | QSP 07j | 01cp x 02/j |\n| Ou Bactrim cp 960mg | QSP 07j | 01cp x 03/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 48"
+      },
+      {
+        "page": 49,
+        "content": "# Dermite de siège\n\n| -HPM Pde        | 01Tbe                        | 01app x 03/j |\n| --------------- | ---------------------------- | ------------ |\n| -Econazole lait | 01Tbe                        | 01app x 02/j |\n| -Mycotine       | si manifestations digestives |              |\n| -Erythromycine  | si surinfection              |              |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 49"
+      },
+      {
+        "page": 50,
+        "content": "# Diarrhée aigue\n\n# (Shigellose)*\n\n| -SRO sac                 | N°05    | 01sac/01L/24h  |\n| ------------------------ | ------- | -------------- |\n| -Ampicilline amp inj 01g | N°07    | 01inj /j en IM |\n| -Ampicilline gel 500mg   | QSP 07j | 01gel x 02/j   |\n| -Paracétamol cp 500mg    | 01Bte   | 01cp x 03/j    |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 50"
+      },
+      {
+        "page": 51,
+        "content": "# Diarrhée aqueuse d’origine virale\n\n| Ercefuryl gel 20mg | 01Bte | 01gel x 03/j |\n| ------------------ | ----- | ------------ |\n| Smecta sac         | 01Bte | 01sac x 03/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 51"
+      },
+      {
+        "page": 52,
+        "content": "# Diarrhée glairo-sanglante d’origine bactérienne*\n\n| -Bactrim cp 960mg                       | 01Bte   | 02cp x 02/j  |\n| --------------------------------------- | ------- | ------------ |\n| -Flagyl cp 500mg                        | QSP 07j | 01cp x 03/j  |\n| -Débridat cp 400mg (Antispasmodique)    | 01Bte   | 01cp x 03/j  |\n| -Smecta sac                             | 01Bte   | 01sac x 03/j |\n| -Duspatalin gel 200mg (antispasmodique) | 01Bte   | 01gel x 03/j |\n| *Ou* Nifuroxazide gel                   | 01Bte   | 01cp x 03/j  |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 52"
+      },
+      {
+        "page": 53,
+        "content": "# Diarrhée parasitaire\n\n# (Amibiase)*\n\n| Flagyl cp 250mg | 03 Btes | 02 cp x 03/j  |\n| --------------- | ------- | ------------- |\n| Intetrix gel    | 03 Btes | 02 gel x 03/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 53"
+      },
+      {
+        "page": 54,
+        "content": "# Diarrhée sanglante*\n\n- Bactrim cp 960mg\n………………………………………………………… 01Bte\n02cp x 02/j\n- Ercefuryl gel 20mg\n…………………………….…………………………. 01Bte\n01gel x 03/j\n- SRO sac\n…….…………………………………………………………………... N°05\n01sac/01L/24h\n\nB.Bilal « Collection 150 Ordonnances Types » Page 54"
+      },
+      {
+        "page": 55,
+        "content": "# Douleur abdominale*\n\n- Spasfon cp …………………………………………………………. 01-02cp x 3/j\n- Suppo ………………….……………………………… 01suppo x 02/j\n- Inj ……………………………...……………………………. 01inj/j en IM\n- Ou : Viscéralgine cp 50mg ……………………………....……………….. 01Bte /inj\n- Ou : Duspatalin gel 200mg …………………………………………….. 01Bte\n- 01gel x 03/j avant le repas\n- Ou : Riabal inj …………………………….....……………………… 01inj /j en IM\n- Ou : Citrate de bétaïne UPSA …….……………………………. 01cp x 03/j\n- 01 amp buv x 03/j\n\n# Contre indications :\n\n- Viscéralgine inj + Riabal inj :\n- - adénome de la prostate\n- - glaucome\n- Viscéralgine :\n- - colite spasmodique\n- - colique hépatique\n- - colique néphrétique\n- - règles douloureuses\n- Duspatalin :\n- - anti spasmodique\n- - tube digestif\n- - voies biliaires\n- Citrate de bétaïne UPSA : pour le TRT dyspeptique\n- (dlr - malaise / lithiase de V.biliaire)\n\nB.Bilal « Collection 150 Ordonnances Types » Page 55"
+      },
+      {
+        "page": 56,
+        "content": "Douleur cancéreuse*\n\n-Tamgésic cp 20mg ……………………………………………….…………. 01Bte\n\n01cp x 03/j en sublinguale\n\nB.Bilal « Collection 150 Ordonnances Types » Page 56"
+      },
+      {
+        "page": 57,
+        "content": "# Douleur lombosciatique\n\n# (Lombosciatalgie)*\n\n- Voltarene cp 500mg\n……………………………………………………………………………………… 01Bte\n01cp x 03/j\n- Lomac gel 20mg\n……………………………………………………………………………………… 01Bte\n01gel x 02/j\n- Ou\nDoliprane cp 01g\n………………………………………………………………………………… 01Bte\n01cp x 03/j\n- Kefentech patch\n…………………………………………………………………………… 01app/12h\n- IPP\n\nB.Bilal « Collection 150 Ordonnances Types » Page 57"
+      },
+      {
+        "page": 58,
+        "content": "# Douleur thoracique*\n\n- Profénid supp 100mg …………………………………………………….. 01Bte\n- 01supp /j\n- Lomac gel 20mg ……………………..…………………………..………….. 01Bte\n- 01gel /j\n- Efferalgan codéine ………………………………………………………… 01Bte\n- 01cp x 03/j\n- Ou :\n- Nalgésic gel 20mg ……………………………………………………………. 01Bte\n- 01gel x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 58"
+      },
+      {
+        "page": 59,
+        "content": "Dysménorrhée chez une jeune fille*\n\n| 01amp Voltarene en IM | +/–                 |\n| --------------------- | ------------------- |\n| 01amp d’Azantac en IV | (à titre préventif) |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 59"
+      },
+      {
+        "page": 60,
+        "content": "# Dystonie neurovégétative (DNV)*\n\nEn générale il y’a une amélioration spontanée :\n\n- 01amp de Primperan en IVD (neuroleptique)\n- Ou : 01amp de Calcibronat en IVD (rupture) si pas d’amélioration\n- Valium en IM si le patient agité\n- Ou : Valium en IVD si le patient très agité\n\nNB: Valium jamais en 1ère intention\n\nB.Bilal « Collection 150 Ordonnances Types » Page 60"
+      },
+      {
+        "page": 61,
+        "content": "# Eczéma atopique\n\n| -Betasone Pde            | 01Tbe       | 01app x 02/j      |\n| ------------------------ | ----------- | ----------------- |\n| -Hexamidine sol          | 01flc       | 01app x 02/j      |\n| -Clarityne cp 10mg / sol | 01Bte/01flc | 01cp /j / 01CM /j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 61"
+      },
+      {
+        "page": 62,
+        "content": "# Embolie pulmonaire\n\n- ATCD\n- Dlrs thoraciques\n- Dyspnée\n- Toux\n- Tachycardie\n\n# Traitement\n\n- Repos\n- Oxygénothérapie\n- Anticoagulant (Lovenox) inj 20mg ……………………01mg/kg x 02/j\n- Relais les AVK le 3ème jour\n\nB.Bilal « Collection 150 Ordonnances Types » Page 62"
+      },
+      {
+        "page": 63,
+        "content": "# Entorse\n\n- Diclofenac suppo 100mg/25mg …………………………………….. 01Bte\n\n01suppo le soir\n- Diantalvic gel / Xalgésic gel 10mg ………………………………….. 01Bte\n\n01gel x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 63"
+      },
+      {
+        "page": 64,
+        "content": "# Enurésie\n\n- Tofranil cp 10mg ………………………………………………….. QSP 03mois\n- 01cp /j (01h avant le coucher)\n- Psychothérapie\n\nB.Bilal « Collection 150 Ordonnances Types » Page 64"
+      },
+      {
+        "page": 65,
+        "content": "# Epistaxis*\n\n- -Dicynone cp 250mg ………………………………………………………. 01Bte\n- 02cp x 03/j\n- -HEC pmd ………………………………………….……………………………… 01Bte\n- 01app nasale x 04/j\n- -Doliprane cp 01g …………………………………………………………… 02Bte\n- 01cp x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 65"
+      },
+      {
+        "page": 66,
+        "content": "# Eruption\n\n- -Flucidine Pde ………………………………………………………………… 01Bte\n- -Erythromycine cp 500mg / srp 250/125mg …………. 01Bte/01flc\n- 02cp x 02/j / 50mg/kg/j\n- -Hexamidine sol …………………….…….……………………………...…….. 01flc\n- 01app x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 66"
+      },
+      {
+        "page": 67,
+        "content": "# Erysipèle\n\n- Erythromycine cp 500mg / srp 250/125mg …………. 01Bte/01flc\n\n02cp x 02/j / 50mg/kg/j\n- Eosine aqueuse sol …………………………………………….…………….. 01flc\n\n01app x 02/j\n\n# Si érysipèle de la jambe :\n\n- Lovenox inj 20, 40, 60, 80mg ……………………………………………. N°05\n\n01mg/kg en 02 prise\n\nB.Bilal « Collection 150 Ordonnances Types » Page 67"
+      },
+      {
+        "page": 68,
+        "content": "# Erythème fessier, Engelure, Gerçure, Crevasse des seins\n\n| -HFM Pde             | 01Tbe | 01app x 02/j |\n| -------------------- | ----- | ------------ |\n| -Lactacyd pH=5.2 Pde | 01Tbe | 01app x 02/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 68"
+      },
+      {
+        "page": 69,
+        "content": "# Furoncle\n\n| -Bristopen amp inj 01g | N°10    |\n| ---------------------- | ------- |\n| -Bristopen gel 500mg   | QSP 10j |\n| -Hexomedine sol        | 01flc   |\n\n01app x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 69"
+      },
+      {
+        "page": 70,
+        "content": "# Folliculite\n\n# Superficielle\n\n- Hexomedine sol ……………………………………………………………… 01flc\n- 01app x 02/j\n\n# Profonde\n\n- Flucidine Pde ……..…………………………………………………………. 01Tbe\n- 01app x 02/j\n- Hexomedine sol ……………………………………………………………… 01flc\n- 01app x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 70"
+      },
+      {
+        "page": 71,
+        "content": "Gale\n\n-Ascabiol sol …………………………………………………………………….. 01flc\n\nJ1 : après un bain chaud et savonneux de 20min, application, laisser sécher pdt 10min puis 2ème rebadigeonnage\n\nJ2 : 3ème rebadigeonnage sans se laver\n\nJ3 : prendre un douche\n\n-Aphtiria Poudre ………………………………………………………………. 01Bte\n\nPoudrer la lingerie, la literie, les vêtements\n\nB.Bilal « Collection 150 Ordonnances Types » Page 71"
+      },
+      {
+        "page": 72,
+        "content": "GNA\n\n# (Oligurie, HTA, œdème ; Hématurie, Protéinurie)\n\n- FNS, Urée, Créa, Protéinurie des 24h, ECBU\n- Repos\n\n| Extencilline amp inj 1.2MUI/0.6MUI | N°01  | 01inj /21j en IM        |\n| ---------------------------------- | ----- | ----------------------- |\n| Lasilix cp 20mg                    | 01Bte | 01cp x 02/j / 01mg/kg/j |\n| Adalate cp 10mg                    | 01Bte | 01cp x 02/j             |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 72"
+      },
+      {
+        "page": 73,
+        "content": "# Grippe\n\n- Paracétamol cp 500mg/srp/supp\n01Bte / 01flc\n01cp x 03/j / 30mg/kg/j\n- UPSA Vit-C cp*\n01Bte\n01cp* x 03/j\n- Rhinathiol srp\n01flc\n01càs x 03/j\n- Soufrane sol\n01flc\n02 pulv/Narine x 03/j\n- Ou:\nSouframycine sol\n01flc\n01 pulv/Narine x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 73"
+      },
+      {
+        "page": 74,
+        "content": "# Hématurie*\n\n# ECBU Ŕ FNS Ŕ TP Ŕ Echo\n\n- Profénid supp 100mg ……………………………………………….…….. 01Bte\n- 01supp /j le soir pdt 05j\n- Tramadol gel 500mg ……………………………….……………………… 01Bte\n- 01gel x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 74"
+      },
+      {
+        "page": 75,
+        "content": "# Hémorroïdes*\n\n| -Dalfon cp 500 | QSP 10j           |\n| -------------- | ----------------- |\n|                | 02cp x 03/j (04j) |\n|                | 02cp x 02/j (03j) |\n|                | 02cp x 01/j (03j) |\n\n| -Titanoreine crème | 01tube       |\n| ------------------ | ------------ |\n|                    | 01app x 03/j |\n\n| -Diantalvic gel 300mg | 01Bte        |\n| --------------------- | ------------ |\n|                       | 01gel x 02/j |\n\n| -KMnO4 cp 500mg | 01Bte                           |\n| --------------- | ------------------------------- |\n|                 | 01cp dilué dans 05l d’eau tiède |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 75"
+      },
+      {
+        "page": 76,
+        "content": "# Hémorroïdes externes*\n\n| -Dalfon cp 500     | QSP 07j           |\n| ------------------ | ----------------- |\n| 02cp x 03/j (04j)  | 01cp x 03/j (03j) |\n| -Rapidus cp 50     | QSP 07j           |\n| 01cp x 03/j        |                   |\n| -Titanoreine suppo | 01Bte             |\n| 01suppo x 02/j     |                   |\n| -Duphalac sachet   | 01Bte             |\n| 01sachet x 03/j    |                   |\n| -Tronothane pmd    | 01Bte             |\n| 01app x 02/j       |                   |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 76"
+      },
+      {
+        "page": 77,
+        "content": "# Hémorroïdes + Constipation*\n\n- Duphalac sac …………………………………….…………………………… 01Bte\n- 01sac x 03/j\n- Débridat cp 100mg ……………………………………………………….. 01Bte\n- 01cp x 03/j\n- Dalfon cp 500 ……………………………………………………………… QSP 10j\n- 02cp x 03/j (04j)\n- 02cp x 02/j (03j)\n- 02cp x 01/j (03j)\n- Titanoreine crème …………………………………………………………. 01tube\n- 01app x 03/j\n- KMnO4 cp 500mg …………………………………………….…………… 01Bte\n- 01cp dilué dans 05l d’eau tiède\n\nB.Bilal « Collection 150 Ordonnances Types » Page 77"
+      },
+      {
+        "page": 78,
+        "content": "Herpes\n\n# Carciné:\n\n- Ketoderm Pde ………………………………………………………………… 01Tbe\n- 01app x 02/j\n- Hexomedine sol …………………………………………………….………… 01flc\n- 01app x 02/j\n- Paracétamol cp 500mg/srp/supp ………….…….……… 01Bte / 01flc\n- 01cp x 03/j / 30mg/kg/j\n- Erythromycine =› si surinfection\n\n# Oculaire:\n\n- Iduviran collyre …………………………………………………………………. 01flc\n- 01Gtte/h le 1ère j puis 01Gtte/2h les jrs suivants\n\n# Virale:\n\n- Aciclovir Pde / cp 200mg / sol 200mg ………………………… QSP 07j\n- 01app ou 01cp ou 01CM x 05/j / 01app ou ½ CM x 05/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 78"
+      },
+      {
+        "page": 79,
+        "content": "# Hypercholestérolémie\n\n-Tahor cp 10mg ……….……………………………………………. QSP 01mois\n\n01-02cp /j\n\nOu:\n\n-Zostine cp 20mg …………………………………………………. QSP 01mois\n\n01cp /j le soir\n\nB.Bilal « Collection 150 Ordonnances Types » Page 79"
+      },
+      {
+        "page": 80,
+        "content": "# Hyperglycémie avec acétonurie\n\n# Insulinothérapie\n\n5UI d’insuline ordinaire en IVD pour chaque croix d’acétone en laissant une croix de sécurité toutes les heures jusqu’à négativation de l’acétonurie puis procéder à la voie sous cut :\n\n| Glycémie >2.5    | 18UI en S/C |\n| ---------------- | ----------- |\n| Glycémie 1.8-2.5 | 16UI en S/C |\n| Glycémie 1.6-1.8 | 14UI en S/C |\n| Glycémie 1.4-1.6 | 12UI en S/C |\n| Glycémie 1.2-1.4 | 10UI en S/C |\n| Glycémie <1.2    | Abstention  |\n\n# Réhydratation\n\n02L de Nacl 09% en 02h\n\nPuis relais par SG à faible débit 03L/m2 de surface corporelle\n\nB.Bilal     « Collection 150 Ordonnances Types »    Page 80"
+      },
+      {
+        "page": 81,
+        "content": "# Hyper Tension Artérielle (HTA)\n\n| -Lasilix cp 500mg | QSP 01mois | 01cp x 02/j |\n| ----------------- | ---------- | ----------- |\n| -Lopril cp 25mg   | QSP 01mois | ¼ cp /j     |\n\n# -Exploration\n\nB.Bilal « Collection 150 Ordonnances Types » Page 81"
+      },
+      {
+        "page": 82,
+        "content": "# Hypertrophie Bénigne de la Prostate (HBP)*\n\n# Taux de PSA (marqueur tmr)\n\n# -Alpha -bloquant :\n\n| Josir gel 0.4mg    | QSP 01mois | 01gel /j     |\n| ------------------ | ---------- | ------------ |\n| Xatral cp 01g      | QSP 01mois | 01cp /j      |\n| Permixon gel 160mg | QSP 01mois | 01gel x 02/j |\n| Tadenan cp 50mg    | QSP 01mois | 01cp x 02/j  |\n\n# -Inhibiteur de 5 alpha -réductase :\n\n| Avodart cp 0.5mg | QSP 01mois | 01cp /j |\n| ---------------- | ---------- | ------- |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 82"
+      },
+      {
+        "page": 83,
+        "content": "# Hypotension orthostatique*\n\n- Seglor goutte ………………………………………………………………… 01Bte\n- 30gtes x 03/j\n- Sargenor + Vit-C amp buv …………………………..……………… QSP 15j\n- 01AB x 02/j\n- Neuro Vit-B1B6 cp ………………………………………………….………. 02Bte\n- 01cp x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 83"
+      },
+      {
+        "page": 84,
+        "content": "# Impétigo\n\n# (Bulles, Adénopathie, Prurit, Apyrexie)\n\n- Augmentin cp 500mg/srp 125/250mg ………………………. QSP 10j\n\n01cp x 02/j / 50mg/kg/j\n- Flucidine Pde ………………………………………………………………… 01Bte\n\n01app x 02/j\n- Hexamidine sol ………………………….………………………….…... 01flc\n\n01app x 02/j\n- Eau oxygénée sol ……………………………………………………….…… 01flc\n\n01app x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 84"
+      },
+      {
+        "page": 85,
+        "content": "Ingestion d’un caustique\n\n# - Alimentation parentérale\n\n- Phosphalugel / Topaal / Gaviscon st …………………………..…… 01Bte\n- 01st x 03/j / ½ st x 03/j\n\n- Azantac cp 300, 150mg ………………………………………………… 01Bte\n- 01cp (300mg) /j ou 01cp (150mg) x 02/j / 05mg/kg/j\n\n- Primperan sol …………………………………………………………………. 01flc\n- 01CM x 03/j / 01Gtte/kg x 03/j ¼ d’heure avant les repas\n\n- Amoxil cp 500mg / susp bvb 250/125mg ………………….. QSP 10j\n- 02cp x 02/j / 50mg/kg/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 85"
+      },
+      {
+        "page": 86,
+        "content": "# Infection broncho-pulmonaire\n\n- Bactrim cp 480mg, 90mg / sp 200 ……………………………… QSP 10j\n- 02cp (480mg) x 02/j ou 01cp(960mg) x 02/j\n- / 01CM/05kg/02prises\n- Bisolvan srp ………………………………………………………………………. 01flc\n- 01càs x 03/j / 01càc x 03/j\n- OU:\n- Flumicil st ………………………………………………………………………… 01Bte\n- 01st x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 86"
+      },
+      {
+        "page": 87,
+        "content": "Infection génitale chez la femme\n\n# Vaginite à Candida Albicans :\n\n(Ecoulement blanchâtre, Prurit, Dyspareunie, Mqs rouge)\n\n| -Gyno-Pevaryl ovule | 01Bte | 01ovule /j      |\n| ------------------- | ----- | --------------- |\n| -Tergynan cp        | 01Bte | 01cp /j         |\n| -Eurax Pde          | 01Tbe | 01app /j        |\n| -Saforelle sol      | 01flc | 01Toilette VV/j |\n\n# Vaginite à Chlamydia :\n\n(Ecoulement verdâtre nauséabond, Mqs bulleuse framboise)\n\n| -Flagyl ovule      | 01Bte | 01ovule /j            |\n| ------------------ | ----- | --------------------- |\n| -Polygynax capsule | 01Bte | 01capsule vaginale /j |\n| -Saforelle sol     | 01flc | 01Toilette VV/j       |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 87"
+      },
+      {
+        "page": 88,
+        "content": "# Vaginite à Gonocoque\n\n# (Ecoulement jaunâtre, Brulures mictionnelles)\n\n- Amoxil gel 500mg ……………...........................…………………….. QSP 10j\n- 04gel x 02/j\n- Polygynax capsule …….…………………………………………………….. 01Bte\n- 01capsule vaginale /j\n- Saforelle sol ……………………………………………………………………. 01flc\n- 01Toilette VV/j\n\n# Vaginite banale:\n\n# (Ecoulement blanchâtre abondant)\n\n- Colposeptine cp ……………................................……………………….. 01Bte\n- 01cp /j\n- Polygynax capsule …….…………………………………………………….. 01Bte\n- 01capsule vaginale /j\n- Saforelle sol ……………………………………………………………………. 01flc\n- 01Toilette VV/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 88"
+      },
+      {
+        "page": 89,
+        "content": "# Infection urinaire\n\n- SF urinaires : pollakiuries - brulures urinaires - impériosité.\n- BU : suffit.\n- ECBU : douleur, fièvre, HU\n- Grossesse, diabète, femme diabétique\n- ›65ans, récidivante ›4/ans et dernière ‹3mois\n- Anomalie urologique\n\n# TRT fonctionnel :\n\nCiprolon cp 250mg ………………………… QSP 07j (IU basse non cpc)\n\n01cp x 02/j\n\nSi sévère : cp 500mg x 02/j\n\nSauf si urétrite (-) : Clamoxyl\n\nFemme enceinte : Augmentin 03g /j pdt 7-10j + ECBU\n\nB.Bilal « Collection 150 Ordonnances Types » Page 89"
+      },
+      {
+        "page": 90,
+        "content": "# Insomnie\n\n| Sulpiride / Dogmatil gel/sol | 01Bte/01flc | 01gel x 02/j | 01CM | j | 01càc | j |\n| ---------------------------- | ----------- | ------------ | ---- | - | ----- | - |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 90"
+      },
+      {
+        "page": 91,
+        "content": "# Insomnie occasionnelle\n\n- Phenergan cp 25mg ……………………………….…………………….. 01Bte\n½ cp 15-30min avant le coucher\n- En 2 intention:\nAtarax cp 100mg ……………………………………………………………. 01Bte\n01cp le soir avant le coucher\n- Sévère:\nStilnox cp 10mg …………………………………………………….. QSP 02-05j\n01cp le soir avant le coucher\n\nB.Bilal « Collection 150 Ordonnances Types » Page 91"
+      },
+      {
+        "page": 92,
+        "content": "# Intertrigo inter-orteil\n\n- Pevaryl crème ………………………………………………………………….. 01flc\n\n01app x 02/j\n\nB. Bilal « Collection 150 Ordonnances Types » Page 92"
+      },
+      {
+        "page": 93,
+        "content": "# Intertrigo à Candida Albicans\n\n| -Permanganate de potassium sol | 01flc | 01app x 02/j (01-10ème j) |\n| ------------------------------ | ----- | ------------------------- |\n| -Bleu de méthylène sol         | 01flc | 01app x 02/j (01-10ème j) |\n| -Pevaryl crème                 | 01flc | 01app x 02/j (11-21ème j) |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 93"
+      },
+      {
+        "page": 94,
+        "content": "# Intoxication alimentaire\n\n- Bactrim cp 960mg\n………………………………………………..……… 01Bte\n01cp x 02/j\n- Flagyl cp 500mg\n…………………..……………………………….….…. 01Bte\n01cp x 03/j\n- Si diarrhée:\n- Smecta sac\n……………………………………………….. 01Bte\n01sac x 03/j\n- Doliprane cp 500mg\n…………………………………………………… 01Bte\n01cp x 03/j\n- Dimépra gel 02mg\n……………………………………….………………. 01Bte\n(ralentisseur du transit) 01gel/selle à répéter si besoin à chaque selle diarrhéique\n\nB.Bilal « Collection 150 Ordonnances Types » Page 94"
+      },
+      {
+        "page": 95,
+        "content": "Kératodermie\n\n# (Dermatose sèche, Parakeratose, Eczéma squameuse)\n\n| Anaxeryl Pde | 01Tbe | 01app /j |\n| ------------ | ----- | -------- |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 95"
+      },
+      {
+        "page": 96,
+        "content": "# Laryngite\n\n# (Dyspnée, Cyanose, Voix rauque, Tirage)\n\n- Oxygénothérapie\n- HHC\n- Bande alcoolisée\n- Solupred cp 05, 20mg / Celestene sol …………..…….. 01Bte/01flc\n- 01mg/kg/j / 10Gttes/kg/j pdt 05j\n- Amoxil cp 500mg / Susp bvb 250, 125mg …………………. QSP 10j\n- 02cp x 02/j / 50mg/kg/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 96"
+      },
+      {
+        "page": 97,
+        "content": "# Leishmaniose\n\n-Glucantime amp inj 05ml=1500mg ……………………… cure de 20j\n\n20mg/kg/j\n\n¼ dose le 1ᵉʳ j\n\n½ dose le 2ème j\n\nLa dose complète jsq 20ème j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 97"
+      },
+      {
+        "page": 98,
+        "content": "Leucorrhée blanchâtre = Mycosique*\n- Econazole ovule 150 ……………………………………………………. QSP 03j\n- 01 ovule/j le soir\n- Savon alcalin ………………………………….……………………………….. 01Bte\n- 01 toilette x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 98"
+      },
+      {
+        "page": 99,
+        "content": "# Leucorrhée jaunâtre + écoulement urinaire\n\n(Gonocoque / Chlamydia / Germes banaux)*\n- Augmentin cp 01g ……………………………………………………... QSP 10j\n\n01cp x 02/j\n- Polygynax ovule …………………………………………………………. QSP 12j\n\n01ovule /j le soir\n- Saforelle solution ………………………………………………………….. 01Bte\n\n01toilette x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 99"
+      },
+      {
+        "page": 100,
+        "content": "# Leucorrhée verdâtre nauséabonde\n\n# Trichomonas Vaginalis*\n\n| -Metronidazole ovule  | QSP 10j | 01ovule/j         |\n| --------------------- | ------- | ----------------- |\n| -Metronidazole cp 500 | QSP 10j | 01cp x 02/j       |\n| -Savon acide          | 01Bte   | 01toilette x 03/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 100"
+      },
+      {
+        "page": 101,
+        "content": "Lombago aigue*\n\n# Ordonnances\n\n| -Feldene inj       | N°03  | 01inj /j en IM                  |\n| ------------------ | ----- | ------------------------------- |\n| -Divido cp 75      | 01Bte | 01cp x 02/j en milieu des repas |\n| -Codoliprane cp    | 02Bte | 02cp x 03/j                     |\n| -Ketoprofène patch | 01Bte | 01patch /j                      |\n| -Lomac gel 20      | 01Bte | 01gel /j le matin               |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 101"
+      },
+      {
+        "page": 102,
+        "content": "Maladies thromboemboliques des MI\n\n- Praxilene cp 200mg ………………………………………………………… 01Bte\n- 01cp x 03/j\n- Lovenox amp inj 20, 40, 60, 80mg …………………………………… N°05\n- 01mg/kg x 02/j\n- Sintrom cp 04mg …………………………………………………………… 01Bte\n- 01cp /j à 08h\n\nB.Bilal « Collection 150 Ordonnances Types » Page 102"
+      },
+      {
+        "page": 103,
+        "content": "# Migraine*\n\n| -Relpax cp 40      | 01Bte | 01cp /j       |\n| ------------------ | ----- | ------------- |\n| -Seglor goutte     | 01Bte | 30gtes x 03/j |\n| -Codoliprane cp    | 02Bte | 02cp x 03/j   |\n| -Ibuprofène cp 400 | 01Bte | 01cp x 03/j   |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 103"
+      },
+      {
+        "page": 104,
+        "content": "# Migraine\n\n| -Dihydroergotamine cp | 01Bte | 01cp x 02/j |\n| --------------------- | ----- | ----------- |\n| -Sapofen cp 400mg     | 01Bte | 01cp x 03/j |\n| -Paracétamol cp 500mg | 01Bte | 01cp x 03/j |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 104"
+      },
+      {
+        "page": 105,
+        "content": "# Migraine*\n\n| -Relpax cp 40     | 01Bte | 01cp /j                       |\n| ----------------- | ----- | ----------------------------- |\n| -Sanmigran cp 0.5 | 01Bte | 01cp /j (01-03j)              |\n|                   |       | 01cp x 02/j (01-06j)          |\n|                   |       | 01cp x 03/j (à partir du 07j) |\n| -Panadol-Extra cp | 02Bte | 02cp x 03/j                   |\n| -Prof cp 600      | 01Bte | 01cp x 02/j après repas       |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 105"
+      },
+      {
+        "page": 106,
+        "content": "Migraine ou douleur dentaire atroce*\n\n01g de Prodafalgan en IVD\n\n+/−\n\nVoltarene en IM\n\nB.Bilal « Collection 150 Ordonnances Types » Page 106"
+      },
+      {
+        "page": 107,
+        "content": "# MIU (Mort In Utéro)\n\n- Amoxil gel 500mg ……………………………………………………… QSP 10j\n- 02gel x 02/j\n- Lovenox amp inj 40 …………………………………………………………. N°05\n- 01inj /j en S/C\n- Dakin sol …………………………………………………………………………. 01flc\n- 01toilette VV/j\n- Parlodel cp …………………………………………………………………. QSP 15j\n- ½ cp /j le 1ᵉʳ j\n- ½ cp x 02/j le 2ème j\n- 01cp x 02/j du 3-15ème j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 107"
+      },
+      {
+        "page": 108,
+        "content": "# Morsure\n\n# En urgence :\n\n- Dexametazone 100mg/j / 0.4mg/kg/j en IVD\n\n# A la sortie :\n\n- - Solupred cp 20, 05mg …………………………………………………… 01Bte 01mg/kg/j pdt 05j\n- - Clarityne cp 10mg / sol ………………………………………... 01Bte/01flc 01cp /j ou 01CM x 02/j / 01CM /j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 108"
+      },
+      {
+        "page": 109,
+        "content": "# Muguet\n\n| -Fungizone cp 250mg / sol 500mg | 01Bte/01flc | 02cp x 02/j / 50mg/kg/j |\n| ------------------------------- | ----------- | ----------------------- |\n| *Si*                            | *échec*:    |                         |\n| -Duflucan gel 50mg              | 01Bte       | 03gel /j (monoprise)    |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 109"
+      },
+      {
+        "page": 110,
+        "content": "# Névralgie\n\n- Neurovit cp 250mg ………………………………………………...……… 01Bte\n- 01cp x 03/j\n- Voltarene sol …………………………………………………………………. 01Tbe\n- 01app x 02/j\n- Kefentech patch …………………………………………...………… 01app/12h\n\nB.Bilal « Collection 150 Ordonnances Types » Page 110"
+      },
+      {
+        "page": 111,
+        "content": "# OAP (Œdème Aigue du Poumon)\n\n- Lasilix amp inj 20mg .. 01amp en IVD .. Renouvelable si besoin\n- Oxygénothérapie\n- Position demi-assise\n\nB.Bilal « Collection 150 Ordonnances Types » Page 111"
+      },
+      {
+        "page": 112,
+        "content": "# Orchiépididymite*\n\n- F° Ŕ sueurs Ŕ frissons Ŕ dlr Ŕ ↗V Ŕ rougeur Ŕ chaleur +/- hydro\n\n# Prescriptions\n\n| -Vibramycine LP cp 100mg | QSP 21j | 01cp x 02/j             |\n| ------------------------ | ------- | ----------------------- |\n| -Ciprolon cp 500mg       | QSP 04j | 01cp x 02/j             |\n| +/- Gentamycine amp      | QSP 04j | 03mg/kg/j en IM         |\n| Ou Bactrim               |         |                         |\n| -Profénid cp 200mg       | 01Bte   | 01cp /j le soir pdt 05j |\n| -Efferalgan 05mg         | 01Bte   | 01cp x 02/j             |\n\nECBU 05j après TRT\n\nB.Bilal « Collection 150 Ordonnances Types » Page 112"
+      },
+      {
+        "page": 113,
+        "content": "Oreillon\n\n- Pénicilline V cp 01MUI / srp 250mg ………………………….. QSP 10j\n\n01cp x 03/j / 50mg/kg/j\n\n- Maxilase srp ………………………………………………....………………….. 01flc\n\n01CM x 03/j\n\nOu:\n\n- Diclofenac suppo 100mg/25mg ……………………...……………….. 01Bte\n\n01suppo le soir\n\n- Paracétamol cp 500mg/srp/supp ………….…….……… 01Bte / 01flc\n\n01cp x 03/j / 30mg/kg/j\n\nOu:\n\n- Aspégic st 500/250/100mg ………………………...……….…………… 01Bte\n\n01st x 03/j / 50mg/kg/j\n\nB. Bilal « Collection 150 Ordonnances Types » Page 113"
+      },
+      {
+        "page": 114,
+        "content": "Orgelet\n\n# Dacryoserium sol\n\n01flc\n\n01app x 03/j\n\n# Néomycine Pde\n\n01Tbe\n\n01app x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 114"
+      },
+      {
+        "page": 115,
+        "content": "Orgelet\n\n# Prescriptions\n\n- Desomedine collyre ……………………….……………………………. QSP 07j\n- 02 Gttes x 04-06/j\n- Fucithalmic 01% gel opht ……………………………………………. QSP 08j\n- 01 Gte dans le sac conjonctival inf matin et soir\n- Tobrex collyre ……………………………………………………………… QSP 15j\n- 04 app /j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 115"
+      },
+      {
+        "page": 116,
+        "content": "# Otites\n\n# Congestive (simple):\n\n- Augmentin cp 500mg/srp 125/250mg ……………..…………. QSP 10j\n- 02cp x 02/j / 50mg/kg/j\n- Maxilase srp ………………………………………………………….………… 01flc\n- 01càc x 03/j\n- Paracétamol cp 500mg/srp/supp ……………..………… 01Bte / 01flc\n- 01cp x 03/j / 30mg/kg/j\n- Solupred cp 05, 20mg …………….………………………………..…….. 01Bte\n- 01mg/kg/j pdt 05j\n- Ou: Celestene sol ……………………………………………………………… 01flc\n- 10Gttes/kg/j  pdt 05j\n- Otipax sol (si otalgie)………………………………………………………… 01flc\n- 04Gttes x 03/j\n\n# Purulente (suppurée):\n\n- Ospamox/Augmentin cp 500mg/susp bvb 125/250mg...QSP 10j\n- 02cp x 02/j / 50mg/kg/j\n- Otofa sol ………………………………...………………………………………… 01flc\n- 03gttes x 03/j\n- Osmotol lotion ……………………………………………………………….. 01flc\n- 01app x 03/j\n- Otipax sol (si otalgie) ……………………………...………………………… 01flc\n- 04Gttes x 03/j\n\nB.Bilal           « Collection 150 Ordonnances Types »    Page 116"
+      },
+      {
+        "page": 117,
+        "content": "# Otite Moyenne Aigue (OMI)*\n\n- Augmentin sac 01g ……………………………………………………… QSP 07j\n\n01 sac x 02/j\n- Codoliprane cp ……………………….…………………………...………….. 02 Bte\n\n02 cp x 03/j\n- Otipax goutte auriculaire …………………………….………………. QSP 07j\n\n(CI: otorrhée 04 gtes x 03/j)\n\nB. Bilal « Collection 150 Ordonnances Types » Page 117"
+      },
+      {
+        "page": 118,
+        "content": "# Paralysie faciale périphérique*\n\n- Solupred cp 20 …………………………………………………………….. QSP 15j\n- 03cp /j le matin pdt 05j\n- 02cp /j le matin pdt 05j\n- 01cp /j le matin pdt 05j\n- Acyclovir cp 200………………………………………………...…………. QSP 07j\n- 01cp x 05/j\n- Neuro Vit-B1B6 cp ………………………………………………….………. 02Bte\n- 01cp x 03/j\n- Calcifediol gouttes …………………………………………………………. 01Bte\n- 03gtes /j\n- Diffu-K gel ………………………………………………………………………. 02bte\n- 01gel x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 118"
+      },
+      {
+        "page": 119,
+        "content": "# Péri onyxis à Candida Albicans :\n\n- Pevaryl crème …………………………………………………………………. 01tbe 01app x 02/j\n\n# Si échec:\n\n- Duflucan gel 50mg ……………………….………………………………… 01Bte 03gel/j (monoprise) pdt 03sem\n\nB.Bilal « Collection 150 Ordonnances Types » Page 119"
+      },
+      {
+        "page": 120,
+        "content": "# Perlèche\n\n| -Fungizone cp 250mg / sol 500mg | 01Bte/01flc | 02cp x 02/j / 50mg/kg/j |\n| ------------------------------- | ----------- | ----------------------- |\n| *Si*                            | *échec*:    |                         |\n| -Duflucan gel 50mg              | 01Bte       | 03gel/j (monoprise)     |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 120"
+      },
+      {
+        "page": 121,
+        "content": "# Pédiculose ou Phtiriasis\n\n- Aphtiria\n- › Poudrer le cuir chevelu et le couvrir puis repoudrer le 8ème jour\n- Shampooing : Hegor, Item, Itax …\n\nB.Bilal « Collection 150 Ordonnances Types » Page 121"
+      },
+      {
+        "page": 122,
+        "content": "# Pédiculose de cuir chevelu\n\n« poux de tète »*\n\n# Traitements\n\n| - Malathion lotion                 | 01flc                          |\n| ---------------------------------- | ------------------------------ |\n| 01app sur cuir chevelu laissez 08h | et après lavage par Shamp doux |\n\n| Ou :                                 |                                |\n| ------------------------------------ | ------------------------------ |\n| - Para-Plus lotion                   | 01flc                          |\n| 01app sur cuir chevelu laissez 40min | et après lavage par Shamp doux |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 122"
+      },
+      {
+        "page": 123,
+        "content": "# Phlébite\n\n- Repos\n- Lever interdit\n- Lovenox amp inj 20, 40, 0, 80mg ……………………………………… N°05\n- 01mg/kg x 02/j\n- Relais par les AVK le 3ème j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 123"
+      },
+      {
+        "page": 124,
+        "content": "# Piqure d’insecte\n\n# En urgence:\n\n200mg d’HHC en IVD +/- 01amp de Phenergan\n\n# A la sortie:\n\n- Clarityne cp 10mg …………………………………………………………... 01Bte\n- 01cp /j le matin\n\nOu\n- Telfast cp 180, 120mg …………………………….………………………… 01Bte\n- 01cp /j le matin\n\n+/- Celestene cp 02mg ……………………….………………………. QSP 05j\n- 02cp /j le matin\n\n+/- Amoxicilline cp 01g ……………………………………………….. QSP 07j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 124"
+      },
+      {
+        "page": 125,
+        "content": "# Plaie par arme blanche*\n\n# Superficielle : ASP Ŕ soins locaux\n\n| Oxacilline cp 500mg | 01Bte | 01cp x 03/j  |\n| ------------------- | ----- | ------------ |\n| Nifluril supp 400mg | 01Bte | 01supp/j     |\n| Lomac gel 200mg     | 01Bte | 02gel x 02/j |\n| Codoliprane 500mg   | 01Bte | 01cp x 04/j  |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 125"
+      },
+      {
+        "page": 126,
+        "content": "# Plaie infecté*\n\n- Oxacilline inj 01g ……………………………………………………….. QSP 10j\n- 01inj /j en IM (après test)\n- Oxacilline gel 500mg ………………………………….………..…….. QSP 10j\n- 01gel x 02/j\n- Diclofenac gel 75mg LP\n\nOu Nifluril supp 700mg …………………………………..………………. 01Bte\n- 01supp/j le soir\n- Lomac gel 20mg ……………………………………………………………....01Bte\n- 01gel x 02/j\n- Paracétamol / Efferalgan / Nalgésic cp 500mg …………….… 01Bte\n- 01cp x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 126"
+      },
+      {
+        "page": 127,
+        "content": "# Plaie surinfectée\n\n- -Bristopen amp inj 01g …………………………………………………….. N°10\n- 01inj /j en IM\n- -Bristopen gel 500mg …………………………………………..…..….. QSP 10j\n- 01gel x 02/j\n- -Voltarene suppo 100mg/25mg …………………….………………… 01Bte\n- 01suppo le soir\n- Ou:\n- Nifluril supp700mg/gel 250mg / supp400mg/gel250mg…. 01Bte\n- 01supp x 02/j\n- 01gel x 03/j\n- 01suppo x 02/j\n- 01gel x 02/j\n- -Changement des pansements 01j/02j\n- -Ablation du fil le 10ème j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 127"
+      },
+      {
+        "page": 128,
+        "content": "# Prostatite*\n\n# ECBU Ŕ FNS Ŕ VS Ŕ Echo\n\nTR : ↗↗ V de la prostate\n\nSi : rétention, vomissement =› signes de gravité\n\n| Ciprolon cp 500mg   | QSP 21j  | 01cp x 02/j     |\n| ------------------- | -------- | --------------- |\n| Ou Céfacet cp 200mg | QSP 21j  | 01cp x 02/j     |\n| +Gentamycine        | QSP 04j  | 03mg/kg/j en IM |\n| Bactrim fort        | QSP 6sem | 01cp x 02/j     |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 128"
+      },
+      {
+        "page": 129,
+        "content": "# Prurit\n\n| -HHC           | 05mg/kg/j    |             |\n| -------------- | ------------ | ----------- |\n| -Polaramine cp | 02mg / sol   | 01Bte/01flc |\n| 01cp x 02/j    | 01càc x 02/j |             |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 129"
+      },
+      {
+        "page": 130,
+        "content": "PNA*\n\nT° : 39° - CU(+) - Frissons Ŕ Dlr lombaire\n\n# TRT ambulatoire:\n\nsi femme jeune Ŕ ECG normal Ŕ absence de signes de septicémie Ŕ vomissement Ŕ grossesse Ŕ diabète - absence d’une pathologie obstructive.\n\n| - Ciprolon cp 500mg | QSP 15j | 01cp x 02/j    |\n| ------------------- | ------- | -------------- |\n| - Rocéphine sol inj | QSP 05j | 01inj /j en IM |\n| - Oroken cp 200mg   | QSP 04j | 01cp x 02/j    |\n\n# Hospitalisation:\n\n| Cefacidal | 01g x 03/j |\n| --------- | ---------- |\n| Genta     | N° 03      |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 130"
+      },
+      {
+        "page": 131,
+        "content": "# PNA (IDEM Prostatite)\n\n- Oflocet cp 200mg / Oroken srp 40, 100mg ………………. QSP 10j\n- 01cp x 02/j / 01dose/kg x 02/j\n- Paracétamol cp 500mg/srp/supp ……….……..………… 01Bte / 01flc\n- 01cp x 03/j / 30mg/kg/j\n\nNB: Srp 40mg si 06 - 30mois\n\nSrp 100mg si 30mois - 10ans\n\nB.Bilal « Collection 150 Ordonnances Types » Page 131"
+      },
+      {
+        "page": 132,
+        "content": "# Ordonnances Types\n\n# 1. Traitement\n\n- Alginate (Gaviscon) sac …………………………………………………… 01Bte\n- 01sac x 03/j après repas\n- Et/ou\n- Antiacide : Hydroxyde d’Aluminium Ŕ Hydroxyde de Mg\n- Maalox bvb ………………………………………………………………………… 1flc\n- 01càc x 03/j après repas en dehors des autres mdct\n- Ou\n- Azantac cp 300mg …………………………………………………..…….. 01Bte\n- (Anti-H2) 01cp /j le soir\n- Ou\n- IPP : (Meilleur)\n- Demi-dose …. Mopral 10mg /j …. gel 10g …. pdt 04sem\n- Pleine dose …. Mopral 20mg /j …. gel 20g …. pdt 05sem\n\nB.Bilal « Collection 150 Ordonnances Types » Page 132"
+      },
+      {
+        "page": 133,
+        "content": "RGO*\n\n- Alginate (Gaviscon) sac …………………………………………………… 01Bte\n- 01sac x 02/j\n- Topaol cp ………………………………………………………………………… 01Bte\n- 01sac x 02/j\n- Charbon de Bellac cp …………………………………….……………… 01Bte\n- 01cp x 02/j\n\n# TRT des SF OGD et colique + diarrhée A+C :\n\nBedelix Ŕ Smecta Ŕ Pepsane (sac pansement digestif)\n\n# Antiémétique :\n\n- Motilium cp 10mg …………………………………………………………… 01Bte\n- Primperan cp/sirop ……………………………..……..……………………. 01Bte\n- 01cp x 02/j 15mn avant les repas\n\n# Gastro-entérite :\n\nBactrim fort Ŕ Ercefuryl - Ciprolon\n\nB.Bilal « Collection 150 Ordonnances Types » Page 133"
+      },
+      {
+        "page": 134,
+        "content": "# Rhinite aigue\n\n| -Pivalone-Néomycine sol | 01flc           | 01pulv x 03/j        |\n| ----------------------- | --------------- | -------------------- |\n| -Physiol sol            | 01flc           | 01gtte/Narine x 03/j |\n| -Amoxil                 | si surinfection |                      |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 134"
+      },
+      {
+        "page": 135,
+        "content": "# Rhinite allergique saisonnière\n\n| -Clarityne cp 10mg / sol | 01Bte/01flc | 01cp /j ou 01CM x 02/j / 01CM /j |\n| ------------------------ | ----------- | -------------------------------- |\n| -Rhinaaxia sol           | 01flc       | 01pulv/Narine x 04/j             |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 135"
+      },
+      {
+        "page": 136,
+        "content": "# Rhume\n\n- Aspégic cp Effervescent / st 100mg\n……………………………… 01Bte\n01cp* x 03/j / 50mg/kg/j\n- UPSA Vit-C cp Effervescent\n………………………………………… 01Bte\n01cp* x 03/j / ½ cp x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 136"
+      },
+      {
+        "page": 137,
+        "content": "# Rougeole\n\n- - Toplexil (avant 30 mois) srp ………………………………………………. 01 flc\n- 01 càc x 03/j\n- - Trophires (après 30 mois) srp ……………………………………….…… 01 flc\n- ½ càc x 03/j\n- - Paralgan cp 500mg / srp ……………………………………….. 01 Bte/01 flc\n- 01 cp x 03/j / 30 mg/kg/j\n- - Soufrane sol nasale ……………………………………….………………….. 01 flc\n- 02 gttes x 03/j\n\nSi otite associée =› Augmentin\n\nSi bronchite associée =› Clamoxyl\n\nB. Bilal « Collection 150 Ordonnances Types » Page 137"
+      },
+      {
+        "page": 138,
+        "content": "Scarlatine\n\n-Oracilline cp 01MUI / srp 250mg ……………………………….. QSP 10j\n\n01cp x 03/j / 50mg/kg/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 138"
+      },
+      {
+        "page": 139,
+        "content": "# Sciatique*\n\n- Diclofenac inj 75 ………………………………………………………………. N°03\n- 01inj /j en IM\n- Naproxene cp 550 ……………………………………………………… QSP 07j\n- 01cp x 02/j après repas\n- Codoliprane cp ………………………………………………………..……… 02Bte\n- 01cp x 03/j\n- Ketoprofène patch ……………………..…………………………………… 01Bte\n- 01patch /j\n- Esoprotion gel 30 ………………………………………………………….. 01Bte\n- 01gel /j le matin\n\nB.Bilal « Collection 150 Ordonnances Types » Page 139"
+      },
+      {
+        "page": 140,
+        "content": "# Sinusite maxillaire aigue\n\n- Amoxil gel 500mg / sirop 250, 125mg ……………………..…. QSP 10j\n\n02gel x 02/j ou 50mg/kg/j\n- Paralgan cp 500mg / sirop ……………………….………….…………. 01Bte\n\n01cp x 03/j ou 50mg/kg/j\n- Rhumafed cp - sirop ……………………………………..…..…. 01bte / 01flc\n\n01cp x 03/j ou 01càc x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 140"
+      },
+      {
+        "page": 141,
+        "content": "# Suite de couche\n\n- Céfacet cp 01g …………………………………………………………… QSP 10j\n\n01cp x 03/j\n- Cerazette cp 75mg ……………………………………………….. QSP 03mois\n\n01cp/j à partir du 21ème j du PP\n- Tardyferon ……………………………....……………………………………… 01Bte\n\n01cp /j\n\nOu Fumafer 02cp /j\n- Lovenox 0.4cc inj ……………………………………………………………. N°06\n\n01inj /j en s/c\n- Saforelle sol …………………………………………………………………… 01 flc\n\nOu Hydralin apaisa…………………………………………………………….. 01 flc\n\n01app x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 141"
+      },
+      {
+        "page": 142,
+        "content": "# Surinfection bactérienne d’une bronchite aigue virale\n\n- Amoxil gel 500mg Ŕ sirop 250, 125mg ………………………. QSP 10j\n- 02gel x 02/j ou 50mg/kg/j\n- Paralgan cp 500mg / sirop …………………….………………………. 01Bte\n- 01cp x 03/j ou 30mg/kg/j\n- Muxol sol ………………………………………….…………………………..…. 01flc\n- 01càààs x 3/j / 01càc x 03/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 142"
+      },
+      {
+        "page": 143,
+        "content": "# Teigne du cuir chevelu\n\n| - Griséofulvine cp 500 | QSP 02 mois | 01 cp x 02/j  |\n| ---------------------- | ----------- | ------------- |\n| - Ketoconazole crème   | QSP 01 mois | 01 app x 02/j |\n| - Ketoconazole Shampo  | QSP 01 mois | 02 x /sem     |\n\nB. Bilal « Collection 150 Ordonnances Types » Page 143"
+      },
+      {
+        "page": 144,
+        "content": "# Torticolis spasmodiques\n\n| Mydocalm cp 150mg | 01Bte | 01cp /j le soir (jsq x 03/j) |\n| ----------------- | ----- | ---------------------------- |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 144"
+      },
+      {
+        "page": 145,
+        "content": "# Toux\n\n# Sèche:\n\n- Toplexil gel / srp …………………………………………..………. 01Bte/01flc\n- 02gel/02càc x 03/j / 01càc x 03/j\n\n# Productive:\n\n- Rhinathiol adulte / Rhinathiol enfant srp ………………………… 01flc\n- 01càc x 03/j / 01càs\n- Ketotifene / Allerfene srp ……………………………………..…………... 01flc\n- 01CM x 02/j / ½ CM x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 145"
+      },
+      {
+        "page": 146,
+        "content": "# Trachome\n\n(Larmoiement, Photophobie, Sensation de brulure et de corps étranger, Hypersécrétion)\n\n| Chloramphénicol sol | 01flc | 01-08 Gttes /j |\n| ------------------- | ----- | -------------- |\n| Néomycine Pde       | 01Tbe | 01app x 02/j   |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 146"
+      },
+      {
+        "page": 147,
+        "content": "# Traumatisme thoracique\n\n# Palpation - Auscultation - Radio-thorax\n\n# Si fracture d’une cote :\n\n- Elastoplaste ……………………….….. 01app/05j\n- Efferalgan codéine …………………. 01cp x 03/j\n- Voltarene supp 100mg …………… 01supp/j\n- /cp Lp 75 mg ………….. 01cp/j\n\n# Si fracture de 2 cotes :\n\nVolet costal risque de PNO, surtout emphysème sous cutanée.\n\nB.Bilal « Collection 150 Ordonnances Types » Page 147"
+      },
+      {
+        "page": 148,
+        "content": "# Ulcère\n\n- Clamoxyl cp 01g …………………………………………………………..QSP 07j\n\n01cp x 03/j\n- Flagyl cp 500mg ……………………………..……………………………..QSP 07j\n\n01cp x 03/j\n- Proton gel 20mg ……………………………………………………………. 07sem\n\n01gel x 02/j pdt 01sem puis 01gel /j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 148"
+      },
+      {
+        "page": 149,
+        "content": "# Ulcère Gastroduodénal (UGD)*\n\n| -Lomac gel 20mg                  | QSP 01mois     |\n| -------------------------------- | -------------- |\n| 01gel x 02/j (07j)               | 01gel /j (23j) |\n| -Flagyl cp 500mg                 | QSP 07j        |\n| 01cp x 03/j                      |                |\n| -Amoxicilline cp 01g             | QSP 07j        |\n| 01cp x 02/j                      |                |\n| -Pepsane sachet                  | 02Bte          |\n| 02sachets x 03/j avant les repas |                |\n| -Nobac sirop                     | 01Bte          |\n| 01càc x 03/j après repas         |                |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 149"
+      },
+      {
+        "page": 150,
+        "content": "Ulcère Gastroduodénal (UGD)*\n\nAntiulcéreux :\n\n- IPP double dose : Oméprazole 02mg (matin et soir)\n- Proton / Mopral gel 200mg ……………………………..…………….. 01bte\n- 02gel /j\n- Anti histaminique H2 = Anti sécrétoire\n- Ramitidine : Azantac cp 300mg ……………………………………… 01Bte\n- 01cp /j le soir\n\nbi ATB : QSP 07j\n\n- Clarythromycine\n- Macrolide : Zeclar cp 500mg ……………………………...…… 01cp x 02/j\n- Amoxicilline\n- Clamoxyl cp 01g …………….…………..……………………….….. 01cp x 02/j\n- Si allergie :\n- Metronidazole\n- Flagyl cp 500mg ……………………………………………………… 01cp x 03/j\n\nAnti ulcéreux : poursuite à simple dose.\n\nUD =› 07j / à 03sem si cpc +AINS\n\nUG =› 04-06sem dans tous les cas + endoscopie de contrôle\n\nB.Bilal « Collection 150 Ordonnances Types » Page 150"
+      },
+      {
+        "page": 151,
+        "content": "# Urétrite\n\n- Oroken cp 200mg …………….………………………….…………………. 01Bte\n- 01cp prise unique pdt 07j\n- Vibramycine cp 100mg ……………………………………………….. QSP 07j\n- 01cp x 02/j\n- Ou Zithromax cp 200mg ………………………………………………. QSP 07j\n- 01cp prise unique\n\nECBU : 48h . 20j après TRT\n\nB.Bilal « Collection 150 Ordonnances Types » Page 151"
+      },
+      {
+        "page": 152,
+        "content": "Urticaire\n\n# Zyrtec\n\n| cp / sol | 01Bte/01flc |\n| -------- | ----------- |\n| 01cp /j  | 01Gttes /j  |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 152"
+      },
+      {
+        "page": 153,
+        "content": "# Varicocèle*\n\n-Dalfon cp 500mg …………………………………………………. QSP 02mois\n\n01cp x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 153"
+      },
+      {
+        "page": 154,
+        "content": "# Varicelle\n\n| -Keforal cp 500      | QSP 10j | 02cp x 02/j     |\n| -------------------- | ------- | --------------- |\n| -Hexomedine solution | 03flc   | 01app x 03/j    |\n| -Loratadine cp 10    | 01Bte   | 01cp /j le soir |\n| -Doliprane cp 01g    | 02Bte   | 01cp x 03/j     |\n\nB.Bilal « Collection 150 Ordonnances Types » Page 154"
+      },
+      {
+        "page": 155,
+        "content": "# Verrues\n\n# Vericide-Coricide / Duofilm / Verrufilm / Verrulyse-Methionine\n\nPde ………… 01Tbe\n\n01app x 02/j\n\nB.Bilal « Collection 150 Ordonnances Types » Page 155"
+      },
+      {
+        "page": 156,
+        "content": "# Vers dans les selles\n\n- Fluvermal cp, srp 100mg ……………………………………… 01Bte/01flc\n\nOxyurose=› 01CM prise unique le 1ᵉʳ j, 02ème prise le 15ème j\n\nAscaridiase =› 01cp/01CM x 02/j pdt 03jrs (CI: 15mois)\n\nB.Bilal « Collection 150 Ordonnances Types » Page 156"
+      },
+      {
+        "page": 157,
+        "content": "# Vertige\n\n# En urgence :\n\n- -01amp Tanganil inj 500mg/ml\n\n# A la sortie :\n\n- -Tanakan sol bvb 40mg/ml ……………………………………………….. 01flc\n\n01dose x 03/j\n- Ou :\n- -Tanganil cp 500mg …………………………………………………………. 01Bte\n\n01cp x 03/j\n- Ou :\n- -Serc cp 08mg ………………………………………..………………………… 01Bte\n\n01cp x 03/j\n\n# Si vomissement :\n\n- -Primperan cp 10mg …………..……………………………………………. 01Bte\n\n01cp x 03/j ¼ h avant les repas\n\n= Demander l’avis de l’ORL\n\nB.Bilal « Collection 150 Ordonnances Types » Page 157"
+      },
+      {
+        "page": 158,
+        "content": "# Vomissement\n\n- Primperan cp 10mg/srp …………..………….…………………. 01Bte/01flc\n\n01cp x 03/j / 01càc x 03/j\n- Ou:\n- Motilium srp …………………………………………………………………….. 01flc\n\n01càc x 03/j 15-30min avant les repas\n\nB.Bilal « Collection 150 Ordonnances Types » Page 158"
+      },
+      {
+        "page": 159,
+        "content": "# CONTACTEZ-NOUS !\n\nBoutelis Bilal\n\nB.Bilal « Collection 150 Ordonnances Types » Page 159"
+      },
+      {
+        "page": 160,
+        "content": "# Collection 150 Ordonnances Types\n\nC’est juste une collection des ordonnances types correspondant à des situations cliniques les plus courantes, rédigées de façon précise, avec les posologies ..\n\nElles constituent un aide-mémoire précieux pour les internes, les jeunes médecins et tous ceux qui sont amenés à prescrire, pour leur offrir une aide pratique immédiate ..\n\nB.Bilal\n\nPage 160"
+      }
+    ]
+  },
+  {
+    "pdf": "1Anti-inflammatoires.pdf",
+    "hash": "9e6812bc6721e01c2ad76b8592e7d856d85f1956bb8b1dc2a102249ce7f4f9be",
+    "quality": "online",
+    "timestamp": 1784734706441,
+    "pages": [
+      {
+        "page": 1,
+        "content": "# Les Corticoides\n\n| La famille                | DCI                        | Spécialités         | La forme | Le dosage       |\n| ------------------------- | -------------------------- | ------------------- | -------- | --------------- |\n| Corticoides               | Methyl                     | Solu-Medrol//Medrol | Cp/Inj   | 40mg/2ml        |\n|                           | Prednisolone               |                     | Cp       | 40mg            |\n| (effet courte)            | Lemod-Solu                 |                     | Cp       | 20mg            |\n|                           | Prednol                    |                     | Cp       | 40mg            |\n| Suppressent l'inflamation | Lisamethyle                | Solupred            | Cp       | 20mg            |\n|                           | Prednisolone               |                     |          | Effet courte    |\n|                           |                            |                     |          | 0.35-1.2mg/kg/j |\n| Immuno-suppression        | Pridnisone                 |                     |          |                 |\n|                           | Acetonide de Triancinolone | Kenacort Retard     | Inj      | 40mg/1ml        |\n|                           | Dexamethasone              | Dexol               |          |                 |\n|                           |                            | Desacrovis          |          |                 |\n|                           | Bethametasone        "
+      },
+      {
+        "page": 2,
+        "content": "# Anti inflamatoire non stéroidien\n\n| La famille          | DCI               | Spécialités | I.a    | Le dosage     | forme |\n| ------------------- | ----------------- | ----------- | ------ | ------------- | ----- |\n| Ibuprofene          | Sapolen           | Cp          | Adulte | Max 1200 mg   |       |\n|                     | Neupren           | Sp          |        | 20mg/ml       |       |\n|                     | Antarenr Ge       | Cp          |        | 400mg         |       |\n|                     | Profen Lp         | Cp          |        | 200mg         |       |\n| Enfant              | Spifen            | Cp          |        | 400mg         |       |\n|                     | Algifen           | Sp          |        | 20mg/ml       |       |\n|                     | Xydol             | Cp          |        | 200 mg        |       |\n|                     | Bufen             |             |        | 200mg         |       |\n|                     | Upfen             | Cp          |        | 200mg         |       |\n|                     | Antalfen          |             |        | 400/600 mg    |       |\n| Anti - inflamatoire | Upfen             |             |        |               |       |\n| Non                 | Remofen           |             |        | 20mg/ml       |       |\n| stéroidien          | Upactive          |             |        |               |       |\n|                     | Antalfan          |             |        |               |       |\n| Flurbi"
+      },
+      {
+        "page": 3,
+        "content": "# Diclofenac\n\n|            | Flovenac Lp | Gel | 75mg |\n| ---------- | ----------- | --- | ---- |\n| Diclofenac | Rapidus     | Cp  | 50mg |\n\n# Naproxéne\n\n| Nopain    | Cp | 275/550mg |\n| --------- | -- | --------- |\n| Narex     | Cp | 275mg     |\n| Apranax   |    |           |\n| Nhupain   | Cp | 550mg     |\n| Naprolgic | Cp | 55mg      |\n\n# Indometacine\n\n| Indomine  | Spp | 50-100mg |\n| --------- | --- | -------- |\n| Indomet   |     |          |\n| Indocid   |     |          |\n| Indogesic |     |          |\n\n# Acide méfenamique\n\n| Ketoproféne | Profen LP    | Cp       | 200 mg |           |\n| ----------- | ------------ | -------- | ------ | --------- |\n|             | 150-300mg /j | Profenid | Cp     | 200 mg LP |\n|             | 100mg        |          |        |           |\n|             | 1mg/ml       | enf      |        |           |\n|             | Profenid     | Spp      | 100 mg |           |\n|             | Alprofen     | Spp      | 100 mg |           |\n|             | Ketofen      |          |        |           |\n|             | Ketum        |          |        |           |\n\n# Piroxicam\n\n| Felden          | Inj      | 20mg  |      |\n| --------------- | -------- | ----- | ---- |\n| Contre indique  | Piroxene | Gel   | 0.5% |\n| enfant <1Sans   | Prixam   | Gel   | 0.5% |\n| 1 prise / jr au | Piroxal  | Spp   | 20mg |\n| cours du repas  | Orthcam  | Créme | 0.5% |\n| 20mg /j         | Felcam   | Gel   | 0.5% |\n| Pas dépasse     | Fenoxam  | Gel   | 0.5% |\n| 40mg/jr        "
+      }
+    ]
+  },
+  {
+    "pdf": "ASP.pdf",
+    "hash": "ffd2a8602f4ea9b1b6d42b0831db8af0cbc45e35306873b5f8cf9683c0dce696",
+    "quality": "online",
+    "timestamp": 1784734717924,
+    "pages": [
+      {
+        "page": 1,
+        "content": "# ASP\n\n# Dr. KHERBA_N"
+      },
+      {
+        "page": 2,
+        "content": "# Femme de 29 ans\n\nDouleur épigastrique et au niveau de l'hypochondre gauche\n\nMétéorisme abdominal\n\nArrêt des matières et des gaz depuis ce matin\n\n⚠️ASP: Aérocolie\n\n✅️Traitement symptomatique"
+      },
+      {
+        "page": 3,
+        "content": "# 2\n\n# A\n\nPatient 48 ans consulte pour arrêt des matières et des gaz depuis 2 jours\n\n⚠️ASP: Aspect en grains de café ☕️\n\n=> Occlusion intestinale (Volvulus de sigmoïde)\n\n➡️Évacuation: Chirurgie en Urgence"
+      },
+      {
+        "page": 4,
+        "content": "# Patient aux ATCD d’occlusion opéré en 2010\n\nconsulte pour une douleur abdominal intense avec vomissements\n\nabdomen légèrement distendu\n\narrêt des matières et des gaz depuis 2h du matin\n\n⚠️ASP: NHA plus large que haut et central\n\n=> Occlusion grélique\n\nTDM AP + Ionogramme en urgence"
+      },
+      {
+        "page": 5,
+        "content": "NO_CONTENT_HERE"
       }
     ]
   },
   {
     "pdf": "CAT Urgences1.pdf",
-    "size": 189316,
-    "mtime": 1783818968436.6113,
+    "hash": "058c97edd4184da4d8263e5d472395d9cf29c82be1f17a451aeb275e1f8d8395",
+    "quality": "online",
+    "timestamp": 1784734733169,
     "pages": [
       {
         "page": 1,
-        "text": "CAT devant une hyperkaliémie :\nDiagnostic : = Onde T ample et >pointue\n= Hyperkaliémie 5.5 mmol/l\nCAT : = Donner immédiatement 1-2 amp de Ca+ de 120mg (si\nI.renale : à refaire si persistance)\n= Selon l’importance de hyperkaliémie : 2càm de Kayexalate\ndans un grand bol d’eau ou bien sérum glucosé à 30% + 30 UI d’IO\nou bien hémodialyse si K+ >7 mmol/l +IRCT\nCAT devant un OAP :\nDiagnostic : = Dyspnée + râles crépitant\n= OAP sur pic hypertensif\n= OAP sur cardiopathie + TA normale voir basse\nCAT : = Position demi assise\n= Oxygénothérapie\n= 40mg de lasilix (120mg si IRC) à renouveler 30min ou 1h\nsi persistance de l’OAP jusqu’à 160mg à 200mg chez un\nsujet normal et IRC de 120mg (3-4 fois)\n= Faire un ECG + Avis de cardio\nSi OAP + TA basse :\n= Dobutrex : 2amp dans 250cc de SG à 5% jusqu’a\naugmentation de la TA puis lasilix"
+        "content": "CAT devant une hyperkaliémie :\nDiagnostic :\n- Onde T ample et >pointue\n- Hyperkaliémie 5.5 mmol/l\n\nCAT :\n- Donner immédiatement 1-2 amp de Ca+ de 120mg (si I.renale : à refaire si persistance)\n- Selon l’importance de hyperkaliémie : 2càm de Kayexalate dans un grand bol d’eau ou bien sérum glucosé à 30% + 30 UI d’IO ou bien hémodialyse si K⁺ >7 mmol/l +IRCT\n\nCAT devant un OAP :\nDiagnostic :\n- Dyspnée + râles crépitant\n- OAP sur pic hypertensif\n- OAP sur cardiopathie + TA normale voir basse\n\nCAT :\n- Position demi assise\n- Oxygénothérapie\n- 40mg de lasilix (120mg si IRC) à renouveler 30min ou 1h si persistance de l’OAP jusqu’à 160mg à 200mg chez un sujet normal et IRC de 120mg (3-4 fois)\n- Faire un ECG + Avis de cardio\n- 🡺Si OAP + TA basse :\n- Dobutrex : 2amp dans 250cc de SG à 5% jusqu’a augmentation de la TA puis lasilix"
       },
       {
         "page": 2,
-        "text": "CAT devant une cétose diabétique :\nSelon la glycémie et l’acétonurie\n= Gly >2.5g/l SSI à 9% + électrolytes\n= Gly <2.5g/l SGI à 5% + électrolytes\n= Si acétonurie (+)  10UI (IO)en IV/1h\n= Si acétonurie (-)  10UI (IO) en SC/4h\nLes électrolytes : (adapter les résultats surtout si hypokaliémie)\n2g de Nacl (1amp)\n1g de Kcl (1/2 amp)\n1g de Mg+2 (1/2 amp)\n1g de Ca+2 (1/2 amp)\nSi signes d’infection Antibiothérapie :\n= Flagyl 500mg/1flacon /8h\n= Autres antibiotiques selon type d’infection exp : Claforan /6h\nGly >5g/l (HI) : CDU = Cetone (-) : 10UI /IV + Sce pd 1h\n2.5< Gly <3.5 : CDU = Cetone (-) : 10UI /SC + Sce pd 4h\nRentre avec observance du trt et vérifier le régime\nGly >3.5g/l: CDU = Cetone (-) :10UI en IVD + Sce chaque 1h\nGly >2.5g/l : CDU = Cetone (+) : 10UI /IV + SSI + Eléct\n(dl.abd, nousées, vo, odeur d’haleine)\nGly <2.5 g/l : CDU = Cetone (+) : 10UI /IV + SG + Sce 1h"
+        "content": "# CAT devant une cétose diabétique :\n\n- Selon la glycémie et l’acétonurie\n- - Gly >2.5g/l\n- SSI à 9% + électrolytes\n- Gly &#x3C;2.5g/l\n- SGI à 5% + électrolytes\n- Si acétonurie (+)\n- 10UI (IO) en IV/1h\n- Si acétonurie (-)\n- 10UI (IO) en SC/4h\n\nLes électrolytes : (adapter les résultats surtout si hypokaliémie)\n- 2g de Nacl (1amp)\n- 1g de Kcl (1/2 amp)\n- 1g de Mg²⁺ (1/2 amp)\n- 1g de Ca²⁺ (1/2 amp)\n- Si signes d’infection\n- Antibiothérapie :\n- Flagyl 500mg/1flacon /8h\n- Autres antibiotiques selon type d’infection exp : Claforan /6h\n\nGly >5g/l (HI) :\n\n- CDU = Cetone (-) : 10UI /IV + Sᶜᵉ pd 1h\n\n2.5&#x3C; Gly &#x3C;3.5 :\n\n- CDU = Cetone (-) : 10UI /SC + Sce pd 4h\n- Rentre avec observance du trt et vérifier le régime\n\nGly >3.5g/l:\n\n- CDU = Cetone (-) :10UI en IVD + Sᶜᵉ chaque 1h\n\nGly >2.5g/l :\n\n- CDU = Cetone (+) : 10UI /IV + SSI + Eléct\n- (dl.abd, nousées, vo, odeur d’haleine)\n\nGly &#x3C;2.5 g/l :\n\n- CDU = Cetone (+) : 10UI /IV + SG + Sce 1h"
       },
       {
         "page": 3,
-        "text": "CAT devant un AVC :\nDiagnostic : TA ≥ 18/10 (ne pas abaisser la TA avant résultats\nTDM)\nTroubles neurologiques\n- Aphasie ou Dysarthrie, Céphalées, Flou visuel\n- Paralysie faciale centrale ou périphérique\n- Déficit moteur : hémiparésie ou hémiplégie\nCAT : 1)-Hospitalisation au moins 24 à 48h\n2)-Bilan complet : bilan d’urgence, ECG, TA, glycémie\n3)-TDM cérébral : objectivant\nHyperdensité : AVC hémorragique\nHypodensité : AVC ischémique\nTDM cérébral : Normal suspicion d’AVC ischémique\nA refaire 48-72h après (l’image va se constituer)\n4)-Surveillance : TA, gly : si patient diabétique\n5)-Flash de mannitol : 100cc/8h si AVC ischémique\n100cc/6h si AVC hémorragique\nN’utilise plus le SGI : risque d’œdème cérébral\nToujours utiliser le SSI à bas début\nMannitol : on le donne avant 48h\nAspégic : on le donne après 48h"
+        "content": "# CAT devant un AVC :\n\n# Diagnostic :\n\n- TA ≥ 18/10 (ne pas abaisser la TA avant résultats TDM)\n- Troubles neurologiques\n- Aphasie ou Dysarthrie, Céphalées, Flou visuel\n- Paralysie faciale centrale ou périphérique\n- Déficit moteur : hémiparésie ou hémiplégie\n\n# CAT :\n\n1. Hospitalisation au moins 24 à 48h\n2. Bilan complet : bilan d’urgence, ECG, TA, glycémie\n3. TDM cérébral : objectivant\n- Hyperdensité : AVC hémorragique\n- Hypodensité : AVC ischémique\n\nTDM cérébral : Normal 🡺 suspicion d’AVC ischémique 🡺 A refaire 48-72h après (l’image va se constituer)\n4. Surveillance : TA, gly : si patient diabétique\n5. Flash de mannitol :\n- 100cc/8h si AVC ischémique\n- 100cc/6h si AVC hémorragique\n\nN’utilise plus le SGI : risque d’œdème cérébral\n\nToujours utiliser le SSI à bas début\n\nMannitol : on le donne avant 48h\n\nAspégic : on le donne après 48h"
       },
       {
         "page": 4,
-        "text": "6)-Ordonnance de sortie : Somazina inj : 1inj/j (relais par\nper os= somazina gtt : 2ml*3/j)\nAspégic sachet 100mg: 1sachet/j\n(AVC isthémique)\nAzantac\n7)-Lettres à l’astreinte de neuro-med\nAVC hémorragique : abstention thérapeutique pour la TA sauf si >22\nAVC isthémique : ↓ la TA mais ne pas dépasser 20% ds le 1e 24h\nCAT devant une convulsion :\nSi la 1e convulsion : = Recherche une hypocalcémie\n= AVC\n= Troubles ioniques (hyponatrémie, hypoK)\n= ECG\nSi sujet épileptique connu : = Recherche un écart thérapeutique\n= un changement thérapeutique\n= une cause, une complication\nSi pas de crise : = TDM cérébral + bilan d’urgence\n= Garder le pour surveillance.\n= Faire un bon intérrogatoire\n= Avis de neuro-med à l’astreinte"
+        "content": "# 6) Ordonnance de sortie :\n\n- Somazina inj : 1 inj/j (relais par per os= somazina gtt : 2ml*3/j)\n- Aspégic sachet 100mg: 1 sachet/j (AVC isthémique)\n- Azantac\n\n# 7) Lettres à l’astreinte de neuro-med\n\nAVC hémorragique : abstention thérapeutique pour la TA sauf si >22\n\nAVC isthémique : ↓ la TA mais ne pas dépasser 20% ds le 1ᵉ 24h\n\n# CAT devant une convulsion :\n\n- Si la 1ᵉ convulsion :\n- Recherche une hypocalcémie\n- AVC\n- Troubles ioniques (hyponatrémie, hypoK)\n- ECG\n- Si sujet épileptique connu :\n- Recherche un écart thérapeutique\n- un changement thérapeutique\n- une cause, une complication\n- Si pas de crise :\n- TDM cérébral + bilan d’urgence\n- Garder le pour surveillance.\n- Faire un bon intérrogatoire\n- Avis de neuro-med à l’astreinte"
       },
       {
         "page": 5,
-        "text": "Si crise devant nous : = 1amp de valium dilué en IVL\n= 10mg/kg de Gardénal (dose de charge)\nSi crise convulsive à répétition et du mal épileptique :\n= Amp de valium dilué (0.1mg/kg/j) en IVL\n= 10mg/kg de Gardénal\n- Dose de charge pour la ½ 2*/j\n- Dose d’entretien pour être efficace\n= Canule de Guidel\nSuce : si notion de convulsion et pas de convulsion devant nous\nMouillance si épileptique connu\nAttention : il faut éliminer le diagnostic différentiel :\n= Hy\n= Etat d’agitation\nNe donne pas de valium\nOn donne ½ amp de MG+2 dilué en IVL\nCAT devant une ingestion de produit caustique :\nBilan radiologique : Téléthorax + ASP\nSi acide : = Arrêt d’alimentation orale même de l’eau\n= Réhydratation : ♠-500cc de SSI à 9 % /2h\n♠-500cc de SG à 5% /2h\n♠-500cc de sérum bicarbonaté /2h"
+        "content": "# Si crise devant nous\n\n= 1 amp de valium dilué en IVL\n\n= 10mg/kg de Gardénal (dose de charge)\n\n# Si crise convulsive à répétition et du mal épileptique :\n\n= Amp de valium dilué (0.1mg/kg/j) en IVL\n\n= 10mg/kg de Gardénal\n\n- Dose de charge pour la ½ 2*/j\n- Dose d’entretien pour être efficace\n\n= Canule de Guidel\n\nSuce : si notion de convulsion et pas de convulsion devant nous\n\nMouillance si épileptique connu\n\nAttention : il faut éliminer le diagnostic différentiel :\n\n- Hy\n- Etat d’agitation\n\nNe donne pas de valium\n\nOn donne ½ amp de MG+2 dilué en IVL\n\n# CAT devant une ingestion de produit caustique :\n\n- Bilan radiologique : Téléthorax + ASP\n- Si acide : = Arrêt d’alimentation orale même de l’eau\n- Réhydratation :"
       },
       {
         "page": 6,
-        "text": "♠-Électrolytes\n= Azantac : 1amp/4h\n= Fibroscopie OGD +++\nSi l’eau de javel ou autres : = Arrêt d’alimentation\n= Réhydratation\n= Azantac 1amp de 150mg /6h\n(dose de charge) puis 1amp 50mg/6h\n= Fibroscopie OGD après 48h\n(si normale : reprise Altorol)\nTraitement : trithérapie de l’ulcère ou IPP seul (OMEPRAZOL)\nCAT devant un Pic hypertensif :\nPAS >21 ou/et PAD >10\nNe pas abaisser la TA plus de 25%\n(max : 10cc de loxen /24h + surveillance pendant 15-20min)\nTA ≥18/10 sans troubles neurologiques :\n= 1cc de Loxen dilué dans 1cc de SG à 5% en IVL pendant 3min\n= TA toujours augmenter Même schéma + ECG\n= Puis TA augmentée : 20mg de Lasilix\n= Ordonnance de sortie : ♠- Profil tensionnel\n♠- loxen cp 50mg : 1cp/j\n♠- lettre de consultation en cardio"
+        "content": "# Électrolytes\n\nAzantac : 1amp/4h\n\nFibroscopie OGD +++\n\n- Si l’eau de javel ou autres : Arrêt d’alimentation\n- Réhydratation\n- Azantac 1amp de 150mg /6h (dose de charge) puis 1amp 50mg/6h\n- Fibroscopie OGD après 48h (si normale : reprise Altorol)\n\n# Traitement\n\ntrithérapie de l’ulcère ou IPP seul (OMEPRAZOL)\n\n# CAT devant un Pic hypertensif :\n\nPAS >21 ou/et PAD >10\n\n- Ne pas abaisser la TA plus de 25%\n- (max : 10cc de loxen /24h + surveillance pendant 15-20min)\n\nTA ≥18/10 sans troubles neurologiques :\n\n- 1cc de Loxen dilué dans 1cc de SG à 5% en IVL pendant 3min\n- TA toujours augmenter\n- Même schéma + ECG\n- Puis TA augmentée : 20mg de Lasilix\n\n# Ordonnance de sortie :\n\n- Profil tensionnel\n- loxen cp 50mg : 1cp/j\n- lettre de consultation en cardio"
       },
       {
         "page": 7,
-        "text": "Bilan complet\n- FO (pr HTA inaugural)\n- Fonction rénale\n- Ionogramme sanguin (NA+, K+)\n- Chol total, HDL, LDL, TG\n- FNS complète\n- Fonction hépatique (Protides toraux, TP, Alb, TGO, TGP,\nphosphatase alcaline, BT et conj)\nCAT devant une douleur thoracique :\nTA, Gly, Théléthorax, ECG : Avis de cardio\nECG normal : ½ amp de Mg2+\nECG pathologique : Troponine, CPK\nCAT devant une hémorragie digestive :\nBilan d’urgence (surtout HK)\nSi HK <25% = Transfusion\nPrésenter le malade à la gastro pour Fibro\nHospitalisation\nInterrogatoire + Examen clinique + TR + Sonde nasogastrique\nSi saignement actif = lavage par SSI à 9% glacé\nTA basse = Plasmagel en attendant la transfusion\nSi épigastralgie associée = Azantac"
+        "content": "# Bilan complet\n\n- FO (pr HTA inaugural)\n- Fonction rénale\n- Ionogramme sanguin (NA⁺, K⁺)\n- Chol total, HDL, LDL, TG\n- FNS complète\n- Fonction hépatique (Protides toraux, TP, Alb, TGO, TGP, phosphatase alcaline, BT et conj)\n\n# CAT devant une douleur thoracique :\n\n- TA, Gly, Théléthorax, ECG : Avis de cardio\n- ECG normal : ½ amp de Mg²⁺\n- ECG pathologique : Troponine, CPK\n\n# CAT devant une hémorragie digestive :\n\n- Bilan d’urgence (surtout HK)\n- Si HK &#x3C;25% = Transfusion\n- Présenter le malade à la gastro pour Fibro\n- Hospitalisation\n- Interrogatoire + Examen clinique + TR + Sonde nasogastrique\n- Si saignement actif = lavage par SSI à 9% glacé\n- TA basse = Plasmagel en attendant la transfusion\n- Si épigastralgie associée = Azantac"
       },
       {
         "page": 8,
-        "text": "Recherche la prise d’anticoagulant ou AVK\nFaire TP, INR ===> Avis de cardio\nLieux de consultation :\n- Consultation de néphro et uro = 08 mai 1945\n- Consultation de cardio = Loussafna\n- Consultation de neuro-méd = Astreinte au service + 8 -05 -1945\n- Consultation d’endocrino = Astreinte au service +c de santé\n- Consultation de gastro = Astreinte au service + ????\nFonction rénale perturbée au bilan  Demander de\nnéphrologue"
+        "content": "# Recherche la prise d’anticoagulant ou AVK\n\n# Faire TP, INR ===> Avis de cardio\n\nLieux de consultation :\n- Consultation de néphro et uro = 08 mai 1945\n- Consultation de cardio = Loussafna\n- Consultation de neuro-méd = Astreinte au service + 8 -05 -1945\n- Consultation d’endocrino = Astreinte au service +c de santé\n- Consultation de gastro = Astreinte au service + ????\n\nFonction rénale perturbée au bilan 🡺 Demander de néphrologue"
       }
     ]
   },
   {
     "pdf": "Guide_Controle_Medical_DGSN.pdf",
-    "size": 3736,
-    "mtime": 1784655225250.3528,
+    "hash": "a7db47effd41483a601c8d47d7dfe10a872b130c7d2f4947e68278546e543073",
+    "quality": "online",
+    "timestamp": 1784734744472,
     "pages": [
       {
         "page": 1,
-        "text": "DGSN - SERVICE DE SANTE - PROTOCOLE DE CONTROLE MEDICAL\nNom du Fonctionnaire : .............................................. Date de l'examen : ...... / ...... / 2026\nGrade / Unite : ........................................................... Age : ........... ans\nPARTIE I : SIGNES CLINIQUES OBJECTIFS (Pathologie Reelle)\n[ ] Amyotrophie (Difference de perimetre > 1,5 cm entre les deux membres)\n[ ] Abolition ou diminution d'un reflexe osteo-tendineux (ROT L4 ou S1)\n[ ] Deficit moteur vrai (Testing segm. contre resistance ou marche impossible)\n[ ] Lasegue radiculaire franc (Douleur trajet electrique entre 30 et 70 deg)\n[ ] Concordance exacte imagerie/clinique (Hernie avec conflit prouve)\n[ ] Signes inflammatoires ou raideur segmentaire non-volontaire\nPARTIE II : SIGNES DE WADDELL (Simulation / Majoration)\n[ ] Hyper-reactivite / Grimaces / Cris lors de manoeuvres indolores\n[ ] Pression Axiale : Douleur lombaire lors de l'appui sur le crane\n[ ] Rotation Simulee : Douleur lombaire lors du pivotement du bloc tronc\n[ ] Flip Test (Distraction) : Lasegue positif allonge mais negatif assis\n[ ] Troubles sensitivo-moteurs non-anatomiques (global/changeant)\nPARTIE III : TEST DE HOOVER\n[ ] Test de Hoover POSITIF (Absence d'appui controlateral = Simulation)\nPARTIE IV : CONSTAT ET DECISION DU MEDECIN CONTROLEUR\nSCORE OBJECTIF : ......... / 6 | SCORE WADDELL : ......... / 5\nA. CAS DE PATHOLOGIE REELLE :\n[ ] Etat de sante altere : Concordance anatomo-clinique.\n[ ] Arret de travail JUSTIFIE. Duree recommandee : ............. jours.\nB. CAS DE SIMULATION OU MAJORATION :\n[ ] Incoherence anatomo-clinique (Waddell >= 3).\n[ ] Majoration manifeste des symptomes / Absence de lesion handicapante.\n[ ] Arret de travail NON JUSTIFIE. Reprise immediate du service.\nPage 1 - Document de controle interne DGSN"
+        "content": "DGSN - SERVICE DE SANTE - PROTOCOLE DE CONTROLE MEDICAL\n\nNom du Fonctionnaire : ..............................................           Date de l'examen : ...... / ...... / 2026\n\nGrade / Unite : ...........................................................     Age : ........... ans\n\n# PARTIE I : SIGNES CLINIQUES OBJECTIFS (Pathologie Reelle)\n\n- [ ] Amyotrophie (Difference de perimetre > 1,5 cm entre les deux membres)\n- [ ] Abolition ou diminution d'un reflexe osteo-tendineux (ROT L4 ou S1)\n- [ ] Deficit moteur vrai (Testing segm. contre resistance ou marche impossible)\n- [ ] Lasegue radiculaire franc (Douleur trajet electrique entre 30 et 70 deg)\n- [ ] Concordance exacte imagerie/clinique (Hernie avec conflit prouve)\n- [ ] Signes inflammatoires ou raideur segmentaire non-volontaire\n\n# PARTIE II : SIGNES DE WADDELL (Simulation / Majoration)\n\n- [ ] Hyper-reactivite / Grimaces / Cris lors de manoeuvres indolores\n- [ ] Pression Axiale : Douleur lombaire lors de l'appui sur le crane\n- [ ] Rotation Simulee : Douleur lombaire lors du pivotement du bloc tronc\n- [ ] Flip Test (Distraction) : Lasegue positif allonge mais negatif assis\n- [ ] Troubles sensitivo-moteurs non-anatomiques (global/changeant)\n\n# PARTIE III : TEST DE HOOVER\n\n- [ ] Test de Hoover POSITIF (Absence d'appui controlateral = Simulation)\n\n# PARTIE IV : CONSTAT ET DECISION DU MEDECIN CONTROLEUR\n\nSCORE OBJECTIF : ......... / 6 | SCORE WADDELL : ......... / 5\n\n# A. CAS DE PATHOLOGIE REELLE :\n\n- [ ] Etat de sante altere : "
       },
       {
         "page": 2,
-        "text": "GUIDE TECHNIQUE DES TESTS DE NON-ORGANICITE (Recto)\n1. Pression Axiale\nExercez une pression verticale sur le vertex du patient debout. Anatomiquement, cela n'induit aucune contrainte discale lombaire.\nUne plainte de douleur lombaire signe une majoration.\n2. Rotation Simulee\nFaites tourner le bassin et les epaules en bloc. Le rachis ne subit aucune torsion. Si le patient dit avoir mal au dos, c'est une reponse\nsimulee.\n3. Flip Test (Lasegue Distrait)\nFaites mine d'examiner les pieds du patient assis et tendez la jambe a 90 degres. S'il n'a pas mal alors que son Lasegue allonge est\npositif a 20 degres, la simulation est prouvee.\n4. Signe de Hoover\nL'expert place ses mains sous les deux talons. Le patient doit lever la jambe 'malade'. Si le talon de la jambe saine ne s'enfonce pas\ndans votre main, le patient ne fait aucun effort reel.\n5. Testing Moteur L5/S1\nL5 : Releve du gros orteil. S1 : Marche sur la pointe des pieds. Une hernie 'irritative' ne peut pas causer une paralysie totale de ces\nmouvements.\nCachet du Medecin Controleur : Signature :\nPage 2 - Document de controle interne DGSN"
+        "content": "GUIDE TECHNIQUE DES TESTS DE NON-ORGANICITE (Recto)\n\n# 1. Pression Axiale\n\nExercez une pression verticale sur le vertex du patient debout. Anatomiquement, cela n'induit aucune contrainte discale lombaire. Une plainte de douleur lombaire signe une majoration.\n\n# 2. Rotation Simulee\n\nFaites tourner le bassin et les epaules en bloc. Le rachis ne subit aucune torsion. Si le patient dit avoir mal au dos, c'est une reponse simulee.\n\n# 3. Flip Test (Lasegue Distrait)\n\nFaites mine d'examiner les pieds du patient assis et tendez la jambe a 90 degres. S'il n'a pas mal alors que son Lasegue allonge est positif a 20 degres, la simulation est prouvee.\n\n# 4. Signe de Hoover\n\nL'expert place ses mains sous les deux talons. Le patient doit lever la jambe 'malade'. Si le talon de la jambe saine ne s'enfonce pas dans votre main, le patient ne fait aucun effort reel.\n\n# 5. Testing Moteur L5/S1\n\nL5 : Releve du gros orteil. S1 : Marche sur la pointe des pieds. Une hernie 'irritative' ne peut pas causer une paralysie totale de ces mouvements.\n\nCachet du Medecin Controleur :    Signature :\n\nPage 2 - Document de controle interne DGSN"
       }
     ]
   },
   {
     "pdf": "certificat accident travail.pdf",
-    "size": 374017,
-    "mtime": 1784655128106.3528,
+    "hash": "a36bd774388c28b07345ec8060db00031cab2f7bbdc7b7987c6dd6e98e272b88",
+    "quality": "online",
+    "timestamp": 1784734760959,
     "pages": [
       {
         "page": 1,
-        "text": ""
+        "content": "SECURITE SOCIALE                                          Accidents du Travail\n\n# CERTIFICAT MEDICAL\n\n# INITIAL OU DE PROLONGATION\n\nCentre de paiement &#x26; établir en 2 exemplaires :\n\n- Original destiné &#x26; la Securite Sociale\n- Double à remettre à la victime.\n\nJe soussigné, Docteur (en lettres d'imprimerie)\n\nGrade et Spécialité\n\nAdresse\n\naprès avoir examiné M (en lettres d'imprimerie)\n\nné (e) le (en lettres d'imprimerie)\n\nNuméro d'immatriculation\n\ndemeurant à:\n\nlequel m'a déclaré avoir été victime d'un accident du travail le heures au service de :\n\nNom et raison sociale :\n\nNuméro d'immatriculation\n\n# constate et certifie ce qui suit :\n\na) siège des lésions :\n\n……………………………………………………………………………………………..\n\nb) nature des lésions:\n\nc) pronostic:\n\nEn conséquence de quoi je lui prescris.\n\n- (1) un arrêt de travail de jours à compter du\n- (1) de prolonger de jours l'arrêt de travail prescrit par le certificat du\n- (1) de continuer le travail avec soins perdant jours\n- (1) il y a lieu de prévoir une incapacité permanente.\n- (1) il n'y a pas lieu de prévoir une incapacité permanente.\n\nFait à le\n\nCachet et Signature du Médecin\n\n(1) Mettre une croix dans la case correspondante."
       }
     ]
   }

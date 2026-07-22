@@ -336,7 +336,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.22.18.05">
+  <meta name="app-build-version" content="2026.07.22.21.49">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -375,19 +375,19 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607221805" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607221805"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607222149" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607222149"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607221805" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607221805"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607222149" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607222149"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607221805" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607221805" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607222149" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607222149" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607221805">
-    <link rel="stylesheet" href="css/utilities.css?v=2607221805">
+    <link rel="stylesheet" href="style.css?v=2607222149">
+    <link rel="stylesheet" href="css/utilities.css?v=2607222149">
   </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
@@ -1330,7 +1330,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-T4J3JF36.js"></script>
+  <script type="module" src="dist/app-2BQBIJI5.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
@@ -1430,34 +1430,17 @@ body {
     })();
   </script>
 
-  <!-- Skip loading button event listener (moved from inline onclick) -->
-  <script>
-    document.getElementById('skip-loading-btn')?.addEventListener('click', function() {
-      if (window.setLoaderProgress) {
-        window.setLoaderProgress(100);
-      } else {
-        var ov = document.getElementById('app-loading-overlay');
-        if (ov) {
-          ov.style.opacity = '0';
-          ov.style.visibility = 'hidden';
-          ov.classList.add('hidden');
-        }
-        window.__drCatBooted = true;
-      }
-    });
-  </script>
-
   <!-- Legal Modal -->
-  <div class="modal-overlay" id="legal-modal">
-    <div class="modal-content" style="max-width: 600px; border-top: 4px solid var(--color-primary);">
-      <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
-        <h2 style="font-size: 18px; display: flex; align-items: center; gap: 10px;"><i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Mentions Légales & CGU</h2>
-        <button class="close-modal" id="close-legal-modal-btn"><i class="fa-solid fa-times"></i></button>
+  <div class="modal-overlay" id="legal-modal" style="display: none;">
+    <div class="modal-card modal-card-lg" style="padding: 24px; border-top: 4px solid var(--color-primary);">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 18px; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Mentions Légales & CGU</h2>
+        <button class="close-modal" id="close-legal-modal-btn" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-times"></i></button>
       </div>
       <div class="modal-body" style="max-height: 65vh; overflow-y: auto; padding-right: 10px; font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);">
         
         <div style="margin-bottom: 25px;">
-          <h3 style="color: #ef4444; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> 1. Avertissement Médical (Important)</h3>
+          <h3 style="color: var(--color-danger, #ef4444); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> 1. Avertissement Médical (Important)</h3>
           <p style="margin-bottom: 8px;"><strong>Dr. CAT est un outil strictement éducatif.</strong> L'application ne fournit aucun avis médical officiel. Les informations cliniques, algorithmes et protocoles thérapeutiques présentés sont fournis à titre de révision et d'aide-mémoire pour les professionnels de la santé ou les étudiants en médecine.</p>
           <p style="margin-bottom: 0;"><strong>En aucun cas</strong> l'utilisation de cette application ne saurait se substituer au jugement clinique du médecin. L'auteur (Dr. K-Ali) décline toute responsabilité quant aux conséquences directes ou indirectes pouvant résulter de l'utilisation des informations contenues dans cette application dans la pratique médicale réelle.</p>
         </div>
@@ -1478,15 +1461,10 @@ body {
         </div>
 
         <div>
-          <h3 style="color: var(--text-primary); font-size: 14px; margin-bottom: 8px;">4. Propriété Intellectuelle & Crédits</h3>
-          <p style="margin-bottom: 8px;">Conception médicale et développement par <strong>Dr. K-Ali</strong>.</p>
-          <p style="margin-bottom: 8px;">L'application utilise plusieurs technologies Open Source dont :</p>
-          <ul style="padding-left: 20px; margin-bottom: 12px;">
-            <li style="margin-bottom: 4px;"><strong>LlamaParse & Google Gemini :</strong> Extraction AI des PDF.</li>
-            <li style="margin-bottom: 4px;"><strong>PDF.js (Mozilla) :</strong> Rendu natif des manuels.</li>
-            <li><strong>FontAwesome :</strong> Iconographie.</li>
-          </ul>
-          <p style="margin-bottom: 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: var(--radius-md);">Pour tout signalement ou suggestion : <a href="mailto:airdrop257@gmail.com" style="color: var(--color-primary); text-decoration: underline;">airdrop257@gmail.com</a></p>
+          <h3 style="color: var(--text-primary); font-size: 14px; margin-bottom: 8px;">4. Propriété Intellectuelle & Droits Réservés</h3>
+          <p style="margin-bottom: 8px;">Conception médicale, algorithmes et développement exclusif par <strong>Dr. K-Ali</strong>. Tous droits réservés.</p>
+          <p style="margin-bottom: 12px;">L'ensemble des contenus, structures de données, moteurs de recherche internes et interfaces graphiques sont la propriété exclusive de l'auteur et protégés par le droit d'auteur.</p>
+          <p style="margin-bottom: 0; padding: 12px; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md);">Pour tout signalement ou suggestion : <a href="mailto:airdrop257@gmail.com" style="color: var(--color-primary); text-decoration: underline;">airdrop257@gmail.com</a></p>
         </div>
 
       </div>
@@ -1494,16 +1472,17 @@ body {
   </div>
 
   <!-- Cookie Consent Banner -->
-  <div id="legal-consent-banner" class="legal-consent-banner hidden">
+  <div id="legal-consent-banner" class="legal-consent-banner hidden" style="display: none;">
     <div class="consent-content">
       <div class="consent-icon"><i class="fa-solid fa-shield-halved"></i></div>
       <div class="consent-text">
-        <strong>Avertissement & Cookies :</strong> Dr. CAT est un outil éducatif qui ne remplace pas le jugement clinique. En naviguant, vous acceptez l'utilisation du stockage local pour sauvegarder votre progression.
-        <a href="#" id="open-legal-from-banner">Lire les mentions légales</a>.
+        <strong>Avertissement :</strong> Dr. CAT est un outil éducatif. Stockage local utilisé pour la progression.
+        <a href="#" id="open-legal-from-banner">Mentions légales</a>.
       </div>
     </div>
     <div class="consent-actions">
-      <button id="accept-legal-btn" class="save-btn" style="padding: 8px 16px; font-size: 13px;"><i class="fa-solid fa-check"></i> J'accepte</button>
+      <button id="accept-legal-btn" class="save-btn" style="padding: 6px 14px; font-size: 12px;"><i class="fa-solid fa-check"></i> J'accepte</button>
+      <button id="dismiss-legal-btn" class="dismiss-banner-btn" title="Fermer"><i class="fa-solid fa-xmark"></i></button>
     </div>
   </div>
 
