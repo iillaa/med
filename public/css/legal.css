@@ -1,0 +1,76 @@
+/* public/css/legal.css */
+
+/* Cookie & Legal Banner */
+.legal-consent-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  z-index: 10000;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.legal-consent-banner:not(.hidden) {
+  transform: translateY(0);
+}
+
+.legal-consent-banner .consent-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.legal-consent-banner .consent-icon {
+  font-size: 24px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.legal-consent-banner .consent-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.legal-consent-banner .consent-text strong {
+  color: #ef4444; /* Alert color for medical disclaimer */
+}
+
+.legal-consent-banner .consent-text a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+.legal-consent-banner .consent-actions {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .legal-consent-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .legal-consent-banner .consent-actions {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .legal-consent-banner .consent-actions button {
+    width: 100%;
+  }
+}
