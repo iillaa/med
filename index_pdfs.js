@@ -96,6 +96,7 @@ async function indexPdfs(force = false) {
         
         // Let the Strategy Manager handle hashing, caching, and LlamaParse delegation
         const extractedData = await extractPdfData(filePath, force);
+        extractedData.mtime = stats.mtimeMs;
         
         // Compare with old index to detect if it actually changed for logging
         const existing = index.find(item => item.pdf === file);

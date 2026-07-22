@@ -102,7 +102,8 @@ async function extractPdfData(filePath, force = false) {
 
   // 4. Guard against all extractors failing
   if (!result || !result.quality) {
-    throw new Error(`All PDF extractors (LlamaParse, Google, Offline) failed to parse ${fileName}.`);
+    console.error(`[Extractor] All PDF extractors failed to parse ${fileName}. Marking as failed to prevent infinite retry loop.`);
+    result = { quality: 'failed', pages: [] };
   }
   
   // 5. Save to Cache
