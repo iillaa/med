@@ -828,7 +828,10 @@ export function loadRelatedPdfs(cat) {
   const keywords = Array.isArray(cat?.pdf_keywords) ? cat.pdf_keywords : [];
   const categoryName = cat?.category ? cat.category.toLowerCase() : '';
   const tags = Array.isArray(cat?.tags) ? cat.tags.map(t => t.toLowerCase()) : [];
-  const generalKeywords = [categoryName, ...tags].filter(k => k && k.trim().length > 2);
+  
+  // Broad clinical terms that define a "General Guide" (Urgencies, Therapeutics, Prescriptions, etc.)
+  const clinicalGenerals = ['urgence', 'urgences', 'traitement', 'thérapeutique', 'ordonnance', 'ordonnances', 'manuel', 'guide'];
+  const generalKeywords = [categoryName, ...tags, ...clinicalGenerals].filter(k => k && k.trim().length > 2);
 
   // Specific PDFs matching pdf_keywords
   const matchedFiles = state.allPdfs.filter(filename => {
