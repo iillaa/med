@@ -1,4 +1,8 @@
-/* App Container Layout */
+/* App Container Layout & Touch Optimizations */
+html, body {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 .desktop-only-inline {
   display: inline;
 }
