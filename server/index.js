@@ -13,6 +13,7 @@ const { registerCatRoutes } = require('./routes/cats');
 const { registerSuggestionRoutes } = require('./routes/suggestions');
 const { registerSearchRoutes } = require('./routes/search');
 const { registerServerProviderRoutes } = require('./routes/server-providers');
+const { registerPdfRoutes } = require('./routes/pdfs');
 const allowedOriginsSvc = require('./services/allowed-origins');
 const spc = require('./services/server-providers-config');
 
@@ -210,6 +211,15 @@ app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'drcat_logo.png'));
 });
 
+// Block public access to the admin PDF Lab UI
+app.get('/pdf_lab.html', (req, res, next) => {
+  const { isLocalhostConnection } = require('./utils/request');
+  if (!isLocalhostConnection(req)) {
+    return res.status(403).send('Accès interdit. This is an admin tool.');
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, '..', 'public'), {
   etag: false,
   lastModified: false,
@@ -243,9 +253,10 @@ app.get('/health', (req, res) => {
 
 registerAuthRoutes(app);
 registerCatRoutes(app);
-registerSuggestionRoutes(app);
-registerSearchRoutes(app);
-registerServerProviderRoutes(app);
+registerSuggestionRoutes(app, cache);
+registerSearchRoutes(app, cache);
+registerServerProviderRoutes(app, cache);
+registerPdfRoutes(app, cache);
 
 let serverInstance = null;
 

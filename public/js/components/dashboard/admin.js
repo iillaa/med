@@ -1,11 +1,17 @@
 import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
+import { renderAdminPdfTab } from './admin_pdf.js';
 
 let onSuggestionHandledCallback = null;
 
 export function initAdminTabListeners(onSuggestionHandled) {
   onSuggestionHandledCallback = onSuggestionHandled;
+  
+  const pdfPane = document.getElementById('admin-pane-pdfs');
+  if (pdfPane) {
+    renderAdminPdfTab(pdfPane);
+  }
 
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
   adminTabBtns.forEach(btn => {

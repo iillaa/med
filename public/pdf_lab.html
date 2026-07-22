@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark-theme">
+<head>
+  <meta charset="UTF-8">
+  <title>Dr.CAT — PDF Inspector</title>
+  <style>
+    :root {
+      --bg: #0f172a; --panel: #1e293b; --text: #f8fafc; --text-muted: #94a3b8;
+      --primary: #0ea5e9; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --border: #334155;
+    }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .panel { background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
+    h1, h2, h3 { margin-top: 0; color: var(--primary); }
+    button { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger { background: var(--danger); }
+    .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    th { color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .badge-offline { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-google { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .badge-llamaparse { background: rgba(14, 165, 233, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+    
+    .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    pre { background: #000; padding: 15px; border-radius: 6px; overflow: auto; color: #a5b4fc; max-height: 600px; font-size: 13px; margin: 0; }
+    
+    .log-line { font-family: monospace; font-size: 12px; margin: 2px 0; color: #cbd5e1; }
+    
+    #overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+    .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="overlay">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+      <div class="spinner"></div>
+      <div id="overlay-text" style="font-weight: bold; font-size: 18px;">Extracting via LlamaParse...</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1><span style="font-size: 28px;">🔬</span> PDF Inspector</h1>
+        <p style="color: var(--text-muted); margin: 5px 0 0 0;">Manage and upgrade your Master Index quality offline.</p>
+      </div>
+      <button onclick="fetchList()">🔄 Refresh List</button>
+    </div>
+
+    <div class="two-cols">
+      <!-- Left Column: PDF List -->
+      <div class="panel" style="grid-column: 1 / 3;">
+        <h3>Master Index Files (<span id="total-count">0</span>)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Filename</th>
+              <th>Quality</th>
+              <th>Pages</th>
+              <th>Last Indexed</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pdf-list">
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading PDFs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Action Logs / Output -->
+    <div class="panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3>Console Output</h3>
+        <button id="copy-btn" class="btn-outline" style="font-size: 11px; padding: 4px 8px; display: none;">Copy JSON</button>
+      </div>
+      <pre id="json-output">Select an action above to view details...</pre>
+    </div>
+
+  </div>
+
+  <script>
+    const API_HEADERS = {
+      'Content-Type': 'application/json',
+      'x-admin-token': localStorage.getItem('dr_cat_admin_token') || ''
+    };
+
+    const tbody = document.getElementById('pdf-list');
+    const totalCount = document.getElementById('total-count');
+    const jsonOutput = document.getElementById('json-output');
+    const overlay = document.getElementById('overlay');
+    const overlayText = document.getElementById('overlay-text');
+
+    function getQualityBadge(q) {
+      if (!q) return '<span class="badge badge-offline">Offline</span>';
+      const clean = q.toLowerCase();
+      if (clean === 'online' || clean === 'llamaparse') return '<span class="badge badge-llamaparse">LlamaParse</span>';
+      if (clean === 'online-google' || clean === 'google') return '<span class="badge badge-google">Google Flash</span>';
+      return '<span class="badge badge-offline">Offline</span>';
+    }
+
+    async function fetchList() {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Refreshing...</td></tr>';
+      try {
+        const res = await fetch('/api/admin/pdf-lab-list', { headers: API_HEADERS });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        
+        if (!data.files || data.files.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No PDFs found in Master Index.</td></tr>';
+          totalCount.textContent = '0';
+          return;
+        }
+
+        totalCount.textContent = data.files.length;
+        tbody.innerHTML = '';
+        
+        data.files.forEach(file => {
+          const tr = document.createElement('tr');
+          const date = new Date(file.timestamp).toLocaleString();
+          
+          tr.innerHTML = `
+            <td style="font-weight: 500;">${file.pdf}</td>
+            <td>${getQualityBadge(file.quality)}</td>
+            <td>${file.pages}</td>
+            <td style="color: var(--text-muted); font-size: 12px;">${date}</td>
+            <td style="text-align: right; gap: 5px; display: flex; justify-content: flex-end;">
+              <button class="btn-outline" style="background: rgba(14, 165, 233, 0.1);" onclick="viewJson('${file.pdf}')" title="View JSON Output">View JSON</button>
+              <button class="btn-outline" style="background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: var(--success);" onclick="downloadJson('${file.pdf}')" title="Download JSON File">Download</button>
+              <button class="btn-outline" onclick="forceExtract('${file.pdf}')" title="Delete Cache & Force Online Re-Extraction">Force Upgrade</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="5" style="color: var(--danger); text-align: center;">Error loading list. Are you admin?</td></tr>`;
+      }
+    }
+
+    async function forceExtract(filename) {
+      if (!confirm(`Are you sure you want to FORCE re-extract "${filename}"?\n\nThis will bypass the hash cache and send it directly to LlamaParse/Google online. This consumes API credits.`)) return;
+
+      overlay.style.display = 'flex';
+      overlayText.textContent = `Upgrading ${filename}... (This may take a minute)`;
+      jsonOutput.textContent = `[Processing] Force re-extracting ${filename}...`;
+
+      try {
+        const res = await fetch('/api/admin/pdf-lab-force-extract', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ filename })
+        });
+        
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText);
+        }
+        
+        const data = await res.json();
+        
+        jsonOutput.textContent = JSON.stringify(data.result, null, 2);
+        document.getElementById('copy-btn').style.display = 'block';
+        
+        alert(`Success! ${filename} upgraded to ${data.result.quality} quality.`);
+        fetchList(); // Refresh to see new badge
+      } catch (err) {
+        console.error(err);
+        jsonOutput.textContent = `[ERROR]\n\n${err.message}`;
+        alert(`Failed to force extract: ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    async function viewJson(filename) {
+      jsonOutput.textContent = `[Loading] Fetching JSON for ${filename}...`;
+      try {
+        const res = await fetch(`/api/admin/pdf-lab-json?filename=${encodeURIComponent(filename)}`, { headers: API_HEADERS });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        
+        jsonOutput.textContent = JSON.stringify(data.result, null, 2);
+        document.getElementById('copy-btn').style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        jsonOutput.textContent = `[ERROR]\n\nFailed to load JSON: ${err.message}`;
+      }
+    }
+
+    async function downloadJson(filename) {
+      try {
+        const res = await fetch(`/api/admin/pdf-lab-json?filename=${encodeURIComponent(filename)}`, { headers: API_HEADERS });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        
+        const blob = new Blob([JSON.stringify(data.result, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error(err);
+        alert(`Failed to download JSON: ${err.message}`);
+      }
+    }
+
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(jsonOutput.textContent);
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy JSON', 2000);
+    });
+
+    // Auto load on init
+    fetchList();
+  </script>
+</body>
+</html>

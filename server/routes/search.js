@@ -59,22 +59,23 @@ function registerSearchRoutes(app) {
       for (const doc of cache.pdfIndex) {
         if (!doc.pages) continue;
         for (const p of doc.pages) {
-          if (!p.text) continue;
+          const textData = p.content || p.text;
+          if (!textData) continue;
 
           if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
             continue;
           }
 
-          const textLower = p.text.toLowerCase();
+          const textLower = textData.toLowerCase();
           
           const indexMatch = textLower.indexOf(cleanQuery);
           if (indexMatch !== -1) {
             const start = Math.max(0, indexMatch - 60);
-            const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
-            let snippet = p.text.substring(start, end);
+            const end = Math.min(textData.length, indexMatch + cleanQuery.length + 60);
+            let snippet = textData.substring(start, end);
             
             if (start > 0) snippet = '...' + snippet;
-            if (end < p.text.length) snippet = snippet + '...';
+            if (end < textData.length) snippet = snippet + '...';
             
             results.push({
               pdf: doc.pdf,
@@ -110,7 +111,10 @@ function registerSearchRoutes(app) {
       const statusMap = {};
       for (const doc of cache.pdfIndex) {
         const totalPages = doc.pages ? doc.pages.length : 0;
-        const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
+        const pagesWithText = doc.pages ? doc.pages.filter(p => {
+          const txt = p.content || p.text || '';
+          return txt.trim().length > 15;
+        }).length : 0;
         
         let status = 'red';
         if (totalPages > 0) {
@@ -183,37 +187,6 @@ function registerSearchRoutes(app) {
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Failed to trigger reindexing" });
-    }
-  });
-
-  app.post('/api/diagnostics/upload-pdf', async (req, res) => {
-    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
-      return res.status(403).json({ error: 'Accès interdit.' });
-    }
-    try {
-      const { filename, base64Data } = req.body;
-      if (!filename || !base64Data) {
-        return res.status(400).json({ error: 'Filename and base64Data are required.' });
-      }
-
-      const cleanFilename = path.basename(filename);
-      if (!cleanFilename.toLowerCase().endsWith('.pdf')) {
-        return res.status(400).json({ error: 'Only PDF files are supported.' });
-      }
-
-      const targetPath = path.join(PDF_DIR, cleanFilename);
-      const fileBuffer = Buffer.from(base64Data, 'base64');
-
-      await fs.promises.writeFile(targetPath, fileBuffer);
-      console.log(`[PDF Upload] Saved ${cleanFilename} to public/pdfs folder.`);
-
-      indexPdfs(true).catch(err => console.error("Error in post-upload indexing:", err));
-
-      logAuditEvent('pdf_upload_triggered', { filename: cleanFilename }, req);
-      res.json({ success: true, message: `PDF ${cleanFilename} uploaded and indexing started.` });
-    } catch (err) {
-      console.error('[PDF Upload Error]', err);
-      res.status(500).json({ error: 'Failed to write PDF file to server storage.' });
     }
   });
 
