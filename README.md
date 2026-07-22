@@ -34,14 +34,16 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - Zone de prise de notes persistantes, sauvegardées localement dans `localStorage`.
 - Idéal pour documenter vos protocoles locaux ou adaptations spécifiques.
 
-### 📄 Intégration PDF de Référence
-- Association automatique des fichiers PDF de votre répertoire `reference-pdfs` avec la fiche active selon des mots-clés configurables.
-- Section *Manuels Généraux* pour un accès permanent à vos gros ouvrages (guides d'ordonnances, manuels).
-- **Recherche plein texte** dans le contenu des 78 PDFs indexés, avec affichage des extraits de contexte pertinents.
+### 📄 Intégration PDF de Référence & Extraction AI
+- Association automatique des fichiers PDF de votre répertoire `public/pdfs` avec la fiche active selon des mots-clés configurables.
+- Extraction hybride à 3 niveaux (LlamaParse AI → Google Gemini Flash → Parseur Offline) pour supporter les tableaux complexes et documents scannés.
+- **Recherche plein texte** dans le contenu des PDFs indexés, avec affichage des extraits de contexte pertinents et ouverture précise à la bonne page.
+- Indexation optimisée via hash SHA-256 pour économiser les appels API.
 
-### 👤 Système Collaboratif (Admin / Utilisateurs)
+### 👤 Système Collaboratif & Lab Admin
 - Les **utilisateurs non-admin** peuvent proposer des modifications ou ajouts de fiches (via un système de suggestions).
 - L'**administrateur** valide ou rejette les suggestions depuis le panneau de modération sur le tableau de bord.
+- **Dr. CAT PDF Inspector (Nouveau)** : Un laboratoire admin pour inspecter l'index PDF, voir et télécharger les structures JSON extraites, et forcer une ré-extraction AI ciblée.
 - Mode admin activé par un token de session sécurisé, jamais stocké en clair côté serveur.
 
 ---
@@ -87,20 +89,18 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 ├── cats_db.json                 # Base de données des fiches CAT (JSON)
 ├── cats_db.json.bak             # Sauvegarde automatique (créée avant chaque écriture)
 ├── suggestions.json             # File d'attente des suggestions en attente de modération
-├── pdf_index.json               # Index de recherche plein texte des PDFs (~1 MB)
 ├── admin_password.txt           # Mot de passe admin hashed (⚠️ hors git)
 ├── package.json                 # Dépendances Node.js
-├── .eslintrc.json               # Configuration ESLint
-├── .prettierrc                  # Configuration Prettier
-├── cat-med/
-│   └── reference-pdfs/          # Vos fichiers PDF/DOCX de cours médicaux (78 fichiers)
+├── data/
+│   └── pdf_cache/               # Cache local des structures PDF JSON extraites par l'AI
+├── server/
+│   ├── pdf_extractor.js         # Routeur 3-tiers (LlamaParse -> Google -> Offline)
+│   └── parsers/                 # Modules d'extraction par API tierce
 └── public/                      # Interface Frontend statique
-    ├── drcat_logo.png           # Logo officiel (stéthoscope & croix médicale en C)
     ├── index.html               # Structure HTML5 de l'application
-    ├── style.css                # Point d'entrée de style CSS
-    ├── css/                     # Dossier des feuilles de style CSS modulaires
-    │   └── utilities.css        # Classes utilitaires extraites des inline styles
     ├── pdf_viewer.html          # Visionneuse PDF intégrée avec surbrillance
+    ├── pdf_lab.html             # Dr. CAT PDF Inspector (Admin Localhost uniquement)
+    ├── pdfs/                    # Vos fichiers PDF de cours médicaux
     ├── manifest.json            # Manifest PWA pour installation mobile
     ├── service-worker.js        # Service Worker gérant le cache offline du client web
     └── js/
