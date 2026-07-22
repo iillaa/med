@@ -105,7 +105,7 @@ async function extractPdfData(filePath, force = false) {
     throw new Error(`All PDF extractors (LlamaParse, Google, Offline) failed to parse ${fileName}.`);
   }
   
-  // 4. Save to Cache
+  // 5. Save to Cache
   const finalData = {
     pdf: fileName,
     hash: currentHash,

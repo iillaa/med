@@ -126,33 +126,28 @@
         totalCount.textContent = data.files.length;
         tbody.innerHTML = '';
         
-        // Simple HTML escape function to prevent stored XSS
-        const escapeHtml = (unsafe) => {
-          return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-        };
-        
         data.files.forEach(file => {
           const tr = document.createElement('tr');
           const date = new Date(file.timestamp).toLocaleString();
-          const safeFileName = escapeHtml(file.pdf);
-          const escapedFileNameArg = safeFileName.replace(/'/g, "\\'"); // escape for inline JS
           
           tr.innerHTML = `
-            <td style="font-weight: 500;">${safeFileName}</td>
+            <td class="pdf-name-cell" style="font-weight: 500;"></td>
             <td>${getQualityBadge(file.quality)}</td>
             <td>${file.pages}</td>
             <td style="color: var(--text-muted); font-size: 12px;">${date}</td>
             <td style="text-align: right; gap: 5px; display: flex; justify-content: flex-end;">
-              <button class="btn-outline" style="background: rgba(14, 165, 233, 0.1);" onclick="viewJson('${escapedFileNameArg}')" title="View JSON Output">View JSON</button>
-              <button class="btn-outline" style="background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: var(--success);" onclick="downloadJson('${escapedFileNameArg}')" title="Download JSON File">Download</button>
-              <button class="btn-outline" onclick="forceExtract('${escapedFileNameArg}')" title="Delete Cache & Force Online Re-Extraction">Force Upgrade</button>
+              <button class="btn-outline view-json-btn" style="background: rgba(14, 165, 233, 0.1);" title="View JSON Output">View JSON</button>
+              <button class="btn-outline download-json-btn" style="background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: var(--success);" title="Download JSON File">Download</button>
+              <button class="btn-outline force-extract-btn" title="Delete Cache & Force Online Re-Extraction">Force Upgrade</button>
             </td>
           `;
+          
+          // Securely inject text content and attach event listeners to prevent XSS
+          tr.querySelector('.pdf-name-cell').textContent = file.pdf;
+          tr.querySelector('.view-json-btn').addEventListener('click', () => viewJson(file.pdf));
+          tr.querySelector('.download-json-btn').addEventListener('click', () => downloadJson(file.pdf));
+          tr.querySelector('.force-extract-btn').addEventListener('click', () => forceExtract(file.pdf));
+          
           tbody.appendChild(tr);
         });
       } catch (err) {
