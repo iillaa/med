@@ -112,24 +112,32 @@ The client records per-server health and orders requests by `priority` then heal
 
 ---
 
-## 📄 PDF Text Search & Indexing Engine
+## 📄 PDF Search & Hybrid Extraction Pipeline
 
-The PDF search engine runs locally on Termux and compiles binary page contents into a fast indexed database.
+The PDF search engine runs locally on Termux and utilizes a robust 3-tier fallback strategy to process complex medical PDFs (which often contain scanned images or multi-column layouts) before compiling them into a fast, mobile-friendly indexed database.
 
-### 1. Checksum Optimization
-To avoid re-parsing large medical directories on every restart:
-* The indexer compares each file's `mtime` and `size` against records in `pdf_index.json`.
-* Only new or modified files are parsed. Unchanged files use their cached page text.
+### 1. The Strategy Manager (3-Tier Extraction)
+To guarantee the highest quality text extraction, `pdf_extractor.js` routes files through a waterfall of parsers:
+1. **LlamaParse API:** (Primary) AI-driven parser capable of reading complex medical tables and scanned imagery.
+2. **Google Gemini Flash API:** (Fallback) Kicks in if LlamaParse fails or hits quota limits. Chunks large texts to prevent memory spikes.
+3. **Offline `pdf-parse`:** (Ultimate Fallback) Native Node.js parser for standard text-based PDFs when offline.
 
-### 2. Coverage Scoring
-Each PDF is assigned a coverage badge:
-* 🟢 **Green** (Fully Searchable): ≥90% of pages contain extractable text.
-* 🟡 **Orange** (Partial): Between 30%–90% of pages are text-bearing.
-* 🔴 **Red** (Image-Only / Unsearchable): <30% of pages contain text.
+### 2. SHA-256 Hash Caching
+To completely eliminate wasted API credits and redundant parsing:
+* Each raw PDF is hashed using SHA-256 before extraction.
+* The parsed JSON output is saved to `data/pdf_cache/<filename>.json` with the hash embedded.
+* On subsequent restarts, `index_pdfs.js` checks the hash. If the hash hasn't changed *and* the quality hasn't been upgraded, it loads instantly from cache.
 
-### 3. Text Parser
-* Extracts contents page-by-page using `pdf-parse`.
-* Builds an array of page objects with plain text strings stored in `pdf_index.json`.
+### 3. The Master Index Bundler
+* `index_pdfs.js` acts as a compiler, merging all individual cached JSONs into one giant `pdf_index.json`.
+* The Android APK directly bundles this master index, allowing lightning-fast offline search with zero server load.
+* Searches leverage `p.content || p.text` dual-field reads for backward compatibility.
+
+### 4. Admin PDF Inspector UI
+* A dedicated dashboard (`pdf_lab.html`) allows the admin to view the Master Index.
+* Visual quality badges distinguish `LlamaParse`, `Google Flash`, and `Offline` extractions.
+* Provides a surgical **"Force Upgrade"** button to bypass the cache and push specific PDFs to LlamaParse.
+* Secured entirely by `isLocalhostConnection` and Admin tokens; the UI is 403-blocked to the public internet.
 
 ---
 
