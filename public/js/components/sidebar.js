@@ -25,29 +25,47 @@ function setupPullToRefresh(listEl, onRefresh) {
   const THRESHOLD = 64;
   let startY = 0, dragging = false, refreshing = false;
 
+  let rAFPending = null;
+  let currentPull = 0;
   const onStart = (e) => {
     if (refreshing) return;
     if (container.scrollTop > 0) return;
     startY = e.touches ? e.touches[0].clientY : e.clientY;
     dragging = true;
+    currentPull = 0;
   };
   const onMove = (e) => {
     if (!dragging || refreshing) return;
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     const delta = y - startY;
-    if (delta <= 0) { container.style.transform = ''; indicator.classList.remove('visible'); return; }
+    if (delta <= 0) { 
+      currentPull = 0;
+      container.style.transform = ''; 
+      indicator.classList.remove('visible'); 
+      return; 
+    }
     if (container.scrollTop > 0) { dragging = false; return; }
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
+    currentPull = Math.min(delta * 0.5, THRESHOLD + 24);
     if (prefersReducedMotion()) return;
-    const pull = Math.min(delta * 0.5, THRESHOLD + 24);
-    container.style.transform = `translateY(${pull}px)`;
-    indicator.classList.add('visible');
-    indicator.style.opacity = String(Math.min(pull / THRESHOLD, 1));
+    if (!rAFPending) {
+      rAFPending = requestAnimationFrame(() => {
+        container.style.transform = `translateY(${currentPull}px)`;
+        indicator.classList.add('visible');
+        indicator.style.opacity = String(Math.min(currentPull / THRESHOLD, 1));
+        rAFPending = null;
+      });
+    }
   };
   const onEnd = async () => {
+    if (rAFPending) {
+      cancelAnimationFrame(rAFPending);
+      rAFPending = null;
+    }
     if (!dragging || refreshing) { dragging = false; return; }
     dragging = false;
-    const pulled = parseFloat((container.style.transform.match(/translateY\(([\d.]+)px\)/) || [])[1] || '0');
+    const pulled = currentPull;
+    currentPull = 0;
     container.style.transform = '';
     indicator.style.opacity = '';
     indicator.classList.remove('visible');
@@ -87,6 +105,22 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
 
   const openSidebarBtn = document.getElementById('open-sidebar-btn');
   const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
+  if (catList) {
+    catList.addEventListener('click', (e) => {
+      const item = e.target.closest('.cat-item');
+      if (!item) return;
+      const catId = parseInt(item.getAttribute('data-id'), 10);
+      if (isNaN(catId)) return;
+      const targetCat = state.allCats.find(c => c.id === catId);
+      if (targetCat) {
+        onSelectCat(targetCat);
+        if (window.innerWidth <= 850 && sidebar) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+  }
 
   // Search and Category input listeners.
   // Debounce keystrokes (150ms) so the (full) list re-render only fires after
@@ -173,7 +207,7 @@ export function populateCategoryFilter(cats) {
 // list updates O(changes) instead of O(all) and preserves attached listeners.
 const catItemNodes = new Map();
 
-function buildCatItem(cat, onSelectCat) {
+function buildCatItem(cat) {
   const li = document.createElement('li');
   li.className = 'cat-item';
   li.setAttribute('data-id', cat.id);
@@ -187,12 +221,6 @@ function buildCatItem(cat, onSelectCat) {
       </div>
     </div>
   `;
-  li.addEventListener('click', () => {
-    onSelectCat(cat);
-    if (window.innerWidth <= 850 && sidebar) {
-      sidebar.classList.remove('open');
-    }
-  });
   return li;
 }
 
@@ -272,7 +300,7 @@ export function renderCatList(cats, onSelectCat) {
   cats.forEach((cat) => {
     let li = catItemNodes.get(cat.id);
     if (!li) {
-      li = buildCatItem(cat, onSelectCat);
+      li = buildCatItem(cat);
       catItemNodes.set(cat.id, li);
       fragment.appendChild(li);
       attached = true;

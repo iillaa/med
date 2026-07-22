@@ -439,18 +439,36 @@ async function bootstrapApp() {
   const closeLegalBtn = document.getElementById('close-legal-modal-btn');
   const cookieBanner = document.getElementById('legal-consent-banner');
   const acceptCookieBtn = document.getElementById('accept-legal-btn');
+  const dismissCookieBtn = document.getElementById('dismiss-legal-btn');
 
-  // Check if consent was already given
+  const hideCookieBanner = () => {
+    if (cookieBanner) {
+      cookieBanner.classList.add('hidden');
+      cookieBanner.style.display = 'none';
+    }
+  };
+
+  // Check if consent or dismissal was already given
   if (!localStorage.getItem('drcat_legal_consent_v1')) {
     if (cookieBanner) {
-      setTimeout(() => cookieBanner.classList.remove('hidden'), 1000);
+      cookieBanner.style.display = 'flex';
+      setTimeout(() => cookieBanner.classList.remove('hidden'), 500);
     }
+  } else {
+    hideCookieBanner();
   }
 
   if (acceptCookieBtn) {
     acceptCookieBtn.addEventListener('click', () => {
       localStorage.setItem('drcat_legal_consent_v1', 'true');
-      if (cookieBanner) cookieBanner.classList.add('hidden');
+      hideCookieBanner();
+    });
+  }
+
+  if (dismissCookieBtn) {
+    dismissCookieBtn.addEventListener('click', () => {
+      localStorage.setItem('drcat_legal_consent_v1', 'dismissed');
+      hideCookieBanner();
     });
   }
 
@@ -458,14 +476,30 @@ async function bootstrapApp() {
     if (btn) {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (legalModal) legalModal.classList.add('active');
+        if (legalModal) {
+          legalModal.style.display = 'flex';
+          legalModal.classList.add('active');
+        }
       });
     }
   });
 
+  const closeLegalModal = () => {
+    if (legalModal) {
+      legalModal.style.display = 'none';
+      legalModal.classList.remove('active');
+    }
+  };
+
   if (closeLegalBtn) {
-    closeLegalBtn.addEventListener('click', () => {
-      if (legalModal) legalModal.classList.remove('active');
+    closeLegalBtn.addEventListener('click', closeLegalModal);
+  }
+
+  if (legalModal) {
+    legalModal.addEventListener('click', (e) => {
+      if (e.target === legalModal) {
+        closeLegalModal();
+      }
     });
   }
 
@@ -489,8 +523,8 @@ async function bootstrapApp() {
         if (form) form.reset();
       }
       const legalModalElem = document.getElementById('legal-modal');
-      if (legalModalElem && legalModalElem.classList.contains('active')) {
-        legalModalElem.classList.remove('active');
+      if (legalModalElem && (legalModalElem.classList.contains('active') || legalModalElem.style.display !== 'none')) {
+        closeLegalModal();
       }
     }
  

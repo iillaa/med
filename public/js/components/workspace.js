@@ -438,6 +438,40 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     pdfSearch.addEventListener('input', filterAllPdfsList);
   }
 
+  const deleteCatBtn = document.getElementById('delete-cat-btn');
+  if (deleteCatBtn) {
+    deleteCatBtn.addEventListener('click', async () => {
+      if (!state.activeCat) return;
+      const catToDelete = state.activeCat;
+      const catId = catToDelete.id;
+      const catTitle = catToDelete.title;
+
+      if (!confirm(`Voulez-vous vraiment supprimer définitivement la fiche "${catTitle}" (ID: ${catId}) ?`)) {
+        return;
+      }
+
+      try {
+        const res = await api.deleteCatFromServer(catId);
+        if (res && (res.success || res.message)) {
+          showToast(`La fiche "${escapeHTML(catTitle)}" a été supprimée avec succès.`, "fa-circle-check", 4000);
+          
+          // Remove from local state
+          state.allCats = state.allCats.filter(c => c.id !== catId);
+          
+          if (onCatDeleted) await onCatDeleted(catId);
+          else if (onProgressReset) await onProgressReset();
+          
+          selectCat(null);
+        } else {
+          showToast(escapeHTML(res.error || "Échec de la suppression de la fiche."), "fa-triangle-exclamation", 4000);
+        }
+      } catch (err) {
+        console.error('[Delete CAT Error]', err);
+        showToast("Erreur lors de la suppression de la fiche.", "fa-circle-exclamation", 4000);
+      }
+    });
+  }
+
   const resetProgressBtn = document.getElementById('reset-progress-btn');
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener('click', async () => {
@@ -608,6 +642,14 @@ export function selectCat(cat, preserveTab = false) {
   if (window.perf) window.perf.startMeasure('workspace.selectCat');
   state.activeCat = cat;
   state.activePrescriptionVariantIndex = 0;
+
+  if (!cat) {
+    if (workspace) workspace.style.display = 'none';
+    if (welcomeScreen) welcomeScreen.style.display = 'flex';
+    document.querySelectorAll('.cat-item').forEach(item => item.classList.remove('active'));
+    if (window.perf) window.perf.endMeasure('workspace.selectCat');
+    return;
+  }
 
   if (!preserveTab) {
     cat.lastRead = Date.now();

@@ -156,27 +156,36 @@
    On narrow viewports the card slides up from the bottom edge instead of
    scaling in place, matching native sheet presentation. */
 @media (max-width: 600px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
   .modal-overlay.modal-overlay--sheet {
     align-items: flex-end;
-    padding: 0;
+    padding: 12px 10px max(14px, env(safe-area-inset-bottom)) 10px;
   }
+  
   .modal-overlay.modal-overlay--sheet .modal-card {
     max-width: 100%;
     width: 100%;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    max-height: 92dvh;
+    border-radius: var(--radius-lg);
+    max-height: 88dvh;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
     animation: modalSheetIn var(--motion-slow) var(--ease-emphasized);
   }
+  
   .modal-overlay.modal-overlay--sheet.modal-closing .modal-card {
     animation: modalSheetOut var(--motion-base) var(--ease-standard) forwards;
   }
+  
   @keyframes modalSheetIn {
-    from { transform: translateY(100%); opacity: 1; }
+    from { transform: translateY(100%); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
+  
   @keyframes modalSheetOut {
     from { transform: translateY(0); opacity: 1; }
-    to { transform: translateY(100%); opacity: 1; }
+    to { transform: translateY(100%); opacity: 0; }
   }
 }
 
@@ -225,45 +234,62 @@
 }
 
 .reader-modal-header {
-  padding: 20px 28px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: var(--bg-sidebar);
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .reader-cat-meta {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
 }
 
 .reader-cat-meta h2 {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reader-cat-meta .badge {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--color-primary) !important;
+  font-weight: 600;
 }
 
 .reader-close-btn {
-  background: var(--color-primary);
-  color: #000;
-  font-weight: 700;
-  border: none;
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  gap: 6px;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .reader-close-btn:hover {
-  transform: scale(1.03);
-  opacity: 0.95;
+  background: rgba(6, 182, 212, 0.2);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .reader-modal-body {
@@ -277,16 +303,34 @@
 
 @media (max-width: 768px) {
   .reader-modal-overlay {
-    padding: 10px;
+    padding: max(14px, env(safe-area-inset-top)) 10px max(14px, env(safe-area-inset-bottom)) 10px;
   }
   .reader-modal-content {
-    height: 96vh;
+    height: auto;
+    max-height: calc(100dvh - max(28px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    border-radius: var(--radius-lg);
   }
   .reader-modal-header {
-    padding: 14px 16px;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  .reader-cat-meta {
+    gap: 6px;
+  }
+  .reader-cat-meta h2 {
+    font-size: 13px;
+  }
+  .reader-cat-meta .badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  .reader-close-btn {
+    padding: 4px 8px;
+    font-size: 11px;
   }
   .reader-modal-body {
-    padding: 18px;
-    font-size: 15px;
+    padding: 16px 14px;
+    font-size: 14px;
+    line-height: 1.65;
   }
 }
