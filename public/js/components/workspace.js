@@ -438,6 +438,40 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     pdfSearch.addEventListener('input', filterAllPdfsList);
   }
 
+  const deleteCatBtn = document.getElementById('delete-cat-btn');
+  if (deleteCatBtn) {
+    deleteCatBtn.addEventListener('click', async () => {
+      if (!state.activeCat) return;
+      const catToDelete = state.activeCat;
+      const catId = catToDelete.id;
+      const catTitle = catToDelete.title;
+
+      if (!confirm(`Voulez-vous vraiment supprimer définitivement la fiche "${catTitle}" (ID: ${catId}) ?`)) {
+        return;
+      }
+
+      try {
+        const res = await api.deleteCatFromServer(catId);
+        if (res && (res.success || res.message)) {
+          showToast(`La fiche "${catTitle}" a été supprimée avec succès.`, "fa-circle-check", 4000);
+          
+          // Remove from local state
+          state.allCats = state.allCats.filter(c => c.id !== catId);
+          
+          if (onCatDeleted) await onCatDeleted(catId);
+          else if (onProgressReset) await onProgressReset();
+          
+          selectCat(null);
+        } else {
+          showToast(res.error || "Échec de la suppression de la fiche.", "fa-triangle-exclamation", 4000);
+        }
+      } catch (err) {
+        console.error('[Delete CAT Error]', err);
+        showToast("Erreur lors de la suppression de la fiche.", "fa-circle-exclamation", 4000);
+      }
+    });
+  }
+
   const resetProgressBtn = document.getElementById('reset-progress-btn');
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener('click', async () => {
