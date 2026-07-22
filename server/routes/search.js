@@ -60,7 +60,7 @@ function registerSearchRoutes(app) {
         if (!doc.pages) continue;
         for (const p of doc.pages) {
           const textData = p.content || p.text;
-          if (!textData) continue;
+          if (!textData || textData.trim() === 'NO_CONTENT_HERE') continue;
 
           if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
             continue;

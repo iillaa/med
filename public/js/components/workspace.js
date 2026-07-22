@@ -453,7 +453,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       try {
         const res = await api.deleteCatFromServer(catId);
         if (res && (res.success || res.message)) {
-          showToast(`La fiche "${catTitle}" a été supprimée avec succès.`, "fa-circle-check", 4000);
+          showToast(`La fiche "${escapeHTML(catTitle)}" a été supprimée avec succès.`, "fa-circle-check", 4000);
           
           // Remove from local state
           state.allCats = state.allCats.filter(c => c.id !== catId);
@@ -463,7 +463,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           
           selectCat(null);
         } else {
-          showToast(res.error || "Échec de la suppression de la fiche.", "fa-triangle-exclamation", 4000);
+          showToast(escapeHTML(res.error || "Échec de la suppression de la fiche."), "fa-triangle-exclamation", 4000);
         }
       } catch (err) {
         console.error('[Delete CAT Error]', err);

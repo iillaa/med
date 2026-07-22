@@ -698,7 +698,7 @@ export async function searchPdfsContent(query) {
       if (!doc.pages) continue;
       for (const p of doc.pages) {
         const textData = p.content || p.text;
-        if (!textData) continue;
+        if (!textData || textData.trim() === 'NO_CONTENT_HERE') continue;
 
         if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
           continue;
@@ -763,7 +763,10 @@ export async function fetchPdfIndexStatus() {
       const statusMap = {};
       for (const doc of index) {
         const totalPages = doc.pages ? doc.pages.length : 0;
-        const pagesWithText = doc.pages ? doc.pages.filter(p => p.text && p.text.trim().length > 15).length : 0;
+        const pagesWithText = doc.pages ? doc.pages.filter(p => {
+          const txt = (p.content || p.text || '').trim();
+          return txt.length > 15 && txt !== 'NO_CONTENT_HERE';
+        }).length : 0;
         
         let status = 'red';
         if (totalPages > 0) {

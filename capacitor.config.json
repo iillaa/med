@@ -19,6 +19,7 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 0,
+      "launchAutoHide": false,
       "backgroundColor": "#0b101d"
     },
     "Keyboard": {

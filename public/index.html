@@ -336,7 +336,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.22.23.02">
+  <meta name="app-build-version" content="2026.07.22.23.45">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -375,19 +375,19 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607222302" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607222302"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607222345" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607222345"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607222302" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607222302"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607222345" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607222345"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607222302" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607222302" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607222345" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607222345" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607222302">
-    <link rel="stylesheet" href="css/utilities.css?v=2607222302">
+    <link rel="stylesheet" href="style.css?v=2607222345">
+    <link rel="stylesheet" href="css/utilities.css?v=2607222345">
   </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
@@ -1330,7 +1330,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-EXA5QPRE.js"></script>
+  <script type="module" src="dist/app-TTMDJPCE.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
@@ -1435,7 +1435,7 @@ body {
     <div class="modal-card modal-card-lg" style="padding: 24px; border-top: 4px solid var(--color-primary);">
       <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
         <h2 style="font-size: 18px; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Mentions Légales & CGU</h2>
-        <button class="close-modal" id="close-legal-modal-btn" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-times"></i></button>
+        <button type="button" class="close-modal" id="close-legal-modal-btn" aria-label="Fermer les mentions légales" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-times"></i></button>
       </div>
       <div class="modal-body" style="max-height: 65vh; overflow-y: auto; padding-right: 10px; font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);">
         

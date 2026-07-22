@@ -523,8 +523,8 @@ async function bootstrapApp() {
         if (form) form.reset();
       }
       const legalModalElem = document.getElementById('legal-modal');
-      if (legalModalElem && legalModalElem.classList.contains('active')) {
-        legalModalElem.classList.remove('active');
+      if (legalModalElem && (legalModalElem.classList.contains('active') || legalModalElem.style.display !== 'none')) {
+        closeLegalModal();
       }
     }
  

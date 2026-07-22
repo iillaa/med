@@ -25,36 +25,47 @@ function setupPullToRefresh(listEl, onRefresh) {
   const THRESHOLD = 64;
   let startY = 0, dragging = false, refreshing = false;
 
+  let rAFPending = null;
+  let currentPull = 0;
   const onStart = (e) => {
     if (refreshing) return;
     if (container.scrollTop > 0) return;
     startY = e.touches ? e.touches[0].clientY : e.clientY;
     dragging = true;
+    currentPull = 0;
   };
-  let rAFPending = false;
   const onMove = (e) => {
     if (!dragging || refreshing) return;
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     const delta = y - startY;
-    if (delta <= 0) { container.style.transform = ''; indicator.classList.remove('visible'); return; }
+    if (delta <= 0) { 
+      currentPull = 0;
+      container.style.transform = ''; 
+      indicator.classList.remove('visible'); 
+      return; 
+    }
     if (container.scrollTop > 0) { dragging = false; return; }
     if (e.cancelable) e.preventDefault();
+    currentPull = Math.min(delta * 0.5, THRESHOLD + 24);
     if (prefersReducedMotion()) return;
     if (!rAFPending) {
-      rAFPending = true;
-      requestAnimationFrame(() => {
-        const pull = Math.min(delta * 0.5, THRESHOLD + 24);
-        container.style.transform = `translateY(${pull}px)`;
+      rAFPending = requestAnimationFrame(() => {
+        container.style.transform = `translateY(${currentPull}px)`;
         indicator.classList.add('visible');
-        indicator.style.opacity = String(Math.min(pull / THRESHOLD, 1));
-        rAFPending = false;
+        indicator.style.opacity = String(Math.min(currentPull / THRESHOLD, 1));
+        rAFPending = null;
       });
     }
   };
   const onEnd = async () => {
+    if (rAFPending) {
+      cancelAnimationFrame(rAFPending);
+      rAFPending = null;
+    }
     if (!dragging || refreshing) { dragging = false; return; }
     dragging = false;
-    const pulled = parseFloat((container.style.transform.match(/translateY\(([\d.]+)px\)/) || [])[1] || '0');
+    const pulled = currentPull;
+    currentPull = 0;
     container.style.transform = '';
     indicator.style.opacity = '';
     indicator.classList.remove('visible');
