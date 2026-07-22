@@ -643,6 +643,14 @@ export function selectCat(cat, preserveTab = false) {
   state.activeCat = cat;
   state.activePrescriptionVariantIndex = 0;
 
+  if (!cat) {
+    if (workspace) workspace.style.display = 'none';
+    if (welcomeScreen) welcomeScreen.style.display = 'flex';
+    document.querySelectorAll('.cat-item').forEach(item => item.classList.remove('active'));
+    if (window.perf) window.perf.endMeasure('workspace.selectCat');
+    return;
+  }
+
   if (!preserveTab) {
     cat.lastRead = Date.now();
     const progress = getLocalProgress();
