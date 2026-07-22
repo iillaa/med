@@ -31,7 +31,7 @@ function rebuildClientAssets() {
     fs.mkdirSync(publicDataDir, { recursive: true });
   }
 
-  // Copy cats_db.json (stripping version history to optimize PWA client asset size)
+  // Copy cats_db.json (stripping version history and minifying JSON to optimize PWA client asset size)
   try {
     const rawDb = fs.readFileSync(path.join(__dirname, 'cats_db.json'), 'utf-8');
     const db = JSON.parse(rawDb);
@@ -41,36 +41,37 @@ function rebuildClientAssets() {
     });
     fs.writeFileSync(
       path.join(publicDataDir, 'cats_db.json'),
-      JSON.stringify(cleanDb, null, 2),
+      JSON.stringify(cleanDb),
       'utf-8'
     );
-    console.log("Copied cats_db.json (with history stripped) to public/data/");
+    console.log("Copied cats_db.json (minified with history stripped) to public/data/");
   } catch (err) {
     console.error("Error packaging cats_db.json during build:", err);
   }
 
-  // Copy pdf_index.json and generate pdf_list.json
+  // Copy pdf_index.json (minified) and generate pdf_list.json
   const pdfIndexSource = path.join(__dirname, 'pdf_index.json');
   if (fs.existsSync(pdfIndexSource)) {
-    fs.copyFileSync(
-      pdfIndexSource,
-      path.join(publicDataDir, 'pdf_index.json')
-    );
-    console.log("Copied pdf_index.json to public/data/");
-
-    // Generate lightweight pdf_list.json for fast rendering of lists
     try {
       const rawData = fs.readFileSync(pdfIndexSource, 'utf-8');
-      const index = JSON.parse(rawData);
-      const list = index.map(doc => doc.pdf);
+      const parsedIndex = JSON.parse(rawData);
       fs.writeFileSync(
-        path.join(publicDataDir, 'pdf_list.json'),
-        JSON.stringify(list, null, 2),
+        path.join(publicDataDir, 'pdf_index.json'),
+        JSON.stringify(parsedIndex),
         'utf-8'
       );
-      console.log("Generated and copied pdf_list.json to public/data/");
+      console.log("Copied pdf_index.json (minified) to public/data/");
+
+      // Generate lightweight pdf_list.json for fast rendering of lists
+      const list = parsedIndex.map(doc => doc.pdf);
+      fs.writeFileSync(
+        path.join(publicDataDir, 'pdf_list.json'),
+        JSON.stringify(list),
+        'utf-8'
+      );
+      console.log("Generated and copied pdf_list.json (minified) to public/data/");
     } catch (err) {
-      console.error("Error generating pdf_list.json during build:", err);
+      console.error("Error processing pdf_index.json during build:", err);
     }
   } else {
     console.warn("pdf_index.json not found, skipping copy and list generation.");
