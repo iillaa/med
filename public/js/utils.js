@@ -7,74 +7,6 @@
  * @param {number} [duration=5000] - Auto-dismiss delay in ms.
  */
 export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
-  // Inject toast styles once into <head> — bypasses CSS caching entirely
-  if (!document.getElementById('drcat-toast-styles')) {
-    const style = document.createElement('style');
-    style.id = 'drcat-toast-styles';
-    style.textContent = `
-      #drcat-toast {
-        position: fixed !important;
-        top: 20px !important;
-        right: 20px !important;
-        z-index: 999999 !important;
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
-        max-width: 320px !important;
-        width: max-content !important;
-        padding: 14px 16px !important;
-        background: #1e293b !important;
-        border: 1px solid #334155 !important;
-        border-left: 3px solid #06b6d4 !important;
-        border-radius: 10px !important;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-         opacity: 0 !important;
-         transform: translateX(30px) !important;
-         transition: opacity 0.3s ease, transform 0.3s ease !important;
-         /* Respect reduced motion: drop the slide/opacity tween when requested */
-         ${window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'transition: none !important; transform: none !important;' : ''}
-        pointer-events: auto !important;
-        font-family: inherit !important;
-      }
-      #drcat-toast.toast-visible {
-        opacity: 1 !important;
-        transform: translateX(0) !important;
-      }
-      .light-theme #drcat-toast {
-        background: #ffffff !important;
-        border-color: #e2e8f0 !important;
-        border-left-color: #06b6d4 !important;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
-      }
-      #drcat-toast .t-icon {
-        color: #06b6d4;
-        font-size: 15px;
-        flex-shrink: 0;
-        margin-top: 2px;
-      }
-      #drcat-toast .t-msg {
-        font-size: 12.5px;
-        color: #94a3b8;
-        line-height: 1.5;
-        flex: 1;
-      }
-      .light-theme #drcat-toast .t-msg { color: #475569; }
-      #drcat-toast .t-close {
-        background: none;
-        border: none;
-        color: #64748b;
-        cursor: pointer;
-        font-size: 13px;
-        padding: 0;
-        flex-shrink: 0;
-        margin-top: 1px;
-        line-height: 1;
-      }
-      #drcat-toast .t-close:hover { color: #f8fafc; }
-      .light-theme #drcat-toast .t-close:hover { color: #0f172a; }
-    `;
-    document.head.appendChild(style);
-  }
 
   // Remove any existing toast
   const existing = document.getElementById('drcat-toast');
@@ -488,41 +420,39 @@ export function exportDataFile(fileName, dataTitle, payload) {
   modal.setAttribute('role', 'dialog');
   modal.setAttribute('aria-modal', 'true');
   modal.innerHTML = `
-    <div class="modal-card" style="border-color: var(--color-primary); max-width: 420px; box-shadow: var(--shadow-xl);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="color: var(--color-success); margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-circle-check"></i> ${dataTitle} Prêt
-        </h3>
-        <button id="univ-modal-close" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px;">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-circle-check" style="color: var(--color-success)"></i> ${dataTitle} Prêt</h3>
+        <button class="close-modal-btn" id="univ-modal-close" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
-        Fichier : <strong style="color: var(--text-primary); word-break: break-all;">${fileName}</strong>
-        <br><span style="font-size: 11px;">${jsonStr.length} caractères · Format JSON</span>
-      </p>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;">
+          Fichier : <strong style="color: var(--text-primary); word-break: break-all;">${fileName}</strong>
+          <br><span style="font-size: 11.5px;">${jsonStr.length} caractères · Format JSON</span>
+        </p>
 
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        ${canShare || isCapacitor ? `
-        <button id="univ-btn-share" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-share-nodes"></i> Partager (Telegram, WhatsApp, Email...)
-        </button>
-        ` : ''}
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          ${canShare || isCapacitor ? `
+          <button id="univ-btn-share" class="btn-block btn-gradient-primary">
+            <i class="fa-solid fa-share-nodes"></i> Partager (Telegram, WhatsApp, Email...)
+          </button>
+          ` : ''}
 
-        <button id="univ-btn-download" style="width: 100%; padding: 12px; background: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid var(--color-success); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-download"></i> Télécharger en JSON
-        </button>
+          <button id="univ-btn-download" class="btn-block btn-outline-success">
+            <i class="fa-solid fa-download"></i> Télécharger en JSON
+          </button>
 
-        <button id="univ-btn-copy" style="width: 100%; padding: 12px; background: rgba(99, 102, 241, 0.1); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i class="fa-solid fa-copy"></i> Copier dans le presse-papiers
-        </button>
+          <button id="univ-btn-copy" class="btn-block btn-outline-indigo">
+            <i class="fa-solid fa-copy"></i> Copier dans le presse-papiers
+          </button>
 
-        <details style="margin-top: 4px;">
-          <summary style="font-size: 11px; color: var(--text-muted); cursor: pointer; padding: 6px 0;">
-            Aperçu (premiers 500 caractères)
-          </summary>
-          <pre style="font-size: 10px; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; overflow: auto; max-height: 160px; white-space: pre-wrap; word-break: break-all; margin-top: 6px;">${jsonStr.slice(0, 500)}...</pre>
-        </details>
+          <details style="margin-top: 8px;">
+            <summary style="font-size: 12px; color: var(--text-secondary); cursor: pointer; padding: 6px 0;">
+              Aperçu (premiers 500 caractères)
+            </summary>
+            <pre style="font-size: 11px; color: var(--text-secondary); background: var(--bg-input); padding: 8px; border-radius: var(--radius-md); overflow: auto; max-height: 160px; white-space: pre-wrap; word-break: break-all; margin-top: 6px; border: 1px solid var(--border-color);">${jsonStr.slice(0, 500)}...</pre>
+          </details>
+        </div>
       </div>
     </div>
   `;
@@ -671,57 +601,6 @@ export function exportDataFile(fileName, dataTitle, payload) {
  * @returns {object} Controller containing updateMessage(msg) and hide() functions.
  */
 function showLoadingOverlay(initialMessage) {
-  if (!document.getElementById('drcat-loading-styles')) {
-    const style = document.createElement('style');
-    style.id = 'drcat-loading-styles';
-    style.textContent = `
-      #drcat-loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(9, 13, 22, 0.7);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        z-index: 9999999;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 18px;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: all;
-      }
-      #drcat-loading-overlay.visible {
-        opacity: 1;
-      }
-      .drcat-spinner {
-        width: 46px;
-        height: 46px;
-        border: 4px solid rgba(6, 182, 212, 0.1);
-        border-left-color: #06b6d4;
-        border-radius: 50%;
-        animation: drcat-spin 1s linear infinite;
-      }
-      .drcat-loading-text {
-        color: #f8fafc;
-        font-size: 14.5px;
-        font-family: inherit;
-        font-weight: 500;
-        text-align: center;
-        max-width: 290px;
-        line-height: 1.5;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-      }
-      @keyframes drcat-spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   const overlay = document.createElement('div');
   overlay.id = 'drcat-loading-overlay';

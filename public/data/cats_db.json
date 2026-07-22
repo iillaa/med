@@ -753,5 +753,15 @@
       "Certificats_",
       "Certificats"
     ]
+  },
+  {
+    "id": 56,
+    "category": "Test",
+    "title": "Test",
+    "summary": "Hdudhjjbghjjbjjj",
+    "red_flags": "Test",
+    "ordonnance": "Jejdje",
+    "pdf_keywords": [],
+    "updatedAt": 1784717879373
   }
 ]

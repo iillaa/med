@@ -325,12 +325,20 @@ function filterCats(onFilterTriggered) {
   const selectedCat = categoryFilter.value;
 
   const filtered = state.allCats.filter(cat => {
-    // 1. Search text match (Expanded to search in Title, Summary, Red Flags, Category, and ID)
-    const matchesQuery = cat.title.toLowerCase().includes(query) || 
-                         cat.summary.toLowerCase().includes(query) || 
-                         (cat.red_flags && cat.red_flags.toLowerCase().includes(query)) ||
-                         cat.category.toLowerCase().includes(query) ||
-                         cat.id.toString() === query;
+    if (!cat) return false;
+    const titleStr = (cat.title || '').toLowerCase();
+    const summaryStr = (cat.summary || '').toLowerCase();
+    const redFlagsStr = (cat.red_flags || '').toLowerCase();
+    const categoryStr = (cat.category || '').toLowerCase();
+    const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
+
+    // 1. Search text match
+    const matchesQuery = !query || 
+                         titleStr.includes(query) || 
+                         summaryStr.includes(query) || 
+                         redFlagsStr.includes(query) ||
+                         categoryStr.includes(query) ||
+                         idStr === query;
 
     // 2. Category filter match
     const matchesCategory = selectedCat === 'all' || cat.category === selectedCat;
@@ -341,9 +349,9 @@ function filterCats(onFilterTriggered) {
     else if (state.activeStatusFilter === 'doing') matchesStatus = cat.status === 'doing';
     else if (state.activeStatusFilter === 'done') matchesStatus = cat.status === 'done';
     else if (state.activeStatusFilter === 'redflags') {
-      matchesStatus = cat.red_flags && cat.red_flags.trim().length > 0 && 
-                      !cat.red_flags.toLowerCase().includes("aucun signe de gravité") && 
-                      !cat.red_flags.toLowerCase().includes("aucun");
+      matchesStatus = redFlagsStr.length > 0 && 
+                      !redFlagsStr.includes("aucun signe de gravité") && 
+                      !redFlagsStr.includes("aucun");
     }
 
     return matchesQuery && matchesCategory && matchesStatus;
