@@ -826,21 +826,28 @@ export function loadRelatedPdfs(cat) {
   pdfListContainer.innerHTML = '';
 
   const keywords = Array.isArray(cat?.pdf_keywords) ? cat.pdf_keywords : [];
+  const categoryName = cat?.category ? cat.category.toLowerCase() : '';
+  const tags = Array.isArray(cat?.tags) ? cat.tags.map(t => t.toLowerCase()) : [];
+  const generalKeywords = [categoryName, ...tags].filter(k => k && k.trim().length > 2);
 
-  // Specific PDFs matching keywords
+  // Specific PDFs matching pdf_keywords
   const matchedFiles = state.allPdfs.filter(filename => {
     if (!filename) return false;
     const lowerName = filename.toLowerCase();
-    const isGlobal = ["abouimed", "kacem", "boughoufala", "150 ordonnances", "pathognomoniques", "autres cat", "formes d_administration", "jeûne"].some(g => lowerName.includes(g));
-    if (isGlobal) return false;
     return keywords.some(kw => kw && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
   });
 
-  // Global PDFs (Manuals, general guides)
+  // Global PDFs matching category or tags (but not already caught by specific keywords)
   const globalFiles = state.allPdfs.filter(filename => {
     if (!filename) return false;
     const lowerName = filename.toLowerCase();
-    return ["abouimed", "kacem", "boughoufala", "150 ordonnances", "pathognomoniques", "autres cat", "formes d_administration", "jeûne"].some(g => lowerName.includes(g));
+    
+    // Skip if it's already in the specific matched files
+    const isSpecific = keywords.some(kw => kw && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
+    if (isSpecific) return false;
+
+    // Must match the category or tags
+    return generalKeywords.some(kw => lowerName.includes(kw));
   });
 
   // Render Specific section
@@ -867,53 +874,20 @@ export function loadRelatedPdfs(cat) {
     });
   }
 
-  // Render Global section
-  const globalHeader = document.createElement('h4');
-  globalHeader.style.gridColumn = '1 / -1';
-  globalHeader.style.color = 'var(--color-success)';
-  globalHeader.style.margin = '20px 0 5px';
-  globalHeader.style.fontSize = '14px';
-  globalHeader.style.fontWeight = '600';
-  globalHeader.innerHTML = '<i class="fa-solid fa-book-medical"></i> Manuels & Guides Généraux (Tous sujets)';
-  pdfListContainer.appendChild(globalHeader);
+  // Render Global section (Specialty manuals)
+  if (globalFiles.length > 0) {
+    const globalHeader = document.createElement('h4');
+    globalHeader.style.gridColumn = '1 / -1';
+    globalHeader.style.color = 'var(--color-success)';
+    globalHeader.style.margin = '20px 0 5px';
+    globalHeader.style.fontSize = '14px';
+    globalHeader.style.fontWeight = '600';
+    globalHeader.innerHTML = `<i class="fa-solid fa-book-medical"></i> Manuels & Guides (${cat?.category || 'Généraux'})`;
+    pdfListContainer.appendChild(globalHeader);
 
-  if (globalFiles.length === 0) {
-    const emptyG = document.createElement('p');
-    emptyG.className = 'text-muted';
-    emptyG.style.gridColumn = '1 / -1';
-    emptyG.style.fontSize = '13px';
-    emptyG.style.margin = '5px 0 15px';
-    emptyG.textContent = 'Aucun manuel général trouvé dans vos fichiers.';
-    pdfListContainer.appendChild(emptyG);
-  } else {
     globalFiles.forEach(file => {
       pdfListContainer.appendChild(createPdfCardElement(file, true));
     });
-  }
-
-  // Fallback: If no matched or global files found, display all available PDFs directly
-  if (matchedFiles.length === 0 && globalFiles.length === 0) {
-    const allHeader = document.createElement('h4');
-    allHeader.style.gridColumn = '1 / -1';
-    allHeader.style.color = 'var(--color-primary)';
-    allHeader.style.margin = '10px 0 5px';
-    allHeader.style.fontSize = '14px';
-    allHeader.style.fontWeight = '600';
-    allHeader.innerHTML = '<i class="fa-solid fa-folder-open"></i> Documents Médicaux Disponibles';
-    pdfListContainer.appendChild(allHeader);
-
-    if (state.allPdfs.length > 0) {
-      state.allPdfs.forEach(file => {
-        pdfListContainer.appendChild(createPdfCardElement(file, false));
-      });
-    } else {
-      const emptyDiv = document.createElement('div');
-      emptyDiv.style.gridColumn = '1 / -1';
-      emptyDiv.className = 'empty-state';
-      emptyDiv.style.padding = '20px';
-      emptyDiv.textContent = 'Aucun document PDF disponible pour le moment.';
-      pdfListContainer.appendChild(emptyDiv);
-    }
   }
 }
 
