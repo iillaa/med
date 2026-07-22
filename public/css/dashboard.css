@@ -488,6 +488,19 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+
+  .admin-panes-container {
+    padding: 12px !important;
+  }
+
+  .suggestion-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .suggestion-actions {
+    flex-wrap: wrap;
+  }
 }
 
 /* Suggestion cards for Admin Moderation */

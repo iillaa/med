@@ -156,27 +156,36 @@
    On narrow viewports the card slides up from the bottom edge instead of
    scaling in place, matching native sheet presentation. */
 @media (max-width: 600px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
   .modal-overlay.modal-overlay--sheet {
     align-items: flex-end;
-    padding: 0;
+    padding: 12px 10px max(14px, env(safe-area-inset-bottom)) 10px;
   }
+  
   .modal-overlay.modal-overlay--sheet .modal-card {
     max-width: 100%;
     width: 100%;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    max-height: 92dvh;
+    border-radius: var(--radius-lg);
+    max-height: 88dvh;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
     animation: modalSheetIn var(--motion-slow) var(--ease-emphasized);
   }
+  
   .modal-overlay.modal-overlay--sheet.modal-closing .modal-card {
     animation: modalSheetOut var(--motion-base) var(--ease-standard) forwards;
   }
+  
   @keyframes modalSheetIn {
-    from { transform: translateY(100%); opacity: 1; }
+    from { transform: translateY(100%); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
+  
   @keyframes modalSheetOut {
     from { transform: translateY(0); opacity: 1; }
-    to { transform: translateY(100%); opacity: 1; }
+    to { transform: translateY(100%); opacity: 0; }
   }
 }
 
