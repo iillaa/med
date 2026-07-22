@@ -286,16 +286,19 @@
 
 @media (max-width: 768px) {
   .reader-modal-overlay {
-    padding: 10px;
+    padding: max(14px, env(safe-area-inset-top)) 10px max(14px, env(safe-area-inset-bottom)) 10px;
   }
   .reader-modal-content {
-    height: 96vh;
+    height: auto;
+    max-height: calc(100dvh - max(28px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    border-radius: var(--radius-lg);
   }
   .reader-modal-header {
-    padding: 14px 16px;
+    padding: 14px 18px;
   }
   .reader-modal-body {
-    padding: 18px;
-    font-size: 15px;
+    padding: 20px 18px;
+    font-size: 14.5px;
+    line-height: 1.7;
   }
 }
