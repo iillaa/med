@@ -129,6 +129,16 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
   1. For scroll containers, wrapped the `scrollTop = scrollHeight` assignment in a `setTimeout(..., 0)` to defer execution to a future macro-task. Since the browser performs style recalculation and layout updates before the next macro-task executes, reading `scrollHeight` is layout-safe and does not trigger synchronous forced reflow (unlike `requestAnimationFrame`, which runs *before* paint and still forces reflow if DOM updates are pending).
   2. For animation resets, replaced the synchronous `offsetWidth` read trick with a double `requestAnimationFrame` wrapper, allowing the browser to render the class removal frame first, and then add the animation class back cleanly in the next frame.
 
+### 27. Hash Caching vs. Quality Updates in Offline Generators
+* **Problem**: When a master index bundler uses file hashes (SHA-256) to skip redundant parsing of massive files (e.g., PDFs), it will ignore explicit user requests to "upgrade" a specific file to a higher-quality parser, because the underlying source file hash hasn't changed.
+* **Solution**: The bundler's skip-logic must evaluate *both* the source file hash *and* the cached extraction quality tier. If the extraction quality metadata upgrades (e.g. from `offline` to `llamaparse`), the bundler must regenerate the master index even if the source file is identical.
+
+### 28. Dual-Field Backward Compatibility in JSON Migrations
+* **Problem**: Changing a core data property in a heavily cached environment (e.g., changing PDF page content fields from `text` to `content`) immediately breaks the search engine for clients holding old cached data, while new clients break when reading old data.
+* **Solution**: Implement dual-field reading (`p.content || p.text`) in the search loops. This allows the system to seamlessly bridge old and new JSON schemas without requiring forced cache purges across thousands of Android client devices.
+
+### 29. Securing Admin HTML Pages (Beyond API Protection)
+* **Problem**: Protecting API routes (`/api/admin/*`) with admin tokens prevents unauthorized data access, but leaving the static HTML interface (e.g. `pdf_lab.html`) in the `public/` folder exposes the admin UI layout to anyone guessing the URL. 
+* **Solution**: Use Express middleware to intercept requests to the specific HTML file and assert `isLocalhostConnection`. If the request originates remotely, block it with a 403 Forbidden. This ensures the admin UI is truly invisible to the public internet without requiring complex cookie/session configurations on static files.
+
 ---
-
-

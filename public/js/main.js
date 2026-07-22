@@ -433,7 +433,42 @@ async function bootstrapApp() {
     updateEditButtonsVisibility();
   });
 
- 
+  // --- Legal Modal & Cookie Banner Logic ---
+  const legalModal = document.getElementById('legal-modal');
+  const openLegalBtns = [document.getElementById('open-legal-modal-btn'), document.getElementById('open-legal-from-banner')];
+  const closeLegalBtn = document.getElementById('close-legal-modal-btn');
+  const cookieBanner = document.getElementById('legal-consent-banner');
+  const acceptCookieBtn = document.getElementById('accept-legal-btn');
+
+  // Check if consent was already given
+  if (!localStorage.getItem('drcat_legal_consent_v1')) {
+    if (cookieBanner) {
+      setTimeout(() => cookieBanner.classList.remove('hidden'), 1000);
+    }
+  }
+
+  if (acceptCookieBtn) {
+    acceptCookieBtn.addEventListener('click', () => {
+      localStorage.setItem('drcat_legal_consent_v1', 'true');
+      if (cookieBanner) cookieBanner.classList.add('hidden');
+    });
+  }
+
+  openLegalBtns.forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (legalModal) legalModal.classList.add('active');
+      });
+    }
+  });
+
+  if (closeLegalBtn) {
+    closeLegalBtn.addEventListener('click', () => {
+      if (legalModal) legalModal.classList.remove('active');
+    });
+  }
+
   // Handle keyboard shortcuts
   window.addEventListener('keydown', (e) => {
     const isEditing = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
@@ -452,6 +487,10 @@ async function bootstrapApp() {
         modal.style.display = 'none';
         const form = document.getElementById('add-cat-form');
         if (form) form.reset();
+      }
+      const legalModalElem = document.getElementById('legal-modal');
+      if (legalModalElem && legalModalElem.classList.contains('active')) {
+        legalModalElem.classList.remove('active');
       }
     }
  

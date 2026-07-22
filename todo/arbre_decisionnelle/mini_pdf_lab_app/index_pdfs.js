@@ -87,6 +87,8 @@ async function indexPdfs(force = false) {
     for (const file of pdfFiles) {
       const filePath = path.join(PDF_DIR, file);
       const stats = await fs.promises.stat(filePath);
+      const mtime = stats.mtimeMs;
+      const size = stats.size;
 
       indexState.currentFile = file;
 
@@ -96,7 +98,6 @@ async function indexPdfs(force = false) {
         
         // Let the Strategy Manager handle hashing, caching, and LlamaParse delegation
         const extractedData = await extractPdfData(filePath, force);
-        extractedData.mtime = stats.mtimeMs;
         
         // Compare with old index to detect if it actually changed for logging
         const existing = index.find(item => item.pdf === file);

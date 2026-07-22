@@ -1,11 +1,17 @@
 import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
+import { renderAdminPdfTab } from './admin_pdf.js';
 
 let onSuggestionHandledCallback = null;
 
 export function initAdminTabListeners(onSuggestionHandled) {
   onSuggestionHandledCallback = onSuggestionHandled;
+  
+  const pdfPane = document.getElementById('admin-pane-pdfs');
+  if (pdfPane) {
+    renderAdminPdfTab(pdfPane);
+  }
 
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
   adminTabBtns.forEach(btn => {
@@ -110,53 +116,44 @@ export function initAdminTabListeners(onSuggestionHandled) {
       let fieldsHtml = '';
       if (sug.type === 'add') {
         fieldsHtml = `
-          <div style="margin-bottom: 14px;">
-            <label for="review-sug-title" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Titre de la fiche</label>
-            <input type="text" id="review-sug-title" value="${escapeHTML(sug.data.title || '')}" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none;">
+          <div class="form-group">
+            <label for="review-sug-title">Titre de la fiche</label>
+            <input type="text" id="review-sug-title" value="${escapeHTML(sug.data.title || '')}">
           </div>
-          <div style="margin-bottom: 14px;">
-            <label for="review-sug-category" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Spécialité</label>
-            <input type="text" id="review-sug-category" value="${escapeHTML(sug.data.category || '')}" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:13px; outline:none;">
+          <div class="form-group">
+            <label for="review-sug-category">Spécialité</label>
+            <input type="text" id="review-sug-category" value="${escapeHTML(sug.data.category || '')}">
           </div>
-          <div style="margin-bottom: 14px;">
-            <label for="review-sug-redflags" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Red Flags (signes de gravité)</label>
-            <textarea id="review-sug-redflags" rows="3" style="width:100%; padding:10px 12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:inherit; resize:vertical; outline:none;">${escapeHTML(sug.data.red_flags || '')}</textarea>
+          <div class="form-group">
+            <label for="review-sug-redflags">Red Flags (signes de gravité)</label>
+            <textarea id="review-sug-redflags" rows="3">${escapeHTML(sug.data.red_flags || '')}</textarea>
           </div>
         `;
       }
 
       fieldsHtml += `
-        <div style="margin-bottom: 14px;">
-          <label for="review-sug-summary" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Synthèse de Conduite à Tenir</label>
-          <textarea id="review-sug-summary" rows="12" style="width:100%; padding:12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:monospace; font-size:12px; line-height:1.5; resize:vertical; outline:none;">${escapeHTML(sug.data.summary || '')}</textarea>
+        <div class="form-group">
+          <label for="review-sug-summary">Synthèse de Conduite à Tenir</label>
+          <textarea id="review-sug-summary" class="font-monospace" rows="12">${escapeHTML(sug.data.summary || '')}</textarea>
         </div>
-        <div style="margin-bottom: 14px;">
-          <label for="review-sug-ordonnance" style="display:block; font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Ordonnance Type</label>
-          <textarea id="review-sug-ordonnance" rows="8" style="width:100%; padding:12px; background:var(--bg-body); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:monospace; font-size:12px; line-height:1.5; resize:vertical; outline:none;">${escapeHTML(sug.data.ordonnance || '')}</textarea>
+        <div class="form-group">
+          <label for="review-sug-ordonnance">Ordonnance Type</label>
+          <textarea id="review-sug-ordonnance" class="font-monospace" rows="8">${escapeHTML(sug.data.ordonnance || '')}</textarea>
         </div>
       `;
 
       modal.innerHTML = `
-        <div class="modal-card" style="border-color: var(--color-primary); max-width: 650px; box-shadow: var(--shadow-xl);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-shrink: 0;">
-            <h3 style="color: var(--color-primary); margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; font-weight: 600;">
-              <i class="fa-solid fa-pen-to-square"></i> Réviser & Éditer la proposition
-            </h3>
-            <button id="review-modal-close" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; display: flex; align-items: center;">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
+        <div class="modal-card modal-card-lg">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Réviser & Éditer la proposition</h3>
+            <button class="close-modal-btn" id="review-modal-close" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
           </div>
-
-          <div style="flex-grow: 1; overflow-y: auto; padding-right: 6px; margin-bottom: 18px;">
+          <div class="modal-body">
             ${fieldsHtml}
           </div>
-          <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0;">
-            <button id="review-btn-cancel" style="padding: 10px 18px; background: none; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 13px; font-weight: 500;">
-              Annuler
-            </button>
-            <button id="review-btn-save" style="padding: 10px 18px; background: var(--color-success); border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-weight: 600; display:flex; align-items:center; gap:8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-              <i class="fa-solid fa-floppy-disk"></i> Enregistrer les corrections
-            </button>
+          <div class="modal-footer">
+            <button id="review-btn-cancel" class="cancel-btn">Annuler</button>
+            <button id="review-btn-save" class="btn-solid-success"><i class="fa-solid fa-floppy-disk"></i> Enregistrer les corrections</button>
           </div>
         </div>
       `;
@@ -238,11 +235,11 @@ export async function loadPendingSuggestions(targetListEl) {
         diffHtml = `<strong>Fiche ciblée :</strong> ${escapeHTML(originalTitle)}<br>`;
         if (sug.data.summary) {
           const previewText = sug.data.summary.length > 200 ? escapeHTML(sug.data.summary.substring(0, 200)) + '...' : escapeHTML(sug.data.summary);
-          diffHtml += `<strong>Proposition Synthèse (extrait) :</strong><div class="suggestion-diff-container" style="max-height: 90px; overflow: hidden; text-overflow: ellipsis; white-space: pre-wrap; font-family: monospace; font-size:12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; margin-top: 4px;">${previewText}</div>`;
+          diffHtml += `<strong>Proposition Synthèse (extrait) :</strong><div class="suggestion-diff-container">${previewText}</div>`;
         }
         if (sug.data.ordonnance) {
           const previewText = sug.data.ordonnance.length > 150 ? escapeHTML(sug.data.ordonnance.substring(0, 150)) + '...' : escapeHTML(sug.data.ordonnance);
-          diffHtml += `<strong>Proposition Ordonnance (extrait) :</strong><div class="suggestion-diff-container" style="max-height: 80px; overflow: hidden; text-overflow: ellipsis; white-space: pre-wrap; font-family: monospace; font-size:12px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 6px; margin-top: 4px;">${previewText}</div>`;
+          diffHtml += `<strong>Proposition Ordonnance (extrait) :</strong><div class="suggestion-diff-container">${previewText}</div>`;
         }
       }
 
@@ -252,17 +249,17 @@ export async function loadPendingSuggestions(targetListEl) {
             <span class="suggestion-badge ${badgeClass}">${badgeText}</span>
             <span class="suggestion-time">${formattedDate}</span>
           </div>
-          <div class="suggestion-body" style="margin-bottom: 12px;">
-            <div style="font-size: 13px; line-height: 1.5;">${diffHtml}</div>
+          <div class="suggestion-body">
+            <div class="suggestion-diff-content">${diffHtml}</div>
           </div>
-          <div class="suggestion-actions" style="display: flex; gap: 8px;">
-            <button class="suggestion-btn btn-reject" data-action="reject" style="flex: 1;">
+          <div class="suggestion-actions">
+            <button class="suggestion-btn btn-reject" data-action="reject">
               <i class="fa-solid fa-xmark"></i> Rejeter
             </button>
-            <button class="suggestion-btn btn-review" data-action="review" style="flex: 1; background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3);">
+            <button class="suggestion-btn btn-review" data-action="review">
               <i class="fa-solid fa-pen-to-square"></i> Réviser
             </button>
-            <button class="suggestion-btn btn-approve" data-action="approve" style="flex: 1;">
+            <button class="suggestion-btn btn-approve" data-action="approve">
               <i class="fa-solid fa-check"></i> Accepter
             </button>
           </div>

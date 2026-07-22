@@ -166,7 +166,7 @@ export async function fetchServerList() {
   return serverListCache;
 }
 
-function getApiUrl(endpoint, overrideUrl) {
+export function getApiUrl(endpoint, overrideUrl) {
   const configuredUrl = overrideUrl || getRemoteServerUrl();
   // On localhost web browser (not standalone Capacitor app), use relative paths to avoid cross-origin requests to the tunnel URL
   const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
@@ -251,7 +251,7 @@ export async function checkAdminStatus() {
  
 // Shared fetch helper with strict timeout to prevent indefinite hangs
 // Timeout is configured in config.js (FETCH_TIMEOUT_MS)
-async function fetchWithTimeout(url, options = {}) {
+export async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -697,20 +697,21 @@ export async function searchPdfsContent(query) {
     for (const doc of offlinePdfIndexCache) {
       if (!doc.pages) continue;
       for (const p of doc.pages) {
-        if (!p.text) continue;
+        const textData = p.content || p.text;
+        if (!textData) continue;
 
         if (results.some(r => r.pdf === doc.pdf && r.page === p.page)) {
           continue;
         }
 
-        const textLower = p.text.toLowerCase();
+        const textLower = textData.toLowerCase();
         const indexMatch = textLower.indexOf(cleanQuery);
         if (indexMatch !== -1) {
           const start = Math.max(0, indexMatch - 60);
-          const end = Math.min(p.text.length, indexMatch + cleanQuery.length + 60);
-          let snippet = p.text.substring(start, end);
+          const end = Math.min(textData.length, indexMatch + cleanQuery.length + 60);
+          let snippet = textData.substring(start, end);
           if (start > 0) snippet = '...' + snippet;
-          if (end < p.text.length) snippet = snippet + '...';
+          if (end < textData.length) snippet = snippet + '...';
 
           results.push({
             pdf: doc.pdf,

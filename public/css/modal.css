@@ -37,6 +37,14 @@
   will-change: transform, opacity;
 }
 
+.modal-card.modal-card-lg {
+  max-width: 650px;
+}
+
+.modal-card.modal-card-sm {
+  max-width: 420px;
+}
+
 @keyframes modalCardIn {
   from { transform: scale(0.96) translateY(8px); opacity: 0; }
   to { transform: scale(1) translateY(0); opacity: 1; }

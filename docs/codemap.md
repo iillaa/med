@@ -111,11 +111,12 @@ Serves the web client, handles local cache synchronization, and secure administr
   * `GET /api/pdf-index-status` / `GET /api/search-status`: Returns indexing completeness percentages.
   * `POST /api/reindex`: Triggers index update for newly added documents.
 
-### 2. PDF Indexer (`index_pdfs.js`)
-Parses reference clinical documents in Termux's `.cat-med/reference-pdfs/` directory page-by-page.
-* **Extraction**: Uses `pdf-parse` to convert binary page elements into plain text strings.
-* **Caching**: Skips unmodified documents via `mtime` and `size` checksum comparisons.
-* **Integrations**: Rewrites `pdf_index.json` which is re-read by `server.js` and loaded client-side for offline searches.
+### 2. PDF Indexer Server (`index_pdfs.js` & `server/pdf_extractor.js`)
+Parses reference clinical documents in `public/pdfs/` directory page-by-page.
+* **Extraction Strategy**: Uses a 3-tier cascade (`server/pdf_extractor.js`): LlamaParse (API) -> Google Gemini Flash (API) -> Offline `pdf-parse`.
+* **Caching**: Hashes each PDF (SHA-256) and stores the JSON result in `data/pdf_cache/` to avoid massive repetitive API costs.
+* **Bundler**: Merges all cached JSONs into `pdf_index.json` which is loaded client-side for offline searches. Only rebuilds if the hash *or* the quality tier changes.
+* **Admin Lab**: `public/pdf_lab.html` (secured by localhost check) provides an interface to view JSON caches, download them, and manually force a LlamaParse upgrade for specific PDFs.
 
 ### 3. API Router Client (`public/js/api.js`)
 The core communication layer that abstracts local server and offline Capacitor calls.

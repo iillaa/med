@@ -97,11 +97,11 @@ export function filterAllPdfsList() {
   const allPdfsList = document.getElementById('all-pdfs-list');
   const pdfSearch = document.getElementById('pdf-search');
   if (!allPdfsList || !pdfSearch) return;
-  const query = pdfSearch.value.toLowerCase().trim();
+  const query = (pdfSearch.value || '').toLowerCase().trim();
   const items = allPdfsList.querySelectorAll('li');
 
   items.forEach(item => {
-    const text = item.textContent.toLowerCase();
-    item.style.display = text.includes(query) ? 'block' : 'none';
+    const text = (item.textContent || '').toLowerCase();
+    item.style.display = !query || text.includes(query) ? 'block' : 'none';
   });
 }

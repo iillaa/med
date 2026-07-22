@@ -36,12 +36,17 @@ To configure the workspace on a Termux instance or standard Linux terminal:
     echo "your_secure_password" > admin_password.txt
     ```
 5. **Add Reference PDFs**:
-   Create the PDF directory and copy your study guides inside:
+   PDFs can be uploaded directly via the web interface. If you wish to manually add them, copy your study guides into the public folder:
    ```bash
-   mkdir -p .cat-med/reference-pdfs
+   mkdir -p public/pdfs
    # copy pdf files to this folder
    ```
-
+6. **Set up API Keys (Optional but Recommended)**:
+   For high-quality extraction, set these in `.env`:
+   ```bash
+   LLAMAPARSE_API_KEY=llx-yourkey
+   GOOGLE_API_KEY=AIzaSy-yourkey
+   ```
 ---
 
 ## 🌿 Git Branching Strategy
