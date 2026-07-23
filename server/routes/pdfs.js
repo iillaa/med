@@ -5,7 +5,10 @@ const { indexPdfs } = require('../../index_pdfs');
 const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 
-const PDF_DIR = path.join(__dirname, '..', '..', 'public', 'pdfs');
+const { compressPdfFile } = require('../../scripts/compress_pdfs');
+
+const PDF_MASTERS_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_masters');
+const PUBLIC_PDF_DIR = path.join(__dirname, '..', '..', 'public', 'pdfs');
 
 function registerPdfRoutes(app, cache) {
 
@@ -25,24 +28,26 @@ function registerPdfRoutes(app, cache) {
         return res.status(400).json({ error: 'Only PDF files are supported.' });
       }
 
-      const targetPath = path.join(PDF_DIR, cleanFilename);
+      const masterPath = path.join(PDF_MASTERS_DIR, cleanFilename);
+      const publicPath = path.join(PUBLIC_PDF_DIR, cleanFilename);
       const fileBuffer = Buffer.from(base64Data, 'base64');
       
-      // Ensure PDF directory exists
-      if (!fs.existsSync(PDF_DIR)) {
-        fs.mkdirSync(PDF_DIR, { recursive: true });
-      }
+      if (!fs.existsSync(PDF_MASTERS_DIR)) fs.mkdirSync(PDF_MASTERS_DIR, { recursive: true });
+      if (!fs.existsSync(PUBLIC_PDF_DIR)) fs.mkdirSync(PUBLIC_PDF_DIR, { recursive: true });
 
-      await fs.promises.writeFile(targetPath, fileBuffer);
-      console.log(`[PDF Upload] Saved ${cleanFilename} to public/pdfs folder.`);
+      await fs.promises.writeFile(masterPath, fileBuffer);
+      console.log(`[PDF Upload] Saved master original ${cleanFilename} to data/pdf_masters.`);
 
-      res.json({ success: true, message: `PDF ${cleanFilename} uploaded.` });
+      // Auto-compress master original for public web and APK bundling
+      compressPdfFile(masterPath, publicPath);
 
-      // Run extraction asynchronously in the background so request doesn't hang
-      extractPdfData(targetPath)
+      res.json({ success: true, message: `PDF ${cleanFilename} uploaded and compressed.` });
+
+      // Run extraction asynchronously on master original in background
+      extractPdfData(masterPath)
         .then(async () => {
           console.log(`[Background Task] Extraction finished for ${cleanFilename}. Rebuilding global index...`);
-          await indexPdfs(false); // Rebuilds the big JSON file
+          await indexPdfs(false);
         })
         .catch(err => {
           console.error(`[Background Task] Extraction failed for ${cleanFilename}`, err);

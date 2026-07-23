@@ -1,9 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 const { extractPdfData } = require('./server/pdf_extractor');
+const { compressPdfFile } = require('./scripts/compress_pdfs');
 
-const PDF_DIR = path.join(__dirname, 'public', 'pdfs');
+const PDF_MASTERS_DIR = path.join(__dirname, 'data', 'pdf_masters');
+const PUBLIC_PDF_DIR = path.join(__dirname, 'public', 'pdfs');
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
+
+function ensurePdfDirectories() {
+  if (!fs.existsSync(PDF_MASTERS_DIR)) fs.mkdirSync(PDF_MASTERS_DIR, { recursive: true });
+  if (!fs.existsSync(PUBLIC_PDF_DIR)) fs.mkdirSync(PUBLIC_PDF_DIR, { recursive: true });
+
+  // Auto-sync any existing public PDFs to pdf_masters if missing
+  const publicFiles = fs.existsSync(PUBLIC_PDF_DIR) ? fs.readdirSync(PUBLIC_PDF_DIR).filter(f => f.endsWith('.pdf')) : [];
+  for (const file of publicFiles) {
+    const masterPath = path.join(PDF_MASTERS_DIR, file);
+    if (!fs.existsSync(masterPath)) {
+      fs.copyFileSync(path.join(PUBLIC_PDF_DIR, file), masterPath);
+    }
+  }
+}
 
 // Status object to track indexing state in memory
 let indexState = {
@@ -24,7 +40,8 @@ function onIndexUpdated(cb) {
  * Returns the current state of the indexer
  */
 function getIndexStatus() {
-  const files = fs.existsSync(PDF_DIR) ? fs.readdirSync(PDF_DIR) : [];
+  ensurePdfDirectories();
+  const files = fs.existsSync(PDF_MASTERS_DIR) ? fs.readdirSync(PDF_MASTERS_DIR) : [];
   const pdfFiles = files.filter(f => f.toLowerCase().endsWith('.pdf'));
   
   let indexedCount = 0;
@@ -44,8 +61,9 @@ function getIndexStatus() {
 }
 
 /**
- * Indexes PDF files in public/pdfs directory page by page.
- * Caches results in pdf_index.json to avoid parsing unmodified PDFs.
+ * Indexes PDF files in data/pdf_masters directory page by page.
+ * Caches results in pdf_index.json to avoid parsing unmodified PDFs,
+ * and compresses master PDFs into public/pdfs/ for lightweight APK bundling.
  */
 async function indexPdfs(force = false) {
   if (indexState.isIndexing) {
@@ -53,9 +71,10 @@ async function indexPdfs(force = false) {
     return;
   }
 
+  ensurePdfDirectories();
   indexState.isIndexing = true;
   indexState.currentFile = 'Initialisation...';
-  console.log("Starting PDF text indexing...");
+  console.log("Starting PDF text indexing from master originals (data/pdf_masters/)...");
 
   try {
     let index = [];
@@ -69,13 +88,7 @@ async function indexPdfs(force = false) {
       }
     }
 
-    if (!fs.existsSync(PDF_DIR)) {
-      console.error(`PDF directory not found at: ${PDF_DIR}`);
-      indexState.isIndexing = false;
-      return;
-    }
-
-    const files = await fs.promises.readdir(PDF_DIR);
+    const files = await fs.promises.readdir(PDF_MASTERS_DIR);
     const pdfFiles = files.filter(f => f.toLowerCase().endsWith('.pdf'));
     
     indexState.totalFiles = pdfFiles.length;
@@ -85,34 +98,39 @@ async function indexPdfs(force = false) {
     let updated = false;
 
     for (const file of pdfFiles) {
-      const filePath = path.join(PDF_DIR, file);
-      const stats = await fs.promises.stat(filePath);
+      const masterPath = path.join(PDF_MASTERS_DIR, file);
+      const publicPath = path.join(PUBLIC_PDF_DIR, file);
+      const stats = await fs.promises.stat(masterPath);
 
       indexState.currentFile = file;
 
       try {
-        console.log(`[Bundler] Processing "${file}"...`);
+        console.log(`[Indexer] Parsing master original "${file}"...`);
         const parseStart = Date.now();
         
-        // Let the Strategy Manager handle hashing, caching, and LlamaParse delegation
-        const extractedData = await extractPdfData(filePath, force);
+        // Strategy Manager extracts from uncompressed master original
+        const extractedData = await extractPdfData(masterPath, force);
         extractedData.mtime = stats.mtimeMs;
         
-        // Compare with old index to detect if it actually changed for logging
+        // Compare with old index to detect changes
         const existing = index.find(item => item.pdf === file);
         if (!existing || existing.hash !== extractedData.hash || existing.quality !== extractedData.quality || force) {
           updated = true;
         }
 
         newIndex.push(extractedData);
+
+        // Auto-compress master original into public/pdfs/ for web view and APK bundling
+        if (!fs.existsSync(publicPath) || force) {
+          compressPdfFile(masterPath, publicPath);
+        }
         
         const parseDuration = Date.now() - parseStart;
         if (global.perfServer && (!existing || existing.hash !== extractedData.hash)) {
           global.perfServer.recordPdfParse(file, parseDuration, extractedData.pages.length);
         }
       } catch (err) {
-        console.error(`[Bundler] Failed to process "${file}":`, err);
-        // Keep existing if possible
+        console.error(`[Indexer] Failed to process "${file}":`, err);
         const existing = index.find(item => item.pdf === file);
         if (existing) {
           newIndex.push(existing);
