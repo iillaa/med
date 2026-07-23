@@ -9,23 +9,35 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ```text
 /data/data/com.termux/files/home/med/
 ├── server.js                    # Express.js backend (REST API, local auth, data cache)
-├── index_pdfs.js                # PDF parser & text indexer script (pdf-parse wrapper)
-├── build.js                     # Static site compilation: copies DBs + generates remote_config.js
-├── set_admin_password.js        # Admin password setter (PBKDF2 hash, replaces plain-text setup)
-├── set_server_provider.js       # Server-provider list setter (mirrors set_admin_password; writes remote_server_config.json)
-├── test_api.js                  # Smoke test suite for all server API routes
+├── index_pdfs.js                # PDF parser & text indexer script (LlamaParse/Gemini AI pipeline)
+├── build.js                     # Static site compilation & minifier for cats_db, pdf_index & pdf_list
+├── set_admin_password.js        # Admin password setter (PBKDF2 hash)
+├── set_server_provider.js       # Server-provider list setter (writes remote_server_config.json)
 ├── cats_db.json                 # JSON database of clinical fiches (CATs)
 ├── cats_db.json.bak             # Automatic database backup (created before writes)
 ├── suggestions.json             # Moderation suggestions queue
-├── pdf_index.json               # Indexed PDF page text database (~1 MB, git-tracked)
+├── pdf_index.json               # Master indexed PDF page text database
 ├── remote_server_config.json    # Active tunnel/provider URL config (⚠️ Git-ignored)
 ├── admin_password.txt           # PBKDF2-hashed admin password (⚠️ Git-ignored)
 ├── capacitor.config.json        # Capacitor native wrapper configuration
 ├── package.json                 # Node dependencies and project build scripts
-├── .eslintrc.json               # ESLint configuration
-├── .prettierrc                  # Prettier code formatting configuration
 ├── README.md                    # Project landing, features, security and performance overview
 ├── TODO.md                      # Developer technical debt and backlog
+│
+├── data/                        # Server Data & PDF Master Store
+│   ├── pdf_masters/             # Uncompressed master original PDFs for AI indexing (⚠️ Git-ignored)
+│   └── pdf_cache/               # Cached SHA-256 JSON extractions from LlamaParse/Gemini
+│
+├── scripts/                     # Utility & Optimization Scripts
+│   └── compress_pdfs.js         # Ghostscript ultra-compressor (96 DPI + JPEGQ 60 + Bicubic downsampling)
+│
+├── tests/                       # Automated Test Suite
+│   ├── run_all_tests.js         # Master test runner (runs all 5 test suites)
+│   ├── test_api.js              # Server API smoke tests
+│   ├── test_auth.js             # Authentication & protected route tests
+│   ├── test_suggestions.js      # Full suggestion lifecycle tests
+│   ├── test_resume.mjs          # "Reprendre la révision" tests
+│   └── test_prescription.mjs    # Prescription rendering tests
 │
 ├── docs/                        # Active Project Documentation
 │   ├── codemap.md               # This file — structural map for developers and AI agents

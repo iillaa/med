@@ -25,17 +25,26 @@
     th { color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 12px; }
     tr:hover { background: rgba(255,255,255,0.02); }
     
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
     .badge-offline { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
     .badge-google { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
     .badge-llamaparse { background: rgba(14, 165, 233, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+    .badge-failed { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
     
+    .pill-page { background: rgba(255,255,255,0.06); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 5px; }
+    .pill-page:hover { border-color: var(--primary); background: rgba(14, 165, 233, 0.1); }
+    
+    .compression-pill { font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+    .comp-high { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .comp-none { color: var(--text-muted); }
+
     .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     pre { background: #000; padding: 15px; border-radius: 6px; overflow: auto; color: #a5b4fc; max-height: 600px; font-size: 13px; margin: 0; }
     
     .log-line { font-family: monospace; font-size: 12px; margin: 2px 0; color: #cbd5e1; }
     
-    #overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+    #overlay, #modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; max-width: 650px; width: 90%; max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
     .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -49,11 +58,60 @@
     </div>
   </div>
 
+  <!-- Detailed Page & Metric Inspection Modal -->
+  <div id="modal-overlay">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h2 id="modal-title" style="margin: 0; font-size: 20px; color: var(--text);">PDF Details</h2>
+          <div id="modal-hash" style="font-size: 12px; font-family: monospace; color: var(--text-muted); margin-top: 4px;">Hash: -</div>
+        </div>
+        <button onclick="closeModal()" class="btn-outline" style="padding: 4px 10px; font-size: 16px;">✕</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 8px;">
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Parser Engine</div>
+          <div id="modal-engine" style="font-weight: bold; font-size: 14px; margin-top: 4px;">-</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Word Count</div>
+          <div id="modal-words" style="font-weight: bold; font-size: 14px; margin-top: 4px; color: var(--primary);">-</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">APK Savings</div>
+          <div id="modal-savings" style="font-weight: bold; font-size: 14px; margin-top: 4px; color: var(--success);">-</div>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="margin: 12px 0 8px 0; font-size: 13px; text-transform: uppercase; color: var(--text-muted);">Page-by-Page Extraction Breakdown</h4>
+        <div style="background: #000; border-radius: 6px; border: 1px solid var(--border); max-height: 250px; overflow-y: auto;">
+          <table style="margin: 0;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.04);">
+                <th style="padding: 8px 12px;">Page</th>
+                <th style="padding: 8px 12px;">Words</th>
+                <th style="padding: 8px 12px;">Characters</th>
+                <th style="padding: 8px 12px;">Density Bar</th>
+              </tr>
+            </thead>
+            <tbody id="modal-page-rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+        <button onclick="closeModal()" class="btn-outline">Fermer</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <div class="header">
       <div>
         <h1><span style="font-size: 28px;">🔬</span> PDF Inspector</h1>
-        <p style="color: var(--text-muted); margin: 5px 0 0 0;">Manage and upgrade your Master Index quality offline.</p>
+        <p style="color: var(--text-muted); margin: 5px 0 0 0;">Manage, inspect, and optimize your Master PDF Index and mobile APK sizes.</p>
       </div>
       <button onclick="fetchList()">🔄 Refresh List</button>
     </div>
@@ -66,14 +124,15 @@
           <thead>
             <tr>
               <th>Filename</th>
-              <th>Quality</th>
-              <th>Pages</th>
+              <th>Quality & Engine</th>
+              <th>Pages & Words</th>
+              <th>APK Savings</th>
               <th>Last Indexed</th>
               <th style="text-align: right;">Actions</th>
             </tr>
           </thead>
           <tbody id="pdf-list">
-            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading PDFs...</td></tr>
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading PDFs...</td></tr>
           </tbody>
         </table>
       </div>
@@ -101,28 +160,80 @@
     const jsonOutput = document.getElementById('json-output');
     const overlay = document.getElementById('overlay');
     const overlayText = document.getElementById('overlay-text');
+    const modalOverlay = document.getElementById('modal-overlay');
+
+    let currentFilesData = [];
 
     function getQualityBadge(q) {
-      if (!q) return '<span class="badge badge-offline">Offline</span>';
+      if (!q) return '<span class="badge badge-offline">🟢 Offline</span>';
       const clean = q.toLowerCase();
-      if (clean === 'online' || clean === 'llamaparse') return '<span class="badge badge-llamaparse">LlamaParse</span>';
-      if (clean === 'online-google' || clean === 'google') return '<span class="badge badge-google">Google Flash</span>';
-      return '<span class="badge badge-offline">Offline</span>';
+      if (clean === 'online' || clean === 'llamaparse') return '<span class="badge badge-llamaparse">🟢 LlamaParse</span>';
+      if (clean === 'online-google' || clean === 'google') return '<span class="badge badge-google">🟠 Google Flash</span>';
+      if (clean === 'failed') return '<span class="badge badge-failed">🔴 Failed</span>';
+      return '<span class="badge badge-offline">🔵 Offline</span>';
+    }
+
+    function formatMb(bytes) {
+      if (!bytes || bytes <= 0) return '-';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function closeModal() {
+      modalOverlay.style.display = 'none';
+    }
+
+    function inspectPdf(pdfName) {
+      const fileData = currentFilesData.find(f => f.pdf === pdfName);
+      if (!fileData) return;
+
+      document.getElementById('modal-title').textContent = fileData.pdf;
+      document.getElementById('modal-hash').textContent = `SHA-256: ${fileData.hash || 'N/A'}`;
+      document.getElementById('modal-engine').innerHTML = getQualityBadge(fileData.quality);
+      document.getElementById('modal-words').textContent = `${(fileData.totalWords || 0).toLocaleString()} words (${(fileData.totalChars || 0).toLocaleString()} chars)`;
+      
+      const savedText = fileData.savedPercent > 0 
+        ? `${formatMb(fileData.masterSize)} ➔ ${formatMb(fileData.publicSize)} (-${fileData.savedPercent}%)`
+        : (fileData.publicSize > 0 ? formatMb(fileData.publicSize) : 'Original Only');
+      document.getElementById('modal-savings').textContent = savedText;
+
+      const pageRows = document.getElementById('modal-page-rows');
+      pageRows.innerHTML = '';
+      const pages = fileData.pageStats || [];
+      const maxChars = Math.max(...pages.map(p => p.chars || 0), 1);
+
+      pages.forEach(p => {
+        const percent = Math.min(Math.round((p.chars / maxChars) * 100), 100);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding: 6px 12px; font-weight: bold; color: var(--primary);">p. ${p.page}</td>
+          <td style="padding: 6px 12px;">${p.words.toLocaleString()}</td>
+          <td style="padding: 6px 12px; color: var(--text-muted);">${p.chars.toLocaleString()}</td>
+          <td style="padding: 6px 12px; width: 40%;">
+            <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+              <div style="background: var(--primary); width: ${percent}%; height: 100%;"></div>
+            </div>
+          </td>
+        `;
+        pageRows.appendChild(tr);
+      });
+
+      modalOverlay.style.display = 'flex';
     }
 
     async function fetchList() {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Refreshing...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Refreshing...</td></tr>';
       try {
         const res = await fetch('/api/admin/pdf-lab-list', { headers: API_HEADERS });
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         
         if (!data.files || data.files.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No PDFs found in Master Index.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No PDFs found in Master Index.</td></tr>';
           totalCount.textContent = '0';
           return;
         }
 
+        currentFilesData = data.files;
         totalCount.textContent = data.files.length;
         tbody.innerHTML = '';
         
@@ -130,29 +241,69 @@
           const tr = document.createElement('tr');
           const date = new Date(file.timestamp).toLocaleString();
           
+          const savingsHtml = file.savedPercent > 0
+            ? `<span class="compression-pill comp-high" title="${formatMb(file.masterSize)} ➔ ${formatMb(file.publicSize)}">💾 -${file.savedPercent}%</span>`
+            : `<span class="compression-pill comp-none">${file.publicSize > 0 ? formatMb(file.publicSize) : '-'}</span>`;
+
           tr.innerHTML = `
             <td class="pdf-name-cell" style="font-weight: 500;"></td>
-            <td>${getQualityBadge(file.quality)}</td>
-            <td>${file.pages}</td>
+            <td class="quality-cell"></td>
+            <td class="pages-cell"></td>
+            <td>${savingsHtml}</td>
             <td style="color: var(--text-muted); font-size: 12px;">${date}</td>
             <td style="text-align: right; gap: 5px; display: flex; justify-content: flex-end;">
               <button class="btn-outline view-json-btn" style="background: rgba(14, 165, 233, 0.1);" title="View JSON Output">View JSON</button>
               <button class="btn-outline download-json-btn" style="background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: var(--success);" title="Download JSON File">Download</button>
               <button class="btn-outline force-extract-btn" title="Delete Cache & Force Online Re-Extraction">Force Upgrade</button>
+              <button class="btn-outline delete-pdf-btn" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444;" title="Supprimer définitivement ce PDF">Supprimer</button>
             </td>
           `;
           
           // Securely inject text content and attach event listeners to prevent XSS
           tr.querySelector('.pdf-name-cell').textContent = file.pdf;
+
+          const qualityCell = tr.querySelector('.quality-cell');
+          qualityCell.innerHTML = getQualityBadge(file.quality);
+          qualityCell.querySelector('.badge').addEventListener('click', () => inspectPdf(file.pdf));
+
+          const pagesCell = tr.querySelector('.pages-cell');
+          pagesCell.innerHTML = `<span class="pill-page" title="Click to view page breakdown">📄 ${file.pagesCount} p. (${(file.totalWords || 0).toLocaleString()} w)</span>`;
+          pagesCell.querySelector('.pill-page').addEventListener('click', () => inspectPdf(file.pdf));
+
           tr.querySelector('.view-json-btn').addEventListener('click', () => viewJson(file.pdf));
           tr.querySelector('.download-json-btn').addEventListener('click', () => downloadJson(file.pdf));
           tr.querySelector('.force-extract-btn').addEventListener('click', () => forceExtract(file.pdf));
+          tr.querySelector('.delete-pdf-btn').addEventListener('click', () => deletePdf(file.pdf));
           
           tbody.appendChild(tr);
         });
       } catch (err) {
         console.error(err);
-        tbody.innerHTML = `<tr><td colspan="5" style="color: var(--danger); text-align: center;">Error loading list. Are you admin?</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="color: var(--danger); text-align: center;">Error loading list. Are you admin?</td></tr>`;
+      }
+    }
+
+    async function deletePdf(filename) {
+      if (!confirm(`Voulez-vous vraiment supprimer définitivement le PDF "${filename}" ?\n\nCela supprimera le fichier original (data/pdf_masters), le fichier compressé (public/pdfs), le cache d'extraction et l'entrée dans l'index.`)) return;
+
+      overlay.style.display = 'flex';
+      overlayText.textContent = `Suppression de ${filename}...`;
+
+      try {
+        const res = await fetch('/api/admin/delete-pdf', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erreur lors de la suppression.');
+
+        alert(`Le PDF "${filename}" a été supprimé avec succès.`);
+        fetchList();
+      } catch (err) {
+        alert(`Échec de la suppression: ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
       }
     }
 

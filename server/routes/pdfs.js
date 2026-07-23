@@ -5,7 +5,10 @@ const { indexPdfs } = require('../../index_pdfs');
 const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 
-const PDF_DIR = path.join(__dirname, '..', '..', 'public', 'pdfs');
+const { compressPdfFile } = require('../../scripts/compress_pdfs');
+
+const PDF_MASTERS_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_masters');
+const PUBLIC_PDF_DIR = path.join(__dirname, '..', '..', 'public', 'pdfs');
 
 function registerPdfRoutes(app, cache) {
 
@@ -25,24 +28,26 @@ function registerPdfRoutes(app, cache) {
         return res.status(400).json({ error: 'Only PDF files are supported.' });
       }
 
-      const targetPath = path.join(PDF_DIR, cleanFilename);
+      const masterPath = path.join(PDF_MASTERS_DIR, cleanFilename);
+      const publicPath = path.join(PUBLIC_PDF_DIR, cleanFilename);
       const fileBuffer = Buffer.from(base64Data, 'base64');
       
-      // Ensure PDF directory exists
-      if (!fs.existsSync(PDF_DIR)) {
-        fs.mkdirSync(PDF_DIR, { recursive: true });
-      }
+      if (!fs.existsSync(PDF_MASTERS_DIR)) fs.mkdirSync(PDF_MASTERS_DIR, { recursive: true });
+      if (!fs.existsSync(PUBLIC_PDF_DIR)) fs.mkdirSync(PUBLIC_PDF_DIR, { recursive: true });
 
-      await fs.promises.writeFile(targetPath, fileBuffer);
-      console.log(`[PDF Upload] Saved ${cleanFilename} to public/pdfs folder.`);
+      await fs.promises.writeFile(masterPath, fileBuffer);
+      console.log(`[PDF Upload] Saved master original ${cleanFilename} to data/pdf_masters.`);
 
-      res.json({ success: true, message: `PDF ${cleanFilename} uploaded.` });
+      // Auto-compress master original for public web and APK bundling
+      compressPdfFile(masterPath, publicPath);
 
-      // Run extraction asynchronously in the background so request doesn't hang
-      extractPdfData(targetPath)
+      res.json({ success: true, message: `PDF ${cleanFilename} uploaded and compressed.` });
+
+      // Run extraction asynchronously on master original in background
+      extractPdfData(masterPath)
         .then(async () => {
           console.log(`[Background Task] Extraction finished for ${cleanFilename}. Rebuilding global index...`);
-          await indexPdfs(false); // Rebuilds the big JSON file
+          await indexPdfs(false);
         })
         .catch(err => {
           console.error(`[Background Task] Extraction failed for ${cleanFilename}`, err);
@@ -51,6 +56,32 @@ function registerPdfRoutes(app, cache) {
     } catch (err) {
       console.error('[PDF Upload Error]', err);
       res.status(500).json({ error: 'Failed to write PDF file to server storage.' });
+    }
+  });
+
+  // POST /api/admin/delete-pdf
+  // Deletes PDF from master folder, public folder, cache, and index
+  app.post('/api/admin/delete-pdf', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { filename } = req.body;
+      if (!filename) return res.status(400).json({ error: 'Filename is required.' });
+
+      const { deletePdfFile } = require('../../scripts/delete_pdf');
+      const success = deletePdfFile(filename);
+      
+      if (success) {
+        // Refresh in-memory index cache
+        await indexPdfs(false);
+        res.json({ success: true, message: `PDF ${filename} deleted successfully.` });
+      } else {
+        res.status(404).json({ error: `PDF ${filename} not found on server.` });
+      }
+    } catch (err) {
+      console.error('[PDF Delete Error]', err);
+      res.status(500).json({ error: 'Failed to delete PDF from server storage.' });
     }
   });
 
@@ -64,9 +95,13 @@ function registerPdfRoutes(app, cache) {
       const { filename, base64Data } = req.body;
       if (!filename || !base64Data) return res.status(400).json({ error: 'Missing data' });
 
-      // Save temporarily for parsing
-      const tempPath = path.join(__dirname, '..', '..', 'tmp_' + Date.now() + '.pdf');
-      await fs.promises.writeFile(tempPath, Buffer.from(base64Data, 'base64'));
+      // Guard against path traversal attacks
+      const cleanFilename = path.basename(filename);
+      const tempPath = path.join(PDF_MASTERS_DIR, `lab_temp_${cleanFilename}`);
+      
+      // Save temp PDF file
+      const buffer = Buffer.from(base64Data, 'base64');
+      fs.writeFileSync(tempPath, buffer);
 
       try {
         // Process it completely and await the result (so lab can view it)
@@ -86,19 +121,52 @@ function registerPdfRoutes(app, cache) {
   });
 
   // GET /api/admin/pdf-lab-list
-  // Lists all PDFs in the master index with their quality levels
+  // Lists all PDFs in the master index with detailed metrics, page stats, and compression savings
   app.get('/api/admin/pdf-lab-list', (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
-      const summary = cache.pdfIndex.map(doc => ({
-        pdf: doc.pdf,
-        quality: doc.quality || 'offline',
-        hash: doc.hash,
-        timestamp: doc.timestamp,
-        pages: doc.pages ? doc.pages.length : 0
-      }));
+      const summary = cache.pdfIndex.map(doc => {
+        const pages = doc.pages || [];
+        let totalWords = 0;
+        let totalChars = 0;
+        const pageStats = pages.map(p => {
+          const content = p.content || p.text || '';
+          const chars = content.length;
+          const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+          totalChars += chars;
+          totalWords += words;
+          return { page: p.page, chars, words };
+        });
+
+        // Compute dual-folder file sizes
+        let masterSize = 0;
+        let publicSize = 0;
+        const masterPath = path.join(PDF_MASTERS_DIR, doc.pdf);
+        const publicPath = path.join(PUBLIC_PDF_DIR, doc.pdf);
+        try { if (fs.existsSync(masterPath)) masterSize = fs.statSync(masterPath).size; } catch (_) {}
+        try { if (fs.existsSync(publicPath)) publicSize = fs.statSync(publicPath).size; } catch (_) {}
+
+        let savedPercent = 0;
+        if (masterSize > 0 && publicSize > 0 && publicSize < masterSize) {
+          savedPercent = Math.round(((masterSize - publicSize) / masterSize) * 100);
+        }
+
+        return {
+          pdf: doc.pdf,
+          quality: doc.quality || 'offline',
+          hash: doc.hash,
+          timestamp: doc.timestamp,
+          pagesCount: pages.length,
+          totalWords,
+          totalChars,
+          masterSize,
+          publicSize,
+          savedPercent,
+          pageStats
+        };
+      });
       res.json({ success: true, files: summary });
     } catch(err) {
       console.error('[Lab Error]', err);
@@ -118,7 +186,7 @@ function registerPdfRoutes(app, cache) {
 
       // Guard against path traversal attacks
       const cleanFilename = path.basename(filename);
-      const targetPath = path.join(PDF_DIR, cleanFilename);
+      const targetPath = path.join(PDF_MASTERS_DIR, cleanFilename);
       if (!fs.existsSync(targetPath)) {
         return res.status(404).json({ error: 'File not found on server' });
       }

@@ -14,6 +14,7 @@
     "test:theme": "node tests/headless/harness.mjs themeReveal",
     "build": "node build.js",
     "build:bundle": "node build-bundle.js",
+    "compress:pdfs": "node scripts/compress_pdfs.js",
     "reindex": "node index_pdfs.js",
     "cap:sync": "npx cap sync",
     "set:password": "node set_admin_password.js",

@@ -34,16 +34,24 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - Zone de prise de notes persistantes, sauvegardées localement dans `localStorage`.
 - Idéal pour documenter vos protocoles locaux ou adaptations spécifiques.
 
-### 📄 Intégration PDF de Référence & Extraction AI
-- Association automatique des fichiers PDF de votre répertoire `public/pdfs` avec la fiche active selon des mots-clés configurables.
-- Extraction hybride à 3 niveaux (LlamaParse AI → Google Gemini Flash → Parseur Offline) pour supporter les tableaux complexes et documents scannés.
-- **Recherche plein texte** dans le contenu des PDFs indexés, avec affichage des extraits de contexte pertinents et ouverture précise à la bonne page.
-- Indexation optimisée via hash SHA-256 pour économiser les appels API.
+### 📄 Architecture PDF 2-Dossiers & Compression Ultra Ghostscript
+- **Pipeline 2-Dossiers (`data/pdf_masters/` vs `public/pdfs/`)** : Découple l'extraction IA haute précision de l'empaquetage mobile APK.
+  - `data/pdf_masters/` : Stocke les originaux non-compressés pour une extraction IA à 100% de précision (LlamaParse / Gemini). Dossier exclu de Git.
+  - `public/pdfs/` : Stocke les PDFs ultra-compressés pour le web mobile et le bundle APK.
+- **Moteur de Compression Ghostscript (`npm run compress:pdfs`)** : Réductions de taille de fichier jusqu'à **80%** (96 DPI + JPEGQ 60 + filtrage bicubique) tout en conservant la netteté des schémas cliniques sur mobile.
+- **Recherche plein texte** dans les PDFs indexés avec ouverture directe à la bonne page.
+- **Minification des données client** : `build.js` minifie automatiquement `pdf_index.json`, `pdf_list.json` et `cats_db.json` (-35% de poids de transfert JSON).
+
+### 📱 Optimisation Capacitor Mobile APK (60 FPS Native Feel)
+- Acceleration matérielle GPU (`hardwareAccelerated="true"` & `largeHeap="true"` dans `AndroidManifest.xml`).
+- Schéma sécurisé HTTPS (`androidScheme: "https"`) dans `capacitor.config.json`.
+- Neutralisation des délais tactiles (300ms) via CSS touch rules & `requestAnimationFrame` gesture throttling.
+- Event Delegation sur la liste des fiches (`#cat-list`) pour minimiser la consommation RAM/CPU.
 
 ### 👤 Système Collaboratif & Lab Admin
 - Les **utilisateurs non-admin** peuvent proposer des modifications ou ajouts de fiches (via un système de suggestions).
 - L'**administrateur** valide ou rejette les suggestions depuis le panneau de modération sur le tableau de bord.
-- **Dr. CAT PDF Inspector (Nouveau)** : Un laboratoire admin pour inspecter l'index PDF, voir et télécharger les structures JSON extraites, et forcer une ré-extraction AI ciblée.
+- **Dr. CAT PDF Inspector** : Un laboratoire admin pour inspecter l'index PDF, voir et télécharger les structures JSON extraites, et forcer une ré-extraction AI ciblée.
 - Mode admin activé par un token de session sécurisé, jamais stocké en clair côté serveur.
 
 ---
