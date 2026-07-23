@@ -157,11 +157,17 @@ To completely eliminate wasted API credits and redundant parsing:
 * The Android APK directly bundles this minified master index, allowing lightning-fast offline search with zero server load.
 * Searches leverage `p.content || p.text` dual-field reads for backward compatibility.
 
-### 6. Admin PDF Inspector UI
-* A dedicated dashboard (`pdf_lab.html`) allows the admin to view the Master Index.
-* Visual quality badges distinguish `LlamaParse`, `Google Flash`, and `Offline` extractions.
-* Provides a surgical **"Force Upgrade"** button to bypass the cache and push specific PDFs to LlamaParse.
-* Secured entirely by `isLocalhostConnection` and Admin tokens; the UI is 403-blocked to the public internet.
+### 6. Admin PDF Inspector & Deletion Engine (`public/pdf_lab.html`)
+* **Advanced Metrics Dashboard:** Displays parser engine badges (`LlamaParse`, `Google Flash`, `Offline`, `Failed`), page count pills with word totals (`📄 X p. (Y w)`), and mobile APK size reduction pills (`💾 -78%`).
+* **Interactive Inspection Modal (`#modal-overlay`):** Clicking any quality badge or page pill opens a modal containing SHA-256 fingerprints, total words/chars, dual-folder size comparison (`Master ➔ Mobile APK`), and a page-by-page text density progress bar table.
+* **6-Location Atomic PDF Deletion Engine (`scripts/delete_pdf.js` & `POST /api/admin/delete-pdf`):**
+  1. Removes raw original from `data/pdf_masters/`.
+  2. Removes compressed copy from `public/pdfs/`.
+  3. Removes SHA-256 extraction cache from `data/pdf_cache/`.
+  4. Purges document entry from root `pdf_index.json`.
+  5. Purges document entry from minified `public/data/pdf_index.json`.
+  6. Purges filename entry from `public/data/pdf_list.json`.
+* Secured entirely by `isLocalhostConnection` and Admin tokens; the endpoint and UI are 403-blocked on remote connections.
 
 ---
 

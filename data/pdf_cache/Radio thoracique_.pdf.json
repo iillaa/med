@@ -1,0 +1,48 @@
+{
+  "pdf": "Radio thoracique_.pdf",
+  "hash": "c97cb04ed257c436268488789a82137cd3ea21ec5d83d68d77ca74704afb096c",
+  "quality": "online",
+  "timestamp": 1784767680681,
+  "pages": [
+    {
+      "page": 1,
+      "content": "# Radio du Thorax"
+    },
+    {
+      "page": 2,
+      "content": "MODÉLE DE LECTURE:\n# 1. Extérieur du thorax\n\n# 2. Parties molles extra-thoraciques\n\n# 3. Structures osseuses et régions sous-diaphragmatiques\n\n# 4. Plèvre\n\n# 5. Parenchyme pulmonaire\n\n# 6. Médiastin"
+    },
+    {
+      "page": 3,
+      "content": "# CRITERES DE BONNE QUALITE :\n\n- Cliche de face (extrémités internes des clavicules sont à égales distance des épineuses dorsales)\n- Cliché debout (Poche à air gastrique sous la coupole gauche avec un niveau hydro aérique)\n- Cliché pris en inspiration profonde (Visualisation de 6 à 7 arcs costaux antérieurs au-dessus des coupoles diaphragmatiques)\n- Cliché bien expose, scapula dégagées"
+    },
+    {
+      "page": 4,
+      "content": "# SYNDROME BRONCHIQUE\n\n# Epaississement des parois bronchiques :\n\nOPACITÉS EN RAILS : si bronChe est perpendiculaire au rayon incident\n\n→ IMAGE CERCLÉE : si vue en tangenCe\n\n# Dilatation des bronches"
+    },
+    {
+      "page": 5,
+      "content": "# SYNDROME INTERSTITIEL\n\nImage radiologique normale OU\n\nImages linéaires \"réticulaires\"\n\nImages nodulaires\n\n# CARACTERISTIQUES :\n\nImages non confluentes ; bilatérales et non systématisées ; souvent d'évolution lente ; masquées par le syndrome alvéolaire si association"
+    },
+    {
+      "page": 6,
+      "content": "# SYNDROME ALVÉOLAIRE\n\n# CARACTERISTIQUES :\n\nOpacités à contours flous ; opacités confluentes ; distribution systématisée à contour net bronchogramme aérien ; évolution plutôt rapide\n\n# 2 PRINCIPALES ETIOLOGIES :\n\nOpacité localisé et aigue (pneumopathies infectieuses); opacités alvéolaires bilatérales diffuses et aiguës (OAP)"
+    },
+    {
+      "page": 7,
+      "content": "# SYNDROME PLEURAL\n\n# Pneumothorax\n\nIrruption d'air entre les 2 feuillets de la plèvre\n\n- Complet : moignon pulmonaire rétracté vers la région hilaire\n- Compressif : déplacement du médiastin du côté opposé +/- associé à une distension des espaces intercostaux\n\n# Hemo-pneumothorax\n\nÉpanchement pleural liquidien surmonté d'une clarté gazeuse\n\n# Pleurésie\n\nOpacité franche hydrique\n\n# Calcifications pleurales\n\nImages de haute densité / images périphériques le long de la paroi du médiastin ou du diaphragme"
+    },
+    {
+      "page": 8,
+      "content": "# SYNDROME DE MASSE :\n\n- Micronodule: Opacité ronde &#x3C; 3 mm\n- Nodule: Opacité ronde de 3 mm à 3 cm\n- Masse: Image arrondie intra-parenchymateuse > 3 cm"
+    },
+    {
+      "page": 9,
+      "content": "# SYNDROME MÉDIASTINAL :\n\n| Compartiment | Étage                     | Anterieur            | Moyen                       | Posterieur |\n| ------------ | ------------------------- | -------------------- | --------------------------- | ---------- |\n| Supérieur    | Goitre thyroidien         | Adénopathies         | Tumeur neurogène            |            |\n| Moyen        | Lésions thymiques         | Adénopathies         | Tumeur kyste bronchogenique |            |\n| Inferieur    | Kyste pleuro péricardique | Kyste bronchogenique | Tumeur neurogène            |            |\n\n# Cardiomegalie :\n\nIndex cardio-thoracique > 0,55 : largeur du cæur / largeur max du thorax"
+    },
+    {
+      "page": 10,
+      "content": "# ATÉLECTASIE :\n\n= condensation alvéolaire rétractile\n\nDisparition de l'air alvéolaire due à un collapsus complet des alvéoles\n\nOpacité pulmonaire systématisée rétractile"
+    }
+  ]
+}

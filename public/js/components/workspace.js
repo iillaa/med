@@ -684,7 +684,24 @@ export function selectCat(cat, preserveTab = false) {
   }
 
   if (wsCategory) wsCategory.textContent = cat.category;
-  if (wsTitle) wsTitle.textContent = `${cat.id}. ${cat.title}`;
+  if (wsTitle) {
+    const fullTitle = `${cat.id}. ${cat.title}`;
+    if (fullTitle.length > 50) {
+      wsTitle.classList.add('very-long-title');
+      let formattedTitle = escapeHTML(fullTitle);
+      if (formattedTitle.includes(' et ')) {
+        formattedTitle = formattedTitle.replace(' et ', '<br>et ');
+      } else if (formattedTitle.includes(' avec ')) {
+        formattedTitle = formattedTitle.replace(' avec ', '<br>avec ');
+      } else if (formattedTitle.includes(' : ')) {
+        formattedTitle = formattedTitle.replace(' : ', ' :<br>');
+      }
+      wsTitle.innerHTML = formattedTitle;
+    } else {
+      wsTitle.classList.remove('very-long-title');
+      wsTitle.textContent = fullTitle;
+    }
+  }
   if (wsRedFlags) wsRedFlags.textContent = cat.red_flags;
 
   const redFlagsBannerEl = document.getElementById('red-flags-banner');

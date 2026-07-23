@@ -59,6 +59,30 @@ function registerPdfRoutes(app, cache) {
     }
   });
 
+  // POST /api/admin/delete-pdf
+  // Deletes PDF from master folder, public folder, cache, and index
+  app.post('/api/admin/delete-pdf', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { filename } = req.body;
+      if (!filename) return res.status(400).json({ error: 'Filename is required.' });
+
+      const { deletePdfFile } = require('../../scripts/delete_pdf');
+      const success = deletePdfFile(filename);
+      
+      if (success) {
+        res.json({ success: true, message: `PDF ${filename} deleted successfully.` });
+      } else {
+        res.status(404).json({ error: `PDF ${filename} not found on server.` });
+      }
+    } catch (err) {
+      console.error('[PDF Delete Error]', err);
+      res.status(500).json({ error: 'Failed to delete PDF from server storage.' });
+    }
+  });
+
   // POST /api/admin/pdf-lab-parse
   // Used purely by the isolated lab tool to test parsing and get immediate JSON response
   app.post('/api/admin/pdf-lab-parse', async (req, res) => {
@@ -91,19 +115,52 @@ function registerPdfRoutes(app, cache) {
   });
 
   // GET /api/admin/pdf-lab-list
-  // Lists all PDFs in the master index with their quality levels
+  // Lists all PDFs in the master index with detailed metrics, page stats, and compression savings
   app.get('/api/admin/pdf-lab-list', (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
-      const summary = cache.pdfIndex.map(doc => ({
-        pdf: doc.pdf,
-        quality: doc.quality || 'offline',
-        hash: doc.hash,
-        timestamp: doc.timestamp,
-        pages: doc.pages ? doc.pages.length : 0
-      }));
+      const summary = cache.pdfIndex.map(doc => {
+        const pages = doc.pages || [];
+        let totalWords = 0;
+        let totalChars = 0;
+        const pageStats = pages.map(p => {
+          const content = p.content || p.text || '';
+          const chars = content.length;
+          const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+          totalChars += chars;
+          totalWords += words;
+          return { page: p.page, chars, words };
+        });
+
+        // Compute dual-folder file sizes
+        let masterSize = 0;
+        let publicSize = 0;
+        const masterPath = path.join(PDF_MASTERS_DIR, doc.pdf);
+        const publicPath = path.join(PUBLIC_PDF_DIR, doc.pdf);
+        try { if (fs.existsSync(masterPath)) masterSize = fs.statSync(masterPath).size; } catch (_) {}
+        try { if (fs.existsSync(publicPath)) publicSize = fs.statSync(publicPath).size; } catch (_) {}
+
+        let savedPercent = 0;
+        if (masterSize > 0 && publicSize > 0 && publicSize < masterSize) {
+          savedPercent = Math.round(((masterSize - publicSize) / masterSize) * 100);
+        }
+
+        return {
+          pdf: doc.pdf,
+          quality: doc.quality || 'offline',
+          hash: doc.hash,
+          timestamp: doc.timestamp,
+          pagesCount: pages.length,
+          totalWords,
+          totalChars,
+          masterSize,
+          publicSize,
+          savedPercent,
+          pageStats
+        };
+      });
       res.json({ success: true, files: summary });
     } catch(err) {
       console.error('[Lab Error]', err);

@@ -35,18 +35,27 @@ To configure the workspace on a Termux instance or standard Linux terminal:
     # Option C: Manual plain-text (will be auto-migrated to PBKDF2 hash on first run)
     echo "your_secure_password" > admin_password.txt
     ```
-5. **Add Reference PDFs**:
-   PDFs can be uploaded directly via the web interface. If you wish to manually add them, copy your study guides into the public folder:
+5. **Add Master Reference PDFs (Dual-Folder Pipeline)**:
+   Upload PDFs via the web interface or copy raw, uncompressed master original PDFs into `data/pdf_masters/`:
    ```bash
-   mkdir -p public/pdfs
-   # copy pdf files to this folder
+   mkdir -p data/pdf_masters
+   # copy uncompressed master pdf files here
    ```
-6. **Set up API Keys (Optional but Recommended)**:
+   > Uncompressed originals in `data/pdf_masters/` guarantee 100% precision AI extraction (LlamaParse/Gemini). `index_pdfs.js` automatically compresses them into `public/pdfs/` for lightweight APK packaging.
+
+6. **Install Ghostscript (Recommended for Ultra PDF Compression)**:
+   ```bash
+   pkg install ghostscript    # Termux
+   # or: apt install ghostscript  (Debian/Ubuntu)
+   ```
+
+7. **Set up API Keys (Optional but Recommended)**:
    For high-quality extraction, set these in `.env`:
    ```bash
    LLAMAPARSE_API_KEY=llx-yourkey
    GOOGLE_API_KEY=AIzaSy-yourkey
    ```
+
 ---
 
 ## 🌿 Git Branching Strategy
@@ -77,33 +86,44 @@ npm run start:admin
 ADMIN_PASSWORD=admin123 npm start
 ```
 
-### 2. Set admin password manually
+### 2. Compress PDFs for Lightweight Mobile APK Packaging
+Runs Ghostscript ultra-compression engine (96 DPI + JPEGQ 60 + Bicubic downsampling):
 ```bash
-# Interactive mode
-node set_admin_password.js
-
-# Direct password
-node set_admin_password.js mypassword
+npm run compress:pdfs
 ```
 
-### 3. Compile assets for offline standalone mode
-Generates offline JSON database clones and syncs resources to Capacitor's Android folder.
+### 3. Delete a Test or Old PDF from All Locations
+Purges a PDF across raw originals, public compressed copies, AI cache, and all indices:
+```bash
+node scripts/delete_pdf.js "my_old_file.pdf"
+```
+
+### 4. Run Master Automated Test Suite
+Runs all 5 automated unit, API, auth, prescription, and resume test suites:
+```bash
+npm run test:suite
+```
+
+### 4. Compile assets for offline standalone mode
+Generates minified offline JSON database clones and syncs resources to Capacitor's Android folder.
 ```bash
 # 1. Re-build index and cats clones into public/data/
-node build.js
+npm run build
 
 # 2. Sync public folder with Capacitor android assets
-npx cap sync
+npm run cap:sync
 ```
 
-### 4. Available npm scripts
+### 5. Available npm scripts
 ```bash
-npm start              # Start server (random password if none set)
-npm run start:admin    # Start server with ADMIN_PASSWORD=admin123
-npm run set:password   # Interactive password setter
-npm run build          # Compile static assets
-npm run reindex        # Re-index PDFs
-npm run cap:sync       # Sync Capacitor assets
+npm start               # Start server (random password if none set)
+npm run start:admin     # Start server with ADMIN_PASSWORD=admin123
+npm run set:password    # Interactive password setter
+npm run build           # Compile static assets & minify JSON DBs
+npm run reindex         # Re-index master PDFs (from data/pdf_masters/)
+npm run compress:pdfs   # Compress PDFs using Ghostscript ultra engine
+npm run test:suite      # Run master automated test suite
+npm run cap:sync        # Sync Capacitor assets
 ```
 
 ---
