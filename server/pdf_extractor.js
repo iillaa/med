@@ -106,11 +106,12 @@ async function extractPdfData(filePath, force = false) {
     result = { quality: 'failed', pages: [] };
   }
 
-  // If existing cache exists with high-quality AI extraction (llama or gemini) and new result is offline/failed, preserve existing cache
+  // If existing cache exists with high-quality AI extraction (online, online-google, llama, or gemini) and new result is offline/failed, preserve existing cache
   if (fs.existsSync(cacheFilePath)) {
     try {
       const existingCacheData = JSON.parse(fs.readFileSync(cacheFilePath, 'utf-8'));
-      if (existingCacheData && (existingCacheData.quality === 'llama' || existingCacheData.quality === 'gemini')) {
+      const highQualityTiers = ['online', 'online-google', 'llama', 'gemini'];
+      if (existingCacheData && highQualityTiers.includes(existingCacheData.quality)) {
         if (result.quality === 'offline' || result.quality === 'failed') {
           console.warn(`[Extractor] New extraction for ${fileName} degraded to '${result.quality}', preserving existing '${existingCacheData.quality}' cache.`);
           return existingCacheData;
