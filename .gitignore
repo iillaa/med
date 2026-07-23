@@ -17,8 +17,8 @@ node_modules/
 .DS_Store
 .cat-med/reference-pdfs
 
-# Generated PDF index cache (Tracked for offline search build packaging)
-# pdf_index.json
+# Uncompressed Master Original PDFs (Local server only, keep off GitHub to minimize repo/APK size)
+data/pdf_masters/
 
 # Local ngrok binary
 ngrok
