@@ -5,9 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.78);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,6 +13,14 @@
   padding: 16px;
   animation: modalBackdropIn var(--motion-fast) ease;
   will-change: opacity;
+}
+
+@media (min-width: 851px) {
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
 }
 
 @keyframes modalBackdropIn {
@@ -209,15 +215,21 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(10, 15, 29, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 15, 29, 0.94);
   z-index: 10000;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 24px;
   animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 851px) {
+  .reader-modal-overlay {
+    background: rgba(10, 15, 29, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 .reader-modal-content {
