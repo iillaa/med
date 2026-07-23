@@ -188,6 +188,7 @@ html.theme-switching *::after {
 html {
   height: 100dvh;
   overflow: hidden;
+  background-color: var(--bg-app);
   -webkit-text-size-adjust: 100%; /* stop WebView/mobile from auto-inflating text */
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased; /* crisper text on WebKit/Android WebView */
