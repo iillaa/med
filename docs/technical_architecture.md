@@ -132,7 +132,7 @@ To decouple 100% accurate AI text extraction from lightweight mobile APK packagi
 ```
 
 ### 2. Ghostscript Ultra-Compression Engine (`scripts/compress_pdfs.js`)
-Triggered automatically during PDF uploads or via `npm run compress-pdfs`:
+Triggered automatically during PDF uploads or via `npm run compress:pdfs`:
 * **96 DPI Downsampling**: `-dColorImageResolution=96 -dGrayImageResolution=96 -dMonoImageResolution=96`. Downsamples high-resolution embedded graphics to 96 DPI (crisp on mobile screens).
 * **JPEG Quantization**: `-dJPEGQ=60 -dColorImageFilter=/DCTEncode`. Re-encodes embedded image streams with JPEG quality factor 60.
 * **Bicubic Downsampling**: `-dColorImageDownsampleType=/Bicubic`. Smooths downsampled images so small text inside clinical diagrams remains legible.

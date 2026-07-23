@@ -73,6 +73,8 @@ function registerPdfRoutes(app, cache) {
       const success = deletePdfFile(filename);
       
       if (success) {
+        // Refresh in-memory index cache
+        await indexPdfs(false);
         res.json({ success: true, message: `PDF ${filename} deleted successfully.` });
       } else {
         res.status(404).json({ error: `PDF ${filename} not found on server.` });
@@ -93,9 +95,13 @@ function registerPdfRoutes(app, cache) {
       const { filename, base64Data } = req.body;
       if (!filename || !base64Data) return res.status(400).json({ error: 'Missing data' });
 
-      // Save temporarily for parsing
-      const tempPath = path.join(__dirname, '..', '..', 'tmp_' + Date.now() + '.pdf');
-      await fs.promises.writeFile(tempPath, Buffer.from(base64Data, 'base64'));
+      // Guard against path traversal attacks
+      const cleanFilename = path.basename(filename);
+      const tempPath = path.join(PDF_MASTERS_DIR, `lab_temp_${cleanFilename}`);
+      
+      // Save temp PDF file
+      const buffer = Buffer.from(base64Data, 'base64');
+      fs.writeFileSync(tempPath, buffer);
 
       try {
         // Process it completely and await the result (so lab can view it)
@@ -180,7 +186,7 @@ function registerPdfRoutes(app, cache) {
 
       // Guard against path traversal attacks
       const cleanFilename = path.basename(filename);
-      const targetPath = path.join(PDF_DIR, cleanFilename);
+      const targetPath = path.join(PDF_MASTERS_DIR, cleanFilename);
       if (!fs.existsSync(targetPath)) {
         return res.status(404).json({ error: 'File not found on server' });
       }

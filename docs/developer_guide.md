@@ -104,7 +104,7 @@ Runs all 5 automated unit, API, auth, prescription, and resume test suites:
 npm run test:suite
 ```
 
-### 4. Compile assets for offline standalone mode
+### 5. Compile assets for offline standalone mode
 Generates minified offline JSON database clones and syncs resources to Capacitor's Android folder.
 ```bash
 # 1. Re-build index and cats clones into public/data/
@@ -114,7 +114,7 @@ npm run build
 npm run cap:sync
 ```
 
-### 5. Available npm scripts
+### 6. Available npm scripts
 ```bash
 npm start               # Start server (random password if none set)
 npm run start:admin     # Start server with ADMIN_PASSWORD=admin123

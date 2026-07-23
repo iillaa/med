@@ -38,7 +38,7 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - **Pipeline 2-Dossiers (`data/pdf_masters/` vs `public/pdfs/`)** : Découple l'extraction IA haute précision de l'empaquetage mobile APK.
   - `data/pdf_masters/` : Stocke les originaux non-compressés pour une extraction IA à 100% de précision (LlamaParse / Gemini). Dossier exclu de Git.
   - `public/pdfs/` : Stocke les PDFs ultra-compressés pour le web mobile et le bundle APK.
-- **Moteur de Compression Ghostscript (`npm run compress-pdfs`)** : Réductions de taille de fichier jusqu'à **80%** (96 DPI + JPEGQ 60 + filtrage bicubique) tout en conservant la netteté des schémas cliniques sur mobile.
+- **Moteur de Compression Ghostscript (`npm run compress:pdfs`)** : Réductions de taille de fichier jusqu'à **80%** (96 DPI + JPEGQ 60 + filtrage bicubique) tout en conservant la netteté des schémas cliniques sur mobile.
 - **Recherche plein texte** dans les PDFs indexés avec ouverture directe à la bonne page.
 - **Minification des données client** : `build.js` minifie automatiquement `pdf_index.json`, `pdf_list.json` et `cats_db.json` (-35% de poids de transfert JSON).
 

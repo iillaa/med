@@ -489,6 +489,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .cat-item-meta {

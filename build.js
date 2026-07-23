@@ -47,6 +47,7 @@ function rebuildClientAssets() {
     console.log("Copied cats_db.json (minified with history stripped) to public/data/");
   } catch (err) {
     console.error("Error packaging cats_db.json during build:", err);
+    throw err;
   }
 
   // Copy pdf_index.json (minified) and generate pdf_list.json
@@ -72,6 +73,7 @@ function rebuildClientAssets() {
       console.log("Generated and copied pdf_list.json (minified) to public/data/");
     } catch (err) {
       console.error("Error processing pdf_index.json during build:", err);
+      throw err;
     }
   } else {
     console.warn("pdf_index.json not found, skipping copy and list generation.");
