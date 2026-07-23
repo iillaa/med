@@ -100,10 +100,23 @@ async function extractPdfData(filePath, force = false) {
     }
   }
 
-  // 4. Guard against all extractors failing
+  // 4. Guard against all extractors failing or degrading
   if (!result || !result.quality) {
     console.error(`[Extractor] All PDF extractors failed to parse ${fileName}. Marking as failed to prevent infinite retry loop.`);
     result = { quality: 'failed', pages: [] };
+  }
+
+  // If existing cache exists with high-quality AI extraction (llama or gemini) and new result is offline/failed, preserve existing cache
+  if (fs.existsSync(cacheFilePath)) {
+    try {
+      const existingCacheData = JSON.parse(fs.readFileSync(cacheFilePath, 'utf-8'));
+      if (existingCacheData && (existingCacheData.quality === 'llama' || existingCacheData.quality === 'gemini')) {
+        if (result.quality === 'offline' || result.quality === 'failed') {
+          console.warn(`[Extractor] New extraction for ${fileName} degraded to '${result.quality}', preserving existing '${existingCacheData.quality}' cache.`);
+          return existingCacheData;
+        }
+      }
+    } catch (_) {}
   }
   
   // 5. Save to Cache
