@@ -186,7 +186,7 @@ html.theme-switching *::after {
 }
 
 html {
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
   background-color: var(--bg-app);
   -webkit-text-size-adjust: 100%; /* stop WebView/mobile from auto-inflating text */
@@ -197,7 +197,7 @@ html {
 }
 
 body {
-  height: 100dvh;
+  height: 100%;
   overflow: visible; /* allow position:fixed children (toasts) to escape */
   font-family: var(--font-sans);
   font-size: var(--text-base);
