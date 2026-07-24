@@ -21,7 +21,7 @@ button i,
   position: fixed;
   inset: 0;
   width: 100%;
-  height: 100dvh;
+  height: 100%;
   /* Theme-aware: matches app background in light & dark. Subtle radial glow
      behind the brand for depth. Fallback first for pre-Chrome-111 WebViews. */
   background: var(--bg-app);
