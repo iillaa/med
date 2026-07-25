@@ -1,15 +1,39 @@
 package com.drcat.app;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.Window;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Prevent the WebView from adding its own system-window padding on top of
-        // the Android activity insets. This removes the extra dark gap that appears
-        // above the navigation bar while keeping the system bars opaque/normal.
+        
+        Window window = getWindow();
+        
+        // Enable true Edge-to-Edge window layout so WebView spans 100% of the physical screen
+        // height behind system navigation and status bars without native inset gaps.
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false);
+        }
+
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(false);
+            controller.setAppearanceLightNavigationBars(false);
+        }
+
         if (getBridge() != null && getBridge().getWebView() != null) {
             getBridge().getWebView().setFitsSystemWindows(false);
         }
