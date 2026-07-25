@@ -14,28 +14,19 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         
         Window window = getWindow();
-        
-        // Enable true Edge-to-Edge window layout so WebView spans 100% of the physical screen
-        // height behind system navigation and status bars without native inset gaps.
-        WindowCompat.setDecorFitsSystemWindows(window, false);
+
+        // Normal native layout: WebView fits above system navigation bar
+        WindowCompat.setDecorFitsSystemWindows(window, true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.setNavigationBarContrastEnforced(false);
+            window.setStatusBarColor(Color.parseColor("#090d16"));
+            window.setNavigationBarColor(Color.parseColor("#090d16"));
         }
 
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
         if (controller != null) {
             controller.setAppearanceLightStatusBars(false);
             controller.setAppearanceLightNavigationBars(false);
-        }
-
-        if (getBridge() != null && getBridge().getWebView() != null) {
-            getBridge().getWebView().setFitsSystemWindows(false);
         }
     }
 }
