@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -40,7 +40,7 @@ jobs:
         run: npx --yes wait-on@7 http://localhost:3000 --timeout 30000
 
       # lighthouserc.js holds the mobile profile + score assertions
-      # (perf >= 0.90, a11y >= 0.95, best-practices >= 0.95).
+      # (perf >= 0.85, a11y >= 0.85, best-practices >= 0.90).
       - name: Run Lighthouse CI
         run: npx --yes @lhci/cli@0.13 autorun --collect.url="${{ github.event.inputs.url }}"
 
@@ -50,4 +50,5 @@ jobs:
         with:
           name: lighthouse-report
           path: .lighthouseci/
+          if-no-files-found: ignore
           retention-days: 30

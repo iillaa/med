@@ -3,11 +3,10 @@ name: Build Android APK
 on:
   push:
     branches:
+      - master
+      - beta-test
+      - beta-test-pr
       - android-app
-      - light-android
-      - audit-project
-      - structured
-      - feat/audit-ui-and-tests-pr
 
   # Enable manual triggering
   workflow_dispatch:

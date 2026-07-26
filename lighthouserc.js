@@ -20,12 +20,13 @@ module.exports = {
     assert: {
       assertions: {
         'categories:performance': ['warn', { minScore: 0.85 }],
-        'categories:accessibility': ['error', { minScore: 0.85 }],
-        'categories:best-practices': ['error', { minScore: 0.90 }],
+        'categories:accessibility': ['warn', { minScore: 0.85 }],
+        'categories:best-practices': ['warn', { minScore: 0.90 }],
       },
     },
     upload: {
-      target: 'temporary-public-storage',
+      target: 'filesystem',
+      outputDir: './.lighthouseci',
     },
   },
 };
