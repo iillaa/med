@@ -26,6 +26,10 @@ html, body {
   animation: viewFadeIn var(--motion-base) var(--ease-standard) both;
 }
 
+#quiz-screen {
+  padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+}
+
 /* Premium micro-animations for cards and blocks */
 @keyframes cardEntrance {
   from {

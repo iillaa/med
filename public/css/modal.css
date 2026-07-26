@@ -10,7 +10,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 16px;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   animation: modalBackdropIn var(--motion-fast) ease;
   will-change: opacity;
 }
@@ -37,7 +37,7 @@
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  max-height: 90dvh;
+  max-height: calc(100dvh - max(32px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
   transform-origin: center;
   animation: modalCardIn var(--motion-base) var(--ease-decelerate);
   will-change: transform, opacity;
@@ -93,7 +93,7 @@
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 20px 20px max(24px, env(safe-area-inset-bottom)) 20px;
   overflow-y: auto;
 }
 
@@ -305,7 +305,7 @@
 }
 
 .reader-modal-body {
-  padding: 32px 40px;
+  padding: 32px 40px max(40px, env(safe-area-inset-bottom)) 40px;
   overflow-y: auto;
   flex-grow: 1;
   font-size: 16px;
