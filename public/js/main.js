@@ -230,7 +230,18 @@ async function bootstrapApp() {
           }
         `;
         document.head.appendChild(style);
-        vt.call(document, swap);
+        const transition = vt.call(document, swap);
+        if (transition) {
+          if (transition.finished && typeof transition.finished.catch === 'function') {
+            transition.finished.catch(() => {});
+          }
+          if (transition.ready && typeof transition.ready.catch === 'function') {
+            transition.ready.catch(() => {});
+          }
+          if (transition.updateCallbackDone && typeof transition.updateCallbackDone.catch === 'function') {
+            transition.updateCallbackDone.catch(() => {});
+          }
+        }
         setTimeout(() => style.remove(), 400);
       } else {
         swap();

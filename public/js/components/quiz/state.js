@@ -91,6 +91,8 @@ export function releaseWakeLock(wakeLock) {
     if (wakeLock !== null) {
       wakeLock.release().then(() => {
         console.log('[Wake Lock] Screen Wake Lock released.');
+      }).catch(err => {
+        console.warn(`[Wake Lock] Notice on release: ${err.message}`);
       });
     }
   } catch (err) {
