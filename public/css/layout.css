@@ -149,11 +149,7 @@ html, body {
   
   .mobile-header {
     display: flex;
-    padding: 6px 12px;
-    /* Keep content clear of the status bar / notch on notched devices. */
-    padding-top: max(10px, calc(env(safe-area-inset-top) + 4px));
-    padding-left: max(12px, env(safe-area-inset-left));
-    padding-right: max(12px, env(safe-area-inset-right));
+    padding: 10px 14px;
   }
   
   .workspace-header {
