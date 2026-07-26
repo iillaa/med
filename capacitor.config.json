@@ -17,6 +17,11 @@
     "captureInput": true
   },
   "plugins": {
+    "SystemBars": {
+      "enabled": true,
+      "style": "DARK",
+      "backgroundColor": "#090d16"
+    },
     "SplashScreen": {
       "launchShowDuration": 0,
       "launchAutoHide": false,
