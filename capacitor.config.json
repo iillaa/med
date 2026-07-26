@@ -3,7 +3,7 @@
   "appName": "Dr.CAT",
   "webDir": "public",
   "bundledWebRuntime": false,
-  "backgroundColor": "#0b101d",
+  "backgroundColor": "#090d16",
   "server": {
     "androidScheme": "https",
     "cleartext": true,
@@ -12,18 +12,19 @@
     ]
   },
   "android": {
-    "backgroundColor": "#0b101d",
+    "backgroundColor": "#090d16",
     "allowMixedContent": true,
-    "captureInput": true
+    "captureInput": true,
+    "adjustMarginsForEdgeToEdge": "disable"
   },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 0,
       "launchAutoHide": false,
-      "backgroundColor": "#0b101d"
+      "backgroundColor": "#090d16"
     },
     "Keyboard": {
-      "resize": "body",
+      "resize": "none",
       "style": "DARK"
     }
   }

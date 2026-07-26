@@ -7,6 +7,7 @@ on:
       - light-android
       - audit-project
       - structured
+      - feat/audit-ui-and-tests-pr
 
   # Enable manual triggering
   workflow_dispatch:

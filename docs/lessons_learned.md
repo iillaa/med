@@ -141,4 +141,22 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Protecting API routes (`/api/admin/*`) with admin tokens prevents unauthorized data access, but leaving the static HTML interface (e.g. `pdf_lab.html`) in the `public/` folder exposes the admin UI layout to anyone guessing the URL. 
 * **Solution**: Use Express middleware to intercept requests to the specific HTML file and assert `isLocalhostConnection`. If the request originates remotely, block it with a 403 Forbidden. This ensures the admin UI is truly invisible to the public internet without requiring complex cookie/session configurations on static files.
 
+### 30. Capacitor Android — Navigation Bar Dark Gap (Edge-to-Edge)
+* **Problem**: A dark empty space appears between app content and the 3-button Android navigation bar in the Capacitor APK. The gap cannot be selected by Eruda/DOM inspector, proving it is native (outside the WebView). `window.innerHeight` is smaller than expected — more than just status bar + nav bar height.
+* **Root Cause**: `adjustMarginsForEdgeToEdge: "disable"` in `capacitor.config.json` causes Capacitor's `BridgeActivity.super.onCreate()` to internally call `WindowCompat.setDecorFitsSystemWindows(window, true)`, reverting edge-to-edge mode and shrinking the window — leaving a native dead zone between the WebView and the nav bar. Important: `"none"` is NOT a valid value (silently falls back to `"auto"`). Valid values are `"auto"`, `"force"`, `"disable"`.
+* **Diagnostic**: Inject a JS overlay into `index.html` printing `screen.h - win.h` and `env(safe-area-inset-bottom)`. If `safe-bot = 0px`, Capacitor has reverted edge-to-edge and the window is smaller than the screen.
+* **Fix**: In `android/app/src/main/java/com/drcat/app/MainActivity.java`, call `WindowCompat.setDecorFitsSystemWindows(getWindow(), false)` **after** `super.onCreate()` to override Capacitor's revert:
+  ```java
+  import androidx.core.view.WindowCompat;
+  public class MainActivity extends BridgeActivity {
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+          super.onCreate(savedInstanceState);
+          WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+      }
+  }
+  ```
+* **Also required**: `activity_main.xml` must use `FrameLayout` (not `CoordinatorLayout`), and `Keyboard.resize: "none"` in `capacitor.config.json`. Add `padding-bottom: max(16px, env(safe-area-inset-bottom))` to scrollable content containers in CSS.
+* **Do NOT try**: `adjustMarginsForEdgeToEdge: "none"` (invalid), `windowSoftInputMode="adjustNothing"` (breaks top insets / pushes header down), or overriding `ViewCompat.setOnApplyWindowInsetsListener` on the WebView parent (doesn't help when Capacitor reverts at window level).
+
 ---

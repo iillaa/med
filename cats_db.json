@@ -802,5 +802,22 @@
         }
       }
     ]
+  },
+  {
+    "id": 60,
+    "category": "Cardiologie",
+    "title": "Test New CAT 1784853922985",
+    "summary": "Corrected summary after admin review",
+    "red_flags": "Chest pain",
+    "ordonnance": "Corrected ordonnance after admin review",
+    "pdf_keywords": [],
+    "updatedAt": 1784853923033,
+    "history": [
+      {
+        "timestamp": 1784853923033,
+        "action": "create",
+        "detail": "Créé via approbation d'une proposition de fiche"
+      }
+    ]
   }
 ]

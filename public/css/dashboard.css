@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 24px 48px 24px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -134,12 +134,15 @@
 /* Welcome Screen */
 .welcome-screen {
   flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow-y: auto;
-  padding: 0;
+  padding: 0 0 max(24px, env(safe-area-inset-bottom)) 0;
   width: 100%;
+  background-color: var(--bg-app);
 }
 
 .welcome-screen::-webkit-scrollbar {
@@ -468,7 +471,7 @@
 /* Mobile Dashboard Adjustments */
 @media (max-width: 680px) {
   .dashboard-container {
-    padding: 16px 16px max(48px, env(safe-area-inset-bottom)) 16px;
+    padding: 16px 16px max(32px, env(safe-area-inset-bottom)) 16px;
     gap: 16px;
   }
 
