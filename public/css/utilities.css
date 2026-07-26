@@ -557,23 +557,7 @@ div[class*="eruda-"] {
 }
 
 #eruda .eruda-nav-bar,
-.eruda-container .eruda-nav-bar,
-#eruda .eruda-header,
-.eruda-header {
-  padding-top: max(8px, env(safe-area-inset-top)) !important;
-}
-
-#eruda .eruda-console,
-#eruda .eruda-elements,
-#eruda .eruda-network,
-#eruda .eruda-resources,
-#eruda .eruda-sources,
-#eruda .eruda-info,
-#eruda .eruda-snippets {
-  padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
-}
-
 #eruda .eruda-entry-btn {
-  bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px)) !important;
-  right: max(20px, env(safe-area-inset-right)) !important;
+  bottom: 20px !important;
+  right: 20px !important;
 }

@@ -23,8 +23,8 @@
 
 @media (max-width: 680px) {
   #drcat-toast {
-    top: max(16px, calc(env(safe-area-inset-top) + 6px)) !important;
-    right: max(16px, env(safe-area-inset-right)) !important;
+    top: 16px !important;
+    right: 16px !important;
     max-width: calc(100vw - 32px) !important;
     width: max-content !important;
   }

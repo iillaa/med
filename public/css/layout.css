@@ -31,9 +31,7 @@ html, body {
   animation: viewFadeIn var(--motion-base) var(--ease-standard) both;
 }
 
-#quiz-screen {
-  padding-bottom: max(60px, calc(env(safe-area-inset-bottom) + 36px)) !important;
-}
+
 
 /* Premium micro-animations for cards and blocks */
 @keyframes cardEntrance {
@@ -261,18 +259,17 @@ html, body {
     border-radius: 7px !important;
   }
   
-  /* Global safe-area bottom padding for ALL views (current & future) under main-content */
+  /* Global bottom padding for views under main-content */
   .main-content > section {
-    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    padding-bottom: 24px;
   }
 
   #quiz-screen {
-    padding: 16px 12px max(64px, calc(env(safe-area-inset-bottom) + 40px)) 12px !important;
+    padding: 16px 12px 24px 12px !important;
   }
 
   .tab-content-container {
-    padding: 8px 12px;
-    padding-bottom: max(28px, env(safe-area-inset-bottom)) !important;
+    padding: 8px 12px 16px 12px !important;
   }
 
   .pane-header {
