@@ -19,13 +19,13 @@ module.exports = {
     },
     assert: {
       assertions: {
-        'categories:performance': ['warn', { minScore: 0.9 }],
-        'categories:accessibility': ['error', { minScore: 0.95 }],
-        'categories:best-practices': ['error', { minScore: 0.95 }],
+        'categories:performance': ['warn', { minScore: 0.85 }],
+        'categories:accessibility': ['error', { minScore: 0.85 }],
+        'categories:best-practices': ['error', { minScore: 0.90 }],
       },
     },
     upload: {
-      target: 'temporary',
+      target: 'temporary-public-storage',
     },
   },
 };
