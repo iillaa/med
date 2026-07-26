@@ -10,7 +10,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  padding: 16px;
   animation: modalBackdropIn var(--motion-fast) ease;
   will-change: opacity;
 }

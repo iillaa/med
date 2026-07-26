@@ -140,8 +140,8 @@ function createUI() {
     style.textContent = `
       #debug-toggle-btn {
         position: fixed;
-        bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px));
-        right: max(20px, env(safe-area-inset-right));
+        bottom: 20px;
+        right: 20px;
         width: 48px;
         height: 48px;
         border-radius: 50%;
@@ -195,7 +195,7 @@ function createUI() {
         z-index: 999998;
         display: none;
         flex-direction: column;
-        padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        padding: 16px;
         box-sizing: border-box;
       }
       #debug-console-panel .header {

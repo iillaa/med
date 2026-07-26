@@ -35,8 +35,6 @@ button i,
   justify-content: center;
   gap: var(--space-8, 32px);
   padding: var(--space-6, 24px);
-  padding-top: max(var(--space-6, 24px), env(safe-area-inset-top));
-  padding-bottom: max(var(--space-6, 24px), env(safe-area-inset-bottom));
   box-sizing: border-box;
   transition: opacity var(--motion-slower) ease, visibility var(--motion-slower) ease;
 }
