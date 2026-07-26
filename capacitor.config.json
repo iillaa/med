@@ -15,7 +15,7 @@
     "backgroundColor": "#090d16",
     "allowMixedContent": true,
     "captureInput": true,
-    "adjustMarginsForEdgeToEdge": "none"
+    "adjustMarginsForEdgeToEdge": "disable"
   },
   "plugins": {
     "SplashScreen": {
