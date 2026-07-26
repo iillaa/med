@@ -8,6 +8,7 @@ const { initAdminPassword } = require('./services/auth-service');
 const { safeWriteJsonAsync, runDatabaseBackup, dbLock } = require('./services/data-store');
 const { corsMiddleware } = require('./middleware/cors');
 const { rateLimitMiddleware } = require('./middleware/rate-limit');
+const { gzipMiddleware } = require('./middleware/gzip');
 const { registerAuthRoutes } = require('./routes/auth');
 const { registerCatRoutes } = require('./routes/cats');
 const { registerSuggestionRoutes } = require('./routes/suggestions');
@@ -152,6 +153,7 @@ onIndexUpdated(async () => {
   }
 });
 
+app.use(gzipMiddleware);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

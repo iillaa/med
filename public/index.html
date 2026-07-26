@@ -357,7 +357,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.26.16.12">
+  <meta name="app-build-version" content="2026.07.26.16.25">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -396,19 +396,19 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607261612" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607261612"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607261625" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607261625"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607261612" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607261612"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607261625" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607261625"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607261612" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607261612" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607261625" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607261625" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607261612">
-    <link rel="stylesheet" href="css/utilities.css?v=2607261612">
+    <link rel="stylesheet" href="style.css?v=2607261625">
+    <link rel="stylesheet" href="css/utilities.css?v=2607261625">
   </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
@@ -487,7 +487,7 @@ body {
         <!-- Collapsible inner panel -->
         <div class="controls-panel" id="controls-panel">
           <!-- Category filter -->
-          <select id="category-filter" class="category-select">
+          <select id="category-filter" class="category-select" aria-label="Filtrer par spécialité">
             <option value="all">Toutes les spécialités</option>
           </select>
 
@@ -601,7 +601,7 @@ body {
             </div>
              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
               <div class="specialty-export-container" style="display: none; align-items: center; gap: 6px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: var(--radius-md);">
-                <select id="export-specialty-select" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
+                <select id="export-specialty-select" aria-label="Sélectionner une spécialité à exporter" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
                   <option value="">Sélectionner spécialité...</option>
                 </select>
                 <button class="action-btn" id="export-specialty-btn" style="font-size: 11px; padding: 4px 8px; border: none; background: rgba(6,182,212,0.1); color: var(--color-primary); cursor: pointer; display: flex; align-items: center; gap: 4px; border-radius: 4px; font-weight: 600;">
@@ -1011,14 +1011,14 @@ body {
           <div class="dashboard-block" style="gap: 16px;">
             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
               <label for="quiz-category" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-filter"></i> Sélectionner une Spécialité :</label>
-              <select id="quiz-category" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+              <select id="quiz-category" aria-label="Sélectionner une spécialité pour le quiz" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
                 <option value="all">Toutes les spécialités</option>
               </select>
             </div>
 
             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
               <label for="quiz-count" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-list-ol"></i> Nombre de Questions :</label>
-              <select id="quiz-count" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+              <select id="quiz-count" aria-label="Sélectionner le nombre de questions" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
                 <option value="5">5 questions</option>
                 <option value="10" selected>10 questions</option>
                 <option value="15">15 questions</option>
@@ -1064,7 +1064,7 @@ body {
                 <input type="checkbox" id="quiz-timed-mode" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
                 <span>Activer le chronomètre par question</span>
               </label>
-              <select id="quiz-timer-seconds" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); margin-top: 4px; display: none;">
+              <select id="quiz-timer-seconds" aria-label="Temps par question" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); margin-top: 4px; display: none;">
                 <option value="15">15 secondes</option>
                 <option value="30" selected>30 secondes</option>
                 <option value="60">60 secondes</option>
@@ -1247,7 +1247,7 @@ body {
           <div class="form-group">
             <label for="new-cat-category">Spécialité / Catégorie *</label>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-              <select id="new-cat-category-select">
+              <select id="new-cat-category-select" aria-label="Spécialité de la nouvelle fiche">
                 <!-- Populated dynamically -->
               </select>
               <input type="text" id="new-cat-category" required placeholder="Ou saisissez une nouvelle spécialité...">
