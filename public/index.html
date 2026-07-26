@@ -357,7 +357,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.26.03.20">
+  <meta name="app-build-version" content="2026.07.26.11.56">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -396,19 +396,19 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607260320" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607260320"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607261156" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607261156"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607260320" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607260320"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607261156" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607261156"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607260320" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607260320" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607261156" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607261156" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607260320">
-    <link rel="stylesheet" href="css/utilities.css?v=2607260320">
+    <link rel="stylesheet" href="style.css?v=2607261156">
+    <link rel="stylesheet" href="css/utilities.css?v=2607261156">
   </noscript>
   <!-- Capacitor native bridge script -->
   <script src="capacitor.js"></script>
@@ -1507,38 +1507,12 @@ body {
     </div>
   </div>
   <!-- Mobile In-App DevTools (Eruda) -->
-  <script src="js/eruda.js?v=2607260320"></script>
+  <script src="js/eruda.js?v=2607261156"></script>
   <script>
     if (typeof eruda !== 'undefined' && localStorage.getItem('debug_eruda') === 'true') {
       eruda.init();
     }
   </script>
-<!-- ═══ TEMP DIAGNOSTIC: remove after nav bar fix confirmed ═══ -->
-<script>
-(function(){
-  var d = document.createElement('div');
-  d.id = '_nav_diag';
-  d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:2147483647;background:rgba(200,0,0,0.93);color:#fff;font:10px/1.6 monospace;padding:3px 6px;pointer-events:none;';
-  document.documentElement.appendChild(d);
-  function update(){
-    // Measure safe-area-inset-bottom via a probe element
-    var p = document.createElement('div');
-    p.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);visibility:hidden;pointer-events:none;';
-    document.documentElement.appendChild(p);
-    var sb = p.offsetHeight; document.documentElement.removeChild(p);
-    d.innerHTML =
-      'screen=' + screen.width + 'x' + screen.height +
-      '  win=' + window.innerWidth + 'x' + window.innerHeight +
-      '  dpr=' + window.devicePixelRatio +
-      '<br>screen.h - win.h = <b>' + (screen.height - window.innerHeight) + 'px</b>' +
-      '  safe-bot=<b>' + sb + 'px</b>' +
-      '  docEl.h=' + document.documentElement.clientHeight;
-  }
-  update();
-  window.addEventListener('resize', update);
-  setTimeout(update, 500); setTimeout(update, 2000);
-})();
-</script>
-<!-- ═══ END TEMP DIAGNOSTIC ═══ -->
+
 </body>
 </html>
