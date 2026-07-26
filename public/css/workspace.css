@@ -209,7 +209,7 @@
 .tab-content-container {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 20px 24px 40px;
+  padding: 20px 24px 60px;
   contain: content;   /* Isolate workspace tab content layout & paints */
 }
 
