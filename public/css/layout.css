@@ -254,10 +254,6 @@ html, body {
     border-radius: 7px !important;
   }
   
-  /* Global safe-area bottom padding for ALL views (current & future) under main-content */
-  .main-content > section {
-    padding-bottom: max(24px, env(safe-area-inset-bottom));
-  }
 
   #quiz-screen {
     padding: 16px 12px max(64px, calc(env(safe-area-inset-bottom) + 40px)) 12px !important;
