@@ -239,13 +239,9 @@ html, body {
     padding: 7px 12px !important;
     font-size: 12px !important;
     gap: 6px !important;
-    border-radius: 7px !important;
+      border-radius: 7px !important;
   }
   
-  .main-content > section {
-    padding-bottom: 24px;
-  }
-
   #quiz-screen {
     padding: 16px 12px 60px 12px !important;
   }

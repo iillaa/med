@@ -61,9 +61,15 @@
   --leading-normal: 1.5;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
---font-weight-bold: 700;
+  --font-weight-bold: 700;
 
-  /* ── Z-index scale — single source so overlays never fight ── */
+  /* ── Icon sizing — single source so icons read consistently ── */
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 18px;
+  --icon-xl: 22px;
+
+/* ── Z-index scale — single source so overlays never fight ── */
   --z-sidebar: 100;
   --z-sticky: 500;
   --z-overlay: 1000;
@@ -349,7 +355,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.27.00.45">
+  <meta name="app-build-version" content="2026.07.27.17.00">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -389,66 +395,20 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607270045" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607270045"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607271700" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607271700"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607270045" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607270045"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607271700" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607271700"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607270045" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607270045" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2607271700" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607271700" media="print" onload="this.media='all'">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607270045">
-    <link rel="stylesheet" href="css/utilities.css?v=2607270045">
+    <link rel="stylesheet" href="style.css?v=2607271700">
+    <link rel="stylesheet" href="css/utilities.css?v=2607271700">
   </noscript>
-  <!-- Eruda Mobile DevTools — auto-start with all panels for debugging -->
-  <script>
-    (function() {
-      // Auto-start Eruda if not already initialized
-      if (!window.eruda && !window.__erudaInjected) {
-        window.__erudaInjected = true;
-        var script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/eruda';
-        script.onload = function() {
-          if (window.eruda) {
-            // Defer init to ensure #eruda-dev-tools container exists in DOM
-            var deferredInit = function() {
-              try {
-                var container = document.getElementById('eruda-dev-tools');
-                if (!container) {
-                  console.warn('[Eruda] Container #eruda-dev-tools not found, will retry');
-                  return;
-                }
-                window.eruda.init({
-                  container: container,
-                  tool: ['console', 'elements', 'network', 'resources', 'info', 'sources'],
-                  useShadowDom: true,
-                  autoScale: true
-                });
-                window.eruda.console.log('🚀 Eruda DevTools loaded with all panels');
-              } catch(e) {
-                console.warn('[Eruda] Init failed:', e);
-              }
-            };
-            // Wait for DOM + 500ms ensure app layout is stable before attaching
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(deferredInit, 500);
-              });
-            } else {
-              setTimeout(deferredInit, 500);
-            }
-          }
-        };
-        script.onerror = function() {
-          console.warn('[Eruda] Failed to load from CDN');
-        };
-        document.head.appendChild(script);
-      }
-    })();
-  </script>
   <!-- Capacitor native bridge script (deferred for zero-render-blocking first paint) -->
 </head>
 <body>
@@ -1386,7 +1346,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-ZPO2R36Q.js"></script>
+  <script type="module" src="dist/app-G5MZN5JC.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
@@ -1526,9 +1486,6 @@ body {
       </div>
     </div>
   </div>
-
-  <!-- Eruda DevTools Container (dedicated, avoids corrupting app DOM) -->
-  <div id="eruda-dev-tools"></div>
 
   <!-- Cookie Consent Banner -->
   <div id="legal-consent-banner" class="legal-consent-banner hidden" style="display: none;">
