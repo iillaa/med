@@ -807,14 +807,42 @@
     "id": 60,
     "category": "Cardiologie",
     "title": "Test New CAT 1784853922985",
-    "summary": "Corrected summary after admin review",
+    "summary": "Corrected summary after admin review.",
     "red_flags": "Chest pain",
-    "ordonnance": "Corrected ordonnance after admin review",
+    "ordonnance": "",
     "pdf_keywords": [],
-    "updatedAt": 1784853923033,
+    "updatedAt": 1785192516452,
     "history": [
       {
         "timestamp": 1784853923033,
+        "action": "create",
+        "detail": "Créé via approbation d'une proposition de fiche"
+      },
+      {
+        "timestamp": 1785192516452,
+        "action": "edit",
+        "detail": "Modifié via approbation d'une proposition de modification",
+        "previousState": {
+          "summary": "Corrected summary after admin review",
+          "ordonnance": "Corrected ordonnance after admin review"
+        }
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "category": "K",
+    "title": "K",
+    "summary": "J",
+    "red_flags": "J",
+    "ordonnance": "K",
+    "pdf_keywords": [
+      "Asp"
+    ],
+    "updatedAt": 1785192523034,
+    "history": [
+      {
+        "timestamp": 1785192523034,
         "action": "create",
         "detail": "Créé via approbation d'une proposition de fiche"
       }

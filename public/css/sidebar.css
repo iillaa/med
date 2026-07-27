@@ -360,9 +360,13 @@
   min-height: 0;    /* Critical: lets flex-child shrink below content size */
   overflow-y: auto;
   overflow-x: hidden;
-padding: 6px 8px 60px;
+  padding: 6px 8px 60px;
   position: relative; /* anchor the pull-to-refresh indicator */
   contain: content;  /* Isolate list layout & paint bounds for 60 FPS mobile scrolling */
+  scroll-behavior: smooth;
+  /* Smooth mask transition at top & bottom edges so scrolling list items don't clip hard against controls */
+  mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 24px), transparent 100%);
 }
 
 /* Pull-to-refresh spinner (Phase 3.6). Sits above the list, hidden until the

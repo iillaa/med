@@ -215,7 +215,7 @@ app.get('/favicon.ico', (req, res) => {
 
 // Simple x-app-key guard for static data files (cats_db.json, pdf_index.json, etc.)
 // The client already sends this header — this just stops casual curl/wget data grabs.
-const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+const { APP_DATA_KEY } = require('./config/constants');
 app.use('/data', (req, res, next) => {
   const requestKey = req.headers['x-app-key'];
   if (!requestKey || requestKey !== APP_DATA_KEY) {
