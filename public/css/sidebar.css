@@ -360,7 +360,7 @@
   min-height: 0;    /* Critical: lets flex-child shrink below content size */
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 6px 8px max(60px, var(--safe-area-bottom, 0px));
+padding: 6px 8px 60px;
   position: relative; /* anchor the pull-to-refresh indicator */
   contain: content;  /* Isolate list layout & paint bounds for 60 FPS mobile scrolling */
 }

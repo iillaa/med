@@ -61,19 +61,7 @@
   --leading-normal: 1.5;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-
-  /* ── Icon sizing — single source so icons read consistently ── */
-  --icon-sm: 14px;
-  --icon-md: 16px;
-  --icon-lg: 18px;
-  --icon-xl: 22px;
-
-    /* ── Safe Area Insets (notch, status bar, home indicator) ── */
-    --safe-area-top: env(safe-area-inset-top, 0px);
-    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-area-left: env(safe-area-inset-left, 0px);
-    --safe-area-right: env(safe-area-inset-right, 0px);
+--font-weight-bold: 700;
 
   /* ── Z-index scale — single source so overlays never fight ── */
   --z-sidebar: 100;
@@ -415,8 +403,41 @@ body {
     <link rel="stylesheet" href="style.css?v=2607270045">
     <link rel="stylesheet" href="css/utilities.css?v=2607270045">
   </noscript>
+  <!-- Eruda Mobile DevTools — auto-start with all panels for debugging -->
+  <script>
+    (function() {
+      // Auto-start Eruda if not already initialized
+      if (!window.eruda && !window.__erudaInjected) {
+        window.__erudaInjected = true;
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+        script.onload = function() {
+          if (window.eruda) {
+            try {
+              window.eruda.init({
+                container: document.body,
+                tool: ['console', 'elements', 'network', 'resources', 'info', 'sources'],
+                useShadowDom: true,
+                autoScale: true
+              });
+              // Show all panels by default
+              var el = document.querySelector('.eruda-container');
+              if (el) el.style.display = 'block';
+              window.eruda.show();
+              window.eruda.console.log('🚀 Eruda DevTools loaded with all panels');
+            } catch(e) {
+              console.warn('[Eruda] Init failed:', e);
+            }
+          }
+        };
+        script.onerror = function() {
+          console.warn('[Eruda] Failed to load from CDN');
+        };
+        document.head.appendChild(script);
+      }
+    })();
+  </script>
   <!-- Capacitor native bridge script (deferred for zero-render-blocking first paint) -->
-  <script src="capacitor.js" defer></script>
 </head>
 <body>
   <!-- APP LOADING OVERLAY - full-screen boot splash, hidden when ready -->

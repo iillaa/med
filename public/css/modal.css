@@ -37,7 +37,7 @@
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  max-height: calc(100dvh - max(32px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+  max-height: calc(100dvh - 32px);
   transform-origin: center;
   animation: modalCardIn var(--motion-base) var(--ease-decelerate);
   will-change: transform, opacity;
@@ -93,7 +93,7 @@
 }
 
 .modal-body {
-  padding: 20px 20px max(24px, env(safe-area-inset-bottom)) 20px;
+  padding: 20px 20px 24px 20px;
   overflow-y: auto;
 }
 
@@ -168,7 +168,7 @@
 
   .modal-overlay.modal-overlay--sheet {
     align-items: flex-end;
-    padding: 12px 10px max(14px, env(safe-area-inset-bottom)) 10px;
+    padding: 12px 10px 14px 10px;
   }
   
   .modal-overlay.modal-overlay--sheet .modal-card {
@@ -305,7 +305,7 @@
 }
 
 .reader-modal-body {
-  padding: 32px 40px max(40px, env(safe-area-inset-bottom)) 40px;
+  padding: 32px 40px 40px 40px;
   overflow-y: auto;
   flex-grow: 1;
   font-size: 16px;
@@ -315,11 +315,11 @@
 
 @media (max-width: 768px) {
   .reader-modal-overlay {
-    padding: max(14px, env(safe-area-inset-top)) 10px max(14px, env(safe-area-inset-bottom)) 10px;
+    padding: 14px 10px;
   }
   .reader-modal-content {
     height: auto;
-    max-height: calc(100dvh - max(28px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    max-height: calc(100dvh - 28px);
     border-radius: var(--radius-lg);
   }
   .reader-modal-header {

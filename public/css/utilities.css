@@ -421,7 +421,7 @@ button i,
 /* Offline indicator badge (Phase 6.3) — subtle, non-intrusive. */
 .offline-badge {
   position: fixed;
-  bottom: max(12px, env(safe-area-inset-bottom));
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%) translateY(12px);
   display: flex;

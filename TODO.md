@@ -18,7 +18,6 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 - `[x]` **Local PDF Index Caching**: Bundle the full `pdf_index.json` inside the Capacitor APK during `npm run build` so full-text PDF search works in `android_offline` mode without ever needing a server connection.
 - `[x]` **Incremental Sync**: Instead of a full `cats_db.json` pull on every sync, send a `?since=<timestamp>` query param to the server so only modified CATs are transferred, reducing bandwidth for mobile testers.
 
-
 ---
 
 ## 🗄️ Database & Content
@@ -65,7 +64,16 @@ Items are grouped by category and priority. Completed items are marked `[x]`.
 - `[x]` **Progress Ring Animation**: Animate the specialty completion rings on the dashboard using SVG stroke-dashoffset transitions.
 - `[x]` **Dark/Light Mode Persistence**: Remember the user's chosen theme across sessions using `localStorage`.
 
----
+## ✅ Fixed: Padding & Safe Zone Issues (CSS Debug)
+
+- `[x]` **Removed `--safe-area-*` CSS variables**: These env()-based variables were causing layout issues on devices without a notch, adding phantom padding that pushed content around.
+- `[x]` **Removed safe-area-inset from `.drcat-toast`**: The `top: max(20px, env(safe-area-inset-top))` and `right: max(20px, env(safe-area-inset-right))` were causing the toast to position off-screen on non-notch devices with incorrect safe-area fallback behavior.
+- `[x]` **Fixed `sidebar.css` scroll height**: The `.cat-list-wrapper` was set to `calc(100vh - 240px)` which didn't account for the OS status bar, safe areas, or Android WebView chrome, causing the list to overflow the viewport on mobile devices. Changed to `flex: 1` with `min-height: 0` for natural flex-based height calculation.
+- `[x]` **Fixed `layout.css` responsive**: Removed duplicate `.sidebar` rules from the responsive section (they were conflicting with the ones in sidebar.css), ensuring the mobile sidebar overlay toggles correctly without extra translate interference.
+- `[x]` **Mobile header padding**: Adjusted `.mobile-header` padding to `10px 14px` for a more compact touch-friendly layout that doesn't eat into safe zones.
+- `[x]` **Workspace responsive**: Tightened `.workspace-header` padding to `6px 12px`, reduced tab padding/size, and added `padding-bottom: 24px` on main sections to ensure bottom content isn't cut off by Android navigation bars.
+- `[x]` **Quiz screen**: Added `padding-bottom: 60px` on mobile quiz screen to prevent the bottom navigation bar from obscuring quiz buttons.
+- `[x]` **Red Flags Banner**: Made it collapsible on mobile (tap to expand/collapse) with a chevron indicator, preventing it from taking too much vertical space.
 
 ## ✅ Completed (Archived)
 
