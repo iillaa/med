@@ -34,12 +34,15 @@
 
 ---
 
-## 🛡️ Phase 4: Server, Security & Resilience Enhancements
-- [ ] **6. Rate-Limiting & Anti-Abuse Shield**
+## 🛡️ Phase 4: Server, Security & Proprietary Engine Hardening
+- [ ] **6. Proprietary Engine Privacy & Architecture Safeguards**
+  - **IP/Mechanism Confidentiality:** Maintain strict confidentiality surrounding internal search index and PDF view rendering strategies. Never expose implementation hints or internal mechanisms in user-facing UI or public logs.
+  - **Dr.CAT v2 Architecture Planning:** Evaluate relocation and enhanced obfuscation/gating for indexing and view data endpoints when scaling to v2 with expanded content libraries.
+- [ ] **7. Rate-Limiting & Anti-Abuse Shield**
   - Add Express rate-limiting (`express-rate-limit`) to `/api/*` and `/data/*` routes to prevent DDoS and API spam.
-- [ ] **7. Automated Server Database Backups**
+- [ ] **8. Automated Server Database Backups**
   - Implement automated periodic rotation and compression backups for `cats_db.json` and user data stores.
-- [ ] **8. Security Audit & Header Hardening**
+- [ ] **9. Security Audit & Header Hardening**
   - Add `Helmet.js` security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, CSP rules).
 
 ---
