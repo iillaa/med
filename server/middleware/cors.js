@@ -42,9 +42,12 @@ function corsMiddleware(allowedOrigins, serverProviders) {
       if (origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
-      } else {
+      } else if (!req.path.startsWith('/api/')) {
+        // Only allow wildcard for non-API static assets (fonts, images, etc.)
         res.setHeader('Access-Control-Allow-Origin', '*');
       }
+      // For API requests without an Origin header, don't set CORS at all
+      // (browser won't allow cross-origin reads without ACAO header)
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', Array.from(uniqueHeaders).join(', '));
     }

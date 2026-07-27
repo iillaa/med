@@ -6,7 +6,15 @@ const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-
 const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
 
 function registerCatRoutes(app) {
+  const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+
   app.get('/api/cats', (req, res) => {
+    // Simple x-app-key check to stop casual data grabs (the client always sends this)
+    const requestKey = req.headers['x-app-key'];
+    if (!requestKey || requestKey !== APP_DATA_KEY) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+
     const isAdmin = checkIsAdmin(req, cache.activeTokens);
     const since = parseInt(req.query.since);
 

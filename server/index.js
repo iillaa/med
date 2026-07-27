@@ -213,6 +213,17 @@ app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'drcat_logo.png'));
 });
 
+// Simple x-app-key guard for static data files (cats_db.json, pdf_index.json, etc.)
+// The client already sends this header — this just stops casual curl/wget data grabs.
+const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+app.use('/data', (req, res, next) => {
+  const requestKey = req.headers['x-app-key'];
+  if (!requestKey || requestKey !== APP_DATA_KEY) {
+    return res.status(403).json({ error: 'Accès interdit. Données non disponibles.' });
+  }
+  next();
+});
+
 // Block public access to the admin PDF Lab UI
 app.get('/pdf_lab.html', (req, res, next) => {
   const { isLocalhostConnection } = require('./utils/request');
