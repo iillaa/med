@@ -1,17 +1,52 @@
-# Security & Preload Fix TODO
+# Dr.CAT — Project Roadmap & Feature TODO
 
-## Completed ✅
-- [x] Plan approved by user
-- [x] **1. Remove preload link** — `public/index.html`: Removed `<link rel="preload" href="data/cats_db.json">`
-- [x] **2. Add `x-app-key` validation middleware** — `server/index.js`: Added middleware that blocks `/data/*` files unless `x-app-key` matches
-- [x] **3. Validate `x-app-key` on `GET /api/cats`** — `server/routes/cats.js`: Added key check on the GET route
-- [x] **4. Secure `/data/pdf_index.json`** — Covered by item 2 (middleware blocks all `/data/*`)
-- [x] **5. Tighten CORS for API** — `server/middleware/cors.js`: Don't allow wildcard origin for API when no Origin header
+---
 
-## Completed ✅
-- [x] **6. Test** — All tests passed:
-  - `curl /data/cats_db.json` without key → **403** ✅
-  - `curl /api/cats` without key → **403** ✅
-  - `curl /data/cats_db.json` WITH key → **200** ✅
-  - `curl /api/cats` WITH key → **200** ✅
-  - `curl /data/pdf_index.json` WITH key → **200** ✅
+## 🚨 Top Priority
+- [ ] **1. Fix App Logo** — Audit and fix logo rendering/asset resolutions across desktop header, mobile header, PWA manifest, and Android APK launcher icon to ensure sharp visual display without distortion.
+
+---
+
+## 📌 Phase 1: Versioning & Version Enforcement (Force Update)
+- [ ] **2. Formalize Semantic App Versioning**
+  - Increment `package.json` version beyond `1.0.0` (e.g. `1.1.0-beta.1`).
+  - Wire build script to automatically propagate app version to Android `build.gradle` (`versionCode` & `versionName`), `public/index.html`, and server APIs.
+- [ ] **3. Mandatory Force-Update System**
+  - **Server Endpoint:** `GET /api/v1/version-check?client_version=X.Y.Z&platform=android|web`.
+  - **Client Guard:** On app boot (or resume), check server minimum required version.
+  - **Blocking Modal:** If client version < `minimum_required_version`, display a non-dismissible modal ("Mise à jour obligatoire requis") with a direct "Télécharger la mise à jour" button linking to APK download / Store page.
+
+---
+
+## 👥 Phase 2: Active User Analytics & Presence Tracker
+- [ ] **4. Real-time Active User & Session Counter**
+  - **Server Heartbeat System:** Implement `POST /api/v1/heartbeat` (or lightweight WebSocket/SSE) to track active Web and Android sessions (with privacy-preserving anonymous session ID).
+  - **Platform Split:** Distinguish between active Web desktop users vs. native Android APK users.
+  - **Admin & Dashboard Metrics:** Display real-time active user count ("X utilisateurs en ligne") on admin dashboard / telemetry panel.
+
+---
+
+## 🐛 Phase 3: Consent-Based One-Tap Bug & Log Reporting
+- [ ] **5. One-Tap Consent-Based Error Reporter**
+  - **In-App Error Collector:** Capture uncaught errors, failed fetches, and console error logs into an in-memory buffer.
+  - **User Feedback & Bug Modal:** Provide a "Signaler un problème" button in sidebar/settings.
+  - **One-Tap Email / Endpoint Dispatch:** User reviews logs, taps once, and sends debug log package via `mailto:` pre-filled draft or direct server endpoint with explicit consent toggle.
+
+---
+
+## 🛡️ Phase 4: Server, Security & Resilience Enhancements
+- [ ] **6. Rate-Limiting & Anti-Abuse Shield**
+  - Add Express rate-limiting (`express-rate-limit`) to `/api/*` and `/data/*` routes to prevent DDoS and API spam.
+- [ ] **7. Automated Server Database Backups**
+  - Implement automated periodic rotation and compression backups for `cats_db.json` and user data stores.
+- [ ] **8. Security Audit & Header Hardening**
+  - Add `Helmet.js` security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, CSP rules).
+
+---
+
+## 📋 Completed Tasks ✅
+- [x] Centralize `APP_DATA_KEY` verification across server middleware (`server/config/constants.js`).
+- [x] Protect `/data/*` files and `/api/cats` from direct unauthorized curl/scraping.
+- [x] Ship 78 compressed master PDFs in `public/pdfs/`.
+- [x] Polish navigation tab bar with sticky glassmorphism, horizontal width stretch, and top gradient scroll edge fade.
+- [x] Add smooth scroll gradient edge masks to sidebar list items and modal dialogs.
