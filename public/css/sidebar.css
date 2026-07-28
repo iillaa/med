@@ -364,9 +364,18 @@
   position: relative; /* anchor the pull-to-refresh indicator */
   contain: content;  /* Isolate list layout & paint bounds for 60 FPS mobile scrolling */
   scroll-behavior: smooth;
-  /* Smooth mask transition at top & bottom edges so scrolling list items don't clip hard against controls */
-  mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 24px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 24px), transparent 100%);
+  -webkit-overflow-scrolling: touch;
+  /* Promote to composite GPU layer for buttery smooth 60fps scrolling on mobile */
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+/* Use GPU gradient mask only on non-touch desktop pointer devices where GPU overhead is negligible */
+@media (hover: hover) and (pointer: fine) {
+  .cat-list-wrapper {
+    mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 12px, black calc(100% - 24px), transparent 100%);
+  }
 }
 
 /* Pull-to-refresh spinner (Phase 3.6). Sits above the list, hidden until the

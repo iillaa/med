@@ -249,9 +249,18 @@
   padding: 16px 12px 60px;
   contain: content;   /* Isolate workspace tab content layout & paints */
   scroll-behavior: smooth;
-  /* Smooth mask transition at top edge so scrolling content doesn't chop off hard against tabs */
-  mask-image: linear-gradient(to bottom, transparent 0px, black 16px, black calc(100% - 24px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 16px, black calc(100% - 24px), transparent 100%);
+  -webkit-overflow-scrolling: touch;
+  /* Promote to GPU composite layer to avoid CPU scroll bottleneck on mobile */
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+/* Restrict expensive mask-image gradient calculations to desktop devices */
+@media (hover: hover) and (pointer: fine) {
+  .tab-content-container {
+    mask-image: linear-gradient(to bottom, transparent 0px, black 16px, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 16px, black calc(100% - 24px), transparent 100%);
+  }
 }
 
 @media (min-width: 768px) {

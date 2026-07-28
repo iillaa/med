@@ -96,8 +96,15 @@
   padding: 20px 20px 24px 20px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  mask-image: linear-gradient(to bottom, transparent 0px, black 14px, black calc(100% - 14px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 14px, black calc(100% - 14px), transparent 100%);
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .modal-body {
+    mask-image: linear-gradient(to bottom, transparent 0px, black 14px, black calc(100% - 14px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 14px, black calc(100% - 14px), transparent 100%);
+  }
 }
 
 .form-group {

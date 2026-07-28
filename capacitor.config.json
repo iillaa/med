@@ -14,7 +14,8 @@
   "android": {
     "backgroundColor": "#090d16",
     "allowMixedContent": true,
-    "captureInput": true
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
   },
   "plugins": {
     "SplashScreen": {
