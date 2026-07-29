@@ -15,6 +15,8 @@ const { registerSuggestionRoutes } = require('./routes/suggestions');
 const { registerSearchRoutes } = require('./routes/search');
 const { registerServerProviderRoutes } = require('./routes/server-providers');
 const { registerPdfRoutes } = require('./routes/pdfs');
+const { registerVersionRoutes } = require('./routes/version');
+const { versionGuardMiddleware } = require('./middleware/version-guard');
 const allowedOriginsSvc = require('./services/allowed-origins');
 const spc = require('./services/server-providers-config');
 
@@ -264,7 +266,10 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(versionGuardMiddleware);
+
 registerAuthRoutes(app);
+registerVersionRoutes(app, cache);
 registerCatRoutes(app);
 registerSuggestionRoutes(app, cache);
 registerSearchRoutes(app, cache);

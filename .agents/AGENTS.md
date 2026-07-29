@@ -39,3 +39,25 @@ public class MainActivity extends BridgeActivity {
 - `adjustMarginsForEdgeToEdge: "none"` — invalid, silently ignored
 - `windowSoftInputMode="adjustNothing"` — breaks top (status bar inset inflates, pushes header down)
 - `setOnApplyWindowInsetsListener` on WebView parent — doesn't help when Capacitor reverts at window level
+
+# App Versioning & Mandatory Prompt Protocol
+
+## Automatic Version Bump Proposal Requirement
+Whenever completing work on code updates, bug fixes, performance improvements, or new features:
+1. **Assess Change Severity & Semantic Version Bump**:
+   - **PATCH (`1.0.X`)**: Bug fixes, minor styling tweaks, internal code refactoring, non-breaking asset updates.
+   - **MINOR (`1.X.0`)**: New user-facing features, new UI views/modals, DB schema expansion, new API endpoints.
+   - **MAJOR (`X.0.0`)**: Massive application overhaul, breaking API/schema changes, major redesign.
+2. **Mandatory End-of-Task Prompt**:
+   - At the conclusion of every response where code/files were modified, **Gemini MUST propose a new app version** based on the changes made.
+   - Example prompt format:
+     > 📌 **App Version Proposal**:
+     > - **Current Version**: `1.0.0`
+     > - **Proposed Version**: `1.0.1` (Patch: bug fix / minor update)
+     > - **Reason**: Fixed navbar inset and updated search cache.
+     > - *Would you like me to update `package.json` and stamp the build with `1.0.1` now?*
+3. **Server-Controlled Force Update Gate**:
+   - App update enforcement is controlled via server configuration (`version.json` / Admin API).
+   - When `forceUpdateActive` is set to `true` on the server and client version < `minVersion`, the server signals a mandatory app update to clients (Android APK & PWA).
+
+
