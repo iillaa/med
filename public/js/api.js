@@ -865,6 +865,33 @@ export async function updateServerProviders(payload) {
   return res.json();
 }
 
+export async function fetchVersionConfigOnServer() {
+  const res = await fetchWithTimeout(getApiUrl('/api/version'), {
+    method: 'GET',
+    headers: getHeaders()
+  });
+  if (!res.ok) {
+    throw new Error("Impossible de récupérer la configuration de version.");
+  }
+  return res.json();
+}
+
+export async function updateVersionConfigOnServer(payload) {
+  const res = await fetchWithTimeout(getApiUrl('/api/admin/version'), {
+    method: 'PUT',
+    headers: getHeaders({
+      'Content-Type': 'application/json',
+      'x-api-key': 'drcat_secret_api_key_2026'
+    }),
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Échec de la mise à jour de la version.");
+  }
+  return res.json();
+}
+
 // Learn the authoritative server list from the backend. Safe to call anywhere:
 // on localhost it returns the same-origin list; on the offline APK it fails
 // silently and the build-baked seed remains in use.

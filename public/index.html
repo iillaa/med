@@ -355,7 +355,7 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.29.22.44">
+  <meta name="app-build-version" content="2026.07.29.23.26">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -395,17 +395,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607292244" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607292244"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607292326" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607292326"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607292244" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607292244"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607292326" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607292326"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607292244" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2607292244">
-  <script type="module" src="js/version-checker.js?v=2607292244"></script>
+  <link rel="stylesheet" href="style.css?v=2607292326" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607292326" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2607292326">
+  <noscript>
+    <link rel="stylesheet" href="style.css?v=2607292326">
+    <link rel="stylesheet" href="css/utilities.css?v=2607292326">
+  </noscript>
+  <script type="module" src="js/version-checker.js?v=2607292326"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -683,6 +688,9 @@ body {
               <button class="admin-tab-btn" data-target="admin-pane-pdfs" role="tab" aria-selected="false" aria-controls="admin-pane-pdfs" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
                 <i class="fa-solid fa-file-pdf"></i> Fichiers PDF
               </button>
+              <button class="admin-tab-btn" data-target="admin-pane-version" role="tab" aria-selected="false" aria-controls="admin-pane-version" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Kill Switch & Version
+              </button>
             </div>
 
             <!-- Admin Tab Panes -->
@@ -720,6 +728,11 @@ body {
               <!-- PANE 2: PDF Management -->
               <div class="admin-pane-content" id="admin-pane-pdfs" role="tabpanel" style="display: none;">
                 <!-- Dynamically rendered by admin_pdf.js -->
+              </div>
+
+              <!-- PANE 3: Kill Switch & Version Control -->
+              <div class="admin-pane-content" id="admin-pane-version" role="tabpanel" style="display: none;">
+                <!-- Dynamically rendered by admin_version.js -->
               </div>
             </div>
           </div>
@@ -1345,7 +1358,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-ZPO2R36Q.js"></script>
+  <script type="module" src="dist/app-FLS2UBUK.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

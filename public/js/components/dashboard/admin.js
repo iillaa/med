@@ -2,6 +2,7 @@ import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 import { renderAdminPdfTab } from './admin_pdf.js';
+import { renderAdminVersionTab } from './admin_version.js';
 
 let onSuggestionHandledCallback = null;
 
@@ -11,6 +12,11 @@ export function initAdminTabListeners(onSuggestionHandled) {
   const pdfPane = document.getElementById('admin-pane-pdfs');
   if (pdfPane) {
     renderAdminPdfTab(pdfPane);
+  }
+
+  const versionPane = document.getElementById('admin-pane-version');
+  if (versionPane) {
+    renderAdminVersionTab(versionPane);
   }
 
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
@@ -37,6 +43,9 @@ export function initAdminTabListeners(onSuggestionHandled) {
       const activePane = document.getElementById(targetId);
       if (activePane) {
         activePane.style.display = 'block';
+        if (targetId === 'admin-pane-version') {
+          renderAdminVersionTab(activePane);
+        }
       }
 
       window.dispatchEvent(new CustomEvent('drcat-admin-tab-changed', {
