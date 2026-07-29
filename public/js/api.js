@@ -157,7 +157,7 @@ export function hasRemoteServer() {
 
 export async function fetchServerList() {
   try {
-    const res = await fetchWithTimeout('/api/server-providers', { headers: getHeaders() });
+    const res = await fetchWithTimeout(getApiUrl('/api/server-providers'), { headers: getHeaders() });
     if (res.ok) {
       const data = await res.json();
       serverListCache = { servers: data.servers || [], primaryProvider: data.primaryProvider || null };
