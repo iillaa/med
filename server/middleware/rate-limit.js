@@ -5,11 +5,11 @@ const path = require('path');
 const BAN_DURATION_MS = 10 * 60 * 1000; // 10 minutes temporary IP ban
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
 
-// Limits per window
+// Limits per window (tuned for smooth search typing & tunnel proxies)
 const LIMITS = {
-  api: 60,       // Strict limit for API endpoints
-  static: 200,   // More generous limit for static files (html, js, css, images, pdfs)
-  critical: 15,  // Extra strict limit for authentication, search, and admin endpoints
+  api: 180,      // Generous limit for API endpoints (180 req/min)
+  static: 500,   // High limit for static files (500 req/min)
+  critical: 80,  // Smooth limit for live search, auth, and version check (80 req/min)
 };
 
 // In-Memory Storage (extremely fast O(1) lookups)
