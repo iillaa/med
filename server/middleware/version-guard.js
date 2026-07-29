@@ -65,16 +65,21 @@ function versionGuardMiddleware(req, res, next) {
     return next();
   }
 
-  // Extract client version from header (X-App-Version) or query string
+  // The Kill Switch targets native mobile app builds (Android APK) which send X-App-Version.
+  // Web browser requests serve live server code and do not send X-App-Version.
   const clientVersion = req.headers['x-app-version'] || req.query.app_version;
 
-  if (!clientVersion || compareVersions(clientVersion, config.minVersion) < 0) {
+  if (!clientVersion) {
+    return next(); // Allow web browser requests through
+  }
+
+  if (compareVersions(clientVersion, config.minVersion) < 0) {
     return res.status(426).json({
       error: 'Upgrade Required',
       forceUpdateRequired: true,
       minVersion: config.minVersion,
       latestVersion: config.latestVersion,
-      updateMessage: config.updateMessage || 'Une mise à jour obligatoire est requise pour accéder aux données.',
+      updateMessage: config.updateMessage || 'Une mise à jour obligatoire de l\'application Android est requise.',
       downloadLinks: config.downloadLinks || {}
     });
   }

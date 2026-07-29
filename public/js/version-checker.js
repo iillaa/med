@@ -24,8 +24,13 @@
     return metaVer || '1.0.0';
   })();
 
-  const LOCK_STORAGE_KEY = 'dr_cat_version_lock_state';
   const isNativeApk = !!window.Capacitor || (navigator.userAgent && navigator.userAgent.toLowerCase().includes('capacitor'));
+
+  // Semantic versioning & Kill Switch is strictly for standalone Android APK native builds.
+  // Web browser users receive live server code and bypass version checking completely.
+  if (!isNativeApk) {
+    return;
+  }
 
   /**
    * Compare two semantic version strings numerically.
