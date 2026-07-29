@@ -46,6 +46,7 @@ function versionGuardMiddleware(req, res, next) {
   if (
     pathName === '/api/version' ||
     pathName.startsWith('/api/version') ||
+    pathName.startsWith('/api/admin/version') ||
     pathName === '/health' ||
     pathName === '/favicon.ico' ||
     pathName === '/capacitor.js' ||
