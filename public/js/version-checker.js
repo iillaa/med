@@ -5,11 +5,13 @@
 (function () {
   'use strict';
 
-  // ── Localhost & Admin Exemption (Local developers and logged-in admins are never locked out) ──
-  const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1';
-  const isAdmin = !!localStorage.getItem('dr_cat_admin_token');
+  const isNativeApk = !!window.Capacitor || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || (navigator.userAgent && navigator.userAgent.toLowerCase().includes('capacitor'));
+
+  // ── Localhost & Admin Exemption (Only for Web Browser development, NOT native Android APK) ──
+  const isLocalhost = !isNativeApk && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
+  const isAdmin = !isNativeApk && !!localStorage.getItem('dr_cat_admin_token');
   if (isLocalhost || isAdmin) {
-    console.log('[VersionChecker] Localhost / Admin session detected. Version lock screen bypassed for developer/admin access.');
+    console.log('[VersionChecker] Web browser developer/admin session detected. Version lock screen bypassed.');
     return;
   }
 
@@ -24,10 +26,7 @@
     return metaVer || '1.0.0';
   })();
 
-  const isNativeApk = !!window.Capacitor || (navigator.userAgent && navigator.userAgent.toLowerCase().includes('capacitor'));
-
   // Semantic versioning & Kill Switch is strictly for standalone Android APK native builds.
-  // Web browser users receive live server code and bypass version checking completely.
   if (!isNativeApk) {
     return;
   }
@@ -270,8 +269,22 @@
    */
   async function checkVersion() {
     try {
-      const res = await fetch('/api/version', {
-        headers: { 'X-App-Version': CLIENT_VERSION },
+      const getVersionEndpoint = () => {
+        if (window.api && typeof window.api.getApiUrl === 'function') {
+          return window.api.getApiUrl('/api/version');
+        }
+        const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || (window.REMOTE_SERVER_URLS && window.REMOTE_SERVER_URLS[0]) || 'https://rendition-duchess-dry.ngrok-free.dev';
+        const cleanUrl = String(configuredUrl).replace(/\/+$/, '');
+        return `${cleanUrl}/api/version`;
+      };
+
+      const versionUrl = getVersionEndpoint();
+      const res = await fetch(versionUrl, {
+        headers: {
+          'X-App-Version': CLIENT_VERSION,
+          'x-app-key': 'drcat_pub_2f7a91c4e8',
+          'ngrok-skip-browser-warning': 'true'
+        },
         cache: 'no-store'
       });
 
