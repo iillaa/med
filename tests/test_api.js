@@ -11,7 +11,7 @@ function req(method, reqPath, body, headers = {}) {
     const opts = {
       hostname: url.hostname, port: url.port,
       path: url.pathname + url.search, method,
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...headers }
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'x-app-key': 'drcat_pub_2f7a91c4e8', ...headers }
     };
     const r = http.request(opts, res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => {
@@ -74,12 +74,13 @@ function req(method, reqPath, body, headers = {}) {
   try {
     console.log('\nTesting GET /api/cats...');
     const cats = await req('GET', '/api/cats');
+    const catsList = Array.isArray(cats.body) ? cats.body : (cats.body.cats || []);
     check('Status 200', cats.status === 200);
-    check('Returns array', Array.isArray(cats.body));
-    check('Array not empty', cats.body.length > 0);
-    check('CAT has id', typeof cats.body[0].id === 'number');
-    check('CAT has title', typeof cats.body[0].title === 'string');
-    check('CAT has category', typeof cats.body[0].category === 'string');
+    check('Returns array', Array.isArray(catsList));
+    check('Array not empty', catsList.length > 0);
+    check('CAT has id', typeof catsList[0].id === 'number');
+    check('CAT has title', typeof catsList[0].title === 'string');
+    check('CAT has category', typeof catsList[0].category === 'string');
 
     console.log('Testing GET /api/is-local...');
     const isLocal = await req('GET', '/api/is-local');

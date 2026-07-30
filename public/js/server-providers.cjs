@@ -14,21 +14,21 @@ const PROVIDERS = [
   {
     id: 'ngrok',
     name: 'ngrok',
-    // Matches both old (.ngrok.io) and new (.ngrok-free.app / .ngrok-free.dev) domains
-    urlPattern: /(^|\.)ngrok(-free)?\.(app|dev|io)$/,
+    // Matches any ngrok domain URL (e.g. rendition-duchess-dry.ngrok-free.dev, .ngrok.app, .ngrok.io)
+    urlPattern: /ngrok(-free)?\.(app|dev|io)/i,
     // ngrok serves an HTML warning page that must be bypassed
     extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     // ngrok exposes a local management API on this port
     managementPort: 4040,
     managementPath: '/api/tunnels',
-    isDevHostname: (h) => /(^|\.)ngrok(-free)?\.(app|dev|io)$/.test(h),
+    isDevHostname: (h) => /ngrok(-free)?\.(app|dev|io)/i.test(h),
     isTunnelOrigin: (o) => o.includes('ngrok'),
     tunnelLabel: 'Tunnel',
   },
   {
     id: 'localtunnel',
     name: 'localtunnel',
-    urlPattern: /(^|\.)loca\.lt$/,
+    urlPattern: /loca\.lt/i,
     extraHeaders: {},
     managementPort: null,
     managementPath: null,
@@ -39,7 +39,7 @@ const PROVIDERS = [
   {
     id: 'cloudflare',
     name: 'Cloudflare Tunnel',
-    urlPattern: /(^|\.)trycloudflare\.com$/,
+    urlPattern: /trycloudflare\.com/i,
     extraHeaders: {},
     managementPort: null,
     managementPath: null,

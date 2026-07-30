@@ -168,12 +168,14 @@ export async function fetchServerList() {
 }
 
 export function getApiUrl(endpoint, overrideUrl) {
-  const configuredUrl = overrideUrl || getRemoteServerUrl();
+  let configuredUrl = overrideUrl || getRemoteServerUrl();
   // On localhost web browser (not standalone Capacitor app), use relative paths to avoid cross-origin requests to the tunnel URL
   const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
   if (isLocalWebBrowser) return endpoint;
   if (isOfflineApp && configuredUrl) {
-    return `${configuredUrl}${endpoint}`;
+    const cleanUrl = configuredUrl.replace(/\/+$/, '');
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    return `${cleanUrl}${cleanEndpoint}`;
   }
   return endpoint;
 }
@@ -207,7 +209,7 @@ export async function loginAdmin(password) {
     return { success: false, error: 'Connexion administrateur impossible en mode hors-ligne.' };
   }
  
-  const res = await fetchWithTimeout('/api/login', {
+  const res = await fetchWithTimeout(getApiUrl('/api/login'), {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({ password })
@@ -226,7 +228,7 @@ export async function logoutAdmin() {
   }
  
   try {
-    await fetchWithTimeout('/api/logout', {
+    await fetchWithTimeout(getApiUrl('/api/logout'), {
       method: 'POST',
       headers: getHeaders()
     });
@@ -277,7 +279,7 @@ export async function fetchCats(since) {
 
   // 1. ADMIN_LOCAL: Fast local server load
   if (mode === APP_MODES.ADMIN_LOCAL) {
-    const res = await fetchWithTimeout(`/api/cats${queryParam}`, { headers: getHeaders() });
+    const res = await fetchWithTimeout(getApiUrl(`/api/cats${queryParam}`), { headers: getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch CATs from local server');
     const data = await res.json();
     const activeIds = res.headers.get('X-Active-Cat-IDs');
@@ -446,7 +448,7 @@ export async function fetchPdfs() {
     return res.json();
   }
 
-  const res = await fetchWithTimeout('/api/pdfs', { headers: getHeaders() });
+  const res = await fetchWithTimeout(getApiUrl('/api/pdfs'), { headers: getHeaders() });
   if (!res.ok) throw new Error("Failed to fetch PDFs");
   return res.json();
 }
@@ -454,7 +456,7 @@ export async function fetchPdfs() {
 export async function saveCatDataToServer(id, data) {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
   try {
-    const res = await fetchWithTimeout(`/api/cats/${id}`, {
+    const res = await fetchWithTimeout(getApiUrl(`/api/cats/${id}`), {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data)
@@ -489,7 +491,7 @@ export async function saveCatDataToServer(id, data) {
 export async function deleteCatFromServer(id) {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
   try {
-    const res = await fetchWithTimeout(`/api/cats/${id}`, {
+    const res = await fetchWithTimeout(getApiUrl(`/api/cats/${id}`), {
       method: 'DELETE',
       headers: getHeaders()
     });
@@ -509,7 +511,7 @@ export async function deleteCatFromServer(id) {
 export async function createCatOnServer(catData) {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
   try {
-    const res = await fetchWithTimeout('/api/cats', {
+    const res = await fetchWithTimeout(getApiUrl('/api/cats'), {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(catData)
@@ -523,7 +525,7 @@ export async function createCatOnServer(catData) {
 
 export async function bulkImportCats(importList) {
   try {
-    const res = await fetchWithTimeout('/api/cats/bulk-import', {
+    const res = await fetchWithTimeout(getApiUrl('/api/cats/bulk-import'), {
       method: 'POST',
       headers: getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(importList)
@@ -594,7 +596,7 @@ export async function submitSuggestion(suggestionData, onAttempt) {
 
 export async function fetchSuggestions() {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
-  const res = await fetchWithTimeout('/api/suggestions', { headers: getHeaders() });
+  const res = await fetchWithTimeout(getApiUrl('/api/suggestions'), { headers: getHeaders() });
   if (res.status === 403) throw new Error('403 Forbidden');
   if (!res.ok) throw new Error('Failed to fetch suggestions');
   return res.json();
@@ -657,7 +659,7 @@ export async function fetchSearchStatus() {
     return { isIndexing: false, totalFiles: 76, indexedFiles: 76, currentFile: '' };
   }
 
-  const res = await fetchWithTimeout('/api/search-status', { headers: getHeaders() });
+  const res = await fetchWithTimeout(getApiUrl('/api/search-status'), { headers: getHeaders() });
   if (!res.ok) throw new Error('Failed to fetch search status');
   return res.json();
 }
@@ -667,7 +669,7 @@ export async function searchPdfsContent(query) {
 
   if (!isOfflineApp) {
     try {
-      const res = await fetchWithTimeout(`/api/search-pdfs?q=${encodeURIComponent(query)}`, {
+      const res = await fetchWithTimeout(getApiUrl(`/api/search-pdfs?q=${encodeURIComponent(query)}`), {
         headers: getHeaders()
       });
       if (res.ok) return res;
@@ -748,7 +750,7 @@ export async function triggerReindexing() {
     return { success: true, message: "La ré-indexation n'est pas prise en charge hors-ligne." };
   }
 
-  const res = await fetchWithTimeout('/api/reindex', { 
+  const res = await fetchWithTimeout(getApiUrl('/api/reindex'), { 
     method: 'POST',
     headers: getHeaders()
   });
@@ -796,7 +798,7 @@ export async function fetchPdfIndexStatus() {
 
   // Server mode: fetch pre-calculated status from API
   try {
-    const res = await fetchWithTimeout('/api/pdf-index-status', { headers: getHeaders() });
+    const res = await fetchWithTimeout(getApiUrl('/api/pdf-index-status'), { headers: getHeaders() });
     if (!res.ok) throw new Error("Failed to fetch PDF index status from server");
     return res.json();
   } catch (err) {

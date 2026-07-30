@@ -13,7 +13,7 @@ function req(method, reqPath, body, headers = {}) {
     const opts = {
       hostname: url.hostname, port: url.port,
       path: url.pathname + url.search, method,
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...headers }
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'x-app-key': 'drcat_pub_2f7a91c4e8', ...headers }
     };
     const r = http.request(opts, res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => {
@@ -158,7 +158,8 @@ async function runTests() {
       check('POST /api/suggestions/:id/approve (add) → 200', approveAddRes.status === 200 && approveAddRes.body.success === true);
 
       const catsRes = await req('GET', '/api/cats');
-      createdCat = catsRes.body.find(c => c.title === newCatTitle || c.summary === 'Corrected summary after admin review');
+      const catsList = Array.isArray(catsRes.body) ? catsRes.body : (catsRes.body.cats || []);
+      createdCat = catsList.find(c => c.title === newCatTitle || c.summary === 'Corrected summary after admin review');
       check('New CAT created in cats_db.json', createdCat !== undefined && createdCat.category === 'Cardiologie');
 
       // 6. Admin approves 'edit' suggestion on temporary test CAT
@@ -167,7 +168,8 @@ async function runTests() {
       check('POST /api/suggestions/:id/approve (edit) → 200', approveEditRes.status === 200 && approveEditRes.body.success === true);
 
       const updatedCatsRes = await req('GET', '/api/cats');
-      const targetTempCat = updatedCatsRes.body.find(c => c.id === tempCatId);
+      const updatedCatsList = Array.isArray(updatedCatsRes.body) ? updatedCatsRes.body : (updatedCatsRes.body.cats || []);
+      const targetTempCat = updatedCatsList.find(c => c.id === tempCatId);
       check('Temp CAT updated in cats_db.json (Real CATs untouched)', targetTempCat && targetTempCat.summary === 'Proposed update for temp CAT summary');
 
       // 7. Admin rejects suggestion
