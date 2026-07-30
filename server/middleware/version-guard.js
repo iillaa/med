@@ -42,7 +42,7 @@ function getVersionConfig() {
 
 function versionGuardMiddleware(req, res, next) {
   // 1. Exclude non-guarded routes
-  const pathName = req.path;
+  const pathName = (req.path || '').replace(/^\/+/, '/');
   if (
     pathName === '/api/version' ||
     pathName.startsWith('/api/version') ||

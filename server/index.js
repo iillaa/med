@@ -31,6 +31,15 @@ const DB_FILE = path.join(__dirname, '..', 'cats_db.json');
 // compatibility with Capacitor's static data fetch.
 
 const app = express();
+
+// Clean double-slash request URLs (e.g. //api/search-status -> /api/search-status) sent by legacy APK clients
+app.use((req, res, next) => {
+  if (req.url && req.url.startsWith('//')) {
+    req.url = req.url.replace(/^\/+/, '/');
+    delete req._parsedUrl;
+  }
+  next();
+});
 const PORT = process.env.PORT || 3000;
 const configuredRemoteUrls = [];
 
@@ -159,6 +168,7 @@ onIndexUpdated(async () => {
 });
 
 app.use(gzipMiddleware);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

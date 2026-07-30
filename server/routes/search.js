@@ -138,7 +138,7 @@ function registerSearchRoutes(app) {
     }
   });
 
-  app.get('/api/search-status', (req, res) => {
+  app.get(['/api/search-status', '//api/search-status'], (req, res) => {
     try {
       res.json(getIndexStatus());
     } catch (err) {
