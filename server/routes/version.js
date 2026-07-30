@@ -56,8 +56,11 @@ function registerVersionRoutes(app, cache) {
         forceUpdateActive: typeof req.body.forceUpdateActive === 'boolean' 
           ? req.body.forceUpdateActive 
           : (currentConfig.forceUpdateActive || false),
-        updateMessage: req.body.updateMessage || currentConfig.updateMessage || 'Mise à jour requise',
-        releaseNotes: Array.isArray(req.body.releaseNotes) ? req.body.releaseNotes : (currentConfig.releaseNotes || []),
+        releaseNotes: Array.isArray(req.body.releaseNotes)
+          ? req.body.releaseNotes
+          : (typeof req.body.releaseNotes === 'string'
+              ? req.body.releaseNotes.split('\n').map(s => s.trim()).filter(Boolean)
+              : (currentConfig.releaseNotes || [])),
         downloadLinks: {
           ...currentConfig.downloadLinks,
           ...(req.body.downloadLinks || {})

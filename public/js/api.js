@@ -117,51 +117,64 @@ let offlinePdfIndexCache = null;
 // Seeded from the build-baked remote_config.js so the offline APK has a fallback
 // before it can reach any server. Never persisted to localStorage (single source of truth).
 let serverListCache = null;
-// url -> { ok, latencyMs, last }  (health, for failover + load-balancing)
-const serverHealth = new Map();
+// --- Simplified & Stable Primary-First Server Failover Protocol ---
+let activeProviderIndex = 0;
+let consecutiveFailures = 0;
+const MAX_CONSECUTIVE_FAILURES = 3;
 
-function healthRank(url) {
-  const h = serverHealth.get(url);
-  if (!h) return 0; // unknown = neutral
-  return h.ok ? (1 - Math.min(h.latencyMs || 0, 5000) / 10000) : -1;
-}
-
-export function recordServerHealth(url, ok, latencyMs) {
+export function recordServerHealth(url, ok) {
   if (!url) return;
-  serverHealth.set(url, { ok, latencyMs: latencyMs || 0, last: Date.now() });
+  const urls = getConfiguredRemoteUrls();
+  if (!urls.length) return;
+  
+  const currentActiveUrl = urls[activeProviderIndex] || urls[0];
+
+  // Only track failures for the currently active server URL
+  if (url !== currentActiveUrl) return;
+
+  if (ok) {
+    // Success! Reset failure count and stay on active provider
+    consecutiveFailures = 0;
+  } else {
+    // Failure! Increment counter
+    consecutiveFailures++;
+    console.warn(`[ServerFailover] Provider "${url}" failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
+
+    if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+      consecutiveFailures = 0;
+      if (urls.length > 1) {
+        activeProviderIndex = (activeProviderIndex + 1) % urls.length;
+        console.warn(`[ServerFailover] 3 consecutive failures reached. Switched active provider to: ${urls[activeProviderIndex]}`);
+      } else {
+        activeProviderIndex = 0;
+        console.warn(`[ServerFailover] 3 consecutive failures reached. Reverting to Primary server: ${urls[0]}`);
+      }
+    }
+  }
 }
 
 export function getConfiguredRemoteUrls() {
   if (serverListCache && serverListCache.servers.length) {
-    // Priority first; among equal priority, healthy + low-latency servers win
-    // (this is what gives failover + cross-provider load-balancing).
+    // Preserve strict priority order without random latency flipping
     return serverListCache.servers
       .slice()
-      .sort((a, b) => (a.priority - b.priority) || (healthRank(b.url) - healthRank(a.url)))
+      .sort((a, b) => (a.priority - b.priority))
       .map(s => s.url);
   }
   if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS) && REMOTE_SERVER_URLS.length > 0) {
     return REMOTE_SERVER_URLS.slice();
   }
-  if (REMOTE_SERVER_URL) return [REMOTE_SERVER_URL];
+  if (typeof REMOTE_SERVER_URL !== 'undefined' && REMOTE_SERVER_URL) return [REMOTE_SERVER_URL];
   return [];
 }
 
-// TODO (Multi-Provider Failover Optimization):
-// When multiple providers are configured, if the primary provider (urls[0]) becomes unreachable,
-// getRemoteServerUrl() should dynamically select the highest-scoring healthy provider from
-// serverHealth map instead of falling back to offline mode when healthy secondary providers exist.
 function getRemoteServerUrl() {
   const urls = getConfiguredRemoteUrls();
   if (!urls.length) return null;
-  // Pick the first provider marked healthy, or default to primary url[0]
-  for (const url of urls) {
-    const health = serverHealth.get(url);
-    if (!health || health.ok !== false) {
-      return url;
-    }
+  if (activeProviderIndex >= urls.length) {
+    activeProviderIndex = 0;
   }
-  return urls[0];
+  return urls[activeProviderIndex];
 }
 
 export function hasRemoteServer() {

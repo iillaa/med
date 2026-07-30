@@ -78,6 +78,14 @@ export async function renderAdminVersionTab(containerEl) {
               <textarea id="ver-input-message" rows="2" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 13px; resize: vertical;">${escapeHTML(config.updateMessage || '')}</textarea>
             </div>
 
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Nouveautés de la mise à jour (Release Notes publiques - une note par ligne)</label>
+              <textarea id="ver-input-releasenotes" rows="4" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 13px; resize: vertical;" placeholder="Amélioration générale de la rapidité et de la stabilité&#10;Optimisation de la recherche et de la consultation des fiches cliniques&#10;Mise à jour de sécurité et corrections d'affichage">${escapeHTML(Array.isArray(config.releaseNotes) ? config.releaseNotes.join('\n') : (config.releaseNotes || ''))}</textarea>
+              <small style="display: block; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                <i class="fa-solid fa-circle-info"></i> Rédigez ici les notes destinées aux utilisateurs. Ne divulguez pas de détails techniques internes.
+              </small>
+            </div>
+
             <div style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 4px;">
               <h5 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: var(--text-primary);">Sources de Téléchargement Multi-Boutons</h5>
               
@@ -142,6 +150,7 @@ export async function renderAdminVersionTab(containerEl) {
             minVersion: formEl.querySelector('#ver-input-min').value.trim(),
             latestVersion: formEl.querySelector('#ver-input-latest').value.trim(),
             updateMessage: formEl.querySelector('#ver-input-message').value.trim(),
+            releaseNotes: formEl.querySelector('#ver-input-releasenotes').value.trim(),
             downloadLinks: {
               uptodownUrl: formEl.querySelector('#ver-input-uptodown').value.trim(),
               telegramUrl: formEl.querySelector('#ver-input-telegram').value.trim(),
