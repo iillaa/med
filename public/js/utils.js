@@ -98,6 +98,41 @@ export function parsePrescriptionText(text) {
 }
 
 /**
+ * Format timestamp using native Intl.DateTimeFormat (fr-FR)
+ */
+export function formatDateFR(dateOrTimestamp, options = {}) {
+  if (!dateOrTimestamp) return '';
+  const date = new Date(dateOrTimestamp);
+  if (isNaN(date.getTime())) return '';
+  const defaultOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return new Intl.DateTimeFormat('fr-FR', { ...defaultOptions, ...options }).format(date);
+}
+
+/**
+ * Format relative time using native Intl.RelativeTimeFormat (fr)
+ */
+export function formatRelativeTimeFR(dateOrTimestamp) {
+  if (!dateOrTimestamp) return '';
+  const date = new Date(dateOrTimestamp);
+  if (isNaN(date.getTime())) return '';
+  const now = new Date();
+  const diffSeconds = Math.round((date.getTime() - now.getTime()) / 1000);
+  const rtf = new Intl.RelativeTimeFormat('fr', { numeric: 'auto' });
+
+  if (Math.abs(diffSeconds) < 60) return rtf.format(diffSeconds, 'second');
+  const diffMinutes = Math.round(diffSeconds / 60);
+  if (Math.abs(diffMinutes) < 60) return rtf.format(diffMinutes, 'minute');
+  const diffHours = Math.round(diffMinutes / 60);
+  if (Math.abs(diffHours) < 24) return rtf.format(diffHours, 'hour');
+  const diffDays = Math.round(diffHours / 24);
+  if (Math.abs(diffDays) < 30) return rtf.format(diffDays, 'day');
+  const diffMonths = Math.round(diffDays / 30);
+  if (Math.abs(diffMonths) < 12) return rtf.format(diffMonths, 'month');
+  const diffYears = Math.round(diffDays / 365);
+  return rtf.format(diffYears, 'year');
+}
+
+/**
  * Escape HTML characters to prevent XSS injection
  */
 export function escapeHTML(str) {

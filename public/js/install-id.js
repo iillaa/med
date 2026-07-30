@@ -27,7 +27,10 @@ export function getInstallId() {
   try {
     let installId = localStorage.getItem(INSTALL_ID_KEY);
     if (!installId) {
-      installId = `drcat-inst-${generateUUID()}`;
+      const uuid = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+        ? crypto.randomUUID()
+        : generateUUID();
+      installId = `drcat-inst-${uuid}`;
       localStorage.setItem(INSTALL_ID_KEY, installId);
       console.log('[InstallID] Generated new anonymous installation ID:', installId);
     }

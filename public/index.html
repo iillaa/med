@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.1.10">
-  <meta name="app-build-version" content="2026.07.30.12.35">
+  <meta name="app-build-version" content="2026.07.30.13.29">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -396,22 +396,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607301235" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607301235"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2607301329" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607301329"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607301235" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607301235"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607301329" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607301329"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607301235" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607301235" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2607301235">
+  <link rel="stylesheet" href="style.css?v=2607301329" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607301329" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2607301329">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607301235">
-    <link rel="stylesheet" href="css/utilities.css?v=2607301235">
+    <link rel="stylesheet" href="style.css?v=2607301329">
+    <link rel="stylesheet" href="css/utilities.css?v=2607301329">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2607301235"></script>
+  <script type="module" src="js/version-checker.js?v=2607301329"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1240,7 +1240,7 @@ body {
   </div>
 
   <!-- Add CAT Modal -->
-  <div class="modal-overlay" id="add-cat-modal" role="dialog" aria-modal="true" aria-labelledby="add-cat-modal-title" style="display: none;">
+  <dialog class="modal-overlay" id="add-cat-modal" aria-labelledby="add-cat-modal-title">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="add-cat-modal-title"><i class="fa-solid fa-plus-circle"></i> Ajouter une nouvelle CAT</h3>
@@ -1284,7 +1284,7 @@ body {
         </form>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- Beautiful Printed PDF Template Block (Only visible when printing) -->
   <div id="print-template-container">
@@ -1359,7 +1359,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-EJLLMUYC.js"></script>
+  <script type="module" src="dist/app-OP6CAEFQ.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
@@ -1460,7 +1460,7 @@ body {
   </script>
 
   <!-- Legal Modal -->
-  <div class="modal-overlay" id="legal-modal" style="display: none;">
+  <dialog class="modal-overlay" id="legal-modal">
     <div class="modal-card modal-card-lg" style="padding: 24px; border-top: 4px solid var(--color-primary);">
       <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
         <h2 style="font-size: 18px; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Mentions Légales & CGU</h2>
@@ -1498,7 +1498,7 @@ body {
 
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- Cookie Consent Banner -->
   <div id="legal-consent-banner" class="legal-consent-banner hidden" style="display: none;">
