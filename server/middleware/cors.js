@@ -33,6 +33,9 @@ function corsMiddleware(allowedOrigins, serverProviders) {
       const uniqueHeaders = new Set([
         'Content-Type',
         'Authorization',
+        'X-App-Version',
+        'X-Install-ID',
+        'x-api-key',
         'x-admin-token',
         'x-app-key',
         'ngrok-skip-browser-warning',

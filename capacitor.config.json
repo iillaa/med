@@ -8,7 +8,11 @@
     "androidScheme": "https",
     "cleartext": true,
     "allowNavigation": [
-      "*"
+      "*",
+      "*.ngrok-free.dev",
+      "*.ngrok-free.app",
+      "*.ngrok.io",
+      "*.trycloudflare.com"
     ]
   },
   "android": {

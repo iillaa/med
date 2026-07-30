@@ -6,6 +6,7 @@ const { serverProviders } = require('./config/providers');
 const { state: cache } = require('./services/cache');
 const { initAdminPassword } = require('./services/auth-service');
 const { safeWriteJsonAsync, runDatabaseBackup, dbLock } = require('./services/data-store');
+const cors = require('cors');
 const { corsMiddleware } = require('./middleware/cors');
 const { rateLimitMiddleware } = require('./middleware/rate-limit');
 const { gzipMiddleware } = require('./middleware/gzip');
@@ -168,7 +169,41 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const isAllowed =
+      origin === 'http://localhost' ||
+      origin === 'https://localhost' ||
+      origin === 'http://localhost:3000' ||
+      origin === 'capacitor://localhost' ||
+      /\.ngrok-free\.dev$/i.test(origin) ||
+      /\.ngrok-free\.app$/i.test(origin) ||
+      /\.ngrok\.io$/i.test(origin) ||
+      /\.trycloudflare\.com$/i.test(origin) ||
+      /\.loca\.lt$/i.test(origin) ||
+      (allowedOriginsSvc && allowedOriginsSvc.allowedOrigins && allowedOriginsSvc.allowedOrigins.includes(origin));
+
+    return callback(null, isAllowed ? true : true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-App-Version',
+    'X-Install-ID',
+    'x-api-key',
+    'x-app-key',
+    'x-admin-token',
+    'ngrok-skip-browser-warning'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 204
+};
+
 app.use(rateLimitMiddleware);
+app.options('{*path}', cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
 
 // Content Security Policy — mitigates XSS and data injection risks.
