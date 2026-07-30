@@ -804,7 +804,7 @@ export async function runBackgroundSync() {
     for (const url of remoteUrls) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         // Merge base headers + provider-specific bypass headers (e.g. ngrok-skip-browser-warning)
         const headers = {
           ...api.getHeaders(),
