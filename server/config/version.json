@@ -1,7 +1,7 @@
 {
   "minVersion": "1.0.0",
-  "latestVersion": "1.1.9",
-  "forceUpdateActive": true,
+  "latestVersion": "1.1.10",
+  "forceUpdateActive": false,
   "updateMessage": "Une mise à jour obligatoire de Dr.CAT est requise pour continuer.",
   "releaseNotes": [
     "Correction de la barre de navigation Android",
