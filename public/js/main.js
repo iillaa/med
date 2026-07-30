@@ -810,7 +810,8 @@ export async function runBackgroundSync() {
           ...api.getHeaders(),
           ...getExtraHeaders(url)
         };
-        const res = await fetch(`${url}/api/search-status`, {
+        const cleanUrl = url.replace(/\/+$/, '');
+        const res = await fetch(`${cleanUrl}/api/search-status`, {
           signal: controller.signal,
           headers
         });

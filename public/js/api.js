@@ -319,10 +319,11 @@ export async function fetchCats(since) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), PING_TIMEOUT_MS);
       // For fast check we only care about whether the network path accepts the request.
-      await fetch(`${url}/api/search-status`, {
-        method: 'HEAD',
+      const cleanUrl = url.replace(/\/+$/, '');
+      await fetch(`${cleanUrl}/api/search-status`, {
+        method: 'GET',
         signal: controller.signal,
-        mode: 'no-cors'
+        headers: getHeaders()
       });
       clearTimeout(timeoutId);
       recordServerHealth(url, true, PING_TIMEOUT_MS);
@@ -922,7 +923,12 @@ async function api_pingHealth(url) {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 4000);
     const start = performance.now();
-    await fetch(`${url}/api/search-status`, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' });
+    const cleanUrl = url.replace(/\/+$/, '');
+    await fetch(`${cleanUrl}/api/search-status`, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: getHeaders()
+    });
     clearTimeout(t);
     recordServerHealth(url, true, performance.now() - start);
   } catch (_) {
