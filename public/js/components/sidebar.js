@@ -349,24 +349,30 @@ export function updateSidebarItemUI(cat) {
 
 // Filter CAT list based on search, category, and quick status filter selections
 function filterCats(onFilterTriggered) {
-  const query = searchInput.value.toLowerCase().trim();
+  const rawQuery = searchInput.value.toLowerCase().trim();
   const selectedCat = categoryFilter.value;
+
+  // Split query into terms for multi-keyword search (e.g. "otomycose orl")
+  const queryTokens = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
 
   const filtered = state.allCats.filter(cat => {
     if (!cat) return false;
+
+    // Deep search across title, summary, ordonnance/prescription, red flags, category, keywords, and notes
     const titleStr = (cat.title || '').toLowerCase();
-    const summaryStr = (cat.summary || '').toLowerCase();
+    const summaryStr = (cat.summary || cat.customSummary || '').toLowerCase();
+    const ordonnanceStr = (cat.ordonnance || cat.customOrdonnance || '').toLowerCase();
     const redFlagsStr = (cat.red_flags || '').toLowerCase();
     const categoryStr = (cat.category || '').toLowerCase();
+    const notesStr = (cat.notes || '').toLowerCase();
+    const keywordsStr = Array.isArray(cat.pdf_keywords) ? cat.pdf_keywords.join(' ').toLowerCase() : (cat.pdf_keywords || '').toLowerCase();
     const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
 
-    // 1. Search text match
-    const matchesQuery = !query || 
-                         titleStr.includes(query) || 
-                         summaryStr.includes(query) || 
-                         redFlagsStr.includes(query) ||
-                         categoryStr.includes(query) ||
-                         idStr === query;
+    // Combine all fields into a single searchable text space
+    const fullCatText = `${idStr} ${titleStr} ${categoryStr} ${summaryStr} ${ordonnanceStr} ${redFlagsStr} ${keywordsStr} ${notesStr}`;
+
+    // 1. Search text match (every search token must appear somewhere in the CAT content)
+    const matchesQuery = queryTokens.length === 0 || queryTokens.every(token => fullCatText.includes(token));
 
     // 2. Category filter match
     const matchesCategory = selectedCat === 'all' || cat.category === selectedCat;

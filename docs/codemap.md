@@ -8,7 +8,7 @@ This document outlines the file layout, key data modules, and logic flows of **D
 
 ```text
 /data/data/com.termux/files/home/med/
-├── server.js                    # Express.js backend (REST API, local auth, data cache)
+├── server.js                    # Express.js backend entry point (REST API, local auth, data cache)
 ├── index_pdfs.js                # PDF parser & text indexer script (LlamaParse/Gemini AI pipeline)
 ├── build.js                     # Static site compilation & minifier for cats_db, pdf_index & pdf_list
 ├── set_admin_password.js        # Admin password setter (PBKDF2 hash)
@@ -20,9 +20,31 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── remote_server_config.json    # Active tunnel/provider URL config (⚠️ Git-ignored)
 ├── admin_password.txt           # PBKDF2-hashed admin password (⚠️ Git-ignored)
 ├── capacitor.config.json        # Capacitor native wrapper configuration
-├── package.json                 # Node dependencies and project build scripts
+├── package.json                 # Node dependencies, version (1.1.6), and build scripts
 ├── README.md                    # Project landing, features, security and performance overview
-├── TODO.md                      # Developer technical debt and backlog
+│
+├── server/                      # Server Modules & Services Architecture
+│   ├── index.js                 # Server routes & middleware bootstrap
+│   ├── config/
+│   │   ├── constants.js         # Security keys & constants
+│   │   └── version.json         # Master version config (minVersion, latestVersion, forceUpdateActive)
+│   ├── data/
+│   │   └── active_devices.json  # Persistent store for anonymous device tokens & telemetry
+│   ├── middleware/
+│   │   ├── rate-limit.js        # Express WAF & IP rate limiter (80 req/min critical, 180 req/min API)
+│   │   └── version-guard.js     # Numeric version check & HTTP 426 Upgrade Required middleware
+│   ├── routes/
+│   │   ├── admin-analytics.js   # GET /api/admin/active-devices analytics endpoint
+│   │   ├── search.js            # PDF search & index status routes
+│   │   ├── server-providers.js  # Server provider discovery & CORS management routes
+│   │   └── version.js           # GET /api/version & PUT /api/admin/version config endpoints
+│   ├── services/
+│   │   ├── active-devices.js    # Device telemetry service (DAU, MAU, version distribution)
+│   │   ├── allowed-origins.js   # Dynamic CORS allowlist service
+│   │   ├── auth-service.js      # Session token validation service
+│   │   └── data-store.js        # Safe async JSON read/write queues
+│   └── utils/
+│       └── request.js           # Loopback IP & reverse-proxy request helpers
 │
 ├── data/                        # Server Data & PDF Master Store
 │   ├── pdf_masters/             # Uncompressed master original PDFs for AI indexing (⚠️ Git-ignored)
@@ -31,55 +53,46 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── scripts/                     # Utility & Optimization Scripts
 │   └── compress_pdfs.js         # Ghostscript ultra-compressor (96 DPI + JPEGQ 60 + Bicubic downsampling)
 │
-├── tests/                       # Automated Test Suite
-│   ├── run_all_tests.js         # Master test runner (runs all 5 test suites)
+├── tests/                       # Automated Verification & Test Suite
+│   ├── run_all_tests.js         # Master test runner
 │   ├── test_api.js              # Server API smoke tests
 │   ├── test_auth.js             # Authentication & protected route tests
 │   ├── test_suggestions.js      # Full suggestion lifecycle tests
+│   ├── test_version.js          # Numeric version comparison & route exclusion unit tests
+│   ├── test_analytics.js        # Device telemetry & DAU/MAU calculation unit tests
+│   ├── test_cat_search.js       # Deep multi-token CAT content search unit tests
 │   ├── test_resume.mjs          # "Reprendre la révision" tests
 │   └── test_prescription.mjs    # Prescription rendering tests
 │
-├── docs/                        # Active Project Documentation
-│   ├── codemap.md               # This file — structural map for developers and AI agents
-│   ├── developer_guide.md       # Workflow guide: setup, branching, compiling, CI/CD
-│   ├── technical_architecture.md# Technical architecture details
-│   ├── lessons_learned.md       # Engineering log: pitfalls, bugs avoided and best practices
-│   ├── perf-baseline.md         # Lighthouse and telemetry performance baselines
-│   ├── plan-progress.md         # Multi-stage roadmap and progress tracker
-│   ├── premium-todo.md          # Active premium roadmap and tasks status
-│   ├── DIAGNOSTICS_PANEL_SPEC.md# Diagnostics panel specification
-│   └── PERFORMANCE_MONITORING_SPEC.md # Performance telemetry monitoring specification
+├── todo/                        # Active Decision Trees & Flowcharts
+│   ├── arbre_decisionnelle/     # Decision tree data assets
+│   └── arbre_decisionnelle_project.md # Interactive Decision Tree specification
 │
-├── archive/                     # Obsolete audit reports and historic scripts (archived)
-│   ├── AUDIT_PROMPTS_REPORT.md  # Historic prompt audits
-│   ├── AUDIT_REPORT.md          # Historic audit reports (1, 2, 3)
-│   ├── AUDIT_REPORT_2.md
-│   ├── AUDIT_REPORT_3.md
-│   ├── AUDIT_REVIEW_55_COMMITS.md # Commit audit review
-│   ├── AUDIT_STATIC_ANALYSIS_REPORT.md # Static analysis audit
-│   ├── PHASE1_AUDIT_REPORT.md
-│   ├── PHASE2_AUDIT_REPORT.md
-│   ├── TODO-AUDIT-FIXES.md      # Record of completed audit fixes
-│   ├── analysis_results.md      # Historic analysis results
-│   ├── SESSION_2026-07-04.md    # Past session handoff
-│   ├── migration.md             # Past migration handoff guide
-│   ├── generate_db.js           # Obsolete initial database generator script
-│   ├── update_examens.js        # Obsolete data correction script
-│   └── update_summaries.js      # Obsolete data correction script
+├── docs/                        # Active Core Documentation
+│   ├── codemap.md               # Structural codebase map (this file)
+│   ├── developer_guide.md       # Developer setup, commands, testing & CI/CD workflow
+│   ├── technical_architecture.md# Deep-dive system architecture, security & telemetry specs
+│   └── lessons_learned.md       # Engineering log: pitfalls, fixes, bugs avoided (36 items)
+│
+├── archive/                     # Archived Historical Specifications & Reports
+│   ├── ARCHIVE_NOTICE.md        # AI agent / bot warning notice against reading obsolete specs
+│   ├── README.md                # Archive directory notice
+│   ├── docs/                    # Archived specs (premium-todo, plan-progress, perf-baseline, etc.)
+│   └── todo/                    # Archived legacy todo items
 │
 ├── .github/
 │   └── workflows/
 │       └── build-apk.yml        # CI/CD compiler to build standalone Android APK on push
 │
-├── .cat-med/
-│   └── reference-pdfs/          # Local Termux PDF repository (78 documents, Git-ignored)
-│
 └── public/                      # App Frontend Root
     ├── index.html               # Main single-page application structure
     ├── pdf_viewer.html          # Custom offline-ready PDF.js-based reader
+    ├── pdf_lab.html             # Standalone PDF Inspector & Extraction Lab (Localhost protected)
+    ├── analytics_lab.html       # Standalone Analytics & Device Telemetry Lab (Localhost protected)
     ├── style.css                # CSS entry point
-    ├── css/                     # Modular CSS stylesheets (clinical theme, glassmorphism)
-    │   └── utilities.css        # Extracted inline utility classes
+    ├── css/                     # Modular CSS stylesheets
+    │   ├── utilities.css        # Extracted utility classes
+    │   └── update-modal.css     # Hard Kill Switch lock screen overlay styles
     ├── data/                    # Bundled offline database copies (generated by build.js)
     │   ├── cats_db.json
     │   ├── pdf_index.json
@@ -90,6 +103,8 @@ This document outlines the file layout, key data modules, and logic flows of **D
     └── js/
         ├── main.js              # Initial orchestration, PWA SW config, app mode detection
         ├── api.js               # API client (online server/offline Capacitor/localStorage router)
+        ├── install-id.js        # Anonymous Installation ID (UUIDv4) token manager
+        ├── version-checker.js   # Client version checker & Kill Switch lock gate (IIFE scope)
         ├── state.js             # Client-side state manager (active fiches, scores, filters)
         ├── utils.js             # Shared helpers (markdown parser, toaster alerts, swipe controls)
         ├── performance.js       # Telemetry engine: milestones, click profiling, API timing
@@ -100,83 +115,27 @@ This document outlines the file layout, key data modules, and logic flows of **D
         │   └── helpers.js       # Shared helpers: isOfflineCat(), mergeCatsWithLocalState()
         │
         └── components/
-            ├── sidebar.js       # Search filters and sidebar cards rendering
+            ├── sidebar.js       # Deep content search filter & sidebar rendering
             ├── workspace.js     # Detail view workspace (Summary, Prescriptions, PDFs tab)
-            ├── dashboard.js     # Stats dashboard, resume revision, and admin moderation
+            ├── dashboard.js     # Stats dashboard & admin moderation manager
             ├── quiz.js          # Interactive QCM & text writing evaluation system
-            ├── diagnostics.js   # Live server diagnostics panel (latency, sync, endpoints)
-            └── performance.js   # Telemetry dashboard panel with in-UI log console
+            ├── diagnostics.js   # Live server diagnostics panel
+            └── dashboard/
+                ├── admin.js     # Admin Moderation Panel tab router
+                └── admin_version.js # Kill Switch control panel & Analytics Lab launcher
 ```
 
 ---
 
-## 🔩 Key File Descriptions & API Interfaces
+## 🔩 Core API Endpoints
 
-### 1. Backend Server (`server.js`)
-Serves the web client, handles local cache synchronization, and secure administrative operations.
-* **APIs**:
-  * `GET /api/cats` / `POST /api/cats` / `DELETE /api/cats/:id`: Clinical fiches CRUD operations.
-  * `GET /api/is-admin`: Check status of session token validation.
-  * `GET /api/is-local`: Restrict admin button visibility depending on socket IP address.
-  * `POST /api/login` / `POST /api/logout`: Session management.
-  * `GET /api/suggestions` / `POST /api/suggestions`: Proposal queuing and moderation approvals.
-  * `GET /api/pdf-index-status` / `GET /api/search-status`: Returns indexing completeness percentages.
-  * `POST /api/reindex`: Triggers index update for newly added documents.
+### 1. Versioning & Force Update System
+* `GET /api/version`: Returns active version configuration (`minVersion`, `latestVersion`, `forceUpdateActive`, `updateMessage`, `downloadLinks`).
+* `PUT /api/admin/version`: Protected by `x-api-key`. Allows toggling the Kill Switch and updating min version numbers.
 
-### 2. PDF Indexer Server (`index_pdfs.js` & `server/pdf_extractor.js`)
-Parses reference clinical documents in `public/pdfs/` directory page-by-page.
-* **Extraction Strategy**: Uses a 3-tier cascade (`server/pdf_extractor.js`): LlamaParse (API) -> Google Gemini Flash (API) -> Offline `pdf-parse`.
-* **Caching**: Hashes each PDF (SHA-256) and stores the JSON result in `data/pdf_cache/` to avoid massive repetitive API costs.
-* **Bundler**: Merges all cached JSONs into `pdf_index.json` which is loaded client-side for offline searches. Only rebuilds if the hash *or* the quality tier changes.
-* **Admin Lab**: `public/pdf_lab.html` (secured by localhost check) provides an interface to view JSON caches, download them, and manually force a LlamaParse upgrade for specific PDFs.
+### 2. Device Telemetry & Analytics
+* `GET /api/admin/active-devices`: Protected by `x-api-key`. Returns aggregated device analytics (Total Devices, DAU 24h, MAU 30d, Version Distribution).
 
-### 3. API Router Client (`public/js/api.js`)
-The core communication layer that abstracts local server and offline Capacitor calls.
-* **Mode Detection**: Checks host/protocol at startup to detect `android_offline`, `android_online`, `browser_local`, or `browser_remote` mode and routes all calls accordingly.
-* **Offline Mocks**: Mocks CRUD and login endpoints by writing overrides directly to the device's `localStorage` and `sessionStorage`.
-* **Provider-Based Sync**: Reads the server-authoritative provider list (from `GET /api/server-providers`) and uses provider-specific HTTP headers (e.g. Ngrok skip-browser-warning) for accurate real-fetch connectivity checks, ordered by priority with health-based failover/load-balancing.
-* **Dynamic Mode Switching**: Exposes `api.setAppMode()` which fires a `drcat-app-mode-changed` event so all UI components react live when a server connection is (re)established.
-
-### 4. Server Providers Registry (`public/js/server-providers.js`)
-Provider-agnostic tunnel URL registry. Replaces the old hardcoded Ngrok constant.
-* **Provider Detection**: Inspects loaded URLs from `remote_config.js` and identifies provider type (Ngrok, Cloudflare, or custom domain).
-* **Header Injection**: Returns the correct provider-bypass headers needed for clean CORS fetches per provider (e.g., `ngrok-skip-browser-warning: true`).
-* **Runtime Updates**: URL list is driven by `remote_server_config.json` on the server (the single source of truth), exposed via the public `GET /api/server-providers` endpoint. The client learns it at runtime (with priority-based failover and health-based load-balancing); it is also baked into the client via `build.js` as the APK seed, so no code changes are needed when switching providers.
-
-### 5. Telemetry Engine (`public/js/performance.js`)
-Global performance profiler that captures metrics without polluting the main debug console.
-* **Milestone Tracking**: Wraps app boot phases (data fetch, UI render, first interaction) with `performance.now()` timestamps into a dedicated in-memory buffer (`perfLogBuffer`).
-* **Click Profiling**: Intercepts all `click` events via a capturing-phase listener to measure UI interaction latency and element render delays.
-* **Telemetry Journal**: Exposes `logPerf()` so any module can write a labeled metric entry. Entries are displayed in the in-app Telemetry Journal console (not in the main debug console).
-
-### 6. Debug Console (`public/js/debug-console.js`)
-A floating in-app developer console activated by the 🐛 button, designed for mobile debugging.
-* **Network Interceptor**: Patches `window.fetch` and `XMLHttpRequest` to capture and log all network requests/responses with status codes and timing.
-* **Console Routing**: Intercepts `console.log`, `console.warn`, and `console.error` and pipes them into the visual log viewer while preserving original browser console output.
-* **Copy & Clear**: Provides buttons to copy the full log to clipboard or clear the log buffer.
-
-### 7. Diagnostics Panel (`public/js/components/diagnostics.js`)
-Live operational health dashboard for the server connection and sync state.
-* **Endpoint Probing**: Pings core API routes (`/api/cats`, `/api/search-status`, `/api/pdf-index-status`) and reports latency and HTTP status codes.
-* **Sync Status**: Displays the last successful background sync timestamp and the active provider URL being used.
-* **Export**: Allows exporting the full diagnostics report as a JSON file for offline sharing.
-
-### 8. Performance Panel (`public/js/components/performance.js`)
-UI component that renders the telemetry data collected by the engine into a readable dashboard.
-* **Metric Cards**: Renders component render times and interaction latency into live-updating stat cards.
-* **Telemetry Journal UI**: Renders the `perfLogBuffer` into a scrollable in-app console with **Copier** and **Vider** action buttons.
-
-### 9. Workspace View (`public/js/components/workspace.js`)
-Manages rendering of active CAT cards, tabs switching, and note-taking interfaces.
-* **Status Indicators**: Fetches indexing percentage from `pdfIndexStatus` and outputs color-coded badges (🟢/🟡/🔴) on PDF links.
-* **State Retention**: Hooks card clicks to dump active variables into session memory to enable backward tab restoration on page reloads.
-
-### 10. Quiz System (`public/js/components/quiz.js`)
-Compiles selected category questions (QCM + Redaction) and renders an auto-correct evaluation table.
-* **Regex Detection**: Parses user typed redaction text to highlight correct diagnostic keywords found in their answers.
-
-### 11. Dashboard (`public/js/components/dashboard.js`)
-User progress overview and admin moderation hub.
-* **Progress Tracking**: Renders per-specialty completion percentages and overall mastery rate from `localStorage` progress data.
-* **Admin Moderation**: Displays the pending suggestions queue and exposes approve/reject controls (visible only when admin token is valid).
-* **Resume Revision**: Offers a quick-launch button that resumes quiz mode from the last incomplete session.
+### 3. Standalone Admin Labs
+* `/pdf_lab.html`: PDF page indexer, quality inspector, and LlamaParse/Gemini lab (Localhost protected).
+* `/analytics_lab.html`: Active device telemetry lab with search/filters, version progress bars, modal inspection, and CSV export (Localhost protected).

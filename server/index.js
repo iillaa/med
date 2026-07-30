@@ -16,7 +16,9 @@ const { registerSearchRoutes } = require('./routes/search');
 const { registerServerProviderRoutes } = require('./routes/server-providers');
 const { registerPdfRoutes } = require('./routes/pdfs');
 const { registerVersionRoutes } = require('./routes/version');
+const { registerAdminAnalyticsRoutes } = require('./routes/admin-analytics');
 const { versionGuardMiddleware } = require('./middleware/version-guard');
+const { recordDeviceActivity } = require('./services/active-devices');
 const allowedOriginsSvc = require('./services/allowed-origins');
 const spc = require('./services/server-providers-config');
 
@@ -192,6 +194,9 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   const start = Date.now();
+  try {
+    recordDeviceActivity(req);
+  } catch (_) { /* ignore device tracking errors */ }
   res.on('finish', () => {
     if (req.path.startsWith('/api')) {
       const duration = Date.now() - start;
@@ -226,8 +231,8 @@ app.use('/data', (req, res, next) => {
   next();
 });
 
-// Block public access to the admin PDF Lab UI
-app.get('/pdf_lab.html', (req, res, next) => {
+// Block public access to the admin PDF Lab UI and Analytics Lab UI
+app.get(['/pdf_lab.html', '/analytics_lab.html'], (req, res, next) => {
   const { isLocalhostConnection } = require('./utils/request');
   if (!isLocalhostConnection(req)) {
     return res.status(403).send('Accès interdit. This is an admin tool.');
@@ -270,6 +275,7 @@ app.use(versionGuardMiddleware);
 
 registerAuthRoutes(app);
 registerVersionRoutes(app, cache);
+registerAdminAnalyticsRoutes(app, cache);
 registerCatRoutes(app);
 registerSuggestionRoutes(app, cache);
 registerSearchRoutes(app, cache);

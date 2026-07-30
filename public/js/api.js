@@ -5,7 +5,8 @@ import { REMOTE_SERVER_URL, REMOTE_SERVER_URLS } from './remote_config.js';
 import { getExtraHeaders } from './server-providers.js';
 import { isOfflineCat } from './lib/helpers.js';
 import { FETCH_TIMEOUT_MS, PING_TIMEOUT_MS, SYNC_MAX_RETRIES, SYNC_RETRY_DELAY_MS } from './config.js';
-export { REMOTE_SERVER_URL };
+import { getInstallId } from './install-id.js';
+export { REMOTE_SERVER_URL, getInstallId };
 
 
 // Transparent wrapper to log API latencies and dispatch debug events
@@ -185,13 +186,16 @@ const STATIC_DATA_HEADERS = { 'x-app-key': APP_DATA_KEY };
 
 export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
+  const installId = getInstallId();
+  const metaVer = document.querySelector('meta[name="app-version"]')?.content || '1.1.6';
   const configuredUrl = getRemoteServerUrl() || REMOTE_SERVER_URL;
-  // Only add provider headers if we are not on localhost or if explicitly hitting a remote URL
   const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
   const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
     'x-app-key': APP_DATA_KEY,
+    'x-install-id': installId,
+    'x-app-version': metaVer,
     ...(token ? { 'x-admin-token': token } : {}),
     ...providerExtraHeaders,
     ...extraHeaders

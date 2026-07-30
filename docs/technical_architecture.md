@@ -249,3 +249,30 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 * Pings core API endpoints and displays latency in real time.
 * Shows last sync timestamp, active provider URL, and PDF index coverage.
 * Allows exporting the full diagnostics snapshot as a JSON file.
+
+---
+
+## 🚨 Server-Controlled Force Update, Kill Switch & Anonymous Telemetry
+
+### 1. Multi-Source Mandatory Force Update System (`v1.1.6`)
+* **Server Version Config Store (`server/config/version.json`)**: Persists `minVersion`, `latestVersion`, `forceUpdateActive`, `updateMessage`, `releaseNotes`, and multi-source `downloadLinks`.
+* **Numeric Version Guard Middleware (`server/middleware/version-guard.js`)**: Inspects `X-App-Version` headers on incoming API calls. Compares semantic version numbers numerically (`compareVersions`). Responds with `HTTP 426 Upgrade Required` when `forceUpdateActive: true` and client version `< minVersion`.
+* **Target-Specific Lockout**: Native Android APKs send `X-App-Version` and are strictly locked out when outdated. Web browser clients (without `X-App-Version`) pass through cleanly to receive live server assets.
+* **Route Exclusion Guarantee**: Excludes `/api/version`, `/api/admin/version`, `/api/server-providers`, and static assets from version checks to prevent administrative deadlocks.
+* **Client Lock Gate & Offline Resilience (`public/js/version-checker.js`)**: Encapsulates lock state inside an IIFE closure. Purges non-essential browser caches (`wipeStorageOnLock()`) while explicitly preserving `dr_cat_install_id`. Attaches a DOM `MutationObserver` to prevent DevTools element deletion tampering.
+
+### 2. Anonymous Installation ID & Device Telemetry Engine
+* **Persistent Device Token (`public/js/install-id.js`)**: Generates a persistent UUID (`drcat-inst-${crypto.randomUUID()}`) saved in `localStorage`. Automatically attached to all outgoing API calls via `X-Install-ID` header.
+* **Server Active Device Tracker (`server/services/active-devices.js`)**: Records unique installation tokens, app versions, platform types (`android_apk` vs `web_pwa`), and request frequencies.
+* **Debounced Persistence (`server/data/active_devices.json`)**: Writes updated device data asynchronously using a 10-second debounce timer to eliminate disk I/O thrashing.
+* **Protected Admin Analytics Endpoint (`GET /api/admin/active-devices`)**: Protected by `x-api-key`. Computes Total Devices, Daily Active Users (DAU - 24h), Monthly Active Users (MAU - 30d), and Version Distribution ratios.
+
+### 3. Standalone Analytics Lab UI (`analytics_lab.html`)
+* **Protected Localhost Interface**: HTML route protected in `server/index.js` via `isLocalhostConnection(req)` (identical security tier to `pdf_lab.html`).
+* **Rich Tooling Suite**:
+  - Live search & filter bar by UUID, platform type (`Android APK` / `Web PWA`), and activity window (DAU/MAU).
+  - Visual version distribution progress bars.
+  - Device inspection modal drawer showing detailed request logs and timestamps.
+  - 1-Click CSV Spreadsheet Exporter (`drcat_active_devices_2026-07-30.csv`).
+  - Auto-refresh toggle (10s polling interval).
+

@@ -1,14 +1,17 @@
+/**
+ * Admin Panel — Kill Switch & Version Control Tab
+ */
+
 import * as api from '../../api.js';
-import { showToast, escapeHTML } from '../../utils.js';
+
+function escapeHTML(str) {
+  return String(str || '').replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
 
 export async function renderAdminVersionTab(containerEl) {
   if (!containerEl) return;
-
-  containerEl.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: center; padding: 20px; color: var(--text-secondary);">
-      <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Chargement de la configuration de version...
-    </div>
-  `;
 
   try {
     const config = await api.fetchVersionConfigOnServer();
@@ -17,6 +20,7 @@ export async function renderAdminVersionTab(containerEl) {
 
     containerEl.innerHTML = `
       <div class="admin-version-panel" style="display: flex; flex-direction: column; gap: 20px;">
+        
         <!-- Status Header Card -->
         <div style="background: ${isForced ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)'}; border: 1px solid ${isForced ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)'}; border-radius: 12px; padding: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
           <div>
@@ -25,7 +29,7 @@ export async function renderAdminVersionTab(containerEl) {
               Statut du Kill Switch : ${isForced ? '<span style="color: var(--color-danger);">ACTIVÉ (Mise à jour obligatoire)</span>' : '<span style="color: var(--color-success);">INACTIF (Accès normal)</span>'}
             </h3>
             <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">
-              ${isForced ? 'Toutes les versions antérieures à v' + escapeHTML(config.minVersion || '1.1.0') + ' sont actuellement bloquées.' : 'L\'application fonctionne normalement pour tous les utilisateurs.'}
+              ${isForced ? 'Toutes les versions antérieures à v' + escapeHTML(config.minVersion || '1.1.6') + ' sont actuellement bloquées.' : 'L\'application fonctionne normalement pour tous les utilisateurs.'}
             </p>
           </div>
 
@@ -33,6 +37,21 @@ export async function renderAdminVersionTab(containerEl) {
             <i class="${isForced ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'}"></i>
             ${isForced ? 'Désactiver le Kill Switch' : '🚨 Activer le Kill Switch'}
           </button>
+        </div>
+
+        <!-- Standalone Analytics Lab Link Banner -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-chart-line" style="color: var(--color-primary);"></i> Analytics Lab & Télémétrie
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+              Consultez les appareils actifs (DAU/MAU) et la répartition des versions installées dans une interface dédiée.
+            </div>
+          </div>
+          <a href="/analytics_lab.html" target="_blank" rel="noopener" style="padding: 9px 16px; font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: rgba(6, 182, 212, 0.15); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); transition: all 0.2s;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir Analytics Lab
+          </a>
         </div>
 
         <!-- Configuration Form Card -->
@@ -43,43 +62,45 @@ export async function renderAdminVersionTab(containerEl) {
 
           <form id="admin-version-form" style="display: flex; flex-direction: column; gap: 14px;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
-              <div class="form-group" style="margin: 0;">
-                <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Version Minimale Requise (minVersion)</label>
-                <input type="text" id="ver-min-input" value="${escapeHTML(config.minVersion || '1.1.0')}" style="width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Version Minimale Requise (minVersion)</label>
+                <input type="text" id="ver-input-min" value="${escapeHTML(config.minVersion || '1.1.6')}" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 13px; font-weight: 600;">
               </div>
 
-              <div class="form-group" style="margin: 0;">
-                <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Dernière Version Disponible (latestVersion)</label>
-                <input type="text" id="ver-latest-input" value="${escapeHTML(config.latestVersion || '1.1.0')}" style="width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Dernière Version Disponible (latestVersion)</label>
+                <input type="text" id="ver-input-latest" value="${escapeHTML(config.latestVersion || '1.1.6')}" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 13px; font-weight: 600;">
               </div>
             </div>
 
-            <div class="form-group" style="margin: 0;">
-              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Message de Notification</label>
-              <textarea id="ver-msg-input" rows="2" style="width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; font-size: 13px; box-sizing: border-box;">${escapeHTML(config.updateMessage || '')}</textarea>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Message de Notification</label>
+              <textarea id="ver-input-message" rows="2" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 13px; resize: vertical;">${escapeHTML(config.updateMessage || '')}</textarea>
             </div>
 
-            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 6px 0;">
+            <div style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 4px;">
+              <h5 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: var(--text-primary);">Sources de Téléchargement Multi-Boutons</h5>
+              
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                  <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">Bouton 1 : Lien Uptodown Store</label>
+                  <input type="url" id="ver-input-uptodown" value="${escapeHTML(links.uptodownUrl || '')}" placeholder="https://dr-cat.en.uptodown.com/android" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 12px;">
+                </div>
 
-            <h5 style="margin: 0; font-size: 13.5px; font-weight: 700; color: var(--color-primary);"><i class="fa-solid fa-link"></i> Liens de Téléchargement Multi-Sources</h5>
+                <div>
+                  <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">Bouton 2 : Lien Canal Telegram Officiel</label>
+                  <input type="url" id="ver-input-telegram" value="${escapeHTML(links.telegramUrl || '')}" placeholder="https://t.me/DrCatOfficialApp" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 12px;">
+                </div>
 
-            <div class="form-group" style="margin: 0;">
-              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-cloud-arrow-down" style="color: #00c875;"></i> Lien Uptodown (Button 1)</label>
-              <input type="url" id="ver-uptodown-input" value="${escapeHTML(links.uptodownUrl || '')}" style="width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; font-size: 13px; box-sizing: border-box;">
-            </div>
-
-            <div class="form-group" style="margin: 0;">
-              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-brands fa-telegram" style="color: #229ed9;"></i> Lien Canal Telegram (Button 2)</label>
-              <input type="url" id="ver-telegram-input" value="${escapeHTML(links.telegramUrl || '')}" style="width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; font-size: 13px; box-sizing: border-box;">
-            </div>
-
-            <div class="form-group" style="margin: 0;">
-              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-globe" style="color: #06b6d4;"></i> Lien Direct Serveur / APK (Button 3)</label>
-              <input type="text" id="ver-direct-input" value="${escapeHTML(links.directServerUrl || '')}" style="width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; font-size: 13px; box-sizing: border-box;">
+                <div>
+                  <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">Bouton 3 : Lien Direct Serveur / APK</label>
+                  <input type="text" id="ver-input-direct" value="${escapeHTML(links.directServerUrl || '')}" placeholder="/download/drcat-latest.apk" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 12px;">
+                </div>
+              </div>
             </div>
 
             <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-              <button type="submit" id="ver-save-btn" style="padding: 10px 20px; background: var(--color-primary); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-md); transition: all 0.2s;">
+              <button type="submit" id="admin-save-version-btn" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; background: var(--color-primary); color: #fff; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-floppy-disk"></i> Enregistrer les Modifications
               </button>
             </div>
@@ -89,62 +110,59 @@ export async function renderAdminVersionTab(containerEl) {
     `;
 
     // Attach Toggle Kill Switch listener
-    const toggleBtn = document.getElementById('admin-toggle-killswitch-btn');
+    const toggleBtn = containerEl.querySelector('#admin-toggle-killswitch-btn');
     if (toggleBtn) {
       toggleBtn.addEventListener('click', async () => {
-        const actionText = isForced ? 'désactiver' : 'ACTIVER';
-        if (!confirm(`Voulez-vous vraiment ${actionText} la mise à jour obligatoire (Kill Switch) ?`)) return;
-
         try {
-          showToast("Mise à jour du Kill Switch en cours...", "fa-spinner fa-spin", 1500);
-          const updated = await api.updateVersionConfigOnServer({
-            forceUpdateActive: !isForced,
-            minVersion: document.getElementById('ver-min-input').value || '1.1.0',
-            latestVersion: document.getElementById('ver-latest-input').value || '1.1.0'
-          });
-
-          if (updated.success) {
-            showToast(`Kill Switch ${!isForced ? 'ACTIVÉ 🚨' : 'Désactivé 🟢'} avec succès !`, "fa-circle-check", 3500);
-            renderAdminVersionTab(containerEl);
-          }
+          const newStatus = !isForced;
+          toggleBtn.disabled = true;
+          toggleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mise à jour...';
+          
+          await api.updateVersionConfigOnServer({ forceUpdateActive: newStatus });
+          alert(`Statut du Kill Switch mis à jour : ${newStatus ? 'ACTIVÉ 🚨' : 'DÉSACTIVÉ 🟢'}`);
+          renderAdminVersionTab(containerEl);
         } catch (err) {
-          console.error(err);
-          showToast("Erreur: " + err.message, "fa-circle-exclamation", 4000);
+          alert(`Erreur lors du basculement : ${err.message}`);
+          renderAdminVersionTab(containerEl);
         }
       });
     }
 
     // Attach Form Submit listener
-    const form = document.getElementById('admin-version-form');
-    if (form) {
-      form.addEventListener('submit', async (e) => {
+    const formEl = containerEl.querySelector('#admin-version-form');
+    if (formEl) {
+      formEl.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = formEl.querySelector('#admin-save-version-btn');
         try {
-          showToast("Enregistrement de la configuration...", "fa-spinner fa-spin", 1500);
-          const updated = await api.updateVersionConfigOnServer({
-            minVersion: document.getElementById('ver-min-input').value,
-            latestVersion: document.getElementById('ver-latest-input').value,
-            updateMessage: document.getElementById('ver-msg-input').value,
-            downloadLinks: {
-              uptodownUrl: document.getElementById('ver-uptodown-input').value,
-              telegramUrl: document.getElementById('ver-telegram-input').value,
-              directServerUrl: document.getElementById('ver-direct-input').value
-            }
-          });
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enregistrement...';
 
-          if (updated.success) {
-            showToast("Configuration enregistrée avec succès !", "fa-circle-check", 3000);
-            renderAdminVersionTab(containerEl);
-          }
+          const payload = {
+            minVersion: formEl.querySelector('#ver-input-min').value.trim(),
+            latestVersion: formEl.querySelector('#ver-input-latest').value.trim(),
+            updateMessage: formEl.querySelector('#ver-input-message').value.trim(),
+            downloadLinks: {
+              uptodownUrl: formEl.querySelector('#ver-input-uptodown').value.trim(),
+              telegramUrl: formEl.querySelector('#ver-input-telegram').value.trim(),
+              directServerUrl: formEl.querySelector('#ver-input-direct').value.trim()
+            }
+          };
+
+          await api.updateVersionConfigOnServer(payload);
+          alert('Configuration des versions enregistrée avec succès !');
+          renderAdminVersionTab(containerEl);
         } catch (err) {
-          console.error(err);
-          showToast("Erreur: " + err.message, "fa-circle-exclamation", 4000);
+          alert(`Erreur lors de l'enregistrement : ${err.message}`);
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les Modifications';
+          }
         }
       });
     }
 
   } catch (err) {
-    console.error("Error rendering Admin Version tab:", err);
-    containerEl.innerHTML = `<div style="padding: 20px; color: var(--color-danger); text-align: center;">Erreur lors du chargement de la configuration de version.</div>`;
+    containerEl.innerHTML = `<div style="padding: 20px; color: var(--color-danger);">Erreur de chargement de la configuration de version : ${escapeHTML(err.message)}</div>`;
   }
 }

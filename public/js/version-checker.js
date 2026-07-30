@@ -59,10 +59,14 @@
   async function wipeStorageOnLock() {
     try {
       const lockState = localStorage.getItem(LOCK_STORAGE_KEY);
+      const installId = localStorage.getItem('dr_cat_install_id');
       localStorage.clear();
       sessionStorage.clear();
       if (lockState) {
         localStorage.setItem(LOCK_STORAGE_KEY, lockState);
+      }
+      if (installId) {
+        localStorage.setItem('dr_cat_install_id', installId);
       }
 
       if (window.indexedDB && typeof window.indexedDB.databases === 'function') {

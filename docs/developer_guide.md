@@ -224,3 +224,28 @@ Direct database writing and suggestion moderation are unavailable on standalone 
 2. **Unlock Diagnostics Panel**: Click or tap the **🐛 button 3 times** consecutively. This triggers a toast notification confirming activation, automatically closes the log viewer overlay, and reveals the **Admin Control Center** (Diagnostics/Performance tabs) at the bottom of the main dashboard.
 3. **Persistence**: The developer mode state is saved to local storage and persists across application restarts.
 
+---
+
+## 🧪 Testing & Verification Suite
+
+The repository includes standalone node testing scripts to verify system integrity before releases:
+
+```bash
+# 1. Test version comparison and version guard middleware exclusions
+node tests/test_version.js
+
+# 2. Test active device telemetry & DAU/MAU analytics calculation
+node tests/test_analytics.js
+
+# 3. Test deep multi-token CAT content search matching
+node tests/test_cat_search.js
+```
+
+---
+
+## 🔬 Admin Labs & Diagnostic Tools
+
+- **PDF Lab**: `http://localhost:3000/pdf_lab.html` (Protected localhost PDF inspection & extraction lab)
+- **Analytics Lab**: `http://localhost:3000/analytics_lab.html` (Protected localhost active device telemetry, DAU/MAU charts, CSV export)
+
+

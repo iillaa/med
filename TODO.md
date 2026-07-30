@@ -2,54 +2,33 @@
 
 ---
 
-## 🚨 Top Priority
-- [x] **1. Fix App Logo** — Extracted core cyan emblem, generated 2-layer Android adaptive icon set (foreground/background) across all mipmap densities (mdpi to xxxhdpi) adhering to the 66% safe zone for perfect scaling on Lenovo tablets (rounded rectangle), Samsung (squircle), Pixel (circle), and Xiaomi devices.
+## 🚨 Top Priority & Active Development
 
----
-
-## 📌 Phase 1: Versioning & Version Enforcement (Force Update)
-- [ ] **2. Formalize Semantic App Versioning**
-  - Increment `package.json` version beyond `1.0.0` (e.g. `1.1.0-beta.1`).
-  - Wire build script to automatically propagate app version to Android `build.gradle` (`versionCode` & `versionName`), `public/index.html`, and server APIs.
-- [ ] **3. Mandatory Force-Update System**
-  - **Server Endpoint:** `GET /api/v1/version-check?client_version=X.Y.Z&platform=android|web`.
-  - **Client Guard:** On app boot (or resume), check server minimum required version.
-  - **Blocking Modal:** If client version < `minimum_required_version`, display a non-dismissible modal ("Mise à jour obligatoire requis") with a direct "Télécharger la mise à jour" button linking to APK download / Store page.
-
----
-
-## 👥 Phase 2: Active User Analytics & Presence Tracker
-- [ ] **4. Real-time Active User & Session Counter**
-  - **Server Heartbeat System:** Implement `POST /api/v1/heartbeat` (or lightweight WebSocket/SSE) to track active Web and Android sessions (with privacy-preserving anonymous session ID).
-  - **Platform Split:** Distinguish between active Web desktop users vs. native Android APK users.
-  - **Admin & Dashboard Metrics:** Display real-time active user count ("X utilisateurs en ligne") on admin dashboard / telemetry panel.
-
----
-
-## 🐛 Phase 3: Consent-Based One-Tap Bug & Log Reporting
-- [ ] **5. One-Tap Consent-Based Error Reporter**
+- [ ] **1. One-Tap Consent-Based Error & Log Reporter**
   - **In-App Error Collector:** Capture uncaught errors, failed fetches, and console error logs into an in-memory buffer.
   - **User Feedback & Bug Modal:** Provide a "Signaler un problème" button in sidebar/settings.
-  - **One-Tap Email / Endpoint Dispatch:** User reviews logs, taps once, and sends debug log package via `mailto:` pre-filled draft or direct server endpoint with explicit consent toggle.
+  - **One-Tap Dispatch:** User reviews logs, taps once, and sends debug log package via `mailto:` pre-filled draft or direct server endpoint with explicit consent toggle.
 
----
-
-## 🛡️ Phase 4: Server, Security & Proprietary Engine Hardening
-- [ ] **6. Proprietary Engine Privacy & Architecture Safeguards**
+- [ ] **2. Proprietary Engine Privacy & Architecture Safeguards**
   - **IP/Mechanism Confidentiality:** Maintain strict confidentiality surrounding internal search index and PDF view rendering strategies. Never expose implementation hints or internal mechanisms in user-facing UI or public logs.
   - **Dr.CAT v2 Architecture Planning:** Evaluate relocation and enhanced obfuscation/gating for indexing and view data endpoints when scaling to v2 with expanded content libraries.
-- [ ] **7. Rate-Limiting & Anti-Abuse Shield**
-  - Add Express rate-limiting (`express-rate-limit`) to `/api/*` and `/data/*` routes to prevent DDoS and API spam.
-- [ ] **8. Automated Server Database Backups**
-  - Implement automated periodic rotation and compression backups for `cats_db.json` and user data stores.
-- [ ] **9. Security Audit & Header Hardening**
-  - Add `Helmet.js` security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, CSP rules).
+
+- [ ] **3. Interactive Clinical Decision Trees (Arbre Décisionnel)**
+  - Integrate interactive decision flowcharts (`todo/arbre_decisionnelle_project.md`) into the workspace view for diagnostic guidance.
 
 ---
 
 ## 📋 Completed Tasks ✅
-- [x] Centralize `APP_DATA_KEY` verification across server middleware (`server/config/constants.js`).
-- [x] Protect `/data/*` files and `/api/cats` from direct unauthorized curl/scraping.
-- [x] Ship 78 compressed master PDFs in `public/pdfs/`.
-- [x] Polish navigation tab bar with sticky glassmorphism, horizontal width stretch, and top gradient scroll edge fade.
-- [x] Add smooth scroll gradient edge masks to sidebar list items and modal dialogs.
+
+- [x] **App Logo & Adaptive Icon Set** — Generated 2-layer Android adaptive icons (foreground/background) across all mipmap densities (mdpi to xxxhdpi) adhering to the 66% safe zone for perfect scaling on Lenovo tablets, Samsung, Pixel, and Xiaomi devices.
+- [x] **Formalize Semantic App Versioning (v1.1.9)** — Incremented `package.json` and `version.json` to `v1.1.9`. Stamped build scripts to automatically propagate build version (`app-build-version`) and asset cache-busters (`?v=2607300058`).
+- [x] **Mandatory Force-Update & Multi-Source Kill Switch System** — Implemented numeric version guard middleware (`server/middleware/version-guard.js`), protected version API routes (`server/routes/version.js`), and hardened IIFE client lock gate (`public/js/version-checker.js`) with 3 multi-source download options (Uptodown, Telegram, Direct Server).
+- [x] **Target-Specific Lockout** — Enforced hard Kill Switch lock screen strictly for compiled native Android APKs (`X-App-Version`), while serving web browser users with live server assets.
+- [x] **Anonymous Installation ID & Active Device Analytics Engine** — Built persistent client UUID generator (`public/js/install-id.js`), server active device tracker (`server/services/active-devices.js`), debounced data store (`server/data/active_devices.json`), and protected analytics API (`GET /api/admin/active-devices`).
+- [x] **Standalone Analytics Lab UI (`analytics_lab.html`)** — Built protected standalone Analytics Lab page featuring DAU/MAU stats, platform distribution, live search & filtering, version progress bars, device inspection modal drawer, and 1-click CSV spreadsheet exporter.
+- [x] **Deep Multi-Token CAT Content Search** — Upgraded `filterCats()` in `sidebar.js` to perform deep multi-keyword content search across titles, summaries, prescriptions (`ordonnance`), red flags, keywords, and notes.
+- [x] **Rate-Limiting & Anti-Abuse WAF Shield** — Implemented Express rate-limiter middleware (`server/middleware/rate-limit.js`) with tuned limits (80 req/min critical, 180 req/min API) and WAF query inspection.
+- [x] **PBKDF2 Salted Admin Password Hashing** — Migrated admin password storage to PBKDF2 hashing with random salt (`set_admin_password.js`).
+- [x] **Standalone Admin Labs Route Protection** — Blocked public access to `/pdf_lab.html` and `/analytics_lab.html` via loopback IP assertion (`isLocalhostConnection`).
+- [x] **PDF Compression Pipeline** — Shipped 78 compressed master PDFs in `public/pdfs/` with Ghostscript downsampling.
+- [x] **Android Navbar Gap Fix** — Resolved Capacitor Android 3-button navigation bar gap via `WindowCompat.setDecorFitsSystemWindows(getWindow(), false)`.

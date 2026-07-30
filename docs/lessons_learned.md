@@ -160,3 +160,28 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Do NOT try**: `adjustMarginsForEdgeToEdge: "none"` (invalid), `windowSoftInputMode="adjustNothing"` (breaks top insets / pushes header down), or overriding `ViewCompat.setOnApplyWindowInsetsListener` on the WebView parent (doesn't help when Capacitor reverts at window level).
 
 ---
+
+### 31. Relative API URL Failures on Standalone Native Capacitor Android Builds
+* **Problem**: Calling relative API paths (e.g. `fetchWithTimeout('/api/server-providers')`) works cleanly on local web browsers (where the origin is `http://localhost:3000`), but fails completely on native standalone Android APKs. In Capacitor Android, the WebView origin is `https://localhost` (a local webview container). The browser engine attempts to fetch `https://localhost/api/server-providers` which returns 404 / Connection Refused because the local Android WebView has no backend server listening on `/api`.
+* **Solution**: Every client API call targeting `/api/*` MUST be wrapped with `getApiUrl('/api/...')` (defined in `public/js/api.js`). On native standalone Capacitor builds, `getApiUrl()` automatically prepends the configured remote server URL (e.g. `https://ngrok-tunnel-url/...`), routing network requests correctly to the backend server.
+
+### 32. Version Guard Route Exclusion Deadlocks (Admin Lockout)
+* **Problem**: When a server-controlled Kill Switch (`forceUpdateActive: true`) is enabled on the server, the version guard middleware intercepts incoming data endpoints and responds with `HTTP 426 Upgrade Required`. If administrative endpoints (such as `PUT /api/admin/version`) or server discovery routes (`GET /api/server-providers`) are not excluded from the version guard, administrative requests are blocked with HTTP 426, creating a deadlock where the admin can never log in or disable the Kill Switch.
+* **Solution**: Explicitly add administrative configuration routes (`/api/admin/version`), server discovery routes (`/api/server-providers`), static resources, and health endpoints to the route exclusion list in `server/middleware/version-guard.js` before evaluating version limits.
+
+### 33. Target-Specific Version Guarding (Android APK vs. Web/PWA)
+* **Problem**: Applying a strict hard Kill Switch lock to web browser visitors (`http://localhost` or web domains) blocks web users and developers unnecessarily. Web browsers receive live, updated code directly from the server on page load and do not run compiled device binaries.
+* **Solution**: Differentiate client environments. Native Android APKs send the `X-App-Version` header on every request; web browsers do not. In `version-guard.js`, if `X-App-Version` is missing, the request is allowed through as a web client. In `version-checker.js`, checking `if (!isNativeApk) return;` ensures web users experience zero lockouts or version checks, keeping hard Kill Switch enforcement strictly focused on compiled native mobile APKs.
+
+### 34. Preserving Anonymous Installation IDs Across Storage Purges
+* **Problem**: When a Kill Switch force update triggers a hard storage purge (`localStorage.clear()`), non-essential caches are wiped. If an anonymous client Installation ID (`dr_cat_install_id`) is stored in `localStorage` without protection, the storage clear erases the ID. When the user opens the updated app, a new UUID is generated, creating a false metric inflation (counting 1 user as multiple new users).
+* **Solution**: In `version-checker.js` (`wipeStorageOnLock()`), back up `dr_cat_install_id` before calling `localStorage.clear()` and immediately restore it back to `localStorage` after the wipe completes. This guarantees token persistence across app updates and purges.
+
+### 35. Deep Multi-Token CAT Content Search vs. Title-Only Filtering
+* **Problem**: Filtering CAT clinical items solely by `title` or `category` fails when doctors search for specific symptoms, prescriptions, posologies, or diagnostic criteria (e.g., searching for `"otomycose"`, which lives inside the `ordonnance` or `summary` of CAT #22 "Otite Externe").
+* **Solution**: Upgrade `filterCats()` in `public/js/components/sidebar.js` to construct a unified searchable text space (`title`, `summary`, `ordonnance`, `red_flags`, `category`, `pdf_keywords`, `notes`). Tokenize the search query by whitespace and assert that *every* query token appears somewhere within the unified text space. This enables instant deep content search across all clinical fiches.
+
+### 36. Omission of Utility Stylesheets in HTML String Manipulations
+* **Problem**: Editing `index.html` via string replacements can accidentally remove core CSS link tags (such as `css/utilities.css`). This causes subtle, hard-to-debug layout shifts across the dashboard, breaking flex button alignments and dark/light mode button positioning without throwing JavaScript exceptions.
+* **Solution**: Always audit stylesheet link tags in `index.html` after major HTML updates, and run UI layout verification checks to confirm component alignments remain pristine.
+
