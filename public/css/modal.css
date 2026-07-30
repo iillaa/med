@@ -1,4 +1,3 @@
-/* Modal Overlay & Styling */
 dialog.modal-overlay {
   border: none;
   padding: 0;
@@ -8,6 +7,10 @@ dialog.modal-overlay {
   height: 100vh;
   max-width: 100vw;
   max-height: 100vh;
+}
+
+dialog.modal-overlay:not([open]):not([style*="display: flex"]):not([style*="display: block"]) {
+  display: none !important;
 }
 
 dialog.modal-overlay::backdrop {
