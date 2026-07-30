@@ -1,7 +1,7 @@
 {
-  "minVersion": "1.4.4",
-  "latestVersion": "1.2.0",
-  "forceUpdateActive": true,
+  "minVersion": "1.0.0",
+  "latestVersion": "1.2.1",
+  "forceUpdateActive": false,
   "updateMessage": "Une mise à jour obligatoire de Dr.CAT est requise pour continuer.",
   "releaseNotes": [
     "Architecture 1.2.0 overhaul",
