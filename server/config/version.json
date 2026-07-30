@@ -1,7 +1,7 @@
 {
-  "minVersion": "1.0.0",
+  "minVersion": "1.2.2",
   "latestVersion": "1.1.10",
-  "forceUpdateActive": false,
+  "forceUpdateActive": true,
   "updateMessage": "Une mise à jour obligatoire de Dr.CAT est requise pour continuer.",
   "releaseNotes": [
     "Correction de la barre de navigation Android",
@@ -13,5 +13,5 @@
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-07-30T03:04:48.685Z"
+  "lastUpdated": "2026-07-30T11:05:33.132Z"
 }
