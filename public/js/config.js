@@ -12,10 +12,10 @@ const _isCapacitor = !!(
 );
 
 /** Max time (ms) before an individual fetch() call is aborted. */
-export const FETCH_TIMEOUT_MS = _isCapacitor ? 3000 : 8000;
+export const FETCH_TIMEOUT_MS = _isCapacitor ? 4000 : 10000;
 
 /** Per-server ping timeout during remote reachability checks (ms). */
-export const PING_TIMEOUT_MS = 1500;
+export const PING_TIMEOUT_MS = 4000;
 
 /** Interval (ms) between background sync polls. */
 export const SYNC_INTERVAL_MS = 30000;

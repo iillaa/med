@@ -212,6 +212,7 @@ const corsOptions = {
     'x-api-key',
     'x-app-key',
     'x-admin-token',
+    'x-capacitor-platform',
     'ngrok-skip-browser-warning'
   ],
   credentials: true,
@@ -227,22 +228,20 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-app.options('{*path}', cors(corsOptions));
 app.use(cors(corsOptions));
 app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
 
 // Content Security Policy — mitigates XSS and data injection risks.
-// This is a restrictive baseline; adjust as needed for specific endpoints.
 app.use((req, res, next) => {
   res.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  // unsafe-inline needed for inline scripts; unsafe-eval for esbuild
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.trycloudflare.com wss:",
+      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.ngrok-free.dev https://*.trycloudflare.com wss:",
       "frame-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",

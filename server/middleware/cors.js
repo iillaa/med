@@ -38,6 +38,7 @@ function corsMiddleware(allowedOrigins, serverProviders) {
         'x-api-key',
         'x-admin-token',
         'x-app-key',
+        'x-capacitor-platform',
         'ngrok-skip-browser-warning',
         ...providerHeaders
       ]);

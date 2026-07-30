@@ -228,7 +228,16 @@
   function setupGlobalEventLockdown() {
     const blockEvent = (e) => {
       if (isLocked) {
-        if (e.target.closest('[data-update-link], .btn-update, .update-lock-card a, .update-lock-card button')) {
+        const link = e.target.closest('a, button, [data-update-link], .btn-update');
+        if (link) {
+          const href = link.getAttribute('href');
+          if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+            if (window.Capacitor && window.Capacitor.Commands && typeof window.Capacitor.Commands.openUrl === 'function') {
+              window.Capacitor.Commands.openUrl({ url: href });
+            } else {
+              window.open(href, '_system');
+            }
+          }
           return;
         }
         e.stopImmediatePropagation();
@@ -238,15 +247,6 @@
 
     window.addEventListener('click', blockEvent, true);
     window.addEventListener('touchstart', blockEvent, true);
-    window.addEventListener('keydown', (e) => {
-      if (isLocked) {
-        if (e.target.closest('[data-update-link], .btn-update, .update-lock-card a, .update-lock-card button')) {
-          return;
-        }
-        e.stopImmediatePropagation();
-        e.preventDefault();
-      }
-    }, true);
   }
 
   /**
@@ -296,19 +296,19 @@
       const config = await res.json();
       currentVersionConfig = config;
 
-      try {
-        localStorage.setItem(LOCK_STORAGE_KEY, JSON.stringify({
-          minVersion: config.minVersion,
-          latestVersion: config.latestVersion,
-          forceUpdateActive: !!config.forceUpdateActive,
-          updateMessage: config.updateMessage,
-          releaseNotes: config.releaseNotes,
-          downloadLinks: config.downloadLinks,
-          lastChecked: Date.now()
-        }));
-      } catch (_) { /* no-op */ }
-
       if (config.forceUpdateActive && compareVersions(CLIENT_VERSION, config.minVersion) < 0) {
+        try {
+          localStorage.setItem(LOCK_STORAGE_KEY, JSON.stringify({
+            minVersion: config.minVersion,
+            latestVersion: config.latestVersion,
+            forceUpdateActive: true,
+            updateMessage: config.updateMessage,
+            releaseNotes: config.releaseNotes,
+            downloadLinks: config.downloadLinks,
+            lastChecked: Date.now()
+          }));
+        } catch (_) { /* no-op */ }
+
         if (isNativeApk) {
           console.warn(`[VersionChecker] Force update active on Android APK! Client (v${CLIENT_VERSION}) < Min (v${config.minVersion})`);
           await wipeStorageOnLock();
@@ -319,10 +319,14 @@
         }
       } else {
         console.log(`[VersionChecker] Version check passed. Client v${CLIENT_VERSION} is authorized.`);
+        try {
+          localStorage.removeItem(LOCK_STORAGE_KEY);
+        } catch (_) {}
+
         if (isLocked) {
           isLocked = false;
-          const root = document.getElementById('security-root');
-          if (root) root.innerHTML = '';
+          console.log('[VersionChecker] Kill switch disabled on server. Reloading app to restore clean UI...');
+          window.location.reload(true);
         }
       }
     } catch (err) {
