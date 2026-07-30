@@ -1,5 +1,5 @@
 {
-  "minVersion": "1.1.9",
+  "minVersion": "1.0.0",
   "latestVersion": "1.1.9",
   "forceUpdateActive": false,
   "updateMessage": "Une mise à jour obligatoire de Dr.CAT est requise pour continuer.",
@@ -13,5 +13,5 @@
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-07-29T22:27:18.226Z"
+  "lastUpdated": "2026-07-30T03:00:34.339Z"
 }
