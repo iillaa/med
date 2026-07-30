@@ -209,8 +209,8 @@ export function getHeaders(extraHeaders = {}) {
     'Content-Type': 'application/json',
     'x-app-key': APP_DATA_KEY,
     'x-install-id': installId,
-    'x-app-version': metaVer,
     'ngrok-skip-browser-warning': 'true',
+    ...(isOfflineApp ? { 'x-app-version': metaVer, 'x-capacitor-platform': 'android' } : {}),
     ...(token ? { 'x-admin-token': token } : {}),
     ...providerExtraHeaders,
     ...extraHeaders
@@ -457,14 +457,32 @@ export async function fetchCats(since) {
 export async function fetchPdfs() {
   if (isOfflineApp) {
     // Load only the list of filenames instead of the heavy index structure containing all parsed texts
-    const res = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
-    if (!res.ok) throw new Error("Failed to fetch PDFs list statically");
-    return res.json();
+    try {
+      const res = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) return data;
+      }
+    } catch (_) { /* no-op */ }
+    return [];
   }
 
-  const res = await fetchWithTimeout(getApiUrl('/api/pdfs'), { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch PDFs");
-  return res.json();
+  try {
+    const res = await fetchWithTimeout(getApiUrl('/api/pdfs'), { headers: getHeaders() });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) return data;
+    }
+  } catch (_) { /* fallback to static list */ }
+
+  try {
+    const fallbackRes = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
+    if (fallbackRes.ok) {
+      const data = await fallbackRes.json();
+      if (Array.isArray(data)) return data;
+    }
+  } catch (_) { /* no-op */ }
+  return [];
 }
 
 export async function saveCatDataToServer(id, data) {

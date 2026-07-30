@@ -5,6 +5,7 @@
 (function () {
   'use strict';
 
+  const LOCK_STORAGE_KEY = 'dr_cat_app_lock_state';
   const isNativeApk = !!window.Capacitor || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || (navigator.userAgent && navigator.userAgent.toLowerCase().includes('capacitor'));
 
   // ── Localhost & Admin Exemption (Only for Web Browser development, NOT native Android APK) ──

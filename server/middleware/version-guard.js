@@ -60,6 +60,13 @@ function versionGuardMiddleware(req, res, next) {
     return next();
   }
 
+  const { isLocalhostConnection } = require('../utils/request');
+
+  // 0. Exclude Localhost development connections and Admin sessions from 426 version locks
+  if (isLocalhostConnection(req) || req.headers['x-admin-token']) {
+    return next();
+  }
+
   const config = getVersionConfig();
   if (!config.forceUpdateActive) {
     return next();
