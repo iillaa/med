@@ -28,6 +28,25 @@ To configure the workspace on a Termux instance or standard Linux terminal:
     echo 'export ADMIN_PASSWORD=admin123' >> ~/.bashrc
     source ~/.bashrc
     npm start
+    ```
+
+---
+
+## 🚀 Version 1.2.0 Architecture & Modulization Overhaul
+
+Dr. CAT v1.2.0 replaces legacy custom middleware and boilerplate with industry-standard open-source modules and native Web APIs:
+
+1. **Backend Server Security & Performance**:
+   - **`cors`**: RFC-compliant cross-origin resource sharing and preflight `OPTIONS` handling.
+   - **`compression`**: Automatic Gzip & Brotli response compression engine.
+   - **`express-rate-limit`**: Production-grade sliding-window rate limiting (120 req/min).
+   - **`helmet`**: Enterprise HTTP security header engine.
+
+2. **Frontend Security & UI Engines**:
+   - **`DOMPurify`**: HTML sanitization across clinical markdown summaries and search previews.
+   - **`crypto.randomUUID()`**: Zero-bundle-size native cryptographic device UUID generation (`drcat-inst-${crypto.randomUUID()}`).
+   - **`Intl.DateTimeFormat` / `Intl.RelativeTimeFormat`**: Native French date and relative time formatting.
+   - **HTML5 `<dialog>`**: Native browser modal dialogs with landscape safe-area inset protection.
     
     # Option B: Use the interactive password setter script
     node set_admin_password.js mypassword

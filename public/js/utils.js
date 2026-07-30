@@ -224,6 +224,13 @@ export function parseSummaryMarkdown(text) {
   // Clean empty tags
   html = html.replace(/<p>\s*<\/p>/g, '').replace(/<p>\s*<ul>/g, '<ul>').replace(/<\/ul>\s*<\/p>/g, '</ul>');
 
+  try {
+    const DOMPurify = require('dompurify');
+    if (DOMPurify && typeof DOMPurify.sanitize === 'function') {
+      return DOMPurify.sanitize(html);
+    }
+  } catch (_) { /* no-op: fallback to html */ }
+
   return html;
 }
 

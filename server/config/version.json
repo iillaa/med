@@ -1,17 +1,18 @@
 {
-  "minVersion": "1.2.2",
-  "latestVersion": "1.1.10",
-  "forceUpdateActive": true,
+  "minVersion": "1.0.0",
+  "latestVersion": "1.2.0",
+  "forceUpdateActive": false,
   "updateMessage": "Une mise à jour obligatoire de Dr.CAT est requise pour continuer.",
   "releaseNotes": [
-    "Correction de la barre de navigation Android",
-    "Optimisation de la recherche rapide dans les PDF",
-    "Mise à jour des conduites à tenir cliniques"
+    "Architecture 1.2.0 overhaul",
+    "Standardized production CORS, Rate-Limiting, Compression, & Helmet security",
+    "DOMPurify HTML sanitization & native HTML5 <dialog> refactor",
+    "Cryptographic UUID & French Intl date formatting"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-07-30T11:05:33.132Z"
+  "lastUpdated": "2026-07-30T12:36:35.000Z"
 }
