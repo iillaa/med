@@ -7,6 +7,9 @@ const { state: cache } = require('./services/cache');
 const { initAdminPassword } = require('./services/auth-service');
 const { safeWriteJsonAsync, runDatabaseBackup, dbLock } = require('./services/data-store');
 const cors = require('cors');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const { corsMiddleware } = require('./middleware/cors');
 const { rateLimitMiddleware } = require('./middleware/rate-limit');
 const { gzipMiddleware } = require('./middleware/gzip');
@@ -167,7 +170,11 @@ onIndexUpdated(async () => {
   }
 });
 
-app.use(gzipMiddleware);
+app.use(compression());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -211,7 +218,15 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
-app.use(rateLimitMiddleware);
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Trop de requêtes. Veuillez réessayer dans une minute." }
+});
+
+app.use(limiter);
 app.options('{*path}', cors(corsOptions));
 app.use(cors(corsOptions));
 app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));

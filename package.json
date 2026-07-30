@@ -32,9 +32,12 @@
     "@capacitor/keyboard": "^7.0.6",
     "@capacitor/share": "^7.0.4",
     "@capacitor/status-bar": "^7.0.6",
+    "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.6.1",
+    "helmet": "^8.3.0",
     "pdf-parse": "2.4.5"
   },
   "devDependencies": {
