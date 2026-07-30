@@ -56,13 +56,25 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 
 ### 9. Capturing-Phase Error Listeners Trapping Non-Fatal Asset 404s
 * **Problem**: Listening to `error` events in the capturing phase (`true`) to catch early startup module crashes also traps normal resource loading failures (like a `404 Not Found` for `capacitor.js` on localhost). If the error handler automatically locks the loading screen visible on any error, these harmless warnings will freeze the app.
-* **Solution**: Filter out element-level errors by checking `if (event.target && event.target !== window) return;` to only process real JavaScript runtime execution crashes.
+### 10. Express 5 & Capacitor Android CORS Preflight Handling
+* **Problem**: Native Android Capacitor WebViews send `Origin: http://localhost` or `Origin: capacitor://localhost` with custom headers (`X-App-Version`, `X-Install-ID`, `ngrok-skip-browser-warning`). Standard Express CORS configurations dropped these custom headers or failed OPTIONS preflights, causing WebViews to block requests.
+* **Solution**: Integrated explicit `cors` middleware with `app.options('{*path}', cors(corsOptions))` preflight handling and whitelisted all custom headers in both `server/index.js` and `server/middleware/cors.js`.
 
-### 10. Static Caching of App Modes
+### 11. Double-Slash URL Normalization (`//api/*`)
+* **Problem**: When a configured tunnel base URL has a trailing slash (`https://domain.dev/`), appending `/api/search-status` produces a double slash (`//api/search-status`). In Express 5 / `path-to-regexp` v8, `//api` is parsed as the hostname, causing routes to return `404 Not Found`.
+* **Solution**: Implemented top-level Express middleware (`req.url.replace(/^\/+/, '/')` and `delete req._parsedUrl`) to clean double slashes before routing, while sanitizing client-side base URLs in `api.js` and `main.js`.
+
+### 12. Android `build.gradle` & Capacitor `localhost` Versioning
+* **Problem**: Android OS Settings reads `versionName` directly from `android/app/build.gradle` (which was hardcoded to `"1.0"`). Furthermore, Capacitor WebViews run under `location.hostname === 'localhost'`, causing `isLocalhost` version checker guards to mistakenly bypass Kill Switch force updates.
+* **Solution**: Synchronized `android/app/build.gradle` (`versionCode 10110`, `versionName "1.1.10"`) with `package.json`, and updated `version-checker.js` so `isLocalhost` exemption only applies to desktop web browser developers (`!isNativeApk`).
+
+---
+
+### 13. Static Caching of App Modes
 * **Problem**: Caching the app mode statically at launch (e.g., locking the app mode to `ANDROID_OFFLINE` on standalone Capacitor boot) prevents background sync handlers from ever retrieving remote server updates, even if they detect the server is reachable. Calling `api.fetchCats()` continues to load local bundle copies.
 * **Solution**: Implement dynamic setter interfaces (`api.setAppMode()`) that dispatch custom DOM events (`drcat-app-mode-changed`) so that relevant UI elements automatically re-evaluate their state (e.g., toggling edit controls or refreshing data grids).
 
-### 11. Invoking Catch Handlers on Synchronous Methods
+### 14. Invoking Catch Handlers on Synchronous Methods
 * **Problem**: Attempting to attach `.catch()` directly to synchronous functions (like asset builders that return `undefined`) throws a `TypeError` which blocks thread execution and crashes the boot phase.
 * **Solution**: Standardize synchronous wrapper callbacks or wrap synchronous tasks inside a try/catch block inside a non-blocking `setImmediate()` or next-tick deferral.
 
