@@ -147,9 +147,21 @@ export function getConfiguredRemoteUrls() {
   return [];
 }
 
+// TODO (Multi-Provider Failover Optimization):
+// When multiple providers are configured, if the primary provider (urls[0]) becomes unreachable,
+// getRemoteServerUrl() should dynamically select the highest-scoring healthy provider from
+// serverHealth map instead of falling back to offline mode when healthy secondary providers exist.
 function getRemoteServerUrl() {
   const urls = getConfiguredRemoteUrls();
-  return urls.length ? urls[0] : null;
+  if (!urls.length) return null;
+  // Pick the first provider marked healthy, or default to primary url[0]
+  for (const url of urls) {
+    const health = serverHealth.get(url);
+    if (!health || health.ok !== false) {
+      return url;
+    }
+  }
+  return urls[0];
 }
 
 export function hasRemoteServer() {
