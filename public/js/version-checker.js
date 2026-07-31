@@ -325,8 +325,11 @@
 
         if (isLocked) {
           isLocked = false;
-          console.log('[VersionChecker] Kill switch disabled on server. Reloading app to restore clean UI...');
-          window.location.reload(true);
+          console.log('[VersionChecker] Kill switch disabled on server. Restoring active UI...');
+          const overlay = document.getElementById('app-update-lock-overlay');
+          if (overlay) overlay.remove();
+          const root = document.getElementById('security-root');
+          if (root) root.innerHTML = '';
         }
       }
     } catch (err) {

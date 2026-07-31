@@ -120,6 +120,7 @@ let serverListCache = null;
 // --- Simplified & Stable Primary-First Server Failover Protocol ---
 let activeProviderIndex = 0;
 let consecutiveFailures = 0;
+let lastFailureTimestamp = 0;
 const MAX_CONSECUTIVE_FAILURES = 3;
 
 export function recordServerHealth(url, ok) {
@@ -136,9 +137,13 @@ export function recordServerHealth(url, ok) {
     // Success! Reset failure count and stay on active provider
     consecutiveFailures = 0;
   } else {
-    // Failure! Increment counter
-    consecutiveFailures++;
-    console.warn(`[ServerFailover] Provider "${url}" failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
+    const now = Date.now();
+    // Debounce parallel request bursts occurring within the same 1000ms window
+    if (now - lastFailureTimestamp > 1000) {
+      consecutiveFailures++;
+      lastFailureTimestamp = now;
+      console.warn(`[ServerFailover] Provider "${url}" failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
+    }
 
     if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
       consecutiveFailures = 0;

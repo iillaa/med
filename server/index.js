@@ -170,6 +170,44 @@ onIndexUpdated(async () => {
   }
 });
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const isAllowed =
+      origin === 'http://localhost' ||
+      origin === 'https://localhost' ||
+      origin === 'http://localhost:3000' ||
+      origin === 'capacitor://localhost' ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.ngrok-free\.dev$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.ngrok-free\.app$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.ngrok\.io$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.trycloudflare\.com$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.loca\.lt$/i.test(origin) ||
+      (allowedOriginsSvc && allowedOriginsSvc.allowedOrigins && allowedOriginsSvc.allowedOrigins.includes(origin));
+
+    return callback(null, isAllowed ? true : false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-App-Version',
+    'X-Install-ID',
+    'x-api-key',
+    'x-app-key',
+    'x-admin-token',
+    'x-capacitor-platform',
+    'ngrok-skip-browser-warning'
+  ],
+  credentials: true,
+  maxAge: 86400,
+  optionsSuccessStatus: 204
+};
+
+// 1. CORS MUST come BEFORE Rate Limiting so error responses (HTTP 429) contain CORS headers
+app.use(cors(corsOptions));
+app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
+
 app.use(compression());
 app.use(helmet({
   contentSecurityPolicy: false,
@@ -186,39 +224,6 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    const isAllowed =
-      origin === 'http://localhost' ||
-      origin === 'https://localhost' ||
-      origin === 'http://localhost:3000' ||
-      origin === 'capacitor://localhost' ||
-      /\.ngrok-free\.dev$/i.test(origin) ||
-      /\.ngrok-free\.app$/i.test(origin) ||
-      /\.ngrok\.io$/i.test(origin) ||
-      /\.trycloudflare\.com$/i.test(origin) ||
-      /\.loca\.lt$/i.test(origin) ||
-      (allowedOriginsSvc && allowedOriginsSvc.allowedOrigins && allowedOriginsSvc.allowedOrigins.includes(origin));
-
-    return callback(null, isAllowed ? true : true);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-App-Version',
-    'X-Install-ID',
-    'x-api-key',
-    'x-app-key',
-    'x-admin-token',
-    'x-capacitor-platform',
-    'ngrok-skip-browser-warning'
-  ],
-  credentials: true,
-  optionsSuccessStatus: 204
-};
-
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
@@ -228,8 +233,6 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-app.use(cors(corsOptions));
-app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
 
 // Content Security Policy — mitigates XSS and data injection risks.
 app.use((req, res, next) => {

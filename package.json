@@ -1,6 +1,6 @@
 {
   "name": "med",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Dr.CAT — Clinical Review App",
   "main": "server/index.js",
   "type": "commonjs",
