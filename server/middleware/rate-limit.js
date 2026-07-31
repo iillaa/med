@@ -5,19 +5,40 @@ const path = require('path');
 const BAN_DURATION_MS = 10 * 60 * 1000; // 10 minutes temporary IP ban
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
 
-// Limits per window (tuned for smooth search typing & tunnel proxies)
+// Generous limits per window (tuned to never block search typing, lab batch operations, or development)
 const LIMITS = {
-  api: 180,      // Generous limit for API endpoints (180 req/min)
-  static: 500,   // High limit for static files (500 req/min)
-  critical: 80,  // Smooth limit for live search, auth, and version check (80 req/min)
+  api: 600,       // Generous limit for API endpoints (600 req/min)
+  static: 2000,   // High limit for static files (2000 req/min)
+  critical: 300,  // Smooth limit for live search, auth, and version check (300 req/min)
 };
 
 // In-Memory Storage (extremely fast O(1) lookups)
 const rateLimitMap = new Map();
 const bannedIps = new Map();
 
-// Local IP whitelist to prevent developers from getting rate-limited during testing
-const LOCAL_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+/**
+ * Checks if an IP address belongs to local host or private LAN subnets
+ */
+function isLocalAddress(ip) {
+  if (!ip) return true;
+  const cleanIp = ip.replace(/^::ffff:/, '').trim();
+
+  // Loopback
+  if (cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost' || cleanIp === 'unknown') {
+    return true;
+  }
+
+  // Private Subnets (192.168.x.x, 10.x.x.x, 172.16.x.x - 172.31.x.x)
+  if (/^192\.168\./.test(cleanIp) || /^10\./.test(cleanIp)) {
+    return true;
+  }
+  const match172 = cleanIp.match(/^172\.(\d+)\./);
+  if (match172 && parseInt(match172[1], 10) >= 16 && parseInt(match172[1], 10) <= 31) {
+    return true;
+  }
+
+  return false;
+}
 
 // Pre-compiled WAF Signatures for performance (avoid ReDoS)
 const SUSPICIOUS_UA_KEYWORDS = [
@@ -72,8 +93,8 @@ function rateLimitMiddleware(req, res, next) {
   res.setHeader('X-RateLimit-Limit', String(limit));
   res.setHeader('X-RateLimit-Reset', String(Math.ceil((now + RATE_LIMIT_WINDOW_MS) / 1000)));
 
-  // 1. Skip checks for whitelisted local IPs
-  if (LOCAL_IPS.has(ip)) {
+  // 1. Skip rate limits for local host and private network IPs
+  if (isLocalAddress(ip)) {
     res.setHeader('X-RateLimit-Remaining', String(limit));
     return next();
   }
