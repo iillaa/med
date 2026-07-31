@@ -4,7 +4,7 @@ import { shuffleArray, updateLeitnerStats, updateQuizStreak, requestWakeLock, re
 import {
   getOrientationText, cleanTextOfClues, cleanOrientationOfClues,
   generateClinicalVignette, getKeywordHints
-} from './generator.js';
+} from './quiz_generator.js';
 import { submitWriteInAnswer, saveWriteInGrade } from './scoring.js';
 
 let quizScreen, welcomeScreen, workspaceView;

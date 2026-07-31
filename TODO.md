@@ -16,6 +16,9 @@
 - [ ] **3. Interactive Clinical Decision Trees (Arbre Décisionnel)**
   - Integrate interactive decision flowcharts (`todo/arbre_decisionnelle_project.md`) into the workspace view for diagnostic guidance.
 
+- [ ] **4. Interactive Quiz Engine V2 Upgrade (`quiz_generator.js`)**
+  - **Dynamic QCM Distractor & Vignette Synthesis V2**: Expand `public/js/components/quiz/quiz_generator.js` with multi-stage clinical vignette generation, differential diagnosis options, and AI-driven question variations.
+
 ---
 
 ## 📋 Completed Tasks ✅

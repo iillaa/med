@@ -54,31 +54,13 @@
   }
 
   /**
-   * Wipe non-essential browser caches on hard lock to prevent stale data usage
+   * Safely purge ONLY stale network DB caches on lock without EVER touching user notes or revision progress.
    */
-  async function wipeStorageOnLock() {
+  function purgeStaleNetworkCacheOnLock() {
     try {
-      const lockState = localStorage.getItem(LOCK_STORAGE_KEY);
-      const installId = localStorage.getItem('dr_cat_install_id');
-      localStorage.clear();
-      sessionStorage.clear();
-      if (lockState) {
-        localStorage.setItem(LOCK_STORAGE_KEY, lockState);
-      }
-      if (installId) {
-        localStorage.setItem('dr_cat_install_id', installId);
-      }
-
-      if (window.indexedDB && typeof window.indexedDB.databases === 'function') {
-        const dbs = await window.indexedDB.databases();
-        for (const db of dbs) {
-          if (db.name) {
-            window.indexedDB.deleteDatabase(db.name);
-          }
-        }
-      }
+      localStorage.removeItem('dr_cat_synced_db');
     } catch (err) {
-      console.warn('[VersionChecker] Error purging storage on lock:', err);
+      console.warn('[VersionChecker] Error clearing network cache on lock:', err);
     }
   }
 
@@ -311,7 +293,7 @@
 
         if (isNativeApk) {
           console.warn(`[VersionChecker] Force update active on Android APK! Client (v${CLIENT_VERSION}) < Min (v${config.minVersion})`);
-          await wipeStorageOnLock();
+          purgeStaleNetworkCacheOnLock();
           renderLockScreen();
         } else {
           console.log('[VersionChecker] Soft update banner shown for Web/PWA mode.');
@@ -325,11 +307,9 @@
 
         if (isLocked) {
           isLocked = false;
-          console.log('[VersionChecker] Kill switch disabled on server. Restoring active UI...');
-          const overlay = document.getElementById('app-update-lock-overlay');
-          if (overlay) overlay.remove();
-          const root = document.getElementById('security-root');
-          if (root) root.innerHTML = '';
+          console.log('[VersionChecker] Kill switch disabled on server. Reloading app to restore active UI...');
+          window.location.reload();
+          return;
         }
       }
     } catch (err) {
@@ -344,7 +324,7 @@
 
             if (cached.forceUpdateActive && compareVersions(CLIENT_VERSION, cached.minVersion) < 0) {
               console.warn('[VersionChecker] Offline lock triggered from cached config on Android APK.');
-              await wipeStorageOnLock();
+              purgeStaleNetworkCacheOnLock();
               renderLockScreen({
                 offlineMode: true,
                 message: 'Mode hors-ligne : Une mise à jour obligatoire a été détectée. Veuillez vous connecter à Internet pour valider l\'installation.'

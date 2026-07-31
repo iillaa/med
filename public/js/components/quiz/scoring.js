@@ -1,7 +1,7 @@
 import { state } from '../../state.js';
 import { setButtonLoading } from '../../utils.js';
 import { updateLeitnerStats } from './state.js';
-import { checkMatchedKeywords } from './generator.js';
+import { checkMatchedKeywords } from './quiz_generator.js';
 
 export function submitWriteInAnswer({ userTextArea, submitTextBtn, keywordsMatchedTags, displayUserAnswer, displayCorrectAnswer, feedbackPanel, comparisonGrid, keywordsMatchedPanel, selfGradingPanel, feedbackStatus, feedbackHeader, nextBtn }) {
   const session = state.quizSession;

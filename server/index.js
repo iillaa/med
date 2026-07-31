@@ -1,3 +1,9 @@
+/**
+ * Dr.CAT — Clinical Review App
+ * Authored, Architected & Developed by Dr. Kibeche Ali Dia Eddine
+ * Copyright (c) 2026 Dr. Kibeche Ali Dia Eddine. All rights reserved.
+ */
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
