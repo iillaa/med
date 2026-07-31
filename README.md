@@ -56,10 +56,16 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 
 ---
 
-## 🔐 Sécurité
+### 🔒 Sécurité & Hardening APK Production (Anti-Décompilation)
+- **Hardening Assets APK (`npm run cap:sync`)** : Filtrage automatique des fichiers sources de développement non-minifiés (`components/`, `lib/`, `workspace/`, `dashboard/`, `main.js`, `api.js`, `utils.js`). Les outils de rétro-ingénierie (`apktool`, `jadx`, `unzip`) ne trouvent **que** le bundle de production minifié `dist/app-*.js`.
+- **Exclusion AAPT Native (`build.gradle`)** : Règle `ignoreAssetsPattern` au niveau du compilateur Android empêchant tout empaquetage de code source brut dans le fichier `.apk`.
+- **Obfuscation Bytecode Android R8** : `minifyEnabled true` et `shrinkResources true` activés pour obscurcir le code Java native.
+- **Protection des Données Utilisateur (`version-checker.js`)** : Le système de Kill Switch / Lock Screen bloque strictement l'interface lors des mises à jour obligatoires **sans jamais effacer le `localStorage`** (les notes personnelles `dr_cat_notes_*`, la progression `dr_cat_user_progress`, et les statistiques Leitner restent 100% conservées).
+- **Hachage Mot de Passe PBKDF2** : Stockage du mot de passe admin avec hachage salé PBKDF2 (100 000 itérations).
+- **Auteur & Droits d'Auteur** : Conçu et développé par **Dr. Kibeche Ali** (Affichage UI) / **Dr. Kibeche Ali Dia Eddine** (Métadonnées & Mentions Légales).
 
 ### Authentification Admin
-- **Mot de passe sécurisé** stocké dans `admin_password.txt` (exclu du git via `.gitignore`).
+- **Mot de passe sécurisé** salé et haché via PBKDF2.
 - **Token de session aléatoire** (32 caractères hex) généré à chaque connexion. Stocké côté serveur en mémoire (`Set`), envoyé par header `x-admin-token`.
 - **Toutes les routes d'administration** (modification/suppression de fiches, approbation de suggestions, ré-indexation PDF) vérifient ce token.
 - La route `/api/login` est **restreinte à localhost uniquement** via vérification de l'adresse IP du socket TCP — impossible à usurper via le header `Host`.

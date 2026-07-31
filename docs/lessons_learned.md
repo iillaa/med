@@ -197,3 +197,16 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Editing `index.html` via string replacements can accidentally remove core CSS link tags (such as `css/utilities.css`). This causes subtle, hard-to-debug layout shifts across the dashboard, breaking flex button alignments and dark/light mode button positioning without throwing JavaScript exceptions.
 * **Solution**: Always audit stylesheet link tags in `index.html` after major HTML updates, and run UI layout verification checks to confirm component alignments remain pristine.
 
+### 37. Complete Prohibition of Destructive `localStorage.clear()` in Version Lock Gates
+* **Problem**: In early implementations of the Security Lock Gate (`version-checker.js`), triggering a Kill Switch or Force Update called `localStorage.clear()`. This permanently destroyed the doctor's personal clinical notes (`dr_cat_notes_*`), reading history (`dr_cat_user_progress`), Leitner spaced repetition stats (`dr_cat_leitner`), and study streaks (`dr_cat_streak`), even if the admin turned off the Kill Switch later.
+* **Solution**: Completely remove `localStorage.clear()`, `sessionStorage.clear()`, and `indexedDB.deleteDatabase()` from `version-checker.js`. Lock gates must strictly block UI interaction while leaving 100% of user data intact. Only temporary network HTTP cache keys (`dr_cat_synced_db`) should ever be cleared.
+
+### 38. Native AAPT Exclusions & Production Asset Hardening for Capacitor APKs
+* **Problem**: Standard `capacitor sync android` copies the entire `public/` web directory into `android/app/src/main/assets/public/`. This accidentally packages unbundled raw ES module source files (`public/js/components/`, `public/js/lib/`, `main.js`, `api.js`, `utils.js`) alongside the compiled bundle (`dist/app-*.js`). Decompiling tools (`apktool`, `jadx`) can extract these raw source files.
+* **Solution**: Implement a 2-stage hardening architecture: (1) Add `clean_android_assets.js` to `"cap:sync"` in `package.json`, and (2) Configure `aaptOptions.ignoreAssetsPattern` in `android/app/build.gradle` to permanently exclude raw JS source folders (`components`, `lib`, `workspace`, `dashboard`, `main.js`, `api.js`, `utils.js`, `state.js`). Any APK built by Android Studio or GitHub Actions will contain ONLY `dist/app-*.js` and zero readable source files.
+
+### 39. Dual-Tier Author Credit Attribution (UI vs. Metadata)
+* **Problem**: Inconsistent author credits across app interfaces, legal disclaimers, and metadata files creates confusion for copyright licensing, app store publishing, and legal liability.
+* **Solution**: Enforce a strict dual-tier attribution standard across the project: (1) **User-Facing UI Credit**: Display **`Dr. Kibeche Ali`** (in Dashboard footer, About modal, Legal/CGU disclaimer); (2) **Code & Legal Metadata**: Display **`Dr. Kibeche Ali Dia Eddine`** (in `package.json`, `LICENSE`, `server/index.js`, and `android/app/build.gradle`).
+
+

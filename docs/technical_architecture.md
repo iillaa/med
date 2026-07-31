@@ -207,24 +207,31 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 
 ## 🔒 Security & Admin Hardening
 
-### 1. Localhost-Only Authentication
+### 1. Production APK Asset Hardening & Anti-Decompilation
+* **Automated Asset Stripping**: `"cap:sync"` script in `package.json` executes `node scripts/clean_android_assets.js` after `cap sync` to remove unbundled development JS source files (`components/`, `lib/`, `workspace/`, `dashboard/`, `main.js`, `api.js`, `utils.js`, `state.js`).
+* **Native AAPT Exclusion**: `android/app/build.gradle` enforces `aaptOptions.ignoreAssetsPattern` (`components:lib:workspace:dashboard:main.js:...`) to filter out development source files at the Gradle compiler level.
+* **Bytecode Obfuscation**: Android R8/ProGuard obfuscation enabled (`minifyEnabled true`, `shrinkResources true`).
+* **Reverse Engineering Protection**: Decompilation tools (`apktool`, `jadx`, `unzip`) find **ONLY** `public/dist/app-*.js` (minified production bundle) and runtime engine files (`pdf.min.js`, `version-checker.js`).
+
+### 2. User Data Storage Protection & Non-Destructive Lock Gate
+* **Kill Switch / Force Update Protection**: `public/js/version-checker.js` is strictly prohibited from calling `localStorage.clear()` or `indexedDB.deleteDatabase()`.
+* **Data Preservation**: User clinical notes (`dr_cat_notes_*`), reading history (`dr_cat_user_progress`), Leitner spaced repetition stats (`dr_cat_leitner`), and streaks (`dr_cat_streak`) remain 100% preserved during version locks.
+* **Network Cache Purging**: Locks clear ONLY temporary network API caches (`dr_cat_synced_db`). When the lock is deactivated or the APK is updated, `window.location.reload()` restores active UI with 100% of user data intact.
+
+### 3. Localhost-Only Authentication
 * `/api/login` is locked to loopback IP addresses (`127.0.0.1`, `::1`).
 * Handles proxy layers (Ngrok/Cloudflare tunnels) by inspecting `X-Forwarded-For` header.
 * Remote users only see the app in read-only/suggestion mode.
 
-### 2. PBKDF2 Password Hashing
+### 4. PBKDF2 Password Hashing
 * Admin passwords are never stored in plain text.
 * `set_admin_password.js` hashes passwords using PBKDF2 with a random 16-byte salt and 100,000 iterations, identical to the server's verification logic.
 * The resulting `salt:hash` pair is stored in `admin_password.txt` (Git-ignored).
-* On first run, if no password file exists, `server.js` auto-generates a long random password and writes the hashed credentials.
 
-### 3. Dynamic Token Generation
+### 5. Dynamic Token Generation & HTML Sanitization
 * Logins yield a 32-character hex token from `crypto.randomBytes(16).toString('hex')`.
 * Stored in a server-side memory `Set`, verified on every administrative API call.
-* Cleared on logout or server restart.
-
-### 3. HTML Sanitization (XSS Prevention)
-* User-submitted suggestions are escaped at rendering time via `escapeHTML()` before being injected into the DOM.
+* User-submitted suggestions are escaped at rendering time via `escapeHTML()` (XSS Prevention).
 
 ### 4. Admin UI Gating
 * The **Admin** button is hidden by default for all remote users.
