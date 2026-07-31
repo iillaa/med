@@ -1,0 +1,146 @@
+#drcat-toast {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  max-width: 320px !important;
+  width: max-content !important;
+  padding: 14px 16px !important;
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-left: 3px solid #06b6d4 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+  opacity: 0 !important;
+  transform: translateY(-16px) !important;
+  transition: opacity 0.3s ease, transform 0.3s ease !important;
+  pointer-events: auto !important;
+  font-family: inherit !important;
+}
+
+@media (max-width: 680px) {
+  #drcat-toast {
+    top: 16px !important;
+    right: 16px !important;
+    max-width: calc(100vw - 32px) !important;
+    width: max-content !important;
+  }
+}
+
+#drcat-toast.toast-visible {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+.light-theme #drcat-toast {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  border-left-color: #06b6d4 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+}
+
+#drcat-toast .t-icon {
+  color: #06b6d4;
+  font-size: 15px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+#drcat-toast .t-msg {
+  font-size: 12.5px;
+  color: #94a3b8;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.light-theme #drcat-toast .t-msg {
+  color: #475569;
+}
+
+#drcat-toast .t-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  flex-shrink: 0;
+  margin-top: 1px;
+  line-height: 1;
+}
+
+#drcat-toast .t-close:hover {
+  color: #f8fafc;
+}
+
+.light-theme #drcat-toast .t-close:hover {
+  color: #0f172a;
+}
+
+/* Honor reduced-motion for toast */
+@media (prefers-reduced-motion: reduce) {
+  #drcat-toast {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+
+/* Loading Overlay Styles */
+#drcat-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(9, 13, 22, 0.92);
+  z-index: 9999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: all;
+}
+
+@media (min-width: 851px) {
+  #drcat-loading-overlay {
+    background: rgba(9, 13, 22, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+#drcat-loading-overlay.visible {
+  opacity: 1;
+}
+
+.drcat-spinner {
+  width: 46px;
+  height: 46px;
+  border: 4px solid rgba(6, 182, 212, 0.1);
+  border-left-color: #06b6d4;
+  border-radius: 50%;
+  animation: drcat-spin 1s linear infinite;
+}
+
+.drcat-loading-text {
+  color: #f8fafc;
+  font-size: 14.5px;
+  font-family: inherit;
+  font-weight: 500;
+  text-align: center;
+  max-width: 290px;
+  line-height: 1.5;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+@keyframes drcat-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <style>
+/* Critical CSS (Phase 5.4) — inlined for instant first paint */
+:root {
+  color-scheme: dark; /* default; head script + toggle override via style.colorScheme */
+  /* Native soft-keyboard height, set by setupKeyboardHandling() (Phase 4.6). */
+  --capacitor-keyboard-height: 0px;
+  --bg-app: #090d16;
+  --bg-sidebar: #0f172a;
+  --bg-card: #1e293b;
+  --bg-input: #1e293b;
+  --border-color: #334155;
+
+  /* ── Surface Elevation Levels (Zero-Shadow Luminosity Hierarchy) ── */
+  --surface-base: #090d16;       /* Base app background */
+  --surface-card: #0f172a;       /* Level 1: Sidebar & cards */
+  --surface-hover: #1e293b;      /* Level 2: Active / Hover state */
+  --surface-modal: #1e293b;      /* Level 3: Floating dialogs & sheets */
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #94a3b8; /* Darkened from #64748b -> 5.7:1 on card (was 3.1:1, failed AA) */
+  
+  --color-primary: #06b6d4; /* Neon Cyan */
+  --color-primary-hover: #0891b2;
+  --color-success: #10b981; /* Emerald */
+  --color-warning: #f59e0b; /* Amber */
+  --color-danger: #f87171;  /* Rose (lightened from #ef4444 -> 5.3:1 on dark card, was 3.9:1) */
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* ── Spacing scale (4px base) — use instead of magic pixel values ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* ── Typography scale ── */
+  --text-xs: 11px;
+  --text-sm: 12.5px;
+  --text-base: 15px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ── Icon sizing — single source so icons read consistently ── */
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 18px;
+  --icon-xl: 22px;
+
+/* ── Z-index scale — single source so overlays never fight ── */
+  --z-sidebar: 100;
+  --z-sticky: 500;
+  --z-overlay: 1000;
+  --z-modal: 2000;
+  --z-toast: 9999;
+
+  /* ── Motion tokens ─────────────────────────────────────────
+     Single source of truth for timing & easing so animation feels
+     consistent across the whole app. Animate transform/opacity only. */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --motion-slower: 450ms;
+  /* Standard eases */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);     /* material standard */
+  --ease-decelerate: cubic-bezier(0.16, 1, 0.3, 1);  /* entrance/overshoot settle */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);     /* emphasized in */
+  --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);   /* subtle pop */
+  
+  /* GPU Composite Motion Tokens (Zero Layout/Paint Reflows) */
+  --transition-gpu: transform var(--motion-base) var(--ease-decelerate), opacity var(--motion-base) ease;
+  --transition-paint: background-color var(--motion-fast) ease, border-color var(--motion-fast) ease;
+  --transition-smooth: transform var(--motion-base) var(--ease-decelerate), opacity var(--motion-base) ease, background-color var(--motion-fast) ease, border-color var(--motion-fast) ease;
+  --transition-color: background-color var(--motion-fast) ease, border-color var(--motion-fast) ease, color var(--motion-fast) ease;
+  --transition-fast: transform var(--motion-fast) ease, opacity var(--motion-fast) ease;
+  --transition-emphasized: transform var(--motion-slow) var(--ease-emphasized), opacity var(--motion-slow) ease;
+
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Light Mode Variables Override
+   Applied on <html> (documentElement) by the anti-FOUC head script, and
+   toggled at runtime. As an ancestor of everything, its CSS variables cascade
+   to the whole tree and its descendant selectors (.light-theme .foo) match. */
+.light-theme {
+  --bg-app: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  --bg-card: #f8fafc;
+  --bg-input: #ffffff;
+  --border-color: #cbd5e1;
+
+  --surface-base: #f1f5f9;
+  --surface-card: #ffffff;
+  --surface-hover: #f8fafc;
+  --surface-modal: #ffffff;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --color-primary: #0e7490; /* Cyan Primary — WCAG AA (>=4.5:1) on white/card */
+  --color-primary-hover: #155e75;
+  --color-success: #047857; /* Darkened from #059669 -> 5.2:1 on card (was 3.6:1) */
+  --color-warning: #b45309; /* Darkened from #d97706 -> 4.8:1 on card (was 3.0:1) */
+  --color-danger: #dc2626;  /* Darker Rose */
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* ── Theme-switch flicker control ─────────────────────────────
+   Premium apps make the theme swap feel *atomic* (everything changes at
+   once) instead of a staggered wipe where some elements animate over 0.2s
+   and others snap. We do that by hard-disabling every transition/animation
+   for one frame while the .light-theme class flips, then re-enabling.
+   - .theme-booting: set in <head> before first paint, removed after load,
+     so the initial render never animates.
+   - .theme-switching: set by the toggle handler for a single frame. */
+html.theme-booting *,
+html.theme-booting *::before,
+html.theme-booting *::after,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ── Respect the OS "Reduce Motion" accessibility setting ─────
+   Premium/native apps honor this: users who get motion sickness or prefer
+   calm UIs (Android: Settings > Accessibility > Remove animations) get near-
+   instant transitions instead of movement. We keep opacity fades subtle but
+   strip transforms/long animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Theme-toggle circular reveal (Phase 3.5, View Transitions API) ──
+   The new theme is revealed via a clip-path circle from the toggle button
+   (keyframes injected in main.js). The old snapshot is hidden instantly so
+   only the circular reveal of the new theme is visible. */
+::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-app);
+  -webkit-text-size-adjust: 100%; /* stop WebView/mobile from auto-inflating text */
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased; /* crisper text on WebKit/Android WebView */
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none; /* kill the rubber-band/glow so it feels app-native */
+}
+
+body {
+  height: 100%;
+  overflow: visible; /* allow position:fixed children (toasts) to escape */
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: var(--leading-normal);
+}
+
+.light-theme {
+  --bg-app: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  --bg-card: #f8fafc;
+  --bg-input: #ffffff;
+  --border-color: #cbd5e1;
+
+  --surface-base: #f1f5f9;
+  --surface-card: #ffffff;
+  --surface-hover: #f8fafc;
+  --surface-modal: #ffffff;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --color-primary: #0e7490; /* Cyan Primary — WCAG AA (>=4.5:1) on white/card */
+  --color-primary-hover: #155e75;
+  --color-success: #047857; /* Darkened from #059669 -> 5.2:1 on card (was 3.6:1) */
+  --color-warning: #b45309; /* Darkened from #d97706 -> 4.8:1 on card (was 3.0:1) */
+  --color-danger: #dc2626;  /* Darker Rose */
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+html.theme-booting *,
+html.theme-booting *::before,
+html.theme-booting *::after,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ── Respect the OS "Reduce Motion" accessibility setting ─────
+   Premium/native apps honor this: users who get motion sickness or prefer
+   calm UIs (Android: Settings > Accessibility > Remove animations) get near-
+   instant transitions instead of movement. We keep opacity fades subtle but
+   strip transforms/long animations. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-app);
+  -webkit-text-size-adjust: 100%; /* stop WebView/mobile from auto-inflating text */
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased; /* crisper text on WebKit/Android WebView */
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none; /* kill the rubber-band/glow so it feels app-native */
+}
+
+body {
+  height: 100%;
+  overflow: visible; /* allow position:fixed children (toasts) to escape */
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: var(--leading-normal);
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Theme-aware: matches app background in light & dark. Subtle radial glow
+     behind the brand for depth. Fallback first for pre-Chrome-111 WebViews. */
+  background: var(--bg-app);
+  background:
+    radial-gradient(120% 80% at 50% 38%, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 70%),
+    var(--bg-app);
+  z-index: var(--z-overlay, 9999999);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8, 32px);
+  padding: var(--space-6, 24px);
+  box-sizing: border-box;
+  transition: opacity var(--motion-slower) ease, visibility var(--motion-slower) ease;
+}
+
+.loading-overlay-bar-bg {
+  width: 100%;
+  height: 5px;
+  background: var(--border-color);
+  background: color-mix(in srgb, var(--text-muted) 22%, transparent);
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+}
+
+.loading-overlay-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  border-radius: var(--radius-full, 9999px);
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.45);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+.loading-overlay-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4, 16px);
+  text-align: center;
+}
+
+#app-loading-overlay {
+  opacity: 1;
+  visibility: visible;
+  /* Premium splash handoff: fade out smoothly into the app (Phase 4.3). */
+  transition: opacity var(--motion-slow) var(--ease-standard), visibility 0s linear var(--motion-slow);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(6,182,212,0.3); }
+  50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
+}
+</style>
+  <meta name="app-version" content="1.2.4">
+  <meta name="app-build-version" content="2026.07.31.23.34">
+  <title>Dr.CAT — Rappel Clinique</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
+  <link rel="manifest" href="manifest.json">
+  <!-- iOS PWA support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Dr.CAT">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <!-- Dual theme-color: browser/PWA chrome matches active theme -->
+  <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#090d16" media="(prefers-color-scheme: dark)">
+  <!--
+    Anti-FOUC (flash of unstyled/wrong theme): apply the saved theme to the
+    document BEFORE any CSS paints. Runs synchronously in <head>, so the very
+    first frame is already correct — no dark->light flash on launch.
+  -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        var theme = saved || (prefersLight ? 'light' : 'dark');
+        var root = document.documentElement;
+        if (theme === 'light') root.classList.add('light-theme');
+        // Native color-scheme hint (form controls, scrollbars) matches theme.
+        root.style.colorScheme = theme;
+        // Suppress transitions until first paint settles (prevents load-time animation).
+        root.classList.add('theme-booting');
+      } catch (e) { /* localStorage unavailable — fall back to default dark */ }
+    })();
+  </script>
+  <!-- Preload critical assets & database for instant LCP render -->
+  <link rel="preload" href="drcat_logo.webp" as="image" type="image/webp">
+  <link rel="preload" href="data/cats_db.json" as="fetch" crossorigin>
+  <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
+       works fully offline. Loaded non-render-blocking. -->
+  <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css?v=2607312334" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607312334"></noscript>
+  <!-- FontAwesome Icons (non-blocking) -->
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2607312334" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607312334"></noscript>
+  <!-- Full app stylesheet: loaded non-render-blocking so first paint
+       (critical CSS is inlined above) never waits on this network request.
+       The media="print" onload swap flips it to all once fetched. -->
+  <link rel="stylesheet" href="style.css?v=2607312334" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2607312334" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2607312334">
+  <noscript>
+    <link rel="stylesheet" href="style.css?v=2607312334">
+    <link rel="stylesheet" href="css/utilities.css?v=2607312334">
+  </noscript>
+  <script type="module" src="js/version-checker.js?v=2607312334"></script>
+</head>
+<body>
+  <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
+  <div id="security-root"></div>
+
+  <!-- APP LOADING OVERLAY - full-screen boot splash, hidden when ready -->
+  <div id="app-loading-overlay" class="loading-overlay">
+    <div class="loading-overlay-brand">
+      <img src="drcat_logo.webp" alt="Dr.CAT" width="88" height="88"
+           style="width: 88px; height: 88px; border-radius: 20px; object-fit: cover; box-shadow: var(--shadow-lg); animation: pulse-glow 2s ease-in-out infinite;">
+      <div>
+        <h1 style="font-size: var(--text-2xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin: 0; letter-spacing: -0.02em;">Dr.CAT</h1>
+        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: var(--space-1) 0 0;">Rappel Clinique</p>
+      </div>
+    </div>
+
+    <div class="loading-overlay-progress">
+      <div class="loading-overlay-bar-bg">
+        <div id="app-loading-bar" class="loading-overlay-bar-fill" style="width: 0%;"></div>
+      </div>
+      <p style="font-size: var(--text-xs); color: var(--text-muted); margin: 0;">Chargement en cours…</p>
+      <div id="app-loading-msg" class="loading-overlay-msg"></div>
+    </div>
+
+    <div class="loading-overlay-actions">
+      <button id="skip-loading-btn" class="btn-danger-ghost">✕ Ignorer</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+
+      <!-- LEVEL 1: Compact Header Strip -->
+      <div class="sidebar-header">
+        <div class="brand" id="brand-logo" style="cursor: pointer;">
+          <picture>
+            <source srcset="drcat_logo.webp" type="image/webp">
+            <img src="drcat_logo.png" alt="Dr.CAT Logo" class="brand-icon" width="36" height="36" fetchpriority="high" decoding="async">
+          </picture>
+          <div>
+            <h1 style="display: flex; align-items: center; gap: 5px;">
+              Dr.CAT
+              <span style="font-size: 8px; font-weight: 800; background: rgba(6, 182, 212, 0.15); color: var(--color-primary); padding: 1px 4px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">BETA</span>
+            </h1>
+            <p>Rappel Clinique</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="theme-toggle-btn" class="theme-toggle-btn" title="Changer le thème" aria-label="Changer le thème">
+            <i class="fa-solid fa-moon" id="theme-toggle-icon"></i>
+          </button>
+          <button class="toggle-sidebar-btn" id="close-sidebar-btn" aria-label="Fermer le menu de navigation">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- LEVEL 2: Collapsible Controls Band -->
+      <div class="sidebar-controls" id="sidebar-controls">
+
+        <!-- Always-visible: Search + Toggle chevron -->
+        <div class="search-row">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="search-input" placeholder="Rechercher une CAT...">
+          </div>
+          <button class="controls-toggle-btn" id="controls-toggle-btn" title="Afficher/Masquer les filtres">
+            <i class="fa-solid fa-chevron-up" id="controls-toggle-icon"></i>
+          </button>
+        </div>
+
+        <!-- Collapsible inner panel -->
+        <div class="controls-panel" id="controls-panel">
+          <!-- Category filter -->
+          <select id="category-filter" class="category-select" aria-label="Filtrer par spécialité">
+            <option value="all">Toutes les spécialités</option>
+          </select>
+
+          <!-- Status pills -->
+          <div class="quick-status-filters">
+            <button class="status-pill active" data-filter="all">Tous</button>
+            <button class="status-pill" data-filter="todo">À faire</button>
+            <button class="status-pill" data-filter="doing">En cours</button>
+            <button class="status-pill" data-filter="done">Maîtrisé</button>
+          </div>
+
+          <!-- Action buttons row -->
+          <div class="sidebar-action-row">
+            <button class="action-btn sidebar-btn-quiz" id="start-quiz-nav-btn">
+              <i class="fa-solid fa-brain"></i> Quiz 🧠
+            </button>
+            <button class="action-btn sidebar-btn-add" id="add-cat-btn">
+              <i class="fa-solid fa-plus"></i> CAT
+            </button>
+          </div>
+
+          <!-- Slim progress bar -->
+          <div class="slim-progress">
+            <div class="slim-progress-top">
+              <span class="slim-progress-label"><i class="fa-solid fa-chart-line"></i> Progression globale</span>
+              <span id="progress-percent" class="slim-progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="stats-counters">
+              <span class="stat-counter todo">
+                <i class="fa-regular fa-circle"></i>
+                <span id="count-todo">0</span>
+              </span>
+              <span class="stat-counter doing">
+                <i class="fa-solid fa-spinner fa-spin-hover"></i>
+                <span id="count-doing">0</span>
+              </span>
+              <span class="stat-counter done">
+                <i class="fa-solid fa-circle-check"></i>
+                <span id="count-done">0</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEVEL 3: Scrollable CAT List (dominant, takes remaining space) -->
+      <div class="cat-list-wrapper">
+        <ul class="cat-list" id="cat-list">
+          <!-- Shimmer Skeletons displayed during boot loading -->
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+          <li class="cat-item-skeleton">
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Sidebar Overlay for mobile tap-to-close & click blocking -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Mobile header -->
+      <header class="mobile-header">
+        <button class="menu-btn" id="open-sidebar-btn" aria-label="Ouvrir le menu de navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+          <div class="mobile-brand" id="mobile-brand-logo">
+            <picture>
+              <source srcset="drcat_logo.webp" type="image/webp">
+              <img src="drcat_logo.png" alt="Dr.CAT" class="mobile-brand-icon" width="24" height="24" decoding="async">
+            </picture>
+           <span class="mobile-brand-text">
+             Dr.CAT
+             <span class="mobile-beta-badge">BETA</span>
+           </span>
+         </div>
+        <div class="mobile-status-placeholder"></div>
+      </header>
+
+      <!-- Welcome/Dashboard screen -->
+      <section class="welcome-screen" id="welcome-screen">
+        <div class="dashboard-container">
+          <header class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h2>Tableau de Bord 🩺 <span style="font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.2); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px;">BETA</span></h2>
+              <p>Suivi de votre apprentissage des <span id="total-cats-count">55</span> conduites à tenir</p>
+            </div>
+             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <div class="specialty-export-container" style="display: none; align-items: center; gap: 6px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: var(--radius-md);">
+                <select id="export-specialty-select" aria-label="Sélectionner une spécialité à exporter" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
+                  <option value="">Sélectionner spécialité...</option>
+                </select>
+                <button class="action-btn" id="export-specialty-btn" style="font-size: 11px; padding: 4px 8px; border: none; background: rgba(6,182,212,0.1); color: var(--color-primary); cursor: pointer; display: flex; align-items: center; gap: 4px; border-radius: 4px; font-weight: 600;">
+                  <i class="fa-solid fa-file-export"></i> Exporter
+                </button>
+              </div>
+              <button class="action-btn" id="export-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+                <i class="fa-solid fa-download"></i> Exporter Progrès
+              </button>
+              <button class="action-btn" id="import-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
+                <i class="fa-solid fa-upload"></i> Importer Progrès
+              </button>
+              <input type="file" id="import-progress-file" accept=".json" style="display: none;">
+              <button class="action-btn" id="admin-login-btn" style="font-size: 12px; padding: 6px 12px; display: none; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-lock"></i> Connexion Admin
+              </button>
+              <button class="cancel-btn" id="reset-progress-btn" style="border-color: rgba(239, 68, 68, 0.4); color: var(--color-danger); font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-trash-can"></i> Réinitialiser la progression
+              </button>
+            </div>
+          </header>
+          
+            <!-- Quick Stats Grid -->
+            <div class="dashboard-grid">
+              <div class="dash-card mastery-card animate-entrance delay-1">
+                <div class="mastery-circular-container">
+                  <svg class="progress-ring" width="52" height="52">
+                    <circle class="progress-ring-circle-bg" stroke="var(--border-color)" stroke-width="3.5" fill="transparent" r="22" cx="26" cy="26"/>
+                    <circle class="progress-ring-circle" id="dash-mastery-ring" stroke="var(--color-primary)" stroke-width="3.5" stroke-linecap="round" fill="transparent" r="22" cx="26" cy="26" stroke-dasharray="138.23" stroke-dashoffset="138.23"/>
+                  </svg>
+                  <div class="mastery-value" id="dash-mastery-rate">0%</div>
+                </div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Taux de Maîtrise</span>
+                  <span class="dash-card-desc">Progression globale</span>
+                </div>
+              </div>
+              
+              <div class="dash-card done-card animate-entrance delay-2">
+                <div class="dash-card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Maîtrisés</span>
+                  <span class="dash-card-val" id="dash-count-done">0 / 55</span>
+                </div>
+              </div>
+  
+              <div class="dash-card doing-card animate-entrance delay-3">
+                <div class="dash-card-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">En cours</span>
+                  <span class="dash-card-val" id="dash-count-doing">0 / 55</span>
+                </div>
+              </div>
+  
+              <div class="dash-card streak-card animate-entrance delay-4" style="border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.02);">
+                <div class="dash-card-icon" style="color: var(--color-warning); background: rgba(245, 158, 11, 0.08);"><i class="fa-solid fa-fire"></i></div>
+                <div class="dash-card-info">
+                  <span class="dash-card-label">Série d'Études</span>
+                  <span class="dash-card-val" id="dash-streak-count">0 jour</span>
+                </div>
+              </div>
+            </div><!-- /.dashboard-grid -->
+
+          <!-- First-Run Welcome Banner (hidden after first CAT started) -->
+          <div id="first-run-banner" style="display: none; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.07), rgba(16,185,129,0.05)); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 20px; flex-wrap: wrap;">
+            <div style="font-size: 52px; line-height: 1; flex-shrink: 0;">🩺</div>
+            <div style="flex: 1; min-width: 200px;">
+              <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">Bienvenue sur Dr.CAT !</h3>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">Sélectionnez une <strong>Conduite à Tenir</strong> dans la liste à gauche pour commencer. Marquez-la <em>En cours</em> pour qu'elle apparaisse ici lors de vos prochaines sessions.</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+              <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> 78 livres de référence indexés</span>
+              <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> Quiz clinique intégré</span>
+              <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i> Notes & ordonnances personnalisables</span>
+            </div>
+          </div>
+
+          <!-- Admin Control Center (Visible only to Admin) -->
+          <div class="dashboard-block admin-moderation-panel" id="admin-moderation-panel" style="display: none; border-color: var(--color-primary); margin-bottom: 24px; padding: 0; overflow: hidden; background: var(--bg-sidebar); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <!-- Admin Tabs Header -->
+            <div class="admin-tabs-header" role="tablist" style="display: flex; background: rgba(0,0,0,0.25); border-bottom: 1px solid var(--border-color); padding: 4px; gap: 4px;">
+              <button class="admin-tab-btn active" data-target="admin-pane-suggestions" role="tab" aria-selected="true" aria-controls="admin-pane-suggestions" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-inbox"></i> Propositions
+              </button>
+              <button class="admin-tab-btn" data-target="admin-pane-pdfs" role="tab" aria-selected="false" aria-controls="admin-pane-pdfs" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-file-pdf"></i> Fichiers PDF
+              </button>
+              <button class="admin-tab-btn" data-target="admin-pane-version" role="tab" aria-selected="false" aria-controls="admin-pane-version" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Kill Switch & Version
+              </button>
+            </div>
+
+            <!-- Admin Tab Panes -->
+            <div class="admin-panes-container" style="padding: 20px;">
+              
+              <!-- PANE 1: Suggestions Moderation -->
+              <div class="admin-pane-content" id="admin-pane-suggestions" role="tabpanel" style="display: block;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <h4 style="margin: 0; color: var(--color-primary); font-size: 14.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-user-shield"></i> Propositions en attente</h4>
+                </div>
+                <p class="block-desc" style="margin: 0 0 12px 0;">Validez ou rejetez les suggestions soumises par vos collègues :</p>
+                <div class="suggestions-list" id="suggestions-list" style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Dynamically populated -->
+                  <p class="text-muted text-center" style="padding: 10px 0;">Aucune proposition en attente.</p>
+                </div>
+
+                <!-- Bulk Import Box -->
+                <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                  <h4 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 13.5px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-file-import"></i> Importation Groupée (JSON)</h4>
+                  <p class="block-desc" style="margin: 0 0 10px 0;">Sélectionnez un fichier JSON contenant une liste de fiches pour les importer en lot.</p>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="file" id="admin-bulk-import-input" accept=".json" style="display: none;">
+                    <button class="action-btn" id="admin-bulk-import-trigger-btn" style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: rgba(6,182,212,0.1); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                      <i class="fa-solid fa-folder-open"></i> Choisir le fichier JSON
+                    </button>
+                    <span id="bulk-import-file-name" class="text-muted" style="font-size: 11.5px;">Aucun fichier sélectionné</span>
+                    <button class="action-btn" id="admin-bulk-import-submit-btn" disabled style="padding: 6px 12px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; border-radius: 4px; cursor: not-allowed; opacity: 0.5; transition: all 0.2s;">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Importer
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+              
+              <!-- PANE 2: PDF Management -->
+              <div class="admin-pane-content" id="admin-pane-pdfs" role="tabpanel" style="display: none;">
+                <!-- Dynamically rendered by admin_pdf.js -->
+              </div>
+
+              <!-- PANE 3: Kill Switch & Version Control -->
+              <div class="admin-pane-content" id="admin-pane-version" role="tabpanel" style="display: none;">
+                <!-- Dynamically rendered by admin_version.js -->
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-content-split">
+            <!-- Resume block -->
+            <div class="dashboard-block resume-block animate-entrance delay-3">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Reprendre la révision</h3>
+              <p class="block-desc">Vos derniers cours en cours de lecture :</p>
+              <ul class="resume-list" id="dash-resume-list">
+                <li class="empty-state">Aucun cours en cours. Sélectionnez un cours dans la barre latérale pour commencer !</li>
+              </ul>
+            </div>
+
+            <!-- Categories progress block -->
+            <div class="dashboard-block categories-block animate-entrance delay-4">
+              <h3><i class="fa-solid fa-chart-pie"></i> Progrès par spécialité</h3>
+              <div class="categories-list" id="dash-categories-progress">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Legal & Compliance Button -->
+          <div class="dashboard-block" style="margin-top: 20px; border-color: rgba(6, 182, 212, 0.15); background: rgba(30, 41, 59, 0.25); padding: 16px; text-align: center; border-radius: var(--radius-md);">
+            <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 12px 0;">Application éducative en version BETA conçue par Dr. Kibeche Ali.</p>
+            <button id="open-legal-modal-btn" class="action-btn" style="background: rgba(6, 182, 212, 0.1); color: var(--color-primary); border: 1px solid rgba(6, 182, 212, 0.3); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">
+              <i class="fa-solid fa-scale-balanced"></i> Consulter les Mentions Légales & CGU
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active CAT workspace -->
+      <section class="workspace" id="workspace" style="display: none;">
+        <!-- Workspace Header -->
+        <header class="workspace-header">
+          <div class="title-area">
+            <div class="title-header-row">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="cat-badge" id="workspace-cat-category" style="margin-bottom: 0;">Gastro-entérologie</span>
+                <button id="workspace-back-to-quiz-btn" class="action-btn" style="display: none; padding: 4px 10px; font-size: 11px; font-weight: 700; align-items: center; gap: 4px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; border-radius: var(--radius-sm);">
+                  <i class="fa-solid fa-arrow-left-long"></i> Retour au Quiz
+                </button>
+              </div>
+              <div class="workspace-header-actions">
+                <button id="print-cat-btn" class="action-btn print-compact-btn" title="Imprimer la fiche" aria-label="Imprimer la fiche">
+                  <i class="fa-solid fa-print"></i>
+                </button>
+                <button id="delete-cat-btn" class="btn-delete-ghost" title="Supprimer la fiche" aria-label="Supprimer la fiche">
+                  <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
+                </button>
+              </div>
+            </div>
+            <h2 id="workspace-cat-title">CAT devant intoxication alimentaire</h2>
+          </div>
+          
+          <div class="status-selector-area">
+            <span class="status-label">Statut :</span>
+            <div class="status-btn-group">
+              <button class="status-btn btn-todo" data-status="todo" title="À réviser">
+                <i class="fa-regular fa-circle"></i> <span>À faire</span>
+              </button>
+              <button class="status-btn btn-doing" data-status="doing" title="En cours de révision">
+                <i class="fa-solid fa-spinner"></i> <span>En cours</span>
+              </button>
+              <button class="status-btn btn-done" data-status="done" title="Maîtrisé">
+                <i class="fa-solid fa-circle-check"></i> <span>Maîtrisé</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Red Flags Banner -->
+        <div class="red-flags-banner" id="red-flags-banner">
+          <div class="red-flags-title">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>SIGNES DE GRAVITÉ / RED FLAGS</span>
+          </div>
+          <p id="workspace-red-flags">Contenu des red flags...</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs-nav" role="tablist">
+          <button class="tab-btn active" data-tab="tab-summary" role="tab" aria-selected="true" aria-controls="tab-summary">
+            <i class="fa-solid fa-file-invoice-document"></i> Fiche de Synthèse
+          </button>
+          <button class="tab-btn" data-tab="tab-notes" role="tab" aria-selected="false" aria-controls="tab-notes">
+            <i class="fa-solid fa-clipboard-question"></i> Notes Personnelles
+          </button>
+          <button class="tab-btn" data-tab="tab-prescription" role="tab" aria-selected="false" aria-controls="tab-prescription">
+            <i class="fa-solid fa-prescription-bottle-medical"></i> Ordonnance Type
+          </button>
+          <button class="tab-btn" data-tab="tab-pdfs" role="tab" aria-selected="false" aria-controls="tab-pdfs">
+            <i class="fa-solid fa-folder-open"></i> PDFs de Référence
+          </button>
+          <button class="tab-btn" data-tab="tab-search-pdf" role="tab" aria-selected="false" aria-controls="tab-search-pdf">
+            <i class="fa-solid fa-magnifying-glass"></i> Recherche PDF
+          </button>
+        </nav>
+
+        <!-- Tabs Content -->
+        <div class="tab-content-container">
+          <!-- Summary Tab -->
+          <div class="tab-pane active" id="tab-summary" role="tabpanel">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-shield-halved"></i> Conduite Pratique<span class="desktop-only-inline"> Recommandée</span></h3>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="action-btn" id="reader-mode-btn" title="Mode Lecture Plein Écran (Confort Visuel)">
+                  <i class="fa-solid fa-expand"></i> Mode<span class="desktop-only-inline"> Lecture</span>
+                </button>
+                <button class="action-btn edit-summary-btn" id="edit-summary-btn">
+                  <i class="fa-solid fa-pen"></i> Modifier<span class="desktop-only-inline"> la fiche</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="summary-view" id="summary-view">
+              <!-- Rendered summary -->
+            </div>
+            
+            <div class="summary-editor-wrapper" id="summary-editor-wrapper" style="display: none;">
+              <textarea id="summary-editor" rows="18" placeholder="Rédiger votre propre synthèse..."></textarea>
+              <div class="editor-actions">
+                <button class="cancel-btn" id="cancel-summary-edit-btn">Annuler</button>
+                <button class="save-btn" id="save-summary-btn">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes Tab -->
+          <div class="tab-pane" id="tab-notes" role="tabpanel">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations<span class="desktop-only-inline"> & Protocoles Locaux</span></h3>
+            </div>
+            <p class="tab-instruction">Prenez vos notes personnelles, observations cliniques ou ajustements ici. Elles sont sauvegardées localement.</p>
+            <textarea class="notes-textarea" id="notes-input" placeholder="Saisir vos notes ici..."></textarea>
+            <div class="pane-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; width: 100%;">
+              <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px;">
+                <span class="save-indicator" id="save-indicator"><i class="fa-solid fa-cloud-arrow-up"></i> Changements enregistrés</span>
+                <span style="font-size: 11px; color: var(--text-muted); display: block;"><i class="fa-solid fa-circle-info"></i> Notes stockées localement. Utilisez l'export du tableau de bord pour les sauvegarder.</span>
+              </div>
+              <button class="save-btn" id="save-notes-btn" style="margin-left: auto;">Sauvegarder les notes</button>
+            </div>
+          </div>
+
+          <!-- Prescription Tab -->
+          <div class="tab-pane" id="tab-prescription" role="tabpanel">
+            <div class="pane-header" style="margin-bottom: 12px;">
+              <h3><i class="fa-solid fa-file-prescription"></i> <span class="desktop-only-inline">Exemple d'</span>Ordonnance Type</h3>
+              <div style="display: flex; gap: 8px;">
+                <button class="action-btn" id="edit-prescription-btn" aria-label="Modifier l'ordonnance type">
+                  <i class="fa-solid fa-pen"></i> Modifier<span class="desktop-only-inline"> l'ordonnance</span>
+                </button>
+                <button class="action-btn copy-prescription-btn" id="copy-prescription-btn" title="Copier dans le presse-papier" aria-label="Copier l'ordonnance dans le presse-papier">
+                  <i class="fa-regular fa-copy"></i> Copier
+                </button>
+              </div>
+            </div>
+            <!-- Prescription Variants Selector -->
+            <div class="prescription-variants-selector" id="prescription-variants-selector" style="display: none; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; padding: 0 4px;">
+              <!-- Variant pills will be injected dynamically -->
+            </div>
+            <div class="prescription-container">
+              <div class="prescription-header">
+                <div class="clinic-info">
+                  <strong>Cabinet Médical de Médecine Générale</strong>
+                  <span>Alger, Algérie</span>
+                </div>
+                <div class="date-placeholder">Le: <span id="current-date">--/--/----</span></div>
+              </div>
+              <div class="prescription-body">
+                <div class="patient-line">Nom, Prénom : .................................................... Âge : ............</div>
+                <div class="prescription-content" id="workspace-prescription">
+                  <!-- Prescription text -->
+                </div>
+                <textarea id="prescription-editor" class="notes-textarea" style="display: none; background: #fff; color: #000; border-color: #cbd5e1; font-family: monospace; font-size: 14.5px; font-weight: bold; margin-top: 10px; resize: none;"></textarea>
+                <div id="prescription-editor-actions" style="display: none; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                  <button class="cancel-btn" id="cancel-prescription-edit-btn" style="border-color: #cbd5e1; color: #475569;">Annuler</button>
+                  <button class="save-btn" id="save-prescription-btn">Enregistrer</button>
+                </div>
+              </div>
+              <div class="prescription-footer">
+                <div class="stamp-container">
+                  <div class="official-red-stamp" title="Cachet Officiel Dr. CAT">
+                    <span class="stamp-top">CABINET MÉDICAL</span>
+                    <div class="stamp-center">
+                      <i class="fa-solid fa-stethoscope"></i>
+                      <strong>Dr. CAT</strong>
+                    </div>
+                    <span class="stamp-sub">MÉDECINE GÉNÉRALE</span>
+                    <span class="stamp-code" id="stamp-code">N° 01/CAT-2026</span>
+                  </div>
+                  <span class="signature-label">Signature et Cachet</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PDFs Tab -->
+          <div class="tab-pane" id="tab-pdfs" role="tabpanel">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-file-pdf"></i> Documents<span class="desktop-only-inline"> Médicaux</span> de Référence</h3>
+            </div>
+            <p class="tab-instruction">Voici les cours et documents PDF de votre dossier de référence correspondant à cette spécialité :</p>
+            <div class="pdf-list" id="pdf-list">
+              <!-- Dynamically populated links to PDFs -->
+            </div>
+            
+            <div class="all-pdfs-accordion">
+              <div class="accordion-header" id="all-pdfs-header">
+                <span><i class="fa-solid fa-search"></i> Parcourir tous les PDFs disponibles</span>
+                <i class="fa-solid fa-chevron-down accordion-icon"></i>
+              </div>
+              <div class="accordion-content" id="all-pdfs-content" style="display: none;">
+                <input type="text" id="pdf-search" placeholder="Filtrer parmi les 78 fichiers PDF...">
+                <ul class="all-pdfs-list" id="all-pdfs-list">
+                  <!-- List of all 78 PDFs -->
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- PDF Search Tab -->
+          <div class="tab-pane" id="tab-search-pdf" role="tabpanel">
+            <div class="pane-header">
+              <h3><i class="fa-solid fa-magnifying-glass"></i> Recherche Globale<span class="desktop-only-inline"> dans le texte des PDFs</span></h3>
+            </div>
+            <p class="tab-instruction">Saisissez un mot-clé (médicament, posologie, symptôme) pour fouiller dans le texte complet de vos 78 livres et guides de référence.</p>
+            
+            <div class="pdf-search-box">
+              <div class="search-input-wrapper">
+                <input type="text" id="pdf-content-search-input" placeholder="Rechercher un mot (ex: Amoxicilline, Asthme, Céphalée)...">
+                <button id="pdf-content-search-btn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> <span class="desktop-only-inline">Rechercher</span></button>
+              </div>
+              
+              <div class="index-status-indicator" id="pdf-index-status">
+                <span class="status-text"><i class="fa-solid fa-circle-notch fa-spin"></i> Chargement du statut d'indexation...</span>
+                <button id="pdf-reindex-btn" class="btn-text" title="Forcer la ré-indexation de tous les PDFs" style="display: none;"><i class="fa-solid fa-rotate"></i> Ré-indexer</button>
+              </div>
+            </div>
+
+            <div class="pdf-search-loading" id="pdf-search-loading" style="display: none;">
+              <span class="pdf-search-loading-label"><i class="fa-solid fa-spinner fa-spin"></i> Recherche en cours dans vos documents…</span>
+              <div class="pdf-search-skeleton" aria-hidden="true">
+                <div class="pdf-search-result-card skeleton">
+                  <div class="pdf-search-result-header"><span class="skeleton-line" style="width: 60%;"></span><span class="skeleton-line" style="width: 42px;"></span></div>
+                  <div class="skeleton-line" style="width: 95%;"></div>
+                  <div class="skeleton-line" style="width: 88%;"></div>
+                </div>
+                <div class="pdf-search-result-card skeleton">
+                  <div class="pdf-search-result-header"><span class="skeleton-line" style="width: 55%;"></span><span class="skeleton-line" style="width: 42px;"></span></div>
+                  <div class="skeleton-line" style="width: 92%;"></div>
+                  <div class="skeleton-line" style="width: 80%;"></div>
+                </div>
+                <div class="pdf-search-result-card skeleton">
+                  <div class="pdf-search-result-header"><span class="skeleton-line" style="width: 65%;"></span><span class="skeleton-line" style="width: 42px;"></span></div>
+                  <div class="skeleton-line" style="width: 90%;"></div>
+                  <div class="skeleton-line" style="width: 84%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pdf-search-results" id="pdf-search-results-container">
+              <!-- Search results dynamically populated -->
+              <p class="text-muted text-center" style="margin-top: 30px;">Entrez un terme de recherche ci-dessus pour commencer.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz Screen Section -->
+      <section class="workspace" id="quiz-screen" style="display: none; flex-direction: column; padding: 24px; overflow-y: auto;">
+        
+        <!-- 1. Quiz Configuration Setup View -->
+        <div id="quiz-setup-view" style="display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; width: 100%;">
+          <div style="text-align: center; margin-bottom: 10px;">
+            <i class="fa-solid fa-brain" style="font-size: 48px; color: var(--color-primary); margin-bottom: 16px;"></i>
+            <h2 style="color: var(--text-primary);">Mode Entraînement & Quiz 🧠</h2>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Simulez des cas cliniques et révisez les Red Flags et Ordonnances types de vos fiches médicales.</p>
+          </div>
+
+          <div class="dashboard-block" style="gap: 16px;">
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="quiz-category" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-filter"></i> Sélectionner une Spécialité :</label>
+              <select id="quiz-category" aria-label="Sélectionner une spécialité pour le quiz" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+                <option value="all">Toutes les spécialités</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="quiz-count" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-list-ol"></i> Nombre de Questions :</label>
+              <select id="quiz-count" aria-label="Sélectionner le nombre de questions" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+                <option value="5">5 questions</option>
+                <option value="10" selected>10 questions</option>
+                <option value="15">15 questions</option>
+                <option value="20">20 questions</option>
+                <option value="30">30 questions</option>
+                <option value="50">50 questions</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</div>
+              <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+                  <input type="checkbox" id="quiz-type-specialty" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                  <span>Cas Clinique & Orientation (QCM 🩺)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+                  <input type="checkbox" id="quiz-type-posology" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                  <span>Ordonnance & Posologie (QCM 💊)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+                  <input type="checkbox" id="quiz-type-redflags" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                  <span>Red Flags / Signes de Gravité (Écrire la réponse ✍️)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+                  <input type="checkbox" id="quiz-type-prescription" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                  <span>Ordonnance Type / Traitement (Écrire la réponse ✍️)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+              <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-graduation-cap"></i> Mode d'apprentissage :</div>
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; margin-top: 4px;">
+                <input type="checkbox" id="quiz-spaced-repetition" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                <span>Priorité répétition espacée (Leitner 📅)</span>
+              </label>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+              <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-clock"></i> Limite de temps :</div>
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; margin-top: 4px;">
+                <input type="checkbox" id="quiz-timed-mode" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                <span>Activer le chronomètre par question</span>
+              </label>
+              <select id="quiz-timer-seconds" aria-label="Temps par question" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); margin-top: 4px; display: none;">
+                <option value="15">15 secondes</option>
+                <option value="30" selected>30 secondes</option>
+                <option value="60">60 secondes</option>
+              </select>
+            </div>
+
+            <button class="action-btn" id="start-quiz-btn" style="width: 100%; font-weight: 700; margin-top: 10px; justify-content: center; display: flex; gap: 8px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; padding: 12px; font-size: 14px; border-radius: var(--radius-md);">
+              <i class="fa-solid fa-play"></i> Commencer le Quiz
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Active Quiz Session Card View -->
+        <div id="quiz-active-view" style="display: none; flex-direction: column; gap: 20px; max-width: 700px; margin: 0 auto; width: 100%;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);"><i class="fa-solid fa-hourglass-half"></i> Quiz en cours</h3>
+            <span id="quiz-progress-text" style="font-weight: 600; color: var(--color-primary); font-size: 14px;">Question 1 / 10</span>
+          </div>
+
+          <!-- Progress Bar Fill -->
+          <div class="category-progress-bar" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+            <div id="quiz-progress-fill" style="width: 10%; height: 100%; background: linear-gradient(90deg, var(--color-primary), #10b981); border-radius: 4px;"></div>
+          </div>
+
+          <!-- Timer Bar (visible if Timed Mode is on) -->
+          <div id="quiz-timer-wrapper" style="display: none; flex-direction: column; gap: 4px; margin-bottom: 10px; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--color-danger);">
+              <span><i class="fa-solid fa-clock"></i> Temps restant :</span>
+              <span id="quiz-timer-count">30s</span>
+            </div>
+            <div style="height: 6px; background: rgba(239, 68, 68, 0.1); border-radius: 3px; overflow: hidden; width: 100%;">
+              <div id="quiz-timer-fill" style="width: 100%; height: 100%; background: var(--color-danger); transition: width 0.1s linear;"></div>
+            </div>
+          </div>
+
+          <!-- Question Content Card -->
+          <div class="dashboard-block" id="quiz-question-card" style="gap: 16px; padding: 24px;">
+            <!-- Category and ID indicator -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span class="cat-badge" id="quiz-q-meta" style="margin-bottom: 0;">Red Flags</span>
+              <span id="quiz-q-points" style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Valeur : 1 point</span>
+            </div>
+            
+            <h2 id="quiz-q-title" style="font-size: 18px; font-weight: 700; line-height: 1.4; color: var(--text-primary); margin-bottom: 8px;">Question Title</h2>
+            
+            <!-- A. Multiple Choice (QCM) Container -->
+            <div id="quiz-qcm-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%;">
+              <!-- Dynamically generated button options -->
+            </div>
+
+            <!-- B. Text Write-In Input Container -->
+            <div id="quiz-writein-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 100%;">
+              <label for="quiz-user-text" style="font-size: 13px; color: var(--text-secondary);">Saisissez votre conduite à tenir ou traitement ci-dessous :</label>
+              <textarea id="quiz-user-text" rows="5" placeholder="Écrivez votre réponse ici. Essayez de mentionner les médicaments clés, les posologies, ou les critères d'urgence précis..." style="width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; color: var(--text-primary); font-family: var(--font-sans); font-size: 13.5px; resize: vertical;"></textarea>
+              
+              <!-- Hint Button & Box -->
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                <button id="quiz-hint-btn" class="action-btn" style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-secondary); font-size: 12px; padding: 6px 12px; align-self: flex-start; display: flex; gap: 6px; font-weight: 600;">
+                  <i class="fa-regular fa-lightbulb" style="color: var(--color-warning);"></i> Obtenir un indice (-0.5 pt)
+                </button>
+                <div id="quiz-hint-box" style="display: none; font-size: 12.5px; padding: 10px 14px; background: rgba(245, 158, 11, 0.05); border: 1px dashed rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); color: var(--color-warning); font-weight: 500;">
+                  <!-- Indice content -->
+                </div>
+              </div>
+
+              <button class="action-btn" id="quiz-submit-text-btn" style="width: 100%; font-weight: 700; justify-content: center; display: flex; gap: 8px;">
+                <i class="fa-solid fa-circle-check"></i> Valider ma réponse
+              </button>
+            </div>
+
+            <!-- C. Feedback Comparison Panel (Hidden until answered) -->
+            <div id="quiz-feedback-panel" style="display: none; flex-direction: column; gap: 16px; margin-top: 16px; border-top: 1px dashed var(--border-color); padding-top: 16px;">
+              <div id="quiz-feedback-header" style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: var(--text-primary);">
+                <i class="fa-solid fa-circle-info"></i> <span id="quiz-feedback-status">Correction</span>
+              </div>
+
+              <!-- Side-by-side comparison for write-in questions -->
+              <div id="quiz-comparison-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%;">
+                <div class="dashboard-block" style="background: rgba(255,255,255,0.01); padding: 14px; border: 1px solid var(--border-color);">
+                  <h4 style="font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;"><i class="fa-solid fa-pen-clip"></i> Votre réponse :</h4>
+                  <div id="quiz-display-user-answer" style="font-size: 13px; white-space: pre-wrap; line-height: 1.5; color: var(--text-primary);">...</div>
+                </div>
+                <div class="dashboard-block" style="background: rgba(16, 185, 129, 0.02); padding: 14px; border: 1px solid rgba(16, 185, 129, 0.15);">
+                  <h4 style="font-size: 13px; color: var(--color-success); margin-bottom: 6px; font-weight: 600;"><i class="fa-solid fa-clipboard-check"></i> Réponse attendue (Fiche officielle) :</h4>
+                  <div id="quiz-display-correct-answer" style="font-size: 13px; white-space: pre-wrap; line-height: 1.5; color: var(--text-primary);">...</div>
+                </div>
+              </div>
+
+              <!-- Keyword matching tags indicator -->
+              <div id="quiz-keywords-matched-panel" style="display: flex; flex-direction: column; gap: 8px;">
+                <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;"><i class="fa-solid fa-key"></i> Mots-clés identifiés dans votre réponse :</span>
+                <div id="quiz-keywords-matched-tags" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  <!-- Dynamic badges -->
+                </div>
+              </div>
+
+              <!-- Self-grading keys for write-in questions -->
+              <div id="quiz-self-grading-panel" style="display: flex; flex-direction: column; gap: 8px;">
+                <span style="font-size: 12.5px; color: var(--color-primary); font-weight: 700;">Attribuez votre note honnêtement en fonction du comparatif :</span>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%;">
+                  <button class="status-btn btn-done" id="quiz-grade-full" style="justify-content: center; font-weight: 700; padding: 10px; display: flex; gap: 6px;"><i class="fa-solid fa-check-double"></i> 100% (1 pt)</button>
+                  <button class="status-btn btn-doing" id="quiz-grade-partial" style="justify-content: center; font-weight: 700; padding: 10px; display: flex; gap: 6px;"><i class="fa-solid fa-circle-half-stroke"></i> Partiel (0.5 pt)</button>
+                  <button class="status-btn btn-todo" id="quiz-grade-zero" style="justify-content: center; font-weight: 700; padding: 10px; display: flex; gap: 6px;"><i class="fa-solid fa-xmark"></i> Revoir (0 pt)</button>
+                </div>
+              </div>
+
+              <!-- Consultation of referenced card button -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
+                <button class="cancel-btn" id="quiz-view-ref-btn" style="padding: 8px 14px; font-size: 12.5px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-eye"></i> Ouvrir la Fiche Référence
+                </button>
+                <button class="action-btn" id="quiz-next-btn" style="padding: 10px 20px; font-weight: 700; display: flex; align-items: center; gap: 6px; font-size: 13.5px;">
+                  Suivant <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Quiz Score Results View -->
+        <div id="quiz-results-view" style="display: none; flex-direction: column; gap: 24px; max-width: 700px; margin: 0 auto; width: 100%;">
+          <div style="text-align: center; padding: 30px 20px; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <i class="fa-solid fa-award" style="font-size: 56px; color: var(--color-warning); margin-bottom: 16px;"></i>
+            <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary);">Quiz Terminé ! 🎓</h2>
+            <div style="font-size: 40px; font-weight: 800; color: var(--color-primary); margin: 16px 0;" id="quiz-results-score">8.5 / 10</div>
+            <p id="quiz-results-feedback" style="color: var(--text-secondary); font-size: 14.5px; max-width: 480px; margin: 0 auto; line-height: 1.5;">Félicitations, vous consolidez vos acquis ! Révisez les points faibles identifiés ci-dessous.</p>
+            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
+              <button class="action-btn" id="quiz-retry-btn" style="padding: 10px 20px; font-weight: 700; display: flex; gap: 8px;"><i class="fa-solid fa-rotate-left"></i> Recommencer</button>
+              <button class="action-btn" id="quiz-retry-errors-btn" style="padding: 10px 20px; font-weight: 700; display: none; gap: 8px; background: linear-gradient(135deg, var(--color-warning), #d97706) !important; color: #000 !important;"><i class="fa-solid fa-triangle-exclamation"></i> Corriger mes erreurs</button>
+              <button class="cancel-btn" id="quiz-quit-btn" style="padding: 10px 20px; display: flex; gap: 8px; justify-content: center; align-items: center;"><i class="fa-solid fa-house"></i> Tableau de bord</button>
+            </div>
+          </div>
+
+          <!-- Weak Points & Category Breakdown Panel -->
+          <div class="dashboard-block" id="quiz-weak-points-panel" style="display: none; gap: 12px; padding: 20px;">
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-triangle-exclamation" style="color: var(--color-warning);"></i> Analyse par Spécialité & Points Faibles</h3>
+            <div id="quiz-category-scores-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px; width: 100%;">
+              <!-- Dynamic category breakdown bars -->
+            </div>
+          </div>
+
+          <!-- Breakdown History Table -->
+          <div class="dashboard-block" style="gap: 12px; padding: 20px;">
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-list-check"></i> Détail de vos réponses</h3>
+            <div style="overflow-x: auto; width: 100%;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;" id="quiz-results-table">
+                <thead>
+                  <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-secondary);">
+                    <th style="padding: 10px;">Question / Sujet</th>
+                    <th style="padding: 10px;">Type</th>
+                    <th style="padding: 10px; text-align: center;">Score</th>
+                    <th style="padding: 10px; text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="quiz-results-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Add CAT Modal -->
+  <dialog class="modal-overlay" id="add-cat-modal" aria-labelledby="add-cat-modal-title" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="add-cat-modal-title"><i class="fa-solid fa-plus-circle"></i> Ajouter une nouvelle CAT</h3>
+        <button class="close-modal-btn" id="close-add-cat-modal-btn" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="add-cat-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="new-cat-title">Titre de la CAT *</label>
+            <input type="text" id="new-cat-title" required placeholder="Ex: CAT devant colique néphrétique...">
+          </div>
+          <div class="form-group">
+            <label for="new-cat-category">Spécialité / Catégorie *</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <select id="new-cat-category-select" aria-label="Spécialité de la nouvelle fiche">
+                <!-- Populated dynamically -->
+              </select>
+              <input type="text" id="new-cat-category" required placeholder="Ou saisissez une nouvelle spécialité...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-red-flags">Signes de Gravité / Red Flags (séparés par des virgules ou retours à la ligne)</label>
+            <textarea id="new-cat-red-flags" rows="3" placeholder="Ex: Fièvre élevée, perte de poids..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-summary">Fiche de Synthèse / Conduite à tenir</label>
+            <textarea id="new-cat-summary" rows="6" placeholder="**1. Évaluation :** ...&#10;**2. Traitement :** ..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-ordonnance">Ordonnance Type</label>
+            <textarea id="new-cat-ordonnance" rows="5" placeholder="1. Amoxicilline 1g...&#10;2. Paracétamol 1g..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="new-cat-pdf-keywords">Mots-clés pour l'association des PDFs (ex: Gastro, Pediatrie...)</label>
+            <input type="text" id="new-cat-pdf-keywords" placeholder="Mots clés séparés par des virgules">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="cancel-btn" id="cancel-add-cat-btn">Annuler</button>
+            <button type="submit" class="save-btn" id="save-new-cat-btn">Ajouter la fiche</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Beautiful Printed PDF Template Block (Only visible when printing) -->
+  <div id="print-template-container">
+    <div class="print-header">
+      <picture>
+        <source srcset="drcat_logo.webp" type="image/webp">
+        <img src="drcat_logo.png" alt="Dr.CAT Logo" class="print-logo" width="52" height="52" loading="lazy" decoding="async">
+      </picture>
+      <div class="print-app-details">
+        <h1>Dr.CAT — Rappel Clinique</h1>
+        <p>Aide à la Décision Médicale Clinique & Protocoles Thérapeutiques</p>
+      </div>
+      <div class="print-date-stamp" id="print-date-stamp">Le: --/--/----</div>
+    </div>
+    
+    <div class="print-divider"></div>
+    
+    <div class="print-cat-badge-wrap">
+      <span class="print-category" id="print-val-category">Spécialité</span>
+    </div>
+    
+    <h2 class="print-cat-title" id="print-val-title">Titre de la Conduite à Tenir</h2>
+    
+    <div class="print-section print-red-flags" id="print-section-redflags">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> Signes de Gravité / Red Flags</h3>
+      <p id="print-val-redflags">Aucun signe de gravité spécifié.</p>
+    </div>
+    
+    <div class="print-section">
+      <h3><i class="fa-solid fa-file-invoice-document"></i> Fiche de Synthèse Clinique</h3>
+      <div class="summary-view" id="print-val-summary">...</div>
+    </div>
+    
+    <div class="print-section" id="print-section-prescription">
+      <h3><i class="fa-solid fa-prescription-bottle-medical"></i> Ordonnance Type / Traitement de Référence</h3>
+      <div class="prescription-container" style="background: #fff; color: #000; box-shadow: none; border: 1px solid #ddd; padding: 20px; border-radius: var(--radius-md);">
+        <div class="prescription-header" style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-size: 11px;">
+          <strong>Ordonnance type recommandée</strong>
+        </div>
+        <div class="prescription-body" id="print-val-prescription" style="white-space: pre-wrap; font-family: var(--font-sans); font-size: 13px; line-height: 1.6;">
+          ...
+        </div>
+      </div>
+    </div>
+    
+    <div class="print-section" id="print-section-notes">
+      <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations & Protocoles Locaux</h3>
+      <div class="summary-view" id="print-val-notes" style="font-style: italic; white-space: pre-wrap;">Aucune note personnelle enregistrée.</div>
+    </div>
+    
+    <div class="print-footer">
+      <div class="print-quote">"Primum non nocere. L'art de la médecine consiste à divertir le patient pendant que la nature guérit la maladie."</div>
+      <div class="print-page-info">Généré via Dr.CAT Rappel Clinique</div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Summary Reader Modal -->
+  <div class="reader-modal-overlay" id="summary-reader-modal" style="display: none;">
+    <div class="reader-modal-content">
+      <div class="reader-modal-header">
+        <div class="reader-cat-meta">
+          <span class="badge badge-info" id="reader-cat-category">Spécialité</span>
+          <h2 id="reader-cat-title" style="margin: 0;">Titre de la Fiche</h2>
+        </div>
+        <button class="reader-close-btn" id="close-reader-modal-btn" title="Fermer (Échap)">
+          <i class="fa-solid fa-compress"></i> Quitter<span class="desktop-only-inline"> le Mode Lecture</span>
+        </button>
+      </div>
+      <div class="reader-modal-body summary-view" id="reader-summary-view">
+        <!-- Rendered summary content -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="dist/app-U7USIH46.js"></script>
+  <script>
+    window.__drCatBooted = false;
+    (function() {
+      var started = Date.now();
+      var overlay = document.getElementById('app-loading-overlay');
+      var bar = document.getElementById('app-loading-bar');
+      var msg = document.getElementById('app-loading-msg');
+
+      window.setLoaderProgress = function(pct) {
+        if (bar) {
+          bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        }
+        if (pct >= 100) {
+          if (msg && msg.style.display === 'block') {
+            return;
+          }
+          setTimeout(function() {
+            if (overlay) {
+              overlay.style.opacity = '0';
+              overlay.style.visibility = 'hidden';
+              overlay.classList.add('hidden');
+            }
+            window.__drCatBooted = true;
+          }, 350);
+        }
+      };
+
+      function showError(text) {
+        if (msg) {
+          msg.textContent = text;
+          msg.style.display = 'block';
+          msg.style.whiteSpace = 'pre-wrap';
+          msg.style.textAlign = 'left';
+          msg.style.fontFamily = 'monospace';
+          msg.style.fontSize = '10px';
+          msg.style.maxHeight = '250px';
+          msg.style.overflowY = 'auto';
+          msg.style.background = 'rgba(239, 68, 68, 0.1)';
+          msg.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          msg.style.padding = '8px';
+          msg.style.borderRadius = '6px';
+        }
+        if (overlay) {
+          overlay.style.opacity = '1';
+          overlay.style.visibility = 'visible';
+          overlay.classList.remove('hidden');
+        }
+        window.setLoaderProgress(100);
+      }
+
+      window.addEventListener('error', function(event) {
+        // Ignore resource loading errors (e.g., 404s on images, stylesheets, or capacitor.js)
+        if (event.target && event.target !== window) {
+          return;
+        }
+        // Only freeze the loading banner for startup/bootstrap failures
+        if (window.__drCatBooted) {
+          return;
+        }
+        var errMessage = event.message || 'Unknown Error';
+        var source = event.filename ? event.filename.split('/').pop() : 'unknown';
+        var lineno = event.lineno || 0;
+        var colno = event.colno || 0;
+        var errorStr = '💥 Startup Crash: ' + errMessage + ' (' + source + ':' + lineno + ':' + colno + ')';
+        if (event.error && event.error.stack) {
+          errorStr += '\n' + event.error.stack;
+        }
+        showError(errorStr);
+      }, true);
+
+      window.addEventListener('unhandledrejection', function(event) {
+        // Only freeze the loading banner for startup/bootstrap failures
+        if (window.__drCatBooted) {
+          return;
+        }
+        var reason = event.reason;
+        var errorStr = '💥 Startup Promise Rejected: ' + (reason && reason.message ? reason.message : reason);
+        if (reason && reason.stack) {
+          errorStr += '\n' + reason.stack;
+        }
+        showError(errorStr);
+      }, true);
+
+      window.setLoaderProgress(2);
+
+      window.__drCatRetry = function() {
+        if (overlay) {
+          overlay.style.opacity = '1';
+          overlay.style.visibility = 'visible';
+          overlay.classList.remove('hidden');
+        }
+        window.setLoaderProgress(3);
+        setTimeout(function() {
+          location.reload();
+        }, 300);
+      };
+    })();
+  </script>
+
+  <!-- Legal Modal -->
+  <dialog class="modal-overlay" id="legal-modal" style="display: none;">
+    <div class="modal-card modal-card-lg" style="padding: 24px; border-top: 4px solid var(--color-primary);">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 18px; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Mentions Légales & CGU</h2>
+        <button type="button" class="close-modal" id="close-legal-modal-btn" aria-label="Fermer les mentions légales" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="max-height: 65vh; overflow-y: auto; padding-right: 10px; font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);">
+        
+        <div style="margin-bottom: 25px;">
+          <h3 style="color: var(--color-danger, #ef4444); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> 1. Avertissement Médical (Important)</h3>
+          <p style="margin-bottom: 8px;"><strong>Dr. CAT est un outil strictement éducatif.</strong> L'application ne fournit aucun avis médical officiel. Les informations cliniques, algorithmes et protocoles thérapeutiques présentés sont fournis à titre de révision et d'aide-mémoire pour les professionnels de la santé ou les étudiants en médecine.</p>
+          <p style="margin-bottom: 0;"><strong>En aucun cas</strong> l'utilisation de cette application ne saurait se substituer au jugement clinique du médecin. L'auteur (Dr. Kibeche Ali) décline toute responsabilité quant aux conséquences directes ou indirectes pouvant résulter de l'utilisation des informations contenues dans cette application dans la pratique médicale réelle.</p>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+          <h3 style="color: var(--text-primary); font-size: 14px; margin-bottom: 8px;">2. Protection des Données (RGPD) & Confidentialité</h3>
+          <p style="margin-bottom: 8px; color: var(--color-primary); font-weight: 600;">Aucune donnée patient n'est collectée.</p>
+          <p style="margin-bottom: 0;">L'application fonctionne selon une architecture "Offline-First". Vos notes personnelles, vos réponses aux quiz et vos préférences de navigation sont stockées <strong>exclusivement en local</strong> sur votre propre appareil (via <code>localStorage</code>) et ne sont ni analysées par, ni revendues à, des tiers.</p>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+          <h3 style="color: var(--text-primary); font-size: 14px; margin-bottom: 8px;">3. Conditions Générales d'Utilisation (CGU)</h3>
+          <p style="margin-bottom: 8px;">En utilisant Dr. CAT, vous acceptez de :</p>
+          <ul style="padding-left: 20px; margin-bottom: 0;">
+            <li style="margin-bottom: 4px;">Ne pas utiliser cet outil comme unique source de décision clinique.</li>
+            <li>Vérifier systématiquement les posologies des ordonnances types avec les recommandations officielles en vigueur (Vidal, HAS, etc.).</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 style="color: var(--text-primary); font-size: 14px; margin-bottom: 8px;">4. Propriété Intellectuelle & Droits Réservés</h3>
+          <p style="margin-bottom: 8px;">Conception médicale, algorithmes et développement exclusif par <strong>Dr. Kibeche Ali</strong>. Tous droits réservés.</p>
+          <p style="margin-bottom: 12px;">L'ensemble des contenus, structures de données, moteurs de recherche internes et interfaces graphiques sont la propriété exclusive de l'auteur et protégés par le droit d'auteur.</p>
+          <p style="margin-bottom: 0; padding: 12px; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md);">Pour tout signalement ou suggestion : <a href="mailto:airdrop257@gmail.com" style="color: var(--color-primary); text-decoration: underline;">airdrop257@gmail.com</a></p>
+        </div>
+
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Cookie Consent Banner -->
+  <div id="legal-consent-banner" class="legal-consent-banner hidden" style="display: none;">
+    <div class="consent-content">
+      <div class="consent-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="consent-text">
+        <strong>Avertissement :</strong> Dr. CAT est un outil éducatif. Stockage local utilisé pour la progression.
+        <a href="#" id="open-legal-from-banner">Mentions légales</a>.
+      </div>
+    </div>
+    <div class="consent-actions">
+      <button id="accept-legal-btn" class="save-btn" style="padding: 6px 14px; font-size: 12px;"><i class="fa-solid fa-check"></i> J'accepte</button>
+      <button id="dismiss-legal-btn" class="dismiss-banner-btn" title="Fermer" aria-label="Fermer le bandeau légal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+
+</body>
+</html>

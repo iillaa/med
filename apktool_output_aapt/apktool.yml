@@ -1,0 +1,19 @@
+version: 3.0.3-dirty
+apkFileName: Dr Cat.apk
+usesFramework:
+  ids:
+  - 1
+sdkInfo:
+  minSdkVersion: 23
+  targetSdkVersion: 34
+versionInfo:
+  versionCode: 10405
+  versionName: 1.4.5
+resourcesInfo:
+  packageId: 127
+doNotCompress:
+- arsc
+- png
+- webp
+- assets/dexopt/baseline.prof
+- assets/dexopt/baseline.profm

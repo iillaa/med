@@ -1,0 +1,35 @@
+{
+	"appId": "com.drcat.app",
+	"appName": "Dr.CAT",
+	"webDir": "public",
+	"bundledWebRuntime": false,
+	"backgroundColor": "#090d16",
+	"server": {
+		"androidScheme": "https",
+		"cleartext": true,
+		"allowNavigation": [
+			"*",
+			"*.ngrok-free.dev",
+			"*.ngrok-free.app",
+			"*.ngrok.io",
+			"*.trycloudflare.com"
+		]
+	},
+	"android": {
+		"backgroundColor": "#090d16",
+		"allowMixedContent": true,
+		"captureInput": true,
+		"webContentsDebuggingEnabled": false
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 0,
+			"launchAutoHide": false,
+			"backgroundColor": "#090d16"
+		},
+		"Keyboard": {
+			"resize": "none",
+			"style": "DARK"
+		}
+	}
+}
