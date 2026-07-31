@@ -20,6 +20,14 @@
 
 ## 📋 Completed Tasks ✅
 
+- [x] **2-Step Live Web Research RAG & Human Active Learning Engine (`generate_cat_db_v2.js`)** — Built 2-step clinical protocol synthesis engine featuring:
+  - **Step 1 Live Web Fetcher (`lib/web-fetcher.js`)**: Scrapes target medical guidelines (`sante.gov.dz`, `cnpm.org.dz`, `samidz.com`, `vidal.fr`, `has-sante.fr`, `sfmu.org`, `who.int`, `msdmanuals.com`) into structured local disk cache (`cat_db_generator/web_cache/`).
+  - **Step 2 Dual RAG AI Engine (`lib/llm-engine.js`)**: Assembles 3 knowledge channels (Offline PDF RAG + Online Web RAG + Human Edit Memory) into Gemini 3.6 Flash synthesis prompts.
+  - **Human Active Learning Loop**: Learns from manual user edits in the Lab UI (`cat_generator_lab.html`) and feeds human corrections into future AI synthesis prompts.
+  - **Admin Generator Lab UI Upgrades (`cat_generator_lab.html`)**: Added 2-step execution buttons, manual human editor modal (`#edit-modal`), and RAG/Memory status badges.
+
+- [x] **Standalone CAT Database V2 Generator Lab UI (`cat_generator_lab.html`)** — Built protected standalone Admin Lab interface (`/cat_generator_lab.html`) featuring side-by-side legacy V1 vs AI-synthesized V2 CAT comparison, live token & latency metric inspection, single/batch generator controls, and 1-click database promotion.
+
 - [x] **App Logo & Adaptive Icon Set** — Generated 2-layer Android adaptive icons (foreground/background) across all mipmap densities (mdpi to xxxhdpi) adhering to the 66% safe zone for perfect scaling on Lenovo tablets, Samsung, Pixel, and Xiaomi devices.
 - [x] **Formalize Semantic App Versioning (v1.1.9)** — Incremented `package.json` and `version.json` to `v1.1.9`. Stamped build scripts to automatically propagate build version (`app-build-version`) and asset cache-busters (`?v=2607300058`).
 - [x] **Mandatory Force-Update & Multi-Source Kill Switch System** — Implemented numeric version guard middleware (`server/middleware/version-guard.js`), protected version API routes (`server/routes/version.js`), and hardened IIFE client lock gate (`public/js/version-checker.js`) with 3 multi-source download options (Uptodown, Telegram, Direct Server).

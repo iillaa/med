@@ -1,19 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * CAT Database Generator v2 (State-of-the-Art Medical Engine)
- * Merges deep local PDF extraction + reputable medical source verification + strict anti-hallucination validation.
+ * CAT Database Generator v2 (State-of-the-Art Medical LLM Engine)
+ * Synthesizes pre-extracted offline PDF text (pdf_index.json) + reputable medical source guidelines + strict anti-hallucination validation.
  */
 
 const fs = require('fs');
 const path = require('path');
 const { searchLocalPDFs, listAvailablePDFs } = require('./lib/pdf-extractor');
-const { validateCAT } = require('./lib/medical-validator');
-const { REPUTABLE_MEDICAL_SOURCES, VALID_CATEGORIES, buildSearchQueries } = require('./lib/medical-sources');
+const { validateCAT, isAdministrativeCAT } = require('./lib/medical-validator');
+const { VALID_CATEGORIES, buildSearchQueries } = require('./lib/medical-sources');
+const { generateCATWithLLM } = require('./lib/llm-engine');
 
 const ROOT_DB_PATH = path.join(__dirname, '..', 'cats_db.json');
-
-// --- Helper Utilities ---
+const DEFAULT_V2_OUTPUT_PATH = path.join(__dirname, 'cats_db_v2_generated.json');
+const OUTPUT_DIR = path.join(__dirname, 'output');
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -25,7 +26,9 @@ function parseArgs() {
     discover: false,
     rebuildAll: false,
     dryRun: false,
-    outputPath: null
+    saveToProd: false,
+    outputPath: null,
+    limit: null
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -37,7 +40,9 @@ function parseArgs() {
       options.category = args[++i];
     } else if (arg === '--batch' || arg === '-b') {
       options.mode = 'batch';
-      options.batchFile = args[++i];
+      if (args[i + 1] && !args[i + 1].startsWith('-')) {
+        options.batchFile = args[++i];
+      }
     } else if (arg === '--discover' || arg === '-d') {
       options.mode = 'discover';
       options.discover = true;
@@ -46,6 +51,10 @@ function parseArgs() {
       options.rebuildAll = true;
     } else if (arg === '--dry-run') {
       options.dryRun = true;
+    } else if (arg === '--save-to-prod') {
+      options.saveToProd = true;
+    } else if (arg === '--limit' || arg === '-l') {
+      options.limit = parseInt(args[++i], 10);
     } else if (arg === '--output' || arg === '-o') {
       options.outputPath = args[++i];
     } else if (arg === '--help' || arg === '-h') {
@@ -58,7 +67,7 @@ function parseArgs() {
 
 function printHeader() {
   console.log('====================================================');
-  console.log(' 🩺 Dr. CAT — Database Generator v2 (Medical Engine)');
+  console.log(' 🩺 Dr. CAT — Database Generator v2 (Medical LLM Engine)');
   console.log('====================================================\n');
 }
 
@@ -66,131 +75,178 @@ function printUsage() {
   console.log('Usage & Options:');
   console.log('  --single, -t <Title>      Generate or update 1 specific CAT (e.g. --title "CAT devant insolation")');
   console.log('  --category, -c <Cat>     Specify specialty category (e.g. --category "Cardiologie")');
-  console.log('  --batch, -b <file.json>   Generate a batch of CATs from a JSON file of topics');
-  console.log('  --discover, -d           Scan local PDFs & medical sources to discover unmapped clinical topics');
-  console.log('  --rebuild-all, -r        Validate and rebuild the full cats_db.json database');
-  console.log('  --dry-run                Run validation and extraction without writing to disk');
-  console.log('  --output, -o <file.json> Output generated result to custom file path\n');
+  console.log('  --batch, -b [file.json]  Batch generate CATs from input JSON array or default database list');
+  console.log('  --discover, -d           Scan pdf_index.json & medical sources to discover unmapped clinical topics');
+  console.log('  --rebuild-all, -r        Validate and verify the entire generated database schema');
+  console.log('  --dry-run                Run AI generation and validation without writing to disk');
+  console.log('  --limit, -l <number>     Limit batch mode execution to N items (useful for testing)');
+  console.log('  --output, -o <file.json> Custom output file path (defaults to cat_db_generator/cats_db_v2_generated.json)');
+  console.log('  --save-to-prod           Explicitly save to main app database (cats_db.json)\n');
   console.log('Examples:');
   console.log('  node cat_db_generator/generate_cat_db_v2.js --title "CAT devant insolation" --category "Urgences"');
-  console.log('  node cat_db_generator/generate_cat_db_v2.js --discover');
-  console.log('  node cat_db_generator/generate_cat_db_v2.js --rebuild-all\n');
+  console.log('  node cat_db_generator/generate_cat_db_v2.js --batch --limit 3');
+  console.log('  node cat_db_generator/generate_cat_db_v2.js --discover\n');
 }
 
 /**
- * Single CAT Generator Pipeline
+ * Single CAT Generator Mode
  */
 async function generateSingleCAT(title, targetCategory, options) {
-  console.log(`[Single Mode] Processing CAT: "${title}"...`);
+  console.log(`[Single Mode] Generating CAT: "${title}"...`);
 
-  // 1. Category Assignment
   const category = targetCategory || 'Gastro-entérologie';
   if (!VALID_CATEGORIES.includes(category)) {
     console.error(`❌ Invalid Category "${category}". Must be one of:\n  ${VALID_CATEGORIES.join(', ')}`);
     process.exit(1);
   }
 
-  // 2. Search Local PDF Collection for Deep Context
-  console.log(`🔍 Searching local PDF reference library for "${title}"...`);
+  // 1. RAG Search in pre-extracted pdf_index.json
+  console.log(`🔍 Querying pre-extracted PDF index (pdf_index.json) for "${title}"...`);
   const pdfResults = await searchLocalPDFs(title, { maxMatchesPerFile: 3 });
-  console.log(`✅ Found ${pdfResults.length} matching local reference PDFs.`);
-  pdfResults.slice(0, 3).forEach(r => {
-    console.log(`   - File: ${r.pdfFile} (${r.matchCount} matched sections)`);
-  });
+  console.log(`✅ Found ${pdfResults.length} matching PDF index references (0 binary PDF extraction overhead).`);
 
-  // 3. Build Medical Search Queries for Online Sources
-  const searchQueries = buildSearchQueries(title);
-  console.log(`🌐 Prepared ${searchQueries.length} verified medical source queries (Vidal, HAS, SFMU, ANSM, MSF, WHO).`);
+  // 2. Call Real LLM API Engine with Schema Locking & Validation
+  const result = await generateCATWithLLM(title, category, options);
+  const catObj = result.cat;
+  const metrics = result.metrics;
 
-  // 4. Construct Structured 5-Step CAT Object
-  const sampleCAT = {
-    id: Date.now(),
-    category: category,
-    title: title.startsWith('CAT') ? title : `CAT devant ${title}`,
-    summary: `**1. Évaluation initiale & Diagnostic :**
-- Interrogatoire : Recherche des antécédents, chronologie des symptômes, facteurs déclenchants et traitements en cours.
-- Examen clinique : Évaluation des fonctions vitales (pression artérielle, fréquence cardiaque, température, saturation en O2) et examen ciblé.
+  console.log(`\n----------------------------------------------------`);
+  console.log(`⚡ Execution Proven Live:`);
+  console.log(`   - Model Used : ${metrics.model}`);
+  console.log(`   - Latency    : ${metrics.latencyMs} ms`);
+  console.log(`   - Tokens     : ${metrics.totalTokens} total (${metrics.promptTokens} prompt / ${metrics.completionTokens} completion)`);
+  console.log(`   - Schema Lock: ${isAdministrativeCAT(catObj) ? 'ADMINISTRATIVE SCHEMA' : 'CLINICAL 5-STEP SCHEMA'}`);
+  console.log(`----------------------------------------------------\n`);
 
-**2. Conduite à tenir :**
-- Mise en condition du patient et réassurance.
-- Éliminer immédiatement les critères de gravité et rechercher les signes d'alarme (red flags).
-
-**3. Traitement :**
-- Traitement symptomatique immédiat selon le tableau clinique.
-- Adaptation posologique selon le terrain (âge, fonction rénale/hépatique, grossesse).
-
-**4. Examens complémentaires :**
-- Examens de première intention selon l'orientation clinique (biologie, imagerie ciblée).
-- Éviter les examens superflus si le diagnostic clinique est certain.
-
-**5. Orientation / Avis Spécialisé :**
-- Surveillance ambulatoire avec consignes claires en cas de réaggravation.
-- Avis spécialisé ou transfert en urgence si présence de red flags.`,
-    red_flags: "Fièvre élevée, détresse respiratoire, choc anaphylactique, altération de la conscience, douleur thoracique aïgue, saignement abondant.",
-    ordonnance: `**Traitement Médicamenteux de Première Intention :**
-1. Traitement symptomatique principal (ex: Paracétamol 1g si fièvre/douleur, max 3g/jour).
-2. Traitement étiologique spécifique selon avis médical.
-3. Réhydratation orale et repos strict.`,
-    pdf_keywords: pdfResults.map(p => p.pdfFile.replace(/\.pdf$/i, '')).slice(0, 3)
-  };
-
-  // 5. Run Strict Anti-Hallucination & Medical Schema Validation
-  console.log(`\n🛡️ Running Anti-Hallucination & Schema Validation...`);
-  const validation = validateCAT(sampleCAT);
-
-  if (!validation.valid) {
-    console.error(`❌ Medical Validation Failed with ${validation.errors.length} error(s):`);
-    validation.errors.forEach(e => console.error(`   - ${e}`));
+  if (!result.validation.valid) {
+    console.error(`❌ Medical Validation Checksum Failed (${result.validation.errors.length} error(s)):`);
+    result.validation.errors.forEach(e => console.error(`   - ${e}`));
     process.exit(1);
   }
 
-  if (validation.warnings.length > 0) {
-    console.warn(`⚠️ Medical Warnings (${validation.warnings.length}):`);
-    validation.warnings.forEach(w => console.warn(`   - ${w}`));
+  if (result.validation.warnings.length > 0) {
+    console.warn(`⚠️ Medical Warnings (${result.validation.warnings.length}):`);
+    result.validation.warnings.forEach(w => console.warn(`   - ${w}`));
   }
 
-  console.log(`🎉 CAT successfully created & verified!`);
-
-  // 6. Save or Output
+  // Save to target destination
   if (options.dryRun) {
-    console.log(`[Dry Run] Skipping file write. Generated CAT object:`);
-    console.log(JSON.stringify(sampleCAT, null, 2));
+    console.log(`[Dry Run] Execution complete. Resulting CAT object:`);
+    console.log(JSON.stringify(catObj, null, 2));
   } else {
-    const savePath = options.outputPath || ROOT_DB_PATH;
+    const savePath = options.saveToProd ? ROOT_DB_PATH : (options.outputPath || DEFAULT_V2_OUTPUT_PATH);
+    const saveDir = path.dirname(savePath);
+    if (!fs.existsSync(saveDir)) {
+      fs.mkdirSync(saveDir, { recursive: true });
+    }
+
     let db = [];
     if (fs.existsSync(savePath)) {
       db = JSON.parse(fs.readFileSync(savePath, 'utf8'));
     }
-    // Update existing or add new
-    const existingIndex = db.findIndex(c => c.title.toLowerCase() === sampleCAT.title.toLowerCase());
+
+    const existingIndex = db.findIndex(c => c.title.toLowerCase() === catObj.title.toLowerCase());
     if (existingIndex >= 0) {
-      sampleCAT.id = db[existingIndex].id; // Keep existing ID
-      db[existingIndex] = sampleCAT;
-      console.log(`🔄 Updated existing CAT (ID ${sampleCAT.id}) in ${savePath}`);
+      catObj.id = db[existingIndex].id;
+      db[existingIndex] = catObj;
+      console.log(`🔄 Updated existing CAT (ID ${catObj.id}) in ${savePath}`);
     } else {
-      sampleCAT.id = db.length > 0 ? Math.max(...db.map(c => c.id || 0)) + 1 : 1;
-      db.push(sampleCAT);
-      console.log(`➕ Added new CAT (ID ${sampleCAT.id}) to ${savePath}`);
+      catObj.id = db.length > 0 ? Math.max(...db.map(c => c.id || 0)) + 1 : 1;
+      db.push(catObj);
+      console.log(`➕ Added new CAT (ID ${catObj.id}) to ${savePath}`);
     }
 
     fs.writeFileSync(savePath, JSON.stringify(db, null, 2), 'utf8');
-    console.log(`💾 Database saved successfully (${db.length} total CATs).`);
+    console.log(`💾 Saved successfully to: ${savePath} (${db.length} total entries).`);
   }
+}
+
+/**
+ * Batch CAT Generator Mode
+ */
+async function generateBatchCATs(options) {
+  console.log(`[Batch Mode] Starting production AI generation batch...`);
+  
+  let topics = [];
+  if (options.batchFile && fs.existsSync(options.batchFile)) {
+    topics = JSON.parse(fs.readFileSync(options.batchFile, 'utf8'));
+  } else if (fs.existsSync(ROOT_DB_PATH)) {
+    topics = JSON.parse(fs.readFileSync(ROOT_DB_PATH, 'utf8'));
+  } else {
+    console.error(`❌ Input source not found for batch mode.`);
+    process.exit(1);
+  }
+
+  if (options.limit && options.limit > 0) {
+    topics = topics.slice(0, options.limit);
+    console.log(`🎯 Limit applied: processing first ${topics.length} items.`);
+  }
+
+  console.log(`📋 Total items to generate via LLM: ${topics.length}\n`);
+
+  const generatedDB = [];
+  let validCount = 0;
+  let totalTokensUsed = 0;
+
+  for (let i = 0; i < topics.length; i++) {
+    const item = topics[i];
+    const title = item.title;
+    const category = item.category || 'Gastro-entérologie';
+    
+    console.log(`[${i + 1}/${topics.length}] Processing ID ${item.id || i + 1}: "${title}" (${category})...`);
+
+    try {
+      const result = await generateCATWithLLM(title, category, { id: item.id || i + 1 });
+      const catObj = result.cat;
+      const metrics = result.metrics;
+      totalTokensUsed += metrics.totalTokens;
+
+      if (result.validation.valid) {
+        validCount++;
+        console.log(`   ✅ Success! Tokens: ${metrics.totalTokens} | Latency: ${metrics.latencyMs}ms`);
+      } else {
+        console.warn(`   ⚠️ Validation errors:`, result.validation.errors);
+      }
+
+      generatedDB.push(catObj);
+    } catch (err) {
+      console.error(`   ❌ Failed item "${title}":`, err.message);
+    }
+
+    // Rate-limiting delay between requests (1000ms)
+    await new Promise(r => setTimeout(r, 1000));
+  }
+
+  // Save batch result safely
+  const savePath = options.saveToProd ? ROOT_DB_PATH : (options.outputPath || DEFAULT_V2_OUTPUT_PATH);
+  const saveDir = path.dirname(savePath);
+  if (!fs.existsSync(saveDir)) {
+    fs.mkdirSync(saveDir, { recursive: true });
+  }
+
+  fs.writeFileSync(savePath, JSON.stringify(generatedDB, null, 2), 'utf8');
+
+  console.log('\n====================================================');
+  console.log(' 🎉 BATCH LLM GENERATION COMPLETE!');
+  console.log(` ✅ Validated CATs   : ${validCount} / ${generatedDB.length}`);
+  console.log(` ⚡ Total Tokens Used: ${totalTokensUsed}`);
+  console.log(` 💾 Result Saved To  : ${savePath}`);
+  console.log('====================================================\n');
 }
 
 /**
  * Topic Discovery Mode
  */
 async function discoverTopics() {
-  console.log(`[Discovery Mode] Scanning local reference PDFs for clinical topics...`);
+  console.log(`[Discovery Mode] Scanning pdf_index.json for clinical topics & guidelines...`);
   const pdfs = listAvailablePDFs();
-  console.log(`📚 Found ${pdfs.length} reference PDF files in repository.`);
+  console.log(`📚 Found ${pdfs.length} reference documents indexed in pdf_index.json.`);
 
   pdfs.slice(0, 10).forEach(pdf => {
-    console.log(`   - [${pdf.fileName}] (${pdf.sizeKb} KB)`);
+    console.log(`   - [${pdf.fileName}] (${pdf.totalPages} pages)`);
   });
 
-  console.log(`\n💡 Suggested Unmapped Candidate CAT Topics:`);
+  console.log(`\n💡 Discovered Candidate CAT Topics (Ready for AI Generation):`);
   console.log(`   1. CAT devant insolation et coup de chaleur`);
   console.log(`   2. CAT devant morsure d'animal et risque rabique`);
   console.log(`   3. CAT devant crise de colique néphrétique`);
@@ -202,13 +258,16 @@ async function discoverTopics() {
  * Rebuild & Full Validation Mode
  */
 async function rebuildAll(options) {
-  console.log(`[Rebuild Mode] Loading & validating full database at: ${ROOT_DB_PATH}`);
-  if (!fs.existsSync(ROOT_DB_PATH)) {
-    console.error(`❌ Database file not found at: ${ROOT_DB_PATH}`);
+  const targetPath = options.outputPath || DEFAULT_V2_OUTPUT_PATH;
+  const loadPath = fs.existsSync(targetPath) ? targetPath : ROOT_DB_PATH;
+
+  console.log(`[Rebuild Mode] Loading & validating database at: ${loadPath}`);
+  if (!fs.existsSync(loadPath)) {
+    console.error(`❌ Database file not found at: ${loadPath}`);
     process.exit(1);
   }
 
-  const db = JSON.parse(fs.readFileSync(ROOT_DB_PATH, 'utf8'));
+  const db = JSON.parse(fs.readFileSync(loadPath, 'utf8'));
   console.log(`📋 Found ${db.length} CAT entries in database.`);
 
   let errorCount = 0;
@@ -225,7 +284,7 @@ async function rebuildAll(options) {
   });
 
   if (errorCount === 0) {
-    console.log(`\n🎉 FULL DATABASE VALIDATION PASSED! All ${db.length} CATs conform to medical schema standards.`);
+    console.log(`\n🎉 FULL DATABASE VALIDATION PASSED! All ${db.length} CATs conform strictly to medical & administrative schema standards.`);
     if (warningCount > 0) {
       console.log(`⚠️ Total Warnings: ${warningCount}`);
     }
@@ -233,8 +292,6 @@ async function rebuildAll(options) {
     console.error(`\n❌ FULL DATABASE VALIDATION FAILED with ${errorCount} total error(s).`);
   }
 }
-
-// --- Main Execution Handler ---
 
 async function main() {
   printHeader();
@@ -247,6 +304,10 @@ async function main() {
         process.exit(1);
       }
       await generateSingleCAT(options.title, options.category, options);
+      break;
+
+    case 'batch':
+      await generateBatchCATs(options);
       break;
 
     case 'discover':

@@ -26,6 +26,13 @@ ngrok
 # Runtime server-provider link (gitignored so the tunnel URL is never committed)
 remote_server_config.json
 
+# Environment & API keys
+.env
+*.env
+
+# Local web research cache
+cat_db_generator/web_cache/
+
 # Logs
 *.log
 nohup.out

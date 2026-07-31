@@ -21,6 +21,7 @@ const { registerServerProviderRoutes } = require('./routes/server-providers');
 const { registerPdfRoutes } = require('./routes/pdfs');
 const { registerVersionRoutes } = require('./routes/version');
 const { registerAdminAnalyticsRoutes } = require('./routes/admin-analytics');
+const { registerCatGeneratorRoutes } = require('./routes/cat-generator');
 const { versionGuardMiddleware } = require('./middleware/version-guard');
 const { recordDeviceActivity } = require('./services/active-devices');
 const allowedOriginsSvc = require('./services/allowed-origins');
@@ -293,8 +294,8 @@ app.use('/data', (req, res, next) => {
   next();
 });
 
-// Block public access to the admin PDF Lab UI and Analytics Lab UI
-app.get(['/pdf_lab.html', '/analytics_lab.html'], (req, res, next) => {
+// Block public access to the admin PDF Lab UI, Analytics Lab UI, and CAT Generator Lab UI
+app.get(['/pdf_lab.html', '/analytics_lab.html', '/cat_lab.html', '/cat_generator_lab.html'], (req, res, next) => {
   const { isLocalhostConnection } = require('./utils/request');
   if (!isLocalhostConnection(req)) {
     return res.status(403).send('Accès interdit. This is an admin tool.');
@@ -319,13 +320,9 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    uptime: Math.floor(process.uptime()),
-    database: {
-      loaded: cache.catsCache.length > 0,
-      records: cache.catsCache.length,
-    },
-    system: {
-      memoryUsage: {
+    uptime: `${Math.round(process.uptime())}s`,
+    performance: {
+      memory: {
         rss: `${Math.round(memory.rss / 1024 / 1024)} MB`,
         heapUsed: `${Math.round(memory.heapUsed / 1024 / 1024)} MB`
       }
@@ -338,6 +335,7 @@ app.use(versionGuardMiddleware);
 registerAuthRoutes(app);
 registerVersionRoutes(app, cache);
 registerAdminAnalyticsRoutes(app, cache);
+registerCatGeneratorRoutes(app);
 registerCatRoutes(app);
 registerSuggestionRoutes(app, cache);
 registerSearchRoutes(app, cache);

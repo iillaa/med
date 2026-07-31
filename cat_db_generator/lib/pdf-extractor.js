@@ -1,81 +1,88 @@
 /**
- * Deep Local PDF Extractor & Scanner
- * Scans local reference PDFs in `.cat-med/reference-pdfs/` and `public/pdfs/`
- * to extract authentic clinical snippets, section titles, and page references.
+ * Offline PDF Index Query Engine (Fast Pre-Extracted Search)
+ * Purely queries the ready `pdf_index.json` database.
+ * DOES NOT parse or extract raw binary PDFs.
  */
 
 const fs = require('fs');
 const path = require('path');
-const pdfParse = require('pdf-parse');
 
-const PDF_DIRECTORIES = [
-  path.join(__dirname, '..', '..', '.cat-med', 'reference-pdfs'),
-  path.join(__dirname, '..', '..', 'public', 'pdfs')
-];
+const PDF_INDEX_PATH = path.join(__dirname, '..', '..', 'pdf_index.json');
+let cachedPdfIndex = null;
 
 /**
- * Searches local PDFs for a clinical term or title
+ * Loads and caches the ready pre-extracted PDF index in memory
+ */
+function getPdfIndex() {
+  if (cachedPdfIndex) return cachedPdfIndex;
+  if (fs.existsSync(PDF_INDEX_PATH)) {
+    try {
+      const raw = fs.readFileSync(PDF_INDEX_PATH, 'utf8');
+      cachedPdfIndex = JSON.parse(raw);
+      console.log(`📑 Loaded pre-built PDF Index (${cachedPdfIndex.length} indexed documents ready).`);
+      return cachedPdfIndex;
+    } catch (e) {
+      console.warn(`⚠️ Failed to parse pdf_index.json: ${e.message}`);
+    }
+  } else {
+    console.warn(`⚠️ pdf_index.json not found at ${PDF_INDEX_PATH}`);
+  }
+  return [];
+}
+
+/**
+ * Searches the pre-extracted PDF index for a clinical term or title (0 binary parsing overhead)
  * @param {string} queryTerm 
  * @param {object} options 
- * @returns {Promise<Array<{ pdfFile: string, pageCount: number, matches: Array<{ page: number, snippet: string }> }>>}
+ * @returns {Promise<Array<{ pdfFile: string, totalPages: number, matchCount: number, matches: Array<{ page: number, snippet: string }> }>>}
  */
 async function searchLocalPDFs(queryTerm, options = {}) {
-  const maxMatchesPerFile = options.maxMatchesPerFile || 5;
+  const maxMatchesPerFile = options.maxMatchesPerFile || 3;
   const results = [];
   const normalizedQuery = queryTerm.toLowerCase().trim();
-  const queryTokens = normalizedQuery.split(/\s+/).filter(t => t.length > 2);
+  const queryTokens = normalizedQuery.split(/\s+/).filter(t => t.length > 2 && t !== 'devant');
 
-  for (const pdfDir of PDF_DIRECTORIES) {
-    if (!fs.existsSync(pdfDir)) continue;
+  const pdfIndex = getPdfIndex();
 
-    const files = fs.readdirSync(pdfDir).filter(f => f.endsWith('.pdf'));
+  if (!pdfIndex || pdfIndex.length === 0) {
+    return [];
+  }
 
-    for (const file of files) {
-      const filePath = path.join(pdfDir, file);
-      try {
-        const dataBuffer = fs.readFileSync(filePath);
-        const pdfData = await pdfParse(dataBuffer);
+  for (const doc of pdfIndex) {
+    const fileName = doc.pdf || 'Unknown.pdf';
+    const pages = doc.pages || [];
+    const matches = [];
 
-        const text = pdfData.text || '';
-        const pages = text.split('\n\n'); // Approximate page or section splits
-        const matches = [];
+    for (const p of pages) {
+      const pageNum = p.page || 1;
+      const pageText = p.content || '';
+      const lowerPageText = pageText.toLowerCase();
 
-        for (let i = 0; i < pages.length; i++) {
-          const pageText = pages[i];
-          const lowerPageText = pageText.toLowerCase();
+      // Calculate token match count
+      const hitTokens = queryTokens.filter(token => lowerPageText.includes(token));
+      if (hitTokens.length > 0 && hitTokens.length >= Math.min(2, queryTokens.length)) {
+        const snippetIndex = lowerPageText.indexOf(hitTokens[0]);
+        const start = Math.max(0, snippetIndex - 80);
+        const end = Math.min(pageText.length, snippetIndex + 320);
+        const snippet = pageText.substring(start, end).replace(/\s+/g, ' ').trim();
 
-          // Check token overlap score
-          const hitTokens = queryTokens.filter(token => lowerPageText.includes(token));
-          if (hitTokens.length > 0 && hitTokens.length >= Math.min(2, queryTokens.length)) {
-            // Extract snippet context
-            const snippetIndex = lowerPageText.indexOf(hitTokens[0]);
-            const start = Math.max(0, snippetIndex - 100);
-            const end = Math.min(pageText.length, snippetIndex + 300);
-            const snippet = pageText.substring(start, end).replace(/\s+/g, ' ').trim();
+        matches.push({
+          page: pageNum,
+          matchedTokens: hitTokens,
+          snippet: snippet
+        });
 
-            matches.push({
-              section: i + 1,
-              matchedTokens: hitTokens,
-              snippet: snippet
-            });
-
-            if (matches.length >= maxMatchesPerFile) break;
-          }
-        }
-
-        if (matches.length > 0) {
-          results.push({
-            pdfFile: file,
-            path: filePath,
-            totalPages: pdfData.numpages || 1,
-            matchCount: matches.length,
-            matches: matches
-          });
-        }
-      } catch (err) {
-        // Skip unreadable or corrupted PDFs safely
-        continue;
+        if (matches.length >= maxMatchesPerFile) break;
       }
+    }
+
+    if (matches.length > 0) {
+      results.push({
+        pdfFile: fileName,
+        totalPages: pages.length,
+        matchCount: matches.length,
+        matches: matches
+      });
     }
   }
 
@@ -83,26 +90,21 @@ async function searchLocalPDFs(queryTerm, options = {}) {
 }
 
 /**
- * Lists all available local PDF reference files
+ * Lists all available local PDF reference files directly from ready pdf_index.json
  */
 function listAvailablePDFs() {
-  const allPDFs = [];
-  for (const pdfDir of PDF_DIRECTORIES) {
-    if (!fs.existsSync(pdfDir)) continue;
-    const files = fs.readdirSync(pdfDir).filter(f => f.endsWith('.pdf'));
-    files.forEach(f => {
-      const stats = fs.statSync(path.join(pdfDir, f));
-      allPDFs.push({
-        fileName: f,
-        directory: pdfDir,
-        sizeKb: Math.round(stats.size / 1024)
-      });
-    });
-  }
-  return allPDFs;
+  const index = getPdfIndex();
+  return index.map(doc => ({
+    fileName: doc.pdf,
+    totalPages: (doc.pages || []).length,
+    quality: doc.quality || 'online'
+  }));
 }
 
 module.exports = {
   searchLocalPDFs,
+  searchPDFIndex: searchLocalPDFs,
   listAvailablePDFs
 };
+
+
