@@ -1,6 +1,6 @@
 {
   "name": "med",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Dr.CAT — Clinical Review App",
   "author": "Dr. Kibeche Ali Dia Eddine",
   "copyright": "Copyright (c) 2026 Dr. Kibeche Ali Dia Eddine. All rights reserved.",
@@ -18,7 +18,7 @@
     "build:bundle": "node build-bundle.js",
     "compress:pdfs": "node scripts/compress_pdfs.js",
     "reindex": "node index_pdfs.js",
-    "cap:sync": "npx cap sync",
+    "cap:sync": "node node_modules/@capacitor/cli/bin/capacitor sync android && node scripts/clean_android_assets.js",
     "set:password": "node set_admin_password.js",
     "set:provider": "node set_server_provider.js"
   },
