@@ -361,7 +361,7 @@ function registerCatGeneratorRoutes(app) {
         addProgressLog(`[${i + 1}/${prodDb.length}] Recherche Web RAG pour : "${cat.title}"...`, 'info');
 
         try {
-          const sources = await fetchAndCacheWebSources(cat.title, { maxSources: 3 });
+          const sources = await fetchAndCacheWebSources(cat.title, { maxSources: 6, searchKeywords: cat.search_keywords });
           addProgressLog(`✅ [${i + 1}/${prodDb.length}] ${sources.length} sources mises en cache pour "${cat.title}"`, 'success');
         } catch (err) {
           addProgressLog(`⚠️ [${i + 1}/${prodDb.length}] Erreur Web fetch : ${err.message}`, 'warn');
@@ -385,7 +385,7 @@ function registerCatGeneratorRoutes(app) {
     if (!verifyAdminAccess(req, res)) return;
 
     const { fetchAndCacheWebSources } = require('../../cat_db_generator/lib/web-fetcher');
-    const { title, forceRefetch } = req.body || {};
+    const { title, forceRefetch, searchKeywords } = req.body || {};
 
     if (!title) {
       return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
@@ -393,7 +393,7 @@ function registerCatGeneratorRoutes(app) {
 
     try {
       console.log(`[API Step 1 Web Fetch] Fetching live medical guidelines for: "${title}"...`);
-      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 4 });
+      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 6, searchKeywords });
 
       res.json({
         success: true,
