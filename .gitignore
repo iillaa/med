@@ -5,7 +5,9 @@ node_modules/
 # Temp files
 *.tmp
 apktool_output/
+apktool_output_new/
 audit_output/
+audit_output_new/
 
 # Local backups (tracked by Git history instead)
 *.bak
