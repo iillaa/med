@@ -27,10 +27,10 @@
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
       "firstSeen": "2026-07-30T01:25:29.182Z",
-      "requestCount": 584,
+      "requestCount": 594,
       "appVersion": "web-live",
       "platform": "web_pwa",
-      "lastSeen": "2026-07-31T13:09:29.191Z"
+      "lastSeen": "2026-07-31T14:31:30.949Z"
     },
     "drcat-inst-6ba21134-a6b7-4c72-adc5-f6ff54fcf123": {
       "installId": "drcat-inst-6ba21134-a6b7-4c72-adc5-f6ff54fcf123",
@@ -113,5 +113,5 @@
       "lastSeen": "2026-07-30T16:19:17.652Z"
     }
   },
-  "lastUpdated": "2026-07-31T13:09:36.797Z"
+  "lastUpdated": "2026-07-31T14:31:37.459Z"
 }

@@ -30,10 +30,10 @@ export function renderAdminPdfTab(containerEl) {
       <h4 style="margin-top: 0; color: var(--text-primary); font-size: 14px;">🛠️ Outils de Développement & Laboratoires</h4>
       <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;">Accédez aux laboratoires isolés d'extraction PDF, d'analyse d'audience et de génération de base V2.</p>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="/pdf_lab.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-sm); font-size: 12px; transition: background 0.2s;">
+        <a href="/admin/pdf_lab.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-sm); font-size: 12px; transition: background 0.2s;">
           <i class="fa-solid fa-flask"></i> Ouvrir le Labo PDF
         </a>
-        <a href="/cat_generator_lab.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--color-primary); text-decoration: none; border-radius: var(--radius-sm); font-size: 12px; transition: background 0.2s;">
+        <a href="/admin/cat_generator_lab.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--color-primary); text-decoration: none; border-radius: var(--radius-sm); font-size: 12px; transition: background 0.2s;">
           <i class="fa-solid fa-stethoscope"></i> Ouvrir le Labo CAT Generator V2
         </a>
       </div>

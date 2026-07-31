@@ -280,13 +280,19 @@ app.use('/data', (req, res, next) => {
   next();
 });
 
-// Block public access to the admin PDF Lab UI, Analytics Lab UI, and CAT Generator Lab UI
-app.get(['/pdf_lab.html', '/analytics_lab.html', '/cat_lab.html', '/cat_generator_lab.html'], (req, res, next) => {
+// Guard and serve /admin tools (cat_generator_lab.html, pdf_lab.html, analytics_lab.html)
+app.use('/admin', (req, res, next) => {
   const { isLocalhostConnection } = require('./utils/request');
   if (!isLocalhostConnection(req)) {
     return res.status(403).send('Accès interdit. This is an admin tool.');
   }
   next();
+}, express.static(path.join(__dirname, '..', 'admin')));
+
+// Redirect legacy lab URLs to /admin/
+app.get(['/pdf_lab.html', '/analytics_lab.html', '/cat_lab.html', '/cat_generator_lab.html'], (req, res) => {
+  const fileBasename = req.path.substring(1);
+  res.redirect(301, `/admin/${fileBasename}`);
 });
 
 app.get('/health', (req, res) => {
