@@ -296,8 +296,7 @@ async function bootstrapApp() {
         };
       }
       if (addCatModal) {
-        if (window.innerWidth <= 600) addCatModal.classList.add('modal-overlay--sheet');
-        else addCatModal.classList.remove('modal-overlay--sheet');
+        addCatModal.classList.remove('modal-overlay--sheet');
         addCatModal.style.display = 'flex';
       }
     });
