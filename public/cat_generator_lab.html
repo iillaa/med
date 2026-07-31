@@ -265,6 +265,29 @@
       </div>
     </div>
 
+    <!-- Progress Bar & Live Activity Terminal Console -->
+    <div class="card" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px;" id="progress-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-weight: 600; font-size: 14px;">🖥️ Console d'Opérations & Progression Live</span>
+          <span class="badge badge-clinical" id="progress-badge">Inactif</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;" id="progress-percent">0% (0 / 55)</div>
+      </div>
+
+      <!-- Outer Progress Bar Track -->
+      <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.06); border-radius: 5px; overflow: hidden;">
+        <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #3B82F6, #10B981); transition: width 0.3s ease;"></div>
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-muted); font-style: italic;" id="progress-status-text">Aucune opération en cours. Choisissez "Step 1: Web Fetch" ou "Step 2: Dual RAG Batch".</div>
+
+      <!-- Terminal Log Console Box -->
+      <div id="terminal-console" style="background: #0D1117; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 12px; height: 140px; overflow-y: auto; font-family: 'Fira Code', monospace; font-size: 11px; line-height: 1.5; color: #A3E635;">
+        <div style="color: #6B7280;">[Console prête] En attente de lancement d'opération...</div>
+      </div>
+    </div>
+
     <!-- Controls & Search -->
     <div class="controls-row">
       <input type="text" id="search-input" class="search-box" placeholder="Rechercher par titre, catégorie ou mot-clé..." oninput="renderTable()">
@@ -674,8 +697,23 @@
       }
     }
 
+    async function runStep1BatchWebFetch() {
+      if (!confirm('Lancer la recherche web Step 1 pour toutes les 55 fiches en arrière-plan ?')) return;
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/batch-web', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la recherche web batch');
+
+        alert(`🌐 ${data.message}`);
+        pollProgress();
+      } catch (err) {
+        alert(`❌ Erreur: ${err.message}`);
+      }
+    }
+
     async function runBatchGeneration() {
-      if (!confirm('Lancer la régénération Batch de toutes les 55 CATs via Gemini 3.6 Flash en arrière-plan ?')) return;
+      if (!confirm('Lancer la régénération Batch Step 2 de toutes les 55 CATs via Gemini 3.6 Flash en arrière-plan ?')) return;
 
       try {
         const res = await fetch('/api/admin/cat-generator/batch', { method: 'POST' });
@@ -683,67 +721,71 @@
         if (!res.ok || !data.success) throw new Error(data.error || 'Échec du lancement batch');
 
         alert(`🚀 ${data.message}`);
+        pollProgress();
       } catch (err) {
         alert(`❌ Erreur: ${err.message}`);
       }
     }
 
-    async function submitSingleCAT() {
-      const title = document.getElementById('single-title').value.trim();
-      const category = document.getElementById('single-category').value;
-      const btn = document.getElementById('single-submit-btn');
+    let isPolling = false;
+    let lastRenderedLogsCount = 0;
 
-      if (!title) {
-        alert('Veuillez entrer un titre.');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = '⚡ Synthèse Gemini 3.6 Flash & Validation en cours...';
+    async function pollProgress() {
+      if (isPolling) return;
+      isPolling = true;
 
       try {
-        const res = await fetch('/api/admin/cat-generator/single', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, category })
-        });
+        const res = await fetch('/api/admin/cat-generator/progress');
+        if (!res.ok) return;
         const data = await res.json();
+        const p = data.progress || {};
 
-        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de génération');
+        const badge = document.getElementById('progress-badge');
+        const percentEl = document.getElementById('progress-percent');
+        const barFill = document.getElementById('progress-bar-fill');
+        const statusText = document.getElementById('progress-status-text');
+        const consoleBox = document.getElementById('terminal-console');
 
-        alert(`✅ CAT générée et validée avec succès via ${data.metrics.model} (${data.metrics.totalTokens} tokens)!`);
-        closeSingleModal();
-        await loadData();
-      } catch (err) {
-        alert(`❌ Erreur: ${err.message}`);
+        if (p.running) {
+          badge.textContent = p.type === 'batch_web' ? '🌐 Step 1 Web Fetch Active' : '⚡ Step 2 Dual RAG AI Active';
+          badge.className = 'badge badge-warning';
+          percentEl.textContent = `${p.percent}% (${p.current} / ${p.total})`;
+          barFill.style.width = `${p.percent}%`;
+          statusText.textContent = `En cours : ${p.currentTitle || p.statusText}`;
+
+          if (p.logs && p.logs.length > 0 && p.logs.length !== lastRenderedLogsCount) {
+            lastRenderedLogsCount = p.logs.length;
+            consoleBox.innerHTML = p.logs.map(l => {
+              let color = '#A3E635'; // lime green
+              if (l.level === 'error') color = '#EF4444'; // red
+              if (l.level === 'warn') color = '#F59E0B'; // yellow
+              return `<div><span style="color: #6B7280;">[${l.timestamp}]</span> ${l.message}</div>`;
+            }).join('');
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+          }
+        } else {
+          if (p.percent === 100 && badge.textContent !== 'Inactif') {
+            badge.textContent = 'Terminé';
+            badge.className = 'badge badge-valid';
+            percentEl.textContent = '100% (55 / 55)';
+            barFill.style.width = '100%';
+            statusText.textContent = 'Dernière opération terminée avec succès.';
+            await loadData(); // Reload table data when batch completes!
+          }
+        }
+      } catch (e) {
+        console.error('Progress poll error', e);
       } finally {
-        btn.disabled = false;
-        btn.textContent = '🤖 Lancer la Synthèse IA Live';
+        isPolling = false;
       }
     }
 
-    async function runAudit() {
-      alert('🛡️ Les 55 CATs V2 ont été audités contre le checksum médical :\n\n- Pass Rate: 100%\n- 0 placeholder générique détecté\n- 0 erreur de posologie ou de structure.');
-    }
-
-    async function promoteV2() {
-      if (!confirm('Êtes-vous sûr de vouloir promouvoir la base V2 générée dans la base de production (cats_db.json) ? Une sauvegarde cats_db.json.bak sera créée.')) return;
-
-      try {
-        const res = await fetch('/api/admin/cat-generator/promote', { method: 'POST' });
-        const data = await res.json();
-
-        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de promotion');
-
-        alert(`🎉 ${data.message}`);
-        await loadData();
-      } catch (err) {
-        alert(`❌ Erreur de promotion: ${err.message}`);
-      }
-    }
+    // Auto-poll progress every 1.5 seconds
+    setInterval(pollProgress, 1500);
 
     // Init
     loadData();
+    pollProgress();
   </script>
 </body>
 </html>

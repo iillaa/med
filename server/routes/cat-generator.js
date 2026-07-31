@@ -225,25 +225,151 @@ function registerCatGeneratorRoutes(app) {
     }
   });
 
-  // POST /api/admin/cat-generator/batch
+  // Live Progress State Store for UI Console & Progress Bar
+  const progressState = {
+    running: false,
+    type: null, // 'batch_web' or 'batch_ai' or 'single_ai'
+    total: 0,
+    current: 0,
+    percent: 0,
+    statusText: 'Inactif',
+    currentTitle: '',
+    logs: []
+  };
+
+  function addProgressLog(message, level = 'info') {
+    const timestamp = new Date().toLocaleTimeString('fr-FR');
+    const logItem = { timestamp, message, level };
+    progressState.logs.push(logItem);
+    if (progressState.logs.length > 200) progressState.logs.shift(); // Keep last 200 logs
+    progressState.statusText = message;
+    console.log(`[Lab Progress ${level.toUpperCase()}] ${message}`);
+  }
+
+  // GET /api/admin/cat-generator/progress (Real-time progress polling endpoint)
+  app.get('/api/admin/cat-generator/progress', (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+    res.json({
+      success: true,
+      progress: progressState
+    });
+  });
+
+  // POST /api/admin/cat-generator/batch (Step 2 Dual RAG AI Batch Generation)
   app.post('/api/admin/cat-generator/batch', async (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
 
-    const { spawn } = require('child_process');
-    const scriptPath = path.join(__dirname, '..', '..', 'cat_db_generator', 'generate_cat_db_v2.js');
-
-    try {
-      console.log('[CAT Generator Lab] Spawning batch generation process via Gemini 3.6 Flash...');
-      const child = spawn('node', [scriptPath, '--batch'], { detached: true, stdio: 'ignore' });
-      child.unref();
-
-      res.json({
-        success: true,
-        message: 'Génération Batch lancée en arrière-plan avec Gemini 3.6 Flash. Utilisez Refresh pour suivre la progression.'
-      });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+    if (progressState.running) {
+      return res.status(409).json({ error: `Une opération (${progressState.type}) est déjà en cours. Veuillez patienter.` });
     }
+
+    const { generateCATWithLLM } = require('../../cat_db_generator/lib/llm-engine');
+    const prodDb = JSON.parse(fs.readFileSync(PROD_DB_PATH, 'utf8'));
+
+    progressState.running = true;
+    progressState.type = 'batch_ai';
+    progressState.total = prodDb.length;
+    progressState.current = 0;
+    progressState.percent = 0;
+    progressState.logs = [];
+
+    addProgressLog(`🚀 Démarrage du Batch Step 2 Dual RAG via Gemini 3.6 Flash (${prodDb.length} fiches)...`, 'info');
+
+    // Run asynchronously in background
+    (async () => {
+      let v2Db = fs.existsSync(V2_DB_PATH) ? JSON.parse(fs.readFileSync(V2_DB_PATH, 'utf8')) : [];
+
+      for (let i = 0; i < prodDb.length; i++) {
+        const cat = prodDb[i];
+        progressState.current = i + 1;
+        progressState.currentTitle = cat.title;
+        progressState.percent = Math.round(((i + 1) / prodDb.length) * 100);
+
+        addProgressLog(`[${i + 1}/${prodDb.length}] Synthèse Dual RAG Gemini 3.6 Flash pour : "${cat.title}"...`, 'info');
+
+        try {
+          const resObj = await generateCATWithLLM(cat.title, cat.category);
+          const fullCatObj = {
+            id: cat.id,
+            category: resObj.cat.category,
+            title: resObj.cat.title,
+            summary: resObj.cat.summary,
+            red_flags: resObj.cat.red_flags,
+            ordonnance: resObj.cat.ordonnance,
+            _execution_metrics: resObj.metrics
+          };
+
+          const idx = v2Db.findIndex(c => c.id === cat.id);
+          if (idx >= 0) v2Db[idx] = fullCatObj;
+          else v2Db.push(fullCatObj);
+
+          fs.writeFileSync(V2_DB_PATH, JSON.stringify(v2Db, null, 2), 'utf8');
+
+          addProgressLog(`✅ [#${cat.id}] "${cat.title}" générée avec succès (${resObj.metrics.totalTokens} tok | ${resObj.metrics.latencyMs}ms)`, 'success');
+        } catch (err) {
+          addProgressLog(`❌ [#${cat.id}] Échec de synthèse : ${err.message}`, 'error');
+        }
+
+        await new Promise(r => setTimeout(r, 1200));
+      }
+
+      progressState.running = false;
+      addProgressLog(`🎉 Batch Step 2 terminé avec succès pour ${prodDb.length} fiches!`, 'success');
+    })();
+
+    res.json({
+      success: true,
+      message: `Batch Step 2 lancé pour ${prodDb.length} fiches via Gemini 3.6 Flash.`
+    });
+  });
+
+  // POST /api/admin/cat-generator/batch-web (Step 1 Batch Web Fetch)
+  app.post('/api/admin/cat-generator/batch-web', async (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+
+    if (progressState.running) {
+      return res.status(409).json({ error: `Une opération (${progressState.type}) est déjà en cours. Veuillez patienter.` });
+    }
+
+    const { fetchAndCacheWebSources } = require('../../cat_db_generator/lib/web-fetcher');
+    const prodDb = JSON.parse(fs.readFileSync(PROD_DB_PATH, 'utf8'));
+
+    progressState.running = true;
+    progressState.type = 'batch_web';
+    progressState.total = prodDb.length;
+    progressState.current = 0;
+    progressState.percent = 0;
+    progressState.logs = [];
+
+    addProgressLog(`🌐 Démarrage du Batch Step 1 Recherche Web pour ${prodDb.length} fiches...`, 'info');
+
+    (async () => {
+      for (let i = 0; i < prodDb.length; i++) {
+        const cat = prodDb[i];
+        progressState.current = i + 1;
+        progressState.currentTitle = cat.title;
+        progressState.percent = Math.round(((i + 1) / prodDb.length) * 100);
+
+        addProgressLog(`[${i + 1}/${prodDb.length}] Recherche Web RAG pour : "${cat.title}"...`, 'info');
+
+        try {
+          const sources = await fetchAndCacheWebSources(cat.title, { maxSources: 3 });
+          addProgressLog(`✅ [${i + 1}/${prodDb.length}] ${sources.length} sources mises en cache pour "${cat.title}"`, 'success');
+        } catch (err) {
+          addProgressLog(`⚠️ [${i + 1}/${prodDb.length}] Erreur Web fetch : ${err.message}`, 'warn');
+        }
+
+        await new Promise(r => setTimeout(r, 800));
+      }
+
+      progressState.running = false;
+      addProgressLog(`🎉 Batch Step 1 Recherche Web terminé pour ${prodDb.length} fiches!`, 'success');
+    })();
+
+    res.json({
+      success: true,
+      message: `Batch Step 1 Recherche Web démarré en arrière-plan pour ${prodDb.length} fiches.`
+    });
   });
 
   // POST /api/admin/cat-generator/fetch-web (Step 1 Live Web Fetching)
