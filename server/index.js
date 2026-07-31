@@ -225,15 +225,7 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 120,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Trop de requêtes. Veuillez réessayer dans une minute." }
-});
-
-app.use(limiter);
+app.use(rateLimitMiddleware);
 
 // Content Security Policy — mitigates XSS and data injection risks.
 app.use((req, res, next) => {
@@ -274,17 +266,11 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
-// Data file access is guarded by the CORS middleware and admin auth.
-// The x-app-key header is a public client token (visible in the bundle)
-// and provides no real security — it's been removed to avoid a false
-// sense of protection. Real access control is handled by admin tokens.
-
 app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'drcat_logo.png'));
 });
 
 // Simple x-app-key guard for static data files (cats_db.json, pdf_index.json, etc.)
-// The client already sends this header — this just stops casual curl/wget data grabs.
 const { APP_DATA_KEY } = require('./config/constants');
 app.use('/data', (req, res, next) => {
   const requestKey = req.headers['x-app-key'];
@@ -303,18 +289,6 @@ app.get(['/pdf_lab.html', '/analytics_lab.html', '/cat_lab.html', '/cat_generato
   next();
 });
 
-app.use(express.static(path.join(__dirname, '..', 'public'), {
-  etag: false,
-  lastModified: false,
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-    } else if (filePath.endsWith('.pdf')) {
-      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
-    }
-  }
-}));
-
 app.get('/health', (req, res) => {
   const memory = process.memoryUsage();
   res.json({
@@ -332,6 +306,7 @@ app.get('/health', (req, res) => {
 
 app.use(versionGuardMiddleware);
 
+// API Route Registration (must take priority before express.static catch-all)
 registerAuthRoutes(app);
 registerVersionRoutes(app, cache);
 registerAdminAnalyticsRoutes(app, cache);
@@ -341,6 +316,18 @@ registerSuggestionRoutes(app, cache);
 registerSearchRoutes(app, cache);
 registerServerProviderRoutes(app, cache);
 registerPdfRoutes(app, cache);
+
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    } else if (filePath.endsWith('.pdf')) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    }
+  }
+}));
 
 let serverInstance = null;
 
