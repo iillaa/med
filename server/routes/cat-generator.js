@@ -151,7 +151,7 @@ function registerCatGeneratorRoutes(app) {
   app.post('/api/admin/cat-generator/update', (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
 
-    const { id, title, category, summary, red_flags, ordonnance } = req.body || {};
+    const { id, title, category, summary, red_flags, ordonnance, search_keywords } = req.body || {};
     if (!id || !title) {
       return res.status(400).json({ error: 'ID et Titre obligatoires.' });
     }
@@ -168,11 +168,19 @@ function registerCatGeneratorRoutes(app) {
         return res.status(404).json({ error: `Fiche #${id} introuvable.` });
       }
 
+      let parsedKeywords = db[catIdx].search_keywords || [];
+      if (Array.isArray(search_keywords)) {
+        parsedKeywords = search_keywords.map(k => String(k).trim()).filter(Boolean);
+      } else if (typeof search_keywords === 'string') {
+        parsedKeywords = search_keywords.split(',').map(k => k.trim()).filter(Boolean);
+      }
+
       // Preserve existing metadata / execution metrics while updating user edits
       const updatedCat = {
         ...db[catIdx],
         title: title.trim(),
         category: category || db[catIdx].category,
+        search_keywords: parsedKeywords,
         summary: summary !== undefined ? summary : db[catIdx].summary,
         red_flags: red_flags !== undefined ? red_flags : db[catIdx].red_flags,
         ordonnance: ordonnance !== undefined ? ordonnance : db[catIdx].ordonnance,

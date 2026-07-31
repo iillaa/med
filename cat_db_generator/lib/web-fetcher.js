@@ -164,9 +164,55 @@ async function fetchMSDManuals(cleanTitle) {
 }
 
 /**
+ * Smart Keyword Normalizer & Extractor
+ * Converts titles like "CAT devant psoriasis peau / cheveux" -> ["psoriasis", "psoriasis cuir chevelu"]
+ */
+function extractSmartKeywords(title, customKeywords) {
+  if (Array.isArray(customKeywords) && customKeywords.length > 0) {
+    return customKeywords.map(k => String(k).trim()).filter(Boolean);
+  }
+  if (typeof customKeywords === 'string' && customKeywords.trim().length > 0) {
+    return customKeywords.split(',').map(k => k.trim()).filter(Boolean);
+  }
+
+  const clean = title
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove accents
+    .replace(/^cat\s+devant\s+(l[a'’]|le|les|un|une)?\s*/i, '')
+    .replace(/^redaction\s+d[a'’]\s*(un|une|la)?\s*/i, '')
+    .replace(/chez\s+(l[a'’]|le|les|adulte|enfant|nourrisson|femme\s+enceinte).*/i, '')
+    .trim();
+
+  // Split slashes into multiple core keywords
+  const parts = clean.split(/[\/\,\&]/).map(p => p.trim()).filter(p => p.length > 2);
+  const keywords = [];
+
+  if (parts.length > 0) {
+    // Primary core medical term (e.g. "psoriasis")
+    const primaryWord = parts[0].split(/\s+/)[0];
+    if (primaryWord.length >= 3) keywords.push(primaryWord);
+    
+    // Full primary part (e.g. "psoriasis peau")
+    if (parts[0] !== primaryWord) keywords.push(parts[0]);
+
+    // Secondary parts (e.g. "RGO", "vomissements")
+    for (let i = 1; i < parts.length; i++) {
+      if (parts[i].length >= 3) keywords.push(parts[i]);
+    }
+  }
+
+  // Fallback to full cleaned title if no parts extracted
+  if (keywords.length === 0) {
+    keywords.push(clean);
+  }
+
+  return Array.from(new Set(keywords));
+}
+
+/**
  * Searches and fetches clinical guidelines for a specific CAT title across 3 high-reliability medical sources
  * @param {string} title CAT Title
- * @param {object} options Options { forceRefetch: boolean, maxSources: number }
+ * @param {object} options Options { forceRefetch: boolean, maxSources: number, searchKeywords: string|Array }
  */
 async function fetchAndCacheWebSources(title, options = {}) {
   const sanitizedDirName = sanitizeTitleForDir(title);
@@ -185,30 +231,32 @@ async function fetchAndCacheWebSources(title, options = {}) {
     }
   }
 
-  console.log(`🌐 [Step 1 Web Research] Fetching live medical guidelines for "${title}"...`);
+  const smartKeywords = extractSmartKeywords(title, options.searchKeywords);
+  const primarySearchKeyword = smartKeywords[0] || title;
 
-  const cleanTitleQuery = title.replace(/^cat\s+devant\s+/i, '').trim();
+  console.log(`🌐 [Step 1 Web Research] Fetching live medical guidelines for "${title}" using search keyword: "${primarySearchKeyword}"...`);
+
   const fetchedSources = [];
 
   // 1. Wikipedia Medical REST API (0-block guaranteed)
-  console.log(`   - Querying French Medical Encyclopedia API...`);
-  const wikiData = await fetchWikipediaMedical(cleanTitleQuery);
+  console.log(`   - Querying French Medical Encyclopedia API for "${primarySearchKeyword}"...`);
+  const wikiData = await fetchWikipediaMedical(primarySearchKeyword);
   if (wikiData) {
     fetchedSources.push(wikiData);
     console.log(`     ✅ Cached ${wikiData.content.length} chars from fr.wikipedia.org`);
   }
 
   // 2. MedG French Clinical Consensus Feed (Status 200 guaranteed)
-  console.log(`   - Querying MedG Fiches & Consensus Feed...`);
-  const medgData = await fetchMedGConsensus(cleanTitleQuery);
+  console.log(`   - Querying MedG Fiches & Consensus Feed for "${primarySearchKeyword}"...`);
+  const medgData = await fetchMedGConsensus(primarySearchKeyword);
   if (medgData) {
     fetchedSources.push(medgData);
     console.log(`     ✅ Cached ${medgData.content.length} chars from medg.fr`);
   }
 
   // 3. MSD Manuals Professionnels (Status 200 guaranteed)
-  console.log(`   - Querying Manuel MSD Professionnels (msdmanuals.com)...`);
-  const msdData = await fetchMSDManuals(cleanTitleQuery);
+  console.log(`   - Querying Manuel MSD Professionnels (msdmanuals.com) for "${primarySearchKeyword}"...`);
+  const msdData = await fetchMSDManuals(primarySearchKeyword);
   if (msdData) {
     fetchedSources.push(msdData);
     console.log(`     ✅ Cached ${msdData.content.length} chars from msdmanuals.com`);
@@ -274,5 +322,6 @@ module.exports = {
   fetchAndCacheWebSources,
   getCachedWebSources,
   listWebCacheStatus,
-  sanitizeTitleForDir
+  sanitizeTitleForDir,
+  extractSmartKeywords
 };

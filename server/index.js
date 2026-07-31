@@ -339,7 +339,9 @@ initializeData().then(() => {
     console.log(`Network Access: http://<your-device-ip>:${PORT}`);
     console.log(`=================================================`);
 
-    indexPdfs().catch(err => console.error("Startup indexing error:", err));
+    if (process.env.NODE_ENV !== 'test') {
+      indexPdfs().catch(err => console.error("Startup indexing error:", err));
+    }
   });
 }).catch(err => {
   console.error("Critical: Failed to initialize application data caches:", err);

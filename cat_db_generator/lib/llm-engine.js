@@ -230,6 +230,7 @@ FORMAT DE RÉPONSE ATTENDU (EXCLUSIVEMENT DU JSON VALIDE) :
 {
   "category": "${category || 'Gastro-entérologie'}",
   "title": "${cleanTitle}",
+  "search_keywords": ["mot-clé 1", "mot-clé 2"],
   "summary": "...",
   "red_flags": "Critères de gravité / Signes d'alarme...",
   "ordonnance": "Modèle de prescription type prêt à l'emploi avec posologies..."
@@ -251,6 +252,7 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
   const maxAttempts = 3;
   let catResult = null;
   let executionMetrics = null;
+  const { extractSmartKeywords } = require('./web-fetcher');
 
   while (attempts < maxAttempts) {
     attempts++;
@@ -260,28 +262,35 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
     executionMetrics = apiResult.metrics;
 
     try {
-      catResult = JSON.parse(apiResult.text);
-    } catch (e) {
-      console.warn(`⚠️ Failed to parse LLM JSON output (Attempt ${attempts}): ${e.message}`);
-      continue;
-    }
+      const cleanJson = apiResult.text
+        .replace(/^```json/i, '')
+        .replace(/^```/, '')
+        .replace(/```$/, '')
+        .trim();
+      catResult = JSON.parse(cleanJson);
 
-    // Attach required metadata
-    catResult.id = options.id || Date.now();
-    catResult.category = category || catResult.category || 'Gastro-entérologie';
-    catResult.title = cleanTitle;
-    catResult.pdf_keywords = pdfKeywords;
-    catResult.online_verification_queries = buildSearchQueries(cleanTitle).map(q => q.queryUrl).slice(0, 3);
+      // Enforce search_keywords array
+      if (!Array.isArray(catResult.search_keywords) || catResult.search_keywords.length === 0) {
+        catResult.search_keywords = extractSmartKeywords(cleanTitle, options.search_keywords);
+      }
 
-    // Validate using Medical Validator
-    const validation = validateCAT(catResult);
-    if (validation.valid) {
-      console.log(`✅ Medical Checksum PASSED on Attempt ${attempts}!`);
-      catResult._execution_metrics = executionMetrics;
-      return { cat: catResult, validation, metrics: executionMetrics };
-    } else {
-      console.warn(`❌ Medical Validation Checksum Failed (Attempt ${attempts}):`, validation.errors);
-      // Feedback into retry prompt if attempting again
+      catResult.id = options.id || Date.now();
+      catResult.category = category || catResult.category || 'Gastro-entérologie';
+      catResult.title = cleanTitle;
+      catResult.pdf_keywords = pdfKeywords;
+      catResult.online_verification_queries = buildSearchQueries(cleanTitle).map(q => q.queryUrl).slice(0, 3);
+
+      // Validate using Medical Validator
+      const validation = validateCAT(catResult);
+      if (validation.valid) {
+        console.log(`✅ Medical Checksum PASSED on Attempt ${attempts}!`);
+        catResult._execution_metrics = executionMetrics;
+        return { cat: catResult, validation, metrics: executionMetrics };
+      } else {
+        console.warn(`❌ Medical Validation Checksum Failed (Attempt ${attempts}):`, validation.errors);
+      }
+    } catch (parseErr) {
+      console.warn(`⚠️ JSON parse error on attempt ${attempts}: ${parseErr.message}`);
     }
   }
 

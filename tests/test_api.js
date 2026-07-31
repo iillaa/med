@@ -3,7 +3,8 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const BASE = 'http://127.0.0.1:3000';
+const PORT = process.env.PORT || '3099';
+const BASE = `http://127.0.0.1:${PORT}`;
 
 function req(method, reqPath, body, headers = {}) {
   return new Promise((resolve, reject) => {
@@ -43,17 +44,20 @@ function req(method, reqPath, body, headers = {}) {
   serverProcess = spawn('node', ['server.js'], {
     cwd: ROOT,
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, NODE_ENV: 'test' }
+    env: { ...process.env, NODE_ENV: 'test', PORT: PORT }
   });
 
   let serverReady = false;
-  serverProcess.stdout.on('data', (data) => {
-    if (data.toString().includes('Medical CAT Learning App is running')) {
+  const onData = (data) => {
+    const text = data.toString();
+    if (text.includes('Medical CAT Learning App is running') || text.includes('App is running')) {
       serverReady = true;
     }
-  });
+  };
+  serverProcess.stdout.on('data', onData);
+  serverProcess.stderr.on('data', onData);
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 60; i++) {
     await new Promise(r => setTimeout(r, 500));
     if (serverReady) break;
   }

@@ -431,6 +431,11 @@
         </div>
 
         <div>
+          <label style="font-size: 12px; color: var(--warning); display: block; margin-bottom: 5px; font-weight: bold;">🔑 Mots-clés de Recherche Web & Indexation App (séparés par des virgules)</label>
+          <input type="text" id="edit-keywords" class="search-box" style="width: 100%; font-family: monospace; font-size: 12px;" placeholder="ex: psoriasis, psoriasis cuir chevelu, dermatose squameuse">
+        </div>
+
+        <div>
           <label style="font-size: 12px; color: var(--primary); display: block; margin-bottom: 5px; font-weight: bold;">Summary / Conduite à tenir (5 étapes cliniques ou 3 étapes administratives)</label>
           <textarea id="edit-summary" class="search-box" style="width: 100%; height: 220px; font-family: monospace; font-size: 12px;"></textarea>
         </div>
@@ -612,6 +617,7 @@
       document.getElementById('edit-modal-header-title').textContent = `✏️ Édition Humaine : [ID #${cat.id}] ${cat.title}`;
       document.getElementById('edit-title').value = cat.title || '';
       document.getElementById('edit-category').value = cat.category || 'Gastro-entérologie';
+      document.getElementById('edit-keywords').value = Array.isArray(cat.search_keywords) ? cat.search_keywords.join(', ') : (cat.search_keywords || '');
       document.getElementById('edit-summary').value = cat.summary || '';
       document.getElementById('edit-redflags').value = cat.red_flags || '';
       document.getElementById('edit-ordonnance').value = cat.ordonnance || '';
@@ -627,6 +633,7 @@
       const id = parseInt(document.getElementById('edit-cat-id').value, 10);
       const title = document.getElementById('edit-title').value.trim();
       const category = document.getElementById('edit-category').value;
+      const search_keywords = document.getElementById('edit-keywords').value;
       const summary = document.getElementById('edit-summary').value;
       const red_flags = document.getElementById('edit-redflags').value;
       const ordonnance = document.getElementById('edit-ordonnance').value;
@@ -640,7 +647,7 @@
         const res = await fetch('/api/admin/cat-generator/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, title, category, summary, red_flags, ordonnance })
+          body: JSON.stringify({ id, title, category, search_keywords, summary, red_flags, ordonnance })
         });
         const data = await res.json();
 
