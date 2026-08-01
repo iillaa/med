@@ -147,6 +147,66 @@ function registerCatGeneratorRoutes(app) {
     }
   });
 
+  // POST /api/admin/cat-generator/promote-single (Promote 1 single CAT into production cats_db.json)
+  app.post('/api/admin/cat-generator/promote-single', async (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+
+    const { cat } = req.body || {};
+    if (!cat || typeof cat !== 'object' || !cat.title) {
+      return res.status(400).json({ error: 'Fiche CAT invalide ou manquante dans req.body.' });
+    }
+
+    try {
+      let prodData = [];
+      if (fs.existsSync(PROD_DB_PATH)) {
+        const prodContent = fs.readFileSync(PROD_DB_PATH, 'utf8');
+        prodData = JSON.parse(prodContent);
+      }
+
+      // Ensure backup
+      if (fs.existsSync(PROD_DB_PATH)) {
+        fs.copyFileSync(PROD_DB_PATH, `${PROD_DB_PATH}.bak`);
+      }
+
+      // Check if item already exists by ID or title match
+      const cleanTitle = (cat.title || '').toLowerCase().replace(/^cat\s+devant\s+/i, '').trim();
+      const existingIdx = prodData.findIndex(c => 
+        (c.id && cat.id && String(c.id) === String(cat.id)) ||
+        (c.title || '').toLowerCase().replace(/^cat\s+devant\s+/i, '').trim() === cleanTitle
+      );
+
+      const updatedCat = {
+        ...cat,
+        id: cat.id || Date.now(),
+        updatedAt: new Date().toISOString()
+      };
+
+      if (existingIdx >= 0) {
+        prodData[existingIdx] = { ...prodData[existingIdx], ...updatedCat };
+      } else {
+        prodData.push(updatedCat);
+      }
+
+      await safeWriteJsonAsync(PROD_DB_PATH, prodData);
+      cache.catsCache = prodData;
+
+      await logAuditEvent(req, 'PROMOTE_SINGLE_CAT', {
+        title: updatedCat.title,
+        id: updatedCat.id,
+        isNew: existingIdx < 0
+      });
+
+      res.json({
+        success: true,
+        message: `Fiche "${updatedCat.title}" promue en production avec succès.`,
+        cat: updatedCat,
+        totalProdCount: prodData.length
+      });
+    } catch (err) {
+      res.status(500).json({ error: `Échec de la promotion de la fiche : ${err.message}` });
+    }
+  });
+
   // POST /api/admin/cat-generator/update (Manual Human Edit)
   app.post('/api/admin/cat-generator/update', (req, res) => {
     if (!verifyAdminAccess(req, res)) return;

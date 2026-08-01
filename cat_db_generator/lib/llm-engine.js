@@ -14,10 +14,11 @@ const { fetchAndCacheWebSources, getCachedWebSources } = require('./web-fetcher'
 const fs = require('fs');
 
 const GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-3.5-flash',
   'gemini-3.6-flash',
-  'gemini-flash-lite-latest',
   'gemini-2.0-flash',
-  'gemini-2.0-flash-lite'
+  'gemini-flash-lite-latest'
 ];
 
 const V2_DB_PATH = path.join(__dirname, '..', 'cats_db_v2_generated.json');

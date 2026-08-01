@@ -528,6 +528,7 @@
           </td>
           <td style="white-space: nowrap;">
             <button onclick="inspectCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">👁️ Inspecter</button>
+            <button onclick="promoteSingleCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--success); border-color: var(--success);">💾 Promouvoir (1)</button>
             <button onclick="openEditModal(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);">✏️ Éditer</button>
             <button onclick="runStep1WebFetch('${c.title.replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">🌐 Step 1 Web</button>
             <button onclick="regenerateSingleCAT('${c.title.replace(/'/g, "\\'")}', '${c.category}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">🔄 Régénérer</button>
@@ -701,6 +702,46 @@
         await loadData();
       } catch (err) {
         alert(`❌ Erreur: ${err.message}`);
+      }
+    }
+
+    async function promoteSingleCAT(id) {
+      const cat = appData.v2.find(c => c.id === id);
+      if (!cat) {
+        alert("Fiche CAT introuvable.");
+        return;
+      }
+
+      if (!confirm(`Promouvoir UNIQUEMENT la fiche #${id} ("${cat.title}") dans la base de production (cats_db.json) ?`)) return;
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/promote-single', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cat })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la promotion individuelle');
+
+        alert(`✅ ${data.message}`);
+        await loadData();
+      } catch (err) {
+        alert(`❌ Erreur Promotion Individuelle: ${err.message}`);
+      }
+    }
+
+    async function promoteV2() {
+      if (!confirm(`Attention: Voulez-vous remplacer TOUTE la base de production (cats_db.json) par l'ensemble des ${appData.v2.length} fiches V2 ?`)) return;
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/promote', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de promotion');
+
+        alert(`💾 ${data.message}`);
+        await loadData();
+      } catch (err) {
+        alert(`❌ Erreur Promotion: ${err.message}`);
       }
     }
 
