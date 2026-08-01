@@ -16,11 +16,24 @@ export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
   toast.id = 'drcat-toast';
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
-  toast.innerHTML = `
-    <i class="fa-solid ${icon} t-icon"></i>
-    <span class="t-msg">${message}</span>
-    <button class="t-close" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
-  `;
+
+  // Build the toast structure with DOM methods — the message is set via textContent
+  // to prevent XSS from server error messages or any user-controlled string.
+  const iconEl = document.createElement('i');
+  iconEl.className = `fa-solid ${icon} t-icon`;
+
+  const msgEl = document.createElement('span');
+  msgEl.className = 't-msg';
+  msgEl.textContent = message; // Safe: never interprets HTML
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 't-close';
+  closeBtn.setAttribute('aria-label', 'Fermer');
+  closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>'; // Static markup only, no user data
+
+  toast.appendChild(iconEl);
+  toast.appendChild(msgEl);
+  toast.appendChild(closeBtn);
 
   document.body.appendChild(toast);
 
@@ -32,7 +45,7 @@ export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
     setTimeout(() => toast.remove(), 350);
   };
 
-  toast.querySelector('.t-close').addEventListener('click', dismiss);
+  closeBtn.addEventListener('click', dismiss);
 
   let timer = setTimeout(dismiss, duration);
   toast.addEventListener('mouseenter', () => clearTimeout(timer));

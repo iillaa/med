@@ -70,12 +70,15 @@ function logWafIncident(ip, reason, req) {
 
 function rateLimitMiddleware(req, res, next) {
   const now = Date.now();
-  
-  // Support reverse proxies by checking X-Forwarded-For first
-  const ip = (
-    req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : 
-    req.socket.remoteAddress || ''
-  ).replace(/^::ffff:/, '') || 'unknown';
+
+  // Determine the real client IP safely.
+  // X-Forwarded-For is ONLY trusted when the TCP socket itself comes from a local/trusted
+  // proxy address — this prevents external attackers from spoofing a 127.0.0.1 header
+  // to bypass rate limiting entirely.
+  const socketIp = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+  const ip = (isLocalAddress(socketIp) && req.headers['x-forwarded-for'])
+    ? req.headers['x-forwarded-for'].split(',')[0].trim().replace(/^::ffff:/, '')
+    : socketIp || 'unknown';
 
   // Determine endpoint category and limit first (for header values)
   let limitType = 'static';

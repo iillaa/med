@@ -11,9 +11,13 @@ const PDF_MASTERS_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_masters');
 const PUBLIC_PDF_DIR = path.join(__dirname, '..', '..', 'public', 'pdfs');
 
 function registerPdfRoutes(app, cache) {
+  const express = require('express');
+  // Local 50 MB body parser — only for the PDF upload route which receives base64 file data.
+  // The global express.json limit is 1 MB; all other routes in this file use the global limit.
+  const pdfUploadBodyParser = express.json({ limit: '50mb' });
 
   // POST /api/admin/upload-pdf
-  app.post('/api/admin/upload-pdf', async (req, res) => {
+  app.post('/api/admin/upload-pdf', pdfUploadBodyParser, async (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }

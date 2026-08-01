@@ -36,8 +36,14 @@ function registerVersionRoutes(app, cache) {
   const handleVersionUpdate = async (req, res) => {
     // Check x-api-key OR admin token / local admin access
     const apiKey = req.headers['x-api-key'];
-    const expectedApiKey = process.env.ADMIN_API_KEY || 'drcat_secret_api_key_2026';
-    const isApiKeyValid = apiKey && apiKey === expectedApiKey;
+    // SECURITY: No hardcoded fallback — ADMIN_API_KEY MUST be set in .env.
+    // If not set, reject all API-key-based version updates to prevent accidental
+    // exposure of the version lock endpoint with a trivially guessable key.
+    const expectedApiKey = process.env.ADMIN_API_KEY;
+    if (!expectedApiKey) {
+      console.error('[VersionRoute] ADMIN_API_KEY is not set in environment. API-key access disabled.');
+    }
+    const isApiKeyValid = expectedApiKey && apiKey && apiKey === expectedApiKey;
     const isAdmin = cache ? isAdminRequest(req, cache.activeTokens) : false;
 
     if (!isApiKeyValid && !isAdmin) {

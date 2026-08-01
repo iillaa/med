@@ -4,6 +4,9 @@
  * Copyright (c) 2026 Dr. Kibeche Ali Dia Eddine. All rights reserved.
  */
 
+// Load environment variables from .env FIRST — before any other require()
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -221,8 +224,9 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Global body limit is 1 MB — the PDF upload route applies its own 50 MB limit locally.
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -239,6 +243,10 @@ app.use((req, res, next) => {
     'Content-Security-Policy',
     [
       "default-src 'self'",
+      // NOTE: 'unsafe-inline' is required by the current HTML structure (inline handlers,
+      // critical CSS). While present, it already allows XSS script injection — so keeping
+      // 'unsafe-eval' costs nothing security-wise and is required by PDF.js PostScript
+      // rendering. The real fix is a nonce-based CSP (future work, tracked in TODO).
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
@@ -259,7 +267,7 @@ app.use((req, res, next) => {
     recordDeviceActivity(req);
   } catch (_) { /* ignore device tracking errors */ }
   res.on('finish', () => {
-    if (req.path.startsWith('/api')) {
+    if (req.path.startsWith('/api') && global.perfServer) {
       const duration = Date.now() - start;
       global.perfServer.recordRequest(req.path, req.method, duration, res.statusCode);
     }

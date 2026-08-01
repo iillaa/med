@@ -44,7 +44,17 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 
 ---
 
-## 📋 Completed Tasks ✅
+## 🔐 Security — Deferred Until > 10,000 Users
+
+> These items are intentionally deferred. Implementing them prematurely on a small project adds complexity without proportional benefit. Revisit when monthly active users exceed 10,000.
+
+- [ ] **Nonce-Based Content Security Policy (CSP)**
+  - **Why deferred:** The current CSP has `unsafe-inline` which already makes XSS via CSP theoretically possible. Removing it requires injecting a unique cryptographic nonce into every `<script>` tag server-side, changing the build pipeline, and auditing all inline event handlers in `index.html`. This is a significant refactor.
+  - **Why NOT to do it now:** At < 10K users, no real attacker is hunting for XSS in Dr.CAT. The bigger XSS risk (raw `innerHTML` with user data) is already fixed. The CSP effort/risk ratio is unfavorable for a small app.
+  - **What to do when the time comes:** Generate a random nonce per request in `server/index.js`, inject it into every `<script>` tag via the HTML template, and replace `unsafe-inline` + `unsafe-eval` with `'nonce-{random}'` + `'wasm-unsafe-eval'` (for PDF.js WebAssembly).
+
+---
+
 
 - [x] **2-Step Live Web Research RAG & Human Active Learning Engine (`generate_cat_db_v2.js`)** — Built 2-step clinical protocol synthesis engine featuring:
   - **Step 1 Live Web Fetcher (`lib/web-fetcher.js`)**: Scrapes target medical guidelines (`sante.gov.dz`, `cnpm.org.dz`, `samidz.com`, `vidal.fr`, `has-sante.fr`, `sfmu.org`, `who.int`, `msdmanuals.com`) into structured local disk cache (`cat_db_generator/web_cache/`).

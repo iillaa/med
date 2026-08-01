@@ -15,10 +15,23 @@ function registerSuggestionRoutes(app) {
   });
 
   app.post('/api/suggestions', async (req, res) => {
+    // Require x-app-key so anonymous bots cannot spam the suggestion queue.
+    const { APP_DATA_KEY } = require('../config/constants');
+    const requestKey = req.headers['x-app-key'];
+    if (!requestKey || requestKey !== APP_DATA_KEY) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+
     try {
       const { type, catId, data } = req.body;
       if (!type || !data) {
         return res.status(400).json({ error: 'Type (add/edit) et Data sont requis.' });
+      }
+
+      // Guard against oversized payloads that could bloat the suggestions file.
+      const dataSize = Buffer.byteLength(JSON.stringify(data), 'utf8');
+      if (dataSize > 5000) {
+        return res.status(413).json({ error: 'Données trop volumineuses (max 5 Ko).' });
       }
 
       const targetCatId = catId ? parseInt(catId) : null;

@@ -115,7 +115,7 @@ async function runTests() {
     check('GET  /api/suggestions → 200', (await req('GET', '/api/suggestions', null, { 'x-admin-token': token })).status === 200);
 
     console.log('\n4. Suggestion lifecycle:');
-    const sug = await req('POST', '/api/suggestions', { type: 'edit', catId: testCatId, data: { summary: 'sug ' + Date.now() } });
+    const sug = await req('POST', '/api/suggestions', { type: 'edit', catId: testCatId, data: { summary: 'sug ' + Date.now() } }, { 'x-app-key': 'drcat_pub_2f7a91c4e8' });
     check('POST /api/suggestions → created', sug.status === 200 && sug.body.success === true);
     const sugId = sug.body.suggestion.id;
 
