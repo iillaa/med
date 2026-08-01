@@ -21,6 +21,29 @@
 
 ---
 
+## 🛠️ Dr. CAT Version 2: Hierarchical Data & Sub-Category Architecture Plan
+
+This blueprint outlines the execution steps for introducing nested sub-categories, specific fiches synthèses, and dedicated ordonnances into your local JSON-driven data architecture without bloating the app or breaking the build pipeline.
+
+### Phase 1: Data Schema & Generator Extension
+- **Update JSON Data Structure**: Modify the schema in your local JSON database files (`cats_db.json`) and generator scripts to support nested sub-category arrays under main clinical topics.
+- **Map Clinical Entities**: Ensure every sub-category object contains dedicated data blocks for its specific variables (e.g., age groups, acute vs. chronic classifications, specific pathogens).
+- **Embed Sub-Assets**: Attach unique `fiche_synthese` and `ordonnance` arrays directly inside each sub-category node rather than relying on global parent-level data.
+
+### Phase 2: Frontend UI & View Navigation
+- **Build Tree-View Navigation**: Update the client-side interface logic to render expandable sub-category lists or tabbed selections whenever a user opens a complex primary topic (e.g., clicking "Diarrhea" expands sub-options like Acute Pediatric, Chronic Adult, etc.).
+- **Dynamic State Handling**: Implement clean event listeners in your UI scripts to track the currently selected sub-category ID and refresh the viewport cleanly without full page reloads.
+
+### Phase 3: Content Component Rendering
+- **Isolate Template Renderers**: Write modular view-rendering functions for the sub-category payload so that selecting a sub-item instantly populates the correct, context-specific fiche synthèse and ordonnance templates.
+- **Refactoring Control**: Keep these renderers cleanly separated in your codebase to prevent falling back into monolithic vanilla JavaScript DOM-manipulation spaghetti.
+
+### Phase 4: Testing & Build Verification
+- **Extend Test Suite**: Update your 5-suite Master Test Runner (`tests/run_all_tests.js`) to include schema validation checks for the new sub-category keys, ensuring no missing data fields exist across your local JSON packs.
+- **Pipeline Validation**: Run a full local build check to verify that minification compiles smoothly and that Capacitor and ProGuard package the updated static data assets cleanly into the target Android APK.
+
+---
+
 ## 📋 Completed Tasks ✅
 
 - [x] **2-Step Live Web Research RAG & Human Active Learning Engine (`generate_cat_db_v2.js`)** — Built 2-step clinical protocol synthesis engine featuring:
