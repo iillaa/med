@@ -47,6 +47,13 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 - **Hybrid RAG Reranker (BM25 + Keyword Priority)**: Rank local PDF extracts containing exact trade names or primary treatment protocols higher than generic diagnostic background text.
 - **Automated Validation Re-Prompting Guardrail**: If `validateCAT()` detects unseparated alternative drugs or missing 1ère INTENTION headers, feed validation errors back into Attempt 2 of LLM synthesis.
 
+### 📚 Open-Source Medical AI Inspiration & Reference Projects (For V2 Research)
+- **[MedRAG](https://github.com/MedRAG/MedRAG)**: Academic benchmark framework for medical retrieval over PubMed, StatPearls & textbooks. *Key takeaway: Hybrid BM25 + dense vector reranking for drug name precision.*
+- **[Meditron](https://github.com/epfl-dlab/meditron)**: EPFL open-source medical LLMs fine-tuned on Clinical Practice Guidelines (CPGs). *Key takeaway: Prompting around clinical decision trees (Reasoning -> Red Flags -> 1st Line -> Alternatives).*
+- **[Instructor](https://github.com/jxnl/instructor)** & **[Guardrails AI](https://github.com/guardrails-ai/guardrails)**: Enforces strict Pydantic/JSON schemas on LLM outputs with automated validation retry loops. *Key takeaway: Automatic re-prompting on schema validation errors.*
+- **[RxNorm](https://www.nlm.nih.gov/research/umls/rxnorm/)** & **[OpenEHR](https://www.openehr.org/)**: International standards for localizing drug databases and mapping International Nonproprietary Names (INN / DCI) to commercial brand names (ATC coding). *Key takeaway: DCI to local trade brand mapping.*
+- **[OpenSRP](https://smartregister.org/)** & **[CommCare](https://www.dimagi.com/commcare/)**: WHO-backed offline-first mobile field health apps for low-bandwidth environments. *Key takeaway: Delta syncing and local storage isolation.*
+
 ---
 
 ## 🔐 Security — Deferred Until > 10,000 Users
