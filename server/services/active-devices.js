@@ -76,7 +76,13 @@ function recordDeviceActivity(req) {
   const now = new Date().toISOString();
   const appVersion = req.headers['x-app-version'] || req.query.app_version || '1.5.2';
   const ua = (req.headers['user-agent'] || '').toLowerCase();
-  const platform = ua.includes('capacitor') ? 'android_apk' : 'web_pwa';
+  
+  // Explicit platform header from client takes precedence, otherwise fallback to UA
+  const explicitPlat = req.headers['x-device-platform'] || req.headers['x-capacitor-platform'];
+  let platform = 'web_pwa';
+  if (explicitPlat === 'android_apk' || explicitPlat === 'android' || ua.includes('capacitor')) {
+    platform = 'android_apk';
+  }
 
   const isLocal = isLocalhostConnection(req);
   const hasAdminAuth = !!(req.headers['x-admin-token'] || req.headers['x-api-key'] || req.headers['authorization']);
@@ -92,6 +98,9 @@ function recordDeviceActivity(req) {
   existing.platform = platform;
   existing.lastSeen = now;
   existing.lastIp = clientIp;
+
+  // Telemetry-only tagging: Mark device as developer/admin if request is local or has admin headers.
+  // NOTE: This flag is strictly for analytics classification and NEVER grants security or API access.
   existing.isAdminDevice = isLocal || hasAdminAuth || !!existing.isAdminDevice;
   existing.requestCount = (existing.requestCount || 0) + 1;
 
@@ -100,18 +109,28 @@ function recordDeviceActivity(req) {
 }
 
 /**
- * Compute Active User Analytics (Total, DAU, MAU, Admin vs External Users)
+ * Compute Active User Analytics (Real-Time Live, 1h Recent, DAU 24h, MAU 30j, Admin vs External)
  */
 function getDeviceAnalytics() {
   const now = Date.now();
+  const FIVE_MIN_MS = 5 * 60 * 1000;
+  const ONE_HOUR_MS = 60 * 60 * 1000;
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
   const THIRTY_DAYS_MS = 30 * ONE_DAY_MS;
 
   let totalDevices = 0;
   let adminDevicesCount = 0;
   let externalDevicesCount = 0;
+
+  let liveNowCount = 0;
+  let externalLiveNowCount = 0;
+
+  let recent1hCount = 0;
+  let externalRecent1hCount = 0;
+
   let dauCount = 0;
   let externalDauCount = 0;
+
   let mauCount = 0;
   let externalMauCount = 0;
 
@@ -128,6 +147,14 @@ function getDeviceAnalytics() {
     const lastSeenTime = new Date(dev.lastSeen).getTime() || 0;
     const diffMs = now - lastSeenTime;
 
+    if (diffMs <= FIVE_MIN_MS) {
+      liveNowCount++;
+      if (!isAdmin) externalLiveNowCount++;
+    }
+    if (diffMs <= ONE_HOUR_MS) {
+      recent1hCount++;
+      if (!isAdmin) externalRecent1hCount++;
+    }
     if (diffMs <= ONE_DAY_MS) {
       dauCount++;
       if (!isAdmin) externalDauCount++;
@@ -143,7 +170,11 @@ function getDeviceAnalytics() {
     const plat = dev.platform || 'web_pwa';
     platformDistribution[plat] = (platformDistribution[plat] || 0) + 1;
 
-    deviceList.push(dev);
+    deviceList.push({
+      ...dev,
+      isLiveNow: diffMs <= FIVE_MIN_MS,
+      isRecent1h: diffMs <= ONE_HOUR_MS
+    });
   }
 
   // Sort device list by lastSeen descending
@@ -153,6 +184,10 @@ function getDeviceAnalytics() {
     totalDevices,
     adminDevices: adminDevicesCount,
     externalDevices: externalDevicesCount,
+    liveNow: liveNowCount,
+    externalLiveNow: externalLiveNowCount,
+    recent1h: recent1hCount,
+    externalRecent1h: externalRecent1hCount,
     dau: dauCount,
     externalDau: externalDauCount,
     mau: mauCount,

@@ -120,6 +120,17 @@
 
   <!-- Key Performance Metrics Grid -->
   <div class="stats-grid">
+    <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.4);">
+      <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
+        <i class="fa-solid fa-signal"></i>
+      </div>
+      <div>
+        <div class="stat-label" style="color: #10b981;">🟢 En Ligne (< 5 min)</div>
+        <div class="stat-val" id="stat-live" style="color: #10b981;">0</div>
+        <div style="font-size: 10px; color: var(--text-muted);" id="stat-live-sub">0 dev / 0 total</div>
+      </div>
+    </div>
+
     <div class="stat-card">
       <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
         <i class="fa-solid fa-mobile-screen"></i>
@@ -293,6 +304,10 @@
       const json = await res.json();
       const data = json.analytics || {};
 
+      document.getElementById('stat-live').textContent = data.externalLiveNow || 0;
+      const devLive = (data.liveNow || 0) - (data.externalLiveNow || 0);
+      document.getElementById('stat-live-sub').textContent = `${devLive} dev / ${data.liveNow || 0} total`;
+
       document.getElementById('stat-total').textContent = data.externalDevices || 0;
       document.getElementById('stat-total-sub').textContent = `${data.adminDevices || 0} dev / ${data.totalDevices || 0} total`;
       
@@ -373,34 +388,46 @@
 
     const tbody = document.getElementById('device-table-body');
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Aucun appareil ne correspond aux filtres.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">Aucun appareil ne correspond aux filtres.</td></tr>';
       return;
     }
 
-    tbody.innerHTML = filtered.map(d => `
-      <tr>
-        <td><span class="install-id-code" title="${d.installId}">${d.installId}</span></td>
-        <td>
-          ${d.isAdminDevice ? 
-            '<span class="badge" style="background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3);"><i class="fa-solid fa-crown"></i> Dev / Admin</span>' : 
-            '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-user"></i> Externe</span>'}
-        </td>
-        <td>
-          ${d.platform === 'android_apk' ? 
-            '<span class="badge badge-apk"><i class="fa-solid fa-android"></i> Android APK</span>' : 
-            '<span class="badge badge-pwa"><i class="fa-solid fa-globe"></i> Web PWA</span>'}
-        </td>
-        <td><strong>v${d.appVersion || '1.5.2'}</strong></td>
-        <td>${d.firstSeen ? new Date(d.firstSeen).toLocaleDateString('fr-FR') : '--'}</td>
-        <td>${new Date(d.lastSeen).toLocaleString('fr-FR')}</td>
-        <td><strong>${d.requestCount || 1}</strong></td>
-        <td>
-          <button class="btn btn-outline" style="padding: 3px 8px; font-size: 10px; min-height: auto;" onclick="inspectDevice('${d.installId}')">
-            <i class="fa-solid fa-eye"></i> Voir
-          </button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = filtered.map(d => {
+      const isLive = d.isLiveNow;
+      const isRecent = d.isRecent1h;
+      let statusBadge = '<span class="badge" style="background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3);"><i class="fa-solid fa-moon"></i> Inactif</span>';
+      if (isLive) {
+        statusBadge = '<span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4);"><i class="fa-solid fa-circle" style="font-size:7px;"></i> 🟢 En Ligne (< 5m)</span>';
+      } else if (isRecent) {
+        statusBadge = '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);"><i class="fa-solid fa-bolt"></i> Récent (< 1h)</span>';
+      }
+
+      return `
+        <tr>
+          <td><span class="install-id-code" title="${d.installId}">${d.installId}</span></td>
+          <td>
+            ${d.isAdminDevice ? 
+              '<span class="badge" style="background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3);"><i class="fa-solid fa-crown"></i> Dev / Admin</span>' : 
+              '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-user"></i> Externe</span>'}
+          </td>
+          <td>${statusBadge}</td>
+          <td>
+            ${d.platform === 'android_apk' ? 
+              '<span class="badge badge-apk"><i class="fa-solid fa-android"></i> Android APK</span>' : 
+              '<span class="badge badge-pwa"><i class="fa-solid fa-globe"></i> Web PWA</span>'}
+          </td>
+          <td><strong>v${d.appVersion || '1.5.2'}</strong></td>
+          <td>${d.firstSeen ? new Date(d.firstSeen).toLocaleDateString('fr-FR') : '--'}</td>
+          <td>${new Date(d.lastSeen).toLocaleString('fr-FR')}</td>
+          <td><strong>${d.requestCount || 1}</strong></td>
+          <td>
+            <button class="btn btn-outline" style="padding: 3px 8px; font-size: 10px; min-height: auto;" onclick="inspectDevice('${d.installId}')">
+              <i class="fa-solid fa-eye"></i> Voir
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
   function inspectDevice(id) {

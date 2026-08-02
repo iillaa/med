@@ -231,6 +231,7 @@ export function getHeaders(extraHeaders = {}) {
     'x-app-key': APP_DATA_KEY,
     'x-install-id': installId,
     'x-app-version': metaVer,
+    'x-device-platform': isOfflineApp ? 'android_apk' : 'web_pwa',
     'ngrok-skip-browser-warning': 'true',
     ...(isOfflineApp ? { 'x-capacitor-platform': 'android' } : {}),
     ...(token ? { 'x-admin-token': token } : {}),
