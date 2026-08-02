@@ -197,6 +197,29 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 
 ---
 
+## 🩺 Doctor-Grade Prescription & Local-First Weighting Engine (v1.5.2)
+
+Le moteur de génération et d'édition d'ordonnances intègre une logique décisionnelle clinique de niveau médical (Doctor-Grade) associée à une pondération contextuelle locale (Local-First Weighting).
+
+### 1. Structure de Prescription à 3 Niveaux (3 Tiers)
+Les ordonnances générées et affichées dans les fiches CAT suivent une hiérarchisation clinique stricte :
+- **1ère Intention (First-Line)** : Traitement étiologique de référence pour le tableau clinique donné (posologie exacte, durée et modalité d'administration).
+- **Alternatives Thérapeutiques (`[OU]`)** : Options de remplacement explicites en cas de contre-indication, d'intolérance, d'allergie ou de rupture de stock.
+- **Traitements Symptomatiques Adjuvants** : Prescriptions d'appoint ciblant les symptômes associés (douleur, fièvre, spasmes, diarrhée, prurit).
+
+### 2. Algorithme de Pondération Locale (Local-First Drug Weighting)
+Pour s'adapter à la réalité du terrain et de la pharmacopée locale, le moteur accorde une priorité algorithmique supérieure aux molécules de référence couramment prescrites et disponibles :
+- **Gastro-entérologie / Antispasmodiques** : Priorisation de *Spasfon* (Phloroglucinol), *Tiorfan* (Racecadotril), *Smecta* (Diosmectite).
+- **Dermatologie / Parasitologie** : Priorisation d'*Ascabiol* (Benzoate de bénzyle) pour les gales et parasitoses cutanées.
+- **Règles d'Équivalence** : Substitution automatique ou suggestion préférentielle des spécialités disponibles localement par rapport aux dénominations internationales rares.
+
+### 3. Garde-Fous Anti-Polypharmacie & Sécurité Patient
+- **Limitation d'Ordonnance** : Alerte clinique et plafonnement des associations systématiques superflues pour réduire la iatrogénie.
+- **Vérification de Redondance** : Détection des doublons de classe thérapeutique (ex. coprescription de deux AINS ou deux antispasmodiques).
+- **Avertissements de Posologie** : Signalement visuel sur les durées de traitement prolongées et ajustements pédiatriques/gériatriques.
+
+---
+
 ## 📶 Offline-First Capabilities & PWA
 
 * **App Mode at Startup**: `main.js` calls `api.getAppMode()` which checks host, protocol, and Capacitor UA to assign the correct data routing strategy before any network call is made.

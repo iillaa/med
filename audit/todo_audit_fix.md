@@ -1,5 +1,5 @@
 # 📝 TODO Audit Fixes — Local & Existing Setup
-> **App Version:** 1.5.1  
+> **App Version:** 1.5.2  
 > **Last Updated:** 2026-08-02  
 > **Context:** Actionable fixes for the current local Termux / Android setup.
 
@@ -12,7 +12,13 @@
 
 ---
 
-## ✅ Completed Fixes (This Session — v1.5.0 → v1.5.1)
+## ✅ Completed Fixes (This Session — v1.5.2 Doctor-Grade Prescription & Local Weighting)
+
+- [x] **Moteur de Prescriptions Grade Médical & Pondération Locale (v1.5.2)**
+  - Hiérarchisation à 3 niveaux (1ère intention, Alternatives `[OU]`, Traitement symptomatique).
+  - Pondération locale des molécules (Ascabiol, Spasfon, Tiorfan, Smecta).
+  - Alertes anti-polypharmacie et garde-fous sur les sur-prescriptions/doublons médicamenteux.
+  - Mise à jour globale de la documentation (`README.md`, `technical_architecture.md`, `todo_audit_fix.md`).
 
 - [x] **Prevent Event-Loop Freezes in AI Generator** (`server/routes/cat-generator.js`)
   - All `fs.readFileSync` / `fs.writeFileSync` replaced with `fs.promises.readFile` / `fs.promises.writeFile`.

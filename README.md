@@ -30,6 +30,11 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - Support des **variantes** via séparateurs `--- Nom de la Variante ---` (ex: `--- Adulte ---` / `--- Enfant ---`). Les boutons de navigation sont générés automatiquement.
 - Bouton de **copie en 1 clic** de la variante active dans le presse-papier.
 
+### 🩺 Prescriptions de Grade Médical & Moteur Local-First (v1.5.2)
+- **Hiérarchisation à 3 Niveaux** : Distinction stricte entre traitement de 1ère intention, alternatives thérapeutiques (`[OU]`), et traitements symptomatiques adjuvants.
+- **Pondération Thérapeutique Locale** : Priorisation des molécules disponibles et courantes en pratique locale (ex: Ascabiol, Spasfon, Tiorfan, Smecta).
+- **Sécurité Anti-Polypharmacie** : Alertes et garde-fous intégrés pour éviter les sur-prescriptions et interactions médicamenteuses.
+
 ### 📝 Notes Personnelles & Observations
 - Zone de prise de notes persistantes, sauvegardées localement dans `localStorage`.
 - Idéal pour documenter vos protocoles locaux ou adaptations spécifiques.
