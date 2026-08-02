@@ -140,6 +140,8 @@ function registerCatRoutes(app) {
           detail: 'Modifié directement par l\'administrateur',
           previousState: Object.keys(previousState).length > 0 ? previousState : undefined
         });
+        // Cap history at 50 entries to prevent unbounded JSON growth
+        if (cat.history.length > 50) cat.history = cat.history.slice(-50);
 
         await safeWriteJsonAsync(DB_FILE, cache.catsCache);
         return { success: true, message: `CAT ${catId} mise à jour directement.` };

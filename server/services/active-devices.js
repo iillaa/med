@@ -26,9 +26,25 @@ function loadDeviceStore() {
 }
 
 // Debounced Disk Persistence (saves every 10 seconds if dirty)
+// Also prunes devices inactive for more than 90 days to prevent unbounded memory growth.
 setInterval(async () => {
   if (!isDirty) return;
   try {
+    const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    let pruned = 0;
+
+    for (const [id, dev] of deviceMap.entries()) {
+      const lastSeen = new Date(dev.lastSeen).getTime() || 0;
+      if (now - lastSeen > NINETY_DAYS_MS) {
+        deviceMap.delete(id);
+        pruned++;
+      }
+    }
+    if (pruned > 0) {
+      console.log(`[ActiveDevices] Pruned ${pruned} inactive device(s) (>90 days).`);
+    }
+
     const devicesObj = {};
     for (const [id, dev] of deviceMap.entries()) {
       devicesObj[id] = dev;

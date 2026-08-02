@@ -34,7 +34,16 @@ function registerSuggestionRoutes(app) {
         return res.status(413).json({ error: 'Données trop volumineuses (max 5 Ko).' });
       }
 
-      const targetCatId = catId ? parseInt(catId) : null;
+      // Strict integer validation — parseInt('abc') = NaN, parseInt('1e5') = 1 (wrong).
+      // Number() catches both cases: Number('abc')=NaN, Number('1e5')=100000 but non-integer.
+      let targetCatId = null;
+      if (catId !== undefined && catId !== null && catId !== '') {
+        const parsed = Number(catId);
+        if (!Number.isInteger(parsed) || parsed <= 0) {
+          return res.status(400).json({ error: 'catId doit être un entier positif valide.' });
+        }
+        targetCatId = parsed;
+      }
       
       const duplicate = cache.suggestionsCache.find(s => 
         s.type === type && 

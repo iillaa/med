@@ -72,14 +72,26 @@ function registerCatGeneratorRoutes(app) {
       return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
     }
 
+    // Sanitize title to prevent prompt injection — strip backticks, angle brackets,
+    // and common override phrases before sending to the LLM.
+    const safeTitle = title
+      .replace(/[`<>]/g, '')
+      .replace(/ignore\s+(all\s+)?(previous|prior|above)\s+instructions?/gi, '')
+      .trim()
+      .slice(0, 200); // Hard cap to avoid token abuse
+
+    if (!safeTitle) {
+      return res.status(400).json({ error: 'Titre invalide après nettoyage.' });
+    }
+
     try {
-      console.log(`[CAT Generator Lab] API requested generation for: "${title}"...`);
-      const result = await generateCATWithLLM(title, category || 'Gastro-entérologie');
-      
-      // Update v2 generated file
+      console.log(`[CAT Generator Lab] API requested generation for: "${safeTitle}"...`);
+      const result = await generateCATWithLLM(safeTitle, category || 'Gastro-entérologie');
+
+      // Update v2 generated file — use async read/write to avoid blocking the event loop
       let db = [];
       if (fs.existsSync(V2_DB_PATH)) {
-        try { db = JSON.parse(fs.readFileSync(V2_DB_PATH, 'utf8')); } catch (e) {}
+        try { db = JSON.parse(await fs.promises.readFile(V2_DB_PATH, 'utf8')); } catch (e) {}
       }
 
       const existingIdx = db.findIndex(c => c.title.toLowerCase() === result.cat.title.toLowerCase());
@@ -91,7 +103,7 @@ function registerCatGeneratorRoutes(app) {
         db.push(result.cat);
       }
 
-      fs.writeFileSync(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+      await fs.promises.writeFile(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
 
       res.json({
         success: true,
@@ -208,7 +220,7 @@ function registerCatGeneratorRoutes(app) {
   });
 
   // POST /api/admin/cat-generator/update (Manual Human Edit)
-  app.post('/api/admin/cat-generator/update', (req, res) => {
+  app.post('/api/admin/cat-generator/update', async (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
 
     const { id, title, category, summary, red_flags, ordonnance, search_keywords } = req.body || {};
@@ -221,7 +233,8 @@ function registerCatGeneratorRoutes(app) {
     }
 
     try {
-      let db = JSON.parse(fs.readFileSync(V2_DB_PATH, 'utf8'));
+      // Async read — avoids blocking the event loop on a large JSON file
+      let db = JSON.parse(await fs.promises.readFile(V2_DB_PATH, 'utf8'));
       const catIdx = db.findIndex(c => c.id === parseInt(id, 10));
 
       if (catIdx === -1) {
@@ -235,7 +248,6 @@ function registerCatGeneratorRoutes(app) {
         parsedKeywords = search_keywords.split(',').map(k => k.trim()).filter(Boolean);
       }
 
-      // Preserve existing metadata / execution metrics while updating user edits
       const updatedCat = {
         ...db[catIdx],
         title: title.trim(),
@@ -251,7 +263,8 @@ function registerCatGeneratorRoutes(app) {
       const validation = validateCAT(updatedCat);
 
       db[catIdx] = updatedCat;
-      fs.writeFileSync(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+      // Async write — avoids blocking the event loop
+      await fs.promises.writeFile(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
 
       res.json({
         success: true,
@@ -265,7 +278,7 @@ function registerCatGeneratorRoutes(app) {
   });
 
   // POST /api/admin/cat-generator/delete
-  app.post('/api/admin/cat-generator/delete', (req, res) => {
+  app.post('/api/admin/cat-generator/delete', async (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
 
     const { id } = req.body || {};
@@ -278,7 +291,7 @@ function registerCatGeneratorRoutes(app) {
     }
 
     try {
-      let db = JSON.parse(fs.readFileSync(V2_DB_PATH, 'utf8'));
+      let db = JSON.parse(await fs.promises.readFile(V2_DB_PATH, 'utf8'));
       const initialCount = db.length;
       db = db.filter(c => c.id !== parseInt(id, 10));
 
@@ -286,7 +299,7 @@ function registerCatGeneratorRoutes(app) {
         return res.status(404).json({ error: `Fiche avec l'ID ${id} introuvable.` });
       }
 
-      fs.writeFileSync(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+      await fs.promises.writeFile(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
       res.json({ success: true, message: `Fiche #${id} supprimée de la base v2 générée.` });
     } catch (err) {
       res.status(500).json({ error: err.message });
