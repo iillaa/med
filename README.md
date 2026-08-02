@@ -56,6 +56,11 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 
 ---
 
+### ⚙️ Process Management & Reliability (v1.5.1)
+- **PM2 Process Supervisor**: Server runs under PM2 for automatic crash recovery (restarts in 3 sec). See `ecosystem.config.js` for all tunable parameters.
+- **Log Rotation** (`npm run log:rotate`): Auto-rotates server logs when they exceed 10 MB. Archives pruned after 7 days.
+- **Key PM2 Commands**: `npm run pm2:start` / `pm2:stop` / `pm2:restart` / `pm2:status` / `pm2:logs`.
+
 ### 🔒 Sécurité & Hardening APK Production (Anti-Décompilation)
 - **Hardening Assets APK (`npm run cap:sync`)** : Filtrage automatique des fichiers sources de développement non-minifiés (`components/`, `lib/`, `workspace/`, `dashboard/`, `main.js`, `api.js`, `utils.js`). Les outils de rétro-ingénierie (`apktool`, `jadx`, `unzip`) ne trouvent **que** le bundle de production minifié `dist/app-*.js`.
 - **Exclusion AAPT Native (`build.gradle`)** : Règle `ignoreAssetsPattern` au niveau du compilateur Android empêchant tout empaquetage de code source brut dans le fichier `.apk`.

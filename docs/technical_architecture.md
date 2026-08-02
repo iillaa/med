@@ -205,6 +205,21 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 
 ---
 
+## 🔐 Security Hardening (v1.5.0)
+
+The following critical security patches were applied in v1.5.0:
+
+| Fix | File | Detail |
+|---|---|---|
+| Hardcoded API key removed | `server/routes/version.js` | `ADMIN_API_KEY` now loaded from `.env` only |
+| dotenv loading | `server/index.js` | Secrets loaded at boot from `.env` |
+| X-Forwarded-For spoofing blocked | `server/middleware/rate-limit.js` | XFF only trusted from local socket IPs |
+| Suggestions endpoint auth | `server/routes/suggestions.js` | Requires valid `x-app-key` header + 5KB payload cap |
+| Toast XSS eliminated | `public/js/utils.js` | `textContent` used instead of `innerHTML` |
+| Body size limit | `server/index.js` + `server/routes/pdfs.js` | Global 1MB limit, PDF upload gets local 50MB |
+
+---
+
 ## 🔒 Security & Admin Hardening
 
 ### 1. Production APK Asset Hardening & Anti-Decompilation

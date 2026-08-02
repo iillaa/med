@@ -147,6 +147,44 @@ npm run cap:sync        # Sync Capacitor assets
 
 ---
 
+## 🔄 Running with PM2 (Recommended for Production)
+
+PM2 supervises the server and auto-restarts it on crash.
+
+```bash
+# Start server under PM2
+npm run pm2:start
+
+# Check status
+npm run pm2:status
+
+# View live logs
+npm run pm2:logs
+
+# Stop server
+npm run pm2:stop
+```
+
+### Changing PM2 Settings
+All parameters are in [`ecosystem.config.js`](../ecosystem.config.js). Edit the file then run `npm run pm2:restart`.
+
+| Parameter | Default | What it controls |
+|---|---|---|
+| `restart_delay` | `3000` | Milliseconds to wait before restarting after a crash |
+| `max_restarts` | `10` | Max crashes before PM2 gives up restarting |
+| `min_uptime` | `'5s'` | App must stay alive this long to count as a clean start |
+| `max_memory_restart` | `'200M'` | Auto-restart if RAM usage exceeds this |
+| `out_file` | `logs/server-out.log` | Standard output log path |
+| `error_file` | `logs/server-err.log` | Error/crash log path |
+
+### Log Rotation
+```bash
+npm run log:rotate   # Rotate logs >10MB, prune archives >7 days
+```
+Settings are in `scripts/rotate-logs.js` (`MAX_SIZE_MB`, `KEEP_DAYS`).
+
+---
+
 ## ⚙️ Configuring Server URLs & Syncing
 
 Dr. CAT lets standalone offline APK builds talk to a central server (tunnel or custom domain) to fetch updates and send suggestions.
