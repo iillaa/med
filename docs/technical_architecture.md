@@ -199,22 +199,31 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 
 ## 🩺 Doctor-Grade Prescription & Local-First Weighting Engine (v1.5.2)
 
-Le moteur de génération et d'édition d'ordonnances intègre une logique décisionnelle clinique de niveau médical (Doctor-Grade) associée à une pondération contextuelle locale (Local-First Weighting).
+Le moteur de génération et d'édition d'ordonnances intègre une logique décisionnelle clinique de niveau médical (Doctor-Grade) associée à une matrice de pondération contextuelle locale à 3 niveaux (3-Tier Source Weighting Matrix).
 
-### 1. Structure de Prescription à 3 Niveaux (3 Tiers)
+### 1. Matrice de Pondération des Sources de la Fiche de Synthèse (Source Weighting Matrix)
+
+| Niveau (Tier) | Source de Connaissances | Coefficient de Pondération | Rôle & Priorité Clinique |
+|---|---|---|---|
+| **Tier 1 (50%)** | **Offline PDF Index** (Originaux Locaux Algérie/Maghreb) | **50% (Priorité Absolue)** | Détermine les molécules médicamenteuses, les posologies locales et les habitudes de prescription (ex: Ascabiol/Benzoate de benzyle, Spasfon, Tiorfan, Smecta). |
+| **Tier 2 (30%)** | **Web RAG** (MedG, MSD Manuals, Wiki FR) | **30% (Consolidation)** | Détermine la structuration rigoureuse en 5 étapes cliniques, le bilan paraclinique et l'exhaustivité des Drapeaux Rouges (*Red Flags*). |
+| **Tier 3 (20%)** | **Connaissances LLM Gemini** | **20% (Formatage & Syntaxe)** | Assure la rigueur de rédaction médicale française, l'absence de répétitions et le respect du schéma JSON. |
+
+### 2. Structure de Prescription à 3 Niveaux (3 Tiers)
 Les ordonnances générées et affichées dans les fiches CAT suivent une hiérarchisation clinique stricte :
 - **1ère Intention (First-Line)** : Traitement étiologique de référence pour le tableau clinique donné (posologie exacte, durée et modalité d'administration).
-- **Alternatives Thérapeutiques (`[OU]`)** : Options de remplacement explicites en cas de contre-indication, d'intolérance, d'allergie ou de rupture de stock.
-- **Traitements Symptomatiques Adjuvants** : Prescriptions d'appoint ciblant les symptômes associés (douleur, fièvre, spasmes, diarrhée, prurit).
+- **Alternatives Thérapeutiques (`[OU]`)** : Options de remplacement explicites en cas de contre-indication, d'intolérance, d'allergie ou de rupture de stock (ex: `[OU] Alternative 1 (Si contre-indication au traitement topique) : Ivermectine orale...`).
+- **Traitements Symptomatiques Adjuvants** : Prescriptions d'appoint ciblant uniquement les symptômes associés (douleur, fièvre, spasmes, diarrhée, prurit).
 
-### 2. Algorithme de Pondération Locale (Local-First Drug Weighting)
+### 3. Algorithme de Pondération Locale (Local-First Drug Weighting)
 Pour s'adapter à la réalité du terrain et de la pharmacopée locale, le moteur accorde une priorité algorithmique supérieure aux molécules de référence couramment prescrites et disponibles :
 - **Gastro-entérologie / Antispasmodiques** : Priorisation de *Spasfon* (Phloroglucinol), *Tiorfan* (Racecadotril), *Smecta* (Diosmectite).
-- **Dermatologie / Parasitologie** : Priorisation d'*Ascabiol* (Benzoate de bénzyle) pour les gales et parasitoses cutanées.
+- **Dermatologie / Parasitologie** : Priorisation d'*Ascabiol* (Benzoate de benzyle) pour les gales et parasitoses cutanées.
 - **Règles d'Équivalence** : Substitution automatique ou suggestion préférentielle des spécialités disponibles localement par rapport aux dénominations internationales rares.
 
-### 3. Garde-Fous Anti-Polypharmacie & Sécurité Patient
-- **Limitation d'Ordonnance** : Alerte clinique et plafonnement des associations systématiques superflues pour réduire la iatrogénie.
+### 4. Garde-Fous Anti-Polypharmacie & Sécurité Patient
+- **Interdiction de la Liste Plate** : Élimination des numérotations plates (1, 2, 3, 4) pouvant faire croire à une coprescription simultanée.
+- **Balises d'Alerte d'Exclusion** : Insertion automatique d'avertissements explicites `⚠️ ALTERNATIVE : Ne pas associer le traitement topique et oral en première intention sauf forme grave/croûteuse`.
 - **Vérification de Redondance** : Détection des doublons de classe thérapeutique (ex. coprescription de deux AINS ou deux antispasmodiques).
 - **Avertissements de Posologie** : Signalement visuel sur les durées de traitement prolongées et ajustements pédiatriques/gériatriques.
 

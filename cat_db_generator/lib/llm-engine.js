@@ -187,11 +187,14 @@ ${sourcesSummary}
 - Algérie : Ministère de la Santé (sante.gov.dz), CNPM (cnpm.org.dz), SAMI (samidz.com).
 - France & International : Vidal, HAS, SFMU, ANSM, MSF, WHO/OMS.
 
-DIRECTIVES MAJEURES DE PONDÉRATION ET PRESCRIPTION CLINIQUE :
-
-1. PONDÉRATION DE DISPONIBILITÉ LOCALE (LOCAL-FIRST PRESCRIBING) :
-   - Pour les traitements et modèles d'ordonnances, donne une PRIORITÉ ABSOLUE à la disponibilité médicamenteuse et aux habitudes de prescription locales (extraites du PDF Index et du contexte algérien/maghrébin comme Ascabiol/Benzoate de benzyle, Spasfon/Phloroglucinol, Tiorfan/Racécadotril, Smecta/Diosmectite).
-   - Ne masque jamais un traitement local de premier recours au profit d'un traitement international non disponible localement.
+1. MATRICE DE PONDÉRATION À 3 NIVEAUX DE LA FICHE DE SYNTHÈSE (SOURCE WEIGHTING MATRIX) :
+   - NIVEAU 1 (Pondération 50% - Priorité Absolue) : EXTRAITS PDF LOCAUX (PDF Index)
+     * Détermine les molécules médicamenteuses, les posologies adaptées au terrain local et les habitudes de prescription (ex: Ascabiol/Benzoate de benzyle, Spasfon/Phloroglucinol, Tiorfan/Racécadotril, Smecta/Diosmectite).
+     * Ne masque jamais un traitement local de premier recours au profit d'un traitement international non disponible localement.
+   - NIVEAU 2 (Pondération 30% - Consolidation Structurelle & Sécurité) : DONNÉES WEB RAG (MedG, MSD Manuals, Wiki FR)
+     * Détermine la structuration rigoureuse en 5 étapes cliniques, les bilans biologiques/imagerie et l'exhaustivité des Drapeaux Rouges (Red Flags).
+   - NIVEAU 3 (Pondération 20% - Formatage & Syntaxe Médicale) : CONNAISSANCES DE BASE GEMINI
+     * Assure la rigueur de rédaction médicale française, l'absence de répétition et la validation du format JSON.
 
 2. RÈGLE STRICTE DE RÉDACTION DE L'ORDONNANCE (HIÉRARCHISATION CLINIQUE ET ANTI-POLYPHARMACIE) :
    - INTERDICTION STRICTE DE LA LISTE PLATE NUMÉROTÉE (1, 2, 3, 4) FANTÔME FAIRE CROIRE QUE TOUS LES MÉDICAMENTS DOIVENT ÊTRE PRIS ENSEMBLE !
@@ -208,7 +211,7 @@ DIRECTIVES MAJEURES DE PONDÉRATION ET PRESCRIPTION CLINIQUE :
    - Traitements de confort ciblés uniquement sur les symptômes associés (ex: 'Uniquement en cas de prurit intense : Anti-histaminique H1...').
 
 RÈGLES ET CONTRAINTES STRICTES :
-1. Synthétise un contenu médical rigoureux en combinant le Web RAG direct et le PDF Index.
+1. Synthétise un contenu médical rigoureux en combinant le Web RAG direct et le PDF Index selon la matrice de pondération à 3 niveaux.
 2. Posologies explicites : Pour tout médicament, précise la forme, la dose et la fréquence (ex: Paracétamol 1g 3x/j, max 3g/j).
 3. Aucun texte fictif ou générique (INTERDICTION TOTALE de: "lorem ipsum", "todo", "à compléter", "sample text", "sans objet", etc.).
 4. Si le sujet est pédiatrique, la posologie DOIT obligatoirement être exprimée en dose-poids ou mg/kg/j.
