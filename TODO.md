@@ -42,6 +42,11 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 - **Extend Test Suite**: Update your 5-suite Master Test Runner (`tests/run_all_tests.js`) to include schema validation checks for the new sub-category keys, ensuring no missing data fields exist across your local JSON packs.
 - **Pipeline Validation**: Run a full local build check to verify that minification compiles smoothly and that Capacitor and ProGuard package the updated static data assets cleanly into the target Android APK.
 
+### Phase 5: Advanced Medical RAG & Local Formulary Upgrades (V2 Scaling)
+- **Local DCI/Brand Dictionary (`local_drugs.json`)**: Lightweight mapping of INN (DCI) to local Algerian commercial brands (e.g., *Benzoate de benzyle* ↔ *Ascabiol*, *Phloroglucinol* ↔ *Spasfon*, *Racécadotril* ↔ *Tiorfan*, *Diosmectite* ↔ *Smecta*).
+- **Hybrid RAG Reranker (BM25 + Keyword Priority)**: Rank local PDF extracts containing exact trade names or primary treatment protocols higher than generic diagnostic background text.
+- **Automated Validation Re-Prompting Guardrail**: If `validateCAT()` detects unseparated alternative drugs or missing 1ère INTENTION headers, feed validation errors back into Attempt 2 of LLM synthesis.
+
 ---
 
 ## 🔐 Security — Deferred Until > 10,000 Users
@@ -55,6 +60,13 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 
 ---
 
+
+- [x] **Doctor-Grade Tiered Prescription & Local-First Weighting Engine (v1.5.2)** — Upgraded synthesis engine (`cat_db_generator/lib/llm-engine.js` & `web-fetcher.js`) featuring:
+  - **Tiered Ordonnance Formatting**: Enforces 3 distinct clinical tiers (`1ère INTENTION`, `ALTERNATIVES [OU]`, `TRAITEMENT SYMPTOMATIQUE / ADJUVANT`) to prevent flat list dumping and accidental polypharmacy.
+  - **Local-First Weighting**: Prioritizes Algerian/Maghreb drug availability (Ascabiol/Benzoate de benzyle, Spasfon, Tiorfan, Smecta) over purely international molecules.
+  - **Anti-Polypharmacy Warnings**: Auto-injects explicit `⚠️ ALTERNATIVE` warnings when topicals vs orals or competing alternatives should not be combined in 1st line treatment.
+  - **Web RAG Relevance Filtering**: Strict accent normalization, test-query rejection, and multi-keyword source gathering across Wikipedia FR, MedG, and MSD Manuals.
+  - **Lab UI Target Display**: Dynamically lists ungenerated production CATs as targets without polluting database files.
 
 - [x] **2-Step Live Web Research RAG & Human Active Learning Engine (`generate_cat_db_v2.js`)** — Built 2-step clinical protocol synthesis engine featuring:
   - **Step 1 Live Web Fetcher (`lib/web-fetcher.js`)**: Scrapes target medical guidelines (`sante.gov.dz`, `cnpm.org.dz`, `samidz.com`, `vidal.fr`, `has-sante.fr`, `sfmu.org`, `who.int`, `msdmanuals.com`) into structured local disk cache (`cat_db_generator/web_cache/`).
