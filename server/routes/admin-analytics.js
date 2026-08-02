@@ -1,14 +1,16 @@
 const { getDeviceAnalytics } = require('../services/active-devices');
 const { isAdminRequest } = require('../services/auth-service');
+const { isLocalhostConnection } = require('../utils/request');
 
 function registerAdminAnalyticsRoutes(app, cache) {
   app.get('/api/admin/active-devices', (req, res) => {
     const apiKey = req.headers['x-api-key'];
     const expectedApiKey = process.env.ADMIN_API_KEY || 'drcat_secret_api_key_2026';
     const isApiKeyValid = apiKey && apiKey === expectedApiKey;
-    const isAdmin = cache ? isAdminRequest(req, cache.activeTokens) : false;
+    const isLocal = isLocalhostConnection(req);
+    const isAdmin = cache ? isAdminRequest(req, cache.activeTokens || new Set()) : false;
 
-    if (!isApiKeyValid && !isAdmin) {
+    if (!isApiKeyValid && !isAdmin && !isLocal) {
       return res.status(401).json({ error: 'Accès non autorisé. Clé API (x-api-key) ou session admin requise.' });
     }
 

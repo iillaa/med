@@ -248,8 +248,15 @@
 
   async function loadAnalytics() {
     try {
+      const token = localStorage.getItem('dr_cat_admin_token') || localStorage.getItem('admin_token') || '';
+      const apiKey = localStorage.getItem('dr_cat_admin_key') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (apiKey) headers['x-api-key'] = apiKey;
+
       const res = await fetch('/api/admin/active-devices', {
-        headers: { 'x-api-key': 'drcat_secret_api_key_2026' }
+        credentials: 'same-origin',
+        headers
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
