@@ -68,6 +68,14 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 ---
 
 
+- [x] **Real-Time Live Telemetry, IP Whitelisting & Auto-Version Stamping (v1.5.3)** — Comprehensive Analytics Lab & Telemetry hardening:
+  - **Real-Time 5-Min Live Users**: Displays 🟢 `En Ligne (< 5 min)` live active users card and table badges alongside 24h DAU and 30j MAU.
+  - **Dev/Admin IP Auto-Whitelisting**: Automatically identifies developer requests (Localhost, Admin Token, or Server IP) and groups them as `👑 Dev / Admin`, eliminating self-testing noise from external beta metrics without affecting route security.
+  - **Manual Dev/External Toggle Button**: 1-click `[ -> Dev ]` / `[ -> Externe ]` toggle directly in the Analytics Lab table.
+  - **Universal Platform & Version Headers**: Client (`public/js/api.js`) transmits explicit `x-device-platform` (`android_apk` vs `web_pwa`) and dynamic `x-app-version` (`1.5.3`).
+  - **Automatic Meta Version Stamping**: `build.js` automatically stamps `<meta name="app-version">` from `package.json` into `index.html` on every build.
+  - **Telemetry Reset with Confirmation Modal**: Added safe reset modal dialog guarding `POST /api/admin/active-devices/reset`.
+
 - [x] **Doctor-Grade Tiered Prescription & Local-First Weighting Engine (v1.5.2)** — Upgraded synthesis engine (`cat_db_generator/lib/llm-engine.js` & `web-fetcher.js`) featuring:
   - **Tiered Ordonnance Formatting**: Enforces 3 distinct clinical tiers (`1ère INTENTION`, `ALTERNATIVES [OU]`, `TRAITEMENT SYMPTOMATIQUE / ADJUVANT`) to prevent flat list dumping and accidental polypharmacy.
   - **Local-First Weighting**: Prioritizes Algerian/Maghreb drug availability (Ascabiol/Benzoate de benzyle, Spasfon, Tiorfan, Smecta) over purely international molecules.
