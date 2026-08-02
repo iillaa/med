@@ -303,6 +303,6 @@ node tests/test_cat_search.js
 ## 🔬 Admin Labs & Diagnostic Tools
 
 - **PDF Lab**: `http://localhost:3000/pdf_lab.html` (Protected localhost PDF inspection & extraction lab)
-- **Analytics Lab**: `http://localhost:3000/analytics_lab.html` (Protected localhost active device telemetry, DAU/MAU charts, CSV export)
+- **Analytics Lab**: `http://localhost:3000/analytics_lab.html` (Protected localhost active device telemetry: real-time 🟢 Live (<5 min) user tracking, IP auto-whitelisting, manual Dev/External toggle, reset confirmation modal, and CSV exporter)
 
 

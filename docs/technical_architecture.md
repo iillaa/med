@@ -321,12 +321,15 @@ The following critical security patches were applied in v1.5.0:
 * **Debounced Persistence (`server/data/active_devices.json`)**: Writes updated device data asynchronously using a 10-second debounce timer to eliminate disk I/O thrashing.
 * **Protected Admin Analytics Endpoint (`GET /api/admin/active-devices`)**: Protected by `x-api-key`. Computes Total Devices, Daily Active Users (DAU - 24h), Monthly Active Users (MAU - 30d), and Version Distribution ratios.
 
-### 3. Standalone Analytics Lab UI (`analytics_lab.html`)
+### 3. Standalone Analytics Lab UI (`analytics_lab.html` v1.5.3)
 * **Protected Localhost Interface**: HTML route protected in `server/index.js` via `isLocalhostConnection(req)` (identical security tier to `pdf_lab.html`).
-* **Rich Tooling Suite**:
-  - Live search & filter bar by UUID, platform type (`Android APK` / `Web PWA`), and activity window (DAU/MAU).
-  - Visual version distribution progress bars.
-  - Device inspection modal drawer showing detailed request logs and timestamps.
-  - 1-Click CSV Spreadsheet Exporter (`drcat_active_devices_2026-07-30.csv`).
-  - Auto-refresh toggle (10s polling interval).
+* **Rich Telemetry Suite (v1.5.3)**:
+  - **Real-Time Live Users Card (`🟢 En Ligne < 5 min`)**: Instantaneous visibility into active beta testers currently connected (5-minute sliding window).
+  - **Dev/Admin IP Auto-Whitelisting & Classification**: Requests from localhost, admin session tokens, or known admin IPs are automatically tagged as `isAdminDevice: true`, completely isolating developer self-testing from external beta metrics without compromising route security.
+  - **Manual Dev/External Toggle Button**: 1-click `[ -> Dev ]` / `[ -> Externe ]` button in the UI table to override classification for any device (`POST /api/admin/active-devices/toggle-admin`).
+  - **Universal Client Headers**: `public/js/api.js` transmits explicit `x-device-platform` (`android_apk` vs `web_pwa`) and dynamic package version (`x-app-version: 1.5.3`).
+  - **Telemetry Reset with Safety Modal**: Protected endpoint `POST /api/admin/active-devices/reset` guarded by an in-app confirmation modal dialog.
+  - **Multi-Window Metrics**: Displays 🟢 Live (<5 min), ⚡ Recent (<1h), 📅 DAU (24h), and 📆 MAU (30d) counters with external vs dev user breakdown.
+  - **1-Click CSV Spreadsheet Exporter**: Exports detailed device telemetry (`drcat_active_devices_YYYY-MM-DD.csv`).
+  - **Auto-Refresh Toggle**: 10-second live polling loop.
 
