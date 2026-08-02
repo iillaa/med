@@ -234,8 +234,8 @@
       </div>
       <div class="btn-group">
         <button onclick="openSingleModal()" class="btn-outline">⚡ Single CAT Generator</button>
-        <button onclick="runStep1BatchWebFetch()" class="btn-outline" style="color: var(--primary); border-color: var(--primary);">🌐 Step 1: Web Fetch (55 CATs)</button>
-        <button onclick="runBatchGeneration()" class="btn-warning">⚡ Step 2: Dual RAG Batch (55 CATs)</button>
+        <button onclick="runStep1BatchWebFetch()" class="btn-outline" style="color: var(--primary); border-color: var(--primary);">🌐 Step 1: Web Fetch (<span class="lbl-total-count">...</span> CATs)</button>
+        <button onclick="runBatchGeneration()" class="btn-warning">⚡ Step 2: Dual RAG Batch (<span class="lbl-total-count">...</span> CATs)</button>
         <button onclick="promoteV2()" class="btn-success">💾 Promote V2 to Production</button>
         <button onclick="loadData()" class="btn-outline">🔄 Refresh</button>
       </div>
@@ -246,7 +246,7 @@
       <div class="card">
         <div class="card-label">Total V2 Generated CATs</div>
         <div id="stat-total" class="card-value" style="color: var(--primary);">0</div>
-        <div class="card-sub">Out of 55 clinical definitions</div>
+        <div class="card-sub" id="stat-total-sub">Out of ... clinical definitions</div>
       </div>
       <div class="card">
         <div class="card-label">Medical Checksum Pass Rate</div>
@@ -272,7 +272,7 @@
           <span style="font-weight: 600; font-size: 14px;">🖥️ Console d'Opérations & Progression Live</span>
           <span class="badge badge-clinical" id="progress-badge">Inactif</span>
         </div>
-        <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;" id="progress-percent">0% (0 / 55)</div>
+        <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;" id="progress-percent">0% (0 / <span class="lbl-total-count">...</span>)</div>
       </div>
 
       <!-- Outer Progress Bar Track -->
@@ -467,6 +467,10 @@
         if (!res.ok) throw new Error('API request failed');
         appData = await res.json();
         
+        const totalCount = Math.max(appData.summary.v1Total || 0, appData.summary.v2Total || 0);
+        document.querySelectorAll('.lbl-total-count').forEach(el => el.textContent = totalCount);
+        document.getElementById('stat-total-sub').textContent = `Out of ${totalCount} clinical definitions`;
+
         document.getElementById('stat-total').textContent = appData.summary.v2Total;
         document.getElementById('stat-passrate').textContent = `${appData.summary.passRate}%`;
         document.getElementById('stat-tokens').textContent = appData.summary.totalTokensConsumed.toLocaleString();
@@ -483,29 +487,55 @@
       const tbody = document.getElementById('cat-table-body');
       tbody.innerHTML = '';
 
-      const filtered = appData.v2.filter(c => 
+      // Merge v1 and v2 so all items in production or v2 are visible
+      const allCatsMap = new Map();
+
+      // First add v1 prod items
+      (appData.v1 || []).forEach(cat => {
+        allCatsMap.set(cat.id || cat.title, {
+          id: cat.id,
+          category: cat.category,
+          title: cat.title,
+          isV2: false,
+          summary: cat.summary,
+          red_flags: cat.red_flags,
+          ordonnance: cat.ordonnance
+        });
+      });
+
+      // Overlay v2 generated items (take precedence)
+      (appData.v2 || []).forEach(cat => {
+        allCatsMap.set(cat.id || cat.title, {
+          ...cat,
+          isV2: true
+        });
+      });
+
+      const allMerged = Array.from(allCatsMap.values());
+
+      const filtered = allMerged.filter(c => 
         (c.title || '').toLowerCase().includes(query) ||
         (c.category || '').toLowerCase().includes(query)
       );
 
-      document.getElementById('record-count').textContent = `Affichage de ${filtered.length} sur ${appData.v2.length} fiches`;
+      document.getElementById('record-count').textContent = `Affichage de ${filtered.length} sur ${allMerged.length} fiches`;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Aucune fiche trouvée.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Aucune fiche trouvée.</td></tr>`;
         return;
       }
 
       filtered.forEach(c => {
         const valObj = appData.validations.find(v => v.id === c.id) || {};
-        const isValid = valObj.validation ? valObj.validation.valid : true;
+        const isValid = c.isV2 ? (valObj.validation ? valObj.validation.valid : true) : null;
         const isAdmin = (c.category || '').toLowerCase() === 'administratif' || /certificat|lettre|attestation/i.test(c.title);
         const isHumanEdited = !!c._human_edited;
         const metrics = c._execution_metrics || {};
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>#${c.id}</strong></td>
-          <td><span style="font-weight: 500;">${c.category}</span></td>
+          <td><strong>#${c.id || '-'}</strong></td>
+          <td><span style="font-weight: 500;">${c.category || 'Non spécifiée'}</span></td>
           <td><strong>${c.title}</strong></td>
           <td>
             <span class="badge ${isAdmin ? 'badge-admin' : 'badge-clinical'}">
@@ -515,24 +545,29 @@
           <td>
             <span class="badge badge-clinical" style="font-size: 10px;">📚 PDF RAG</span>
             ${isHumanEdited ? '<span class="badge badge-valid" style="font-size: 10px;">🧠 Human Memory</span>' : ''}
+            ${!c.isV2 ? '<span class="badge badge-warning" style="font-size: 10px;">📜 Prod Baseline</span>' : ''}
           </td>
           <td>
-            <span class="badge ${isValid ? 'badge-valid' : 'badge-error'}">
-              ${isValid ? '✅ VALID' : '❌ REJECTED'}
-            </span>
+            ${c.isV2 ? `
+              <span class="badge ${isValid ? 'badge-valid' : 'badge-error'}">
+                ${isValid ? '✅ VALID' : '❌ REJECTED'}
+              </span>
+            ` : `
+              <span class="badge badge-warning">⚠️ EN ATTENTE V2</span>
+            `}
           </td>
           <td>
             <div style="font-size: 11px; font-family: monospace;">
-              ${metrics.model || 'gemini-3.6-flash'} | ${metrics.latencyMs ? metrics.latencyMs + 'ms' : '-'} | ${metrics.totalTokens ? metrics.totalTokens + ' tok' : '-'}
+              ${c.isV2 ? `${metrics.model || 'gemini-3.6-flash'} | ${metrics.latencyMs ? metrics.latencyMs + 'ms' : '-'} | ${metrics.totalTokens ? metrics.totalTokens + ' tok' : '-'}` : 'Pas encore générée en V2'}
             </div>
           </td>
           <td style="white-space: nowrap;">
-            <button onclick="inspectCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">👁️ Inspecter</button>
-            <button onclick="promoteSingleCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--success); border-color: var(--success);">💾 Promouvoir (1)</button>
-            <button onclick="openEditModal(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);">✏️ Éditer</button>
-            <button onclick="runStep1WebFetch('${c.title.replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">🌐 Step 1 Web</button>
-            <button onclick="regenerateSingleCAT('${c.title.replace(/'/g, "\\'")}', '${c.category}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">🔄 Régénérer</button>
-            <button onclick="deleteCAT(${c.id}, '${c.title.replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);">🗑️ Supprimer</button>
+            ${c.isV2 ? `<button onclick="inspectCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">👁️ Inspecter</button>` : ''}
+            ${c.isV2 ? `<button onclick="promoteSingleCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--success); border-color: var(--success);">💾 Promouvoir (1)</button>` : ''}
+            ${c.isV2 ? `<button onclick="openEditModal(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);">✏️ Éditer</button>` : ''}
+            <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">🌐 Step 1 Web</button>
+            <button onclick="regenerateSingleCAT('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">${c.isV2 ? '🔄 Régénérer' : '⚡ Générer V2'}</button>
+            ${c.isV2 ? `<button onclick="deleteCAT(${c.id}, '${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);">🗑️ Supprimer</button>` : ''}
           </td>
         `;
         tbody.appendChild(tr);
