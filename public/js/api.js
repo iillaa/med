@@ -222,7 +222,7 @@ const STATIC_DATA_HEADERS = {
 export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
   const installId = getInstallId();
-  const metaVer = document.querySelector('meta[name="app-version"]')?.content || '1.1.6';
+  const metaVer = document.querySelector('meta[name="app-version"]')?.content || document.querySelector('meta[name="app-build-version"]')?.content || '1.5.2';
   const configuredUrl = getRemoteServerUrl() || REMOTE_SERVER_URL;
   const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
   const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
@@ -230,8 +230,9 @@ export function getHeaders(extraHeaders = {}) {
     'Content-Type': 'application/json',
     'x-app-key': APP_DATA_KEY,
     'x-install-id': installId,
+    'x-app-version': metaVer,
     'ngrok-skip-browser-warning': 'true',
-    ...(isOfflineApp ? { 'x-app-version': metaVer, 'x-capacitor-platform': 'android' } : {}),
+    ...(isOfflineApp ? { 'x-capacitor-platform': 'android' } : {}),
     ...(token ? { 'x-admin-token': token } : {}),
     ...providerExtraHeaders,
     ...extraHeaders

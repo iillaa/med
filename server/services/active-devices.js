@@ -62,6 +62,8 @@ setInterval(async () => {
 // Initialize store on startup
 loadDeviceStore();
 
+const { isLocalhostConnection } = require('../utils/request');
+
 /**
  * Record or update device activity from incoming HTTP request
  */
@@ -72,9 +74,13 @@ function recordDeviceActivity(req) {
   }
 
   const now = new Date().toISOString();
-  const appVersion = req.headers['x-app-version'] || req.query.app_version || 'web-live';
+  const appVersion = req.headers['x-app-version'] || req.query.app_version || '1.5.2';
   const ua = (req.headers['user-agent'] || '').toLowerCase();
   const platform = ua.includes('capacitor') ? 'android_apk' : 'web_pwa';
+
+  const isLocal = isLocalhostConnection(req);
+  const hasAdminAuth = !!(req.headers['x-admin-token'] || req.headers['x-api-key'] || req.headers['authorization']);
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || '';
 
   const existing = deviceMap.get(installId) || {
     installId,
@@ -85,6 +91,8 @@ function recordDeviceActivity(req) {
   existing.appVersion = appVersion;
   existing.platform = platform;
   existing.lastSeen = now;
+  existing.lastIp = clientIp;
+  existing.isAdminDevice = isLocal || hasAdminAuth || !!existing.isAdminDevice;
   existing.requestCount = (existing.requestCount || 0) + 1;
 
   deviceMap.set(installId, existing);
@@ -92,7 +100,7 @@ function recordDeviceActivity(req) {
 }
 
 /**
- * Compute Active User Analytics (Total, DAU, MAU, Version Distribution)
+ * Compute Active User Analytics (Total, DAU, MAU, Admin vs External Users)
  */
 function getDeviceAnalytics() {
   const now = Date.now();
@@ -100,19 +108,34 @@ function getDeviceAnalytics() {
   const THIRTY_DAYS_MS = 30 * ONE_DAY_MS;
 
   let totalDevices = 0;
+  let adminDevicesCount = 0;
+  let externalDevicesCount = 0;
   let dauCount = 0;
+  let externalDauCount = 0;
   let mauCount = 0;
+  let externalMauCount = 0;
+
   const versionDistribution = {};
   const platformDistribution = { android_apk: 0, web_pwa: 0 };
   const deviceList = [];
 
   for (const [id, dev] of deviceMap.entries()) {
     totalDevices++;
+    const isAdmin = !!dev.isAdminDevice;
+    if (isAdmin) adminDevicesCount++;
+    else externalDevicesCount++;
+
     const lastSeenTime = new Date(dev.lastSeen).getTime() || 0;
     const diffMs = now - lastSeenTime;
 
-    if (diffMs <= ONE_DAY_MS) dauCount++;
-    if (diffMs <= THIRTY_DAYS_MS) mauCount++;
+    if (diffMs <= ONE_DAY_MS) {
+      dauCount++;
+      if (!isAdmin) externalDauCount++;
+    }
+    if (diffMs <= THIRTY_DAYS_MS) {
+      mauCount++;
+      if (!isAdmin) externalMauCount++;
+    }
 
     const ver = dev.appVersion || 'unknown';
     versionDistribution[ver] = (versionDistribution[ver] || 0) + 1;
@@ -128,8 +151,12 @@ function getDeviceAnalytics() {
 
   return {
     totalDevices,
+    adminDevices: adminDevicesCount,
+    externalDevices: externalDevicesCount,
     dau: dauCount,
+    externalDau: externalDauCount,
     mau: mauCount,
+    externalMau: externalMauCount,
     versionDistribution,
     platformDistribution,
     recentDevices: deviceList.slice(0, 50),
@@ -137,7 +164,25 @@ function getDeviceAnalytics() {
   };
 }
 
+/**
+ * Resets the entire device telemetry store
+ */
+function resetDeviceStore() {
+  deviceMap.clear();
+  if (fs.existsSync(DEVICES_FILE)) {
+    try {
+      fs.unlinkSync(DEVICES_FILE);
+    } catch (e) {
+      console.warn('[ActiveDevices] Could not delete telemetry file:', e.message);
+    }
+  }
+  isDirty = false;
+  console.log('[ActiveDevices] Device telemetry store reset completely.');
+  return { success: true, message: 'Télémétrie réinitialisée avec succès.' };
+}
+
 module.exports = {
   recordDeviceActivity,
-  getDeviceAnalytics
+  getDeviceAnalytics,
+  resetDeviceStore
 };
