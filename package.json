@@ -9,6 +9,12 @@
   "scripts": {
     "start": "node server.js",
     "start:admin": "node server.js",
+    "pm2:start": "node /data/data/com.termux/files/usr/lib/node_modules/pm2/bin/pm2 start ecosystem.config.js",
+    "pm2:stop": "node /data/data/com.termux/files/usr/lib/node_modules/pm2/bin/pm2 stop drcat",
+    "pm2:restart": "node /data/data/com.termux/files/usr/lib/node_modules/pm2/bin/pm2 restart drcat",
+    "pm2:status": "node /data/data/com.termux/files/usr/lib/node_modules/pm2/bin/pm2 list",
+    "pm2:logs": "node /data/data/com.termux/files/usr/lib/node_modules/pm2/bin/pm2 logs drcat --lines 50",
+    "log:rotate": "node scripts/rotate-logs.js",
     "test": "node tests/headless/harness.mjs smoke",
     "test:suite": "node tests/run_all_tests.js",
     "test:safe": "node tests/headless/harness.mjs safeAreas",
