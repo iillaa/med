@@ -421,9 +421,14 @@
           <td>${new Date(d.lastSeen).toLocaleString('fr-FR')}</td>
           <td><strong>${d.requestCount || 1}</strong></td>
           <td>
-            <button class="btn btn-outline" style="padding: 3px 8px; font-size: 10px; min-height: auto;" onclick="inspectDevice('${d.installId}')">
-              <i class="fa-solid fa-eye"></i> Voir
-            </button>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-outline" style="padding: 3px 8px; font-size: 10px; min-height: auto;" onclick="inspectDevice('${d.installId}')">
+                <i class="fa-solid fa-eye"></i> Voir
+              </button>
+              <button class="btn btn-outline" style="padding: 3px 8px; font-size: 10px; min-height: auto; ${d.isAdminDevice ? 'border-color: rgba(16,185,129,0.4); color: #10b981;' : 'border-color: rgba(168,85,247,0.4); color: #a855f7;'}" onclick="toggleAdminStatus('${d.installId}', ${!!d.isAdminDevice})" title="${d.isAdminDevice ? 'Basculer en Utilisateur Externe' : 'Basculer en Appareil Développeur/Admin'}">
+                ${d.isAdminDevice ? '<i class="fa-solid fa-user"></i> -> Externe' : '<i class="fa-solid fa-crown"></i> -> Dev'}
+              </button>
+            </div>
           </td>
         </tr>
       `;
@@ -447,6 +452,28 @@
     `;
 
     document.getElementById('inspect-modal').classList.add('active');
+  }
+
+  async function toggleAdminStatus(id, currentStatus) {
+    const newStatus = !currentStatus;
+    try {
+      const token = localStorage.getItem('dr_cat_admin_token') || localStorage.getItem('admin_token') || '';
+      const apiKey = localStorage.getItem('dr_cat_admin_key') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (apiKey) headers['x-api-key'] = apiKey;
+
+      const res = await fetch('/api/admin/active-devices/toggle-admin', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers,
+        body: JSON.stringify({ installId: id, isAdmin: newStatus })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      await loadAnalytics();
+    } catch (err) {
+      alert('❌ Erreur lors du changement de statut: ' + err.message);
+    }
   }
 
   function openResetModal() {

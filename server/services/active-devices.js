@@ -64,6 +64,9 @@ loadDeviceStore();
 
 const { isLocalhostConnection } = require('../utils/request');
 
+// Set of known Developer/Admin IPs (seeded with localhost)
+const devAdminIps = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+
 /**
  * Record or update device activity from incoming HTTP request
  */
@@ -88,6 +91,11 @@ function recordDeviceActivity(req) {
   const hasAdminAuth = !!(req.headers['x-admin-token'] || req.headers['x-api-key'] || req.headers['authorization']);
   const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || '';
 
+  // If request comes with admin credentials or from localhost, remember this IP as an Admin IP
+  if ((isLocal || hasAdminAuth) && clientIp) {
+    devAdminIps.add(clientIp);
+  }
+
   const existing = deviceMap.get(installId) || {
     installId,
     firstSeen: now,
@@ -99,9 +107,10 @@ function recordDeviceActivity(req) {
   existing.lastSeen = now;
   existing.lastIp = clientIp;
 
-  // Telemetry-only tagging: Mark device as developer/admin if request is local or has admin headers.
+  // Telemetry-only tagging: Mark device as developer/admin if request is local, has admin headers, or matches a known Admin IP.
   // NOTE: This flag is strictly for analytics classification and NEVER grants security or API access.
-  existing.isAdminDevice = isLocal || hasAdminAuth || !!existing.isAdminDevice;
+  const isKnownAdminIp = clientIp && devAdminIps.has(clientIp);
+  existing.isAdminDevice = isLocal || hasAdminAuth || isKnownAdminIp || !!existing.isAdminDevice;
   existing.requestCount = (existing.requestCount || 0) + 1;
 
   deviceMap.set(installId, existing);
@@ -216,8 +225,24 @@ function resetDeviceStore() {
   return { success: true, message: 'Télémétrie réinitialisée avec succès.' };
 }
 
+/**
+ * Manually toggle device admin status in telemetry store
+ */
+function toggleAdminDevice(installId, isAdmin) {
+  const dev = deviceMap.get(installId);
+  if (!dev) return { success: false, error: 'Appareil introuvable.' };
+  dev.isAdminDevice = !!isAdmin;
+  if (dev.lastIp && isAdmin) {
+    devAdminIps.add(dev.lastIp);
+  }
+  deviceMap.set(installId, dev);
+  isDirty = true;
+  return { success: true, installId, isAdminDevice: dev.isAdminDevice };
+}
+
 module.exports = {
   recordDeviceActivity,
   getDeviceAnalytics,
-  resetDeviceStore
+  resetDeviceStore,
+  toggleAdminDevice
 };

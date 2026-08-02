@@ -141,20 +141,29 @@ function rebuildClientAssets() {
     const indexPath = path.join(__dirname, 'public', 'index.html');
     if (fs.existsSync(indexPath)) {
       let indexContent = fs.readFileSync(indexPath, 'utf-8');
+      const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf-8'));
+      const pkgVersion = pkg.version || '1.5.2';
 
-      let updatedIndexContent = indexContent.replace(
-        /<meta name="app-build-version" content="[^"]*">/,
-        `<meta name="app-build-version" content="${versionString}">`
-      );
+      let updatedIndexContent = indexContent
+        .replace(/<meta name="app-version" content="[^"]*">/, `<meta name="app-version" content="${pkgVersion}">`)
+        .replace(/<meta name="app-build-version" content="[^"]*">/, `<meta name="app-build-version" content="${versionString}">`);
+
+      if (!updatedIndexContent.includes('name="app-version"')) {
+        updatedIndexContent = updatedIndexContent.replace(
+          '<head>',
+          `<head>\n  <meta name="app-version" content="${pkgVersion}">`
+        );
+      }
+
       updatedIndexContent = stampAsset(updatedIndexContent);
 
       if (updatedIndexContent !== indexContent) {
         fs.writeFileSync(indexPath, updatedIndexContent, 'utf-8');
-        console.log(`Auto-bumped app-build-version to ${versionString} and stamped assets with ?v=${assetVersion}`);
+        console.log(`Auto-bumped app-version to v${pkgVersion}, app-build-version to ${versionString} and stamped assets with ?v=${assetVersion}`);
       }
     }
   } catch (err) {
-    console.error("Error auto-bumping app-build-version during build:", err);
+    console.error("Error auto-bumping app-version / app-build-version during build:", err);
   }
 
   // 1b. style.css: stamp the @import'd CSS files so they bust too.
