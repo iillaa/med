@@ -490,16 +490,13 @@
       // Merge v1 and v2 so all items in production or v2 are visible
       const allCatsMap = new Map();
 
-      // First add v1 prod items
+      // First add v1 prod items (strictly title, category, id as ungenerated targets)
       (appData.v1 || []).forEach(cat => {
         allCatsMap.set(cat.id || cat.title, {
           id: cat.id,
           category: cat.category,
           title: cat.title,
-          isV2: false,
-          summary: cat.summary,
-          red_flags: cat.red_flags,
-          ordonnance: cat.ordonnance
+          isV2: false
         });
       });
 
