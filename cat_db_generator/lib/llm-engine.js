@@ -187,6 +187,26 @@ ${sourcesSummary}
 - Algérie : Ministère de la Santé (sante.gov.dz), CNPM (cnpm.org.dz), SAMI (samidz.com).
 - France & International : Vidal, HAS, SFMU, ANSM, MSF, WHO/OMS.
 
+DIRECTIVES MAJEURES DE PONDÉRATION ET PRESCRIPTION CLINIQUE :
+
+1. PONDÉRATION DE DISPONIBILITÉ LOCALE (LOCAL-FIRST PRESCRIBING) :
+   - Pour les traitements et modèles d'ordonnances, donne une PRIORITÉ ABSOLUE à la disponibilité médicamenteuse et aux habitudes de prescription locales (extraites du PDF Index et du contexte algérien/maghrébin comme Ascabiol/Benzoate de benzyle, Spasfon/Phloroglucinol, Tiorfan/Racécadotril, Smecta/Diosmectite).
+   - Ne masque jamais un traitement local de premier recours au profit d'un traitement international non disponible localement.
+
+2. RÈGLE STRICTE DE RÉDACTION DE L'ORDONNANCE (HIÉRARCHISATION CLINIQUE ET ANTI-POLYPHARMACIE) :
+   - INTERDICTION STRICTE DE LA LISTE PLATE NUMÉROTÉE (1, 2, 3, 4) FANTÔME FAIRE CROIRE QUE TOUS LES MÉDICAMENTS DOIVENT ÊTRE PRIS ENSEMBLE !
+   - Le champ "ordonnance" DOIT OBLIGATOIREMENT être structuré avec les rubriques claires suivantes (en Markdown) :
+
+   **1ère INTENTION (Traitement de choix / Principal) :**
+   - Nom du médicament de premier recours, posologie exacte, mode, rythme et durée d'administration (ex: Ascabiol lotion 10%/25% : 1 application à J0, renouveler à J7-J14).
+
+   **ALTERNATIVES [OU] (En cas de contre-indication, échec, indisponibilité ou terrain spécifique) :**
+   - Précède TOUJOURS chaque traitement alternatif par la mention claire '[OU] Alternative' ou '2ème intention' avec le motif d'indication (ex: '[OU] Alternative (Si contre-indication au traitement topique ou épidémie collective) : Ivermectine orale 200 µg/kg en prise unique').
+   - SI deux traitements sont des alternatives exclusives (ex: topique vs oral pour la gale), ajoute OBLIGATOIREMENT l'avertissement : '⚠️ ALTERNATIVE : Ne pas associer le traitement topique et oral en première intention sauf forme grave/croûteuse'.
+
+   **TRAITEMENT SYMPTOMATIQUE / ADJUVANT (Si besoin / En option) :**
+   - Traitements de confort ciblés uniquement sur les symptômes associés (ex: 'Uniquement en cas de prurit intense : Anti-histaminique H1...').
+
 RÈGLES ET CONTRAINTES STRICTES :
 1. Synthétise un contenu médical rigoureux en combinant le Web RAG direct et le PDF Index.
 2. Posologies explicites : Pour tout médicament, précise la forme, la dose et la fréquence (ex: Paracétamol 1g 3x/j, max 3g/j).
