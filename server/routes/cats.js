@@ -23,7 +23,11 @@ function registerCatRoutes(app) {
 
     let result = cache.catsCache;
     if (!isNaN(since)) {
-      result = cache.catsCache.filter(c => (c.updatedAt || 0) > since);
+      result = cache.catsCache.filter(c => {
+        if (!c.updatedAt) return false;
+        const catTime = typeof c.updatedAt === 'number' ? c.updatedAt : new Date(c.updatedAt).getTime();
+        return !isNaN(catTime) && catTime > since;
+      });
     }
 
     if (!isAdmin) {
