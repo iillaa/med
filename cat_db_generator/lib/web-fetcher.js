@@ -354,6 +354,33 @@ function clearWebCache(title) {
 }
 
 /**
+ * Clears ALL cached web sources across all CAT titles (Global Master Purge)
+ */
+function clearAllWebCache() {
+  if (fs.existsSync(CACHE_BASE_DIR)) {
+    try {
+      const dirs = fs.readdirSync(CACHE_BASE_DIR);
+      let count = 0;
+      for (const dir of dirs) {
+        const dirPath = path.join(CACHE_BASE_DIR, dir);
+        if (fs.statSync(dirPath).isDirectory()) {
+          const files = fs.readdirSync(dirPath);
+          for (const f of files) {
+            try { fs.unlinkSync(path.join(dirPath, f)); count++; } catch (e) {}
+          }
+          try { fs.rmdirSync(dirPath); } catch (e) {}
+        }
+      }
+      console.log(`🗑️ [Web Cache] Purged ALL web cache folders (${count} files total).`);
+      return { success: true, message: `Tout le cache Web a été effacé (${count} fichier(s) supprimé(s)).`, deletedCount: count };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }
+  return { success: true, message: 'Le cache Web est déjà totalement vide.', deletedCount: 0 };
+}
+
+/**
  * Gets cached web sources for a CAT title from disk
  */
 function getCachedWebSources(title) {
@@ -403,6 +430,7 @@ module.exports = {
   fetchAndCacheWebSources,
   getCachedWebSources,
   clearWebCache,
+  clearAllWebCache,
   listWebCacheStatus,
   sanitizeTitleForDir,
   extractSmartKeywords

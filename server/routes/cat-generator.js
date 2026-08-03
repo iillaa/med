@@ -413,6 +413,7 @@ function registerCatGeneratorRoutes(app) {
     }
 
     const { fetchAndCacheWebSources } = require('../../cat_db_generator/lib/web-fetcher');
+    const { forceRefetch } = req.body || {};
     const prodDb = JSON.parse(fs.readFileSync(PROD_DB_PATH, 'utf8'));
 
     progressState.running = true;
@@ -422,7 +423,7 @@ function registerCatGeneratorRoutes(app) {
     progressState.percent = 0;
     progressState.logs = [];
 
-    addProgressLog(`🌐 Démarrage du Batch Step 1 Recherche Web pour ${prodDb.length} fiches...`, 'info');
+    addProgressLog(`🌐 Démarrage du Batch Step 1 Recherche Web (${forceRefetch ? 'Mode Rechargement Forcé' : 'Mode Incrémental'}) pour ${prodDb.length} fiches...`, 'info');
 
     (async () => {
       for (let i = 0; i < prodDb.length; i++) {
@@ -434,7 +435,7 @@ function registerCatGeneratorRoutes(app) {
         addProgressLog(`[${i + 1}/${prodDb.length}] Recherche Web RAG pour : "${cat.title}"...`, 'info');
 
         try {
-          const sources = await fetchAndCacheWebSources(cat.title, { maxSources: 6, searchKeywords: cat.search_keywords });
+          const sources = await fetchAndCacheWebSources(cat.title, { forceRefetch: !!forceRefetch, maxSources: 6, searchKeywords: cat.search_keywords });
           addProgressLog(`✅ [${i + 1}/${prodDb.length}] ${sources.length} sources mises en cache pour "${cat.title}"`, 'success');
         } catch (err) {
           addProgressLog(`⚠️ [${i + 1}/${prodDb.length}] Erreur Web fetch : ${err.message}`, 'warn');

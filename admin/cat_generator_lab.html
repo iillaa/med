@@ -234,8 +234,10 @@
       </div>
       <div class="btn-group">
         <button onclick="openSingleModal()" class="btn-outline">⚡ Single CAT Generator</button>
-        <button onclick="runStep1BatchWebFetch()" class="btn-outline" style="color: var(--primary); border-color: var(--primary);">🌐 Step 1: Web Fetch (<span class="lbl-total-count">...</span> CATs)</button>
-        <button onclick="runBatchGeneration()" class="btn-warning">⚡ Step 2: Dual RAG Batch (<span class="lbl-total-count">...</span> CATs)</button>
+        <button onclick="runStep1BatchWebFetch(false)" class="btn-outline" style="color: var(--primary); border-color: var(--primary);" title="Mode Incrémental : Réutilise le cache et complète les fiches ayant des sources manquantes">🌐 Step 1: Web Fetch (<span class="lbl-total-count">...</span>)</button>
+        <button onclick="runStep1BatchWebFetch(true)" class="btn-outline" style="color: #38bdf8; border-color: #38bdf8;" title="Forcer la recherche en ligne pour toutes les fiches (remplace le cache)">🔄 Recharger Web Global</button>
+        <button onclick="purgeAllWebCache()" class="btn-outline" style="color: var(--danger); border-color: var(--danger);" title="Effacer définitivement tout le dossier de cache Web sur disque">🗑️ Vider Tout Cache Web</button>
+        <button onclick="runBatchGeneration()" class="btn-warning">⚡ Step 2: Dual RAG Batch (<span class="lbl-total-count">...</span>)</button>
         <button onclick="promoteV2()" class="btn-success">💾 Promote V2 to Production</button>
         <button onclick="loadData()" class="btn-outline">🔄 Refresh</button>
       </div>
@@ -614,9 +616,45 @@
       }
     }
 
-    async function runStep1BatchWebFetch() {
-      if (!confirm('Lancer la recherche web Step 1 pour toutes les fiches en arrière-plan ?')) return;
-      alert('🌐 Recherche web Step 1 lancée. Les pages médicales seront nettoyées et mises en cache sous cat_db_generator/web_cache/.');
+    async function runStep1BatchWebFetch(forceRefetch = false) {
+      const msg = forceRefetch ? 
+        `Forcer la recherche Web en ligne pour TOUTES les fiches (${appData.v1.length} CATs) ? Le cache existant sera remplacé.` :
+        `Lancer la recherche Web Step 1 (mode incrémental) pour TOUTES les fiches (${appData.v1.length} CATs) ?`;
+      if (!confirm(msg)) return;
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/batch-web', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ forceRefetch })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Échec du lancement du batch web');
+
+        alert(`🌐 ${data.message}`);
+        await loadData();
+      } catch (err) {
+        alert(`❌ Erreur Batch Web Fetch: ${err.message}`);
+      }
+    }
+
+    async function purgeAllWebCache() {
+      if (!confirm('⚠️ ATTENTION : Voulez-vous vraiment effacer DÉFINITIVEMENT TOUT le dossier de cache Web sur disque ?')) return;
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/clear-web-cache', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ all: true })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la suppression globale du cache');
+
+        alert(`🗑️ ${data.message}`);
+        await loadData();
+      } catch (err) {
+        alert(`❌ Erreur Effacement Global: ${err.message}`);
+      }
     }
 
     function inspectCAT(id) {
