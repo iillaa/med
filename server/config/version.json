@@ -1,12 +1,12 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.5.3",
+  "latestVersion": "1.5.4",
   "forceUpdateActive": false,
   "updateMessage": "Une mise à jour obligatoire de Dr.CAT est requise pour continuer.",
   "releaseNotes": [
-    "Télémétrie en temps réel (< 5 min) dans l'Analytics Lab",
-    "Détection automatique et masquage des appareils Dev/Admin (Localhost & IP)",
-    "Bouton de basculement manuel entre appareil Dev et Utilisateur Externe",
+    "Mode recherche Web incrémentale : complétion automatique des sources médicales manquantes",
+    "Bouton de vidage du cache Web 1-click et rechargement en ligne forcé dans le Generator Lab",
+    "Télémétrie en temps réel (< 5 min) et classification des appareils Dev/Admin",
     "Bouton de réinitialisation sécurisé de la télémétrie avec modal de confirmation",
     "Normalisation du header x-app-version dynamique sur Web PWA et APK Native"
   ],
@@ -15,5 +15,5 @@
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-08-02T22:07:30.000Z"
+  "lastUpdated": "2026-08-03T22:25:40.000Z"
 }

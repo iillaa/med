@@ -2,64 +2,94 @@
   "devices": {
     "drcat-inst-6f29046b-9939-4ac7-b331-89b04b919f0a": {
       "installId": "drcat-inst-6f29046b-9939-4ac7-b331-89b04b919f0a",
-      "firstSeen": "2026-08-02T21:57:03.020Z",
-      "requestCount": 9,
+      "firstSeen": "2026-08-02T22:10:46.440Z",
+      "requestCount": 7,
       "appVersion": "1.2.4",
       "platform": "android_apk",
-      "lastSeen": "2026-08-02T21:58:16.373Z",
+      "lastSeen": "2026-08-02T22:10:47.474Z",
       "lastIp": "154.121.98.66",
-      "isAdminDevice": false
+      "isAdminDevice": true
+    },
+    "drcat-inst-b997ebfa-8ef5-49d0-88fc-2ee12aa6fa3e": {
+      "installId": "drcat-inst-b997ebfa-8ef5-49d0-88fc-2ee12aa6fa3e",
+      "firstSeen": "2026-08-02T22:11:11.711Z",
+      "requestCount": 1,
+      "appVersion": "1.2.4",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-02T22:11:11.711Z",
+      "lastIp": "154.121.98.66",
+      "isAdminDevice": true
+    },
+    "drcat-inst-ebf3f30f-82b4-4ce3-9b37-2de5a7351c1a": {
+      "installId": "drcat-inst-ebf3f30f-82b4-4ce3-9b37-2de5a7351c1a",
+      "firstSeen": "2026-08-02T22:11:12.977Z",
+      "requestCount": 8,
+      "appVersion": "1.5.3",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-02T22:11:15.637Z",
+      "lastIp": "::1",
+      "isAdminDevice": true
+    },
+    "drcat-inst-d1d8fb50-0550-4cb0-9903-4c6b96537092": {
+      "installId": "drcat-inst-d1d8fb50-0550-4cb0-9903-4c6b96537092",
+      "firstSeen": "2026-08-02T22:12:02.147Z",
+      "requestCount": 8,
+      "appVersion": "1.5.3",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-02T22:12:03.061Z",
+      "lastIp": "154.121.98.66",
+      "isAdminDevice": true
     },
     "drcat-inst-6ba21134-a6b7-4c72-adc5-f6ff54fcf123": {
       "installId": "drcat-inst-6ba21134-a6b7-4c72-adc5-f6ff54fcf123",
-      "firstSeen": "2026-08-02T21:58:15.312Z",
-      "requestCount": 20,
-      "appVersion": "1.2.4",
+      "firstSeen": "2026-08-02T22:12:27.385Z",
+      "requestCount": 9,
+      "appVersion": "1.5.3",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-02T22:01:28.401Z",
+      "lastSeen": "2026-08-02T22:12:31.394Z",
       "lastIp": "154.121.98.66",
-      "isAdminDevice": false
+      "isAdminDevice": true
     },
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
-      "firstSeen": "2026-08-02T21:58:20.197Z",
-      "requestCount": 9,
-      "appVersion": "1.2.4",
+      "firstSeen": "2026-08-03T22:12:43.913Z",
+      "requestCount": 22,
+      "appVersion": "1.5.3",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-02T21:58:21.547Z",
+      "lastSeen": "2026-08-03T22:13:03.773Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
     "drcat-inst-11111111-2222-3333-4444-555555555555": {
       "installId": "drcat-inst-11111111-2222-3333-4444-555555555555",
-      "firstSeen": "2026-08-02T22:07:08.497Z",
+      "firstSeen": "2026-08-03T22:25:18.380Z",
       "requestCount": 1,
       "appVersion": "1.1.6",
       "platform": "android_apk",
-      "lastSeen": "2026-08-02T22:07:08.497Z",
+      "lastSeen": "2026-08-03T22:25:18.380Z",
       "lastIp": "",
       "isAdminDevice": false
     },
     "drcat-inst-aaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": {
       "installId": "drcat-inst-aaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-      "firstSeen": "2026-08-02T22:07:08.498Z",
+      "firstSeen": "2026-08-03T22:25:18.381Z",
       "requestCount": 1,
       "appVersion": "1.0.0",
       "platform": "android_apk",
-      "lastSeen": "2026-08-02T22:07:08.498Z",
+      "lastSeen": "2026-08-03T22:25:18.381Z",
       "lastIp": "",
       "isAdminDevice": false
     },
     "drcat-inst-99999999-8888-7777-6666-555555555555": {
       "installId": "drcat-inst-99999999-8888-7777-6666-555555555555",
-      "firstSeen": "2026-08-02T22:07:08.498Z",
+      "firstSeen": "2026-08-03T22:25:18.381Z",
       "requestCount": 1,
       "appVersion": "1.1.6",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-02T22:07:08.498Z",
+      "lastSeen": "2026-08-03T22:25:18.381Z",
       "lastIp": "",
       "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-08-02T22:07:18.502Z"
+  "lastUpdated": "2026-08-03T22:25:28.382Z"
 }

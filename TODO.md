@@ -68,6 +68,11 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 ---
 
 
+- [x] **Incremental Web Fetch Top-Up & Cache Purge Controls (v1.5.4)** — Upgraded Web RAG acquisition pipeline (`cat_db_generator/lib/web-fetcher.js` & `cat_generator_lab.html`):
+  - **Incremental Top-Up Mode**: Subsequent Web Fetches automatically keep existing cached sources and query online only for missing guidelines up to target max (`maxSources: 6`).
+  - **Force Online Refetch Control**: Added `🔄 Recharger Web` button in Generator Lab UI to trigger fresh online fetches.
+  - **1-Click Web Cache Purging**: Added `🗑️ Vider Cache` UI button and protected backend endpoint `POST /api/admin/cat-generator/clear-web-cache`.
+
 - [x] **Real-Time Live Telemetry, IP Whitelisting & Auto-Version Stamping (v1.5.3)** — Comprehensive Analytics Lab & Telemetry hardening:
   - **Real-Time 5-Min Live Users**: Displays 🟢 `En Ligne (< 5 min)` live active users card and table badges alongside 24h DAU and 30j MAU.
   - **Dev/Admin IP Auto-Whitelisting**: Automatically identifies developer requests (Localhost, Admin Token, or Server IP) and groups them as `👑 Dev / Admin`, eliminating self-testing noise from external beta metrics without affecting route security.

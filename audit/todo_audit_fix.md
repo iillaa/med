@@ -1,6 +1,6 @@
 # 📝 TODO Audit Fixes — Local & Existing Setup
-> **App Version:** 1.5.3  
-> **Last Updated:** 2026-08-02  
+> **App Version:** 1.5.4  
+> **Last Updated:** 2026-08-03  
 > **Context:** Actionable fixes for the current local Termux / Android setup.
 
 ---
@@ -12,12 +12,12 @@
 
 ---
 
-## ✅ Completed Fixes (This Session — v1.5.3 Telemetry & Analytics Upgrade)
+## ✅ Completed Fixes (This Session — v1.5.4 Web RAG Top-Up & Cache Controls)
 
-- [x] **Télémétrie Temps Réel & Authentification Analytics Lab (v1.5.3)**
-  - Télémétrie en temps réel (`🟢 En Ligne < 5 min`) et détection automatique des IP Dev/Admin.
-  - Basculement manuel 1-click Dev / Externe et réinitialisation avec modal de confirmation.
-  - Correction du tag meta version `1.2.4` gelé dans `index.html` via estampillage automatique au build.
+- [x] **Recherche Web Incrémentale & Vidage Cache 1-Click (v1.5.4)**
+  - Mode complétion incrémentale : conserve les sources déjà en cache et complète uniquement les manquantes.
+  - Boutons de rechargement forcé en ligne et vidage du cache Web 1-click dans le Generator Lab.
+  - Verification sanity audit du code backend et 100% des tests automatisés au vert.
 
 - [x] **Prevent Event-Loop Freezes in AI Generator** (`server/routes/cat-generator.js`)
   - All `fs.readFileSync` / `fs.writeFileSync` replaced with `fs.promises.readFile` / `fs.promises.writeFile`.
