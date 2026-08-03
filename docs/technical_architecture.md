@@ -333,3 +333,25 @@ The following critical security patches were applied in v1.5.0:
   - **1-Click CSV Spreadsheet Exporter**: Exports detailed device telemetry (`drcat_active_devices_YYYY-MM-DD.csv`).
   - **Auto-Refresh Toggle**: 10-second live polling loop.
 
+---
+
+## 🌐 Web RAG Pipeline & Generator Lab Architecture (v1.5.4 & v1.5.5)
+
+### 1. Incremental Web RAG Top-Up & Cache Management (v1.5.4)
+* **Incremental Top-Up Mode (`fetchAndCacheWebSources`)**:
+  - When re-running Web Fetch on any CAT, the fetcher inspects existing disk cache files in `cat_db_generator/web_cache/<folder>/`.
+  - If cached files are present but fewer than `maxSources: 6`, it preserves all existing cache files and queries online only for missing guidelines from Wikipedia Medical FR, MedG Consensus, and MSD Manuals.
+* **1-Click Cache Purge & Force Online Refetch**:
+  - **Single & Global Purge Endpoints (`POST /api/admin/cat-generator/clear-web-cache`)**: Supports deleting cache files for a single CAT title or purging the entire `web_cache/` directory cleanly.
+  - **Master Batch Controls**: Added global header buttons (`Recharger Web Global` and `Vider Tout Cache Web`) in `admin/cat_generator_lab.html` alongside per-CAT table actions.
+
+### 2. Client-Server Background Sync Timestamp Type Normalization (v1.5.5)
+* **Problem**: Clients issue delta sync queries sending epoch milliseconds (`GET /api/cats?since=1785700000000`). Database records promoted from the Generator Lab formatted `updatedAt` as ISO strings (`"2026-08-03T23:17:08.210Z"`). In JavaScript array filtering, comparing a string directly with a number (`isoString > numericMs`) evaluates to `NaN > number` (`false`), causing silent exclusion of modified records.
+* **Resolution (`server/routes/cats.js`)**: The API endpoint normalizes all `updatedAt` values at runtime:
+  ```javascript
+  const catTime = typeof c.updatedAt === 'number' ? c.updatedAt : new Date(c.updatedAt).getTime();
+  return !isNaN(catTime) && catTime > since;
+  ```
+  Guarantees 100% reliable delta sync detection across all Android APK versions and PWAs.
+
+
