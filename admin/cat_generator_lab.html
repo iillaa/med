@@ -562,7 +562,9 @@
             ${c.isV2 ? `<button onclick="inspectCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">👁️ Inspecter</button>` : ''}
             ${c.isV2 ? `<button onclick="promoteSingleCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--success); border-color: var(--success);">💾 Promouvoir (1)</button>` : ''}
             ${c.isV2 ? `<button onclick="openEditModal(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);">✏️ Éditer</button>` : ''}
-            <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">🌐 Step 1 Web</button>
+            <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}', false)" class="btn-outline" style="padding: 4px 8px; font-size: 11px;" title="Mode incrémental : complète les sources manquantes">🌐 Step 1 Web</button>
+            <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}', true)" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);" title="Forcer la recherche en ligne (remplace le cache)">🔄 Recharger Web</button>
+            <button onclick="purgeWebCache('${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);" title="Effacer les fichiers de cache Web pour cette fiche">🗑️ Vider Cache</button>
             <button onclick="regenerateSingleCAT('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">${c.isV2 ? '🔄 Régénérer' : '⚡ Générer V2'}</button>
             ${c.isV2 ? `<button onclick="deleteCAT(${c.id}, '${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);">🗑️ Supprimer</button>` : ''}
           </td>
@@ -571,14 +573,17 @@
       });
     }
 
-    async function runStep1WebFetch(title) {
-      if (!confirm(`Lancer l'étape 1 (Recherche Web & Mise en cache) pour : "${title}" ?`)) return;
+    async function runStep1WebFetch(title, forceRefetch = false) {
+      const msg = forceRefetch ? 
+        `Forcer le rechargement Web (recherche en ligne) pour : "${title}" ?` : 
+        `Lancer la recherche Web Step 1 (mode incrémental) pour : "${title}" ?`;
+      if (!confirm(msg)) return;
 
       try {
         const res = await fetch('/api/admin/cat-generator/fetch-web', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, forceRefetch: true })
+          body: JSON.stringify({ title, forceRefetch })
         });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la recherche web');
@@ -587,6 +592,25 @@
         await loadData();
       } catch (err) {
         alert(`❌ Erreur Web Fetch: ${err.message}`);
+      }
+    }
+
+    async function purgeWebCache(title) {
+      if (!confirm(`Voulez-vous vraiment effacer tous les fichiers du cache Web pour : "${title}" ?`)) return;
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/clear-web-cache', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la suppression du cache');
+
+        alert(`🗑️ ${data.message}`);
+        await loadData();
+      } catch (err) {
+        alert(`❌ Erreur Effacement Cache: ${err.message}`);
       }
     }
 

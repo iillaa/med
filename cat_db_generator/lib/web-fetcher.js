@@ -243,44 +243,63 @@ function extractSmartKeywords(title, customKeywords) {
 }
 
 /**
- * Searches and fetches clinical guidelines for a specific CAT title across 3 high-reliability medical sources
+ * Searches and fetches clinical guidelines for a specific CAT title across 3 high-reliability medical sources.
+ * Supports incremental top-up: if existing cache has fewer than maxSources, it attempts to query missing sources.
  * @param {string} title CAT Title
  * @param {object} options Options { forceRefetch: boolean, maxSources: number, searchKeywords: string|Array }
  */
 async function fetchAndCacheWebSources(title, options = {}) {
   const sanitizedDirName = sanitizeTitleForDir(title);
   const targetDir = path.join(CACHE_BASE_DIR, sanitizedDirName);
+  const targetMax = options.maxSources || 6;
 
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
   }
 
-  // Check existing cache if not forcing refetch
-  if (!options.forceRefetch) {
-    const existingCache = getCachedWebSources(title);
-    if (existingCache && existingCache.length > 0) {
-      console.log(`🌐 [Web Cache] Reusing ${existingCache.length} cached web sources for "${title}".`);
-      return existingCache;
+  // If forceRefetch is requested, purge existing cache files first
+  if (options.forceRefetch && fs.existsSync(targetDir)) {
+    const existingFiles = fs.readdirSync(targetDir).filter(f => f.endsWith('.json'));
+    for (const f of existingFiles) {
+      try { fs.unlinkSync(path.join(targetDir, f)); } catch (e) {}
     }
+    console.log(`🗑️ [Web Cache] Purged existing cache for "${title}" due to forceRefetch.`);
   }
 
-  const smartKeywords = extractSmartKeywords(title, options.searchKeywords);
-  console.log(`🌐 [Step 1 Web Research] Fetching live medical guidelines for "${title}" using ${smartKeywords.length} keyword(s): [${smartKeywords.join(', ')}]...`);
+  // Check existing cached sources
+  const existingCache = getCachedWebSources(title);
+  
+  // If we already have enough or more than target max, reuse existing cache
+  if (!options.forceRefetch && existingCache && existingCache.length >= targetMax) {
+    console.log(`🌐 [Web Cache] Reusing ${existingCache.length} cached web sources for "${title}".`);
+    return existingCache;
+  }
 
-  const fetchedSources = [];
-  const fetchedKeys = new Set();
+  // Incremental Top-Up Mode: Keep existing sources and attempt to query missing ones
+  const fetchedSources = [...existingCache];
+  const fetchedKeys = new Set(existingCache.map(s => s.sourceId));
+
+  const smartKeywords = extractSmartKeywords(title, options.searchKeywords);
+  console.log(`🌐 [Step 1 Web Research] ${existingCache.length > 0 ? `Top-up mode (${existingCache.length}/${targetMax} cached)` : 'Fetching live sources'} for "${title}" using ${smartKeywords.length} keyword(s)...`);
 
   for (const kw of smartKeywords) {
-    if (fetchedSources.length >= (options.maxSources || 6)) break;
+    if (fetchedSources.length >= targetMax) break;
 
     // 1. Wikipedia Medical REST API
-    console.log(`   - Querying Wikipedia for "${kw}"...`);
-    const wikiData = await fetchWikipediaMedical(kw, title);
-    if (wikiData && !fetchedKeys.has(wikiData.sourceId)) {
-      fetchedKeys.add(wikiData.sourceId);
-      fetchedSources.push(wikiData);
-      console.log(`     ✅ Cached: ${wikiData.sourceName}`);
+    if (!fetchedKeys.has(`wikipedia_${kw}`)) {
+      console.log(`   - Querying Wikipedia for "${kw}"...`);
+      const wikiData = await fetchWikipediaMedical(kw, title);
+      if (wikiData && !fetchedKeys.has(wikiData.sourceId)) {
+        fetchedKeys.add(wikiData.sourceId);
+        fetchedSources.push(wikiData);
+        // Save new source to disk
+        const fileName = `${wikiData.sourceId}_${Date.now()}.json`;
+        fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(wikiData, null, 2), 'utf8');
+        console.log(`     ✅ Cached new source: ${wikiData.sourceName}`);
+      }
     }
+
+    if (fetchedSources.length >= targetMax) break;
 
     // 2. MedG French Clinical Consensus Feed
     console.log(`   - Querying MedG Consensus for "${kw}"...`);
@@ -288,8 +307,12 @@ async function fetchAndCacheWebSources(title, options = {}) {
     if (medgData && !fetchedKeys.has(medgData.sourceId)) {
       fetchedKeys.add(medgData.sourceId);
       fetchedSources.push(medgData);
-      console.log(`     ✅ Cached: ${medgData.sourceName}`);
+      const fileName = `${medgData.sourceId}_${Date.now()}.json`;
+      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(medgData, null, 2), 'utf8');
+      console.log(`     ✅ Cached new source: ${medgData.sourceName}`);
     }
+
+    if (fetchedSources.length >= targetMax) break;
 
     // 3. MSD Manuals Professionnels
     console.log(`   - Querying Manuel MSD for "${kw}"...`);
@@ -297,18 +320,37 @@ async function fetchAndCacheWebSources(title, options = {}) {
     if (msdData && !fetchedKeys.has(msdData.sourceId)) {
       fetchedKeys.add(msdData.sourceId);
       fetchedSources.push(msdData);
-      console.log(`     ✅ Cached: ${msdData.sourceName}`);
+      const fileName = `${msdData.sourceId}_${Date.now()}.json`;
+      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(msdData, null, 2), 'utf8');
+      console.log(`     ✅ Cached new source: ${msdData.sourceName}`);
     }
   }
 
-  // Write all fetched sources to disk cache
-  for (const src of fetchedSources) {
-    const fileName = `${src.sourceId}_${Date.now()}.json`;
-    const filePath = path.join(targetDir, fileName);
-    fs.writeFileSync(filePath, JSON.stringify(src, null, 2), 'utf8');
+  return fetchedSources;
+}
+
+/**
+ * Clears cached web sources for a specific CAT title
+ */
+function clearWebCache(title) {
+  const sanitizedDirName = sanitizeTitleForDir(title);
+  const targetDir = path.join(CACHE_BASE_DIR, sanitizedDirName);
+
+  if (fs.existsSync(targetDir)) {
+    const files = fs.readdirSync(targetDir);
+    let count = 0;
+    for (const f of files) {
+      try {
+        fs.unlinkSync(path.join(targetDir, f));
+        count++;
+      } catch (e) {}
+    }
+    try { fs.rmdirSync(targetDir); } catch(e) {}
+    console.log(`🗑️ [Web Cache] Purged ${count} file(s) for "${title}".`);
+    return { success: true, message: `Cache Web effacé (${count} fichier(s) supprimé(s)) pour "${title}".` };
   }
 
-  return fetchedSources;
+  return { success: true, message: `Aucun cache Web trouvé pour "${title}".` };
 }
 
 /**
@@ -360,6 +402,7 @@ function listWebCacheStatus() {
 module.exports = {
   fetchAndCacheWebSources,
   getCachedWebSources,
+  clearWebCache,
   listWebCacheStatus,
   sanitizeTitleForDir,
   extractSmartKeywords

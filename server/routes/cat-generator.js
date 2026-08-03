@@ -481,6 +481,25 @@ function registerCatGeneratorRoutes(app) {
     }
   });
 
+  // POST /api/admin/cat-generator/clear-web-cache (Purge web cache for a title)
+  app.post('/api/admin/cat-generator/clear-web-cache', (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+
+    const { clearWebCache } = require('../../cat_db_generator/lib/web-fetcher');
+    const { title } = req.body || {};
+
+    if (!title) {
+      return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
+    }
+
+    try {
+      const result = clearWebCache(title);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/admin/cat-generator/web-cache (Web Cache Inspection)
   app.get('/api/admin/cat-generator/web-cache', (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
