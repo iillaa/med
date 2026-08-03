@@ -209,4 +209,9 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Inconsistent author credits across app interfaces, legal disclaimers, and metadata files creates confusion for copyright licensing, app store publishing, and legal liability.
 * **Solution**: Enforce a strict dual-tier attribution standard across the project: (1) **User-Facing UI Credit**: Display **`Dr. Kibeche Ali`** (in Dashboard footer, About modal, Legal/CGU disclaimer); (2) **Code & Legal Metadata**: Display **`Dr. Kibeche Ali Dia Eddine`** (in `package.json`, `LICENSE`, `server/index.js`, and `android/app/build.gradle`).
 
+### 40. JavaScript `ISO String` vs `Numeric Milliseconds` Type Coercion Bug in Data Sync Filtering
+* **Problem**: Newly promoted or updated CATs on the server were not being detected by client devices (Android APK or PWA) during background sync. The client received an empty update list `[]` and logged `[Background Sync] Remote database is in sync. No action needed.` despite active server database changes.
+* **Root Cause**: The client sends a numeric timestamp in milliseconds (`?since=1785700000000`). When CATs were saved or promoted in the database, `updatedAt` was formatted as an ISO Date String (`"2026-08-03T23:17:08.210Z"`). In JavaScript array filtering, comparing a string directly to a number (`"2026-08-03T23:17:08.210Z" > 1785700000000`) converts the string to `NaN`. Since `NaN > number` evaluates to `false`, the server silently filtered out all updated records.
+* **Fix (`server/routes/cats.js`)**: All timestamp filters in API routes MUST explicitly parse date fields using `typeof val === 'number' ? val : new Date(val).getTime()` to prevent silent type coercion failures between ISO strings and epoch numbers.
+
 
