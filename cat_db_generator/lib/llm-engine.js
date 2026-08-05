@@ -13,12 +13,60 @@ const { buildSearchQueries, REPUTABLE_MEDICAL_SOURCES } = require('./medical-sou
 const { fetchAndCacheWebSources, getCachedWebSources } = require('./web-fetcher');
 const fs = require('fs');
 
-const GEMINI_MODELS = [
+const FALLBACK_GEMINI_MODELS = [
   'gemini-3.6-flash',
+  'gemini-3.5-flash',
   'gemini-2.5-flash',
   'gemini-2.0-flash',
   'gemini-flash-lite-latest'
 ];
+
+let cachedDynamicModels = null;
+let lastModelDiscoveryTime = 0;
+const DISCOVERY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+/**
+ * Dynamically queries Google AI Studio API to discover real active models
+ * and ranks them by highest semantic version number & capability.
+ */
+async function discoverDynamicModels(apiKey) {
+  const now = Date.now();
+  if (cachedDynamicModels && (now - lastModelDiscoveryTime) < DISCOVERY_CACHE_TTL_MS) {
+    return cachedDynamicModels;
+  }
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) return FALLBACK_GEMINI_MODELS;
+
+    const data = await res.json();
+    const models = (data.models || [])
+      .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+      .map(m => m.name.replace('models/', ''))
+      .filter(name => !name.includes('tts') && !name.includes('image') && !name.includes('banana') && !name.includes('clip') && !name.includes('computer-use'));
+
+    // Sort by version numbers (highest version first)
+    models.sort((a, b) => {
+      const getVer = s => {
+        const match = s.match(/gemini-(\d+(?:\.\d+)?)/i);
+        return match ? parseFloat(match[1]) : (s.includes('latest') ? 1.9 : 1.0);
+      };
+      return getVer(b) - getVer(a);
+    });
+
+    if (models.length > 0) {
+      cachedDynamicModels = models;
+      lastModelDiscoveryTime = now;
+      console.log(`🤖 [Dynamic LLM Discovery] Discovered ${models.length} active models. Top primary: ${models[0]}`);
+      return models;
+    }
+  } catch (err) {
+    console.warn(`⚠️ Dynamic model discovery failed: ${err.message}. Using fallback model list.`);
+  }
+
+  return FALLBACK_GEMINI_MODELS;
+}
 
 const V2_DB_PATH = path.join(__dirname, '..', 'cats_db_v2_generated.json');
 let humanEditCache = null;
@@ -38,7 +86,7 @@ function getHumanEditMemory(title) {
 }
 
 /**
- * Call Gemini REST API with token logging, rate-limit backoff retries, and latency tracking
+ * Call Gemini REST API with dynamic model discovery, extended thinking budget, token logging, and rate-limit backoff
  */
 async function callLLMApi(systemPrompt, userPrompt, options = {}) {
   const apiKey = options.apiKey || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
@@ -46,7 +94,9 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
     throw new Error('LLM API Key missing! Set GOOGLE_API_KEY or GEMINI_API_KEY in .env');
   }
 
-  const modelsToTry = options.model ? [options.model, ...GEMINI_MODELS] : GEMINI_MODELS;
+  // Discover highest dynamic active models from Google API
+  const dynamicModels = await discoverDynamicModels(apiKey);
+  const modelsToTry = options.model ? [options.model, ...dynamicModels] : dynamicModels;
   let lastError = null;
 
   for (const model of modelsToTry) {
@@ -59,6 +109,16 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
+        // Enable extended thinking budget (2048 tokens) for reasoning models
+        const generationConfig = {
+          temperature: 0.2,
+          responseMimeType: 'application/json'
+        };
+
+        if (/gemini-(3|2\.5|2\.0|pro)/i.test(model)) {
+          generationConfig.thinkingConfig = { thinkingBudget: 2048 };
+        }
+
         const payload = {
           contents: [
             {
@@ -66,10 +126,7 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
               parts: [{ text: `${systemPrompt}\n\n--- TASK INPUT ---\n${userPrompt}` }]
             }
           ],
-          generationConfig: {
-            temperature: 0.2,
-            responseMimeType: 'application/json'
-          }
+          generationConfig: generationConfig
         };
 
         res = await fetch(url, {
