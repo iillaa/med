@@ -1,19 +1,17 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.5.4",
+  "latestVersion": "1.6.0",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour obligatoire de Dr.CAT est requise pour continuer.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.6.0 est disponible.",
   "releaseNotes": [
-    "Mode recherche Web incrémentale : complétion automatique des sources médicales manquantes",
-    "Bouton de vidage du cache Web 1-click et rechargement en ligne forcé dans le Generator Lab",
-    "Télémétrie en temps réel (< 5 min) et classification des appareils Dev/Admin",
-    "Bouton de réinitialisation sécurisé de la télémétrie avec modal de confirmation",
-    "Normalisation du header x-app-version dynamique sur Web PWA et APK Native"
+    "Moteur Web RAG Médecin V2 : Intégration de StatPearls NCBI & Manuel MSD Professionnel (Jina MD)",
+    "Filtre de densité clinique (isHighClinicalDensity) : Rejet automatique des articles grand public",
+    "Génération Dual RAG haute précision : Posologies DCI locales, grilles dose-poids et drapeaux rouges"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-08-03T22:25:40.000Z"
+  "lastUpdated": "2026-08-05T13:46:40.000Z"
 }

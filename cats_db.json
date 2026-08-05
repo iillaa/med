@@ -5,14 +5,33 @@
     "title": "CAT devant intoxication alimentaire",
     "summary": "**1. Évaluation initiale & Diagnostic :**\n- Interrogatoire : Notion de cas similaires (repas commun), délai d'apparition (court pour Staph. aureus, long pour Salmonella), nature des aliments.\n- Clinique : Douleurs abdominales, vomissements, diarrhée, fièvre, signes de déshydratation.\n\n**2. Conduite à tenir :**\n- Évaluer l'état d'hydratation (pli cutané, soif, tension, diurèse).\n- Repos digestif initial puis réalimentation progressive (éviter lait, graisses, fibres).\n- Réhydratation orale (SRO) prioritaire.\n\n**3. Traitement :**\n- Anti-sécrétoire : Racécadotril (Tiorfan) 100mg, 1 gélule 3x/jour (max 7 jours).\n- Antispasmodique : Phloroglucinol (Spasfon) 80mg, 2 cp au moment de la crise.\n- Antibiotiques : Généralement contre-indiqués (sauf cas sévères avec fièvre élevée, syndrome dysentérique : Ciprofloxacine 500mg 2x/j pendant 3-5 jours).\n\n**4. Examens complémentaires :**\n- Biologie : Ionogramme sanguin, urée, créatinine (uniquement si signes de déshydratation clinique ou terrain fragile).\n- Bactériologie : Coproculture avec recherche de Salmonella, Shigella, Campylobacter (si diarrhée glaireuse/sanglante ou fièvre élevée).\n\n**5. Orientation / Avis Spécialisé :**\n- Avis Gastro-entérologue si symptômes prolongés (>48h), suspicion de germe invasif (Salmonella/Shigella) ou terrain fragile. Hospitalisation urgente si déshydratation sévère ou choc septique.",
     "red_flags": "Fièvre > 38.5°C, syndrome dysentérique (sang/glaires dans les selles), déshydratation clinique (perte de poids > 5%), terrain à risque (nourrisson, sujet âgé, immunodéprimé).",
-    "ordonnance": "1. SRO (Solutés de Réhydratation Orale) : 1 sachet dans 1L d'eau minérale, à boire par petites gorgées.\n2. Tiorfan (Racécadotril) 100mg : 1 gélule 3 fois par jour, max 7 jours.\n3. Spasfon (Phloroglucinol) 80mg : 2 comprimés en cas de douleur abdominale, max 3 fois par jour.",
+    "ordonnance": "",
     "pdf_keywords": [
       "Gastrologie",
       "Médicaments en Gastrologie",
       "Urgences",
       "ioniques"
     ],
-    "updatedAt": 1784417364138
+    "updatedAt": 1785799308495,
+    "history": [
+      {
+        "timestamp": 1785799284795,
+        "action": "edit",
+        "detail": "Modifié via approbation d'une proposition de modification",
+        "previousState": {
+          "summary": "**1. Évaluation initiale & Diagnostic :**\n- Interrogatoire : Notion de cas similaires (repas commun), délai d'apparition (court pour Staph. aureus, long pour Salmonella), nature des aliments.\n- Clinique : Douleurs abdominales, vomissements, diarrhée, fièvre, signes de déshydratation.\n\n**2. Conduite à tenir :**\n- Évaluer l'état d'hydratation (pli cutané, soif, tension, diurèse).\n- Repos digestif initial puis réalimentation progressive (éviter lait, graisses, fibres).\n- Réhydratation orale (SRO) prioritaire.\n\n**3. Traitement :**\n- Anti-sécrétoire : Racécadotril (Tiorfan) 100mg, 1 gélule 3x/jour (max 7 jours).\n- Antispasmodique : Phloroglucinol (Spasfon) 80mg, 2 cp au moment de la crise.\n- Antibiotiques : Généralement contre-indiqués (sauf cas sévères avec fièvre élevée, syndrome dysentérique : Ciprofloxacine 500mg 2x/j pendant 3-5 jours).\n\n**4. Examens complémentaires :**\n- Biologie : Ionogramme sanguin, urée, créatinine (uniquement si signes de déshydratation clinique ou terrain fragile).\n- Bactériologie : Coproculture avec recherche de Salmonella, Shigella, Campylobacter (si diarrhée glaireuse/sanglante ou fièvre élevée).\n\n**5. Orientation / Avis Spécialisé :**\n- Avis Gastro-entérologue si symptômes prolongés (>48h), suspicion de germe invasif (Salmonella/Shigella) ou terrain fragile. Hospitalisation urgente si déshydratation sévère ou choc septique.",
+          "ordonnance": "1. SRO (Solutés de Réhydratation Orale) : 1 sachet dans 1L d'eau minérale, à boire par petites gorgées.\n2. Tiorfan (Racécadotril) 100mg : 1 gélule 3 fois par jour, max 7 jours.\n3. Spasfon (Phloroglucinol) 80mg : 2 comprimés en cas de douleur abdominale, max 3 fois par jour."
+        }
+      },
+      {
+        "timestamp": 1785799308495,
+        "action": "edit",
+        "detail": "Modifié directement par l'administrateur",
+        "previousState": {
+          "summary": "**1. Évaluation initiale & Diagnostic :**\n- Interrogatoire : Notion de cas similaires (repas commun), délai d'apparition (court pour Staph. aureus, long pour Salmonella), nature des aliments.\n- Clinique : Douleurs abdominales, vomissements, diarrhée, fièvre, signes de déshydratation.\n\n**2. Conduite à tenir :**\n- Évaluer l'état d'hydratation (pli cutané, soif, tension, diurèse).\n- Repos digestif initial puis réalimentation progressive (éviter lait, graisses, fibres).\n- Réhydratation orale (SRO) prioritaire.\n\n**3. Traitement :**\n- Anti-sécrétoire : Racécadotril (Tiorfan) 100mg, 1 gélule 3x/jour (max 7 jours).\n- Antispasmodique : Phloroglucinol (Spasfon) 80mg, 2 cp au moment de la crise.\n- Antibiotiques : Généralement contre-indiqués (sauf cas sévères avec fièvre élevée, syndrome dysentérique : Ciprofloxacine 500mg 2x/j pendant 3-5 jours).\n\n**4. Examens complémentaires :**\n- Biologie : Ionogramme sanguin, urée, créatinine (uniquement si signes de déshydratation clinique ou terrain fragile).\n- Bactériologie : Coproculture avec recherche de Salmonella, Shigella, Campylobacter (si diarrhée glaireuse/sanglante ou fièvre élevée).\n\n**5. Orientation / Avis Spécialisé :**\n- Avis Gastro-entérologue si symptômes prolongés (>48h), suspicion de germe invasif (Salmonella/Shigella) ou terrain fragile. Hospitalisation urgente si déshydratation sévère ou choc septique.."
+        }
+      }
+    ]
   },
   {
     "id": 2,
@@ -530,13 +549,39 @@
     "id": 39,
     "category": "Dermatologie",
     "title": "CAT devant gale / poux",
-    "summary": "**1. Gale (Sarcoptose) :**\n- Diagnostic : Prurit à recrudescence nocturne, familial ou collectif.\n- Localisations évocatrices : Espaces interdigitaux des mains, face antérieure des poignets, coudes, aisselles, ombilic, fesses, organes génitaux externes (nodules scabieux). Présence de sillons scabieux ou de vésicules perlées.\n- **Traitement impératif du patient ET de tous les sujets contacts simultanément**, ainsi que désinfection des vêtements et de la literie (lavage à 60°C ou sac plastique fermé avec acaricide type A-Par pendant 72h).\n- Traitement de choix : **Ivermectine** (Stromectol) per os : 200 µg/kg en dose unique, à renouveler obligatoirement à J8-J14 (pour détruire les larves écloses des œufs non touchés par la 1ère prise).\n- +/- Traitement local associé (Benzoate de benzyle - Ascabiol) chez l'adulte.\n\n**2. Poux (Pédiculose du cuir chevelu) :**\n- Prurit du cuir chevelu, surtout rétro-auriculaire et occipital. Présence de lentes vivantes (collées près de la racine du cheveu) et de poux adultes.\n- Traitement de choix : Diméticone lotion (action mécanique étouffante, pas de résistance). Appliquer sur cheveux secs, laisser poser (en général 8h ou selon notice) puis rincer et passer le peigne fin. Répéter à J7-J10.\n- Traiter l'entourage si présence de lentes/poux.\n\n**4. Examens complémentaires :**\n- Diagnostic clinique.\n- Prélèvement cutané par grattage de sillon scabieux au microscope (non systématique, utile en cas de doute diagnostique pour visualiser le sarcopte, ses œufs ou ses excréments).\n\n**5. Orientation / Avis Spécialisé :**\n- Avis Dermatologue si échec de deux traitements bien conduits (suspicion de résistance ou de gale profuse/hyperkératosique nécessitant une prise en charge spécialisée).",
-    "red_flags": "Gale hyperkératosique (norvégienne) chez le sujet âgé ou immunodéprimé : extrêmement contagieuse, nécessite une hospitalisation en chambre d'isolement pour traitement lourd combiné oral + local répété.",
-    "ordonnance": "**Pour le traitement de la Gale (Adulte de 70 kg) :**\n1. Stromectol (Ivermectine) 3mg : 5 comprimés en 1 prise unique à jeun avec un grand verre d'eau (2 heures avant ou après un repas).\n2. À renouveler exactement 10 jours plus tard : 5 comprimés en 1 prise unique.\n3. Spregal ou A-Par aérosol : Pour désinfection de la literie et des vêtements ne passant pas à la machine.",
+    "summary": "**1. Évaluation initiale & Diagnostic :**\n- **Gale (Sarcoptes scabiei var. hominis) :** Prurit généralisé à recrudescence nocturne, très contagieux (notion de contage familial ou en collectivité). Épargne le visage chez l'adulte. Lésions spécifiques : sillons scabieux (interdigitaux, poignets), vésicules perlées, nodules scabieux (emmanchures, fesses, organes génitaux, aréoles mamaires). Chez le nourrisson : atteinte palmoplantaire et du visage possible.\n- **Pédiculose (Poux) :**\n  * *Poux de tête (Pediculus humanus capitis) :* Prurit du cuir chevelu, prédominant au niveau occipital et rétro-auriculaire. Lésions de grattage, surinfections (impétigo de la nuque). Visualisation de lentes vivantes (collées à la racine du cheveu) ou de poux mobiles.\n  * *Poux de corps (Pediculus humanus corporis) :* Prurit corporel dans un contexte de précarité, excoriations, pétéchies. Poux/lentes retrouvés dans les coutures des vêtements.\n  * *Poux de pubis (Pthirus pubis / Morpions) :* Prurit pubien, macules cérulées (taches bleutées), lentes ancrées aux poils pubiens.\n\n**2. Conduite à tenir :**\n- Traitement **SIMULTANÉ** du patient et de TOUS les sujets contacts du foyer (même asymptomatiques pour la gale).\n- **Décontamination de l'environnement (indispensable) :** Lavage à ≥ 60°C des vêtements, linge de lit et serviettes utilisés depuis 3 à 4 jours. Pour le linge non lavable à chaud : enfermement hermétique dans un sac plastique pendant 3 jours (gale) à 7 jours (poux) ou traitement par un insecticide/acaricide en poudre/spray (ex: Aphtiria, A-Par).\n- Couper les ongles ras et appliquer un brossage doux pour éviter les surinfections de grattage.\n- Éviction scolaire/collectivité jusqu'à 24h après la mise en route du traitement efficace.\n\n**3. Traitement :**\n- **Gale :** Traitement de choix topique (Benzoate de benzyle / Ascabiol) ou oral (Ivermectine). Application complète du cou aux pieds (incluant le cuir chevelu chez le nourrisson/jeune enfant) après douche tiède et séchage. Deuxième application systématique à J7-J14 pour détruire les larves écloses.\n- **Pédiculose de tête :** Traitement mécanique étouffant de 1ère intention (Diméticone) sur cheveux secs, suivi d'un peignage humide méticuleux. Deuxième application obligatoire à J7-J10.\n- **Traitement symptomatique :** Antihistaminique H1 oral si prurit intense. Si impétiginisation associant croûtes mélicériques, traiter la surinfection bactérienne (antiseptique local ± antibiothérapie orale antistaphylococcique/streptococcique pendant 7 jours) avant ou en parallèle du traitement antiparasitaire.\n\n**4. Examens complémentaires :**\n- Diagnostic purement **clinique** dans la forme typique.\n- Dermoscopie (visualisation de l'ombre en 'deltaplane' ou 'planeur' correspondant au sarcopte) ou prélèvement d'un sillon à la curette pour examen parasitologique direct au microscope si doute diagnostique.\n- Bilan biologique non recommandé, sauf si surinfection cutanée sévère (NFS, CRP, prélèvement bactériologique d'exsudat).\n\n**5. Orientation / Avis Spécialisé :**\n- **Prise en charge ambulatoire** dans la grande majorité des cas.\n- **Avis dermatologique requis si :** forme profuse ou hyperkératosique (gale norvégienne), échec de 2 lignes de traitement bien conduites, doute diagnostique ou prurit persistant au-delà de 4 semaines (prurit post-scabieux réactionnel).",
+    "red_flags": "Critères de gravité / Signes d'alarme :\n- Gale hyperkératosique / profuse / croûteuse (Gale norvégienne) : extrême contagiosité, atteinte diffuse avec visage et ongles, érythrodermie, terrain immunodéprimé ou sujet âgé institutionnalisé.\n- Surinfection bactérienne étendue (Impétiginisation sévère à Staphylococcus aureus ou Streptococcus pyogenes) avec risque de cellulite, glomérulonéphrite aiguë ou sepsis.\n- Altération de l'état général, fièvre ou frissons associés à des lésions excoriées étenduès.\n- Prurit féroce provoquant des insomnies majeures et une altération sévère de la qualité de vie.",
+    "ordonnance": "**1ère INTENTION (Traitement de choix / Principal) :**\n- Pour la Gale (Adulte et Enfant > 2 ans) :\n  Benzoate de Benzyle 10% / 25% (ex: Ascabiol lotion) :\n  • Adulte : 1 application complète sur tout le corps (du cou aux pieds, sans oublier les plis et espaces interdigitaux) sur peau propre et sèche. Laisser poser 24h sans se laver, puis rincer. Renouveler l'application à J7 ou J8.\n  • Enfant > 2 ans et Femme enceinte : Ascabiol lotion (10% ou dilué à 50% avec de l'eau), 1 application complète laissée poser 12h maximum puis rincer. Renouveler à J7 ou J8.\n  • Nourrisson < 2 ans : 1 application diluée laissée poser 6h à 8h maximum sous occlusion des mains (gants) pour éviter l'ingestion.\n\n- Pour la Pédiculose de tête :\n  Diméticone 4% (lotion anti-poux) :\n  • Appliquer généreusement sur cheveux secs de la racine aux pointes. Laisser agir 15 à 30 minutes. Passer le peigne fin anti-poux mèche par mèche, puis rincer avec un shampooing doux. Répéter impérativement à J7-J10.\n\n**ALTERNATIVES [OU] (En cas de contre-indication, échec, indisponibilité ou terrain spécifique) :**\n⚠️ ALTERNATIVE : Ne pas associer le traitement topique et oral en première intention sauf forme grave/croûteuse.\n- [OU] Alternative orale pour la Gale (Sujet âgé, échec du topique, épidémie en collectivité ou mauvaise observance) :\n  Ivermectine 3 mg comprimés :\n  • Posologie de 200 µg/kg en une prise unique par voie orale avec un grand verre d'eau au cours d'un repas.\n  • Échelle posologique : 15 à 24 kg = 1 cp (3 mg) ; 25 à 35 kg = 2 cp (6 mg) ; 36 à 50 kg = 3 cp (9 mg) ; 51 à 65 kg = 4 cp (12 mg) ; 66 à 79 kg = 5 cp (15 mg).\n  • Renouveler impérativement la prise unique à J7 - J14.\n  (Contre-indiqué chez l'enfant de moins de 15 kg).\n\n- [OU] Alternative pour la Pédiculose du cuir chevelu :\n  Perméthrine 1% lotion : 1 application sur cheveux humides après shampooing, laisser poser 10 minutes, rincer. Répéter à J7.\n\n**TRAITEMENT SYMPTOMATIQUE / ADJUVANT (Si besoin / En option) :**\n- En cas de prurit intense post-parasitaire :\n  Loratadine 10 mg comprimés : 1 comprimé par jour le soir au coucher pendant 5 à 7 jours (Adulte et Enfant > 30 kg).\n  (Si Enfant 10 à 30 kg : Loratadine sirop 5 mg/5 ml, 1 cuillère-mesure de 5 ml par jour).\n- Pour la décontamination du linge / literie non lavable :\n  Poudre antiparasitaire (ex: Aphtiria / Poudre ou Spray A-Par) : Saupoudrer/pulvériser la literie, matelas, vêtements et fermer dans un sac plastique scellé pendant 3 à 7 jours.",
     "pdf_keywords": [
-      "Dermatologie",
-      "CAT Dermatologie"
-    ]
+      "CAT Gynécologie_(3)",
+      "Médicaments en Gastrologie",
+      "150 Ordonnances types",
+      "Antibiotiques1"
+    ],
+    "search_keywords": [
+      "gale",
+      "poux",
+      "pédiculose",
+      "Sarcoptes scabiei",
+      "Pediculus humanus",
+      "Ascabiol",
+      "Ivermectine",
+      "prurit"
+    ],
+    "online_verification_queries": [
+      "https://www.google.com/search?q=gale%20%2F%20poux%20site%3Asante.gov.dz",
+      "https://www.google.com/search?q=gale%20%2F%20poux%20site%3Acnpm.org.dz",
+      "https://www.google.com/search?q=gale%20%2F%20poux%20site%3Asamidz.com"
+    ],
+    "_execution_metrics": {
+      "model": "gemini-3.6-flash",
+      "latencyMs": 24225,
+      "promptTokens": 3953,
+      "completionTokens": 2081,
+      "totalTokens": 8526,
+      "timestamp": "2026-08-03T23:10:18.613Z"
+    },
+    "updatedAt": "2026-08-03T23:17:08.210Z"
   },
   {
     "id": 40,

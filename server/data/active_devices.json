@@ -3,11 +3,11 @@
     "drcat-inst-6f29046b-9939-4ac7-b331-89b04b919f0a": {
       "installId": "drcat-inst-6f29046b-9939-4ac7-b331-89b04b919f0a",
       "firstSeen": "2026-08-02T22:10:46.440Z",
-      "requestCount": 7,
+      "requestCount": 43,
       "appVersion": "1.2.4",
       "platform": "android_apk",
-      "lastSeen": "2026-08-02T22:10:47.474Z",
-      "lastIp": "154.121.98.66",
+      "lastSeen": "2026-08-03T23:21:55.380Z",
+      "lastIp": "154.121.59.13",
       "isAdminDevice": true
     },
     "drcat-inst-b997ebfa-8ef5-49d0-88fc-2ee12aa6fa3e": {
@@ -53,10 +53,10 @@
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
       "firstSeen": "2026-08-03T22:12:43.913Z",
-      "requestCount": 22,
-      "appVersion": "1.5.3",
+      "requestCount": 92,
+      "appVersion": "1.5.4",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-03T22:13:03.773Z",
+      "lastSeen": "2026-08-05T10:11:56.514Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
@@ -89,7 +89,37 @@
       "lastSeen": "2026-08-03T22:25:18.381Z",
       "lastIp": "",
       "isAdminDevice": false
+    },
+    "drcat-inst-7d109725-56e1-4a1f-994c-17ab6baea158": {
+      "installId": "drcat-inst-7d109725-56e1-4a1f-994c-17ab6baea158",
+      "firstSeen": "2026-08-03T23:22:22.831Z",
+      "requestCount": 23,
+      "appVersion": "1.2.4",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-03T23:35:19.441Z",
+      "lastIp": "154.121.59.13",
+      "isAdminDevice": false
+    },
+    "drcat-inst-a813fb35-0f84-4da5-b1e9-95dc8665ae9e": {
+      "installId": "drcat-inst-a813fb35-0f84-4da5-b1e9-95dc8665ae9e",
+      "firstSeen": "2026-08-03T23:22:42.401Z",
+      "requestCount": 7,
+      "appVersion": "1.5.4",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-03T23:22:43.330Z",
+      "lastIp": "::1",
+      "isAdminDevice": true
+    },
+    "drcat-inst-8f3489b2-2071-4b3c-a70e-ecd5c214f814": {
+      "installId": "drcat-inst-8f3489b2-2071-4b3c-a70e-ecd5c214f814",
+      "firstSeen": "2026-08-03T23:23:08.238Z",
+      "requestCount": 10,
+      "appVersion": "1.5.4",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-03T23:25:08.430Z",
+      "lastIp": "154.121.59.13",
+      "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-08-03T22:25:28.382Z"
+  "lastUpdated": "2026-08-05T10:12:04.290Z"
 }

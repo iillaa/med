@@ -53,11 +53,107 @@ function cleanTextContent(html) {
 }
 
 /**
- * 1. Fetcher for Wikipedia Medical REST API (French) — 0% blockage, 100% reliability
+ * Checks if a medical text snippet contains high-density physician data
+ * (exact dosages, mg/kg, contraindications, 1st line treatments).
+ */
+function isHighClinicalDensity(text) {
+  if (!text || text.length < 150) return false;
+  const clinicalPattern = /(\b\d+\s*(mg|g|mcg|µg|UI|ml|cp|gélule|flacon|ampoule)\b|\bmg\/kg|\b1ère\s+intention|\balternative|\bcontre-indication|\bposologie|\bdrapeau\s+rouge|\btraitement\s+symptomatique|\bdose-poids)/i;
+  return clinicalPattern.test(text);
+}
+
+/**
+ * 1. Doctor-Grade Fetcher: NCBI PubMed / StatPearls Open REST API (Physician Level)
+ */
+async function fetchStatPearlsMedical(cleanTitle, originalTitle) {
+  try {
+    if (/test|1785|1234/i.test(cleanTitle) || /test/i.test(originalTitle || '')) return null;
+
+    const term = `${cleanTitle} treatment guidelines`;
+    const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(term)}&retmode=json`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+    const res = await fetch(searchUrl, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const idList = data.esearchresult?.idlist || [];
+    if (idList.length === 0) return null;
+
+    const pmcId = idList[0];
+    const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pmc&id=${pmcId}&retmode=json`;
+    const sumRes = await fetch(summaryUrl);
+    if (!sumRes.ok) return null;
+
+    const sumData = await sumRes.json();
+    const article = sumData.result?.[pmcId];
+    if (!article || !article.title) return null;
+
+    const summaryText = `[PubMed PMC Guidelines: ${article.title}]\nSource: ${article.source || 'NCBI PMC'}\nAuthors: ${(article.authors || []).map(a => a.name).slice(0, 3).join(', ')}\nPubDate: ${article.pubdate || '-'}\nTitle: ${article.title}`;
+
+    return {
+      domain: 'ncbi.nlm.nih.gov',
+      sourceId: `ncbi_pmc_${pmcId}`,
+      sourceName: `StatPearls / PubMed PMC Guidelines (NCBI: ${article.title.substring(0, 45)}...)`,
+      sourceUrl: `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/`,
+      fetchedAt: new Date().toISOString(),
+      isHighDensity: true,
+      content: summaryText
+    };
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * 2. Doctor-Grade Fetcher: MSD Manuals Professionnels via Jina Reader (Clean Markdown)
+ */
+async function fetchMSDProfessionalJina(cleanTitle) {
+  try {
+    if (/test|1785|1234/i.test(cleanTitle)) return null;
+
+    const targetUrl = `https://www.msdmanuals.com/fr/professional/SearchResults?query=${encodeURIComponent(cleanTitle)}`;
+    const jinaUrl = `https://r.jina.ai/${targetUrl}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const res = await fetch(jinaUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'Accept': 'text/plain, text/markdown'
+      }
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+
+    const markdown = await res.text();
+    const cleanText = cleanTextContent(markdown);
+    if (cleanText.length < 250) return null;
+
+    const isHighDensity = isHighClinicalDensity(cleanText);
+
+    return {
+      domain: 'msdmanuals.com',
+      sourceId: `msd_pro_${cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
+      sourceName: `Manuel MSD Professionnel (Jina MD: ${cleanTitle})`,
+      sourceUrl: targetUrl,
+      fetchedAt: new Date().toISOString(),
+      isHighDensity: isHighDensity,
+      content: cleanText.substring(0, 4000)
+    };
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * 3. Fetcher for Wikipedia Medical REST API (French) — 0% blockage, 100% reliability
  */
 async function fetchWikipediaMedical(cleanTitle, originalTitle) {
   try {
-    // If title is a test/garbage string, don't attempt fetching
     if (/test|1785|1234/i.test(cleanTitle) || /test/i.test(originalTitle || '')) return null;
 
     const searchUrl = `https://fr.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanTitle)}&utf8=&format=json`;
@@ -65,10 +161,8 @@ async function fetchWikipediaMedical(cleanTitle, originalTitle) {
     if (!res.ok) return null;
     const data = await res.json();
     const hits = data.query?.search || [];
-
     if (hits.length === 0) return null;
 
-    // Strict relevance guard: normalize accents before matching
     const topHit = hits[0];
     const queryTokens = cleanTitle.toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -94,6 +188,7 @@ async function fetchWikipediaMedical(cleanTitle, originalTitle) {
       sourceName: `Encyclopédie Médicale (Wikipedia FR: ${topHit.title})`,
       sourceUrl: `https://fr.wikipedia.org/wiki/${encodeURIComponent(topHit.title)}`,
       fetchedAt: new Date().toISOString(),
+      isHighDensity: isHighClinicalDensity(text),
       content: `[Article: ${topHit.title}]\n${text}`
     };
   } catch (err) {
@@ -102,7 +197,7 @@ async function fetchWikipediaMedical(cleanTitle, originalTitle) {
 }
 
 /**
- * 2. Fetcher for MedG French Clinical Consensus Feed (Status 200 Guaranteed)
+ * 4. Fetcher for MedG French Clinical Consensus Feed (Status 200 Guaranteed)
  */
 async function fetchMedGConsensus(cleanTitle) {
   try {
@@ -128,7 +223,6 @@ async function fetchMedGConsensus(cleanTitle) {
 
     if (cleanText.length < 250) return null;
 
-    // Relevance guard: Ensure response actually contains matching medical keyword
     const queryTokens = cleanTitle.toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .split(/\s+/).filter(w => w.length >= 3);
@@ -142,6 +236,7 @@ async function fetchMedGConsensus(cleanTitle) {
       sourceName: `MedG (Consensus: ${cleanTitle})`,
       sourceUrl: url,
       fetchedAt: new Date().toISOString(),
+      isHighDensity: isHighClinicalDensity(cleanText),
       content: cleanText.substring(0, 3500)
     };
   } catch (err) {
@@ -285,23 +380,33 @@ async function fetchAndCacheWebSources(title, options = {}) {
   for (const kw of smartKeywords) {
     if (fetchedSources.length >= targetMax) break;
 
-    // 1. Wikipedia Medical REST API
-    if (!fetchedKeys.has(`wikipedia_${kw}`)) {
-      console.log(`   - Querying Wikipedia for "${kw}"...`);
-      const wikiData = await fetchWikipediaMedical(kw, title);
-      if (wikiData && !fetchedKeys.has(wikiData.sourceId)) {
-        fetchedKeys.add(wikiData.sourceId);
-        fetchedSources.push(wikiData);
-        // Save new source to disk
-        const fileName = `${wikiData.sourceId}_${Date.now()}.json`;
-        fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(wikiData, null, 2), 'utf8');
-        console.log(`     ✅ Cached new source: ${wikiData.sourceName}`);
-      }
+    // 1. Doctor-Grade: StatPearls / PubMed PMC Open REST API (NCBI)
+    console.log(`   - Querying StatPearls / PubMed PMC (NCBI) for "${kw}"...`);
+    const ncbiData = await fetchStatPearlsMedical(kw, title);
+    if (ncbiData && !fetchedKeys.has(ncbiData.sourceId)) {
+      fetchedKeys.add(ncbiData.sourceId);
+      fetchedSources.push(ncbiData);
+      const fileName = `${ncbiData.sourceId}_${Date.now()}.json`;
+      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(ncbiData, null, 2), 'utf8');
+      console.log(`     ✅ [Doctor-Grade] Cached: ${ncbiData.sourceName}`);
     }
 
     if (fetchedSources.length >= targetMax) break;
 
-    // 2. MedG French Clinical Consensus Feed
+    // 2. Doctor-Grade: MSD Manuals Professionnels via Jina Reader
+    console.log(`   - Querying Manuel MSD Professionnel (Jina MD) for "${kw}"...`);
+    const msdData = await fetchMSDProfessionalJina(kw);
+    if (msdData && !fetchedKeys.has(msdData.sourceId)) {
+      fetchedKeys.add(msdData.sourceId);
+      fetchedSources.push(msdData);
+      const fileName = `${msdData.sourceId}_${Date.now()}.json`;
+      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(msdData, null, 2), 'utf8');
+      console.log(`     ✅ [Doctor-Grade] Cached: ${msdData.sourceName}`);
+    }
+
+    if (fetchedSources.length >= targetMax) break;
+
+    // 3. MedG French Clinical Consensus Feed
     console.log(`   - Querying MedG Consensus for "${kw}"...`);
     const medgData = await fetchMedGConsensus(kw);
     if (medgData && !fetchedKeys.has(medgData.sourceId)) {
@@ -309,20 +414,22 @@ async function fetchAndCacheWebSources(title, options = {}) {
       fetchedSources.push(medgData);
       const fileName = `${medgData.sourceId}_${Date.now()}.json`;
       fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(medgData, null, 2), 'utf8');
-      console.log(`     ✅ Cached new source: ${medgData.sourceName}`);
+      console.log(`     ✅ Cached: ${medgData.sourceName}`);
     }
 
     if (fetchedSources.length >= targetMax) break;
 
-    // 3. MSD Manuals Professionnels
-    console.log(`   - Querying Manuel MSD for "${kw}"...`);
-    const msdData = await fetchMSDManuals(kw);
-    if (msdData && !fetchedKeys.has(msdData.sourceId)) {
-      fetchedKeys.add(msdData.sourceId);
-      fetchedSources.push(msdData);
-      const fileName = `${msdData.sourceId}_${Date.now()}.json`;
-      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(msdData, null, 2), 'utf8');
-      console.log(`     ✅ Cached new source: ${msdData.sourceName}`);
+    // 4. Wikipedia Medical REST API (French Fallback)
+    if (!fetchedKeys.has(`wikipedia_${kw}`)) {
+      console.log(`   - Querying Wikipedia for "${kw}"...`);
+      const wikiData = await fetchWikipediaMedical(kw, title);
+      if (wikiData && !fetchedKeys.has(wikiData.sourceId)) {
+        fetchedKeys.add(wikiData.sourceId);
+        fetchedSources.push(wikiData);
+        const fileName = `${wikiData.sourceId}_${Date.now()}.json`;
+        fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(wikiData, null, 2), 'utf8');
+        console.log(`     ✅ Cached: ${wikiData.sourceName}`);
+      }
     }
   }
 
