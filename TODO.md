@@ -68,6 +68,15 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 ---
 
 
+- [x] **Dynamic LLM Model Discovery & Extended Thinking Engine (v1.6.1)** — Upgraded AI execution engine (`cat_db_generator/lib/llm-engine.js`):
+  - **Dynamic Model Discovery (`discoverDynamicModels`)**: Queries Google AI Studio API (`GET /v1beta/models`) dynamically to discover active models, sorting them by semantic version numbers so future models (`gemini-3.7`, `gemini-4.0`) are automatically adopted without hardcoded code edits.
+  - **Extended Thinking Budget (`thinkingConfig: { thinkingBudget: 2048 }`)**: Forces 2048-token extended reasoning for clinical decision logic.
+  - **HTTP 429 Backoff & Retries**: Automatically pauses 4 seconds and retries primary models when rate-limited, keeping batch generations on high-performing primary models.
+
+- [x] **Doctor-Grade Web RAG Engine V2 (v1.6.0)** — Upgraded multi-channel web research module (`cat_db_generator/lib/web-fetcher.js`):
+  - **StatPearls NCBI & MSD Pro Jina Reader**: Queries PubMed PMC REST API and Manuel MSD Professional via Jina MD Reader for bedside clinical guidelines.
+  - **Clinical Density Guard (`isHighClinicalDensity`)**: Auto-filters retrieved web text to reject consumer fluff and retain physician posologies.
+
 - [x] **Incremental Web Fetch Top-Up & Cache Purge Controls (v1.5.4)** — Upgraded Web RAG acquisition pipeline (`cat_db_generator/lib/web-fetcher.js` & `cat_generator_lab.html`):
   - **Incremental Top-Up Mode**: Subsequent Web Fetches automatically keep existing cached sources and query online only for missing guidelines up to target max (`maxSources: 6`).
   - **Force Online Refetch Control**: Added `🔄 Recharger Web` button in Generator Lab UI to trigger fresh online fetches.
