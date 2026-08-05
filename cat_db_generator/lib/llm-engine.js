@@ -15,7 +15,6 @@ const fs = require('fs');
 
 const GEMINI_MODELS = [
   'gemini-3.6-flash',
-  'gemini-3.5-flash',
   'gemini-2.5-flash',
   'gemini-2.0-flash',
   'gemini-flash-lite-latest'
@@ -39,7 +38,7 @@ function getHumanEditMemory(title) {
 }
 
 /**
- * Call Gemini REST API with token logging and latency tracking
+ * Call Gemini REST API with token logging, rate-limit backoff retries, and latency tracking
  */
 async function callLLMApi(systemPrompt, userPrompt, options = {}) {
   const apiKey = options.apiKey || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
@@ -53,10 +52,10 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
   for (const model of modelsToTry) {
     const startTime = Date.now();
     let res = null;
-    let netAttempts = 0;
+    let rateLimitAttempts = 0;
 
-    while (netAttempts < 3) {
-      netAttempts++;
+    while (rateLimitAttempts < 3) {
+      rateLimitAttempts++;
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
@@ -79,11 +78,17 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
           body: JSON.stringify(payload)
         });
 
+        if (res.status === 429) {
+          console.warn(`⚠️ [LLM Rate Limit HTTP 429] Model ${model} rate limited (attempt ${rateLimitAttempts}/3). Pausing 4s to reset quota...`);
+          await new Promise(r => setTimeout(r, 4000));
+          continue; // Retry same model after backoff delay
+        }
+
         if (res) break;
       } catch (netErr) {
         lastError = netErr;
-        console.warn(`⚠️ Network fetch attempt ${netAttempts}/3 for model ${model} failed: ${netErr.message}`);
-        if (netAttempts < 3) await new Promise(r => setTimeout(r, 1500));
+        console.warn(`⚠️ Network fetch attempt ${rateLimitAttempts}/3 for model ${model} failed: ${netErr.message}`);
+        if (rateLimitAttempts < 3) await new Promise(r => setTimeout(r, 2000));
       }
     }
 
@@ -94,6 +99,7 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
     if (!res.ok) {
       const errText = await res.text();
       lastError = new Error(`HTTP ${res.status} [${model}]: ${errText.substring(0, 200)}`);
+      console.warn(`⚠️ Model ${model} failed with HTTP ${res.status}. Falling back to next model...`);
       continue;
     }
 
