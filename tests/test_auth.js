@@ -39,6 +39,13 @@ async function runTests() {
   const tempPassword = 'test-temp-password-999';
   fs.writeFileSync(PASSWORD_FILE, tempPassword, 'utf-8');
   
+  const CATS_DB_FILE = path.join(ROOT, 'cats_db.json');
+  const CATS_DB_BAK = path.join(ROOT, 'cats_db.json.bak_auth_test');
+
+  if (fs.existsSync(CATS_DB_FILE)) {
+    fs.copyFileSync(CATS_DB_FILE, CATS_DB_BAK);
+  }
+
   function cleanup() {
     if (serverProcess) {
       try { serverProcess.kill(); } catch (_) {}
@@ -47,6 +54,10 @@ async function runTests() {
       fs.writeFileSync(PASSWORD_FILE, originalPasswordContent, 'utf-8');
     } else {
       try { fs.unlinkSync(PASSWORD_FILE); } catch (_) {}
+    }
+    if (fs.existsSync(CATS_DB_BAK)) {
+      fs.copyFileSync(CATS_DB_BAK, CATS_DB_FILE);
+      try { fs.unlinkSync(CATS_DB_BAK); } catch (_) {}
     }
   }
 

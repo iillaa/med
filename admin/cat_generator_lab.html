@@ -555,7 +555,8 @@
 
       // First add v1 prod items (strictly title, category, id as ungenerated targets)
       (appData.v1 || []).forEach(cat => {
-        allCatsMap.set(cat.id || cat.title, {
+        const key = cat.id ? `id_${cat.id}` : (cat.title || '').toLowerCase().trim();
+        allCatsMap.set(key, {
           id: cat.id,
           category: cat.category,
           title: cat.title,
@@ -563,9 +564,10 @@
         });
       });
 
-      // Overlay v2 generated items (take precedence)
+      // Overlay v2 generated items (take precedence by Primary Key ID)
       (appData.v2 || []).forEach(cat => {
-        allCatsMap.set(cat.id || cat.title, {
+        const key = cat.id ? `id_${cat.id}` : (cat.title || '').toLowerCase().trim();
+        allCatsMap.set(key, {
           ...cat,
           isV2: true
         });
@@ -622,14 +624,14 @@
             </div>
           </td>
           <td style="white-space: nowrap;">
-            <button onclick="run1TapPipelineSingle('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: #10b981; border-color: #10b981; font-weight: bold;" title="Web Fetch + IA Dual RAG + Approbation Auto en 1 Clic !">⚡ 1-Tap Auto</button>
+            <button onclick="run1TapPipelineSingle('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}', ${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: #10b981; border-color: #10b981; font-weight: bold;" title="Web Fetch + IA Dual RAG + Approbation Auto en 1 Clic !">⚡ 1-Tap Auto</button>
             ${c.isV2 ? `<button onclick="inspectCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">👁️ Inspecter</button>` : ''}
             ${c.isV2 ? `<button onclick="promoteSingleCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--success); border-color: var(--success);">💾 Promouvoir (1)</button>` : ''}
             ${c.isV2 ? `<button onclick="openEditModal(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);">✏️ Éditer</button>` : ''}
             <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}', false)" class="btn-outline" style="padding: 4px 8px; font-size: 11px;" title="Mode incrémental : complète les sources manquantes">🌐 Step 1 Web</button>
             <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}', true)" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);" title="Forcer la recherche en ligne (remplace le cache)">🔄 Recharger Web</button>
             <button onclick="purgeWebCache('${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);" title="Effacer les fichiers de cache Web pour cette fiche">🗑️ Vider Cache</button>
-            <button onclick="regenerateSingleCAT('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">${c.isV2 ? '🔄 Régénérer' : '⚡ Générer V2'}</button>
+            <button onclick="regenerateSingleCAT('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}', ${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">${c.isV2 ? '🔄 Régénérer' : '⚡ Générer V2'}</button>
             ${c.isV2 ? `<button onclick="deleteCAT(${c.id}, '${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);">🗑️ Supprimer</button>` : ''}
           </td>
         `;
@@ -637,30 +639,40 @@
       });
     }
 
-    async function run1TapPipelineSingle(title, category) {
-      if (!confirm(`Lancer le pipeline 1-Tap Auto (Web Fetch + IA Dual RAG + Approbation Auto) pour : "${title}" ?`)) return;
+    async function run1TapPipelineSingle(title, category, id) {
+      if (!confirm(`Lancer le pipeline 1-Tap Auto (Web Fetch + IA Dual RAG V2) pour : "${title}" ?`)) return;
 
       try {
-        const res = await fetch('/api/admin/cat-generator/pipeline-full', {
+        // Step 1: Web Fetch
+        const webRes = await fetch('/api/admin/cat-generator/fetch-web', {
           method: 'POST',
           headers: getAdminHeaders(),
-          body: JSON.stringify({ title, category, forceRefetch: false, autoApprove: true })
+          body: JSON.stringify({ title, forceRefetch: false })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || 'Échec du pipeline 1-Tap');
+        const webData = await webRes.json();
+        if (!webRes.ok || !webData.success) throw new Error(webData.error || 'Échec de la recherche web');
 
-        alert(`⚡ Fiche "${title}" générée et approuvée automatiquement !`);
+        // Step 2: Dual RAG Synthesis (writes strictly to cats_db_v2_generated.json)
+        const genRes = await fetch('/api/admin/cat-generator/single', {
+          method: 'POST',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({ id, title, category })
+        });
+        const genData = await genRes.json();
+        if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V2');
+
+        alert(`⚡ Fiche #${id} "${title}" générée avec succès en V2 ! (${genData.metrics ? genData.metrics.model : 'Dual RAG'})`);
         await loadData();
       } catch (err) {
-        alert(`❌ Erreur 1-Tap Pipeline: ${err.message}`);
+        alert(`❌ Erreur 1-Tap Auto: ${err.message}`);
       }
     }
 
     async function run1TapBatchPipeline() {
-      if (!confirm('Lancer le Batch 1-Tap Global (Web Fetch + Génération IA + Approbation Auto pour TOUTES les fiches en attente) ?')) return;
+      if (!confirm('Lancer le Batch 1-Tap Global (Web Fetch + Génération IA V2) pour TOUTES les fiches en attente ?')) return;
 
       const ungenerated = (appData.v1 || []).filter(cat => {
-        return !appData.v2 || !appData.v2.some(v2 => (v2.title || '').toLowerCase() === (cat.title || '').toLowerCase());
+        return !appData.v2 || !appData.v2.some(v2 => Number(v2.id) === Number(cat.id));
       });
 
       if (ungenerated.length === 0) {
@@ -670,15 +682,18 @@
 
       alert(`⚡ Démarrage du Batch 1-Tap Global pour ${ungenerated.length} fiches en attente...`);
 
-      for (let i = 0; i < ungenerated.length; i++) {
-        const cat = ungenerated[i];
-        console.log(`[1-Tap Batch ${i+1}/${ungenerated.length}] Processing "${cat.title}"...`);
-
+      for (const cat of ungenerated) {
         try {
-          await fetch('/api/admin/cat-generator/pipeline-full', {
+          await fetch('/api/admin/cat-generator/fetch-web', {
             method: 'POST',
             headers: getAdminHeaders(),
-            body: JSON.stringify({ title: cat.title, category: cat.category, autoApprove: true })
+            body: JSON.stringify({ title: cat.title, forceRefetch: false })
+          });
+
+          await fetch('/api/admin/cat-generator/single', {
+            method: 'POST',
+            headers: getAdminHeaders(),
+            body: JSON.stringify({ id: cat.id, title: cat.title, category: cat.category })
           });
         } catch (e) {
           console.warn(`Error on "${cat.title}":`, e);
@@ -877,23 +892,61 @@
       }
     }
 
-    async function regenerateSingleCAT(title, category) {
-      if (!confirm(`Relancer la synthèse IA Gemini 3.6 Flash pour : "${title}" ?`)) return;
+    function openSingleModal() {
+      document.getElementById('single-title').value = '';
+      document.getElementById('single-category').value = 'Gastro-entérologie';
+      document.getElementById('single-modal').classList.add('active');
+    }
+
+    function closeSingleModal() {
+      document.getElementById('single-modal').classList.remove('active');
+    }
+
+    async function submitSingleCAT() {
+      const title = document.getElementById('single-title').value.trim();
+      const category = document.getElementById('single-category').value;
+      if (!title) {
+        alert('Veuillez entrer un titre pour la CAT.');
+        return;
+      }
+
+      // Compute next available ID from v1 and v2
+      const existingIds = [
+        ...(appData.v1 || []).map(c => Number(c.id) || 0),
+        ...(appData.v2 || []).map(c => Number(c.id) || 0)
+      ];
+      const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+
+      closeSingleModal();
 
       try {
-        const res = await fetch('/api/admin/cat-generator/single', {
+        // Step 1: Web Fetch
+        const webRes = await fetch('/api/admin/cat-generator/fetch-web', {
           method: 'POST',
           headers: getAdminHeaders(),
-          body: JSON.stringify({ title, category })
+          body: JSON.stringify({ title, forceRefetch: false })
         });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la régénération');
+        const webData = await webRes.json();
+        if (!webRes.ok || !webData.success) throw new Error(webData.error || 'Échec de la recherche web');
 
-        alert(`✅ Fiche régénérée avec succès (${data.metrics.model} | ${data.metrics.totalTokens} tokens)!`);
+        // Step 2: Dual RAG Single Generation (writes strictly to cats_db_v2_generated.json under nextId)
+        const genRes = await fetch('/api/admin/cat-generator/single', {
+          method: 'POST',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({ id: nextId, title, category })
+        });
+        const genData = await genRes.json();
+        if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V2');
+
+        alert(`✨ Nouvelle fiche #${nextId} "${title}" générée avec succès en V2 !`);
         await loadData();
       } catch (err) {
-        alert(`❌ Erreur: ${err.message}`);
+        alert(`❌ Erreur Création Nouvelle CAT: ${err.message}`);
       }
+    }
+
+    async function regenerateSingleCAT(title, category, id) {
+      return run1TapPipelineSingle(title, category, id);
     }
 
     async function deleteCAT(id, title) {

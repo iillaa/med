@@ -222,6 +222,15 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Writing guard expressions with `&&` like `if (!isLocalhostConnection(req) && !checkIsAdmin(req, activeTokens))` evaluated `!isLocalhostConnection(req)` as `false` for any local loopback connection. This short-circuited the `&&` operator and accidentally bypassed admin password verification for unauthenticated local users.
 * **Solution**: Always enforce double-door boolean OR logic (`if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens))`). This asserts that a request MUST originate from localhost AND possess a valid authenticated admin session token. Remote requests are rejected immediately before password evaluation, and unauthenticated local requests are blocked with HTTP 403 Forbidden.
 
+### 43. Mandatory Production Database Backup & Auto-Restore Guard in Automated Test Suites
+* **Problem**: Running integration and suggestion lifecycle tests directly against `cats_db.json` created temporary test records (or approved test modifications). If a test suite exited unexpectedly or failed mid-flight, temporary records remained in the production database file, corrupting the production CAT count or creating duplicate entries.
+* **Solution**: Implemented an automated database backup and restore guard in all test scripts (`tests/test_suggestions.js`, `tests/test_auth.js`). Before any server process is spawned for testing, a snapshot copy (`cats_db.json.bak_*_test`) is created. In the test process `cleanup()` handler (which executes on test completion, `SIGINT`, or `exit`), `cats_db.json` is **AUTOMATICALLY RESTORED** from the backup snapshot and the temporary file is unlinked. This guarantees production database integrity regardless of test outcomes.
+
+### 44. Strict Primary Key (`id`) Database Integrity & Prohibition of Title String Matching
+* **Problem**: Relying on title text matching (or regex string stripping) to look up, update, or generate CAT records in `cats_db.json` was an anti-pattern. Titles can be customized freely by doctors (e.g. without `"CAT devant "`), causing title lookups to fail, generating timestamp IDs (`Date.now()`), and producing duplicate database rows.
+* **Solution**: Refactored all backend routes (`server/routes/cat-generator.js`), AI generation engines (`cat_db_generator/lib/llm-engine.js`), and frontend components (`admin/cat_generator_lab.html`) to operate EXCLUSIVELY by Primary Key (`id`). `Date.now()` primary keys are permanently banned; new records receive an integer sequence ID (`getNextIntegerId()`). Titles are preserved 100% verbatim as entered by the doctor without artificial mutation.
+
+
 
 
 

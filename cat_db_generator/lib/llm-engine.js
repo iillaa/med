@@ -361,9 +361,13 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
         catResult.search_keywords = extractSmartKeywords(cleanTitle, options.search_keywords);
       }
 
-      catResult.id = options.id || Date.now();
+      if (options.id !== undefined && options.id !== null) {
+        catResult.id = Number(options.id);
+      }
       catResult.category = category || catResult.category || 'Gastro-entérologie';
-      catResult.title = cleanTitle;
+      if (options.originalTitle) {
+        catResult.title = options.originalTitle;
+      }
       catResult.pdf_keywords = pdfKeywords;
       catResult.online_verification_queries = buildSearchQueries(cleanTitle).map(q => q.queryUrl).slice(0, 3);
 
