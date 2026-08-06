@@ -68,6 +68,9 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 ---
 
 
+- [x] **Master Batch Web Cache Purge Fix (v1.6.2)** — Generator Lab backend route hardening (`server/routes/cat-generator.js`):
+  - **Route Validation Fix**: Resolved parameter check bug on `POST /api/admin/cat-generator/clear-web-cache` to allow global purging (`all: true` or missing title) without returning HTTP 400 errors.
+
 - [x] **Dynamic LLM Model Discovery & Extended Thinking Engine (v1.6.1)** — Upgraded AI execution engine (`cat_db_generator/lib/llm-engine.js`):
   - **Dynamic Model Discovery (`discoverDynamicModels`)**: Queries Google AI Studio API (`GET /v1beta/models`) dynamically to discover active models, sorting them by semantic version numbers so future models (`gemini-3.7`, `gemini-4.0`) are automatically adopted without hardcoded code edits.
   - **Extended Thinking Budget (`thinkingConfig: { thinkingBudget: 2048 }`)**: Forces 2048-token extended reasoning for clinical decision logic.

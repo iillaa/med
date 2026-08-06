@@ -53,10 +53,10 @@
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
       "firstSeen": "2026-08-03T22:12:43.913Z",
-      "requestCount": 113,
-      "appVersion": "1.6.0",
+      "requestCount": 149,
+      "appVersion": "1.6.1",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-05T15:08:19.106Z",
+      "lastSeen": "2026-08-06T11:58:03.487Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
@@ -121,5 +121,5 @@
       "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-08-05T15:08:19.891Z"
+  "lastUpdated": "2026-08-06T11:58:10.957Z"
 }

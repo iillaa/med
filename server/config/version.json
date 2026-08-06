@@ -1,17 +1,17 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.6.1",
+  "latestVersion": "1.6.2",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.6.1 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.6.2 est disponible.",
   "releaseNotes": [
-    "Découverte dynamique des modèles Google AI Studio (discoverDynamicModels) : Sélection automatique des modèles les plus récents",
-    "Moteur de raisonnement clinique étendu (thinkingConfig 2048 tokens) : Analyse approfondie des posologies et diagnostics",
-    "Gestion automatique des limites de débit HTTP 429 avec retry et pause exponentielle"
+    "Correction du bouton d'effacement global du cache Web (Master Batch Clear Cache)",
+    "Support de la suppression globale du dossier web_cache sans paramètre de titre obligatoire",
+    "Stabilité renforcée du Generator Lab V2"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-08-05T17:11:30.000Z"
+  "lastUpdated": "2026-08-06T12:15:40.000Z"
 }
