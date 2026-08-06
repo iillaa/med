@@ -250,13 +250,13 @@ ${sourcesSummary}
 - Algérie : Ministère de la Santé (sante.gov.dz), CNPM (cnpm.org.dz), SAMI (samidz.com).
 - France & International : Vidal, HAS, SFMU, ANSM, MSF, WHO/OMS.
 
-1. MATRICE DE PONDÉRATION À 3 NIVEAUX DE LA FICHE DE SYNTHÈSE (SOURCE WEIGHTING MATRIX) :
-   - NIVEAU 1 (Pondération 50% - Priorité Absolue) : EXTRAITS PDF LOCAUX (PDF Index)
+1. HIÉRARCHIE DES SOURCES DE CONNAISSANCES (STRICT PRIORITY ORDER) :
+   - PRIORITÉ 1 (SOURCE PRIMAIRE DE RÉFÉRENCE - BASELINE LOCALE) : EXTRAITS PDF LOCAUX (PDF Index)
      * Détermine les molécules médicamenteuses, les posologies adaptées au terrain local et les habitudes de prescription (ex: Ascabiol/Benzoate de benzyle, Spasfon/Phloroglucinol, Tiorfan/Racécadotril, Smecta/Diosmectite).
      * Ne masque jamais un traitement local de premier recours au profit d'un traitement international non disponible localement.
-   - NIVEAU 2 (Pondération 30% - Consolidation Structurelle & Sécurité) : DONNÉES WEB RAG (MedG, MSD Manuals, Wiki FR)
+   - PRIORITÉ 2 (ENRICHISSEMENT ET SÉCURITÉ EN LIGNE - SUPPLEMENT) : DONNÉES WEB RAG (MedG, MSD Manuals, Wiki FR)
      * Détermine la structuration rigoureuse en 5 étapes cliniques, les bilans biologiques/imagerie et l'exhaustivité des Drapeaux Rouges (Red Flags).
-   - NIVEAU 3 (Pondération 20% - Formatage & Syntaxe Médicale) : CONNAISSANCES DE BASE GEMINI
+   - PRIORITÉ 3 (SYNTHÈSE ET RATIONALE MÉDICALE - SYNTHESIS) : MOTEUR DE RAISONNEMENT GEMINI
      * Assure la rigueur de rédaction médicale française, l'absence de répétition et la validation du format JSON.
 
 2. RÈGLE STRICTE DE RÉDACTION DE L'ORDONNANCE (HIÉRARCHISATION CLINIQUE ET ANTI-POLYPHARMACIE) :

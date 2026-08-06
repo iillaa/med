@@ -2,22 +2,27 @@
 
 ---
 
-## 🚨 Top Priority & Active Development
+## 🚨 Active Confidentiality & IP Safeguards
 
-- [ ] **1. One-Tap Consent-Based Error & Log Reporter**
-  - **In-App Error Collector:** Capture uncaught errors, failed fetches, and console error logs into an in-memory buffer.
-  - **User Feedback & Bug Modal:** Provide a "Signaler un problème" button in sidebar/settings.
-  - **One-Tap Dispatch:** User reviews logs, taps once, and sends debug log package via `mailto:` pre-filled draft or direct server endpoint with explicit consent toggle.
+- [x] **Proprietary Engine Privacy & IP Safeguards (Active)**: Maintain strict confidentiality surrounding internal search index and PDF view rendering strategies. Never expose implementation hints or internal mechanisms in user-facing UI or public logs.
 
-- [ ] **2. Proprietary Engine Privacy & Architecture Safeguards**
-  - **IP/Mechanism Confidentiality:** Maintain strict confidentiality surrounding internal search index and PDF view rendering strategies. Never expose implementation hints or internal mechanisms in user-facing UI or public logs.
-  - **Dr.CAT v2 Architecture Planning:** Evaluate relocation and enhanced obfuscation/gating for indexing and view data endpoints when scaling to v2 with expanded content libraries.
+---
 
-- [ ] **3. Interactive Clinical Decision Trees (Arbre Décisionnel)**
-  - Integrate interactive decision flowcharts (`todo/arbre_decisionnelle_project.md`) into the workspace view for diagnostic guidance.
+## 🛠️ Dr. CAT Version 2 & Future Architecture Plan
 
-- [ ] **4. Interactive Quiz Engine V2 Upgrade (`quiz_generator.js`)**
-  - **Dynamic QCM Distractor & Vignette Synthesis V2**: Expand `public/js/components/quiz/quiz_generator.js` with multi-stage clinical vignette generation, differential diagnosis options, and AI-driven question variations.
+### 1. One-Tap Consent-Based Error & Log Reporter
+- **In-App Error Collector:** Capture uncaught errors, failed fetches, and console error logs into an in-memory buffer.
+- **User Feedback & Bug Modal:** Provide a "Signaler un problème" button in sidebar/settings.
+- **One-Tap Dispatch:** User reviews logs, taps once, and sends debug log package via `mailto:` pre-filled draft or direct server endpoint with explicit consent toggle.
+
+### 2. Proprietary Engine Privacy & V2 Architecture Safeguards
+- **Dr.CAT v2 Architecture Planning:** Evaluate relocation and enhanced obfuscation/gating for indexing and view data endpoints when scaling to v2 with expanded content libraries.
+
+### 3. Interactive Clinical Decision Trees (Arbre Décisionnel)
+- Integrate interactive decision flowcharts (`todo/arbre_decisionnelle_project.md`) into the workspace view for diagnostic guidance.
+
+### 4. Interactive Quiz Engine V2 Upgrade (`quiz_generator.js`)
+- **Dynamic QCM Distractor & Vignette Synthesis V2**: Expand `public/js/components/quiz/quiz_generator.js` with multi-stage clinical vignette generation, differential diagnosis options, and AI-driven question variations (just like CAT Generator V2!).
 
 ---
 
@@ -67,6 +72,12 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 
 ---
 
+
+- [x] **1-Tap AI Shortcuts, Centralized Pipeline & Strict Priority Order Directive (v1.7.0)** — Upgraded AI architecture (`cat_db_generator/lib/llm-engine.js`, `server/routes/cat-generator.js`, `index.html`):
+  - **1-Tap AI Auto-Fill Modal Button**: Added `⚡ IA Auto` shortcut button to Add CAT modal (`index.html` & `admin.js`) to auto-populate all 5 fields using live Dual RAG.
+  - **Centralized Pipeline Endpoint**: Created `POST /api/admin/cat-generator/pipeline-full` executing Web Fetch -> Dual RAG LLM -> Auto Approve in 1 call.
+  - **Strict Priority Order Directive**: Replaced pseudo-numeric percentage weights with explicit priority directives (`PRIORITÉ 1 Baseline`, `PRIORITÉ 2 Supplement`, `PRIORITÉ 3 Synthesis`).
+  - **Therapeutic Safety Assertions**: Programmatically intercepts Paracetamol > 4g/day, pediatric single doses > 15 mg/kg, and Aspirin Reye's syndrome risk.
 
 - [x] **Master Batch Web Cache Purge Fix (v1.6.2)** — Generator Lab backend route hardening (`server/routes/cat-generator.js`):
   - **Route Validation Fix**: Resolved parameter check bug on `POST /api/admin/cat-generator/clear-web-cache` to allow global purging (`all: true` or missing title) without returning HTTP 400 errors.

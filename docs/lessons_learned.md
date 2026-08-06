@@ -214,4 +214,9 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Root Cause**: The client sends a numeric timestamp in milliseconds (`?since=1785700000000`). When CATs were saved or promoted in the database, `updatedAt` was formatted as an ISO Date String (`"2026-08-03T23:17:08.210Z"`). In JavaScript array filtering, comparing a string directly to a number (`"2026-08-03T23:17:08.210Z" > 1785700000000`) converts the string to `NaN`. Since `NaN > number` evaluates to `false`, the server silently filtered out all updated records.
 * **Fix (`server/routes/cats.js`)**: All timestamp filters in API routes MUST explicitly parse date fields using `typeof val === 'number' ? val : new Date(val).getTime()` to prevent silent type coercion failures between ISO strings and epoch numbers.
 
+### 41. Replacing Pseudo-Numeric Prompt Weighting Placebos with Strict Priority Directives
+* **Problem**: Early system prompts used pseudo-numeric percentage weights (e.g. `50% PDF Index`, `30% Web RAG`, `20% AI reasoning`). LLM Transformer models do not perform internal floating-point arithmetic on prompt text. Pseudo-numeric weights can distract attention heads by introducing artificial math tokens.
+* **Solution**: Replace pseudo-numeric percentages with an explicit, unambiguous **Strict Priority Order Directive** (`PRIORITÉ 1 (Baseline Locale)`, `PRIORITÉ 2 (Enrichissement Web)`, `PRIORITÉ 3 (Synthèse IA)`). This maintains 100% of the local Algerian drug priority (*Ascabiol*, *Spasfon*, *Smecta*) and doctor-grade Web RAG enrichment while delivering a clean, placebo-free prompt.
+
+
 

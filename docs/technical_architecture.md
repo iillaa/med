@@ -201,13 +201,13 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 
 Le moteur de génération et d'édition d'ordonnances intègre une logique décisionnelle clinique de niveau médical (Doctor-Grade) associée à une matrice de pondération contextuelle locale à 3 niveaux (3-Tier Source Weighting Matrix).
 
-### 1. Matrice de Pondération des Sources de la Fiche de Synthèse (Source Weighting Matrix)
+### 1. Hiérarchie Stricte des Sources de Connaissances (Strict Priority Order Directive)
 
-| Niveau (Tier) | Source de Connaissances | Coefficient de Pondération | Rôle & Priorité Clinique |
-|---|---|---|---|
-| **Tier 1 (50%)** | **Offline PDF Index** (Originaux Locaux Algérie/Maghreb) | **50% (Priorité Absolue)** | Détermine les molécules médicamenteuses, les posologies locales et les habitudes de prescription (ex: Ascabiol/Benzoate de benzyle, Spasfon, Tiorfan, Smecta). |
-| **Tier 2 (30%)** | **Web RAG** (MedG, MSD Manuals, Wiki FR) | **30% (Consolidation)** | Détermine la structuration rigoureuse en 5 étapes cliniques, le bilan paraclinique et l'exhaustivité des Drapeaux Rouges (*Red Flags*). |
-| **Tier 3 (20%)** | **Connaissances LLM Gemini** | **20% (Formatage & Syntaxe)** | Assure la rigueur de rédaction médicale française, l'absence de répétitions et le respect du schéma JSON. |
+| Niveau (Tier) | Source de Connaissances | Rôle & Priorité Clinique |
+|---|---|---|
+| **Priorité 1 (Baseline)** | **Offline PDF Index** (Originaux Locaux Algérie/Maghreb) | **Priorité Absolue** : Détermine les molécules médicamenteuses, les posologies locales et les habitudes de prescription (ex: Ascabiol/Benzoate de benzyle, Spasfon, Tiorfan, Smecta). |
+| **Priorité 2 (Supplement)** | **Web RAG** (StatPearls NCBI, MSD Manuals Pro, MedG) | **Consolidation & Sécurité** : Détermine la structuration rigoureuse en 5 étapes cliniques, le bilan paraclinique et l'exhaustivité des Drapeaux Rouges (*Red Flags*). |
+| **Priorité 3 (Synthesis)** | **Moteur de Raisonnement Gemini** | **Formatage & Syntaxe** : Assure la rigueur de rédaction médicale française, l'absence de répétitions et le respect du schéma JSON. |
 
 ### 2. Structure de Prescription à 3 Niveaux (3 Tiers)
 Les ordonnances générées et affichées dans les fiches CAT suivent une hiérarchisation clinique stricte :
@@ -226,6 +226,33 @@ Pour s'adapter à la réalité du terrain et de la pharmacopée locale, le moteu
 - **Balises d'Alerte d'Exclusion** : Insertion automatique d'avertissements explicites `⚠️ ALTERNATIVE : Ne pas associer le traitement topique et oral en première intention sauf forme grave/croûteuse`.
 - **Vérification de Redondance** : Détection des doublons de classe thérapeutique (ex. coprescription de deux AINS ou deux antispasmodiques).
 - **Avertissements de Posologie** : Signalement visuel sur les durées de traitement prolongées et ajustements pédiatriques/gériatriques.
+
+---
+
+## 🤖 Moteur Dual RAG V2, Découverte Dynamique & Pipeline 1-Tap (v1.6.0 – v1.7.0)
+
+Dr. CAT intègre une architecture **Dual RAG (Retrieval-Augmented Generation)** couplée à un moteur de découverte dynamique de modèles IA et de contrôle de sécurité clinique algorithmique.
+
+### 1. Qu'est-ce que le RAG & le Dual RAG ?
+- **RAG (Génération Amplifiée par Récupération)** : Au lieu de compter uniquement sur la mémoire pré-entraînée de l'IA (qui peut être obsolète ou halluciner), le système extrait d'abord des documents médicaux réels et les transmet à l'IA avant la rédaction.
+- **Dual RAG** : Interroge simultanément **DEUX canaux de connaissances externes distincts** :
+  1. **Canal 1 — Offline RAG (PDF Index Local)** : Interroge `cat_db_generator/pdf_index.json` (77 ouvrages et consensus médicaux algériens/maghrébins) pour garantir la disponibilité des spécialités locales (*Ascabiol*, *Spasfon*, *Smecta*, *Tiorfan*) et les habitudes de prescription régionales.
+  2. **Canal 2 — Online RAG (Doctor Web)** : Interroge en direct des bases médicales professionnelles (StatPearls NCBI open REST API, Manuel MSD Professionnel via Jina MD Reader, MedG) pour intégrer les dernières recommandations internationales 2026.
+
+### 2. Moteur de Découverte Dynamique de Modèles & Extended Thinking (`llm-engine.js`)
+- **Découverte Dynamique (`discoverDynamicModels`)** : Interroge l'API Google AI Studio (`GET /v1beta/models`) au démarrage pour lister les modèles actifs et les classer par version sémantique (`3.6` > `3.5` > `3.1` > `2.5`). Adopte automatiquement les futurs modèles (`gemini-3.7`, `gemini-4.0`) dès leur sortie sans modification de code.
+- **Budget de Raisonnement Étendu (`thinkingConfig`)** : Injecte un budget de 2048 tokens de réflexion clinique approfondie pour valider les diagnostics différentiels et les calculs de posologie pédiatrique.
+- **Gestion des Limites de Débit HTTP 429** : Pause automatiquement 4 secondes et réessaie le modèle principal lors des générations par lots.
+
+### 3. Assertions Algorithmiques de Sécurité Thérapeutique (`medical-validator.js`)
+Garde-fous programmatiques qui vérifient et rejettent les posologies dangereuses avant l'écriture sur disque :
+- **Plafond Quotidien Paracétamol Adulte** : Rejet automatique des prescriptions dépassant `4g/jour` (ex: 2g 4x/j = 8g/j).
+- **Plafond Posologique Pédiatrique** : Rejet des doses uniques pédiatriques dépassant `15 mg/kg`.
+- **Alerte Syndrome de Reye** : Contre-indication stricte de l'Aspirine dans les infections virales pédiatriques (grippe, varicelle).
+
+### 4. Pipeline Centralisé 1-Tap (`POST /api/admin/cat-generator/pipeline-full`)
+Exécute la chaîne complète **Recherche Web Step 1 ➔ Synthèse IA Dual RAG Step 2 ➔ Approbation Auto Step 3** en un seul appel API.
+- Accessible via le bouton **`⚡ IA Auto`** dans le modal d'ajout de CAT (`index.html`) et les boutons **`⚡ 1-Tap Auto`** dans le Generator Lab UI (`admin/cat_generator_lab.html`).
 
 ---
 

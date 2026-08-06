@@ -377,60 +377,64 @@ async function fetchAndCacheWebSources(title, options = {}) {
   const smartKeywords = extractSmartKeywords(title, options.searchKeywords);
   console.log(`🌐 [Step 1 Web Research] ${existingCache.length > 0 ? `Top-up mode (${existingCache.length}/${targetMax} cached)` : 'Fetching live sources'} for "${title}" using ${smartKeywords.length} keyword(s)...`);
 
-  for (const kw of smartKeywords) {
-    if (fetchedSources.length >= targetMax) break;
+  try {
+    for (const kw of smartKeywords) {
+      if (fetchedSources.length >= targetMax) break;
 
-    // 1. Doctor-Grade: StatPearls / PubMed PMC Open REST API (NCBI)
-    console.log(`   - Querying StatPearls / PubMed PMC (NCBI) for "${kw}"...`);
-    const ncbiData = await fetchStatPearlsMedical(kw, title);
-    if (ncbiData && !fetchedKeys.has(ncbiData.sourceId)) {
-      fetchedKeys.add(ncbiData.sourceId);
-      fetchedSources.push(ncbiData);
-      const fileName = `${ncbiData.sourceId}_${Date.now()}.json`;
-      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(ncbiData, null, 2), 'utf8');
-      console.log(`     ✅ [Doctor-Grade] Cached: ${ncbiData.sourceName}`);
-    }
+      // 1. Doctor-Grade: StatPearls / PubMed PMC Open REST API (NCBI)
+      console.log(`   - Querying StatPearls / PubMed PMC (NCBI) for "${kw}"...`);
+      const ncbiData = await fetchStatPearlsMedical(kw, title).catch(() => null);
+      if (ncbiData && !fetchedKeys.has(ncbiData.sourceId)) {
+        fetchedKeys.add(ncbiData.sourceId);
+        fetchedSources.push(ncbiData);
+        const fileName = `${ncbiData.sourceId}_${Date.now()}.json`;
+        fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(ncbiData, null, 2), 'utf8');
+        console.log(`     ✅ [Doctor-Grade] Cached: ${ncbiData.sourceName}`);
+      }
 
-    if (fetchedSources.length >= targetMax) break;
+      if (fetchedSources.length >= targetMax) break;
 
-    // 2. Doctor-Grade: MSD Manuals Professionnels via Jina Reader
-    console.log(`   - Querying Manuel MSD Professionnel (Jina MD) for "${kw}"...`);
-    const msdData = await fetchMSDProfessionalJina(kw);
-    if (msdData && !fetchedKeys.has(msdData.sourceId)) {
-      fetchedKeys.add(msdData.sourceId);
-      fetchedSources.push(msdData);
-      const fileName = `${msdData.sourceId}_${Date.now()}.json`;
-      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(msdData, null, 2), 'utf8');
-      console.log(`     ✅ [Doctor-Grade] Cached: ${msdData.sourceName}`);
-    }
+      // 2. Doctor-Grade: MSD Manuals Professionnels via Jina Reader
+      console.log(`   - Querying Manuel MSD Professionnel (Jina MD) for "${kw}"...`);
+      const msdData = await fetchMSDProfessionalJina(kw).catch(() => null);
+      if (msdData && !fetchedKeys.has(msdData.sourceId)) {
+        fetchedKeys.add(msdData.sourceId);
+        fetchedSources.push(msdData);
+        const fileName = `${msdData.sourceId}_${Date.now()}.json`;
+        fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(msdData, null, 2), 'utf8');
+        console.log(`     ✅ [Doctor-Grade] Cached: ${msdData.sourceName}`);
+      }
 
-    if (fetchedSources.length >= targetMax) break;
+      if (fetchedSources.length >= targetMax) break;
 
-    // 3. MedG French Clinical Consensus Feed
-    console.log(`   - Querying MedG Consensus for "${kw}"...`);
-    const medgData = await fetchMedGConsensus(kw);
-    if (medgData && !fetchedKeys.has(medgData.sourceId)) {
-      fetchedKeys.add(medgData.sourceId);
-      fetchedSources.push(medgData);
-      const fileName = `${medgData.sourceId}_${Date.now()}.json`;
-      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(medgData, null, 2), 'utf8');
-      console.log(`     ✅ Cached: ${medgData.sourceName}`);
-    }
+      // 3. MedG French Clinical Consensus Feed
+      console.log(`   - Querying MedG Consensus for "${kw}"...`);
+      const medgData = await fetchMedGConsensus(kw).catch(() => null);
+      if (medgData && !fetchedKeys.has(medgData.sourceId)) {
+        fetchedKeys.add(medgData.sourceId);
+        fetchedSources.push(medgData);
+        const fileName = `${medgData.sourceId}_${Date.now()}.json`;
+        fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(medgData, null, 2), 'utf8');
+        console.log(`     ✅ Cached: ${medgData.sourceName}`);
+      }
 
-    if (fetchedSources.length >= targetMax) break;
+      if (fetchedSources.length >= targetMax) break;
 
-    // 4. Wikipedia Medical REST API (French Fallback)
-    if (!fetchedKeys.has(`wikipedia_${kw}`)) {
-      console.log(`   - Querying Wikipedia for "${kw}"...`);
-      const wikiData = await fetchWikipediaMedical(kw, title);
-      if (wikiData && !fetchedKeys.has(wikiData.sourceId)) {
-        fetchedKeys.add(wikiData.sourceId);
-        fetchedSources.push(wikiData);
-        const fileName = `${wikiData.sourceId}_${Date.now()}.json`;
-        fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(wikiData, null, 2), 'utf8');
-        console.log(`     ✅ Cached: ${wikiData.sourceName}`);
+      // 4. Wikipedia Medical REST API (French Fallback)
+      if (!fetchedKeys.has(`wikipedia_${kw}`)) {
+        console.log(`   - Querying Wikipedia for "${kw}"...`);
+        const wikiData = await fetchWikipediaMedical(kw, title).catch(() => null);
+        if (wikiData && !fetchedKeys.has(wikiData.sourceId)) {
+          fetchedKeys.add(wikiData.sourceId);
+          fetchedSources.push(wikiData);
+          const fileName = `${wikiData.sourceId}_${Date.now()}.json`;
+          fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(wikiData, null, 2), 'utf8');
+          console.log(`     ✅ Cached: ${wikiData.sourceName}`);
+        }
       }
     }
+  } catch (err) {
+    console.warn(`🌐 [Web RAG Offline] Web research network fetch encountered an error (${err.message}). Falling back 100% to local PDF index.`);
   }
 
   return fetchedSources;

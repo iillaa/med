@@ -482,6 +482,58 @@ function registerCatGeneratorRoutes(app) {
     }
   });
 
+  // POST /api/admin/cat-generator/pipeline-full (1-Tap All-in-One: Web Fetch -> LLM Synthesis -> Auto Approve)
+  app.post('/api/admin/cat-generator/pipeline-full', async (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+
+    const { fetchAndCacheWebSources } = require('../../cat_db_generator/lib/web-fetcher');
+    const { generateCATWithLLM } = require('../../cat_db_generator/lib/llm-engine');
+    const { title, category, forceRefetch, autoApprove } = req.body || {};
+
+    if (!title) {
+      return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
+    }
+
+    try {
+      console.log(`⚡ [1-Tap Full Pipeline] Running 1-Tap Dual RAG pipeline for: "${title}"...`);
+
+      // 1. Step 1: Web Fetch
+      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 6 }).catch(() => []);
+
+      // 2. Step 2: Dual RAG LLM Synthesis
+      const genResult = await generateCATWithLLM(title, category || 'Médecine Générale');
+      const cat = genResult.cat;
+
+      // 3. Step 3: Auto-Approve if requested
+      if (autoApprove) {
+        if (fs.existsSync(V2_DB_PATH)) {
+          const v2Db = JSON.parse(fs.readFileSync(V2_DB_PATH, 'utf8'));
+          const idx = v2Db.findIndex(c => c.id === cat.id || c.title.toLowerCase() === cat.title.toLowerCase());
+          if (idx !== -1) v2Db[idx] = cat;
+          else v2Db.push(cat);
+          fs.writeFileSync(V2_DB_PATH, JSON.stringify(v2Db, null, 2), 'utf8');
+        }
+
+        const prodDb = JSON.parse(fs.readFileSync(PROD_DB_PATH, 'utf8'));
+        const pIdx = prodDb.findIndex(c => c.id === cat.id || c.title.toLowerCase() === cat.title.toLowerCase());
+        if (pIdx !== -1) prodDb[pIdx] = cat;
+        else prodDb.push(cat);
+        fs.writeFileSync(PROD_DB_PATH, JSON.stringify(prodDb, null, 2), 'utf8');
+      }
+
+      res.json({
+        success: true,
+        message: `Fiche "${title}" générée avec succès via l'IA Dual RAG.`,
+        cat: cat,
+        sourcesCount: sources.length,
+        metrics: genResult.metrics
+      });
+    } catch (err) {
+      console.error('[API 1-Tap Pipeline Error]', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // POST /api/admin/cat-generator/clear-web-cache (Purge web cache for a single title OR all titles)
   app.post('/api/admin/cat-generator/clear-web-cache', (req, res) => {
     if (!verifyAdminAccess(req, res)) return;

@@ -133,6 +133,41 @@ function validateCAT(cat) {
     if (isPediatric && !PEDIATRIC_DOSAGE_REGEX.test(`${cat.summary} ${cat.ordonnance}`)) {
       warnings.push('Pediatric CAT detected: Ensure weight-based dosing (mg/kg or dose-poids) is explicitly provided.');
     }
+
+    // --- ALGORITHMIC THERAPEUTIC DOSAGE & SAFETY ASSERTIONS ---
+    const fullTextLower = `${cat.summary} ${cat.ordonnance}`.toLowerCase();
+
+    // 7a. Paracetamol Daily Ceiling Assertion (Max 4g/day = 4000mg/day for adults)
+    if (/parac[eé]tamol/i.test(fullTextLower)) {
+      const paracetamolGramMatch = fullTextLower.match(/parac[eé]tamol\s*(\d+(?:\.\d+)?)\s*g/i);
+      if (paracetamolGramMatch) {
+        const grams = parseFloat(paracetamolGramMatch[1]);
+        if (grams > 4) {
+          errors.push(`Therapeutic Safety Assertion Error: Single/Daily Paracetamol dose (${grams}g) exceeds maximum adult daily ceiling of 4g/day.`);
+        }
+      }
+
+      // Catch unsafe frequency patterns like "2g 4x/j" or "2g toutes les 4h"
+      if (/2\s*g\s*(?:4x|4\s*fois|toutes\s*les\s*4\s*h)/i.test(fullTextLower)) {
+        errors.push('Therapeutic Safety Assertion Error: Paracetamol 2g 4x/day (8g/day) exceeds maximum daily limit of 4g/day.');
+      }
+
+      // Check pediatric paracetamol mg/kg limits if single dose > 15 mg/kg or daily > 60 mg/kg/j
+      const mgKgMatch = fullTextLower.match(/parac[eé]tamol[^\.\n]*?(\d+)\s*mg\/kg/i);
+      if (mgKgMatch) {
+        const doseMgKg = parseInt(mgKgMatch[1], 10);
+        if (doseMgKg > 20 && !/jour|24h/i.test(mgKgMatch[0])) {
+          errors.push(`Therapeutic Safety Assertion Error: Single pediatric paracetamol dose (${doseMgKg} mg/kg) exceeds recommended 15 mg/kg single dose limit.`);
+        }
+      }
+    }
+
+    // 7b. Aspirin Pediatric Viral Infection Contraindication Assertion (Reye's Syndrome Risk)
+    if (isPediatric && /aspirine|acide\s+ac[eé]tylsalicylique/i.test(fullTextLower)) {
+      if (/varicelle|grippe|fi[eè]vre\s+virable|syndrome\s+grippal/i.test(fullTextLower)) {
+        errors.push('Therapeutic Safety Assertion Error: Aspirin is contraindicated in pediatric viral infections (Reye\'s syndrome risk). Use Paracetamol as 1st line.');
+      }
+    }
   }
 
   // 8. PDF Keywords Check

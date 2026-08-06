@@ -1,17 +1,18 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.6.2",
+  "latestVersion": "1.7.0",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.6.2 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.7.0 est disponible.",
   "releaseNotes": [
-    "Correction du bouton d'effacement global du cache Web (Master Batch Clear Cache)",
-    "Support de la suppression globale du dossier web_cache sans paramètre de titre obligatoire",
-    "Stabilité renforcée du Generator Lab V2"
+    "Bouton raccourci ⚡ IA Auto dans le modal d'ajout de CAT et boutons ⚡ 1-Tap Auto dans le Generator Lab",
+    "Endpoint pipeline centralisé POST /api/admin/cat-generator/pipeline-full (Recherche Web + Synthèse IA Dual RAG + Approbation Auto)",
+    "Directives de priorité stricte des sources (Strict Priority Order Directive) éliminant les artéfacts de calculs de pourcentages",
+    "Garde-fous algorithmiques de sécurité thérapeutique (Plafond Paracétamol 4g/j, posologies pédiatriques et contre-indication Aspirine Reye)"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-08-06T12:15:40.000Z"
+  "lastUpdated": "2026-08-06T13:46:25.000Z"
 }

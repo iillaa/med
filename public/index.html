@@ -355,8 +355,8 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-version" content="1.6.2">
-  <meta name="app-build-version" content="2026.08.06.13.16">
+  <meta name="app-version" content="1.7.0">
+  <meta name="app-build-version" content="2026.08.06.14.58">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -396,22 +396,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608061316" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608061316"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608061458" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608061458"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608061316" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608061316"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608061458" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608061458"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608061316" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608061316" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608061316">
+  <link rel="stylesheet" href="style.css?v=2608061458" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608061458" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608061458">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608061316">
-    <link rel="stylesheet" href="css/utilities.css?v=2608061316">
+    <link rel="stylesheet" href="style.css?v=2608061458">
+    <link rel="stylesheet" href="css/utilities.css?v=2608061458">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608061316"></script>
+  <script type="module" src="js/version-checker.js?v=2608061458"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1250,7 +1250,12 @@ body {
         <form id="add-cat-form" onsubmit="return false;">
           <div class="form-group">
             <label for="new-cat-title">Titre de la CAT *</label>
-            <input type="text" id="new-cat-title" required placeholder="Ex: CAT devant colique néphrétique...">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="new-cat-title" required placeholder="Ex: CAT devant colique néphrétique..." style="flex: 1;">
+              <button type="button" id="btn-ai-auto-fill" class="action-btn" title="Générer automatiquement avec l'IA Dual RAG" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; border: none; padding: 10px 16px; border-radius: var(--radius-sm, 6px); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 2px 8px rgba(6,182,212,0.3); transition: all 0.2s ease;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> ⚡ IA Auto
+              </button>
+            </div>
           </div>
           <div class="form-group">
             <label for="new-cat-category">Spécialité / Catégorie *</label>
@@ -1359,7 +1364,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-AR6O6TFO.js"></script>
+  <script type="module" src="dist/app-WYJK5QIU.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
