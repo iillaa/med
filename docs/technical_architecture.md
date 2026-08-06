@@ -256,6 +256,29 @@ Exécute la chaîne complète **Recherche Web Step 1 ➔ Synthèse IA Dual RAG S
 
 ---
 
+## 🔒 Architecture de Sécurité à Double Porte (Double-Door Security v1.7.0)
+
+Les outils d'administration, le Generator Lab V2 et les endpoints d'importation/génération sont protégés par un protocole de sécurité à double verrouillage strict :
+
+### 1. Les Deux Portes de Protection
+$$\text{Accès Autorisé} = \text{Connexion Localhost (Porte 1)} \quad \mathbf{ET} \quad \text{Jeton Admin Valide (Porte 2)}$$
+
+| Type de Requête | Porte 1 (Localhost) | Porte 2 (Mot de passe Admin) | Résultat Serveur |
+|---|---|---|---|
+| **Attaque Distante (Ngrok/Tunnel/Wi-Fi)** | ❌ Non | ❌ Non | 🛑 **REJETÉ (HTTP 403)** |
+| **Attaque Distante (Ngrok/Tunnel/Wi-Fi)** | ❌ Non | 🔑 Présent | 🛑 **REJETÉ (HTTP 403)** |
+| **Utilisateur Local Non Authentifié** | ✅ Oui | ❌ Non | 🛑 **REJETÉ (HTTP 403)** |
+| **Administrateur Local Authentifié** | ✅ Oui | 🔑 Présent | ✅ **AUTORISÉ** |
+
+- **Porte 1 (Périmètre Réseau)** : Les requêtes distantes (via tunnel public, Ngrok ou IP distante) sont rejetées immédiatement avec un code `HTTP 403` **avant même l'évaluation du mot de passe**. Les attaquants distants ne disposent d'aucune surface d'attaque ni d'opportunité de brute-force.
+- **Porte 2 (Authentification Fortifiée)** : La vérification du jeton de session administrateur (`checkIsAdmin`) est obligatoire sur 100% des endpoints sensibles (`/api/admin/cat-generator/*`, `/api/cats/bulk-import`, `/api/pdfs/reindex`).
+
+### 2. Sécurisation de l'Interface Utilisateur (UI Hardening)
+- **Bouton `⚡ IA Auto`** : Masqué par défaut (`display: none`) dans l'HTML brut de `index.html`. Injecté dynamiquement uniquement si `state.isAdmin === true`.
+- **Verrouillage du Generator Lab (`cat_generator_lab.html`)** : Transmission systématique du header `x-admin-token`. Affichage automatique d'un écran de verrouillage 🔐 **Connexion Admin Requise** avec formulaire d'authentification en cas d'accès non autorisé.
+
+---
+
 ## 📶 Offline-First Capabilities & PWA
 
 * **App Mode at Startup**: `main.js` calls `api.getAppMode()` which checks host, protocol, and Capacitor UA to assign the correct data routing strategy before any network call is made.

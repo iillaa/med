@@ -218,5 +218,10 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Early system prompts used pseudo-numeric percentage weights (e.g. `50% PDF Index`, `30% Web RAG`, `20% AI reasoning`). LLM Transformer models do not perform internal floating-point arithmetic on prompt text. Pseudo-numeric weights can distract attention heads by introducing artificial math tokens.
 * **Solution**: Replace pseudo-numeric percentages with an explicit, unambiguous **Strict Priority Order Directive** (`PRIORITÉ 1 (Baseline Locale)`, `PRIORITÉ 2 (Enrichissement Web)`, `PRIORITÉ 3 (Synthèse IA)`). This maintains 100% of the local Algerian drug priority (*Ascabiol*, *Spasfon*, *Smecta*) and doctor-grade Web RAG enrichment while delivering a clean, placebo-free prompt.
 
+### 42. Strict Avoidance of Short-Circuiting `&&` in Localhost Guard Middleware
+* **Problem**: Writing guard expressions with `&&` like `if (!isLocalhostConnection(req) && !checkIsAdmin(req, activeTokens))` evaluated `!isLocalhostConnection(req)` as `false` for any local loopback connection. This short-circuited the `&&` operator and accidentally bypassed admin password verification for unauthenticated local users.
+* **Solution**: Always enforce double-door boolean OR logic (`if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens))`). This asserts that a request MUST originate from localhost AND possess a valid authenticated admin session token. Remote requests are rejected immediately before password evaluation, and unauthenticated local requests are blocked with HTTP 403 Forbidden.
+
+
 
 
