@@ -482,18 +482,19 @@ function registerCatGeneratorRoutes(app) {
     }
   });
 
-  // POST /api/admin/cat-generator/clear-web-cache (Purge web cache for a title)
+  // POST /api/admin/cat-generator/clear-web-cache (Purge web cache for a single title OR all titles)
   app.post('/api/admin/cat-generator/clear-web-cache', (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
 
-    const { clearWebCache } = require('../../cat_db_generator/lib/web-fetcher');
-    const { title } = req.body || {};
-
-    if (!title) {
-      return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
-    }
+    const { clearWebCache, clearAllWebCache } = require('../../cat_db_generator/lib/web-fetcher');
+    const { title, all } = req.body || {};
 
     try {
+      if (all || !title) {
+        const result = clearAllWebCache();
+        return res.json(result);
+      }
+
       const result = clearWebCache(title);
       res.json(result);
     } catch (err) {
