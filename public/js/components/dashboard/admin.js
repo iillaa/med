@@ -60,9 +60,10 @@ export function initAdminTabListeners(onSuggestionHandled) {
     activeTabBtn.style.backgroundColor = 'rgba(6, 182, 212, 0.1)';
   }
 
-  // ⚡ 1-Tap AI Auto-Fill listener for Add CAT Modal
+  // ⚡ 1-Tap AI Auto-Fill listener for Add CAT Modal (Admin Only)
   const aiAutoFillBtn = document.getElementById('btn-ai-auto-fill');
   if (aiAutoFillBtn) {
+    aiAutoFillBtn.style.display = state.isAdmin ? 'inline-flex' : 'none';
     aiAutoFillBtn.addEventListener('click', async () => {
       const titleInput = document.getElementById('new-cat-title');
       const title = titleInput ? titleInput.value.trim() : '';

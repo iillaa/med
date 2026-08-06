@@ -13,10 +13,10 @@ const PROD_DB_PATH = path.join(__dirname, '..', '..', 'cats_db.json');
 const V2_DB_PATH = path.join(__dirname, '..', '..', 'cat_db_generator', 'cats_db_v2_generated.json');
 
 function registerCatGeneratorRoutes(app) {
-  // Guard helper: Require localhost OR valid admin token
+  // Guard helper: Strictly require authenticated admin session token
   function verifyAdminAccess(req, res) {
-    if (!isLocalhostConnection(req) && !checkIsAdmin(req, cache.activeTokens)) {
-      res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur local peut utiliser le laboratoire V2.' });
+    if (!checkIsAdmin(req, cache.activeTokens)) {
+      res.status(403).json({ error: 'Accès interdit. Vous devez être connecté en tant qu\'administrateur pour utiliser les outils de génération V2.' });
       return false;
     }
     return true;

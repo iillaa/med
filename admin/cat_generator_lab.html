@@ -463,9 +463,70 @@
   <script>
     let appData = { v1: [], v2: [], validations: [] };
 
+    function getAdminHeaders() {
+      const token = localStorage.getItem('dr_cat_admin_token') || '';
+      return {
+        'Content-Type': 'application/json',
+        'x-admin-token': token
+      };
+    }
+
+    function showAuthOverlay() {
+      let overlay = document.getElementById('admin-auth-lock-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'admin-auth-lock-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.95);backdrop-filter:blur(10px);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+        overlay.innerHTML = `
+          <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:30px;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+            <div style="font-size:40px;margin-bottom:15px;">🔐</div>
+            <h2 style="color:#f8fafc;font-size:20px;margin-bottom:10px;">Connexion Admin Requise</h2>
+            <p style="color:#94a3b8;font-size:13px;margin-bottom:20px;">Veuillez saisir votre mot de passe administrateur pour accéder au Generator Lab V2.</p>
+            <input type="password" id="lab-auth-password" placeholder="Mot de passe admin..." style="width:100%;padding:10px 14px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#fff;font-size:14px;margin-bottom:15px;box-sizing:border-box;">
+            <button onclick="submitLabLogin()" style="width:100%;padding:10px;background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff;border:none;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;">Se Connecter</button>
+            <div id="lab-auth-error" style="color:#ef4444;font-size:12px;margin-top:12px;display:none;"></div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+      }
+      overlay.style.display = 'flex';
+    }
+
+    async function submitLabLogin() {
+      const pwdInput = document.getElementById('lab-auth-password');
+      const errDiv = document.getElementById('lab-auth-error');
+      const pwd = pwdInput ? pwdInput.value : '';
+      if (!pwd) return;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwd })
+        });
+        const data = await res.json();
+        if (res.ok && data.token) {
+          localStorage.setItem('dr_cat_admin_token', data.token);
+          const overlay = document.getElementById('admin-auth-lock-overlay');
+          if (overlay) overlay.style.display = 'none';
+          await loadData();
+        } else {
+          errDiv.textContent = data.error || 'Mot de passe incorrect.';
+          errDiv.style.display = 'block';
+        }
+      } catch (e) {
+        errDiv.textContent = 'Erreur réseau lors de la connexion.';
+        errDiv.style.display = 'block';
+      }
+    }
+
     async function loadData() {
       try {
-        const res = await fetch('/api/admin/cat-generator/data');
+        const res = await fetch('/api/admin/cat-generator/data', { headers: getAdminHeaders() });
+        if (res.status === 403 || res.status === 401) {
+          showAuthOverlay();
+          return;
+        }
         if (!res.ok) throw new Error('API request failed');
         appData = await res.json();
         
@@ -480,7 +541,7 @@
         renderTable();
       } catch (err) {
         console.error(err);
-        alert('Erreur lors du chargement des données V2.');
+        showAuthOverlay();
       }
     }
 
@@ -582,7 +643,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/pipeline-full', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ title, category, forceRefetch: false, autoApprove: true })
         });
         const data = await res.json();
@@ -616,7 +677,7 @@
         try {
           await fetch('/api/admin/cat-generator/pipeline-full', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAdminHeaders(),
             body: JSON.stringify({ title: cat.title, category: cat.category, autoApprove: true })
           });
         } catch (e) {
@@ -639,7 +700,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/fetch-web', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ title, forceRefetch })
         });
         const data = await res.json();
@@ -658,7 +719,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/clear-web-cache', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ title })
         });
         const data = await res.json();
@@ -680,7 +741,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/batch-web', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ forceRefetch })
         });
         const data = await res.json();
@@ -699,7 +760,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/clear-web-cache', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ all: true })
         });
         const data = await res.json();
@@ -796,7 +857,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ id, title, category, search_keywords, summary, red_flags, ordonnance })
         });
         const data = await res.json();
@@ -822,7 +883,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/single', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ title, category })
         });
         const data = await res.json();
@@ -841,7 +902,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/delete', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ id })
         });
         const data = await res.json();
@@ -866,7 +927,7 @@
       try {
         const res = await fetch('/api/admin/cat-generator/promote-single', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify({ cat })
         });
         const data = await res.json();
@@ -883,7 +944,10 @@
       if (!confirm(`Attention: Voulez-vous remplacer TOUTE la base de production (cats_db.json) par l'ensemble des ${appData.v2.length} fiches V2 ?`)) return;
 
       try {
-        const res = await fetch('/api/admin/cat-generator/promote', { method: 'POST' });
+        const res = await fetch('/api/admin/cat-generator/promote', {
+          method: 'POST',
+          headers: getAdminHeaders()
+        });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Échec de promotion');
 
@@ -898,7 +962,10 @@
       if (!confirm('Lancer la recherche web Step 1 pour toutes les 55 fiches en arrière-plan ?')) return;
 
       try {
-        const res = await fetch('/api/admin/cat-generator/batch-web', { method: 'POST' });
+        const res = await fetch('/api/admin/cat-generator/batch-web', {
+          method: 'POST',
+          headers: getAdminHeaders()
+        });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la recherche web batch');
 
@@ -913,7 +980,10 @@
       if (!confirm('Lancer la régénération Batch Step 2 de toutes les 55 CATs via Gemini 3.6 Flash en arrière-plan ?')) return;
 
       try {
-        const res = await fetch('/api/admin/cat-generator/batch', { method: 'POST' });
+        const res = await fetch('/api/admin/cat-generator/batch', {
+          method: 'POST',
+          headers: getAdminHeaders()
+        });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.error || 'Échec du lancement batch');
 
@@ -932,7 +1002,9 @@
       isPolling = true;
 
       try {
-        const res = await fetch('/api/admin/cat-generator/progress');
+        const res = await fetch('/api/admin/cat-generator/progress', {
+          headers: getAdminHeaders()
+        });
         if (!res.ok) return;
         const data = await res.json();
         const p = data.progress || {};
