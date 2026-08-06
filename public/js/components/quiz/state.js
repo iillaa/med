@@ -38,7 +38,8 @@ export function updateLeitnerStats(catId, wasCorrect) {
 }
 
 export function updateQuizStreak() {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const d = new Date();
+  const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   let streakInfo = { count: 0, lastDate: "" };
   try {
     streakInfo = JSON.parse(localStorage.getItem('dr_cat_streak') || '{"count":0,"lastDate":""}') || { count: 0, lastDate: "" };

@@ -139,11 +139,22 @@ function validateCAT(cat) {
 
     // 7a. Paracetamol Daily Ceiling Assertion (Max 4g/day = 4000mg/day for adults)
     if (/parac[eé]tamol/i.test(fullTextLower)) {
-      const paracetamolGramMatch = fullTextLower.match(/parac[eé]tamol\s*(\d+(?:\.\d+)?)\s*g/i);
+      const paracetamolGramMatch = fullTextLower.match(/parac[eé]tamol[^\.\n]*?(\d+(?:[\.,]\d+)?)\s*g/i);
       if (paracetamolGramMatch) {
-        const grams = parseFloat(paracetamolGramMatch[1]);
+        const grams = parseFloat(paracetamolGramMatch[1].replace(',', '.'));
         if (grams > 4) {
           errors.push(`Therapeutic Safety Assertion Error: Single/Daily Paracetamol dose (${grams}g) exceeds maximum adult daily ceiling of 4g/day.`);
+        }
+      }
+
+      // Catch Paracetamol > 4000 mg/day (e.g. 1000 mg 5x/j = 5000 mg)
+      const mgDailyMatch = fullTextLower.match(/parac[eé]tamol[^\.\n]*?(\d+)\s*mg[^\.\n]*?(\d+)\s*(?:fois|x)\/j/i);
+      if (mgDailyMatch) {
+        const singleMg = parseInt(mgDailyMatch[1], 10);
+        const freq = parseInt(mgDailyMatch[2], 10);
+        const totalMg = singleMg * freq;
+        if (totalMg > 4000) {
+          errors.push(`Therapeutic Safety Assertion Error: Paracetamol ${singleMg}mg ${freq}x/day (${totalMg}mg/day) exceeds maximum adult limit of 4000mg/day.`);
         }
       }
 
