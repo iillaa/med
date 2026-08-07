@@ -12,7 +12,7 @@ try {
 // Phase 5.4: inline critical (above-the-fold) CSS into index.html.
 let inlineCriticalCss = () => {};
 try {
-  ({ inlineIntoIndex } = require('./build-inline-critical-css.js'));
+  const { inlineIntoIndex } = require('./build-inline-critical-css.js');
   inlineCriticalCss = inlineIntoIndex;
 } catch (_) {
   console.warn('[build] critical-css inliner not available; skipping.');

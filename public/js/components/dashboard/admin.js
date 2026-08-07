@@ -79,14 +79,18 @@ export function initAdminTabListeners(onSuggestionHandled) {
       aiAutoFillBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dual RAG...';
 
       try {
-        showToast("Recherche Web & Génération IA Dual RAG en cours...", "fa-wand-magic-sparkles", 5000);
-        const res = await fetch('/api/admin/cat-generator/pipeline-full', {
+        showToast("Recherche Web RAG en cours...", "fa-globe", 3000);
+        await fetch(api.getApiUrl('/api/admin/cat-generator/fetch-web'), {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-key': api.getAdminToken ? api.getAdminToken() : ''
-          },
-          body: JSON.stringify({ title, autoApprove: false })
+          headers: api.getHeaders(),
+          body: JSON.stringify({ title, forceRefetch: false })
+        }).catch(() => {});
+
+        showToast("Synthèse IA Dual RAG en cours...", "fa-wand-magic-sparkles", 5000);
+        const res = await fetch(api.getApiUrl('/api/admin/cat-generator/single'), {
+          method: 'POST',
+          headers: api.getHeaders(),
+          body: JSON.stringify({ title, category })
         });
 
         const data = await res.json();

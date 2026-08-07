@@ -1,18 +1,20 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.7.0",
+  "latestVersion": "1.7.1",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.7.0 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.7.1 est disponible.",
   "releaseNotes": [
-    "Bouton raccourci ⚡ IA Auto dans le modal d'ajout de CAT et boutons ⚡ 1-Tap Auto dans le Generator Lab",
-    "Endpoint pipeline centralisé POST /api/admin/cat-generator/pipeline-full (Recherche Web + Synthèse IA Dual RAG + Approbation Auto)",
-    "Directives de priorité stricte des sources (Strict Priority Order Directive) éliminant les artéfacts de calculs de pourcentages",
-    "Garde-fous algorithmiques de sécurité thérapeutique (Plafond Paracétamol 4g/j, posologies pédiatriques et contre-indication Aspirine Reye)"
+    "Sécurité: suppression de la clé API admin exposée dans le bundle client",
+    "Correction du bouton toast Actualiser (UX background sync)",
+    "network_security_config.xml pour Android 9+ (HTTPS natif)",
+    "Compactage APK: shrinkResources activé",
+    "CORS preflight: tous les headers APK inclus dans OPTIONS",
+    "Téléchargement APK: URL absolue correcte en mode Capacitor"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-08-06T13:46:25.000Z"
+  "lastUpdated": "2026-08-07T14:31:53.017Z"
 }

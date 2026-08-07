@@ -125,6 +125,20 @@
 
     const notesHtml = notes.map(n => `<li>${n}</li>`).join('');
 
+    // Resolve the direct download URL: prefer server-provided absolute URL, then
+    // build one from the active tunnel so it works in Capacitor (localhost origin).
+    const rawDirectUrl = links.directServerUrl;
+    let directDownloadUrl;
+    if (rawDirectUrl && rawDirectUrl.startsWith('http')) {
+      directDownloadUrl = rawDirectUrl;
+    } else {
+      // In Capacitor the origin is https://localhost — build absolute URL from tunnel.
+      const remoteBase = (typeof window !== 'undefined' && window.__DRCAT_REMOTE_URLS__ && window.__DRCAT_REMOTE_URLS__[0]) || '';
+      directDownloadUrl = remoteBase
+        ? `${remoteBase.replace(/\/+$/, '')}/download/drcat-latest.apk`
+        : (rawDirectUrl || '/download/drcat-latest.apk');
+    }
+
     const buttonsHtml = `
       <a href="${links.uptodownUrl || 'https://dr-cat.en.uptodown.com/android'}" target="_blank" rel="noopener" class="btn-update uptodown" data-update-link="uptodown">
         <i class="fa-solid fa-cloud-arrow-down"></i> Télécharger via Uptodown
@@ -132,7 +146,7 @@
       <a href="${links.telegramUrl || 'https://t.me/DrCatOfficialApp'}" target="_blank" rel="noopener" class="btn-update telegram" data-update-link="telegram">
         <i class="fa-brands fa-telegram"></i> Canal Telegram Officiel
       </a>
-      <a href="${links.directServerUrl || '/download/drcat-latest.apk'}" target="_blank" rel="noopener" class="btn-update direct" data-update-link="direct">
+      <a href="${directDownloadUrl}" target="_blank" rel="noopener" class="btn-update direct" data-update-link="direct">
         <i class="fa-solid fa-globe"></i> Lien Direct (Serveur Web)
       </a>
     `;
@@ -257,11 +271,18 @@
           return window.api.getApiUrl('/api/version');
         }
         const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || (window.REMOTE_SERVER_URLS && window.REMOTE_SERVER_URLS[0]) || 'https://rendition-duchess-dry.ngrok-free.dev';
+        if (!window.__DRCAT_REMOTE_URLS__) {
+          window.__DRCAT_REMOTE_URLS__ = [configuredUrl];
+        }
         const cleanUrl = String(configuredUrl).replace(/\/+$/, '');
         return `${cleanUrl}/api/version`;
       };
 
-      const versionUrl = getVersionEndpoint();
+      const rawVersionUrl = getVersionEndpoint();
+      const versionUrl = rawVersionUrl.includes('?')
+        ? `${rawVersionUrl}&ngrok-skip-browser-warning=true`
+        : `${rawVersionUrl}?ngrok-skip-browser-warning=true`;
+
       const res = await fetch(versionUrl, {
         headers: {
           'X-App-Version': CLIENT_VERSION,
@@ -313,23 +334,21 @@
         }
       }
     } catch (err) {
-      console.warn('[VersionChecker] Failed to fetch /api/version. Checking cached lock state...', err);
-
+      console.warn('[VersionChecker] Remote version check unreachable, using offline rules:', err.message || err);
       if (isNativeApk) {
         try {
           const cachedRaw = localStorage.getItem(LOCK_STORAGE_KEY);
           if (cachedRaw) {
             const cached = JSON.parse(cachedRaw);
-            currentVersionConfig = cached;
-
             if (cached.forceUpdateActive && compareVersions(CLIENT_VERSION, cached.minVersion) < 0) {
-              console.warn('[VersionChecker] Offline lock triggered from cached config on Android APK.');
+              currentVersionConfig = cached;
               purgeStaleNetworkCacheOnLock();
-              renderLockScreen({
-                offlineMode: true,
-                message: 'Mode hors-ligne : Une mise à jour obligatoire a été détectée. Veuillez vous connecter à Internet pour valider l\'installation.'
-              });
+              renderLockScreen();
+            } else {
+              console.log('[VersionChecker] Version check passed. Client v' + CLIENT_VERSION + ' is authorized.');
             }
+          } else {
+            console.log('[VersionChecker] Version check passed. Client v' + CLIENT_VERSION + ' is authorized.');
           }
         } catch (cacheErr) {
           console.error('[VersionChecker] Offline fallback evaluation error:', cacheErr);
@@ -341,11 +360,13 @@
   setupMutationObserver();
   setupGlobalEventLockdown();
 
+  const safeCheck = () => checkVersion().catch(e => console.warn('[VersionChecker] Async check notice:', e.message || e));
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkVersion);
+    document.addEventListener('DOMContentLoaded', safeCheck);
   } else {
-    checkVersion();
+    safeCheck();
   }
 
-  window.addEventListener('online', checkVersion);
+  window.addEventListener('online', safeCheck);
 })();

@@ -5,8 +5,9 @@
  * @param {string} message - The text to display.
  * @param {string} [icon='fa-circle-info'] - FontAwesome icon class (without fa-solid prefix).
  * @param {number} [duration=5000] - Auto-dismiss delay in ms.
+ * @param {HTMLElement|null} [actionEl=null] - Optional DOM element appended safely after the message (e.g. a button).
  */
-export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
+export function showToast(message, icon = 'fa-circle-info', duration = 5000, actionEl = null) {
 
   // Remove any existing toast
   const existing = document.getElementById('drcat-toast');
@@ -25,6 +26,12 @@ export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
   const msgEl = document.createElement('span');
   msgEl.className = 't-msg';
   msgEl.textContent = message; // Safe: never interprets HTML
+
+  // Optional safe action element (e.g. a styled link/button built with DOM methods)
+  if (actionEl instanceof HTMLElement) {
+    msgEl.appendChild(document.createTextNode(' '));
+    msgEl.appendChild(actionEl);
+  }
 
   const closeBtn = document.createElement('button');
   closeBtn.className = 't-close';
@@ -149,8 +156,8 @@ export function formatRelativeTimeFR(dateOrTimestamp) {
  * Escape HTML characters to prevent XSS injection
  */
 export function escapeHTML(str) {
-  if (!str) return '';
-  return str
+  if (str === null || str === undefined) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

@@ -193,6 +193,7 @@ const corsOptions = {
       /^https?:\/\/[a-zA-Z0-9-]+\.ngrok\.io$/i.test(origin) ||
       /^https?:\/\/[a-zA-Z0-9-]+\.trycloudflare\.com$/i.test(origin) ||
       /^https?:\/\/[a-zA-Z0-9-]+\.loca\.lt$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9.-]+\.eu\.org$/i.test(origin) ||
       (allowedOriginsSvc && allowedOriginsSvc.allowedOrigins && allowedOriginsSvc.allowedOrigins.includes(origin));
 
     return callback(null, isAllowed ? true : false);
@@ -202,13 +203,17 @@ const corsOptions = {
     'Content-Type',
     'Authorization',
     'X-App-Version',
+    'x-app-version',
     'X-Install-ID',
+    'x-install-id',
+    'x-device-platform',
     'x-api-key',
     'x-app-key',
     'x-admin-token',
     'x-capacitor-platform',
     'ngrok-skip-browser-warning'
   ],
+  exposedHeaders: ['Content-Length', 'X-App-Version'],
   credentials: true,
   maxAge: 86400,
   optionsSuccessStatus: 204

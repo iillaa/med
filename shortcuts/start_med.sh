@@ -3,58 +3,73 @@ set -e
 export PATH=/data/data/com.termux/files/usr/bin:$PATH
 cd /data/data/com.termux/files/home/med
 
-# Nettoyage automatique de Ngrok à la fermeture du script
-trap 'pkill -f "ngrok" 2>/dev/null || true' EXIT
+# Nettoyage automatique des tunnels à la fermeture du script
+trap 'pkill -f "ngrok" 2>/dev/null || true; pkill -f "cloudflared" 2>/dev/null || true' EXIT
 
 # Kill existing instances if any to avoid port conflicts
 pkill -f "node server.js" 2>/dev/null || true
 pkill -f "ngrok" 2>/dev/null || true
+pkill -f "cloudflared" 2>/dev/null || true
 sleep 1
 
 # Detect ngrok binary
 NGROK_CMD=""
-if command -v ngrok &>/dev/null; then
-  NGROK_CMD="ngrok"
-elif [[ -x "./ngrok" ]]; then
+if [[ -x "./ngrok" ]]; then
   NGROK_CMD="./ngrok"
-else
-  echo "❌ Ngrok introuvable. Installez-le ou placez le binaire dans le dossier du projet."
-  exit 1
+elif command -v ngrok &>/dev/null; then
+  NGROK_CMD="ngrok"
+elif [[ -x "/data/data/com.termux/files/home/med/ngrok" ]]; then
+  NGROK_CMD="/data/data/com.termux/files/home/med/ngrok"
 fi
 
-echo "Démarrage du tunnel Ngrok en arrière-plan..."
-nohup $NGROK_CMD http 3000 --log=stdout > ngrok.log 2>&1 &
-NGROK_PID=$!
+# Detect cloudflared binary
+HAS_CLOUDFLARED=false
+if command -v cloudflared &>/dev/null; then
+  HAS_CLOUDFLARED=true
+fi
 
-# Wait for Ngrok to establish the tunnel (up to 15 seconds)
-echo "Attente de l'établissement du tunnel public..."
+echo "Démarrage des tunnels de communication (Ngrok / Cloudflare)..."
+export GODEBUG=netdns=go
+
+if [[ -n "$NGROK_CMD" ]]; then
+  nohup $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
+  NGROK_PID=$!
+fi
+
+if [[ "$HAS_CLOUDFLARED" == "true" ]]; then
+  nohup cloudflared tunnel --url http://localhost:3000 > cloudflared.log 2>&1 &
+  CF_PID=$!
+fi
+
+echo "Attente de l'établissement des tunnels publics..."
 URL=""
+CF_URL=""
 for i in {1..15}; do
-  URL=$(curl -s http://127.0.0.1:4040/api/tunnels 2>/dev/null | grep -o 'https://[^"]*ngrok-free.dev' | head -n 1 || true)
-  if [[ -n "$URL" ]]; then
+  if [[ -z "$URL" && -n "$NGROK_CMD" ]]; then
+    URL=$(curl -s http://127.0.0.1:4040/api/tunnels 2>/dev/null | grep -o 'https://[^"]*ngrok-free.dev' | head -n 1 || true)
+  fi
+  if [[ -z "$CF_URL" && "$HAS_CLOUDFLARED" == "true" ]]; then
+    CF_URL=$(grep -o 'https://[^"]*\.trycloudflare\.com' cloudflared.log 2>/dev/null | head -n 1 || true)
+  fi
+  if [[ ( -n "$URL" || -z "$NGROK_CMD" ) && ( -n "$CF_URL" || "$HAS_CLOUDFLARED" == "false" ) ]]; then
     break
   fi
   sleep 1
 done
 
-if [[ -z "$URL" ]]; then
-  echo "⚠️  Impossible de récupérer l'URL publique après 15s."
-  echo "   Vérifiez 'ngrok.log' (limite de session, erreur réseau, etc.)."
-  echo "   Arrêt du tunnel..."
-  kill $NGROK_PID 2>/dev/null || true
+ACTIVE_URLS=()
+if [[ -n "$URL" ]]; then ACTIVE_URLS+=("$URL"); fi
+if [[ -n "$CF_URL" ]]; then ACTIVE_URLS+=("$CF_URL"); fi
+
+if [[ ${#ACTIVE_URLS[@]} -eq 0 ]]; then
+  echo "⚠️  Impossible de récupérer une URL publique après 15s."
+  echo "   Vérifiez 'ngrok.log' et 'cloudflared.log'."
   exit 1
 fi
 
-echo ""
-echo "✅ Tunnel actif : $URL"
-echo ""
-
-# Sync the new URL into remote_server_config.json
-echo "Mise à jour de remote_server_config.json..."
-node set_server_provider.js "$URL"
-echo ""
-
-# Wait for config write to settle
+URL_STRING=$(IFS=,; echo "${ACTIVE_URLS[*]}")
+echo "Mise à jour du registre des serveurs (remote_server_config.json)..."
+node set_server_provider.js --reset "$URL_STRING"
 sleep 1
 
 echo "=================================================="
@@ -62,7 +77,12 @@ echo "      CLINICAL CAT APP - DISTRIBUTEUR PUBLIC      "
 echo "=================================================="
 echo ""
 echo " Accès Local          : http://localhost:3000"
-echo " Accès Public         : $URL"
+if [[ -n "$CF_URL" ]]; then
+echo " Accès Cloudflare     : $CF_URL"
+fi
+if [[ -n "$URL" ]]; then
+echo " Accès Ngrok          : $URL"
+fi
 echo " Interface Inspecteur : http://localhost:4040"
 echo ""
 echo "=================================================="

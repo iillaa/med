@@ -205,7 +205,11 @@ export function getApiUrl(endpoint, overrideUrl) {
   if (isOfflineApp && configuredUrl) {
     const cleanUrl = configuredUrl.replace(/\/+$/, '');
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    return `${cleanUrl}${cleanEndpoint}`;
+    const fullUrl = `${cleanUrl}${cleanEndpoint}`;
+    if (fullUrl.includes('ngrok-free.dev') || fullUrl.includes('ngrok')) {
+      return fullUrl.includes('?') ? `${fullUrl}&ngrok-skip-browser-warning=true` : `${fullUrl}?ngrok-skip-browser-warning=true`;
+    }
+    return fullUrl;
   }
   return endpoint;
 }
@@ -355,8 +359,8 @@ export async function fetchCats(since) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), PING_TIMEOUT_MS);
       // For fast check we only care about whether the network path accepts the request.
-      const cleanUrl = url.replace(/\/+$/, '');
-      await fetch(`${cleanUrl}/api/search-status`, {
+      const pingUrl = getApiUrl('/api/search-status', url);
+      await fetch(pingUrl, {
         method: 'GET',
         signal: controller.signal,
         headers: getHeaders()
@@ -940,10 +944,7 @@ export async function fetchVersionConfigOnServer() {
 export async function updateVersionConfigOnServer(payload) {
   const res = await fetchWithTimeout(getApiUrl('/api/admin/version'), {
     method: 'PUT',
-    headers: getHeaders({
-      'Content-Type': 'application/json',
-      'x-api-key': 'drcat_secret_api_key_2026'
-    }),
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload)
   });
   if (!res.ok) {
@@ -977,8 +978,8 @@ async function api_pingHealth(url) {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 4000);
     const start = performance.now();
-    const cleanUrl = url.replace(/\/+$/, '');
-    await fetch(`${cleanUrl}/api/search-status`, {
+    const pingUrl = getApiUrl('/api/search-status', url);
+    await fetch(pingUrl, {
       method: 'GET',
       signal: controller.signal,
       headers: getHeaders()
@@ -988,6 +989,10 @@ async function api_pingHealth(url) {
   } catch (_) {
     recordServerHealth(url, false);
   }
+}
+
+export function getAdminToken() {
+  return localStorage.getItem('dr_cat_admin_token') || '';
 }
 
 
