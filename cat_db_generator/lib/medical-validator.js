@@ -15,9 +15,9 @@ const CLINICAL_SUMMARY_SECTIONS = [
 ];
 
 const ADMIN_SUMMARY_SECTIONS = [
-  '1. Principes de rédaction',
-  '2. Structure type',
-  '3. Cadre réglementaire'
+  '1. Cadre Légal & Prérequis',
+  '2. Structure & Mentions Obligatoires',
+  '3. Formules Types & Modèles de Rédaction'
 ];
 
 const FORBIDDEN_PLACEHOLDERS = [

@@ -38,6 +38,31 @@ The mode can switch dynamically at runtime via `api.setAppMode()`, which dispatc
 
 ---
 
+## 🧠 4-Stream Knowledge & Human Active Learning Engine (v1.7.0)
+
+Dr. CAT's V2 Dual RAG generation engine synthesizes medical protocols using 4 distinct, prioritized knowledge streams:
+
+| Stream | Source | Role & Priority |
+|---|---|---|
+| **Stream 1** | **Offline PDF RAG Index (`pdf_index.json`)** | **Priority 1 (Baseline)**: Local Algerian drug monograms, brand names (Ascabiol, Spasfon, Tiorfan, Smecta), and regional emergency protocols. |
+| **Stream 2** | **Web RAG Live Cache (`web_cache/`)** | **Priority 2 (Enrichment)**: Live guidelines from NCBI PubMed, MSD Manuals, MedG, HAS, and legal certificate requirements. |
+| **Stream 3** | **Gemini AI Synthesis Engine** | **Priority 3 (Reasoning)**: Clinical prose formatting, posology precision, and strict Schema Lock enforcement (5-Step Clinical vs 3-Step Administrative). |
+| **Stream 4** | **Human Active Learning Memory** | **Absolute Priority Over Ride**: Learns from manual doctor edits (`✏️ Éditer` in Generator Lab UI). Stamps `_human_edited: true` in V2 DB and injects previous doctor corrections into future AI synthesis prompts. |
+
+```text
+  [1. Offline PDF Index]   [2. Web RAG Cache]   [3. Gemini 3.6 Flash]   [4. Human Active Learning Memory]
+             \                     |                      |                     /
+              \                    |                      |                    /
+               ▼                   ▼                      ▼                   ▼
+           ┌──────────────────────────────────────────────────────────────────┐
+           │     DUAL RAG + HUMAN ACTIVE LEARNING SYNTHESIS ENGINE           │
+           │     - Enforces 5-Step Clinical / 3-Step Administrative Locks    │
+           │     - Preserves 100% of Doctor Modifications & Preferences      │
+           └──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 💾 Data Management & Integrity
 
 To guarantee zero data loss on device power cuts or concurrent accesses, the application implements the following write-path:

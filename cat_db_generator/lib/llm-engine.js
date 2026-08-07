@@ -282,17 +282,30 @@ RÈGLES ET CONTRAINTES STRICTES :
 
   if (isAdmin) {
     systemPrompt += `
-STRUCTURE STRICTEMENT ADMINISTRATIVE LOCK :
-Tu dois générer un objet JSON structuré pour une CAT administrative (certificat, attestation, lettre de liaison).
-LE CHAMP "summary" DOIT STRICTEMENT CONTENIR LES 3 SECTIONS SUIVANTES (UTILISE EXACTEMENT CES TITRES EN MARKDOWN) :
-**1. Principes de rédaction :**
-(Regles medico-legales, consentement, secret medical)
-**2. Structure type :**
-(Mentions obligatoires, corps du texte, formule de conclusion)
-**3. Cadre réglementaire :**
-(Textes de loi, responsabilite, conservation)
+STRUCTURE STRICTEMENT ADMINISTRATIVE LOCK (DOCUMENT MÉDICO-LÉGAL / CERTIFICAT / LETTRE) :
+Tu dois générer un objet JSON structuré pour un acte administratif médical (certificat médical, attestation, lettre d'orientation, CBU, accident du travail).
+INTERDICTION STRICTE DE LA STRUCTURE CLINIQUE EN 5 ÉTAPES ! Utilise exclusivement les 3 étapes administratives suivantes :
 
-ATTENTION ADMINISTRATIVE : NE METS SURTOUT PAS le titre "Évaluation initiale & Diagnostic" car il s'agit d'un document administratif !
+LE CHAMP "summary" DOIT STRICTEMENT CONTENIR LES 3 SECTIONS SUIVANTES (UTILISE EXACTEMENT CES TITRES EN MARKDOWN) :
+**1. Cadre Légal & Prérequis :**
+- Identification formelle du patient (Nom, Prénom, Date de naissance, Pièce d'identité).
+- Règle d'or : Examen médical physique effectif et personnellement réalisé par le médecin.
+- Interdiction absolue de délivrer un certificat de complaisance ou de l'antidater (responsabilité pénale/disciplinaire).
+- Consentement éclairé du patient et respect du secret médical (remise en main propre).
+
+**2. Structure & Mentions Obligatoires :**
+- En-tête du praticien (Nom, Prénom, Qualité, Adresse, N° d'inscription à l'Ordre).
+- Date et lieu de rédaction rédigés en toutes lettres.
+- Faits cliniques constatés médicalement de visu (constatations objectives et doléances rapportées entre guillemets).
+- Évaluation précise de l'Incapacité Totale de Travail (ITT) en jours si applicable (ex: "Incapacité Totale de Travail au sens pénal de X jours, sous réserve de complications").
+- Formule de clôture réglementaire : "Certificat établi à la demande de l'intéressé(e) et remis en main propre pour servir et valoir ce que de droit". Signature et tampon.
+
+**3. Formules Types & Modèles de Rédaction :**
+- Modèles textuels types et expressions juridiques exactes adaptées à cet acte (ex: modèle pour CBU/coups et blessures, certificat de bonne santé, accident du travail ou lettre d'orientation confraternelle).
+
+LE CHAMP "red_flags" DOIT CONTENIR : "Risques Médico-Légaux & Erreurs à Éviter" (ex: certificat de complaisance, remise à un tiers sans procuration, préjugement de la responsabilité pénale/civile, omission d'examen direct, non-respect de l'anonymat/secret).
+
+LE CHAMP "ordonnance" DOIT CONTENIR : "Modèle de Rédaction / Formule Type Prête à l'Emploi" (Texte intégral prêt à être copié/collé ou imprimé par le médecin).
 `;
   } else {
     systemPrompt += `

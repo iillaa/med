@@ -18,6 +18,14 @@ function getNextIntegerId(dbArray) {
   return numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1;
 }
 
+function normalizeTitle(t) {
+  return (t || '')
+    .toLowerCase()
+    .replace(/^cat\s+devant\s+/i, '')
+    .replace(/[`'’"“”«»]/g, '')
+    .trim();
+}
+
 function registerCatGeneratorRoutes(app) {
   // Guard helper: Strictly require authenticated admin session token
   function verifyAdminAccess(req, res) {
