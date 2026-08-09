@@ -1,0 +1,184 @@
+{
+  "_comment": "Dynamic Drug Safety Rules — Add any drug here. No code changes needed.",
+  "_version": "1.0.0",
+  "rules": [
+
+    {
+      "name": "Paracétamol",
+      "detect_regex": "parac[eé]tamol|acetaminoph[eè]ne",
+      "max_single_dose_g": 1.0,
+      "max_daily_dose_g": 4.0,
+      "pediatric_max_single_mg_per_kg": 15,
+      "pediatric_max_daily_mg_per_kg": 60,
+      "contraindications": [],
+      "error_message": "Paracétamol : dose max adulte = 1g/prise et 4g/jour. Dose max pédiatrique = 15 mg/kg/prise et 60 mg/kg/j."
+    },
+
+    {
+      "name": "Ibuprofène",
+      "detect_regex": "ibuprofène|ibuprofen|advil|nurofen",
+      "max_daily_dose_g": 2.4,
+      "pediatric_max_daily_mg_per_kg": 30,
+      "contraindications": [
+        { "trigger_regex": "grossesse|enceinte|3[eè]me trimestre|trimestre", "message": "Ibuprofène : CONTRE-INDIQUÉ après 24 SA (fermeture prématurée du canal artériel, insuffisance rénale fœtale)." },
+        { "trigger_regex": "insuffisance r[eé]nale|DFG|clairance|créatinine [eé]lev", "message": "Ibuprofène : CONTRE-INDIQUÉ en cas d'insuffisance rénale (néphrotoxicité)." },
+        { "trigger_regex": "ulcère|UGD|hémorragie digestive|gastrite", "message": "Ibuprofène/AINS : CONTRE-INDIQUÉ en cas d'ulcère gastroduodénal évolutif ou hémorragie digestive." }
+      ],
+      "error_message": "Ibuprofène : dose max adulte = 2.4g/jour. Dose pédiatrique max = 30 mg/kg/j."
+    },
+
+    {
+      "name": "Kétoprofène",
+      "detect_regex": "k[eé]toprofène|profenid|ketoprofen",
+      "max_daily_dose_g": 0.3,
+      "contraindications": [
+        { "trigger_regex": "grossesse|enceinte|trimestre", "message": "Kétoprofène : CONTRE-INDIQUÉ après 24 SA." },
+        { "trigger_regex": "insuffisance r[eé]nale|DFG", "message": "Kétoprofène : CONTRE-INDIQUÉ en cas d'insuffisance rénale." },
+        { "trigger_regex": "ulcère|hémorragie digestive", "message": "Kétoprofène/AINS : CONTRE-INDIQUÉ en cas d'ulcère ou hémorragie digestive." }
+      ],
+      "error_message": "Kétoprofène : dose max adulte = 300 mg/jour. Éviter sans IPP gastroprotecteur."
+    },
+
+    {
+      "name": "Aspirine",
+      "detect_regex": "aspirine|acide\\s+ac[eé]tylsalicylique|AAS",
+      "contraindications": [
+        { "trigger_regex": "(?:enfant|pédiatr|nourrisson).*(?:varicelle|grippe|virale|grippal)|(?:varicelle|grippe|virale|grippal).*(?:enfant|pédiatr|nourrisson)", "message": "Aspirine : CONTRE-INDIQUÉE chez l'enfant en cas d'infection virale (risque de syndrome de Reye, potentiellement fatal)." },
+        { "trigger_regex": "grossesse|enceinte", "message": "Aspirine à dose anti-inflammatoire : CONTRE-INDIQUÉE pendant la grossesse (sauf faible dose < 150 mg/j sous surveillance spécialisée)." },
+        { "trigger_regex": "ulcère|hémorragie digestive", "message": "Aspirine : CONTRE-INDIQUÉE en cas d'ulcère gastroduodénal évolutif ou hémorragie digestive active." }
+      ],
+      "error_message": "Aspirine : vérifier l'âge, terrain viral et terrain gastrique avant prescription."
+    },
+
+    {
+      "name": "Amoxicilline",
+      "detect_regex": "amoxicilline|amoxicillin|clamoxyl|amoxiclav|augmentin|co-amoxiclav",
+      "max_daily_dose_g": 3.0,
+      "pediatric_max_daily_mg_per_kg": 80,
+      "contraindications": [
+        { "trigger_regex": "allergie.*p[eé]nicilline|allergie.*b[eé]ta-lactamine|allergie.*bêta-lactamine|choc anaphylactique.*p[eé]nic", "message": "Amoxicilline : CONTRE-INDIQUÉE en cas d'allergie documentée aux pénicillines/bêta-lactamines." }
+      ],
+      "error_message": "Amoxicilline : dose max adulte = 3g/jour. Dose pédiatrique = max 80-100 mg/kg/j selon indication."
+    },
+
+    {
+      "name": "Ciprofloxacine",
+      "detect_regex": "ciprofloxacine|ciprofloxacin|ciflox",
+      "max_daily_dose_g": 1.5,
+      "contraindications": [
+        { "trigger_regex": "enfant|pédiatr|nourrisson|adolescent", "message": "Ciprofloxacine : DÉCONSEILLÉE chez l'enfant et l'adolescent < 18 ans (risque articulaire/tendineux). Usage réservé aux infections graves sans alternative." },
+        { "trigger_regex": "QTc|QT long|torsades de pointes|arythmie", "message": "Ciprofloxacine : CONTRE-INDIQUÉE en cas de QTc long ou de traitement allongeant le QTc (risque de torsades de pointes)." },
+        { "trigger_regex": "grossesse|enceinte|allaitement", "message": "Ciprofloxacine : DÉCONSEILLÉE pendant la grossesse et l'allaitement." }
+      ],
+      "error_message": "Ciprofloxacine : dose max adulte = 1.5g/jour. Surveiller QTc."
+    },
+
+    {
+      "name": "Métronidazole",
+      "detect_regex": "métronidazole|metronidazole|flagyl",
+      "max_daily_dose_g": 2.0,
+      "contraindications": [
+        { "trigger_regex": "alcool|boisson alcoolisée|alcoolisme", "message": "Métronidazole : CONTRE-INDIQUÉ avec l'alcool (effet antabuse/disulfirame-like : flush, nausées, vomissements, malaise)." },
+        { "trigger_regex": "1er trimestre|premier trimestre|12 semaines|12 SA", "message": "Métronidazole : CONTRE-INDIQUÉ au 1er trimestre de grossesse (effet tératogène potentiel)." }
+      ],
+      "error_message": "Métronidazole : dose max adulte = 2g/jour. Éviction stricte de l'alcool pendant et 48h après le traitement."
+    },
+
+    {
+      "name": "Tramadol",
+      "detect_regex": "tramadol|topalgic|contramal",
+      "max_daily_dose_g": 0.4,
+      "contraindications": [
+        { "trigger_regex": "ISRS|sertraline|fluox[eé]tine|parox[eé]tine|escitalopram|venlafaxine|IMAo|triptans?", "message": "Tramadol + ISRS/IMAo/Triptans : CONTRE-INDIQUÉ — risque de syndrome sérotoninergique potentiellement fatal (agitation, hyperthermie, rigidité, crise convulsive)." },
+        { "trigger_regex": "insuffisance h[eé]patique|cirrhose|insuffisance r[eé]nale sév[eè]re", "message": "Tramadol : CONTRE-INDIQUÉ en cas d'insuffisance hépatique ou rénale sévère (accumulation toxique)." },
+        { "trigger_regex": "épilepsie|convulsion|seuil épileptogène", "message": "Tramadol : à éviter en cas d'épilepsie ou de traitement abaissant le seuil épileptogène." }
+      ],
+      "error_message": "Tramadol : dose max adulte = 400 mg/jour. Ne jamais associer à un ISRS, IMAo ou triptan."
+    },
+
+    {
+      "name": "Codéine",
+      "detect_regex": "cod[eé]ine|dafalgan cod[eé]iné|efferalgan cod[eé]iné|codoliprane",
+      "contraindications": [
+        { "trigger_regex": "enfant|pédiatr|nourrisson|< 12 ans|moins de 12 ans", "message": "Codéine : CONTRE-INDIQUÉE chez l'enfant < 12 ans (risque de dépression respiratoire fatale chez les métaboliseurs rapides)." },
+        { "trigger_regex": "allaitement|allait", "message": "Codéine : CONTRE-INDIQUÉE pendant l'allaitement (passage dans le lait maternel, risque de dépression respiratoire néonatale)." },
+        { "trigger_regex": "amygdalectomie|adéno-amygdalectomie|apnée du sommeil", "message": "Codéine : CONTRE-INDIQUÉE après amygdalectomie/adéno-amygdalectomie pour SAOS chez l'enfant." }
+      ],
+      "error_message": "Codéine : CONTRE-INDIQUÉE chez < 12 ans et pendant l'allaitement."
+    },
+
+    {
+      "name": "Morphine",
+      "detect_regex": "morphine|moscontin|skenan|oxycodone|oxycontin",
+      "contraindications": [
+        { "trigger_regex": "insuffisance respiratoire|BPCO sév[eè]re|asthme sév[eè]re|SpO2 < 90", "message": "Morphine/Opioïdes : CONTRE-INDIQUÉS en cas d'insuffisance respiratoire décompensée (risque d'apnée)." },
+        { "trigger_regex": "IMAO|inhibiteur de la monoamine", "message": "Morphine + IMAo : CONTRE-INDIQUÉS (risque de syndrome sérotoninergique et de dépression respiratoire majeure)." }
+      ],
+      "error_message": "Morphine/Opioïdes forts : utilisation strictement contrôlée, titration obligatoire, antidote Naloxone disponible."
+    },
+
+    {
+      "name": "Metformine",
+      "detect_regex": "metformine|metformin|glucophage|stagid",
+      "contraindications": [
+        { "trigger_regex": "insuffisance r[eé]nale|DFG\\s*<\\s*30|créatinine [eé]lev|clairance < 30", "message": "Metformine : CONTRE-INDIQUÉE si DFG < 30 mL/min/1.73m² (risque d'acidose lactique)." },
+        { "trigger_regex": "produit de contraste iodé|scanner inject|injection iodée", "message": "Metformine : à ARRÊTER 48h avant une injection de produit de contraste iodé et à ne reprendre que 48h après (risque d'acidose lactique)." },
+        { "trigger_regex": "insuffisance cardiaque sév[eè]re|choc cardiogénique", "message": "Metformine : CONTRE-INDIQUÉE en cas d'insuffisance cardiaque sévère (risque d'acidose lactique)." }
+      ],
+      "error_message": "Metformine : arrêter si DFG < 30 et avant injection de produit de contraste iodé."
+    },
+
+    {
+      "name": "Corticoïdes (systémiques)",
+      "detect_regex": "prednisone|prednisolone|m[eé]thylprednisolone|cortisone|d[eé]xaméthasone|bétaméthasone|sol-m[eé]drol",
+      "contraindications": [
+        { "trigger_regex": "diab[eè]te|hyperglycémie|insuline", "message": "Corticoïdes : risque d'hyperglycémie cortisonique — surveiller la glycémie, adapter les antidiabétiques si nécessaire." },
+        { "trigger_regex": "ulcère|gastrite", "message": "Corticoïdes systémiques : gastroprotection obligatoire par IPP si traitement > 7 jours ou terrain ulcéreux." },
+        { "trigger_regex": "arrêt brutal|stop|discontinuer brusquement", "message": "Corticoïdes : NE JAMAIS ARRÊTER BRUTALEMENT après > 7 jours de traitement (risque d'insuffisance surrénale aiguë). Dégression obligatoire." }
+      ],
+      "error_message": "Corticoïdes systémiques : surveiller glycémie, tension artérielle, et décroissance progressive obligatoire."
+    },
+
+    {
+      "name": "Warfarine / AVK",
+      "detect_regex": "warfarine|warfarin|coumadine|acénocoumarol|sintrom|fluindione|previscan",
+      "contraindications": [
+        { "trigger_regex": "AINS|ibuprofène|kétoprofène|aspirine|acide acétylsalicylique", "message": "AVK + AINS/Aspirine : association à ÉVITER (potentialisation du risque hémorragique majeur)." },
+        { "trigger_regex": "chirurgie|intervention|opération", "message": "AVK : à discuter avec le spécialiste pour relais héparinique ou bridging avant toute chirurgie (risque thromboembolique vs hémorragique)." }
+      ],
+      "error_message": "AVK (Warfarine/Sintrom) : surveillance INR obligatoire. Cible INR 2-3 (ou 2.5-3.5 si prothèse mécanique)."
+    },
+
+    {
+      "name": "Benzodiazépines",
+      "detect_regex": "diazépam|diazepam|valium|lorazépam|lorazepam|alprazolam|clonazépam|clonazepam|midazolam|bromazépam|bromazepam",
+      "max_duration_days": 30,
+      "contraindications": [
+        { "trigger_regex": "insuffisance respiratoire|apnée du sommeil|BPCO sév[eè]re", "message": "Benzodiazépines : CONTRE-INDIQUÉES en cas d'insuffisance respiratoire sévère ou de SAOS non appareillé (dépression respiratoire)." },
+        { "trigger_regex": "alcool|prise d'alcool", "message": "Benzodiazépines + Alcool : CONTRE-INDIQUÉS (potentialisation des effets dépresseurs du SNC, risque de coma)." },
+        { "trigger_regex": "personne âg[eé]e|sujet âg[eé]|> 65 ans|gériatrie", "message": "Benzodiazépines : à éviter chez le sujet âgé (chutes, confusion, dépendance — liste de Beers/STOPP)." }
+      ],
+      "error_message": "Benzodiazépines : durée limitée (4 sem anxiété, 2-4 sem insomnie). Risque dépendance, sevrage, et chutes chez sujet âgé."
+    },
+
+    {
+      "name": "Lopéramide",
+      "detect_regex": "lop[eé]ramide|imodium|arestal",
+      "contraindications": [
+        { "trigger_regex": "enfant|pédiatr|< 2 ans|nourrisson", "message": "Lopéramide : CONTRE-INDIQUÉ chez l'enfant < 2 ans (risque d'iléus paralytique et de décès)." },
+        { "trigger_regex": "diarrhée (glairo-)?sanglante|syndrome dysentérique|fièvre|sang dans les selles", "message": "Lopéramide : CONTRE-INDIQUÉ en cas de diarrhée fébrile ou sanglante/dysentérique (risque de rétention de l'agent pathogène et de mégacôlon toxique)." }
+      ],
+      "error_message": "Lopéramide : uniquement pour diarrhée hydro-électrolytique non invasive sans fièvre chez adulte > 2 ans."
+    },
+
+    {
+      "name": "Métoclopramide",
+      "detect_regex": "m[eé]toclopramide|primperan|primpéran",
+      "contraindications": [
+        { "trigger_regex": "enfant|adolescent|< 18 ans|pédiatr", "message": "Métoclopramide : CONTRE-INDIQUÉ chez l'enfant et l'adolescent < 18 ans (risque de dyskinésie tardive et de syndrome extrapyramidal)." },
+        { "trigger_regex": "parkinson|syndrome extrapyramidal|neuroleptique", "message": "Métoclopramide : à éviter en cas de maladie de Parkinson ou de traitement antidopaminergique (aggravation des symptômes extrapyramidaux)." }
+      ],
+      "error_message": "Métoclopramide : durée max 5 jours, dose max 30 mg/jour adulte. CONTRE-INDIQUÉ < 18 ans."
+    }
+  ]
+}

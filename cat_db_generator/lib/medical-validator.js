@@ -1,10 +1,23 @@
 /**
  * Medical Data & Anti-Hallucination Validator
  * Enforces strict medical schema integrity, 5-step clinical structure lock,
- * administrative template structure lock, mandatory red flags, and valid drug prescription formats.
+ * administrative template structure lock, mandatory red flags,
+ * and a fully DYNAMIC drug safety engine loaded from drug-safety-rules.json.
  */
 
+const path = require('path');
+const fs = require('fs');
 const { VALID_CATEGORIES } = require('./medical-sources');
+
+// Load dynamic drug safety rules from JSON (no code change needed to add a drug)
+let DRUG_SAFETY_RULES = [];
+try {
+  const rulesPath = path.join(__dirname, 'drug-safety-rules.json');
+  const rulesData = JSON.parse(fs.readFileSync(rulesPath, 'utf8'));
+  DRUG_SAFETY_RULES = rulesData.rules || [];
+} catch (e) {
+  console.warn('[Medical Validator] Could not load drug-safety-rules.json:', e.message);
+}
 
 const CLINICAL_REQUIRED_SECTION_PATTERNS = [
   { name: '1. Évaluation initiale & Diagnostic', regex: /(?:1\.|#+ 1\.)\s*(?:Évaluation initiale|Définition|Diagnostic)/i },
@@ -134,49 +147,59 @@ function validateCAT(cat) {
       warnings.push('Pediatric CAT detected: Ensure weight-based dosing (mg/kg or dose-poids) is explicitly provided.');
     }
 
-    // --- ALGORITHMIC THERAPEUTIC DOSAGE & SAFETY ASSERTIONS ---
+    // --- DYNAMIC DRUG SAFETY ENGINE (loaded from drug-safety-rules.json) ---
     const fullTextLower = `${cat.summary} ${cat.ordonnance}`.toLowerCase();
 
-    // 7a. Paracetamol Daily Ceiling Assertion (Max 4g/day = 4000mg/day for adults)
-    if (/parac[eé]tamol/i.test(fullTextLower)) {
-      const paracetamolGramMatch = fullTextLower.match(/parac[eé]tamol[^\.\n]*?(\d+(?:[\.,]\d+)?)\s*g/i);
-      if (paracetamolGramMatch) {
-        const grams = parseFloat(paracetamolGramMatch[1].replace(',', '.'));
-        if (grams > 4) {
-          errors.push(`Therapeutic Safety Assertion Error: Single/Daily Paracetamol dose (${grams}g) exceeds maximum adult daily ceiling of 4g/day.`);
+    for (const rule of DRUG_SAFETY_RULES) {
+      const detectRx = new RegExp(rule.detect_regex, 'i');
+      if (!detectRx.test(fullTextLower)) continue; // drug not mentioned, skip
+
+      // Max daily dose check (grams)
+      if (rule.max_daily_dose_g) {
+        const dailyMgMatch = fullTextLower.match(
+          new RegExp(rule.detect_regex + '[^.\\n]*?(\\d+)\\s*mg[^.\\n]*?(\\d+)\\s*(?:fois|x)\\/?j', 'i')
+        );
+        if (dailyMgMatch) {
+          const singleMg = parseInt(dailyMgMatch[1], 10);
+          const freq = parseInt(dailyMgMatch[2], 10);
+          const totalMg = singleMg * freq;
+          if (totalMg > rule.max_daily_dose_g * 1000) {
+            errors.push(`[Safety] ${rule.name} : ${singleMg}mg × ${freq}/j = ${totalMg}mg/j dépasse la dose max de ${rule.max_daily_dose_g * 1000}mg/j. ${rule.error_message}`);
+          }
+        }
+
+        const dailyGramMatch = fullTextLower.match(
+          new RegExp(rule.detect_regex + '[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*g(?:/j|/jour|\\s+par\\s+jour)?', 'i')
+        );
+        if (dailyGramMatch) {
+          const grams = parseFloat(dailyGramMatch[1].replace(',', '.'));
+          if (grams > rule.max_daily_dose_g) {
+            errors.push(`[Safety] ${rule.name} : ${grams}g dépasse la dose max journalière de ${rule.max_daily_dose_g}g/j. ${rule.error_message}`);
+          }
         }
       }
 
-      // Catch Paracetamol > 4000 mg/day (e.g. 1000 mg 5x/j = 5000 mg)
-      const mgDailyMatch = fullTextLower.match(/parac[eé]tamol[^\.\n]*?(\d+)\s*mg[^\.\n]*?(\d+)\s*(?:fois|x)\/j/i);
-      if (mgDailyMatch) {
-        const singleMg = parseInt(mgDailyMatch[1], 10);
-        const freq = parseInt(mgDailyMatch[2], 10);
-        const totalMg = singleMg * freq;
-        if (totalMg > 4000) {
-          errors.push(`Therapeutic Safety Assertion Error: Paracetamol ${singleMg}mg ${freq}x/day (${totalMg}mg/day) exceeds maximum adult limit of 4000mg/day.`);
+      // Pediatric mg/kg check
+      if (rule.pediatric_max_single_mg_per_kg && isPediatric) {
+        const mgKgMatch = fullTextLower.match(
+          new RegExp(rule.detect_regex + '[^.\\n]*?(\\d+)\\s*mg\\/kg', 'i')
+        );
+        if (mgKgMatch) {
+          const dose = parseInt(mgKgMatch[1], 10);
+          if (dose > rule.pediatric_max_single_mg_per_kg) {
+            errors.push(`[Safety] ${rule.name} pédiatrique : ${dose} mg/kg/prise dépasse la limite de ${rule.pediatric_max_single_mg_per_kg} mg/kg/prise. ${rule.error_message}`);
+          }
         }
       }
 
-      // Catch unsafe frequency patterns like "2g 4x/j" or "2g toutes les 4h"
-      if (/2\s*g\s*(?:4x|4\s*fois|toutes\s*les\s*4\s*h)/i.test(fullTextLower)) {
-        errors.push('Therapeutic Safety Assertion Error: Paracetamol 2g 4x/day (8g/day) exceeds maximum daily limit of 4g/day.');
-      }
-
-      // Check pediatric paracetamol mg/kg limits if single dose > 15 mg/kg or daily > 60 mg/kg/j
-      const mgKgMatch = fullTextLower.match(/parac[eé]tamol[^\.\n]*?(\d+)\s*mg\/kg/i);
-      if (mgKgMatch) {
-        const doseMgKg = parseInt(mgKgMatch[1], 10);
-        if (doseMgKg > 20 && !/jour|24h/i.test(mgKgMatch[0])) {
-          errors.push(`Therapeutic Safety Assertion Error: Single pediatric paracetamol dose (${doseMgKg} mg/kg) exceeds recommended 15 mg/kg single dose limit.`);
+      // Contraindication checks
+      if (Array.isArray(rule.contraindications)) {
+        for (const ci of rule.contraindications) {
+          const ciRx = new RegExp(ci.trigger_regex, 'i');
+          if (ciRx.test(fullTextLower)) {
+            errors.push(`[Safety CI] ${rule.name} : ${ci.message}`);
+          }
         }
-      }
-    }
-
-    // 7b. Aspirin Pediatric Viral Infection Contraindication Assertion (Reye's Syndrome Risk)
-    if (isPediatric && /aspirine|acide\s+ac[eé]tylsalicylique/i.test(fullTextLower)) {
-      if (/varicelle|grippe|fi[eè]vre\s+virable|syndrome\s+grippal/i.test(fullTextLower)) {
-        errors.push('Therapeutic Safety Assertion Error: Aspirin is contraindicated in pediatric viral infections (Reye\'s syndrome risk). Use Paracetamol as 1st line.');
       }
     }
   }
