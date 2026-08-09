@@ -798,5 +798,22 @@
       "Certificats_",
       "Certificats"
     ]
+  },
+  {
+    "id": 56,
+    "category": "Dermatologie",
+    "title": "La gale",
+    "summary": "",
+    "red_flags": "",
+    "ordonnance": "",
+    "pdf_keywords": [],
+    "updatedAt": 1786285672643,
+    "history": [
+      {
+        "timestamp": 1786285672643,
+        "action": "create",
+        "detail": "Créé directement par l'administrateur"
+      }
+    ]
   }
 ]
