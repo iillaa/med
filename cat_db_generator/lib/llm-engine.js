@@ -14,10 +14,10 @@ const { fetchAndCacheWebSources, getCachedWebSources } = require('./web-fetcher'
 const fs = require('fs');
 
 const FALLBACK_GEMINI_MODELS = [
-  'gemini-3.6-flash',
-  'gemini-3.5-flash',
-  'gemini-2.5-flash',
+  'gemini-flash-latest',
+  'gemini-3-flash-preview',
   'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
   'gemini-flash-lite-latest'
 ];
 
@@ -27,7 +27,6 @@ const DISCOVERY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 /**
  * Dynamically queries Google AI Studio API to discover real active models
- * and ranks them by highest semantic version number & capability.
  */
 async function discoverDynamicModels(apiKey) {
   const now = Date.now();
@@ -44,22 +43,17 @@ async function discoverDynamicModels(apiKey) {
     const models = (data.models || [])
       .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
       .map(m => m.name.replace('models/', ''))
-      .filter(name => !name.includes('tts') && !name.includes('image') && !name.includes('banana') && !name.includes('clip') && !name.includes('computer-use'));
+      .filter(name => !name.includes('tts') && !name.includes('image') && !name.includes('banana') && !name.includes('clip') && !name.includes('computer-use') && !name.includes('2.5-flash')); // 2.5-flash deprecated for new users
 
-    // Sort by version numbers (highest version first)
-    models.sort((a, b) => {
-      const getVer = s => {
-        const match = s.match(/gemini-(\d+(?:\.\d+)?)/i);
-        return match ? parseFloat(match[1]) : (s.includes('latest') ? 1.9 : 1.0);
-      };
-      return getVer(b) - getVer(a);
-    });
+    // Put primary working models first
+    const preferred = ['gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-flash-lite-latest'];
+    const sorted = [...preferred.filter(p => models.includes(p)), ...models.filter(m => !preferred.includes(m))];
 
-    if (models.length > 0) {
-      cachedDynamicModels = models;
+    if (sorted.length > 0) {
+      cachedDynamicModels = sorted;
       lastModelDiscoveryTime = now;
-      console.log(`🤖 [Dynamic LLM Discovery] Discovered ${models.length} active models. Top primary: ${models[0]}`);
-      return models;
+      console.log(`🤖 [Dynamic LLM Discovery] Discovered ${sorted.length} active models. Top primary: ${sorted[0]}`);
+      return sorted;
     }
   } catch (err) {
     console.warn(`⚠️ Dynamic model discovery failed: ${err.message}. Using fallback model list.`);
@@ -111,12 +105,45 @@ function safeParseLLMJson(text) {
       return JSON.parse(sanitized);
     } catch (err2) {
       // 3. String-literal repair (newlines/tabs inside strings) + trailing comma strip
-      const stringRepaired = cleaned
-        .replace(/"(?:[^"\\]|\\.)*"/gs, (match) => {
-          return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
-        })
-        .replace(/,\s*([\}\]])/g, '$1');
-      return JSON.parse(stringRepaired);
+      try {
+        const stringRepaired = cleaned
+          .replace(/"(?:[^"\\]|\\.)*"/gs, (match) => {
+            return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+          })
+          .replace(/,\s*([\}\]])/g, '$1');
+        return JSON.parse(stringRepaired);
+      } catch (err3) {
+        // 4. Deterministic schema key regex extraction fallback
+        const res = {};
+        const catMatch = cleaned.match(/"category"\s*:\s*"([^"]+)"/i);
+        if (catMatch) res.category = catMatch[1];
+
+        const titleMatch = cleaned.match(/"title"\s*:\s*"([^"]+)"/i);
+        if (titleMatch) res.title = titleMatch[1];
+
+        const kwMatch = cleaned.match(/"search_keywords"\s*:\s*\[([\s\S]*?)\]/i);
+        if (kwMatch) {
+          try { res.search_keywords = JSON.parse(`[${kwMatch[1]}]`); } catch (_) {}
+        }
+
+        const summaryMatch = cleaned.match(/"summary"\s*:\s*"([\s\S]*?)"\s*,\s*"red_flags"/i);
+        if (summaryMatch) {
+          res.summary = summaryMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        }
+
+        const rfMatch = cleaned.match(/"red_flags"\s*:\s*"([\s\S]*?)"\s*,\s*"ordonnance"/i);
+        if (rfMatch) {
+          res.red_flags = rfMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        }
+
+        const ordMatch = cleaned.match(/"ordonnance"\s*:\s*"([\s\S]*?)"\s*(?:}|\n})/i);
+        if (ordMatch) {
+          res.ordonnance = ordMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+        }
+
+        if (res.title && res.summary) return res;
+        throw err1;
+      }
     }
   }
 }
@@ -145,7 +172,6 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-        // Enable extended thinking budget (2048 tokens) for reasoning models
         const generationConfig = {
           temperature: 0.2,
           responseMimeType: 'application/json'
@@ -172,9 +198,9 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
         });
 
         if (res.status === 429) {
-          console.warn(`⚠️ [LLM Rate Limit HTTP 429] Model ${model} rate limited (attempt ${rateLimitAttempts}/3). Pausing 4s to reset quota...`);
-          await new Promise(r => setTimeout(r, 4000));
-          continue; // Retry same model after backoff delay
+          console.warn(`⚠️ [LLM Rate Limit HTTP 429] Model ${model} rate limited (attempt ${rateLimitAttempts}/3). Pausing 10s to reset quota...`);
+          await new Promise(r => setTimeout(r, 10000));
+          continue; // Retry same model after 10s cooldown
         }
 
         if (res) break;
@@ -183,7 +209,7 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
         console.warn(`⚠️ Network fetch attempt ${rateLimitAttempts}/3 for model ${model} failed: ${netErr.message}`);
         if (rateLimitAttempts < 3) await new Promise(r => setTimeout(r, 2000));
       }
-    }
+    };
 
     if (!res) continue;
 
