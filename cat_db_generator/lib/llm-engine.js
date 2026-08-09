@@ -362,11 +362,20 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
     executionMetrics = apiResult.metrics;
 
     try {
-      const cleanJson = apiResult.text
+      let rawJson = apiResult.text
         .replace(/^```json/i, '')
         .replace(/^```/, '')
         .replace(/```$/, '')
         .trim();
+
+      // Sanitize unescaped raw control characters (like newlines/tabs inside string literals)
+      const cleanJson = rawJson.replace(/[\x00-\x1F]/g, (ch) => {
+        if (ch === '\n') return '\\n';
+        if (ch === '\r') return '\\r';
+        if (ch === '\t') return '\\t';
+        return '';
+      });
+
       catResult = JSON.parse(cleanJson);
 
       // Enforce search_keywords array

@@ -68,10 +68,27 @@ async function safeWriteTextAsync(filePath, textContent) {
 
 async function logAuditEvent(action, details, req) {
   try {
+    // Handle inverted arguments gracefully if req was passed first
+    if (typeof action === 'object' && action && action.headers) {
+      const temp = action;
+      action = details || 'UNKNOWN_ACTION';
+      details = req || {};
+      req = temp;
+    }
     const timestamp = new Date().toISOString();
-    const rawIp = req ? (req.socket.remoteAddress || '').replace(/^::ffff:/, '') : 'system';
-    const token = req ? req.headers['x-admin-token'] || 'no-token' : 'system';
-    const logLine = JSON.stringify({ timestamp, action, ip: rawIp, token: token.substring(0, 6) + '...', details }) + '\n';
+    const rawIp = (req && req.socket && req.socket.remoteAddress)
+      ? req.socket.remoteAddress.replace(/^::ffff:/, '')
+      : (req && typeof req.ip === 'string' ? req.ip.replace(/^::ffff:/, '') : 'system');
+    const token = (req && req.headers && req.headers['x-admin-token'])
+      ? String(req.headers['x-admin-token'])
+      : 'system';
+    const logLine = JSON.stringify({
+      timestamp,
+      action,
+      ip: rawIp,
+      token: token.length > 6 ? token.substring(0, 6) + '...' : token,
+      details: details || {}
+    }) + '\n';
     await fs.promises.appendFile(AUDIT_LOG_FILE, logLine, 'utf-8');
   } catch (err) {
     console.error('[Audit Logger] Failed to write to audit log:', err);

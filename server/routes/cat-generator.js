@@ -169,10 +169,10 @@ function registerCatGeneratorRoutes(app) {
       await safeWriteJsonAsync(PROD_DB_PATH, v2Data);
       cache.catsCache = v2Data;
 
-      await logAuditEvent(req, 'PROMOTE_V2_CATS_DATABASE', {
+      await logAuditEvent('PROMOTE_V2_CATS_DATABASE', {
         count: v2Data.length,
         timestamp: new Date().toISOString()
-      });
+      }, req);
 
       res.json({
         success: true,
@@ -223,11 +223,11 @@ function registerCatGeneratorRoutes(app) {
       await safeWriteJsonAsync(PROD_DB_PATH, prodData);
       cache.catsCache = prodData;
 
-      await logAuditEvent(req, 'PROMOTE_SINGLE_CAT', {
+      await logAuditEvent('PROMOTE_SINGLE_CAT', {
         title: updatedCat.title,
         id: updatedCat.id,
         isNew: existingIdx < 0
-      });
+      }, req);
 
       res.json({
         success: true,
