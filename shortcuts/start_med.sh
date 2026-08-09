@@ -29,10 +29,19 @@ if command -v cloudflared &>/dev/null; then
 fi
 
 echo "Démarrage des tunnels de communication (Ngrok / Cloudflare)..."
-export GODEBUG=netdns=go
+
+# Ensure Termux DNS resolv.conf exists for Go binaries
+if [[ ! -f "/data/data/com.termux/files/usr/etc/resolv.conf" ]]; then
+  echo "nameserver 8.8.8.8" > /data/data/com.termux/files/usr/etc/resolv.conf
+  echo "nameserver 1.1.1.1" >> /data/data/com.termux/files/usr/etc/resolv.conf
+fi
 
 if [[ -n "$NGROK_CMD" ]]; then
-  nohup $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
+  if command -v termux-chroot &>/dev/null; then
+    nohup termux-chroot $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
+  else
+    nohup $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
+  fi
   NGROK_PID=$!
 fi
 
