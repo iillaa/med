@@ -85,6 +85,35 @@ function getHumanEditMemory(title) {
   return null;
 }
 
+function safeParseLLMJson(text) {
+  if (!text || typeof text !== 'string') throw new Error('Empty LLM response');
+
+  let cleaned = text
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .trim();
+
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err1) {
+    try {
+      const sanitized = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+      return JSON.parse(sanitized);
+    } catch (err2) {
+      const stringRepaired = cleaned.replace(/"(?:[^"\\]|\\.)*"/gs, (match) => {
+        return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+      });
+      return JSON.parse(stringRepaired);
+    }
+  }
+}
+
 /**
  * Call Gemini REST API with dynamic model discovery, extended thinking budget, token logging, and rate-limit backoff
  */
@@ -368,21 +397,7 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
     executionMetrics = apiResult.metrics;
 
     try {
-      let rawJson = apiResult.text
-        .replace(/^```json/i, '')
-        .replace(/^```/, '')
-        .replace(/```$/, '')
-        .trim();
-
-      // Sanitize unescaped raw control characters (like newlines/tabs inside string literals)
-      const cleanJson = rawJson.replace(/[\x00-\x1F]/g, (ch) => {
-        if (ch === '\n') return '\\n';
-        if (ch === '\r') return '\\r';
-        if (ch === '\t') return '\\t';
-        return '';
-      });
-
-      catResult = JSON.parse(cleanJson);
+      catResult = safeParseLLMJson(apiResult.text);
 
       // Enforce search_keywords array
       if (!Array.isArray(catResult.search_keywords) || catResult.search_keywords.length === 0) {
