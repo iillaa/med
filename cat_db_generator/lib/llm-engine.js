@@ -14,10 +14,11 @@ const { fetchAndCacheWebSources, getCachedWebSources } = require('./web-fetcher'
 const fs = require('fs');
 
 const FALLBACK_GEMINI_MODELS = [
-  'gemini-flash-latest',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
   'gemini-3-flash-preview',
   'gemini-2.0-flash',
-  'gemini-2.0-flash-lite',
+  'gemini-flash-latest',
   'gemini-flash-lite-latest'
 ];
 
@@ -27,6 +28,7 @@ const DISCOVERY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 /**
  * Dynamically queries Google AI Studio API to discover real active models
+ * and ranks them automatically by highest version number and clinical reasoning capability.
  */
 async function discoverDynamicModels(apiKey) {
   const now = Date.now();
@@ -43,17 +45,22 @@ async function discoverDynamicModels(apiKey) {
     const models = (data.models || [])
       .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
       .map(m => m.name.replace('models/', ''))
-      .filter(name => !name.includes('tts') && !name.includes('image') && !name.includes('banana') && !name.includes('clip') && !name.includes('computer-use') && !name.includes('2.5-flash')); // 2.5-flash deprecated for new users
+      .filter(name => !name.includes('tts') && !name.includes('image') && !name.includes('banana') && !name.includes('clip') && !name.includes('computer-use'));
 
-    // Put primary working models first
-    const preferred = ['gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-flash-lite-latest'];
-    const sorted = [...preferred.filter(p => models.includes(p)), ...models.filter(m => !preferred.includes(m))];
+    // Automatically sort by highest version (highest number first, e.g. 3.6 > 3.5 > 3.0 > 2.0 > latest)
+    models.sort((a, b) => {
+      const getVer = s => {
+        const match = s.match(/gemini-(\d+(?:\.\d+)?)/i);
+        return match ? parseFloat(match[1]) : (s.includes('latest') ? 1.9 : 1.0);
+      };
+      return getVer(b) - getVer(a);
+    });
 
-    if (sorted.length > 0) {
-      cachedDynamicModels = sorted;
+    if (models.length > 0) {
+      cachedDynamicModels = models;
       lastModelDiscoveryTime = now;
-      console.log(`🤖 [Dynamic LLM Discovery] Discovered ${sorted.length} active models. Top primary: ${sorted[0]}`);
-      return sorted;
+      console.log(`🤖 [Dynamic LLM Discovery] Discovered ${models.length} active models. Top primary: ${models[0]}`);
+      return models;
     }
   } catch (err) {
     console.warn(`⚠️ Dynamic model discovery failed: ${err.message}. Using fallback model list.`);
