@@ -6,12 +6,12 @@
 
 const { VALID_CATEGORIES } = require('./medical-sources');
 
-const CLINICAL_SUMMARY_SECTIONS = [
-  '1. Évaluation initiale & Diagnostic',
-  '2. Conduite à tenir',
-  '3. Traitement',
-  '4. Examens complémentaires',
-  '5. Orientation / Avis Spécialisé'
+const CLINICAL_REQUIRED_SECTION_PATTERNS = [
+  { name: '1. Évaluation initiale & Diagnostic', regex: /(?:1\.|#+ 1\.)\s*(?:Évaluation initiale|Définition|Diagnostic)/i },
+  { name: '2. Drapeaux Rouges / Signes de Gravité', regex: /(?:2\.|#+ 2\.)\s*(?:Drapeaux Rouges|Signes de Gravité|Conduite à tenir)/i },
+  { name: '3. Examens complémentaires', regex: /(?:3\.|#+ 3\.)\s*(?:Examens complémentaires|Bilan)/i },
+  { name: '4. Prise en charge & Conduite à tenir', regex: /(?:4\.|#+ 4\.|3\.)\s*(?:Prise en charge|Conduite à tenir|Traitement)/i },
+  { name: '5. Orientation & Suivi', regex: /(?:5\.|#+ 5\.)\s*(?:Orientation|Suivi|Avis Spécialisé)/i }
 ];
 
 const ADMIN_SUMMARY_SECTIONS = [
@@ -103,9 +103,9 @@ function validateCAT(cat) {
       }
     } else {
       // Enforce 5-Step Clinical Structure Lock for Clinical CATs
-      for (const section of CLINICAL_SUMMARY_SECTIONS) {
-        if (!cat.summary.includes(section)) {
-          errors.push(`Clinical 5-Step Schema Lock Error: Missing mandatory section: "${section}".`);
+      for (const pattern of CLINICAL_REQUIRED_SECTION_PATTERNS) {
+        if (!pattern.regex.test(cat.summary)) {
+          errors.push(`Clinical 5-Step Schema Lock Error: Missing mandatory section: "${pattern.name}".`);
         }
       }
     }
@@ -193,9 +193,12 @@ function validateCAT(cat) {
   };
 }
 
+const CLINICAL_SUMMARY_SECTIONS = CLINICAL_REQUIRED_SECTION_PATTERNS.map(p => p.name);
+
 module.exports = {
   validateCAT,
   isAdministrativeCAT,
+  CLINICAL_REQUIRED_SECTION_PATTERNS,
   CLINICAL_SUMMARY_SECTIONS,
   ADMIN_SUMMARY_SECTIONS,
   FORBIDDEN_PLACEHOLDERS

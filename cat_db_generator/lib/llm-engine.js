@@ -99,16 +99,23 @@ function safeParseLLMJson(text) {
     cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
 
+  // 1. Direct parse attempt
   try {
     return JSON.parse(cleaned);
   } catch (err1) {
+    // 2. Remove trailing commas & non-whitespace control characters
     try {
-      const sanitized = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+      const sanitized = cleaned
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+        .replace(/,\s*([\}\]])/g, '$1');
       return JSON.parse(sanitized);
     } catch (err2) {
-      const stringRepaired = cleaned.replace(/"(?:[^"\\]|\\.)*"/gs, (match) => {
-        return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
-      });
+      // 3. String-literal repair (newlines/tabs inside strings) + trailing comma strip
+      const stringRepaired = cleaned
+        .replace(/"(?:[^"\\]|\\.)*"/gs, (match) => {
+          return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+        })
+        .replace(/,\s*([\}\]])/g, '$1');
       return JSON.parse(stringRepaired);
     }
   }
