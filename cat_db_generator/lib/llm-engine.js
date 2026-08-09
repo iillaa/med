@@ -184,8 +184,11 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
           responseMimeType: 'application/json'
         };
 
-        if (/gemini-(3|2\.5|2\.0|pro)/i.test(model)) {
-          generationConfig.thinkingConfig = { thinkingBudget: 2048 };
+        if (/gemini-(3|2\.5|2\.0|pro|flash)/i.test(model)) {
+          const defaultBudget = /pro/i.test(model) ? 4096 : 2048;
+          generationConfig.thinkingConfig = {
+            thinkingBudget: options.thinkingBudget || defaultBudget
+          };
         }
 
         const payload = {
