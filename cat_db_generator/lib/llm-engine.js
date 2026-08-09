@@ -70,7 +70,6 @@ async function discoverDynamicModels(apiKey) {
 }
 
 const V2_DB_PATH = path.join(__dirname, '..', 'cats_db_v2_generated.json');
-let humanEditCache = null;
 
 function getHumanEditMemory(title) {
   if (fs.existsSync(V2_DB_PATH)) {
@@ -184,7 +183,8 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
           responseMimeType: 'application/json'
         };
 
-        if (/gemini-(3|2\.5|2\.0|pro|flash)/i.test(model)) {
+        // Apply thinkingConfig only to full Flash/Pro models — exclude lite variants that don't support it
+        if (/gemini-(3|2\.5|2\.0)/i.test(model) && !/lite/i.test(model)) {
           const defaultBudget = /pro/i.test(model) ? 4096 : 2048;
           generationConfig.thinkingConfig = {
             thinkingBudget: options.thinkingBudget || defaultBudget
@@ -201,11 +201,19 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
           generationConfig: generationConfig
         };
 
-        res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        // 60-second timeout per request — prevents infinite hang on stalled models
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        try {
+          res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+        } finally {
+          clearTimeout(timeoutId);
+        }
 
         if (res.status === 429) {
           console.warn(`⚠️ [LLM Rate Limit HTTP 429] Model ${model} rate limited (attempt ${rateLimitAttempts}/3). Pausing 10s to reset quota...`);
