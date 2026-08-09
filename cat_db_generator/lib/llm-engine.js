@@ -343,11 +343,6 @@ FORMAT DE RÉPONSE ATTENDU (EXCLUSIVEMENT DU JSON VALIDE) :
 }`;
 
   const userPrompt = `GÉNÈRE ET SYNTHÉTISE LA CAT POUR : "${cleanTitle}"
-Catégorie : ${category || 'Gastro-entérologie'} de gravité / Signes d'alarme...",
-  "ordonnance": "Modèle de prescription type prêt à l'emploi avec posologies..."
-}`;
-
-  const userPrompt = `GÉNÈRE ET SYNTHÉTISE LA CAT POUR : "${cleanTitle}"
 Catégorie : ${category || 'Gastro-entérologie'}
 
 ${activeLearningText}
