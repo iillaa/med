@@ -721,6 +721,8 @@ export function selectCat(cat, preserveTab = false) {
     }
   });
 
+  renderSubCatBar(cat);
+
   renderSummary(cat.customSummary || cat.summary, cat);
 
   if (notesInput) notesInput.value = cat.notes || '';
@@ -951,6 +953,74 @@ export function loadRelatedPdfs(cat) {
       pdfListContainer.appendChild(createPdfCardElement(file, true));
     });
   }
+}
+
+/**
+ * Render fluid Sub-CAT / Clinical Profile Segmented Bar
+ */
+function renderSubCatBar(cat) {
+  const subCatBar = document.getElementById('subcat-selector-bar');
+  if (!subCatBar) return;
+
+  const subCats = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? cat.sub_cats : null;
+
+  if (!subCats) {
+    subCatBar.style.display = 'none';
+    subCatBar.innerHTML = '';
+    return;
+  }
+
+  subCatBar.style.display = 'flex';
+  subCatBar.innerHTML = '';
+
+  if (state.activeSubCatIndex === undefined || state.activeSubCatIndex >= subCats.length) {
+    state.activeSubCatIndex = 0;
+  }
+
+  subCats.forEach((sub, idx) => {
+    const pill = document.createElement('button');
+    const isActive = idx === state.activeSubCatIndex;
+    pill.className = `subcat-pill ${isActive ? 'active' : ''}`;
+    pill.setAttribute('role', 'tab');
+    pill.setAttribute('aria-selected', isActive ? 'true' : 'false');
+
+    let icon = 'fa-stethoscope';
+    const labelLower = (sub.label || sub.title || '').toLowerCase();
+    if (labelLower.includes('diabét') || labelLower.includes('diabete')) icon = 'fa-droplet';
+    else if (labelLower.includes('rénal') || labelLower.includes('renal')) icon = 'fa-kidneys';
+    else if (labelLower.includes('enceinte') || labelLower.includes('grossesse')) icon = 'fa-person-pregnant';
+    else if (labelLower.includes('enfant') || labelLower.includes('pédiatr') || labelLower.includes('nourrisson')) icon = 'fa-child';
+    else if (labelLower.includes('âgé') || labelLower.includes('gériatr') || labelLower.includes('senior')) icon = 'fa-person-cane';
+    else if (labelLower.includes('urgence') || labelLower.includes('grave') || labelLower.includes('maligne')) icon = 'fa-truck-medical';
+    else if (labelLower.includes('psych') || labelLower.includes('neuro')) icon = 'fa-brain';
+
+    pill.innerHTML = `<i class="fa-solid ${icon} subcat-pill-icon"></i> <span>${escapeHTML(sub.label || sub.title || `Profil ${idx + 1}`)}</span>`;
+
+    pill.addEventListener('click', () => {
+      state.activeSubCatIndex = idx;
+      subCatBar.querySelectorAll('.subcat-pill').forEach((p, i) => {
+        const isAct = i === idx;
+        p.classList.toggle('active', isAct);
+        p.setAttribute('aria-selected', isAct ? 'true' : 'false');
+      });
+
+      const targetData = {
+        ...cat,
+        title: sub.title || cat.title,
+        summary: sub.summary || cat.summary,
+        red_flags: sub.red_flags !== undefined ? sub.red_flags : cat.red_flags,
+        ordonnance: sub.ordonnance !== undefined ? sub.ordonnance : cat.ordonnance
+      };
+
+      if (wsTitle) wsTitle.textContent = `${cat.id}. ${targetData.title}`;
+      if (wsRedFlags) wsRedFlags.textContent = targetData.red_flags;
+      renderSummary(targetData.summary, targetData);
+      renderPrescription(targetData.ordonnance);
+      triggerHaptic(true);
+    });
+
+    subCatBar.appendChild(pill);
+  });
 }
 
 export { restoreAppState };

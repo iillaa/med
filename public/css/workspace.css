@@ -65,6 +65,58 @@
   line-height: 1.35;
 }
 
+/* Sub-CAT Segmented Bar (Fluid point-of-care variant switcher) */
+.subcat-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding: 4px 2px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.subcat-selector-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.subcat-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.subcat-pill:hover {
+  background: rgba(6, 182, 212, 0.08);
+  border-color: rgba(6, 182, 212, 0.35);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.subcat-pill.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35);
+}
+
+.subcat-pill-icon {
+  font-size: 11px;
+}
+
 .status-selector-area {
   display: flex;
   align-items: center;
