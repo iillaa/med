@@ -61,6 +61,7 @@ function cleanQueryTerm(rawQuery) {
     .replace(/^prise\s+en\s+charge\s+d[eu']\s+/i, '')
     .replace(/[`'’"“”«»]/g, ' ')
     .replace(/[-_/]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 
   const tokens = cleaned
