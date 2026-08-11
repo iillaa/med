@@ -499,6 +499,32 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
     try {
       catResult = safeParseLLMJson(apiResult.text);
 
+      // Automated Markdown Sanitizer (Strips dangling **, unclosed tags, cleans headers)
+      const sanitizeMarkdownText = (text) => {
+        if (!text || typeof text !== 'string') return text;
+        let clean = text;
+        clean = clean.replace(/(?:^|\n)\s*\*\*\s*(?:\n|$)/g, '\n');
+        clean = clean.replace(/\*\*\s*\*\*/g, '');
+        clean = clean.replace(/\*\*([^*\n]+):\*(?!\*)/g, '**$1:**');
+        clean = clean.replace(/:\*\*\s*:/g, ':**');
+        clean = clean.replace(/(?:^|\n)(?:\*\*|#{2,4}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*:?\s*(?:\n|$)/gi, (m, title) => {
+          return '\n\n**' + title.trim() + ' :**\n';
+        });
+        clean = clean.replace(/\n{3,}/g, '\n\n');
+        return clean.trim();
+      };
+
+      if (catResult.summary) catResult.summary = sanitizeMarkdownText(catResult.summary);
+      if (catResult.ordonnance) catResult.ordonnance = sanitizeMarkdownText(catResult.ordonnance);
+      if (catResult.red_flags) catResult.red_flags = sanitizeMarkdownText(catResult.red_flags);
+      if (Array.isArray(catResult.sub_cats)) {
+        catResult.sub_cats.forEach(sub => {
+          if (sub.summary) sub.summary = sanitizeMarkdownText(sub.summary);
+          if (sub.ordonnance) sub.ordonnance = sanitizeMarkdownText(sub.ordonnance);
+          if (sub.red_flags) sub.red_flags = sanitizeMarkdownText(sub.red_flags);
+        });
+      }
+
       debugEmitter.emitEvent('llm_parse_success', {
         attempt: attempts,
         keysParsed: Object.keys(catResult),

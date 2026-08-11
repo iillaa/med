@@ -171,14 +171,21 @@ export function escapeHTML(str) {
 /**
  * Formats a block of markdown text into clean HTML (tables, lists, bold, linebreaks)
  */
+/**
+ * Formats a block of markdown text into clean HTML (tables, lists, bold, linebreaks)
+ */
 export function parseMarkdownBlock(text) {
   if (!text) return '';
-  let html = escapeHTML(text);
 
-  // Bold markdown
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // 1. Sanitize dangling asterisks, empty bold tags, and excessive blank lines
+  let clean = text.trim()
+    .replace(/(?:^|\n)\s*\*\*\s*(?:\n|$)/g, '\n')
+    .replace(/\*\*\s*\*\*/g, '')
+    .replace(/\n{3,}/g, '\n\n');
 
-  // Parse markdown tables if any
+  let html = escapeHTML(clean);
+
+  // 2. Parse markdown tables if any
   if (html.includes('|')) {
     const lines = html.split('\n');
     let inTable = false;
@@ -219,36 +226,58 @@ export function parseMarkdownBlock(text) {
     html = lines.join('\n');
   }
 
-  // Remove raw table lines that were already parsed (to prevent double rendering)
+  // Remove raw table lines that were already parsed
   html = html.split('\n').filter(line => {
     const trimmed = line.trim();
     return !(trimmed.startsWith('|') && trimmed.endsWith('|'));
   }).join('\n');
 
-  // Bullet points
-  html = html.split('\n').map(line => {
-    const trimmed = line.trim();
-    if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-      return `<li>${trimmed.substring(2)}</li>`;
-    }
-    return line;
-  }).join('\n');
+  // 3. Strict single-line bold formatting
+  html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
 
-  // Wrap continuous <li> groups in <ul>
-  html = html.replace(/(<li>.*?<\/li>\s*)+/gs, (match) => `<ul>${match}</ul>`);
-
-  // Sub-CAT In-Text Badges: [Titre de la sous-fiche](subcat:1) or [[subcat:1:Titre]]
+  // 4. Sub-CAT In-Text Badges: [Titre de la sous-fiche](subcat:1) or [[subcat:1:Titre]]
   html = html.replace(/\[(.*?)\]\(subcat:([0-9]+)\)/g, '<button type="button" class="subcat-inline-badge" onclick="window.switchToSubProfile && window.switchToSubProfile($2)" title="Consulter la sous-fiche spécialisée"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span>$1</span></button>');
   html = html.replace(/\[\[subcat:([0-9]+):(.*?)]]/g, '<button type="button" class="subcat-inline-badge" onclick="window.switchToSubProfile && window.switchToSubProfile($1)" title="Consulter la sous-fiche spécialisée"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span>$2</span></button>');
 
-  // Paragraph line breaks
-  html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-  html = `<p>${html}</p>`;
-  
-  // Clean empty tags
-  html = html.replace(/<p>\s*<\/p>/g, '').replace(/<p>\s*<ul>/g, '<ul>').replace(/<\/ul>\s*<\/p>/g, '</ul>');
+  // 5. Line-by-line list and paragraph processor (Clean layout without rogue <br>)
+  const lines = html.split('\n');
+  let inList = false;
+  const out = [];
 
-  return html;
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (!l) {
+      if (inList) {
+        inList = false;
+        out.push('</ul>');
+      }
+      continue;
+    }
+    if (l.startsWith('<table') || l.startsWith('</table') || l.startsWith('<tr>')) {
+      if (inList) {
+        inList = false;
+        out.push('</ul>');
+      }
+      out.push(l);
+      continue;
+    }
+    if (l.startsWith('- ') || l.startsWith('• ') || l.startsWith('* ')) {
+      if (!inList) {
+        inList = true;
+        out.push('<ul>');
+      }
+      out.push(`<li>${l.replace(/^[-•*]\s*/, '')}</li>`);
+    } else {
+      if (inList) {
+        inList = false;
+        out.push('</ul>');
+      }
+      out.push(`<p>${l}</p>`);
+    }
+  }
+  if (inList) out.push('</ul>');
+
+  return out.join('');
 }
 
 /**
@@ -297,7 +326,8 @@ export function parseSummaryMarkdown(text) {
   const raw = text.trim();
 
   // Pattern matching: **0. Step Name :** or ### 0. Step Name or 0. Step Name :
-  const stepRegex = /(?:^|\n)(?:\*\*|#{2,4}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+)(?:\*\*)?:?/gi;
+  // Matches full header line up to newline without leaving stray ** or colons in content
+  const stepRegex = /(?:^|\n)(?:\*\*|#{2,4}\s*)?([0-9]+(?:bis|ter)?\.\s*[^\n]+?)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*(?:\n|$)/gi;
   const matches = [...raw.matchAll(stepRegex)];
 
   // If 2 or more clinical steps are found, render clean retractable title sections
@@ -307,7 +337,10 @@ export function parseSummaryMarkdown(text) {
 
     for (let i = 0; i < matches.length; i++) {
       const match = matches[i];
-      const headerTitle = match[1].trim();
+      const headerTitle = match[1].trim()
+        .replace(/^(\*\*|#{2,4}\s*)/, '')
+        .replace(/(\*\*|:|\s)+$/, '')
+        .trim();
       const matchStart = match.index;
 
       if (i === 0 && matchStart > 0) {
