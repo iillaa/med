@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { setupSwipeGestures, debounce, prefersReducedMotion } from '../utils.js';
+import { setupSwipeGestures, debounce, prefersReducedMotion, escapeHTML } from '../utils.js';
 
 // DOM Elements
 let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
