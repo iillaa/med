@@ -529,6 +529,16 @@
   <script>
     let appData = { v1: [], v2: [], validations: [] };
 
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function getAdminHeaders() {
       const token = localStorage.getItem('dr_cat_admin_token') || '';
       return {
@@ -922,38 +932,59 @@
     }
 
     function inspectCAT(id) {
-      const v1Cat = appData.v1.find(c => c.id === id) || { summary: 'Non présent en V1', red_flags: '-', ordonnance: '-' };
-      const v2Cat = appData.v2.find(c => c.id === id);
+      try {
+        const v1Cat = appData.v1.find(c => c.id === id) || { summary: 'Non présent en V1', red_flags: '-', ordonnance: '-' };
+        const v2Cat = appData.v2.find(c => c.id === id);
 
-      if (!v2Cat) return;
+        if (!v2Cat) {
+          alert(`Fiche V3 [ID ${id}] introuvable.`);
+          return;
+        }
 
-      currentInspectedV2 = v2Cat;
-      activeInspectorSubCatIdx = -1;
+        currentInspectedV2 = v2Cat;
+        activeInspectorSubCatIdx = -1;
 
-      document.getElementById('modal-cat-title').textContent = `[ID ${id}] ${v2Cat.title}`;
-      
-      // Legacy V1 Panel
-      document.getElementById('v1-cat-category').textContent = `Catégorie V1: ${v1Cat.category || 'Non spécifiée'}`;
-      document.getElementById('v1-cat-summary').textContent = v1Cat.summary || 'Non disponible';
-      document.getElementById('v1-cat-redflags').textContent = v1Cat.red_flags || 'Non disponible';
-      document.getElementById('v1-cat-ordonnance').textContent = v1Cat.ordonnance || 'Non disponible';
+        const titleEl = document.getElementById('modal-cat-title');
+        if (titleEl) titleEl.textContent = `[ID ${id}] ${v2Cat.title}`;
+        
+        // Legacy V1 Panel
+        const v1CatEl = document.getElementById('v1-cat-category');
+        if (v1CatEl) v1CatEl.textContent = `Catégorie V1: ${v1Cat.category || 'Non spécifiée'}`;
+        const v1SumEl = document.getElementById('v1-cat-summary');
+        if (v1SumEl) v1SumEl.textContent = v1Cat.summary || 'Non disponible';
+        const v1RfEl = document.getElementById('v1-cat-redflags');
+        if (v1RfEl) v1RfEl.textContent = v1Cat.red_flags || 'Non disponible';
+        const v1OrdEl = document.getElementById('v1-cat-ordonnance');
+        if (v1OrdEl) v1OrdEl.textContent = v1Cat.ordonnance || 'Non disponible';
 
-      // V2 Panel
-      const isAdmin = (v2Cat.category || '').toLowerCase() === 'administratif' || /certificat|lettre|attestation/i.test(v2Cat.title);
-      const schemaBadge = document.getElementById('v2-schema-badge');
-      schemaBadge.textContent = isAdmin ? '📋 Admin Schema Lock' : '🩺 5-Step Clinical Lock';
-      schemaBadge.className = `badge ${isAdmin ? 'badge-admin' : 'badge-clinical'}`;
+        // V2 Panel
+        const isAdmin = (v2Cat.category || '').toLowerCase() === 'administratif' || /certificat|lettre|attestation/i.test(v2Cat.title);
+        const schemaBadge = document.getElementById('v2-schema-badge');
+        if (schemaBadge) {
+          schemaBadge.textContent = isAdmin ? '📋 Admin Schema Lock' : '🩺 5-Step Clinical Lock';
+          schemaBadge.className = `badge ${isAdmin ? 'badge-admin' : 'badge-clinical'}`;
+        }
 
-      const metrics = v2Cat._execution_metrics || {};
-      document.getElementById('metric-model').textContent = metrics.model || 'gemini-3.6-flash';
-      document.getElementById('metric-latency').textContent = metrics.latencyMs ? `${metrics.latencyMs} ms` : '-';
-      document.getElementById('metric-tokens').textContent = metrics.totalTokens ? `${metrics.totalTokens} tokens (${metrics.promptTokens} in / ${metrics.completionTokens} out)` : '-';
+        const metrics = v2Cat._execution_metrics || {};
+        const modelEl = document.getElementById('metric-model');
+        if (modelEl) modelEl.textContent = metrics.model || 'gemini-3.6-flash';
+        const latEl = document.getElementById('metric-latency');
+        if (latEl) latEl.textContent = metrics.latencyMs ? `${metrics.latencyMs} ms` : '-';
+        const tokEl = document.getElementById('metric-tokens');
+        if (tokEl) tokEl.textContent = metrics.totalTokens ? `${metrics.totalTokens} tokens (${metrics.promptTokens} in / ${metrics.completionTokens} out)` : '-';
 
-      renderInspectorTabs(v2Cat);
-      updateInspectorProfile(v2Cat);
+        renderInspectorTabs(v2Cat);
+        updateInspectorProfile(v2Cat);
 
-      document.getElementById('compare-modal').classList.add('active');
-      syncModalBodyLock();
+        const compareModal = document.getElementById('compare-modal');
+        if (compareModal) {
+          compareModal.classList.add('active');
+          syncModalBodyLock();
+        }
+      } catch (err) {
+        console.error('Error in inspectCAT:', err);
+        alert(`Erreur d'ouverture de l'inspecteur : ${err.message}`);
+      }
     }
 
     function syncModalBodyLock() {
