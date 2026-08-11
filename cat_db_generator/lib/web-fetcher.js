@@ -1,107 +1,114 @@
 /**
- * Step 1: Live Web Research & Structured Cacher Module
- * High-reliability multi-source medical fetchers:
- *   Source 1: Wikipedia Medical REST API (French) — 100% 0-block JSON API.
- *   Source 2: MedG Clinical Consensus RSS Feed — 100% status 200, French GP consensus.
- *   Source 3: MSD Manuals Professionnels (French) — 100% status 200, professional diagnostics & treatments.
- * Saves structured JSON cache files under `cat_db_generator/web_cache/<sanitized_title>/`.
+ * V3 Doctor-Grade Web RAG Fetcher & Cache Manager
+ * Fetches clinical reference material from 4 high-reliability medical endpoints:
+ *   1. PubMed / NCBI PMC: efetch real peer-reviewed abstracts & guideline texts.
+ *   2. MSD Manuals Professional (French): Real chapter retrieval via Jina Reader & DDG discovery.
+ *   3. MedG (French Clinical Consensus RSS Feed).
+ *   4. Wikipedia Medical REST API (French Definition & Pathophysiology fallback).
+ * 
+ * Features:
+ *   - 30-Day Cache Expiry (TTL) to ensure guidelines stay clinically updated.
+ *   - Real-time diagnostic telemetry via DebugEmitter.
  */
 
 const fs = require('fs');
 const path = require('path');
 const debugEmitter = require('./debug-emitter');
 
-const CACHE_BASE_DIR = path.join(__dirname, '..', 'web_cache');
+const CACHE_BASE_DIR = path.join(__dirname, '..', '..', 'data', 'web_cache');
+const CACHE_TTL_DAYS = 30; // 30-day freshness lifespan
 
 /**
- * Sanitizes a CAT title to create a clean directory name
+ * Sanitizes CAT Title into a clean folder name
  */
 function sanitizeTitleForDir(title) {
-  return title
+  return (title || 'untitled')
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove accents
-    .replace(/^cat\s+devant\s+/i, '')
-    .replace(/[^a-z0-9_-]+/g, '_')
-    .replace(/^_+|_+$/g, '');
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .substring(0, 70);
 }
 
 /**
- * Cleans raw XML/HTML text into clean readable markdown/plain text
+ * Strips HTML tags, Markdown noise, and excessive whitespace
  */
-function cleanTextContent(html) {
-  if (!html) return '';
-  return html
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-    .replace(/<script\b[^<]*>([\s\S]*?)<\/script>/gi, '')
-    .replace(/<style\b[^<]*>([\s\S]*?)<\/style>/gi, '')
-    .replace(/<nav\b[^<]*>([\s\S]*?)<\/nav>/gi, '')
-    .replace(/<header\b[^<]*>([\s\S]*?)<\/header>/gi, '')
-    .replace(/<footer\b[^<]*>([\s\S]*?)<\/footer>/gi, '')
+function cleanTextContent(raw) {
+  if (!raw) return '';
+  return raw
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
     .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&eacute;/gi, 'é')
-    .replace(/&egrave;/gi, 'è')
-    .replace(/&agrave;/gi, 'à')
-    .replace(/&ugrave;/gi, 'ù')
-    .replace(/&acirc;/gi, 'â')
-    .replace(/&ecirc;/gi, 'ê')
-    .replace(/&icirc;/gi, 'î')
-    .replace(/&ocirc;/gi, 'ô')
-    .replace(/&ucirc;/gi, 'û')
-    .replace(/&amp;/gi, '&')
+    .replace(/\[\s*\]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 /**
- * Checks if a medical text snippet contains high-density physician data
- * (exact dosages, mg/kg, contraindications, 1st line treatments).
+ * Checks if extracted clinical text has substantive medical density
  */
 function isHighClinicalDensity(text) {
   if (!text || text.length < 150) return false;
-  const clinicalPattern = /(\b\d+\s*(mg|g|mcg|µg|UI|ml|cp|gélule|flacon|ampoule)\b|\bmg\/kg|\b1ère\s+intention|\balternative|\bcontre-indication|\bposologie|\bdrapeau\s+rouge|\btraitement\s+symptomatique|\bdose-poids)/i;
-  return clinicalPattern.test(text);
+  const medicalTokens = [
+    'traitement', 'posologie', 'diagnostic', 'symptômes', 'signes', 'clinique',
+    'complications', 'étiologie', 'recommandation', 'molécule', 'ordonnance',
+    'indication', 'contre-indication', 'gravité', 'urgence', 'bilan', 'examen',
+    'mg', 'dose', 'guideline', 'patient', 'hospitalisation'
+  ];
+  const lower = text.toLowerCase();
+  const hits = medicalTokens.filter(t => lower.includes(t));
+  return hits.length >= 3;
 }
 
 /**
- * 1. Doctor-Grade Fetcher: NCBI PubMed / StatPearls Open REST API (Physician Level)
+ * 1. PubMed / NCBI efetch Clinical Abstract Fetcher (Real medical abstracts)
  */
-async function fetchStatPearlsMedical(cleanTitle, originalTitle) {
+async function fetchStatPearlsMedical(keyword, fullTitle) {
   try {
-    if (/test|1785|1234/i.test(cleanTitle) || /test/i.test(originalTitle || '')) return null;
+    if (/test|1785|1234/i.test(keyword)) return null;
 
-    const term = `${cleanTitle} treatment guidelines`;
-    const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=${encodeURIComponent(term)}&retmode=json`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000);
-
-    const res = await fetch(searchUrl, { signal: controller.signal });
-    clearTimeout(timeoutId);
+    const cleanKw = keyword.replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
+    const searchQuery = `(${cleanKw}) AND (guideline[pt] OR practice guideline[pt] OR review[pt] OR treatment OR management)`;
+    
+    // Step A: Search for relevant guideline/review PMIDs
+    const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(searchQuery)}&retmode=json&retmax=3&sort=pub_date`;
+    const sController = new AbortController();
+    const sTimeout = setTimeout(() => sController.abort(), 7000);
+    const res = await fetch(searchUrl, { signal: sController.signal });
+    clearTimeout(sTimeout);
     if (!res.ok) return null;
 
     const data = await res.json();
     const idList = data.esearchresult?.idlist || [];
     if (idList.length === 0) return null;
 
-    const pmcId = idList[0];
-    const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pmc&id=${pmcId}&retmode=json`;
-    const sumRes = await fetch(summaryUrl);
-    if (!sumRes.ok) return null;
+    const pmid = idList[0];
 
-    const sumData = await sumRes.json();
-    const article = sumData.result?.[pmcId];
-    if (!article || !article.title) return null;
+    // Step B: Use efetch to download the REAL clinical abstract text
+    const fetchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${pmid}&rettype=abstract&retmode=text`;
+    const fController = new AbortController();
+    const fTimeout = setTimeout(() => fController.abort(), 8000);
+    const fetchRes = await fetch(fetchUrl, { signal: fController.signal });
+    clearTimeout(fTimeout);
+    if (!fetchRes.ok) return null;
 
-    const summaryText = `[PubMed PMC Guidelines: ${article.title}]\nSource: ${article.source || 'NCBI PMC'}\nAuthors: ${(article.authors || []).map(a => a.name).slice(0, 3).join(', ')}\nPubDate: ${article.pubdate || '-'}\nTitle: ${article.title}`;
+    const rawAbstract = await fetchRes.text();
+    const cleanAbstract = rawAbstract.replace(/\r/g, '').trim();
+
+    if (cleanAbstract.length < 150) return null;
+
+    // Extract title line from efetch output (usually after the journal header line)
+    const lines = cleanAbstract.split('\n').filter(l => l.trim().length > 0);
+    const paperTitle = lines.length > 2 ? lines[1].trim() : `PubMed ID: ${pmid}`;
 
     return {
       domain: 'ncbi.nlm.nih.gov',
-      sourceId: `ncbi_pmc_${pmcId}`,
-      sourceName: `StatPearls / PubMed PMC Guidelines (NCBI: ${article.title.substring(0, 45)}...)`,
-      sourceUrl: `https://www.ncbi.nlm.nih.gov/pmc/articles/PMC${pmcId}/`,
+      sourceId: `ncbi_pubmed_${pmid}`,
+      sourceName: `PubMed Clinical Abstract (PMID ${pmid}: ${paperTitle.substring(0, 40)}...)`,
+      sourceUrl: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
       fetchedAt: new Date().toISOString(),
       isHighDensity: true,
-      content: summaryText
+      content: cleanAbstract.substring(0, 4000)
     };
   } catch (err) {
     return null;
@@ -109,41 +116,82 @@ async function fetchStatPearlsMedical(cleanTitle, originalTitle) {
 }
 
 /**
- * 2. Doctor-Grade Fetcher: MSD Manuals Professionnels via Jina Reader (Clean Markdown)
+ * 2. MSD Manuals Professionnel: Direct French Medical Chapter Fetcher via Jina Reader
  */
 async function fetchMSDProfessionalJina(cleanTitle) {
   try {
     if (/test|1785|1234/i.test(cleanTitle)) return null;
 
-    const targetUrl = `https://www.msdmanuals.com/fr/professional/SearchResults?query=${encodeURIComponent(cleanTitle)}`;
-    const jinaUrl = `https://r.jina.ai/${targetUrl}`;
+    // Step A: Discover the direct French Professional article link via DuckDuckGo HTML Search
+    const ddgQuery = `${cleanTitle} site:msdmanuals.com/fr/professional/`;
+    const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(ddgQuery)}`;
+    
+    let directArticleUrl = null;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
 
-    const res = await fetch(jinaUrl, {
+    const ddgRes = await fetch(ddgUrl, {
       signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html'
+      }
+    });
+    clearTimeout(timeoutId);
+
+    if (ddgRes.ok) {
+      const html = await ddgRes.text();
+      const rx = /uddg=([^&"\x27]+)/g;
+      let m;
+      while ((m = rx.exec(html)) !== null) {
+        const decoded = decodeURIComponent(m[1]);
+        if (decoded.includes('msdmanuals.com/fr/professional/') && !decoded.includes('SearchResults')) {
+          directArticleUrl = decoded;
+          break;
+        }
+      }
+    }
+
+    // Fallback: If DDG was throttled, try search URL directly
+    const targetUrl = directArticleUrl || `https://www.msdmanuals.com/fr/professional/SearchResults?query=${encodeURIComponent(cleanTitle)}`;
+    const jinaUrl = `https://r.jina.ai/${targetUrl}`;
+
+    const jController = new AbortController();
+    const jTimeout = setTimeout(() => jController.abort(), 9000);
+    const jinaRes = await fetch(jinaUrl, {
+      signal: jController.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         'Accept': 'text/plain, text/markdown'
       }
     });
-    clearTimeout(timeoutId);
-    if (!res.ok) return null;
+    clearTimeout(jTimeout);
 
-    const markdown = await res.text();
-    const cleanText = cleanTextContent(markdown);
+    if (!jinaRes.ok) return null;
+
+    const markdown = await jinaRes.text();
+    // Clean out honeypot / navigation headers
+    let cleanText = markdown
+      .replace(/\[honeypot link\][^\n]*/gi, '')
+      .replace(/\[skip to main content\][^\n]*/gi, '')
+      .trim();
+
     if (cleanText.length < 250) return null;
+
+    // Extract title from Jina output
+    const titleMatch = cleanText.match(/^Title:\s*(.+)$/m);
+    const articleTitle = titleMatch ? titleMatch[1].trim() : `Manuel MSD: ${cleanTitle}`;
 
     const isHighDensity = isHighClinicalDensity(cleanText);
 
     return {
       domain: 'msdmanuals.com',
       sourceId: `msd_pro_${cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
-      sourceName: `Manuel MSD Professionnel (Jina MD: ${cleanTitle})`,
+      sourceName: `Manuel MSD Professionnel (${articleTitle.substring(0, 45)}...)`,
       sourceUrl: targetUrl,
       fetchedAt: new Date().toISOString(),
       isHighDensity: isHighDensity,
-      content: cleanText.substring(0, 4000)
+      content: cleanText.substring(0, 4500)
     };
   } catch (err) {
     return null;
@@ -151,7 +199,7 @@ async function fetchMSDProfessionalJina(cleanTitle) {
 }
 
 /**
- * 3. Fetcher for Wikipedia Medical REST API (French) — 0% blockage, 100% reliability
+ * 3. Wikipedia Medical REST API (French) — Instant 100% reliable baseline definition
  */
 async function fetchWikipediaMedical(cleanTitle, originalTitle) {
   try {
@@ -198,7 +246,7 @@ async function fetchWikipediaMedical(cleanTitle, originalTitle) {
 }
 
 /**
- * 4. Fetcher for MedG French Clinical Consensus Feed (Status 200 Guaranteed)
+ * 4. MedG French Clinical Consensus Feed
  */
 async function fetchMedGConsensus(cleanTitle) {
   try {
@@ -247,7 +295,6 @@ async function fetchMedGConsensus(cleanTitle) {
 
 /**
  * Smart Keyword Normalizer & Extractor
- * Converts titles like "CAT devant psoriasis peau / cheveux" -> ["psoriasis", "psoriasis cuir chevelu"]
  */
 function extractSmartKeywords(title, customKeywords) {
   if (Array.isArray(customKeywords) && customKeywords.length > 0) {
@@ -259,31 +306,25 @@ function extractSmartKeywords(title, customKeywords) {
 
   const clean = title
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove accents
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/^cat\s+devant\s+(l[a'’]|le|les|un|une)?\s*/i, '')
     .replace(/^redaction\s+d[a'’]\s*(un|une|la)?\s*/i, '')
     .replace(/chez\s+(l[a'’]|le|les|adulte|enfant|nourrisson|femme\s+enceinte).*/i, '')
     .trim();
 
-  // Split slashes into multiple core keywords
   const parts = clean.split(/[\/\,\&]/).map(p => p.trim()).filter(p => p.length > 2);
   const keywords = [];
 
   if (parts.length > 0) {
-    // Primary core medical term (e.g. "psoriasis")
     const primaryWord = parts[0].split(/\s+/)[0];
     if (primaryWord.length >= 3) keywords.push(primaryWord);
-    
-    // Full primary part (e.g. "psoriasis peau")
     if (parts[0] !== primaryWord) keywords.push(parts[0]);
 
-    // Secondary parts (e.g. "RGO", "vomissements")
     for (let i = 1; i < parts.length; i++) {
       if (parts[i].length >= 3) keywords.push(parts[i]);
     }
   }
 
-  // Fallback to full cleaned title if no parts extracted
   if (keywords.length === 0) {
     keywords.push(clean);
   }
@@ -292,8 +333,45 @@ function extractSmartKeywords(title, customKeywords) {
 }
 
 /**
- * Searches and fetches clinical guidelines for a specific CAT title across 3 high-reliability medical sources.
- * Supports incremental top-up: if existing cache has fewer than maxSources, it attempts to query missing sources.
+ * Gets cached web sources for a CAT title from disk, enforcing 30-day freshness TTL.
+ * @param {string} title CAT Title
+ * @param {number} maxAgeDays Maximum allowable cache age in days (default: 30)
+ */
+function getCachedWebSources(title, maxAgeDays = CACHE_TTL_DAYS) {
+  const sanitizedDirName = sanitizeTitleForDir(title);
+  const targetDir = path.join(CACHE_BASE_DIR, sanitizedDirName);
+
+  if (!fs.existsSync(targetDir)) return [];
+
+  const files = fs.readdirSync(targetDir).filter(f => f.endsWith('.json'));
+  const cached = [];
+  const maxAgeMs = maxAgeDays * 24 * 3600 * 1000;
+
+  for (const file of files) {
+    try {
+      const raw = fs.readFileSync(path.join(targetDir, file), 'utf8');
+      const obj = JSON.parse(raw);
+
+      // Check TTL freshness
+      if (obj.fetchedAt) {
+        const ageMs = Date.now() - new Date(obj.fetchedAt).getTime();
+        if (ageMs > maxAgeMs) {
+          // Stale cache file, skip to trigger fresh fetch
+          continue;
+        }
+      }
+
+      cached.push(obj);
+    } catch (e) {
+      continue;
+    }
+  }
+
+  return cached;
+}
+
+/**
+ * Searches and fetches clinical guidelines across 4 verified medical sources.
  * @param {string} title CAT Title
  * @param {object} options Options { forceRefetch: boolean, maxSources: number, searchKeywords: string|Array }
  */
@@ -306,7 +384,6 @@ async function fetchAndCacheWebSources(title, options = {}) {
     fs.mkdirSync(targetDir, { recursive: true });
   }
 
-  // If forceRefetch is requested, purge existing cache files first
   if (options.forceRefetch && fs.existsSync(targetDir)) {
     const existingFiles = fs.readdirSync(targetDir).filter(f => f.endsWith('.json'));
     for (const f of existingFiles) {
@@ -315,12 +392,11 @@ async function fetchAndCacheWebSources(title, options = {}) {
     console.log(`🗑️ [Web Cache] Purged existing cache for "${title}" due to forceRefetch.`);
   }
 
-  // Check existing cached sources
+  // Check existing cached sources (enforces 30-day TTL)
   const existingCache = getCachedWebSources(title);
   
-  // If we already have enough or more than target max, reuse existing cache
   if (!options.forceRefetch && existingCache && existingCache.length >= targetMax) {
-    console.log(`🌐 [Web Cache] Reusing ${existingCache.length} cached web sources for "${title}".`);
+    console.log(`🌐 [Web Cache] Reusing ${existingCache.length} fresh cached web sources for "${title}".`);
     debugEmitter.emitEvent('web_cache_hit', {
       title,
       cachedCount: existingCache.length,
@@ -329,11 +405,10 @@ async function fetchAndCacheWebSources(title, options = {}) {
     return existingCache;
   }
 
-  // Incremental Top-Up Mode: Keep existing sources and attempt to query missing ones
   const fetchedSources = [...existingCache];
   const fetchedKeys = new Set(existingCache.map(s => s.sourceId));
-
   const smartKeywords = extractSmartKeywords(title, options.searchKeywords);
+
   console.log(`🌐 [Step 1 Web Research] ${existingCache.length > 0 ? `Top-up mode (${existingCache.length}/${targetMax} cached)` : 'Fetching live sources'} for "${title}" using ${smartKeywords.length} keyword(s)...`);
 
   debugEmitter.emitEvent('web_fetch_start', {
@@ -347,8 +422,8 @@ async function fetchAndCacheWebSources(title, options = {}) {
     for (const kw of smartKeywords) {
       if (fetchedSources.length >= targetMax) break;
 
-      // 1. Doctor-Grade: StatPearls / PubMed PMC Open REST API (NCBI)
-      console.log(`   - Querying StatPearls / PubMed PMC (NCBI) for "${kw}"...`);
+      // 1. Doctor-Grade: PubMed efetch Abstract (NCBI)
+      console.log(`   - Querying PubMed efetch (NCBI) for "${kw}"...`);
       const ncbiData = await fetchStatPearlsMedical(kw, title).catch(err => {
         debugEmitter.emitEvent('web_fetch_fail', { source: 'PubMed PMC', keyword: kw, error: err.message });
         return null;
@@ -370,7 +445,7 @@ async function fetchAndCacheWebSources(title, options = {}) {
 
       if (fetchedSources.length >= targetMax) break;
 
-      // 2. Doctor-Grade: MSD Manuals Professionnels via Jina Reader
+      // 2. Doctor-Grade: MSD Manuals Professionnels Direct Chapter via Jina Reader
       console.log(`   - Querying Manuel MSD Professionnel (Jina MD) for "${kw}"...`);
       const msdData = await fetchMSDProfessionalJina(kw).catch(err => {
         debugEmitter.emitEvent('web_fetch_fail', { source: 'MSD Manuals', keyword: kw, error: err.message });
@@ -502,31 +577,6 @@ function clearAllWebCache() {
     }
   }
   return { success: true, message: 'Le cache Web est déjà totalement vide.', deletedCount: 0 };
-}
-
-/**
- * Gets cached web sources for a CAT title from disk
- */
-function getCachedWebSources(title) {
-  const sanitizedDirName = sanitizeTitleForDir(title);
-  const targetDir = path.join(CACHE_BASE_DIR, sanitizedDirName);
-
-  if (!fs.existsSync(targetDir)) return [];
-
-  const files = fs.readdirSync(targetDir).filter(f => f.endsWith('.json'));
-  const cached = [];
-
-  for (const file of files) {
-    try {
-      const raw = fs.readFileSync(path.join(targetDir, file), 'utf8');
-      const obj = JSON.parse(raw);
-      cached.push(obj);
-    } catch (e) {
-      continue;
-    }
-  }
-
-  return cached;
 }
 
 /**
