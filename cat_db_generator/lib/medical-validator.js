@@ -148,57 +148,65 @@ function validateCAT(cat) {
     }
 
     // --- DYNAMIC DRUG SAFETY ENGINE (loaded from drug-safety-rules.json) ---
-    const fullTextLower = `${cat.summary} ${cat.ordonnance}`.toLowerCase();
+    const ordTextLower = (cat.ordonnance || '').toLowerCase();
+    const fullTextLower = `${cat.summary || ''} ${cat.ordonnance || ''}`.toLowerCase();
 
     for (const rule of DRUG_SAFETY_RULES) {
       const detectPattern = `(?:${rule.detect_regex})`;
       const detectRx = new RegExp(detectPattern, 'i');
-      if (!detectRx.test(fullTextLower)) continue; // drug not mentioned, skip
+      
+      // 7a. Overdose checks (Daily Gram ceiling / Daily mg frequency / Pediatric mg/kg)
+      if (detectRx.test(ordTextLower)) {
+        if (rule.max_daily_dose_g) {
+          const dailyMgMatch = ordTextLower.match(
+            new RegExp(detectPattern + '[^.\\n]*?(\\d+)\\s*mg[^.\\n]*?(\\d+)\\s*(?:fois|x)\\/?j', 'i')
+          );
+          if (dailyMgMatch && dailyMgMatch[1] && dailyMgMatch[2]) {
+            const singleMg = parseInt(dailyMgMatch[1], 10);
+            const freq = parseInt(dailyMgMatch[2], 10);
+            const totalMg = singleMg * freq;
+            if (totalMg > rule.max_daily_dose_g * 1000) {
+              errors.push(`[Safety Overdose] ${rule.name} : ${singleMg}mg × ${freq}/j = ${totalMg}mg/j dépasse la dose max de ${rule.max_daily_dose_g * 1000}mg/j. ${rule.error_message}`);
+            }
+          }
 
-      // Max daily dose check (grams)
-      if (rule.max_daily_dose_g) {
-        const dailyMgMatch = fullTextLower.match(
-          new RegExp(detectPattern + '[^.\\n]*?(\\d+)\\s*mg[^.\\n]*?(\\d+)\\s*(?:fois|x)\\/?j', 'i')
-        );
-        if (dailyMgMatch && dailyMgMatch[1] && dailyMgMatch[2]) {
-          const singleMg = parseInt(dailyMgMatch[1], 10);
-          const freq = parseInt(dailyMgMatch[2], 10);
-          const totalMg = singleMg * freq;
-          if (totalMg > rule.max_daily_dose_g * 1000) {
-            errors.push(`[Safety] ${rule.name} : ${singleMg}mg × ${freq}/j = ${totalMg}mg/j dépasse la dose max de ${rule.max_daily_dose_g * 1000}mg/j. ${rule.error_message}`);
+          const dailyGramMatch = ordTextLower.match(
+            new RegExp(detectPattern + '[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*g(?:/j|/jour|\\s+par\\s+jour)?', 'i')
+          );
+          if (dailyGramMatch && dailyGramMatch[1]) {
+            const grams = parseFloat(dailyGramMatch[1].replace(',', '.'));
+            if (grams > rule.max_daily_dose_g) {
+              errors.push(`[Safety Overdose] ${rule.name} : ${grams}g dépasse la dose max journalière de ${rule.max_daily_dose_g}g/j. ${rule.error_message}`);
+            }
           }
         }
 
-        const dailyGramMatch = fullTextLower.match(
-          new RegExp(detectPattern + '[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*g(?:/j|/jour|\\s+par\\s+jour)?', 'i')
-        );
-        if (dailyGramMatch && dailyGramMatch[1]) {
-          const grams = parseFloat(dailyGramMatch[1].replace(',', '.'));
-          if (grams > rule.max_daily_dose_g) {
-            errors.push(`[Safety] ${rule.name} : ${grams}g dépasse la dose max journalière de ${rule.max_daily_dose_g}g/j. ${rule.error_message}`);
+        // Pediatric mg/kg check
+        if (rule.pediatric_max_single_mg_per_kg && isPediatric) {
+          const mgKgMatch = ordTextLower.match(
+            new RegExp(detectPattern + '[^.\\n]*?(\\d+)\\s*mg\\/kg', 'i')
+          );
+          if (mgKgMatch && mgKgMatch[1]) {
+            const dose = parseInt(mgKgMatch[1], 10);
+            if (dose > rule.pediatric_max_single_mg_per_kg) {
+              errors.push(`[Safety Pediatric] ${rule.name} : ${dose} mg/kg/prise dépasse la limite pédiatrique de ${rule.pediatric_max_single_mg_per_kg} mg/kg/prise. ${rule.error_message}`);
+            }
           }
         }
-      }
 
-      // Pediatric mg/kg check
-      if (rule.pediatric_max_single_mg_per_kg && isPediatric) {
-        const mgKgMatch = fullTextLower.match(
-          new RegExp(detectPattern + '[^.\\n]*?(\\d+)\\s*mg\\/kg', 'i')
-        );
-        if (mgKgMatch && mgKgMatch[1]) {
-          const dose = parseInt(mgKgMatch[1], 10);
-          if (dose > rule.pediatric_max_single_mg_per_kg) {
-            errors.push(`[Safety] ${rule.name} pédiatrique : ${dose} mg/kg/prise dépasse la limite de ${rule.pediatric_max_single_mg_per_kg} mg/kg/prise. ${rule.error_message}`);
-          }
-        }
-      }
-
-      // Contraindication checks
-      if (Array.isArray(rule.contraindications)) {
-        for (const ci of rule.contraindications) {
-          const ciRx = new RegExp(ci.trigger_regex, 'i');
-          if (ciRx.test(fullTextLower)) {
-            errors.push(`[Safety CI] ${rule.name} : ${ci.message}`);
+        // 7b. Contraindication checks (Only if prescribed to contraindicated population without a warning clause)
+        if (Array.isArray(rule.contraindications)) {
+          for (const ci of rule.contraindications) {
+            const ciRx = new RegExp(ci.trigger_regex, 'i');
+            const targetPatientContext = `${cat.title || ''} ${cat.category || ''} ${ordTextLower}`;
+            
+            if (ciRx.test(targetPatientContext)) {
+              // If the ordonnance contains explicit warning words ("ne pas", "contre-indiqué", "éviter", "attention"), it is an advisory, not an illegal prescription
+              const isWarningClause = /(?:contre-indiqu[eé]|ne\s+pas|pas\s+de|[eé]viter|attention|ne\s+jamais|interdit|proscrit|sauf\s+si|absence\s+d[e'’]|si\s+allergie)/i.test(ordTextLower);
+              if (!isWarningClause) {
+                errors.push(`[Safety CI] ${rule.name} : ${ci.message}`);
+              }
+            }
           }
         }
       }
