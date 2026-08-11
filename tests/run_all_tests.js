@@ -3,6 +3,9 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const testFiles = [
+  { name: 'Step Accordions & Sub-CAT Parser Test', file: 'tests/test_accordions_and_subcats.mjs' },
+  { name: 'Doctor-Grade Compact Print Formatter Test', file: 'tests/test_print_formatter.mjs' },
+  { name: 'Client References & Lint Static Audit', file: 'tests/lint_client_references.mjs' },
   { name: 'Prescription Rendering Test', file: 'tests/test_prescription.mjs' },
   { name: 'Reprendre la révision Test', file: 'tests/test_resume.mjs' },
   { name: 'Suggestion Lifecycle Test', file: 'tests/test_suggestions.js' },
