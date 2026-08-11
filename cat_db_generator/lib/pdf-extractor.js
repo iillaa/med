@@ -54,11 +54,13 @@ function hasExactWord(text, word) {
 function cleanQueryTerm(rawQuery) {
   const cleaned = (rawQuery || '')
     .toLowerCase()
-    .replace(/^cat\s+devant\s+/i, '')
+    .replace(/^cat\s+devant\s+(?:l[a'’]|le|les|un|une)?\s*/i, '')
     .replace(/^cat\s+/i, '')
-    .replace(/^conduite\s+à\s+tenir\s+devant\s+/i, '')
-    .replace(/^conduite\s+a\s+tenir\s+devant\s+/i, '')
-    .replace(/^prise\s+en\s+charge\s+d[eu']\s+/i, '')
+    .replace(/^la\s+gale/i, 'gale')
+    .replace(/^conduite\s+à\s+tenir\s+devant\s+(?:l[a'’]|le|les|un|une)?\s*/i, '')
+    .replace(/^conduite\s+a\s+tenir\s+devant\s+(?:l[a'’]|le|les|un|une)?\s*/i, '')
+    .replace(/^prise\s+en\s+charge\s+d[eu'’]\s+/i, '')
+    .replace(/\b(?:chez\s+l[’']|chez\s+l[ae]|chez\s+les|chez\s+un[e]?|chez)\b/gi, ' ')
     .replace(/[`'’"“”«»]/g, ' ')
     .replace(/[-_/]/g, ' ')
     .replace(/\s+/g, ' ')
@@ -66,7 +68,7 @@ function cleanQueryTerm(rawQuery) {
 
   const tokens = cleaned
     .split(/\s+/)
-    .filter(t => t.length >= 3 && !['les', 'des', 'une', 'par', 'sur', 'pour', 'dans', 'chez'].includes(t));
+    .filter(t => t.length >= 2 && !['le', 'la', 'les', 'des', 'une', 'un', 'par', 'sur', 'pour', 'dans', 'chez', 'd', 'l'].includes(t));
 
   return {
     fullPhrase: cleaned,
