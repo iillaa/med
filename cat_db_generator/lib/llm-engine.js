@@ -387,6 +387,13 @@ ${sourcesSummary}
    - Insuffisance Rénale / Gériatrie : Adapter les doses selon le DFG (Cockcroft / CKD-EPI) et éliminer les molécules néphrotoxiques.
    - Psychiatrie & Interactions : Alerte sur le risque de syndrome sérotoninergique (ISRS + Tramadol) et d'allongement du QTc.
    - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie et les sources ne la concernent pas.
+
+4. SOUS-PROFILS CLINIQUES ET SUB-CATS DÉDIÉS (Pour les pathologies complexes ou à sous-types critiques) :
+   - Si la pathologie présente des complications aiguës majeures ou des formes cliniques distinctes nécessitant une prise en charge/réanimation dédiée (ex: Diabète ➔ Acidocétose diabétique, Diabète gestationnel ; Diarrhée ➔ Forme glairo-sanglante, Nourrisson/SRO ; HTA ➔ Urgence hypertensive, HTA gravidique ; Asthme ➔ Asthme aigu grave) :
+   - A. DANS LE TEXTE "summary" PRINCIPAL : Insère un lien contextuel naturel vers la sous-fiche avec la syntaxe markdown :
+     [🚨 Ouvrir la Sous-Fiche Acidocétose Diabétique](subcat:1) ou [👶 Ouvrir la Sous-Fiche Nourrisson / SRO](subcat:2)
+   - B. DANS LE TABLEAU "sub_cats" DU JSON : Fournis la sous-fiche complète avec ses 5 étapes modulaires, ses red_flags et son ordonnance dédiée.
+   - Si la pathologie est simple ou univoque (ex: Constipation banale, Furoncle simple), ne génère pas de sub_cats (tableau vide ou absent).
 `;
 
   if (isAdmin) {
@@ -443,7 +450,15 @@ FORMAT DE RÉPONSE ATTENDU (EXCLUSIVEMENT DU JSON VALIDE) :
   "search_keywords": ["mot-clé 1", "mot-clé 2"],
   "summary": "...",
   "red_flags": "Critères de gravité / Signes d'alarme...",
-  "ordonnance": "Modèle de prescription type structuré en 4 parties..."
+  "ordonnance": "Modèle de prescription type structuré en 4 parties...",
+  "sub_cats": [
+    {
+      "label": "🚨 Nom de la sous-fiche spécialisée",
+      "summary": "**0. Stabilisation...**\\n**1. Diagnostic...**\\n**2. Traitement...**",
+      "red_flags": "Drapeaux rouges spécifiques au sous-profil...",
+      "ordonnance": "Prescription dédiée pour ce sous-profil..."
+    }
+  ]
 }`;
 
   const userPrompt = `GÉNÈRE ET SYNTHÉTISE LA CAT POUR : "${cleanTitle}"

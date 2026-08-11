@@ -220,6 +220,25 @@ function validateCAT(cat) {
     warnings.push('Field "pdf_keywords" is empty. Linking to local PDF index will be disabled for this CAT.');
   }
 
+  // 9. Sub-CATs Verification (Optional nested specialized profiles)
+  if (cat.sub_cats) {
+    if (!Array.isArray(cat.sub_cats)) {
+      errors.push('Field "sub_cats" must be an array of specialized profile objects.');
+    } else {
+      cat.sub_cats.forEach((sub, sIdx) => {
+        if (!sub.label || typeof sub.label !== 'string') {
+          errors.push(`Sub-CAT #${sIdx + 1}: Missing "label" field.`);
+        }
+        if (!sub.summary || typeof sub.summary !== 'string' || sub.summary.length < 50) {
+          errors.push(`Sub-CAT #${sIdx + 1} ("${sub.label || 'Sans nom'}"): "summary" is required and must contain structured markdown.`);
+        }
+        if (!sub.ordonnance || typeof sub.ordonnance !== 'string' || sub.ordonnance.length < 15) {
+          errors.push(`Sub-CAT #${sIdx + 1} ("${sub.label || 'Sans nom'}"): "ordonnance" is required.`);
+        }
+      });
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors,

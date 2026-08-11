@@ -240,7 +240,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     editSummaryBtn.addEventListener('click', () => {
       summaryView.style.display = 'none';
       summaryEditorWrapper.style.display = 'flex';
-      summaryEditor.value = state.activeCat.summary;
+      const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat?.sub_cats);
+      summaryEditor.value = isSub
+        ? (state.activeCat.sub_cats[state.activeSubCatIndex - 1].summary || '')
+        : (state.activeCat?.summary || '');
     });
   }
 
@@ -264,16 +267,26 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const restore = setButtonLoading(saveSummaryBtn);
 
       try {
+        const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat.sub_cats);
         if (state.isAdmin) {
-          const result = await api.saveCatDataToServer(state.activeCat.id, { summary: newSummary });
+          let result;
+          if (isSub) {
+            state.activeCat.sub_cats[state.activeSubCatIndex - 1].summary = newSummary;
+            result = await api.saveCatDataToServer(state.activeCat.id, { sub_cats: state.activeCat.sub_cats });
+          } else {
+            result = await api.saveCatDataToServer(state.activeCat.id, { summary: newSummary });
+          }
+
           if (result.success) {
-            state.activeCat.summary = newSummary;
+            if (!isSub) state.activeCat.summary = newSummary;
             const itemInAll = (state.allCats || []).find(c => c.id === state.activeCat.id);
             if (itemInAll) {
-              itemInAll.summary = newSummary;
+              if (isSub) itemInAll.sub_cats = state.activeCat.sub_cats;
+              else itemInAll.summary = newSummary;
             }
-            renderSummary(newSummary, state.activeCat);
-            showToast("Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
+            const subLabel = isSub ? state.activeCat.sub_cats[state.activeSubCatIndex - 1].label : null;
+            renderSummary(newSummary, state.activeCat, subLabel);
+            showToast(isSub ? "Sous-fiche mise à jour avec succès !" : "Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
             triggerHaptic(true);
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
@@ -644,6 +657,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
 export function selectCat(cat, preserveTab = false) {
   if (window.perf) window.perf.startMeasure('workspace.selectCat');
   state.activeCat = cat;
+  state.activeSubCatIndex = 0;
   state.activePrescriptionVariantIndex = 0;
 
   if (!cat) {
