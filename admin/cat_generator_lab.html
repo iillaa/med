@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dr.CAT — CAT Database V2 Generator Lab</title>
+  <title>Dr.CAT — CAT Database V3 Generator Lab</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -229,8 +229,8 @@
   <div class="container">
     <div class="header">
       <div class="header-title">
-        <h1>🩺 Dr. CAT — Database V2 Generator Lab</h1>
-        <p>Real-time AI Synthesis Inspector, PDF Index RAG Verification & Production Database Promoter</p>
+        <h1>🩺 Dr. CAT — Database V3 Generator Lab</h1>
+        <p>Real-time AI Synthesis Inspector, PDF GPS RAG Verification & Production Database Promoter</p>
       </div>
       <div class="btn-group">
         <button onclick="run1TapBatchPipeline()" class="btn-success" style="background: linear-gradient(135deg, #10b981, #06b6d4); color: white;" title="Étape 1 (Web Fetch) + Étape 2 (Dual RAG IA) + Étape 3 (Approbation Auto) en 1-Tap !">⚡ 1-Tap Batch Global (Tout FAIRE)</button>
@@ -238,7 +238,7 @@
         <button onclick="runStep1BatchWebFetch(true)" class="btn-outline" style="color: #38bdf8; border-color: #38bdf8;" title="Forcer la recherche en ligne pour toutes les fiches (remplace le cache)">🔄 Recharger Web Global</button>
         <button onclick="purgeAllWebCache()" class="btn-outline" style="color: var(--danger); border-color: var(--danger);" title="Effacer définitivement tout le dossier de cache Web sur disque">🗑️ Vider Tout Cache Web</button>
         <button onclick="runBatchGeneration()" class="btn-warning">⚡ Step 2: Dual RAG Batch (<span class="lbl-total-count">...</span>)</button>
-        <button onclick="promoteV2()" class="btn-success">💾 Promote V2 to Production</button>
+        <button onclick="promoteV2()" class="btn-success">💾 Promote V3 to Production</button>
         <button onclick="loadData()" class="btn-outline">🔄 Refresh</button>
       </div>
     </div>
@@ -246,7 +246,7 @@
     <!-- Metrics Cards -->
     <div class="stats-grid">
       <div class="card">
-        <div class="card-label">Total V2 Generated CATs</div>
+        <div class="card-label">Total V3 Generated CATs</div>
         <div id="stat-total" class="card-value" style="color: var(--primary);">0</div>
         <div class="card-sub" id="stat-total-sub">Out of ... clinical definitions</div>
       </div>
@@ -335,7 +335,7 @@
           </tr>
         </thead>
         <tbody id="cat-table-body">
-          <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chargement des données V2...</td></tr>
+          <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chargement des données V3...</td></tr>
         </tbody>
       </table>
     </div>
@@ -364,10 +364,10 @@
           <pre id="v1-cat-ordonnance">Non disponible</pre>
         </div>
 
-        <!-- Synthesized V2 Panel -->
+        <!-- Synthesized V3 Panel -->
         <div class="compare-panel">
           <div class="compare-title">
-            <span>⚡ Version 2 (Real AI RAG Engine)</span>
+            <span>⚡ Version 3 (Clinical Dual RAG Engine)</span>
             <span id="v2-schema-badge" class="badge badge-clinical">5-Step Clinical Lock</span>
           </div>
           <div class="metric-row" id="v2-metrics-row">
@@ -504,7 +504,7 @@
           <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:30px;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.5);">
             <div style="font-size:40px;margin-bottom:15px;">🔐</div>
             <h2 style="color:#f8fafc;font-size:20px;margin-bottom:10px;">Connexion Admin Requise</h2>
-            <p style="color:#94a3b8;font-size:13px;margin-bottom:20px;">Veuillez saisir votre mot de passe administrateur pour accéder au Generator Lab V2.</p>
+            <p style="color:#94a3b8;font-size:13px;margin-bottom:20px;">Veuillez saisir votre mot de passe administrateur pour accéder au Generator Lab V3.</p>
             <input type="password" id="lab-auth-password" placeholder="Mot de passe admin..." style="width:100%;padding:10px 14px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#fff;font-size:14px;margin-bottom:15px;box-sizing:border-box;">
             <button onclick="submitLabLogin()" style="width:100%;padding:10px;background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff;border:none;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;">Se Connecter</button>
             <div id="lab-auth-error" style="color:#ef4444;font-size:12px;margin-top:12px;display:none;"></div>
@@ -638,12 +638,12 @@
                 ${isValid ? '✅ VALID' : '❌ REJECTED'}
               </span>
             ` : `
-              <span class="badge badge-warning">⚠️ EN ATTENTE V2</span>
+              <span class="badge badge-warning">⚠️ EN ATTENTE V3</span>
             `}
           </td>
           <td>
             <div style="font-size: 11px; font-family: monospace;">
-              ${c.isV2 ? `${metrics.model || 'gemini-3.6-flash'} | ${metrics.latencyMs ? metrics.latencyMs + 'ms' : '-'} | ${metrics.totalTokens ? metrics.totalTokens + ' tok' : '-'}` : 'Pas encore générée en V2'}
+              ${c.isV2 ? `${metrics.model || 'gemini-3.6-flash'} | ${metrics.latencyMs ? metrics.latencyMs + 'ms' : '-'} | ${metrics.totalTokens ? metrics.totalTokens + ' tok' : '-'}` : 'Pas encore générée en V3'}
             </div>
           </td>
           <td style="white-space: nowrap;">
@@ -654,7 +654,7 @@
             <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}', false)" class="btn-outline" style="padding: 4px 8px; font-size: 11px;" title="Mode incrémental : complète les sources manquantes">🌐 Step 1 Web</button>
             <button onclick="runStep1WebFetch('${(c.title || '').replace(/'/g, "\\'")}', true)" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);" title="Forcer la recherche en ligne (remplace le cache)">🔄 Recharger Web</button>
             <button onclick="purgeWebCache('${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);" title="Effacer les fichiers de cache Web pour cette fiche">🗑️ Vider Cache</button>
-            <button onclick="regenerateSingleCAT('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}', ${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">${c.isV2 ? '🔄 Régénérer' : '⚡ Générer V2'}</button>
+            <button onclick="regenerateSingleCAT('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}', ${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--warning); border-color: var(--warning);">${c.isV2 ? '🔄 Régénérer' : '⚡ Générer V3'}</button>
             ${c.isV2 ? `<button onclick="deleteCAT(${c.id}, '${(c.title || '').replace(/'/g, "\\'")}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--danger); border-color: var(--danger);">🗑️ Supprimer</button>` : ''}
           </td>
         `;
@@ -663,7 +663,7 @@
     }
 
     async function run1TapPipelineSingle(title, category, id) {
-      if (!confirm(`Lancer le pipeline 1-Tap Auto (Web Fetch + IA Dual RAG V2) pour : "${title}" ?`)) return;
+      if (!confirm(`Lancer le pipeline 1-Tap Auto (Web Fetch + IA Dual RAG V3) pour : "${title}" ?`)) return;
 
       try {
         // Step 1: Web Fetch
@@ -682,9 +682,9 @@
           body: JSON.stringify({ id, title, category })
         });
         const genData = await genRes.json();
-        if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V2');
+        if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V3');
 
-        alert(`⚡ Fiche #${id} "${title}" générée avec succès en V2 ! (${genData.metrics ? genData.metrics.model : 'Dual RAG'})`);
+        alert(`⚡ Fiche #${id} "${title}" générée avec succès en V3 ! (${genData.metrics ? genData.metrics.model : 'Dual RAG'})`);
         await loadData();
       } catch (err) {
         alert(`❌ Erreur 1-Tap Auto: ${err.message}`);
@@ -692,14 +692,14 @@
     }
 
     async function run1TapBatchPipeline() {
-      if (!confirm('Lancer le Batch 1-Tap Global (Web Fetch + Génération IA V2) pour TOUTES les fiches en attente ?')) return;
+      if (!confirm('Lancer le Batch 1-Tap Global (Web Fetch + Génération IA V3) pour TOUTES les fiches en attente ?')) return;
 
       const ungenerated = (appData.v1 || []).filter(cat => {
         return !appData.v2 || !appData.v2.some(v2 => Number(v2.id) === Number(cat.id));
       });
 
       if (ungenerated.length === 0) {
-        alert('Toutes les fiches sont déjà générées en V2 !');
+        alert('Toutes les fiches sont déjà générées en V3 !');
         return;
       }
 
