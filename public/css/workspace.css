@@ -65,52 +65,45 @@
   line-height: 1.35;
 }
 
-/* Sub-CAT Segmented Bar (Fluid point-of-care variant switcher) */
+/* Sub-CAT Segmented Bar (Non-scrollable, zero gesture conflict with swipe navigation) */
 .subcat-selector-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  overflow-x: auto;
-  padding: 4px 2px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.subcat-selector-bar::-webkit-scrollbar {
-  display: none;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 2px 0;
 }
 
 .subcat-pill {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  padding: 6px 14px;
-  border-radius: 50px;
-  font-size: 12.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 5px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
-  flex-shrink: 0;
+  touch-action: manipulation;
 }
 
 .subcat-pill:hover {
   background: rgba(6, 182, 212, 0.08);
   border-color: rgba(6, 182, 212, 0.35);
   color: var(--color-primary);
-  transform: translateY(-1px);
 }
 
 .subcat-pill.active {
   background: var(--color-primary);
   color: #ffffff;
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35);
+  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.3);
 }
 
 .subcat-pill-icon {

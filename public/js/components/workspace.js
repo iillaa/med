@@ -586,6 +586,9 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const isTopPanel = e.target.closest('.workspace-header') || e.target.closest('#red-flags-banner');
       if (!isTopPanel) return;
 
+      // Prevent conflict when tapping sub-profile pills
+      if (e.target.closest('#subcat-selector-bar') || e.target.closest('.subcat-pill')) return;
+
       const tagName = e.target.tagName.toLowerCase();
       const insideEditor = e.target.closest('#summary-editor') || e.target.closest('#notes-input');
       if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
