@@ -233,7 +233,7 @@ export function printCatDocument(cat) {
   <style>
     @page {
       size: A4 portrait;
-      margin: 8mm 10mm 8mm 10mm;
+      margin: 10mm 12mm 10mm 12mm;
     }
     * {
       box-sizing: border-box;
@@ -246,34 +246,35 @@ export function printCatDocument(cat) {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: #0f172a;
       background: #ffffff;
-      font-size: 8.5pt;
-      line-height: 1.3;
+      font-size: 10.5pt;
+      line-height: 1.45;
     }
     /* Sleek Doctor-Grade Letterhead */
     .doc-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      border-bottom: 2px solid #0891b2;
-      padding-bottom: 3px;
-      margin-bottom: 6px;
+      border-bottom: 2.5px solid #0891b2;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
     }
     .brand-title {
-      font-size: 11pt;
+      font-size: 13.5pt;
       font-weight: 800;
       color: #0891b2;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.3px;
     }
     .brand-sub {
-      font-size: 7pt;
+      font-size: 9pt;
       color: #64748b;
       font-weight: 500;
+      margin-left: 4px;
     }
     .doc-meta {
       text-align: right;
-      font-size: 7.5pt;
+      font-size: 9pt;
       color: #475569;
-      line-height: 1.2;
+      line-height: 1.3;
     }
     .author-name {
       font-weight: 800;
@@ -283,82 +284,82 @@ export function printCatDocument(cat) {
     .title-strip {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
     .cat-badge {
       background: #0891b2;
       color: #ffffff;
-      font-size: 7pt;
+      font-size: 8.5pt;
       font-weight: 800;
       text-transform: uppercase;
-      padding: 1.5px 5px;
-      border-radius: 3px;
+      padding: 2.5px 7px;
+      border-radius: 4px;
       letter-spacing: 0.3px;
       white-space: nowrap;
     }
     .main-title {
-      font-size: 11pt;
+      font-size: 14pt;
       font-weight: 800;
       color: #0f172a;
       margin: 0;
-      line-height: 1.2;
+      line-height: 1.25;
     }
     /* Compact Red Flags Banner */
     .rf-banner {
       background: #fef2f2;
       border: 1px solid #fecaca;
-      border-left: 3.5px solid #dc2626;
-      padding: 3px 6px;
-      margin-bottom: 6px;
-      border-radius: 3px;
-      font-size: 7.5pt;
+      border-left: 4px solid #dc2626;
+      padding: 5px 9px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 9.5pt;
       color: #991b1b;
-      line-height: 1.25;
+      line-height: 1.35;
       page-break-inside: avoid;
       break-inside: avoid;
     }
     .rf-label {
       font-weight: 800;
       color: #b91c1c;
-      margin-right: 4px;
+      margin-right: 5px;
     }
     /* Clinical Steps Typography */
     .step-block {
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       page-break-inside: avoid;
       break-inside: avoid;
     }
     .step-title {
-      font-size: 8pt;
+      font-size: 10.5pt;
       font-weight: 800;
-      padding: 1.5px 5px;
-      border-radius: 3px;
-      margin-bottom: 2px;
+      padding: 2.5px 7px;
+      border-radius: 4px;
+      margin-bottom: 3px;
       display: inline-block;
       letter-spacing: 0.2px;
     }
-    .step-title-0 { background: #fee2e2; color: #991b1b; border-left: 2.5px solid #ef4444; }
-    .step-title-1 { background: #e0f2fe; color: #0369a1; border-left: 2.5px solid #0284c7; }
-    .step-title-2 { background: #dcfce7; color: #15803d; border-left: 2.5px solid #16a34a; }
-    .step-title-3 { background: #fef3c7; color: #b45309; border-left: 2.5px solid #d97706; }
-    .step-title-4 { background: #f3e8ff; color: #6b21a8; border-left: 2.5px solid #9333ea; }
+    .step-title-0 { background: #fee2e2; color: #991b1b; border-left: 3px solid #ef4444; }
+    .step-title-1 { background: #e0f2fe; color: #0369a1; border-left: 3px solid #0284c7; }
+    .step-title-2 { background: #dcfce7; color: #15803d; border-left: 3px solid #16a34a; }
+    .step-title-3 { background: #fef3c7; color: #b45309; border-left: 3px solid #d97706; }
+    .step-title-4 { background: #f3e8ff; color: #6b21a8; border-left: 3px solid #9333ea; }
     
     .step-body {
-      font-size: 8pt;
-      line-height: 1.28;
+      font-size: 10pt;
+      line-height: 1.4;
       color: #1e293b;
-      padding-left: 4px;
+      padding-left: 6px;
     }
     .step-body p {
-      margin: 0 0 3px 0;
+      margin: 0 0 4px 0;
     }
     .step-body ul {
-      margin: 1px 0 3px 12px;
+      margin: 2px 0 4px 16px;
       padding: 0;
     }
     .step-body li {
-      margin-bottom: 1.5px;
+      margin-bottom: 2px;
     }
     .step-body strong {
       color: #0f172a;
@@ -367,12 +368,12 @@ export function printCatDocument(cat) {
     .print-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 4px 0 6px 0;
-      font-size: 7.5pt;
+      margin: 6px 0 8px 0;
+      font-size: 9pt;
     }
     .print-table th, .print-table td {
       border: 1px solid #cbd5e1;
-      padding: 3px 5px;
+      padding: 4px 7px;
       text-align: left;
     }
     .print-table th {
@@ -385,134 +386,134 @@ export function printCatDocument(cat) {
       border: 1px solid #a5f3fc;
       color: #0891b2;
       font-weight: 700;
-      font-size: 7.5pt;
-      padding: 0.5px 4px;
-      border-radius: 2px;
+      font-size: 9pt;
+      padding: 1px 5px;
+      border-radius: 3px;
       display: inline-block;
     }
     /* Compact Rx Card */
     .rx-card {
       background: #f8fafc;
       border: 1px solid #cbd5e1;
-      border-left: 3.5px solid #0891b2;
-      padding: 5px 8px;
+      border-left: 4px solid #0891b2;
+      padding: 7px 10px;
       border-radius: 4px;
-      margin: 6px 0;
+      margin: 8px 0;
       page-break-inside: avoid;
       break-inside: avoid;
     }
     .rx-header {
-      font-size: 8pt;
+      font-size: 10pt;
       font-weight: 800;
       color: #0891b2;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     .rx-body {
       font-family: inherit;
-      font-size: 7.5pt;
-      line-height: 1.3;
+      font-size: 9.5pt;
+      line-height: 1.4;
       white-space: pre-wrap;
       margin: 0;
       color: #0f172a;
     }
     /* Sub-CATs Section */
     .subcats-section {
-      border-top: 1px dashed #cbd5e1;
-      padding-top: 5px;
-      margin-top: 6px;
+      border-top: 1.5px dashed #cbd5e1;
+      padding-top: 6px;
+      margin-top: 8px;
     }
     .subcats-header {
-      font-size: 8pt;
+      font-size: 10.5pt;
       font-weight: 800;
       color: #0891b2;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
     .subcat-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 6px;
+      gap: 8px;
     }
     .subcat-card {
       background: #fafafa;
       border: 1px solid #e2e8f0;
-      border-left: 3px solid #06b6d4;
+      border-left: 3.5px solid #06b6d4;
       border-radius: 4px;
-      padding: 4px 6px;
+      padding: 6px 8px;
       page-break-inside: avoid;
       break-inside: avoid;
     }
     .subcat-card-title {
-      font-size: 8pt;
+      font-size: 10pt;
       font-weight: 800;
       color: #0891b2;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     .subcat-badge {
       background: #0891b2;
       color: #ffffff;
-      font-size: 6.5pt;
-      padding: 0.5px 4px;
-      border-radius: 6px;
-      margin-right: 2px;
+      font-size: 8pt;
+      padding: 1px 5px;
+      border-radius: 8px;
+      margin-right: 3px;
     }
     .subcat-rf {
       background: #fff5f5;
-      border-left: 2px solid #ef4444;
-      padding: 2px 5px;
-      font-size: 7.5pt;
+      border-left: 2.5px solid #ef4444;
+      padding: 3px 6px;
+      font-size: 9pt;
       color: #991b1b;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       border-radius: 2px;
     }
     .subcat-body {
-      font-size: 7.5pt;
-      line-height: 1.25;
+      font-size: 9.5pt;
+      line-height: 1.35;
     }
     .subcat-body p {
-      margin: 0 0 2px 0;
+      margin: 0 0 3px 0;
     }
     .subcat-rx-box {
       background: #ffffff;
       border: 1px dashed #cbd5e1;
-      padding: 3px 5px;
-      margin-top: 3px;
-      border-radius: 2px;
+      padding: 4px 7px;
+      margin-top: 4px;
+      border-radius: 3px;
     }
     .subcat-rx-tag {
       font-weight: 800;
       color: #0891b2;
-      font-size: 7pt;
-      margin-right: 3px;
+      font-size: 8.5pt;
+      margin-right: 4px;
     }
     .subcat-rx-text {
       margin: 0;
       font-family: inherit;
-      font-size: 7pt;
-      line-height: 1.2;
+      font-size: 8.5pt;
+      line-height: 1.3;
       white-space: pre-wrap;
       display: inline;
     }
     /* Notes */
     .notes-box {
       border: 1px solid #e2e8f0;
-      border-left: 3px solid #8b5cf6;
-      border-radius: 3px;
-      padding: 3px 6px;
+      border-left: 3.5px solid #8b5cf6;
+      border-radius: 4px;
+      padding: 5px 8px;
       background: #faf5ff;
       font-style: italic;
-      font-size: 7.5pt;
-      margin-top: 4px;
+      font-size: 9.5pt;
+      margin-top: 6px;
       page-break-inside: avoid;
       break-inside: avoid;
     }
     /* Footer */
     .doc-footer {
       border-top: 1px solid #cbd5e1;
-      padding-top: 3px;
-      margin-top: 8px;
+      padding-top: 4px;
+      margin-top: 10px;
       display: flex;
       justify-content: space-between;
-      font-size: 6.5pt;
+      font-size: 8pt;
       color: #64748b;
       page-break-inside: avoid;
       break-inside: avoid;
