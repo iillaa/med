@@ -998,22 +998,7 @@ window.switchToSubProfile = function(idx) {
   const wsRedFlags = document.getElementById('red-flags-content');
   if (wsRedFlags) wsRedFlags.textContent = prof.red_flags || state.activeCat.red_flags;
 
-  let summaryContent = prof.summary || state.activeCat.summary;
-  if (targetIdx > 0) {
-    const returnHeader = `
-      <div class="subcat-intext-return-banner">
-        <span class="subcat-intext-return-label">
-          <i class="fa-solid fa-code-branch"></i> Sous-Fiche : <strong>${escapeHTML(prof.label)}</strong>
-        </span>
-        <button type="button" class="subcat-intext-return-btn" onclick="window.switchToSubProfile(0)">
-          <i class="fa-solid fa-arrow-left"></i> Revenir à la fiche principale
-        </button>
-      </div>
-    `;
-    summaryContent = returnHeader + '\n\n' + summaryContent;
-  }
-
-  renderSummary(summaryContent, state.activeCat);
+  renderSummary(prof.summary || state.activeCat.summary, state.activeCat, targetIdx > 0 ? prof.label : null);
   renderPrescription(prof.ordonnance || state.activeCat.ordonnance);
   triggerHaptic(true);
 

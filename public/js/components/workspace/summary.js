@@ -1,10 +1,25 @@
 import { state } from '../../state.js';
 import { parseSummaryMarkdown, escapeHTML } from '../../utils.js';
 
-export function renderSummary(text, cat) {
+export function renderSummary(text, cat, subProfileLabel) {
   const summaryView = document.getElementById('summary-view');
   if (!summaryView) return;
-  summaryView.innerHTML = parseSummaryMarkdown(text);
+
+  let bannerHtml = '';
+  if (state.activeSubCatIndex > 0 && subProfileLabel) {
+    bannerHtml = `
+      <div class="subcat-intext-return-banner">
+        <span class="subcat-intext-return-label">
+          <i class="fa-solid fa-code-branch"></i> Sous-Fiche : <strong>${escapeHTML(subProfileLabel)}</strong>
+        </span>
+        <button type="button" class="subcat-intext-return-btn" onclick="window.switchToSubProfile(0)">
+          <i class="fa-solid fa-arrow-left"></i> Revenir à la fiche principale
+        </button>
+      </div>
+    `;
+  }
+
+  summaryView.innerHTML = bannerHtml + parseSummaryMarkdown(text);
 
   if (state.isAdmin && cat && cat.history && cat.history.length > 0) {
     let historyHtml = '<div class="cat-history-section" style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:14px; pointer-events:none;">';
