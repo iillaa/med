@@ -42,7 +42,9 @@ jobs:
       # lighthouserc.js holds the mobile profile + score assertions
       # (perf >= 0.85, a11y >= 0.85, best-practices >= 0.90).
       - name: Run Lighthouse CI
-        run: npx --yes @lhci/cli@0.13 autorun --collect.url="${{ github.event.inputs.url }}" || true
+        env:
+          LHCI_URL: ${{ github.event.inputs.url }}
+        run: npx --yes @lhci/cli@0.13 autorun --collect.url="$LHCI_URL" || true
 
       - name: Upload Lighthouse Report
         if: always()

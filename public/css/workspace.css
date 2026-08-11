@@ -274,7 +274,7 @@
 .light-theme .tab-btn.active,
 [data-theme="light"] .tab-btn.active {
   background: var(--color-primary);
-  color: #ffffff;
+  color: #042f2e;
   box-shadow: 0 4px 12px rgba(14, 116, 144, 0.3);
 }
 

@@ -21,7 +21,6 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { corsMiddleware } = require('./middleware/cors');
 const { rateLimitMiddleware } = require('./middleware/rate-limit');
-const { gzipMiddleware } = require('./middleware/gzip');
 const { registerAuthRoutes } = require('./routes/auth');
 const { registerCatRoutes } = require('./routes/cats');
 const { registerSuggestionRoutes } = require('./routes/suggestions');
