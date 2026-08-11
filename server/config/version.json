@@ -1,15 +1,14 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.7.1",
+  "latestVersion": "1.7.5",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.7.1 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.7.5 est disponible.",
   "releaseNotes": [
-    "Sécurité: suppression de la clé API admin exposée dans le bundle client",
-    "Correction du bouton toast Actualiser (UX background sync)",
-    "network_security_config.xml pour Android 9+ (HTTPS natif)",
-    "Compactage APK: shrinkResources activé",
-    "CORS preflight: tous les headers APK inclus dans OPTIONS",
-    "Téléchargement APK: URL absolue correcte en mode Capacitor"
+    "V3 RAG Engine: Deep PDF GPS navigation avec indexation par table des matières (+90 pts)",
+    "Web RAG Doctor-Grade: PubMed efetch avec vrais abstracts cliniques et manuels MSD professionnels",
+    "Moteur de sécurité dynamique: assertions sur 16 molécules et tolérance des mises en garde cliniques",
+    "Télémétrie en temps réel: panneau inspecteur SSE dans le Lab d'administration",
+    "Guide de standardisation RAG avec prompt de conversion IA externe"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
