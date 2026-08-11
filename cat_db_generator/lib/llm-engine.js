@@ -513,6 +513,8 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
 
       if (options.id !== undefined && options.id !== null) {
         catResult.id = Number(options.id);
+      } else if (!catResult.id || typeof catResult.id !== 'number') {
+        catResult.id = 999; // Transient integer for standalone generation & validation pass
       }
       catResult.category = category || catResult.category || 'Gastro-entérologie';
       if (options.originalTitle) {

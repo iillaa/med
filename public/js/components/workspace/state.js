@@ -1,17 +1,19 @@
-export function buildPrintableText(cat) {
+export function buildPrintableText(cat, activeSubCat) {
+  const titleSuffix = activeSubCat && activeSubCat.label ? ` — ${activeSubCat.label}` : '';
   const lines = [
-    `Dr.CAT — ${cat.id}. ${cat.title}`,
+    `Dr.CAT — ${cat.id}. ${cat.title}${titleSuffix}`,
     `Catégorie : ${cat.category}`,
     '-------------------------------------------'
   ];
-  if (cat.red_flags && cat.red_flags.trim()) {
-    lines.push(`\nRED FLAGS:\n${cat.red_flags}`);
+  const redFlags = activeSubCat ? (activeSubCat.red_flags || cat.red_flags) : cat.red_flags;
+  if (redFlags && redFlags.trim()) {
+    lines.push(`\nRED FLAGS:\n${redFlags}`);
   }
-  const summary = cat.customSummary || cat.summary;
+  const summary = activeSubCat ? activeSubCat.summary : (cat.customSummary || cat.summary);
   if (summary && summary.trim()) {
-    lines.push(`\nCONDUCTE À TENIR:\n${summary}`);
+    lines.push(`\nCONDUITE À TENIR:\n${summary}`);
   }
-  const prescription = cat.customOrdonnance || cat.ordonnance;
+  const prescription = activeSubCat ? activeSubCat.ordonnance : (cat.customOrdonnance || cat.ordonnance);
   if (prescription && prescription.trim()) {
     lines.push(`\nORDONNANCE TYPE:\n${prescription}`);
   }

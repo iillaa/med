@@ -186,25 +186,34 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const prescriptionVal = document.getElementById('print-val-prescription');
       const notesVal = document.getElementById('print-val-notes');
 
+      const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat.sub_cats);
+      const activeSubCat = isSub ? state.activeCat.sub_cats[state.activeSubCatIndex - 1] : null;
+
       if (catVal) catVal.textContent = state.activeCat.category;
-      if (titleVal) titleVal.textContent = `${state.activeCat.id}. ${state.activeCat.title}`;
+      if (titleVal) {
+        titleVal.textContent = activeSubCat && activeSubCat.label 
+          ? `${state.activeCat.id}. ${state.activeCat.title} — ${activeSubCat.label}`
+          : `${state.activeCat.id}. ${state.activeCat.title}`;
+      }
 
       const rfSec = document.getElementById('print-section-redflags');
-      if (state.activeCat.red_flags && state.activeCat.red_flags.trim().length > 0) {
-        if (redFlagsVal) redFlagsVal.textContent = state.activeCat.red_flags;
+      const activeRedFlags = activeSubCat ? (activeSubCat.red_flags || state.activeCat.red_flags) : state.activeCat.red_flags;
+      if (activeRedFlags && activeRedFlags.trim().length > 0) {
+        if (redFlagsVal) redFlagsVal.textContent = activeRedFlags;
         if (rfSec) rfSec.style.display = 'block';
       } else {
         if (rfSec) rfSec.style.display = 'none';
       }
 
       if (summaryVal) {
-        const rawText = state.activeCat.summary;
+        const rawText = activeSubCat ? activeSubCat.summary : (state.activeCat.customSummary || state.activeCat.summary);
         summaryVal.innerHTML = parseSummaryMarkdown(rawText);
       }
 
       const presSec = document.getElementById('print-section-prescription');
-      if (state.activeCat.ordonnance && state.activeCat.ordonnance.trim().length > 0) {
-        if (prescriptionVal) prescriptionVal.textContent = state.activeCat.ordonnance;
+      const activePrescription = activeSubCat ? (activeSubCat.ordonnance || state.activeCat.ordonnance) : (state.activeCat.customOrdonnance || state.activeCat.ordonnance);
+      if (activePrescription && activePrescription.trim().length > 0) {
+        if (prescriptionVal) prescriptionVal.textContent = activePrescription;
         if (presSec) presSec.style.display = 'block';
       } else {
         if (presSec) presSec.style.display = 'none';
@@ -219,7 +228,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       }
 
       if (typeof window.Capacitor !== 'undefined' || api.isOfflineApp) {
-        const text = buildPrintableText(state.activeCat);
+        const text = buildPrintableText(state.activeCat, activeSubCat);
         if (navigator.clipboard && navigator.clipboard.writeText) {
           try {
             await navigator.clipboard.writeText(text);
@@ -301,12 +310,17 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             return;
           }
 
+          const clonedSubCats = isSub ? JSON.parse(JSON.stringify(state.activeCat.sub_cats)) : null;
+          if (clonedSubCats) {
+            clonedSubCats[state.activeSubCatIndex - 1].summary = newSummary;
+          }
+
           await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'edit',
               catId: state.activeCat.id,
-              data: { summary: newSummary }
+              data: isSub ? { sub_cats: clonedSubCats } : { summary: newSummary }
             },
             "Votre proposition de modification a été envoyée à l'administrateur pour validation."
           );
@@ -357,7 +371,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       wsPrescription.style.display = 'none';
       prescriptionEditor.style.display = 'block';
       prescriptionEditorActions.style.display = 'flex';
-      prescriptionEditor.value = state.activeCat.ordonnance;
+      const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat?.sub_cats);
+      prescriptionEditor.value = isSub
+        ? (state.activeCat.sub_cats[state.activeSubCatIndex - 1].ordonnance || '')
+        : (state.activeCat?.ordonnance || '');
     });
   }
 
@@ -382,16 +399,25 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const restore = setButtonLoading(savePrescriptionBtn);
 
       try {
+        const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat.sub_cats);
         if (state.isAdmin) {
-          const result = await api.saveCatDataToServer(state.activeCat.id, { ordonnance: newOrdonnance });
+          let result;
+          if (isSub) {
+            state.activeCat.sub_cats[state.activeSubCatIndex - 1].ordonnance = newOrdonnance;
+            result = await api.saveCatDataToServer(state.activeCat.id, { sub_cats: state.activeCat.sub_cats });
+          } else {
+            result = await api.saveCatDataToServer(state.activeCat.id, { ordonnance: newOrdonnance });
+          }
+
           if (result.success) {
-            state.activeCat.ordonnance = newOrdonnance;
+            if (!isSub) state.activeCat.ordonnance = newOrdonnance;
             const itemInAll = (state.allCats || []).find(c => c.id === state.activeCat.id);
             if (itemInAll) {
-              itemInAll.ordonnance = newOrdonnance;
+              if (isSub) itemInAll.sub_cats = state.activeCat.sub_cats;
+              else itemInAll.ordonnance = newOrdonnance;
             }
             renderPrescription(newOrdonnance);
-            showToast("Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
+            showToast(isSub ? "Ordonnance de la sous-fiche mise à jour !" : "Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
             triggerHaptic(true);
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
@@ -406,12 +432,17 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             return;
           }
 
+          const clonedSubCats = isSub ? JSON.parse(JSON.stringify(state.activeCat.sub_cats)) : null;
+          if (clonedSubCats) {
+            clonedSubCats[state.activeSubCatIndex - 1].ordonnance = newOrdonnance;
+          }
+
           await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'edit',
               catId: state.activeCat.id,
-              data: { ordonnance: newOrdonnance }
+              data: isSub ? { sub_cats: clonedSubCats } : { ordonnance: newOrdonnance }
             },
             "Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation."
           );
@@ -1009,7 +1040,7 @@ window.switchToSubProfile = function(idx) {
   state.activeSubCatIndex = targetIdx;
 
   const prof = profiles[targetIdx];
-  const wsRedFlags = document.getElementById('red-flags-content');
+  const wsRedFlags = document.getElementById('workspace-red-flags');
   if (wsRedFlags) wsRedFlags.textContent = prof.red_flags || state.activeCat.red_flags;
 
   renderSummary(prof.summary || state.activeCat.summary, state.activeCat, targetIdx > 0 ? prof.label : null);
