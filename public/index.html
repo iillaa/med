@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.7.6">
-  <meta name="app-build-version" content="2026.08.11.18.24">
+  <meta name="app-build-version" content="2026.08.11.18.30">
   <title>Dr.CAT — Rappel Clinique</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
@@ -396,22 +396,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608111824" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608111824"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608111830" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608111830"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608111824" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608111824"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608111830" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608111830"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608111824" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608111824" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608111824">
+  <link rel="stylesheet" href="style.css?v=2608111830" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608111830" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608111830">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608111824">
-    <link rel="stylesheet" href="css/utilities.css?v=2608111824">
+    <link rel="stylesheet" href="style.css?v=2608111830">
+    <link rel="stylesheet" href="css/utilities.css?v=2608111830">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608111824"></script>
+  <script type="module" src="js/version-checker.js?v=2608111830"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1335,6 +1335,12 @@ body {
         </div>
       </div>
     </div>
+
+    <!-- Sub-CATs Multi-Profile Section -->
+    <div class="print-section print-subcats-section" id="print-section-subcats" style="display: none;">
+      <h3><i class="fa-solid fa-code-branch"></i> Profils Spécifiques & Sous-Fiches Cliniques</h3>
+      <div id="print-val-subcats"></div>
+    </div>
     
     <div class="print-section" id="print-section-notes">
       <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations & Protocoles Locaux</h3>
@@ -1343,7 +1349,7 @@ body {
     
     <div class="print-footer">
       <div class="print-quote">"Primum non nocere. L'art de la médecine consiste à divertir le patient pendant que la nature guérit la maladie."</div>
-      <div class="print-page-info">Généré via Dr.CAT Rappel Clinique</div>
+      <div class="print-page-info">Dr. Kibeche Ali — Dr.CAT Rappel Clinique</div>
     </div>
   </div>
 
@@ -1365,7 +1371,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-Z5FG4EMU.js"></script>
+  <script type="module" src="dist/app-5FDVXM6Z.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

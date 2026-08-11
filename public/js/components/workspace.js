@@ -172,8 +172,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   const printCatBtn = document.getElementById('print-cat-btn');
   if (printCatBtn) {
     printCatBtn.addEventListener('click', async () => {
-      if (!state.activeCat) return;
-
+      const cat = state.activeCat;
       const dateEl = document.getElementById('print-date-stamp');
       if (dateEl) {
         dateEl.textContent = 'Le : ' + new Date().toLocaleDateString('fr-FR');
@@ -185,54 +184,80 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const summaryVal = document.getElementById('print-val-summary');
       const prescriptionVal = document.getElementById('print-val-prescription');
       const notesVal = document.getElementById('print-val-notes');
+      const subcatsSec = document.getElementById('print-section-subcats');
+      const subcatsVal = document.getElementById('print-val-subcats');
 
-      const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat.sub_cats);
-      const activeSubCat = isSub ? state.activeCat.sub_cats[state.activeSubCatIndex - 1] : null;
+      if (catVal) catVal.textContent = cat.category;
+      if (titleVal) titleVal.textContent = `${cat.id}. ${cat.title}`;
 
-      if (catVal) catVal.textContent = state.activeCat.category;
-      if (titleVal) {
-        titleVal.textContent = activeSubCat && activeSubCat.label 
-          ? `${state.activeCat.id}. ${state.activeCat.title} — ${activeSubCat.label}`
-          : `${state.activeCat.id}. ${state.activeCat.title}`;
-      }
-
+      // Red Flags
       const rfSec = document.getElementById('print-section-redflags');
-      const activeRedFlags = activeSubCat ? (activeSubCat.red_flags || state.activeCat.red_flags) : state.activeCat.red_flags;
-      if (activeRedFlags && activeRedFlags.trim().length > 0) {
-        if (redFlagsVal) redFlagsVal.textContent = activeRedFlags;
+      if (cat.red_flags && cat.red_flags.trim().length > 0) {
+        if (redFlagsVal) redFlagsVal.textContent = cat.red_flags;
         if (rfSec) rfSec.style.display = 'block';
       } else {
         if (rfSec) rfSec.style.display = 'none';
       }
 
+      // Master Summary
       if (summaryVal) {
-        const rawText = activeSubCat ? activeSubCat.summary : (state.activeCat.customSummary || state.activeCat.summary);
+        const rawText = cat.customSummary || cat.summary;
         summaryVal.innerHTML = parseSummaryMarkdown(rawText);
       }
 
+      // Master Prescription
       const presSec = document.getElementById('print-section-prescription');
-      const activePrescription = activeSubCat ? (activeSubCat.ordonnance || state.activeCat.ordonnance) : (state.activeCat.customOrdonnance || state.activeCat.ordonnance);
-      if (activePrescription && activePrescription.trim().length > 0) {
-        if (prescriptionVal) prescriptionVal.textContent = activePrescription;
+      const rawPrescription = cat.customOrdonnance || cat.ordonnance;
+      if (rawPrescription && rawPrescription.trim().length > 0) {
+        if (prescriptionVal) prescriptionVal.textContent = rawPrescription;
         if (presSec) presSec.style.display = 'block';
       } else {
         if (presSec) presSec.style.display = 'none';
       }
 
+      // Sub-CATs (All nested profiles)
+      if (Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0) {
+        if (subcatsVal) {
+          subcatsVal.innerHTML = cat.sub_cats.map((sub, idx) => `
+            <div class="print-subcat-card">
+              <h4><i class="fa-solid fa-code-branch"></i> Profil ${idx + 1} : ${escapeHTML(sub.label || 'Profil Spécialisé')}</h4>
+              ${sub.red_flags && sub.red_flags.trim() && sub.red_flags !== cat.red_flags ? `
+                <div style="margin-bottom: 8px; color: #991b1b; font-weight: 600; font-size: 11.5px;">
+                  <strong>🚨 Signes de gravité spécifiques :</strong> ${escapeHTML(sub.red_flags)}
+                </div>
+              ` : ''}
+              <div class="print-subcat-summary">
+                ${parseSummaryMarkdown(sub.summary || '')}
+              </div>
+              ${sub.ordonnance && sub.ordonnance.trim() ? `
+                <div class="print-subcat-rx">
+                  <strong>💊 Ordonnance Type :</strong><br>${escapeHTML(sub.ordonnance)}
+                </div>
+              ` : ''}
+            </div>
+          `).join('');
+        }
+        if (subcatsSec) subcatsSec.style.display = 'block';
+      } else {
+        if (subcatsSec) subcatsSec.style.display = 'none';
+      }
+
+      // Notes
       const notesSec = document.getElementById('print-section-notes');
-      if (state.activeCat.notes && state.activeCat.notes.trim().length > 0) {
-        if (notesVal) notesVal.textContent = state.activeCat.notes;
+      if (cat.notes && cat.notes.trim().length > 0) {
+        if (notesVal) notesVal.textContent = cat.notes;
         if (notesSec) notesSec.style.display = 'block';
       } else {
         if (notesSec) notesSec.style.display = 'none';
       }
 
+      // Android Native App / Capacitor Clipboard Copier
       if (typeof window.Capacitor !== 'undefined' || api.isOfflineApp) {
-        const text = buildPrintableText(state.activeCat, activeSubCat);
+        const text = buildPrintableText(cat);
         if (navigator.clipboard && navigator.clipboard.writeText) {
           try {
             await navigator.clipboard.writeText(text);
-            showToast("Texte copié dans le presse-papier. Vous pouvez le coller ailleurs.", "fa-clipboard-check", 4000);
+            showToast("Fiche complète (avec sous-fiches) copiée dans le presse-papier !", "fa-clipboard-check", 4000);
           } catch (_) {
             showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
           }
