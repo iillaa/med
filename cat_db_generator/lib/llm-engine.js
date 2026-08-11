@@ -11,6 +11,7 @@ const { searchLocalPDFs } = require('./pdf-extractor');
 const { validateCAT, isAdministrativeCAT } = require('./medical-validator');
 const { buildSearchQueries, REPUTABLE_MEDICAL_SOURCES } = require('./medical-sources');
 const { fetchAndCacheWebSources, getCachedWebSources } = require('./web-fetcher');
+const debugEmitter = require('./debug-emitter');
 const fs = require('fs');
 
 const FALLBACK_GEMINI_MODELS = [
@@ -173,6 +174,12 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
     let res = null;
     let rateLimitAttempts = 0;
 
+    debugEmitter.emitEvent('llm_model_attempt', {
+      model,
+      attemptNumber: rateLimitAttempts + 1,
+      totalModelsAvailable: modelsToTry.length
+    });
+
     while (rateLimitAttempts < 3) {
       rateLimitAttempts++;
       try {
@@ -217,6 +224,7 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
 
         if (res.status === 429) {
           console.warn(`⚠️ [LLM Rate Limit HTTP 429] Model ${model} rate limited (attempt ${rateLimitAttempts}/3). Pausing 10s to reset quota...`);
+          debugEmitter.emitEvent('llm_model_rate_limit', { model, attempt: rateLimitAttempts, cooldownSec: 10 });
           await new Promise(r => setTimeout(r, 10000));
           continue; // Retry same model after 10s cooldown
         }
@@ -225,6 +233,7 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
       } catch (netErr) {
         lastError = netErr;
         console.warn(`⚠️ Network fetch attempt ${rateLimitAttempts}/3 for model ${model} failed: ${netErr.message}`);
+        debugEmitter.emitEvent('llm_model_fail', { model, attempt: rateLimitAttempts, error: netErr.message });
         if (rateLimitAttempts < 3) await new Promise(r => setTimeout(r, 2000));
       }
     };
@@ -237,6 +246,7 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
       const errText = await res.text();
       lastError = new Error(`HTTP ${res.status} [${model}]: ${errText.substring(0, 200)}`);
       console.warn(`⚠️ Model ${model} failed with HTTP ${res.status}. Falling back to next model...`);
+      debugEmitter.emitEvent('llm_model_fail', { model, httpStatus: res.status, error: lastError.message });
       continue;
     }
 
@@ -265,6 +275,15 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
       };
 
       console.log(`⚡ [LLM API CALL] Model: ${model} | Latency: ${latencyMs}ms | Tokens: ${totalTokens} (${promptTokens} in / ${completionTokens} out)`);
+
+      debugEmitter.emitEvent('llm_response_received', {
+        model,
+        latencyMs,
+        promptTokens,
+        completionTokens,
+        totalTokens,
+        previewSnippet: rawText.slice(0, 300)
+      });
 
       return {
         text: rawText,
@@ -306,6 +325,11 @@ async function generateCATWithLLM(title, category, options = {}) {
 
   // 3. Human Active Learning Memory
   const humanMemory = getHumanEditMemory(cleanTitle);
+  debugEmitter.emitEvent('active_learning_checked', {
+    title: cleanTitle,
+    found: !!humanMemory,
+    doctorEdited: humanMemory ? humanMemory._human_edited : false
+  });
   const activeLearningText = humanMemory ? `
 🧠 MÉMOIRE ET APPRENTISSAGE DES ÉDITIONS MANUELLES DE L'UTILISATEUR (ACTIVE LEARNING) :
 L'utilisateur médecin a manuellement validé et édité cette fiche précédemment :
@@ -440,6 +464,16 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
   let executionMetrics = null;
   const { extractSmartKeywords } = require('./web-fetcher');
 
+  debugEmitter.emitEvent('llm_prompt_built', {
+    title: cleanTitle,
+    category: category || 'Gastro-entérologie',
+    systemPromptChars: systemPrompt.length,
+    userPromptChars: userPrompt.length,
+    estimatedTokens: Math.ceil((systemPrompt.length + userPrompt.length) / 4),
+    ragWebCount: webSources.length,
+    ragPdfCount: pdfMatches.length
+  });
+
   while (attempts < maxAttempts) {
     attempts++;
     console.log(`🤖 LLM Generation Attempt ${attempts}/${maxAttempts} for "${cleanTitle}"...`);
@@ -449,6 +483,13 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
 
     try {
       catResult = safeParseLLMJson(apiResult.text);
+
+      debugEmitter.emitEvent('llm_parse_success', {
+        attempt: attempts,
+        keysParsed: Object.keys(catResult),
+        hasSummary: !!catResult.summary,
+        hasOrdonnance: !!catResult.ordonnance
+      });
 
       // Enforce search_keywords array
       if (!Array.isArray(catResult.search_keywords) || catResult.search_keywords.length === 0) {
@@ -467,21 +508,46 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
 
       // Validate using Medical Validator
       const validation = validateCAT(catResult);
+      debugEmitter.emitEvent('validation_result', {
+        attempt: attempts,
+        valid: validation.valid,
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
+
       if (validation.valid) {
         console.log(`✅ Medical Checksum PASSED on Attempt ${attempts}!`);
         catResult._execution_metrics = executionMetrics;
+        debugEmitter.emitEvent('generation_done', {
+          title: cleanTitle,
+          status: 'success',
+          attempt: attempts,
+          latencyMs: executionMetrics.latencyMs,
+          totalTokens: executionMetrics.totalTokens,
+          model: executionMetrics.model
+        });
         return { cat: catResult, validation, metrics: executionMetrics };
       } else {
         console.warn(`❌ Medical Validation Checksum Failed (Attempt ${attempts}):`, validation.errors);
       }
     } catch (parseErr) {
       console.warn(`⚠️ JSON parse error on attempt ${attempts}: ${parseErr.message}`);
+      debugEmitter.emitEvent('llm_parse_fail', {
+        attempt: attempts,
+        error: parseErr.message
+      });
     }
   }
 
   if (catResult) {
     catResult._execution_metrics = executionMetrics;
     const finalValidation = validateCAT(catResult);
+    debugEmitter.emitEvent('generation_done', {
+      title: cleanTitle,
+      status: 'fallback_accepted',
+      attempts: maxAttempts,
+      validation: finalValidation
+    });
     return { cat: catResult, validation: finalValidation, metrics: executionMetrics };
   }
 

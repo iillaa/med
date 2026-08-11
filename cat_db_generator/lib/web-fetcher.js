@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const debugEmitter = require('./debug-emitter');
 
 const CACHE_BASE_DIR = path.join(__dirname, '..', 'web_cache');
 
@@ -245,53 +246,6 @@ async function fetchMedGConsensus(cleanTitle) {
 }
 
 /**
- * 3. Fetcher for MSD Manuals Professionnels (French) (Status 200 Guaranteed)
- */
-async function fetchMSDManuals(cleanTitle) {
-  try {
-    if (/test|1785|1234/i.test(cleanTitle)) return null;
-
-    const url = `https://www.msdmanuals.com/fr/professional/SearchResults?query=${encodeURIComponent(cleanTitle)}`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000);
-
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml'
-      }
-    });
-    clearTimeout(timeoutId);
-
-    if (!res.ok) return null;
-
-    const html = await res.text();
-    const cleanText = cleanTextContent(html);
-
-    if (cleanText.length < 300) return null;
-
-    const queryTokens = cleanTitle.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .split(/\s+/).filter(w => w.length >= 3);
-    const textLower = cleanText.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const isRelevant = queryTokens.some(tok => textLower.includes(tok));
-    if (!isRelevant) return null;
-
-    return {
-      domain: 'msdmanuals.com',
-      sourceId: `msd_${cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
-      sourceName: `Manuel MSD (Professionnels: ${cleanTitle})`,
-      sourceUrl: url,
-      fetchedAt: new Date().toISOString(),
-      content: cleanText.substring(0, 3500)
-    };
-  } catch (err) {
-    return null;
-  }
-}
-
-/**
  * Smart Keyword Normalizer & Extractor
  * Converts titles like "CAT devant psoriasis peau / cheveux" -> ["psoriasis", "psoriasis cuir chevelu"]
  */
@@ -367,6 +321,11 @@ async function fetchAndCacheWebSources(title, options = {}) {
   // If we already have enough or more than target max, reuse existing cache
   if (!options.forceRefetch && existingCache && existingCache.length >= targetMax) {
     console.log(`🌐 [Web Cache] Reusing ${existingCache.length} cached web sources for "${title}".`);
+    debugEmitter.emitEvent('web_cache_hit', {
+      title,
+      cachedCount: existingCache.length,
+      sources: existingCache.map(s => ({ name: s.sourceName, domain: s.domain }))
+    });
     return existingCache;
   }
 
@@ -377,45 +336,82 @@ async function fetchAndCacheWebSources(title, options = {}) {
   const smartKeywords = extractSmartKeywords(title, options.searchKeywords);
   console.log(`🌐 [Step 1 Web Research] ${existingCache.length > 0 ? `Top-up mode (${existingCache.length}/${targetMax} cached)` : 'Fetching live sources'} for "${title}" using ${smartKeywords.length} keyword(s)...`);
 
+  debugEmitter.emitEvent('web_fetch_start', {
+    title,
+    keywords: smartKeywords,
+    existingCachedCount: existingCache.length,
+    targetMax
+  });
+
   try {
     for (const kw of smartKeywords) {
       if (fetchedSources.length >= targetMax) break;
 
       // 1. Doctor-Grade: StatPearls / PubMed PMC Open REST API (NCBI)
       console.log(`   - Querying StatPearls / PubMed PMC (NCBI) for "${kw}"...`);
-      const ncbiData = await fetchStatPearlsMedical(kw, title).catch(() => null);
+      const ncbiData = await fetchStatPearlsMedical(kw, title).catch(err => {
+        debugEmitter.emitEvent('web_fetch_fail', { source: 'PubMed PMC', keyword: kw, error: err.message });
+        return null;
+      });
       if (ncbiData && !fetchedKeys.has(ncbiData.sourceId)) {
         fetchedKeys.add(ncbiData.sourceId);
         fetchedSources.push(ncbiData);
         const fileName = `${ncbiData.sourceId}_${Date.now()}.json`;
         fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(ncbiData, null, 2), 'utf8');
         console.log(`     ✅ [Doctor-Grade] Cached: ${ncbiData.sourceName}`);
+        debugEmitter.emitEvent('web_fetch_result', {
+          sourceName: ncbiData.sourceName,
+          domain: ncbiData.domain,
+          contentLength: ncbiData.content.length,
+          previewSnippet: ncbiData.content.slice(0, 180),
+          isHighDensity: ncbiData.isHighDensity
+        });
       }
 
       if (fetchedSources.length >= targetMax) break;
 
       // 2. Doctor-Grade: MSD Manuals Professionnels via Jina Reader
       console.log(`   - Querying Manuel MSD Professionnel (Jina MD) for "${kw}"...`);
-      const msdData = await fetchMSDProfessionalJina(kw).catch(() => null);
+      const msdData = await fetchMSDProfessionalJina(kw).catch(err => {
+        debugEmitter.emitEvent('web_fetch_fail', { source: 'MSD Manuals', keyword: kw, error: err.message });
+        return null;
+      });
       if (msdData && !fetchedKeys.has(msdData.sourceId)) {
         fetchedKeys.add(msdData.sourceId);
         fetchedSources.push(msdData);
         const fileName = `${msdData.sourceId}_${Date.now()}.json`;
         fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(msdData, null, 2), 'utf8');
         console.log(`     ✅ [Doctor-Grade] Cached: ${msdData.sourceName}`);
+        debugEmitter.emitEvent('web_fetch_result', {
+          sourceName: msdData.sourceName,
+          domain: msdData.domain,
+          contentLength: msdData.content.length,
+          previewSnippet: msdData.content.slice(0, 180),
+          isHighDensity: msdData.isHighDensity
+        });
       }
 
       if (fetchedSources.length >= targetMax) break;
 
       // 3. MedG French Clinical Consensus Feed
       console.log(`   - Querying MedG Consensus for "${kw}"...`);
-      const medgData = await fetchMedGConsensus(kw).catch(() => null);
+      const medgData = await fetchMedGConsensus(kw).catch(err => {
+        debugEmitter.emitEvent('web_fetch_fail', { source: 'MedG', keyword: kw, error: err.message });
+        return null;
+      });
       if (medgData && !fetchedKeys.has(medgData.sourceId)) {
         fetchedKeys.add(medgData.sourceId);
         fetchedSources.push(medgData);
         const fileName = `${medgData.sourceId}_${Date.now()}.json`;
         fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(medgData, null, 2), 'utf8');
         console.log(`     ✅ Cached: ${medgData.sourceName}`);
+        debugEmitter.emitEvent('web_fetch_result', {
+          sourceName: medgData.sourceName,
+          domain: medgData.domain,
+          contentLength: medgData.content.length,
+          previewSnippet: medgData.content.slice(0, 180),
+          isHighDensity: medgData.isHighDensity
+        });
       }
 
       if (fetchedSources.length >= targetMax) break;
@@ -423,19 +419,36 @@ async function fetchAndCacheWebSources(title, options = {}) {
       // 4. Wikipedia Medical REST API (French Fallback)
       if (!fetchedKeys.has(`wikipedia_${kw}`)) {
         console.log(`   - Querying Wikipedia for "${kw}"...`);
-        const wikiData = await fetchWikipediaMedical(kw, title).catch(() => null);
+        const wikiData = await fetchWikipediaMedical(kw, title).catch(err => {
+          debugEmitter.emitEvent('web_fetch_fail', { source: 'Wikipedia FR', keyword: kw, error: err.message });
+          return null;
+        });
         if (wikiData && !fetchedKeys.has(wikiData.sourceId)) {
           fetchedKeys.add(wikiData.sourceId);
           fetchedSources.push(wikiData);
           const fileName = `${wikiData.sourceId}_${Date.now()}.json`;
           fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(wikiData, null, 2), 'utf8');
           console.log(`     ✅ Cached: ${wikiData.sourceName}`);
+          debugEmitter.emitEvent('web_fetch_result', {
+            sourceName: wikiData.sourceName,
+            domain: wikiData.domain,
+            contentLength: wikiData.content.length,
+            previewSnippet: wikiData.content.slice(0, 180),
+            isHighDensity: wikiData.isHighDensity
+          });
         }
       }
     }
   } catch (err) {
     console.warn(`🌐 [Web RAG Offline] Web research network fetch encountered an error (${err.message}). Falling back 100% to local PDF index.`);
+    debugEmitter.emitEvent('web_fetch_fail', { source: 'Global', error: err.message });
   }
+
+  debugEmitter.emitEvent('web_fetch_done', {
+    title,
+    totalSourcesCount: fetchedSources.length,
+    sources: fetchedSources.map(s => ({ name: s.sourceName, domain: s.domain }))
+  });
 
   return fetchedSources;
 }

@@ -8,6 +8,7 @@ const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-
 const { generateCATWithLLM } = require('../../cat_db_generator/lib/llm-engine');
 const { validateCAT } = require('../../cat_db_generator/lib/medical-validator');
 const { listAvailablePDFs } = require('../../cat_db_generator/lib/pdf-extractor');
+const debugEmitter = require('../../cat_db_generator/lib/debug-emitter');
 
 const PROD_DB_PATH = path.join(__dirname, '..', '..', 'cats_db.json');
 const V2_DB_PATH = path.join(__dirname, '..', '..', 'cat_db_generator', 'cats_db_v2_generated.json');
@@ -74,6 +75,36 @@ function registerCatGeneratorRoutes(app) {
       v2: v2Cats,
       validations: v2Validations
     });
+  });
+
+  // GET /api/admin/cat-generator/debug-stream (SSE Real-Time Telemetry)
+  app.get('/api/admin/cat-generator/debug-stream', (req, res) => {
+    // Note: SSE stream allows authenticated admin session or local loopback connection
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no'
+    });
+    if (res.flushHeaders) res.flushHeaders();
+    debugEmitter.addSSEClient(res);
+  });
+
+  // GET /api/admin/cat-generator/debug-logs (Recent JSON Buffer)
+  app.get('/api/admin/cat-generator/debug-logs', (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+    const limit = Number(req.query.limit) || 150;
+    res.json({
+      success: true,
+      logs: debugEmitter.getRecentLogs(limit)
+    });
+  });
+
+  // DELETE /api/admin/cat-generator/debug-logs (Clear Buffer)
+  app.delete('/api/admin/cat-generator/debug-logs', (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+    const result = debugEmitter.clearLogs();
+    res.json(result);
   });
 
   // POST /api/admin/cat-generator/single

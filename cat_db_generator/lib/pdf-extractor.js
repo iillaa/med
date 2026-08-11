@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const debugEmitter = require('./debug-emitter');
 
 const PDF_INDEX_PATH = path.join(__dirname, '..', '..', 'pdf_index.json');
 let cachedPdfIndex = null;
@@ -44,7 +45,14 @@ async function searchLocalPDFs(queryTerm, options = {}) {
 
   const pdfIndex = getPdfIndex();
 
+  debugEmitter.emitEvent('pdf_search_start', {
+    queryTerm,
+    tokens: queryTokens,
+    totalDocuments: pdfIndex ? pdfIndex.length : 0
+  });
+
   if (!pdfIndex || pdfIndex.length === 0) {
+    debugEmitter.emitEvent('pdf_search_empty', { queryTerm, reason: 'Index is empty or not loaded' });
     return [];
   }
 
@@ -72,6 +80,14 @@ async function searchLocalPDFs(queryTerm, options = {}) {
           snippet: snippet
         });
 
+        debugEmitter.emitEvent('pdf_match_found', {
+          pdfFile: fileName,
+          page: pageNum,
+          matchedTokens: hitTokens,
+          snippetPreview: snippet.slice(0, 180),
+          quality: doc.quality || 'online'
+        });
+
         if (matches.length >= maxMatchesPerFile) break;
       }
     }
@@ -86,7 +102,15 @@ async function searchLocalPDFs(queryTerm, options = {}) {
     }
   }
 
-  return results.sort((a, b) => b.matchCount - a.matchCount);
+  const sortedResults = results.sort((a, b) => b.matchCount - a.matchCount);
+
+  debugEmitter.emitEvent('pdf_search_done', {
+    queryTerm,
+    matchedDocumentsCount: sortedResults.length,
+    topSources: sortedResults.slice(0, 3).map(r => ({ pdfFile: r.pdfFile, matchCount: r.matchCount }))
+  });
+
+  return sortedResults;
 }
 
 /**
