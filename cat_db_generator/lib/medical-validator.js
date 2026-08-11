@@ -151,15 +151,16 @@ function validateCAT(cat) {
     const fullTextLower = `${cat.summary} ${cat.ordonnance}`.toLowerCase();
 
     for (const rule of DRUG_SAFETY_RULES) {
-      const detectRx = new RegExp(rule.detect_regex, 'i');
+      const detectPattern = `(?:${rule.detect_regex})`;
+      const detectRx = new RegExp(detectPattern, 'i');
       if (!detectRx.test(fullTextLower)) continue; // drug not mentioned, skip
 
       // Max daily dose check (grams)
       if (rule.max_daily_dose_g) {
         const dailyMgMatch = fullTextLower.match(
-          new RegExp(rule.detect_regex + '[^.\\n]*?(\\d+)\\s*mg[^.\\n]*?(\\d+)\\s*(?:fois|x)\\/?j', 'i')
+          new RegExp(detectPattern + '[^.\\n]*?(\\d+)\\s*mg[^.\\n]*?(\\d+)\\s*(?:fois|x)\\/?j', 'i')
         );
-        if (dailyMgMatch) {
+        if (dailyMgMatch && dailyMgMatch[1] && dailyMgMatch[2]) {
           const singleMg = parseInt(dailyMgMatch[1], 10);
           const freq = parseInt(dailyMgMatch[2], 10);
           const totalMg = singleMg * freq;
@@ -169,9 +170,9 @@ function validateCAT(cat) {
         }
 
         const dailyGramMatch = fullTextLower.match(
-          new RegExp(rule.detect_regex + '[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*g(?:/j|/jour|\\s+par\\s+jour)?', 'i')
+          new RegExp(detectPattern + '[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*g(?:/j|/jour|\\s+par\\s+jour)?', 'i')
         );
-        if (dailyGramMatch) {
+        if (dailyGramMatch && dailyGramMatch[1]) {
           const grams = parseFloat(dailyGramMatch[1].replace(',', '.'));
           if (grams > rule.max_daily_dose_g) {
             errors.push(`[Safety] ${rule.name} : ${grams}g dépasse la dose max journalière de ${rule.max_daily_dose_g}g/j. ${rule.error_message}`);
@@ -182,9 +183,9 @@ function validateCAT(cat) {
       // Pediatric mg/kg check
       if (rule.pediatric_max_single_mg_per_kg && isPediatric) {
         const mgKgMatch = fullTextLower.match(
-          new RegExp(rule.detect_regex + '[^.\\n]*?(\\d+)\\s*mg\\/kg', 'i')
+          new RegExp(detectPattern + '[^.\\n]*?(\\d+)\\s*mg\\/kg', 'i')
         );
-        if (mgKgMatch) {
+        if (mgKgMatch && mgKgMatch[1]) {
           const dose = parseInt(mgKgMatch[1], 10);
           if (dose > rule.pediatric_max_single_mg_per_kg) {
             errors.push(`[Safety] ${rule.name} pédiatrique : ${dose} mg/kg/prise dépasse la limite de ${rule.pediatric_max_single_mg_per_kg} mg/kg/prise. ${rule.error_message}`);
