@@ -959,150 +959,47 @@ export function loadRelatedPdfs(cat) {
  * Render fluid Sub-CAT / Clinical Profile Segmented Bar
  */
 /**
- * Dynamic Sub-CAT & Branch Navigation Renderer
- * Automatically discovers parent/child relationships across state.allCats in real-time.
+ * Ultra-Compact Horizontal Segmented Sub-Profile Bar
+ * 100% Inlined inside Master CAT JSON — Zero database spam & 32px height on mobile.
  */
 function renderSubCatBar(cat) {
   const subCatBar = document.getElementById('subcat-selector-bar');
   if (!subCatBar) return;
   subCatBar.innerHTML = '';
 
-  const allCats = Array.isArray(state.allCats) ? state.allCats : [];
-  
-  // 1. Check if current CAT is a Child (has parent_id)
-  if (cat && cat.parent_id) {
-    const parentCat = allCats.find(c => Number(c.id) === Number(cat.parent_id));
-    const siblings = allCats.filter(c => Number(c.parent_id) === Number(cat.parent_id));
+  const subCats = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? cat.sub_cats : null;
 
-    subCatBar.style.display = 'block';
-
-    let html = '';
-    if (parentCat) {
-      html += `
-        <div class="subcat-parent-banner" id="btn-back-to-parent" title="Revenir au Master Hub">
-          <div class="subcat-parent-label">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Fiche Parente :</span>
-            <span class="subcat-parent-title">${parentCat.id}. ${escapeHTML(parentCat.title)}</span>
-          </div>
-          <span style="font-size: 11px; color: #38bdf8; font-weight: bold;">Master Hub ➔</span>
-        </div>
-      `;
-    }
-
-    if (siblings.length > 1) {
-      html += `
-        <div class="subcat-branches-hub" style="margin-bottom: 8px;">
-          <div class="subcat-branches-header">
-            <i class="fa-solid fa-code-branch"></i> Branches Spécialisées :
-          </div>
-          <div class="subcat-branches-grid">
-      `;
-
-      siblings.forEach(sib => {
-        const isCurrent = Number(sib.id) === Number(cat.id);
-        const icon = getSubCatIcon(sib.sub_cat_type || sib.title);
-        const typeClass = sib.sub_cat_type || 'default';
-        html += `
-          <button class="subcat-branch-chip ${typeClass} ${isCurrent ? 'active' : ''}" data-sib-id="${sib.id}">
-            <i class="fa-solid ${icon}"></i>
-            <span>${escapeHTML(sib.sub_cat_label || sib.title)}</span>
-          </button>
-        `;
-      });
-
-      html += '</div></div>';
-    }
-
-    subCatBar.innerHTML = html;
-
-    // Attach click listener to back to parent
-    const backBtn = document.getElementById('btn-back-to-parent');
-    if (backBtn && parentCat) {
-      backBtn.addEventListener('click', () => {
-        selectCat(parentCat);
-        triggerHaptic(true);
-      });
-    }
-
-    // Attach click listeners to siblings
-    subCatBar.querySelectorAll('.subcat-branch-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const sibId = Number(btn.getAttribute('data-sib-id'));
-        const targetSib = allCats.find(c => Number(c.id) === sibId);
-        if (targetSib) {
-          selectCat(targetSib);
-          triggerHaptic(true);
-        }
-      });
-    });
-
-    return;
-  }
-
-  // 2. Check if current CAT is a Parent with Relational Children
-  const relationalChildren = allCats.filter(c => Number(c.parent_id) === Number(cat.id));
-  if (relationalChildren.length > 0) {
-    subCatBar.style.display = 'block';
-
-    let html = `
-      <div class="subcat-branches-hub">
-        <div class="subcat-branches-header">
-          <i class="fa-solid fa-tree"></i> 🌿 Branches & Sous-Fiches Spécialisées (${relationalChildren.length}) :
-        </div>
-        <div class="subcat-branches-grid">
-    `;
-
-    relationalChildren.forEach(child => {
-      const icon = getSubCatIcon(child.sub_cat_type || child.title);
-      const typeClass = child.sub_cat_type || 'default';
-      html += `
-        <button class="subcat-branch-chip ${typeClass}" data-child-id="${child.id}">
-          <i class="fa-solid ${icon}"></i>
-          <span>${escapeHTML(child.sub_cat_label || child.title)}</span>
-        </button>
-      `;
-    });
-
-    html += '</div></div>';
-    subCatBar.innerHTML = html;
-
-    subCatBar.querySelectorAll('.subcat-branch-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const childId = Number(btn.getAttribute('data-child-id'));
-        const targetChild = allCats.find(c => Number(c.id) === childId);
-        if (targetChild) {
-          selectCat(targetChild);
-          triggerHaptic(true);
-        }
-      });
-    });
-
-    return;
-  }
-
-  // 3. Fallback: Inlined cat.sub_cats Array
-  const inlinedSubCats = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? cat.sub_cats : null;
-  if (!inlinedSubCats) {
+  if (!subCats) {
     subCatBar.style.display = 'none';
     return;
   }
 
   subCatBar.style.display = 'flex';
 
-  if (state.activeSubCatIndex === undefined || state.activeSubCatIndex >= inlinedSubCats.length) {
+  // Build profile list: [0: Standard Master, 1..N: Sub-Profiles]
+  const profiles = [
+    {
+      label: '🩺 Standard (Adulte)',
+      summary: cat.summary,
+      red_flags: cat.red_flags,
+      ordonnance: cat.ordonnance
+    },
+    ...subCats
+  ];
+
+  if (state.activeSubCatIndex === undefined || state.activeSubCatIndex >= profiles.length) {
     state.activeSubCatIndex = 0;
   }
 
-  inlinedSubCats.forEach((sub, idx) => {
+  profiles.forEach((prof, idx) => {
     const pill = document.createElement('button');
     const isActive = idx === state.activeSubCatIndex;
     pill.className = `subcat-pill ${isActive ? 'active' : ''}`;
     pill.setAttribute('role', 'tab');
     pill.setAttribute('aria-selected', isActive ? 'true' : 'false');
 
-    const icon = getSubCatIcon(sub.label || sub.title);
-    pill.innerHTML = `<i class="fa-solid ${icon} subcat-pill-icon"></i> <span>${escapeHTML(sub.label || sub.title || `Profil ${idx + 1}`)}</span>`;
+    const icon = getSubCatIcon(prof.label || prof.title);
+    pill.innerHTML = `<i class="fa-solid ${icon} subcat-pill-icon"></i> <span>${escapeHTML(prof.label || prof.title || `Profil ${idx}`)}</span>`;
 
     pill.addEventListener('click', () => {
       state.activeSubCatIndex = idx;
@@ -1112,18 +1009,9 @@ function renderSubCatBar(cat) {
         p.setAttribute('aria-selected', isAct ? 'true' : 'false');
       });
 
-      const targetData = {
-        ...cat,
-        title: sub.title || cat.title,
-        summary: sub.summary || cat.summary,
-        red_flags: sub.red_flags !== undefined ? sub.red_flags : cat.red_flags,
-        ordonnance: sub.ordonnance !== undefined ? sub.ordonnance : cat.ordonnance
-      };
-
-      if (wsTitle) wsTitle.textContent = `${cat.id}. ${targetData.title}`;
-      if (wsRedFlags) wsRedFlags.textContent = targetData.red_flags;
-      renderSummary(targetData.summary, targetData);
-      renderPrescription(targetData.ordonnance);
+      if (wsRedFlags) wsRedFlags.textContent = prof.red_flags || cat.red_flags;
+      renderSummary(prof.summary || cat.summary, cat);
+      renderPrescription(prof.ordonnance || cat.ordonnance);
       triggerHaptic(true);
     });
 
@@ -1133,9 +1021,9 @@ function renderSubCatBar(cat) {
 
 function getSubCatIcon(textOrType) {
   const t = (textOrType || '').toLowerCase();
-  if (t === 'emergency' || t.includes('urgence') || t.includes('grave') || t.includes('aigu') || t.includes('maligne')) return 'fa-truck-medical';
-  if (t === 'terrain' || t.includes('enceinte') || t.includes('grossesse')) return 'fa-person-pregnant';
-  if (t.includes('enfant') || t.includes('pédiatr') || t.includes('nourrisson')) return 'fa-child';
+  if (t.includes('urgence') || t.includes('grave') || t.includes('aigu') || t.includes('glairo') || t.includes('sanglant')) return 'fa-truck-medical';
+  if (t.includes('enceinte') || t.includes('grossesse')) return 'fa-person-pregnant';
+  if (t.includes('enfant') || t.includes('pédiatr') || t.includes('nourrisson') || t.includes('sro')) return 'fa-child';
   if (t.includes('âgé') || t.includes('gériatr') || t.includes('senior')) return 'fa-person-cane';
   if (t.includes('diabét') || t.includes('diabete')) return 'fa-droplet';
   if (t.includes('rénal') || t.includes('renal')) return 'fa-kidneys';

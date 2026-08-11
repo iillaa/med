@@ -83,12 +83,12 @@ async function runTests() {
   assert(!plainHtml.includes('<details'), 'Plain markdown falls back without creating accordion cards');
   assert(plainHtml.includes('<p>Ceci est une description médicale simple'), 'Plain markdown formatted as clean paragraph');
 
-  // TEST 4: Workspace CSS Accordion Styles
+  // TEST 4: Workspace CSS Accordion & Sub-Profile Styles
   const workspaceCss = fs.readFileSync(path.join(ROOT, 'public/css/workspace.css'), 'utf-8');
   assert(workspaceCss.includes('.cat-step-section'), 'workspace.css contains .cat-step-section');
   assert(workspaceCss.includes('.cat-step-title-toggle'), 'workspace.css contains .cat-step-title-toggle');
-  assert(workspaceCss.includes('.subcat-parent-banner'), 'workspace.css contains .subcat-parent-banner');
-  assert(workspaceCss.includes('.subcat-branch-chip'), 'workspace.css contains .subcat-branch-chip');
+  assert(workspaceCss.includes('.subcat-selector-bar'), 'workspace.css contains .subcat-selector-bar');
+  assert(workspaceCss.includes('.subcat-pill'), 'workspace.css contains .subcat-pill');
 
   console.log(`\n═══════════════════════════════════════════════════════════════════════`);
   console.log(`📊 ACCORDION & SUBCAT TEST SUMMARY: ${passCount} / ${totalCount} TESTS PASSED`);
