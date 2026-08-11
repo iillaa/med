@@ -205,6 +205,8 @@ export function populateCategoryFilter(cats) {
 // Keep a stable cat.id -> <li> map so re-renders (filtering/search) update
 // existing nodes in place instead of tearing down the whole list. This makes
 // list updates O(changes) instead of O(all) and preserves attached listeners.
+const catItemNodes = new Map();
+
 function buildCatItem(cat) {
   const li = document.createElement('li');
   const isChild = !!cat.parent_id;
