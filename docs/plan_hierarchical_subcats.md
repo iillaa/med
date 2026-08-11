@@ -1,18 +1,16 @@
-# 🌳 Dr.CAT Hierarchical Sub-CAT Architecture & Integration Plan
+# 🌳 Dr.CAT Dynamic Sub-CAT & Retractable Step Architecture Plan
 
 ---
 
-## 1. 🎯 Architectural Vision & Objectives
+## 1. 🎯 Core Principle: 100% Dynamic, Zero Hardcoding
 
-Clinical medicine is inherently hierarchical. While single acute topics (*"Gale"*, *"Morsure d'animal"*) fit cleanly into a single fiche, master clinical syndromes (*"HTA"*, *"Diabète"*, *"Dyspnée"*, *"Anémie"*) require **Clinical Branching**:
-- **Parent CAT (Master Hub)**: Provides diagnostic triage, global classification, baseline workup, and outpatient 1st-line strategy.
-- **Child Sub-CATs (Deep Clinical Nodes)**: Provide intensive, protocol-specific deep dives for acute emergencies, specialized terrains (pregnancy, pediatrics, renal failure), or rare complications.
+Both the **Retractable Step Accordions** and the **Hierarchical Sub-CAT Branches** are completely dynamic:
+- **Zero hardcoded IDs or title lists**: Works out-of-the-box for all existing CATs, newly AI-generated CATs, doctor-edited CATs, and manually created admin CATs.
+- **Pure Relational Runtime Graph**: Relationships and UI cards are computed on-the-fly from data fields (`parent_id` and Markdown step markers).
 
 ---
 
-## 2. 🗄️ Data Model & Schema (100% Backwards Compatible)
-
-The schema extends the existing `cats_db.json` format without breaking standalone CATs:
+## 2. 🗂️ Dynamic Data Model & Relational Graph
 
 ### A. Sub-CAT Child Object (`cats_db.json`)
 ```json
@@ -24,86 +22,78 @@ The schema extends the existing `cats_db.json` format without breaking standalon
   "sub_cat_type": "emergency",
   "sub_cat_label": "🚨 Urgence Hypertensive & Crise",
   "search_keywords": ["urgence hypertensive", "nicardipine", "loxen", "HTA maligne"],
-  "summary": "...",
+  "summary": "**0. Stabilisation Vitale :** ... \n\n**1. Triage :** ...",
   "red_flags": "...",
   "ordonnance": "..."
 }
 ```
 
-### B. Parent Master Hub Object
-```json
-{
-  "id": 12,
-  "parent_id": null,
-  "category": "Cardiologie",
-  "title": "CAT devant Hypertension Artérielle (HTA)",
-  "sub_cat_ids": [120, 121, 122],
-  "summary": "...",
-  "red_flags": "...",
-  "ordonnance": "..."
+### B. Dynamic Runtime Inverted Index (In `state.js` / Client Store)
+On app load or database sync, the client builds an in-memory graph in $O(N)$ time:
+```javascript
+function buildCatRelationshipGraph(allCats) {
+  const childrenMap = new Map(); // parent_id -> [childCats]
+  const parentMap = new Map();   // child_id -> parentCat
+
+  allCats.forEach(cat => {
+    if (cat.parent_id) {
+      if (!childrenMap.has(cat.parent_id)) childrenMap.set(cat.parent_id, []);
+      childrenMap.get(cat.parent_id).push(cat);
+      
+      const parent = allCats.find(p => p.id === cat.parent_id);
+      if (parent) parentMap.set(cat.id, parent);
+    }
+  });
+
+  return { childrenMap, parentMap };
 }
 ```
 
-### C. Standardized `sub_cat_type` Badges:
-1. `emergency` ➔ **🚨 Urgences & Aigu** (e.g. *Urgence Hypertensive*, *Acidocétose*, *Asthme Aigu Grave*)
-2. `terrain` ➔ **🤰 Terrains Particuliers** (e.g. *HTA & Grossesse*, *Diabète du sujet âgé*, *Insuffisance rénale*)
-3. `subtype` ➔ **🔬 Formes & Étiologies** (e.g. *Anémie Hémolytique*, *HTA Secondaire*)
-4. `complication` ➔ **⚠️ Complications** (e.g. *Pied Diabétique*, *Rétinopathie*)
+---
+
+## 3. 📑 Dynamic Retractable Step Parser (`renderDynamicAccordions`)
+
+Instead of rendering plain continuous text, the client uses a **generic Markdown step parser**:
+
+### How It Works Dynamically:
+1. Regex matches numbered clinical step headers:
+   `/(?:\*\*|#{2,4}\s*)([0-9]+(?:bis)?\.\s*[^:\n*]+)(?:\*\*)?:?/gi`
+2. Automatically splits the summary into modular blocks:
+   - `0. Stabilisation Vitale (ABCDE)` ➔ Auto-expanded by default (`open`) if present.
+   - `1. Diagnostic & Bilan Triage` ➔ Auto-expanded (`open`).
+   - `2. Traitement Immédiat & Conduite` ➔ Auto-expanded (`open`).
+   - `3bis. Terrain, Grossesse & Comorbidités` ➔ Collapsed by default (tap to expand).
+   - `4. Critères d'Hospitalisation / Transfert` ➔ Collapsed by default (tap to expand).
+3. If a fiche has no numbered steps, it renders as a clean standard card (100% safe fallback).
 
 ---
 
-## 3. 📱 Mobile UI / UX Flow
+## 4. 📱 Dynamic Sub-CAT UI Rendering
 
-```
-+-------------------------------------------------------------------------+
-| [ < Retour ]   Cardiologie > HTA > 🚨 Urgence Hypertensive              |
-+-------------------------------------------------------------------------+
-|                                                                         |
-|  Parent Hub Link Banner:                                                |
-|  [ 📂 Fiche Parente : CAT devant HTA (Généralités)  ──► ]               |
-|                                                                         |
-|  Sibling Switcher (Direct Jump to other branches):                      |
-|  [ 🚨 Urgence (Actif) ]  [ 🤰 HTA & Grossesse ]  [ 💊 HTA Résistante ]   |
-|                                                                         |
-+-------------------------------------------------------------------------+
-|  📋 Diagnostic & Conduite Pratique (Spécialisée Urgence)                |
-|  ...                                                                    |
-+-------------------------------------------------------------------------+
-```
+When viewing ANY fiche (`currentCat`):
 
-### 1. In Parent CAT View:
-- Directly under the title, a **"🌿 Branches & Sous-Fiches Spécialisées"** Card appears.
-- Displays interactive buttons grouped by type (`🚨 Urgences`, `🤰 Terrains`, `🔬 Sous-types`).
-- Tapping any button smoothly navigates to the child fiche.
+### A. If `currentCat` has Children (`childrenMap.get(currentCat.id)`):
+The UI dynamically generates the **"🌿 Branches & Sous-Fiches Spécialisées"** Card:
+- Iterates over children and groups them by `sub_cat_type`:
+  - 🚨 **Urgences & Formes Aiguës**
+  - 🤰 **Terrains Particuliers (Grossesse, Âge, Rénal)**
+  - 🔬 **Sous-Types Cliniques**
+  - ⚠️ **Complications**
+- Clicking any child chip opens that fiche instantly.
 
-### 2. In Child Sub-CAT View:
-- Displays a prominent **Breadcrumb & Parent Bar**: `⬅️ Retour à : HTA (Généralités)`.
-- Displays a **Sibling Quick-Switcher Bar** to jump between other child branches without going back to the parent.
+### B. If `currentCat` is a Child (`currentCat.parent_id != null`):
+The UI dynamically renders:
+- **Parent Hub Header**: `⬅️ Retour au Master Hub : [Titre du Parent]`
+- **Dynamic Sibling Switcher**: Automatically lists all other children of the same parent so the doctor can flip between branches with a single tap.
 
 ---
 
-## 4. 🔍 Search & Discovery Integration
+## 5. 🤖 AI Generator V3 Dynamic Sub-CAT Integration
 
-1. **Parent-Level Results**: Searching `"HTA"` shows the Master CAT card, with child preview chips below it:
-   `[CAT devant HTA] ──► +3 sous-fiches : Urgence, Grossesse, Résistante`
-2. **Child-Level Direct Match**: Searching `"Nicardipine"` or `"Pré-éclampsie"` brings up the child sub-CAT directly, stamped with a badge: `🌿 Sous-fiche de : HTA`.
-
----
-
-## 5. 🤖 Generator V3 AI Prompt Specialization
-
-When generating a Child Sub-CAT, Generator V3 adapts its prompt context:
-- **Inherited Context**: Injects the parent topic name and clinical domain.
-- **Deep-Dive Constraint**: Prevents the AI from repeating basic definition boilerplate. Forces the AI to dedicate 100% of tokens to:
-  1. *Immediate triage and acute drug titration protocols*.
-  2. *Specific dosages, infusion rates (mg/h, SE), and monitoring criteria*.
-  3. *Precise indications for hospital transfer / ICU admission*.
-
----
-
-## 6. 🛠️ Admin Generator Lab Integration
-
-In `admin/cat_generator_lab.html`:
-- **Nested Table Tree View**: Sub-CATs appear indented under their parent row.
-- **`➕ Ajouter Sous-Fiche` Button**: Instantly opens the generator modal pre-filled with the parent ID and domain.
-- **Drag-and-Drop / Select Linker**: Easily reassign or promote any standalone CAT to be a child of another.
+1. In `admin/cat_generator_lab.html`, clicking **`➕ Ajouter Sous-Fiche`** on any row:
+   - Sets `parent_id: targetRow.id`.
+   - Sends payload `{ parent_id: 12, title: "CAT devant Urgence Hypertensive", category: "Cardiologie" }`.
+2. Generator V3 automatically injects the parent's context:
+   - Prompt: *"You are generating a specialized deep-dive child sub-fiche for [Parent: CAT devant HTA]. Focus 100% on acute management, intravenous drug titration, and emergency triage for this specific scenario."*
+3. The generated child JSON is saved with `parent_id: 12` in `cats_db.json`.
+4. The main app and Admin Lab immediately discover the relationship **without touching a single line of application code**.
