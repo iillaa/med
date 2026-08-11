@@ -962,59 +962,20 @@ export function loadRelatedPdfs(cat) {
  * Render fluid Sub-CAT / Clinical Profile Segmented Bar
  */
 /**
- * Ultra-Compact Horizontal Segmented Sub-Profile Bar
- * 100% Inlined inside Master CAT JSON — Zero database spam & 32px height on mobile.
+ * Sub-CAT Navigation Handler
+ * 100% Inlined Contextual Navigation directly inside Fiche de Synthèse (Zero top header clutter).
  */
 function renderSubCatBar(cat) {
   const subCatBar = document.getElementById('subcat-selector-bar');
-  if (!subCatBar) return;
-  subCatBar.innerHTML = '';
-
-  const subCats = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? cat.sub_cats : null;
-
-  if (!subCats) {
+  if (subCatBar) {
     subCatBar.style.display = 'none';
-    return;
+    subCatBar.innerHTML = '';
   }
-
-  subCatBar.style.display = 'flex';
-
-  // Build profile list: [0: Standard Master, 1..N: Sub-Profiles]
-  const profiles = [
-    {
-      label: '🩺 Standard (Adulte)',
-      summary: cat.summary,
-      red_flags: cat.red_flags,
-      ordonnance: cat.ordonnance
-    },
-    ...subCats
-  ];
-
-  if (state.activeSubCatIndex === undefined || state.activeSubCatIndex >= profiles.length) {
-    state.activeSubCatIndex = 0;
-  }
-
-  profiles.forEach((prof, idx) => {
-    const pill = document.createElement('button');
-    const isActive = idx === state.activeSubCatIndex;
-    pill.className = `subcat-pill ${isActive ? 'active' : ''}`;
-    pill.setAttribute('role', 'tab');
-    pill.setAttribute('aria-selected', isActive ? 'true' : 'false');
-
-    const icon = getSubCatIcon(prof.label || prof.title);
-    pill.innerHTML = `<i class="fa-solid ${icon} subcat-pill-icon"></i> <span>${escapeHTML(prof.label || prof.title || `Profil ${idx}`)}</span>`;
-
-    pill.addEventListener('click', () => {
-      window.switchToSubProfile(idx);
-    });
-
-    subCatBar.appendChild(pill);
-  });
 }
 
 /**
  * Global In-Place Sub-Profile Switcher
- * Callable by both the top segmented pill bar and contextual in-text badges!
+ * Callable directly by contextual in-text badges inside Fiche de Synthèse!
  */
 window.switchToSubProfile = function(idx) {
   if (!state.activeCat) return;
@@ -1033,21 +994,32 @@ window.switchToSubProfile = function(idx) {
   if (targetIdx < 0 || targetIdx >= profiles.length) return;
   state.activeSubCatIndex = targetIdx;
 
-  const subCatBar = document.getElementById('subcat-selector-bar');
-  if (subCatBar) {
-    subCatBar.querySelectorAll('.subcat-pill').forEach((p, i) => {
-      const isAct = i === targetIdx;
-      p.classList.toggle('active', isAct);
-      p.setAttribute('aria-selected', isAct ? 'true' : 'false');
-    });
-  }
-
   const prof = profiles[targetIdx];
   const wsRedFlags = document.getElementById('red-flags-content');
   if (wsRedFlags) wsRedFlags.textContent = prof.red_flags || state.activeCat.red_flags;
-  renderSummary(prof.summary || state.activeCat.summary, state.activeCat);
+
+  let summaryContent = prof.summary || state.activeCat.summary;
+  if (targetIdx > 0) {
+    const returnHeader = `
+      <div class="subcat-intext-return-banner">
+        <span class="subcat-intext-return-label">
+          <i class="fa-solid fa-code-branch"></i> Sous-Fiche : <strong>${escapeHTML(prof.label)}</strong>
+        </span>
+        <button type="button" class="subcat-intext-return-btn" onclick="window.switchToSubProfile(0)">
+          <i class="fa-solid fa-arrow-left"></i> Revenir à la fiche principale
+        </button>
+      </div>
+    `;
+    summaryContent = returnHeader + '\n\n' + summaryContent;
+  }
+
+  renderSummary(summaryContent, state.activeCat);
   renderPrescription(prof.ordonnance || state.activeCat.ordonnance);
   triggerHaptic(true);
+
+  // Smooth scroll back to top of summary view
+  const summaryView = document.getElementById('summary-view');
+  if (summaryView) summaryView.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
 function getSubCatIcon(textOrType) {

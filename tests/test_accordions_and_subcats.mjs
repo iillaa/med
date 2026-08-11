@@ -83,12 +83,17 @@ async function runTests() {
   assert(!plainHtml.includes('<details'), 'Plain markdown falls back without creating accordion cards');
   assert(plainHtml.includes('<p>Ceci est une description médicale simple'), 'Plain markdown formatted as clean paragraph');
 
-  // TEST 4: Workspace CSS Accordion & Sub-Profile Styles
+  // TEST 4: In-Text Contextual Sub-CAT Link Parsing
+  const sampleWithBadge = 'Orientation : Diarrhée invasive [🚨 Ouvrir la Sous-Fiche Glairo-Sanglante](subcat:1)';
+  const parsedBadgeHtml = parseSummaryMarkdown(sampleWithBadge);
+  assert(parsedBadgeHtml.includes('subcat-inline-badge') && parsedBadgeHtml.includes('switchToSubProfile(1)'), 'In-text subcat badge parsed into clickable button');
+
+  // TEST 5: Workspace CSS Accordion & In-Text Sub-Profile Styles
   const workspaceCss = fs.readFileSync(path.join(ROOT, 'public/css/workspace.css'), 'utf-8');
   assert(workspaceCss.includes('.cat-step-section'), 'workspace.css contains .cat-step-section');
   assert(workspaceCss.includes('.cat-step-title-toggle'), 'workspace.css contains .cat-step-title-toggle');
-  assert(workspaceCss.includes('.subcat-selector-bar'), 'workspace.css contains .subcat-selector-bar');
-  assert(workspaceCss.includes('.subcat-pill'), 'workspace.css contains .subcat-pill');
+  assert(workspaceCss.includes('.subcat-inline-badge'), 'workspace.css contains .subcat-inline-badge');
+  assert(workspaceCss.includes('.subcat-intext-return-banner'), 'workspace.css contains .subcat-intext-return-banner');
 
   console.log(`\n═══════════════════════════════════════════════════════════════════════`);
   console.log(`📊 ACCORDION & SUBCAT TEST SUMMARY: ${passCount} / ${totalCount} TESTS PASSED`);
