@@ -6,9 +6,9 @@
 ## 🎯 EXECUTIVE SUMMARY & V3 OBJECTIVES
 
 The goal of **CAT Generator True V3** is to transition the generator from a system that relies primarily on Gemini's general pretrained knowledge into a **precision-engineered Doctor-Grade Clinical Engine** driven by:
-1. **Real local Algerian PDF data** (extracted via a 2-Tier architecture without noise or substring false matches).
-2. **Real online medical guideline articles** (fetching actual PubMed abstracts and MSD articles instead of search result listing pages).
-3. **A Live Diagnostic Debug Panel** that allows the physician-admin to inspect every single token, retrieved snippet, parser tier, and LLM reasoning step in real time with 1-click exportable logs.
+1. **Dynamic Cumulative Local Algerian PDF Data**: Combines dedicated short PDF guides AND multi-topic compilations (150 Ordonnances, specialty textbooks) simultaneously for *any* medical condition without artificial limits.
+2. **Real Online Medical Guideline Articles**: Fetches actual PubMed medical abstracts (`efetch`) and MSD clinical articles via direct URL rather than superficial search listing pages.
+3. **A Live Diagnostic Debug Panel (SSE)**: Enables the physician-admin to inspect every single token, retrieved PDF/Web snippet, parser tier, and LLM reasoning step in real time with 1-click JSON log export.
 
 ---
 
@@ -35,54 +35,65 @@ The goal of **CAT Generator True V3** is to transition the generator from a syst
 
 ---
 
-## 🔬 PART 2 — THE 2-TIER PDF RAG ARCHITECTURE (V3 UPGRADE)
+## 🔬 PART 2 — DYNAMIC CUMULATIVE PDF RAG ARCHITECTURE
 
-### 2.1 The Two Categories of PDFs in the 77-File Master Library
+### 2.1 The Cumulative Multi-Source Strategy (No Artificial Limits)
 
-Our 77 PDFs in `data/pdf_masters/` fall into two radically different structural types:
+In clinical medicine, comprehensive knowledge is rarely found in a single document. For **any given pathology** (e.g. Asthme, Hémorragie digestive, Gale, Insuffisance cardiaque, Colique néphrétique):
+- A **Dedicated Single PDF** provides specific local diagnostic nuances and drug choices.
+- A **Specialty Chapter** (e.g. Urgences, Gastro, Pneumo, Infectio) provides acute stabilization, differential diagnosis, and hospital referral criteria.
+- A **Prescription Compilation** (e.g. *150 Ordonnances types*) provides exact hospital prescription formulas, posologies, and durations.
+
+**V3 Rule**: The engine **never restricts** itself to only one source. It queries **both dedicated files AND multi-topic compilations simultaneously**, merging all relevant findings into one rich RAG context.
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           YOUR 77 PDF FILES                             │
-└────────────────────────────────────┬────────────────────────────────────┘
-                                     │
-          ┌──────────────────────────┴──────────────────────────┐
-          ▼                                                     ▼
-  TIER 1: DEDICATED SHEETS                              TIER 2: BIG COMPILATIONS
-  (1 to 8 pages, 100% focused)                          (50 to 160 pages, 50+ diseases)
-  ────────────────────────────                          ────────────────────────────────
-  • certificat accident travail.pdf (1 page)            • 150 Ordonnances types.pdf (160 pages)
-  • Trt Anémie_.pdf (6 pages)                           • Urologie_.pdf (51 pages)
-  • 1Anti-inflammatoires.pdf (3 pages)                  • Troubles ioniques.pdf (19 pages)
-  • 1Médicaments en Pédiatrie.pdf (6 pages)             • Signes pathognomoniques.pdf (13 pages)
+                   ANY CAT TITLE (e.g. "Hémorragie digestive haute")
+                                          │
+                                          ▼
+                   1. DYNAMIC TOKEN & SYNONYM EXPANSION
+             ["hémorragie digestive", "méléna", "hématémèse", "fibroscopie", "IPP"]
+                                          │
+                                          ▼
+                   2. PARALLEL DUAL-TIER CUMULATIVE SEARCH
+         ┌────────────────────────────────┴────────────────────────────────┐
+         ▼                                                                 ▼
+   LAYER A: DEDICATED FILES                               LAYER B: MULTI-TOPIC COMPILATIONS
+   (Matches in data/pdf_cache/ filenames/P1)              (Searches all 77 PDFs with \b regex)
+   ─────────────────────────────────────────              ───────────────────────────────────
+   • Extracts focused single-topic guide                  • Searches Urgences, Gastro, ECN,
+   • Injects full protocol without chopping                 150 Ordonnances chapters
+                                                          • Scans for Section Anchors:
+                                                            "Traitement", "Posologie",
+                                                            "Signes de gravité"
+                                                          • Extracts 1,200–2,000 char blocks
+         │                                                                 │
+         └────────────────────────────────┬────────────────────────────────┘
+                                          ▼
+                   3. AGGREGATED UNIFIED LOCAL PDF PROMPT
+         [📚 Dedicated Local Guide: ...] + [📚 Hospital Compilation: ...]
 ```
 
-### 2.2 Tier 1: Direct File Match (Golden Reference Injection)
-- **Mechanism**:
-  1. When generating a CAT (e.g. *"CAT devant une Anémie"* or *"Certificat accident de travail"*), the engine checks PDF filenames and Page 1 titles.
-  2. If a dedicated PDF file (length $\le 8$ pages) matches the topic:
-  3. **No slicing, no token chopping.** The **entire clean document** is injected directly into the LLM context as a Primary Golden Algerian Reference.
-- **Benefit**: 100% focused, pure local protocol with zero noise from unrelated diseases.
+### 2.2 Strict French Word-Boundary Matching (`\b`)
+- **Problem**: Substring searching `.includes("gale")` matches `é-gale-ment`, `lé-gale-ment`, `dé-légat-ion`. Searching `.includes("cat")` matches `certifi-cat`.
+- **V3 Solution**: Strict regex matching with word boundaries:
+  ```javascript
+  const rx = new RegExp(`(?:^|[^a-z0-9à-ÿ])${escapedToken}(?:$|[^a-z0-9à-ÿ])`, 'i');
+  ```
+  Matches *"la gale"* or *"gale,"*, but **strictly ignores** *"également"* and *"légalement"*.
 
-### 2.3 Tier 2: Multi-CAT Compilation RAG (Section-Aware Deep Extraction)
-- **Problem with Current Substring Search**:
-  - Searching for `gale` matches `é-gale-ment`, `lé-gale-ment`, `dé-légat-ion`.
-  - Slicing 400 chars around the title keyword grabs the *Definition* at the top of the page, completely missing the *Treatment & Dosages* located 1,500 chars down.
-- **V3 Solution**:
-  1. **Strict Word-Boundary Regex (`\b`)**:
-     - `\bgale\b` matches *"la gale"* or *"gale,"*, but **strictly ignores** *"également"* and *"légalement"*.
-  2. **Clinical Section-Anchor Extraction**:
-     - Scans the matched document for section headers: `Traitement`, `Thérapeutique`, `Prise en charge`, `Ordonnance`, `Posologie`, `Drapeaux rouges`.
-     - Extracts the **entire treatment block** (1,200–2,000 chars) containing real molecules, dosages, and regimens.
-  3. **Multi-Page Continuation**: If a CAT starts at the bottom of Page 4, automatically extracts Page 5 so the prescription is never cut off.
+### 2.3 Clinical Section-Anchor Extraction
+- **Problem**: Slicing 400 characters around the title keyword captures only the *Definition* at the top of the page, missing the *Treatment & Dosages* located 1,500 characters down.
+- **V3 Solution**: 
+  - Scans matched documents for clinical section headers: `Traitement`, `Thérapeutique`, `Prise en charge`, `Ordonnance`, `Posologie`, `Drapeaux rouges`.
+  - Extracts the **entire treatment section block** (1,200–2,000 chars) containing real molecules, dosages, and regimens.
+  - **Multi-Page Continuation**: Automatically extracts `page + 1` if a section continues across page boundaries.
 
 ### 2.4 Dedicated `cat_pdf_index.json` Builder
-- **Separation of Concerns**:
-  - `pdf_index.json`: Stays raw and untouched for the general app's PDF Viewer and user search.
-  - `cat_pdf_index.json`: Generated by `scripts/build_cat_pdf_index.js` specifically for AI generation:
-    - Injects `{ pdf, quality, total_pages }` into every page object.
-    - Classifies documents into `dedicated_sheet` vs `multi_compilation`.
-    - Strips non-clinical noise pages (covers, table of contents, bibliography).
+- `pdf_index.json` remains untouched for the general app's PDF Viewer and user search.
+- `cat_pdf_index.json` is generated by `scripts/build_cat_pdf_index.js` specifically for AI generation:
+  - Injects `{ pdf, quality, total_pages }` into every page object.
+  - Classifies documents into `dedicated_sheet` vs `multi_compilation`.
+  - Filters out non-clinical noise pages (covers, table of contents, bibliography).
 
 ---
 
@@ -96,7 +107,7 @@ Our 77 PDFs in `data/pdf_masters/` fall into two radically different structural 
 1. **PubMed PMC `efetch` API**:
    - Query `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=${pmcId}&rettype=abstract&retmode=text` to extract the **real medical abstract**.
 2. **MSD Direct Article URL Extraction**:
-   - From the search results, parse the first clinical article link (`/fr/professional/.../article-title`), then fetch that specific article via Jina Reader.
+   - From search results, parse the first clinical article link (`/fr/professional/.../article-title`), then fetch that specific article via Jina Reader.
 3. **Web Cache 30-Day Staleness Check**:
    - `getCachedWebSources()` automatically ignores and re-fetches web caches older than 30 days.
 4. **Dead Code Cleanup**:
@@ -137,8 +148,8 @@ CAT Generation Triggered
 |---|---|
 | `web_fetch_start` | Keywords extracted and sources being queried |
 | `web_fetch_result` | Source name, URL, content length, preview snippet |
-| `pdf_tier1_hit` | Dedicated short PDF matched (Full-doc injection triggered) |
-| `pdf_tier2_search` | Word-boundary tokens used, matching pages, section-anchor extracted |
+| `pdf_dedicated_hit` | Dedicated short PDF matched (Full-doc injection triggered) |
+| `pdf_compilation_search` | Word-boundary tokens used, matching pages, section-anchor extracted |
 | `active_learning` | Status of doctor-edited memory in `cats_db_v2_generated.json` |
 | `llm_prompt_built` | Exact system & user prompt character count and estimated token load |
 | `llm_model_try` | Dynamic model selected, attempt number, thinking budget applied |
@@ -154,6 +165,6 @@ CAT Generation Triggered
 | Phase | Task | Impact |
 |---|---|---|
 | **Phase 1 (P1)** | **Real-Time Debug Panel & SSE Telemetry**<br>• Create `cat_db_generator/lib/debug-emitter.js`<br>• Instrument `llm-engine.js`, `web-fetcher.js`, `pdf-extractor.js`<br>• Add SSE endpoint in `server/routes/cat-generator.js`<br>• Add collapsible UI panel + Copy Logs button in `admin/cat_generator_lab.html` | 🔴 CRITICAL: Complete visibility into live operations |
-| **Phase 2 (P2)** | **2-Tier PDF Engine & Word-Boundary Matching**<br>• Implement `matchExactWord()` with `\b` regex in `pdf-extractor.js`<br>• Add Tier 1 Dedicated PDF direct file match detector<br>• Add Clinical Section-Anchor extraction (`Traitement:`, `Posologie:`)<br>• Create `scripts/build_cat_pdf_index.js` for dedicated `cat_pdf_index.json` | 🟠 HIGH: Eliminates PDF noise & extracts actual prescriptions |
+| **Phase 2 (P2)** | **Dynamic Cumulative PDF Engine & Word-Boundary Matching**<br>• Implement `matchExactWord()` with `\b` regex in `pdf-extractor.js`<br>• Add Dynamic Token/Synonym expansion<br>• Add Parallel Dedicated File Matcher + Multi-Topic Compilation Searcher<br>• Add Clinical Section-Anchor extraction (`Traitement:`, `Posologie:`)<br>• Create `scripts/build_cat_pdf_index.js` for dedicated `cat_pdf_index.json` | 🟠 HIGH: Eliminates PDF noise & extracts actual prescriptions across all sources |
 | **Phase 3 (P3)** | **Web RAG Full Article Content**<br>• Switch PubMed to `efetch` (abstract text)<br>• Add MSD direct article link extractor<br>• Add 30-day cache staleness TTL check<br>• Delete dead `fetchMSDManuals()` code | 🟡 HIGH: Feeds genuine clinical text instead of search listings |
 | **Phase 4 (P4)** | **RAG Faithfulness Test Suite & Verification**<br>• Benchmark test with injected controlled parameters<br>• Verify end-to-end V3 generation on sample CATs (#56 Gale, #57 Hémorragie digestive) | 🟢 VALIDATION: Guarantees True V3 quality standard |
