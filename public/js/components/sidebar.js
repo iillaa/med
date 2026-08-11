@@ -205,18 +205,24 @@ export function populateCategoryFilter(cats) {
 // Keep a stable cat.id -> <li> map so re-renders (filtering/search) update
 // existing nodes in place instead of tearing down the whole list. This makes
 // list updates O(changes) instead of O(all) and preserves attached listeners.
-const catItemNodes = new Map();
-
 function buildCatItem(cat) {
   const li = document.createElement('li');
-  li.className = 'cat-item';
+  const isChild = !!cat.parent_id;
+  li.className = `cat-item ${isChild ? 'cat-item-subcat' : ''}`;
   li.setAttribute('data-id', cat.id);
+
+  let branchBadge = '';
+  if (isChild) {
+    branchBadge = '<span class="badge" style="font-size:9.5px; padding:1px 5px; background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3);"><i class="fa-solid fa-code-branch"></i> Sous-fiche</span>';
+  }
+
   li.innerHTML = `
     <div class="cat-indicator ${cat.status}"></div>
     <div class="cat-item-content">
-      <span class="cat-item-title">${cat.id}. ${cat.title}</span>
+      <span class="cat-item-title">${cat.id}. ${escapeHTML(cat.title)}</span>
       <div class="cat-item-meta">
-        <span class="cat-item-cat">${cat.category}</span>
+        <span class="cat-item-cat">${escapeHTML(cat.category)}</span>
+        ${branchBadge}
         <span class="cat-item-status">${getStatusLabel(cat.status)}</span>
       </div>
     </div>
@@ -225,7 +231,8 @@ function buildCatItem(cat) {
 }
 
 function paintCatItem(li, cat) {
-  li.className = `cat-item ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;
+  const isChild = !!cat.parent_id;
+  li.className = `cat-item ${isChild ? 'cat-item-subcat' : ''} ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;
   li.setAttribute('data-id', cat.id);
   const title = li.querySelector('.cat-item-title');
   if (title) title.textContent = `${cat.id}. ${cat.title}`;

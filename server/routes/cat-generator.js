@@ -148,6 +148,11 @@ function registerCatGeneratorRoutes(app) {
 
       const result = await generateCATWithLLM(safeTitle, category || 'Gastro-entérologie', { id: targetId, originalTitle: targetTitle });
       result.cat.id = targetId;
+      if (req.body.parent_id !== undefined && req.body.parent_id !== null && req.body.parent_id !== '') {
+        result.cat.parent_id = Number(req.body.parent_id);
+        result.cat.sub_cat_type = req.body.sub_cat_type || 'emergency';
+        result.cat.sub_cat_label = req.body.sub_cat_label || result.cat.title;
+      }
 
       let db = [];
       if (fs.existsSync(V2_DB_PATH)) {
@@ -308,6 +313,9 @@ function registerCatGeneratorRoutes(app) {
         summary: summary !== undefined ? summary : db[catIdx].summary,
         red_flags: red_flags !== undefined ? red_flags : db[catIdx].red_flags,
         ordonnance: ordonnance !== undefined ? ordonnance : db[catIdx].ordonnance,
+        parent_id: req.body.parent_id !== undefined ? (req.body.parent_id ? Number(req.body.parent_id) : null) : db[catIdx].parent_id,
+        sub_cat_type: req.body.sub_cat_type !== undefined ? req.body.sub_cat_type : db[catIdx].sub_cat_type,
+        sub_cat_label: req.body.sub_cat_label !== undefined ? req.body.sub_cat_label : db[catIdx].sub_cat_label,
         _human_edited: true,
         _last_edited_at: new Date().toISOString()
       };

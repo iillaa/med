@@ -53,10 +53,10 @@
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
       "firstSeen": "2026-08-03T22:12:43.913Z",
-      "requestCount": 149,
-      "appVersion": "1.6.1",
+      "requestCount": 363,
+      "appVersion": "1.7.1",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-06T11:58:03.487Z",
+      "lastSeen": "2026-08-11T13:45:52.316Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
@@ -119,7 +119,47 @@
       "lastSeen": "2026-08-03T23:25:08.430Z",
       "lastIp": "154.121.59.13",
       "isAdminDevice": false
+    },
+    "drcat-inst-6edb142f-8172-4155-b22f-77ca31cbffd1": {
+      "installId": "drcat-inst-6edb142f-8172-4155-b22f-77ca31cbffd1",
+      "firstSeen": "2026-08-09T14:36:57.835Z",
+      "requestCount": 52,
+      "appVersion": "1.7.1",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-09T16:23:46.550Z",
+      "lastIp": "154.121.73.10",
+      "isAdminDevice": false
+    },
+    "drcat-inst-d16bc0e7-fa0e-49fc-bd81-41de979cf894": {
+      "installId": "drcat-inst-d16bc0e7-fa0e-49fc-bd81-41de979cf894",
+      "firstSeen": "2026-08-09T16:19:41.844Z",
+      "requestCount": 8,
+      "appVersion": "1.7.1",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-09T16:19:43.252Z",
+      "lastIp": "154.121.73.10",
+      "isAdminDevice": false
+    },
+    "drcat-inst-eb042e84-0bbe-4705-8513-f558e83e7e46": {
+      "installId": "drcat-inst-eb042e84-0bbe-4705-8513-f558e83e7e46",
+      "firstSeen": "2026-08-09T16:20:16.734Z",
+      "requestCount": 73,
+      "appVersion": "1.7.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-09T17:03:23.139Z",
+      "lastIp": "154.121.87.39",
+      "isAdminDevice": false
+    },
+    "drcat-inst-55870203-3ade-42c2-868a-0ca188f96406": {
+      "installId": "drcat-inst-55870203-3ade-42c2-868a-0ca188f96406",
+      "firstSeen": "2026-08-11T13:28:17.816Z",
+      "requestCount": 6,
+      "appVersion": "1.7.1",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-11T13:28:18.869Z",
+      "lastIp": "66.249.92.14",
+      "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-08-06T11:58:10.957Z"
+  "lastUpdated": "2026-08-11T13:45:56.411Z"
 }

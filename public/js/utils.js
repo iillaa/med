@@ -168,11 +168,11 @@ export function escapeHTML(str) {
 /**
  * Convert line breaks and tables in markdown summaries to HTML elements
  */
-export function parseSummaryMarkdown(text) {
-  if (!text) {
-    return '<p class="text-muted">Aucune synthèse disponible.</p>';
-  }
-
+/**
+ * Formats a block of markdown text into clean HTML (tables, lists, bold, linebreaks)
+ */
+export function parseMarkdownBlock(text) {
+  if (!text) return '';
   let html = escapeHTML(text);
 
   // Bold markdown
@@ -228,7 +228,7 @@ export function parseSummaryMarkdown(text) {
   // Bullet points
   html = html.split('\n').map(line => {
     const trimmed = line.trim();
-    if (trimmed.startsWith('- ')) {
+    if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
       return `<li>${trimmed.substring(2)}</li>`;
     }
     return line;
@@ -244,14 +244,119 @@ export function parseSummaryMarkdown(text) {
   // Clean empty tags
   html = html.replace(/<p>\s*<\/p>/g, '').replace(/<p>\s*<ul>/g, '<ul>').replace(/<\/ul>\s*<\/p>/g, '</ul>');
 
-  try {
-    const DOMPurify = require('dompurify');
-    if (DOMPurify && typeof DOMPurify.sanitize === 'function') {
-      return DOMPurify.sanitize(html);
-    }
-  } catch (_) { /* no-op: fallback to html */ }
-
   return html;
+}
+
+/**
+ * Returns dynamic theme accent, icon, and default expansion state for a clinical step header
+ */
+function getStepTheme(headerText) {
+  const h = (headerText || '').toLowerCase();
+
+  // 0. Stabilisation / ABCDE / Urgence
+  if (/^0\./.test(h) || h.includes('stabilisation') || h.includes('abcde') || h.includes('urgence')) {
+    return { themeClass: 'step-theme-emergency', icon: 'fa-truck-medical', isOpen: true, badge: 'Urgence' };
+  }
+
+  // 1. Diagnostic / Triage / Bilan / Cadre Légal
+  if (/^1\./.test(h) || h.includes('diagnostic') || h.includes('triage') || h.includes('bilan') || h.includes('cadre')) {
+    return { themeClass: 'step-theme-diagnostic', icon: 'fa-stethoscope', isOpen: true, badge: 'Diagnostic' };
+  }
+
+  // 2. Traitement / Posologie / Conduite / Structure
+  if (/^2\./.test(h) || h.includes('traitement') || h.includes('posologie') || h.includes('conduite') || h.includes('structure')) {
+    return { themeClass: 'step-theme-treatment', icon: 'fa-pills', isOpen: true, badge: 'Traitement' };
+  }
+
+  // 3. / 3bis. Terrain Particulier / Grossesse / Comorbidités / Formules
+  if (/^3/.test(h) || h.includes('terrain') || h.includes('grossesse') || h.includes('comorbidit') || h.includes('formule')) {
+    return { themeClass: 'step-theme-terrain', icon: 'fa-person-pregnant', isOpen: false, badge: 'Terrains' };
+  }
+
+  // 4. / 5. Critères d'Hospitalisation / Transfert / MDO
+  if (/^[456]\./.test(h) || h.includes('crit') || h.includes('hospitalis') || h.includes('transfert') || h.includes('mdo')) {
+    return { themeClass: 'step-theme-hospital', icon: 'fa-hospital-user', isOpen: false, badge: 'Orientation' };
+  }
+
+  return { themeClass: 'step-theme-default', icon: 'fa-circle-info', isOpen: true, badge: 'Étape' };
+}
+
+/**
+ * Parses markdown into modern, interactive Dynamic Retractable Step Accordions.
+ */
+export function parseSummaryMarkdown(text) {
+  if (!text) {
+    return '<p class="text-muted">Aucune synthèse disponible.</p>';
+  }
+
+  const raw = text.trim();
+
+  // Pattern matching: **0. Step Name :** or ### 0. Step Name or 0. Step Name :
+  const stepRegex = /(?:^|\n)(?:\*\*|#{2,4}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+)(?:\*\*)?:?/gi;
+  const matches = [...raw.matchAll(stepRegex)];
+
+  // If 2 or more clinical steps are found, dynamically render retractable accordion cards
+  if (matches.length >= 2) {
+    const sections = [];
+    let lastIndex = 0;
+
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      const headerTitle = match[1].trim();
+      const matchStart = match.index;
+
+      if (i === 0 && matchStart > 0) {
+        const intro = raw.substring(0, matchStart).trim();
+        if (intro) sections.push({ header: null, content: intro });
+      }
+
+      if (i > 0) {
+        sections[sections.length - 1].content = raw.substring(lastIndex, matchStart).trim();
+      }
+
+      sections.push({ header: headerTitle, content: '' });
+      lastIndex = matchStart + match[0].length;
+    }
+
+    if (sections.length > 0) {
+      sections[sections.length - 1].content = raw.substring(lastIndex).trim();
+    }
+
+    let accordionsHtml = '<div class="cat-accordions-wrapper">';
+    sections.forEach(sec => {
+      if (!sec.header) {
+        accordionsHtml += `<div class="cat-step-intro">${parseMarkdownBlock(sec.content)}</div>`;
+        return;
+      }
+
+      const { themeClass, icon, isOpen, badge } = getStepTheme(sec.header);
+      const parsedBody = parseMarkdownBlock(sec.content);
+
+      accordionsHtml += `
+        <details class="cat-step-accordion ${themeClass}" ${isOpen ? 'open' : ''}>
+          <summary class="cat-step-header">
+            <div class="cat-step-title-wrap">
+              <span class="cat-step-icon"><i class="fa-solid ${icon}"></i></span>
+              <span class="cat-step-title">${escapeHTML(sec.header)}</span>
+            </div>
+            <div class="cat-step-meta">
+              <span class="cat-step-badge">${badge}</span>
+              <span class="cat-step-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+          </summary>
+          <div class="cat-step-content">
+            ${parsedBody}
+          </div>
+        </details>
+      `;
+    });
+    accordionsHtml += '</div>';
+
+    return accordionsHtml;
+  }
+
+  // Fallback for non-step fiches
+  return parseMarkdownBlock(raw);
 }
 
 /**
