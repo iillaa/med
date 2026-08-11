@@ -81,6 +81,7 @@ function registerCatRoutes(app) {
             summary: item.summary || '',
             red_flags: item.red_flags || '',
             ordonnance: item.ordonnance || '',
+            sub_cats: Array.isArray(item.sub_cats) ? item.sub_cats : undefined,
             pdf_keywords: item.pdf_keywords || [],
             updatedAt: Date.now(),
             history: [{
@@ -115,7 +116,7 @@ function registerCatRoutes(app) {
       if (isNaN(catId)) {
         return res.status(400).json({ error: 'Invalid CAT ID' });
       }
-      const { summary, ordonnance, category, title, red_flags } = req.body;
+      const { summary, ordonnance, category, title, red_flags, sub_cats, pdf_keywords } = req.body;
 
       const result = await dbLock.acquire(async () => {
         const cat = cache.catsCache.find(c => c.id === catId);
@@ -129,12 +130,15 @@ function registerCatRoutes(app) {
         if (category !== undefined && cat.category !== category) previousState.category = cat.category;
         if (title !== undefined && cat.title !== title) previousState.title = cat.title;
         if (red_flags !== undefined && cat.red_flags !== red_flags) previousState.red_flags = red_flags;
+        if (sub_cats !== undefined && JSON.stringify(cat.sub_cats) !== JSON.stringify(sub_cats)) previousState.sub_cats = cat.sub_cats;
 
         if (summary !== undefined) cat.summary = summary;
         if (ordonnance !== undefined) cat.ordonnance = ordonnance;
         if (category !== undefined) cat.category = category;
         if (title !== undefined) cat.title = title;
         if (red_flags !== undefined) cat.red_flags = red_flags;
+        if (sub_cats !== undefined) cat.sub_cats = Array.isArray(sub_cats) ? sub_cats : undefined;
+        if (pdf_keywords !== undefined) cat.pdf_keywords = pdf_keywords;
 
         cat.updatedAt = Date.now();
         if (!cat.history) cat.history = [];
@@ -167,7 +171,7 @@ function registerCatRoutes(app) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
     }
     try {
-      const { title, category, summary, red_flags, ordonnance, pdf_keywords } = req.body;
+      const { title, category, summary, red_flags, ordonnance, pdf_keywords, sub_cats } = req.body;
       if (!title || !category) {
         return res.status(400).json({ error: 'Title and Category are required' });
       }
@@ -181,6 +185,7 @@ function registerCatRoutes(app) {
           summary: summary || '',
           red_flags: red_flags || '',
           ordonnance: ordonnance || '',
+          sub_cats: Array.isArray(sub_cats) ? sub_cats : undefined,
           pdf_keywords: pdf_keywords || [],
           updatedAt: Date.now(),
           history: [{

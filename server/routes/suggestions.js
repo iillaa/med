@@ -30,8 +30,8 @@ function registerSuggestionRoutes(app) {
 
       // Guard against oversized payloads that could bloat the suggestions file.
       const dataSize = Buffer.byteLength(JSON.stringify(data), 'utf8');
-      if (dataSize > 5000) {
-        return res.status(413).json({ error: 'Données trop volumineuses (max 5 Ko).' });
+      if (dataSize > 20000) {
+        return res.status(413).json({ error: 'Données trop volumineuses (max 20 Ko).' });
       }
 
       // Strict integer validation — parseInt('abc') = NaN, parseInt('1e5') = 1 (wrong).
@@ -103,6 +103,7 @@ function registerSuggestionRoutes(app) {
             summary: sug.data.summary || '',
             red_flags: sug.data.red_flags || '',
             ordonnance: sug.data.ordonnance || '',
+            sub_cats: Array.isArray(sug.data.sub_cats) ? sug.data.sub_cats : undefined,
             pdf_keywords: sug.data.pdf_keywords || [],
             updatedAt: Date.now(),
             history: [{
@@ -122,12 +123,14 @@ function registerSuggestionRoutes(app) {
             if (sug.data.category !== undefined && cat.category !== sug.data.category) previousState.category = cat.category;
             if (sug.data.title !== undefined && cat.title !== sug.data.title) previousState.title = cat.title;
             if (sug.data.red_flags !== undefined && cat.red_flags !== sug.data.red_flags) previousState.red_flags = cat.red_flags;
+            if (sug.data.sub_cats !== undefined && JSON.stringify(cat.sub_cats) !== JSON.stringify(sug.data.sub_cats)) previousState.sub_cats = cat.sub_cats;
 
             if (sug.data.summary !== undefined) cat.summary = sug.data.summary;
             if (sug.data.ordonnance !== undefined) cat.ordonnance = sug.data.ordonnance;
             if (sug.data.category !== undefined) cat.category = sug.data.category;
             if (sug.data.title !== undefined) cat.title = sug.data.title;
             if (sug.data.red_flags !== undefined) cat.red_flags = sug.data.red_flags;
+            if (sug.data.sub_cats !== undefined) cat.sub_cats = Array.isArray(sug.data.sub_cats) ? sug.data.sub_cats : undefined;
 
             cat.updatedAt = Date.now();
             if (!cat.history) cat.history = [];
