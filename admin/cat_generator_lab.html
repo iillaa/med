@@ -144,7 +144,11 @@
     .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); }
     .badge-error { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); }
 
-    /* Modal Inspector */
+    /* Modal Inspector & Scroll Isolation */
+    body.modal-open {
+      overflow: hidden !important;
+      height: 100vh !important;
+    }
     .modal-overlay {
       display: none;
       position: fixed;
@@ -154,6 +158,7 @@
       z-index: 1000;
       align-items: center;
       justify-content: center;
+      overscroll-behavior: contain;
     }
     .modal-overlay.active { display: flex; }
     .modal-card {
@@ -166,6 +171,7 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      overscroll-behavior: contain;
     }
     .modal-header {
       padding: 16px 20px;
@@ -180,6 +186,8 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
     @media (max-width: 900px) { .modal-body { grid-template-columns: 1fr; } }
 
@@ -191,6 +199,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      overscroll-behavior: contain;
     }
     .compare-title {
       font-weight: bold;
@@ -212,6 +221,8 @@
       max-height: 500px;
       overflow-y: auto;
       margin: 0;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
     .metric-row {
       display: flex;
@@ -863,18 +874,31 @@
       document.getElementById('v2-cat-ordonnance').textContent = v2Cat.ordonnance || '';
 
       document.getElementById('compare-modal').classList.add('active');
+      syncModalBodyLock();
+    }
+
+    function syncModalBodyLock() {
+      const hasActive = document.querySelector('.modal-overlay.active');
+      if (hasActive) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
+      }
     }
 
     function closeCompareModal() {
       document.getElementById('compare-modal').classList.remove('active');
+      syncModalBodyLock();
     }
 
     function openSingleModal() {
       document.getElementById('single-modal').classList.add('active');
+      syncModalBodyLock();
     }
 
     function closeSingleModal() {
       document.getElementById('single-modal').classList.remove('active');
+      syncModalBodyLock();
     }
 
     function openEditModal(id) {
@@ -894,10 +918,12 @@
       document.getElementById('edit-ordonnance').value = cat.ordonnance || '';
 
       document.getElementById('edit-modal').classList.add('active');
+      syncModalBodyLock();
     }
 
     function closeEditModal() {
       document.getElementById('edit-modal').classList.remove('active');
+      syncModalBodyLock();
     }
 
     async function saveCatEdit() {

@@ -45,6 +45,7 @@ dialog.modal-overlay::backdrop {
   padding: 16px;
   animation: modalBackdropIn var(--motion-fast) ease;
   will-change: opacity;
+  overscroll-behavior: contain;
 }
 
 @media (min-width: 851px) {
@@ -73,6 +74,7 @@ dialog.modal-overlay::backdrop {
   transform-origin: center;
   animation: modalCardIn var(--motion-base) var(--ease-decelerate);
   will-change: transform, opacity;
+  overscroll-behavior: contain;
 }
 
 .modal-card.modal-card-lg {
@@ -130,6 +132,7 @@ dialog.modal-overlay::backdrop {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   transform: translateZ(0);
+  overscroll-behavior: contain;
 }
 
 @media (hover: hover) and (pointer: fine) {
