@@ -1005,22 +1005,50 @@ function renderSubCatBar(cat) {
     pill.innerHTML = `<i class="fa-solid ${icon} subcat-pill-icon"></i> <span>${escapeHTML(prof.label || prof.title || `Profil ${idx}`)}</span>`;
 
     pill.addEventListener('click', () => {
-      state.activeSubCatIndex = idx;
-      subCatBar.querySelectorAll('.subcat-pill').forEach((p, i) => {
-        const isAct = i === idx;
-        p.classList.toggle('active', isAct);
-        p.setAttribute('aria-selected', isAct ? 'true' : 'false');
-      });
-
-      if (wsRedFlags) wsRedFlags.textContent = prof.red_flags || cat.red_flags;
-      renderSummary(prof.summary || cat.summary, cat);
-      renderPrescription(prof.ordonnance || cat.ordonnance);
-      triggerHaptic(true);
+      window.switchToSubProfile(idx);
     });
 
     subCatBar.appendChild(pill);
   });
 }
+
+/**
+ * Global In-Place Sub-Profile Switcher
+ * Callable by both the top segmented pill bar and contextual in-text badges!
+ */
+window.switchToSubProfile = function(idx) {
+  if (!state.activeCat) return;
+  const subCats = Array.isArray(state.activeCat.sub_cats) && state.activeCat.sub_cats.length > 0 ? state.activeCat.sub_cats : [];
+  const profiles = [
+    {
+      label: '🩺 Standard (Adulte)',
+      summary: state.activeCat.summary,
+      red_flags: state.activeCat.red_flags,
+      ordonnance: state.activeCat.ordonnance
+    },
+    ...subCats
+  ];
+
+  const targetIdx = Number(idx);
+  if (targetIdx < 0 || targetIdx >= profiles.length) return;
+  state.activeSubCatIndex = targetIdx;
+
+  const subCatBar = document.getElementById('subcat-selector-bar');
+  if (subCatBar) {
+    subCatBar.querySelectorAll('.subcat-pill').forEach((p, i) => {
+      const isAct = i === targetIdx;
+      p.classList.toggle('active', isAct);
+      p.setAttribute('aria-selected', isAct ? 'true' : 'false');
+    });
+  }
+
+  const prof = profiles[targetIdx];
+  const wsRedFlags = document.getElementById('red-flags-content');
+  if (wsRedFlags) wsRedFlags.textContent = prof.red_flags || state.activeCat.red_flags;
+  renderSummary(prof.summary || state.activeCat.summary, state.activeCat);
+  renderPrescription(prof.ordonnance || state.activeCat.ordonnance);
+  triggerHaptic(true);
+};
 
 function getSubCatIcon(textOrType) {
   const t = (textOrType || '').toLowerCase();

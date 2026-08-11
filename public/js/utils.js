@@ -237,6 +237,10 @@ export function parseMarkdownBlock(text) {
   // Wrap continuous <li> groups in <ul>
   html = html.replace(/(<li>.*?<\/li>\s*)+/gs, (match) => `<ul>${match}</ul>`);
 
+  // Sub-CAT In-Text Badges: [Titre de la sous-fiche](subcat:1) or [[subcat:1:Titre]]
+  html = html.replace(/\[(.*?)\]\(subcat:([0-9]+)\)/g, '<button type="button" class="subcat-inline-badge" onclick="window.switchToSubProfile && window.switchToSubProfile($2)" title="Consulter la sous-fiche spécialisée"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span>$1</span></button>');
+  html = html.replace(/\[\[subcat:([0-9]+):(.*?)]]/g, '<button type="button" class="subcat-inline-badge" onclick="window.switchToSubProfile && window.switchToSubProfile($1)" title="Consulter la sous-fiche spécialisée"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span>$2</span></button>');
+
   // Paragraph line breaks
   html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
   html = `<p>${html}</p>`;
