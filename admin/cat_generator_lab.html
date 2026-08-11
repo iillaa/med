@@ -386,6 +386,18 @@
             <span>⏱️ Latency: <strong id="metric-latency">-</strong></span>
             <span>⚡ Tokens: <strong id="metric-tokens">-</strong></span>
           </div>
+
+          <!-- Sub-CAT Switcher Tabs -->
+          <div id="inspector-subcat-section" style="margin-top: 6px; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px;">
+            <div style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+              <span>🧩 PROFILS & SOUS-FICHES RATTACHÉES :</span>
+              <span id="inspector-subcat-count" class="badge" style="font-size: 10px; background: rgba(168,85,247,0.15); color: #c084fc;">0 sous-fiches</span>
+            </div>
+            <div id="inspector-subcat-tabs" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+          </div>
+
+          <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 6px;" id="v2-active-profile-header">⭐ Fiche Principale (Master Hub)</div>
+
           <h4 style="margin: 4px 0; font-size: 13px; color: var(--primary);">Summary / Conduite à tenir Synthetisée:</h4>
           <pre id="v2-cat-summary">Non disponible</pre>
           <h4 style="margin: 4px 0; font-size: 13px; color: var(--danger);">Drapeaux Rouges (Red Flags):</h4>
@@ -499,6 +511,11 @@
         <div>
           <label style="font-size: 12px; color: var(--success); display: block; margin-bottom: 5px; font-weight: bold;">Modèle d'Ordonnance (Prescription avec posologies et unités)</label>
           <textarea id="edit-ordonnance" class="search-box" style="width: 100%; height: 110px; font-family: monospace; font-size: 12px;"></textarea>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: #c084fc; display: block; margin-bottom: 5px; font-weight: bold;">🧩 Sous-Fiches Spécialisées (Format JSON : [ { "label": "...", "summary": "...", "red_flags": "...", "ordonnance": "..." } ])</label>
+          <textarea id="edit-subcats" class="search-box" style="width: 100%; height: 130px; font-family: monospace; font-size: 11px;" placeholder="[ { &quot;label&quot;: &quot;🚨 Forme Sévère&quot;, &quot;summary&quot;: &quot;...&quot;, &quot;red_flags&quot;: &quot;...&quot;, &quot;ordonnance&quot;: &quot;...&quot; } ]"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -644,7 +661,12 @@
         const metrics = c._execution_metrics || {};
 
         const isSubCat = !!c.parent_id;
-        const subBadge = isSubCat ? `<span class="badge" style="font-size:10px; background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); margin-left:6px;"><i class="fa-solid fa-code-branch"></i> Sous-fiche #${c.parent_id}</span>` : '';
+        let subBadge = '';
+        if (isSubCat) {
+          subBadge = `<span class="badge" style="font-size:10px; background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); margin-left:6px;"><i class="fa-solid fa-code-branch"></i> Sous-fiche #${c.parent_id}</span>`;
+        } else if (Array.isArray(c.sub_cats) && c.sub_cats.length > 0) {
+          subBadge = `<span class="badge" style="font-size:10px; background:rgba(168,85,247,0.25); color:#e9d5ff; border:1px solid rgba(168,85,247,0.6); margin-left:6px;"><i class="fa-solid fa-layer-group"></i> ${c.sub_cats.length} Sous-Fiches</span>`;
+        }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -844,11 +866,69 @@
       }
     }
 
+    let currentInspectedV2 = null;
+    let activeInspectorSubCatIdx = -1;
+
+    function renderInspectorTabs(v2Cat) {
+      const container = document.getElementById('inspector-subcat-tabs');
+      const countEl = document.getElementById('inspector-subcat-count');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const subs = Array.isArray(v2Cat.sub_cats) ? v2Cat.sub_cats : [];
+      if (countEl) countEl.textContent = `${subs.length} sous-fiche(s)`;
+
+      // Main Tab Button
+      const mainBtn = document.createElement('button');
+      mainBtn.className = `btn-outline ${activeInspectorSubCatIdx === -1 ? 'btn-success' : ''}`;
+      mainBtn.style.cssText = 'padding: 4px 10px; font-size: 11px; font-weight: 600;';
+      mainBtn.innerHTML = '⭐ Master Hub';
+      mainBtn.onclick = () => {
+        activeInspectorSubCatIdx = -1;
+        updateInspectorProfile(v2Cat);
+        renderInspectorTabs(v2Cat);
+      };
+      container.appendChild(mainBtn);
+
+      // Sub-CAT Tab Buttons
+      subs.forEach((sub, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `btn-outline ${activeInspectorSubCatIdx === idx ? 'btn-success' : ''}`;
+        btn.style.cssText = 'padding: 4px 10px; font-size: 11px; font-weight: 600;';
+        btn.innerHTML = `🏷️ ${escapeHTML(sub.label || `Option ${idx + 1}`)}`;
+        btn.onclick = () => {
+          activeInspectorSubCatIdx = idx;
+          updateInspectorProfile(v2Cat);
+          renderInspectorTabs(v2Cat);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function updateInspectorProfile(v2Cat) {
+      const headerEl = document.getElementById('v2-active-profile-header');
+      if (activeInspectorSubCatIdx === -1) {
+        if (headerEl) headerEl.innerHTML = '<span style="color: #38bdf8;">⭐ Fiche Principale (Master Hub)</span>';
+        document.getElementById('v2-cat-summary').textContent = v2Cat.summary || 'Non disponible';
+        document.getElementById('v2-cat-redflags').textContent = v2Cat.red_flags || 'Non disponible';
+        document.getElementById('v2-cat-ordonnance').textContent = v2Cat.ordonnance || 'Non disponible';
+      } else if (v2Cat.sub_cats && v2Cat.sub_cats[activeInspectorSubCatIdx]) {
+        const sub = v2Cat.sub_cats[activeInspectorSubCatIdx];
+        if (headerEl) headerEl.innerHTML = `<span style="color: #c084fc;">🏷️ Sous-Fiche ${activeInspectorSubCatIdx + 1} : ${escapeHTML(sub.label || 'Spécialisée')}</span>`;
+        document.getElementById('v2-cat-summary').textContent = sub.summary || 'Non disponible';
+        document.getElementById('v2-cat-redflags').textContent = sub.red_flags || 'Non disponible';
+        document.getElementById('v2-cat-ordonnance').textContent = sub.ordonnance || 'Non disponible';
+      }
+    }
+
     function inspectCAT(id) {
       const v1Cat = appData.v1.find(c => c.id === id) || { summary: 'Non présent en V1', red_flags: '-', ordonnance: '-' };
       const v2Cat = appData.v2.find(c => c.id === id);
 
       if (!v2Cat) return;
+
+      currentInspectedV2 = v2Cat;
+      activeInspectorSubCatIdx = -1;
 
       document.getElementById('modal-cat-title').textContent = `[ID ${id}] ${v2Cat.title}`;
       
@@ -869,9 +949,8 @@
       document.getElementById('metric-latency').textContent = metrics.latencyMs ? `${metrics.latencyMs} ms` : '-';
       document.getElementById('metric-tokens').textContent = metrics.totalTokens ? `${metrics.totalTokens} tokens (${metrics.promptTokens} in / ${metrics.completionTokens} out)` : '-';
 
-      document.getElementById('v2-cat-summary').textContent = v2Cat.summary || '';
-      document.getElementById('v2-cat-redflags').textContent = v2Cat.red_flags || '';
-      document.getElementById('v2-cat-ordonnance').textContent = v2Cat.ordonnance || '';
+      renderInspectorTabs(v2Cat);
+      updateInspectorProfile(v2Cat);
 
       document.getElementById('compare-modal').classList.add('active');
       syncModalBodyLock();
@@ -916,6 +995,7 @@
       document.getElementById('edit-summary').value = cat.summary || '';
       document.getElementById('edit-redflags').value = cat.red_flags || '';
       document.getElementById('edit-ordonnance').value = cat.ordonnance || '';
+      document.getElementById('edit-subcats').value = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? JSON.stringify(cat.sub_cats, null, 2) : '';
 
       document.getElementById('edit-modal').classList.add('active');
       syncModalBodyLock();
@@ -934,17 +1014,28 @@
       const summary = document.getElementById('edit-summary').value;
       const red_flags = document.getElementById('edit-redflags').value;
       const ordonnance = document.getElementById('edit-ordonnance').value;
+      const subcatsRaw = document.getElementById('edit-subcats').value.trim();
 
       if (!id || !title) {
         alert('Titre obligatoire.');
         return;
       }
 
+      let sub_cats = [];
+      if (subcatsRaw) {
+        try {
+          sub_cats = JSON.parse(subcatsRaw);
+        } catch (err) {
+          alert('Format JSON invalide dans le champ Sous-Fiches : ' + err.message);
+          return;
+        }
+      }
+
       try {
         const res = await fetch('/api/admin/cat-generator/update', {
           method: 'POST',
           headers: getAdminHeaders(),
-          body: JSON.stringify({ id, title, category, search_keywords, summary, red_flags, ordonnance })
+          body: JSON.stringify({ id, title, category, search_keywords, summary, red_flags, ordonnance, sub_cats })
         });
         const data = await res.json();
 

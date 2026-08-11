@@ -305,6 +305,17 @@ function registerCatGeneratorRoutes(app) {
         parsedKeywords = search_keywords.split(',').map(k => k.trim()).filter(Boolean);
       }
 
+      let parsedSubCats = db[catIdx].sub_cats || [];
+      if (req.body.sub_cats !== undefined) {
+        if (Array.isArray(req.body.sub_cats)) {
+          parsedSubCats = req.body.sub_cats;
+        } else if (typeof req.body.sub_cats === 'string' && req.body.sub_cats.trim()) {
+          try { parsedSubCats = JSON.parse(req.body.sub_cats); } catch (_) {}
+        } else if (req.body.sub_cats === null || req.body.sub_cats === '') {
+          parsedSubCats = [];
+        }
+      }
+
       const updatedCat = {
         ...db[catIdx],
         title: title.trim(),
@@ -313,6 +324,7 @@ function registerCatGeneratorRoutes(app) {
         summary: summary !== undefined ? summary : db[catIdx].summary,
         red_flags: red_flags !== undefined ? red_flags : db[catIdx].red_flags,
         ordonnance: ordonnance !== undefined ? ordonnance : db[catIdx].ordonnance,
+        sub_cats: parsedSubCats,
         parent_id: req.body.parent_id !== undefined ? (req.body.parent_id ? Number(req.body.parent_id) : null) : db[catIdx].parent_id,
         sub_cat_type: req.body.sub_cat_type !== undefined ? req.body.sub_cat_type : db[catIdx].sub_cat_type,
         sub_cat_label: req.body.sub_cat_label !== undefined ? req.body.sub_cat_label : db[catIdx].sub_cat_label,
