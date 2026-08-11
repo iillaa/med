@@ -1,14 +1,14 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.7.6",
+  "latestVersion": "1.7.7",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.7.6 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.7.7 est disponible.",
   "releaseNotes": [
-    "Architecture Sub-CATs inlinée et contextualisée dans la Fiche de Synthèse",
-    "Titres d'étapes rétractables au clic avec colorimétrie dynamique",
-    "Synchronisation 0ms de la fiche et de l'ordonnance en point-of-care",
-    "Moteur de génération IA V3 avec planification automatique des sous-profils",
-    "Isolation tactile des gestes swipe de navigation"
+    "Générateur d'impression et PDF médical haute densité (Fiche de poche 1-2 pages)",
+    "Rendu autonome isolé du DOM SPA (zéro artefact de capture d'écran)",
+    "Typographie clinique confortable (10.5pt - 14pt avec interlignage 1.45)",
+    "Intégration complète de toutes les sous-fiches (Sub-CATs) et ordonnances",
+    "Export presse-papier Android multi-sections ultra-rapide"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
