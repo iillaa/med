@@ -53,12 +53,12 @@ async function runTests() {
 
   const parsedHtml = parseSummaryMarkdown(sampleClinicalMarkdown);
 
-  assert(parsedHtml.includes('<details class="cat-step-accordion step-theme-emergency" open>'), 'Step 0 parsed as Emergency Accordion with open=true');
-  assert(parsedHtml.includes('<details class="cat-step-accordion step-theme-diagnostic" open>'), 'Step 1 parsed as Diagnostic Accordion with open=true');
-  assert(parsedHtml.includes('<details class="cat-step-accordion step-theme-treatment" open>'), 'Step 2 parsed as Treatment Accordion with open=true');
-  assert(parsedHtml.includes('<details class="cat-step-accordion step-theme-terrain"'), 'Step 3bis parsed as Terrain Accordion (collapsed by default)');
-  assert(!parsedHtml.includes('<details class="cat-step-accordion step-theme-terrain" open>'), 'Step 3bis is collapsed (open=false)');
-  assert(parsedHtml.includes('<details class="cat-step-accordion step-theme-hospital"'), 'Step 4 parsed as Hospitalization Accordion (collapsed by default)');
+  assert(parsedHtml.includes('<details class="cat-step-section step-theme-emergency" open>'), 'Step 0 parsed as Emergency Section with open=true');
+  assert(parsedHtml.includes('<details class="cat-step-section step-theme-diagnostic" open>'), 'Step 1 parsed as Diagnostic Section with open=true');
+  assert(parsedHtml.includes('<details class="cat-step-section step-theme-treatment" open>'), 'Step 2 parsed as Treatment Section with open=true');
+  assert(parsedHtml.includes('<details class="cat-step-section step-theme-terrain" open>'), 'Step 3bis parsed as Terrain Section with open=true (full text visible by default)');
+  assert(parsedHtml.includes('<details class="cat-step-section step-theme-hospital" open>'), 'Step 4 parsed as Hospitalization Section with open=true');
+  assert(parsedHtml.includes('cat-step-title-toggle'), 'Step headers have cat-step-title-toggle class');
 
   // TEST 2: Administrative Step Parsing
   const sampleAdminMarkdown = `
@@ -85,7 +85,8 @@ async function runTests() {
 
   // TEST 4: Workspace CSS Accordion Styles
   const workspaceCss = fs.readFileSync(path.join(ROOT, 'public/css/workspace.css'), 'utf-8');
-  assert(workspaceCss.includes('.cat-step-accordion'), 'workspace.css contains .cat-step-accordion');
+  assert(workspaceCss.includes('.cat-step-section'), 'workspace.css contains .cat-step-section');
+  assert(workspaceCss.includes('.cat-step-title-toggle'), 'workspace.css contains .cat-step-title-toggle');
   assert(workspaceCss.includes('.subcat-parent-banner'), 'workspace.css contains .subcat-parent-banner');
   assert(workspaceCss.includes('.subcat-branch-chip'), 'workspace.css contains .subcat-branch-chip');
 

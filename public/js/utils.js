@@ -248,41 +248,42 @@ export function parseMarkdownBlock(text) {
 }
 
 /**
- * Returns dynamic theme accent, icon, and default expansion state for a clinical step header
+ * Returns dynamic theme accent and icon for clinical step headers
  */
 function getStepTheme(headerText) {
   const h = (headerText || '').toLowerCase();
 
   // 0. Stabilisation / ABCDE / Urgence
   if (/^0\./.test(h) || h.includes('stabilisation') || h.includes('abcde') || h.includes('urgence')) {
-    return { themeClass: 'step-theme-emergency', icon: 'fa-truck-medical', isOpen: true, badge: 'Urgence' };
+    return { themeClass: 'step-theme-emergency', icon: 'fa-truck-medical' };
   }
 
   // 1. Diagnostic / Triage / Bilan / Cadre Légal
   if (/^1\./.test(h) || h.includes('diagnostic') || h.includes('triage') || h.includes('bilan') || h.includes('cadre')) {
-    return { themeClass: 'step-theme-diagnostic', icon: 'fa-stethoscope', isOpen: true, badge: 'Diagnostic' };
+    return { themeClass: 'step-theme-diagnostic', icon: 'fa-stethoscope' };
   }
 
   // 2. Traitement / Posologie / Conduite / Structure
   if (/^2\./.test(h) || h.includes('traitement') || h.includes('posologie') || h.includes('conduite') || h.includes('structure')) {
-    return { themeClass: 'step-theme-treatment', icon: 'fa-pills', isOpen: true, badge: 'Traitement' };
+    return { themeClass: 'step-theme-treatment', icon: 'fa-pills' };
   }
 
   // 3. / 3bis. Terrain Particulier / Grossesse / Comorbidités / Formules
   if (/^3/.test(h) || h.includes('terrain') || h.includes('grossesse') || h.includes('comorbidit') || h.includes('formule')) {
-    return { themeClass: 'step-theme-terrain', icon: 'fa-person-pregnant', isOpen: false, badge: 'Terrains' };
+    return { themeClass: 'step-theme-terrain', icon: 'fa-person-pregnant' };
   }
 
   // 4. / 5. Critères d'Hospitalisation / Transfert / MDO
   if (/^[456]\./.test(h) || h.includes('crit') || h.includes('hospitalis') || h.includes('transfert') || h.includes('mdo')) {
-    return { themeClass: 'step-theme-hospital', icon: 'fa-hospital-user', isOpen: false, badge: 'Orientation' };
+    return { themeClass: 'step-theme-hospital', icon: 'fa-hospital-user' };
   }
 
-  return { themeClass: 'step-theme-default', icon: 'fa-circle-info', isOpen: true, badge: 'Étape' };
+  return { themeClass: 'step-theme-default', icon: 'fa-circle-info' };
 }
 
 /**
- * Parses markdown into modern, interactive Dynamic Retractable Step Accordions.
+ * Parses markdown into clean, seamless clinical text with colored clickable retractable step titles.
+ * All sections are FULL TEXT (open) by default; clicking any title retracts/collapses its text underneath.
  */
 export function parseSummaryMarkdown(text) {
   if (!text) {
@@ -295,7 +296,7 @@ export function parseSummaryMarkdown(text) {
   const stepRegex = /(?:^|\n)(?:\*\*|#{2,4}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+)(?:\*\*)?:?/gi;
   const matches = [...raw.matchAll(stepRegex)];
 
-  // If 2 or more clinical steps are found, dynamically render retractable accordion cards
+  // If 2 or more clinical steps are found, render clean retractable title sections
   if (matches.length >= 2) {
     const sections = [];
     let lastIndex = 0;
@@ -322,37 +323,32 @@ export function parseSummaryMarkdown(text) {
       sections[sections.length - 1].content = raw.substring(lastIndex).trim();
     }
 
-    let accordionsHtml = '<div class="cat-accordions-wrapper">';
+    let html = '<div class="cat-steps-flow">';
     sections.forEach(sec => {
       if (!sec.header) {
-        accordionsHtml += `<div class="cat-step-intro">${parseMarkdownBlock(sec.content)}</div>`;
+        html += `<div class="cat-step-intro">${parseMarkdownBlock(sec.content)}</div>`;
         return;
       }
 
-      const { themeClass, icon, isOpen, badge } = getStepTheme(sec.header);
+      const { themeClass, icon } = getStepTheme(sec.header);
       const parsedBody = parseMarkdownBlock(sec.content);
 
-      accordionsHtml += `
-        <details class="cat-step-accordion ${themeClass}" ${isOpen ? 'open' : ''}>
-          <summary class="cat-step-header">
-            <div class="cat-step-title-wrap">
-              <span class="cat-step-icon"><i class="fa-solid ${icon}"></i></span>
-              <span class="cat-step-title">${escapeHTML(sec.header)}</span>
-            </div>
-            <div class="cat-step-meta">
-              <span class="cat-step-badge">${badge}</span>
-              <span class="cat-step-chevron"><i class="fa-solid fa-chevron-down"></i></span>
-            </div>
+      html += `
+        <details class="cat-step-section ${themeClass}" open>
+          <summary class="cat-step-title-toggle" title="Cliquer pour masquer / afficher cette section">
+            <span class="cat-step-icon"><i class="fa-solid ${icon}"></i></span>
+            <span class="cat-step-heading">${escapeHTML(sec.header)}</span>
+            <span class="cat-step-toggle-caret"><i class="fa-solid fa-chevron-down"></i></span>
           </summary>
-          <div class="cat-step-content">
+          <div class="cat-step-body">
             ${parsedBody}
           </div>
         </details>
       `;
     });
-    accordionsHtml += '</div>';
+    html += '</div>';
 
-    return accordionsHtml;
+    return html;
   }
 
   // Fallback for non-step fiches
