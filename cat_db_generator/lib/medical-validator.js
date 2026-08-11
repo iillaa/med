@@ -27,11 +27,13 @@ const CLINICAL_REQUIRED_SECTION_PATTERNS = [
   { name: '5. Orientation & Suivi', regex: /(?:5\.|#+ 5\.)\s*(?:Orientation|Suivi|Avis Spécialisé)/i }
 ];
 
-const ADMIN_SUMMARY_SECTIONS = [
-  '1. Cadre Légal & Prérequis',
-  '2. Structure & Mentions Obligatoires',
-  '3. Formules Types & Modèles de Rédaction'
+const ADMIN_REQUIRED_SECTION_PATTERNS = [
+  { name: '1. Cadre Légal & Prérequis', regex: /(?:1\.|#+ 1\.)\s*(?:Cadre Légal|Principes|Prérequis|Réglementation|Généralités)/i },
+  { name: '2. Structure & Mentions Obligatoires', regex: /(?:2\.|#+ 2\.)\s*(?:Structure|Mentions|Contenu|Rédaction|Éléments)/i },
+  { name: '3. Formules Types & Modèles de Rédaction', regex: /(?:3\.|#+ 3\.)\s*(?:Formules Types|Modèles|Exemples|Trame|Textes|Cadre réglementaire|Réglementation|Volet Légal)/i }
 ];
+
+const ADMIN_SUMMARY_SECTIONS = ADMIN_REQUIRED_SECTION_PATTERNS.map(p => p.name);
 
 const FORBIDDEN_PLACEHOLDERS = [
   'lorem ipsum',
@@ -109,9 +111,9 @@ function validateCAT(cat) {
       if (cat.summary.includes('Évaluation initiale & Diagnostic')) {
         errors.push('Administrative Schema Error: Non-clinical administrative CAT must NOT include clinical header "Évaluation initiale & Diagnostic".');
       }
-      for (const section of ADMIN_SUMMARY_SECTIONS) {
-        if (!cat.summary.includes(section)) {
-          errors.push(`Administrative Schema Error: Missing mandatory administrative section: "${section}".`);
+      for (const pattern of ADMIN_REQUIRED_SECTION_PATTERNS) {
+        if (!pattern.regex.test(cat.summary)) {
+          errors.push(`Administrative Schema Error: Missing mandatory administrative section: "${pattern.name}".`);
         }
       }
     } else {
