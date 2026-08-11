@@ -127,6 +127,49 @@ function extractSubstantiveClinicalBlock(pageText, nextPageText = '', queryInfo)
 }
 
 /**
+ * Scans the first 10 pages for Table of Contents (Sommaire) lines pointing to exact target page numbers.
+ * E.g. "- Intoxication alimentaire ............ 94" -> resolves to Page 94 directly.
+ */
+function findTocPointers(pages, queryInfo) {
+  const targetPages = new Set();
+  const firstPages = (pages || []).slice(0, 10);
+
+  for (const p of firstPages) {
+    const text = p.content || '';
+    if (!isTableOfContents(text) && (p.page || 1) > 6) continue;
+
+    // 1. Try full phrase match in TOC
+    if (queryInfo.fullPhrase && queryInfo.fullPhrase.length >= 3) {
+      const escaped = queryInfo.fullPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp(escaped + '\\s*[*]?\\s*[.…–\\-_\\s]{2,}\\s*(\\d+)', 'i');
+      const m = text.match(rx);
+      if (m && m[1]) {
+        const pageNum = parseInt(m[1], 10);
+        if (pageNum > 0 && pageNum <= pages.length) {
+          targetPages.add(pageNum);
+        }
+      }
+    }
+
+    // 2. Try primary tokens in TOC
+    for (const tok of queryInfo.tokens) {
+      if (tok.length < 4) continue;
+      const escaped = tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp('(?:^|\\n|[#\\-\\*])\\s*' + escaped + '[^\\n\\d]{0,40}[.…–\\-_\\s]{2,}\\s*(\\d+)', 'i');
+      const m = text.match(rx);
+      if (m && m[1]) {
+        const pageNum = parseInt(m[1], 10);
+        if (pageNum > 0 && pageNum <= pages.length) {
+          targetPages.add(pageNum);
+        }
+      }
+    }
+  }
+
+  return Array.from(targetPages);
+}
+
+/**
  * Purely algorithmic, generic search across all local pre-indexed reference PDFs.
  * @param {string} queryTerm Clinical CAT topic or title
  * @param {object} options Options { maxMatchesPerFile, maxTotalDocuments }
@@ -164,6 +207,9 @@ async function searchLocalPDFs(queryTerm, options = {}) {
       queryInfo.tokens.every(t => hasExactWord(filenameLower, t))
     );
 
+    // 0. Smart Table of Contents (Sommaire) Page Pointer Resolution
+    const tocTargetPages = findTocPointers(pages, queryInfo);
+
     for (let i = 0; i < pages.length; i++) {
       const p = pages[i];
       const pageNum = p.page || (i + 1);
@@ -173,6 +219,12 @@ async function searchLocalPDFs(queryTerm, options = {}) {
       let score = 0;
       const matchedTokens = [];
       const isTOC = isTableOfContents(pageText);
+
+      // TOC Direct Pointer Hit (Highest Confidence GPS Navigation)
+      const isDirectTocTarget = tocTargetPages.includes(pageNum);
+      if (isDirectTocTarget) {
+        score += 90;
+      }
 
       // 1. Full-Phrase exact match (Highest Priority)
       const hasFullPhrase = queryInfo.fullPhrase.length > 3 && hasExactWord(pageText, queryInfo.fullPhrase);
@@ -206,7 +258,7 @@ async function searchLocalPDFs(queryTerm, options = {}) {
 
       // 6. Demote Table of Contents pages
       if (isTOC) {
-        score -= 40;
+        score -= 50;
       }
 
       // Quality Bonus
@@ -214,8 +266,8 @@ async function searchLocalPDFs(queryTerm, options = {}) {
         score += 10;
       }
 
-      // If page is clinically relevant (score >= 35 or full phrase hit)
-      if (score >= 35 || (hasFullPhrase && !isTOC)) {
+      // If page is clinically relevant (score >= 35 or full phrase hit or direct TOC target)
+      if (score >= 35 || isDirectTocTarget || (hasFullPhrase && !isTOC)) {
         const nextPageText = (i + 1 < pages.length) ? (pages[i + 1].content || '') : '';
         const richSnippet = extractSubstantiveClinicalBlock(pageText, nextPageText, queryInfo);
 
@@ -224,6 +276,7 @@ async function searchLocalPDFs(queryTerm, options = {}) {
           score: score,
           matchedTokens: matchedTokens,
           hasFullPhrase: hasFullPhrase,
+          isDirectTocTarget: isDirectTocTarget,
           isTOC: isTOC,
           snippet: richSnippet
         });
