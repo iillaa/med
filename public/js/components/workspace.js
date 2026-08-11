@@ -5,7 +5,7 @@ import { buildPrintableText } from './workspace/state.js';
 import { renderSummary } from './workspace/summary.js';
 import { renderPrescription } from './workspace/prescription.js';
 import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList } from './workspace/pdfs.js';
-import { saveAppStateBeforeNavigation, restoreAppState } from './workspace/print.js';
+import { saveAppStateBeforeNavigation, restoreAppState, printCatDocument } from './workspace/print.js';
 
 let workspace, welcomeScreen;
 let wsCategory, wsTitle, wsRedFlags, wsPrescription, notesInput;
@@ -173,83 +173,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   if (printCatBtn) {
     printCatBtn.addEventListener('click', async () => {
       const cat = state.activeCat;
-      const dateEl = document.getElementById('print-date-stamp');
-      if (dateEl) {
-        dateEl.textContent = 'Le : ' + new Date().toLocaleDateString('fr-FR');
-      }
-
-      const catVal = document.getElementById('print-val-category');
-      const titleVal = document.getElementById('print-val-title');
-      const redFlagsVal = document.getElementById('print-val-redflags');
-      const summaryVal = document.getElementById('print-val-summary');
-      const prescriptionVal = document.getElementById('print-val-prescription');
-      const notesVal = document.getElementById('print-val-notes');
-      const subcatsSec = document.getElementById('print-section-subcats');
-      const subcatsVal = document.getElementById('print-val-subcats');
-
-      if (catVal) catVal.textContent = cat.category;
-      if (titleVal) titleVal.textContent = `${cat.id}. ${cat.title}`;
-
-      // Red Flags
-      const rfSec = document.getElementById('print-section-redflags');
-      if (cat.red_flags && cat.red_flags.trim().length > 0) {
-        if (redFlagsVal) redFlagsVal.textContent = cat.red_flags;
-        if (rfSec) rfSec.style.display = 'block';
-      } else {
-        if (rfSec) rfSec.style.display = 'none';
-      }
-
-      // Master Summary
-      if (summaryVal) {
-        const rawText = cat.customSummary || cat.summary;
-        summaryVal.innerHTML = parseSummaryMarkdown(rawText);
-      }
-
-      // Master Prescription
-      const presSec = document.getElementById('print-section-prescription');
-      const rawPrescription = cat.customOrdonnance || cat.ordonnance;
-      if (rawPrescription && rawPrescription.trim().length > 0) {
-        if (prescriptionVal) prescriptionVal.textContent = rawPrescription;
-        if (presSec) presSec.style.display = 'block';
-      } else {
-        if (presSec) presSec.style.display = 'none';
-      }
-
-      // Sub-CATs (All nested profiles)
-      if (Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0) {
-        if (subcatsVal) {
-          subcatsVal.innerHTML = cat.sub_cats.map((sub, idx) => `
-            <div class="print-subcat-card">
-              <h4><i class="fa-solid fa-code-branch"></i> Profil ${idx + 1} : ${escapeHTML(sub.label || 'Profil Spécialisé')}</h4>
-              ${sub.red_flags && sub.red_flags.trim() && sub.red_flags !== cat.red_flags ? `
-                <div style="margin-bottom: 8px; color: #991b1b; font-weight: 600; font-size: 11.5px;">
-                  <strong>🚨 Signes de gravité spécifiques :</strong> ${escapeHTML(sub.red_flags)}
-                </div>
-              ` : ''}
-              <div class="print-subcat-summary">
-                ${parseSummaryMarkdown(sub.summary || '')}
-              </div>
-              ${sub.ordonnance && sub.ordonnance.trim() ? `
-                <div class="print-subcat-rx">
-                  <strong>💊 Ordonnance Type :</strong><br>${escapeHTML(sub.ordonnance)}
-                </div>
-              ` : ''}
-            </div>
-          `).join('');
-        }
-        if (subcatsSec) subcatsSec.style.display = 'block';
-      } else {
-        if (subcatsSec) subcatsSec.style.display = 'none';
-      }
-
-      // Notes
-      const notesSec = document.getElementById('print-section-notes');
-      if (cat.notes && cat.notes.trim().length > 0) {
-        if (notesVal) notesVal.textContent = cat.notes;
-        if (notesSec) notesSec.style.display = 'block';
-      } else {
-        if (notesSec) notesSec.style.display = 'none';
-      }
+      if (!cat) return;
 
       // Android Native App / Capacitor Clipboard Copier
       if (typeof window.Capacitor !== 'undefined' || api.isOfflineApp) {
@@ -265,7 +189,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
         }
       } else {
-        window.print();
+        // Desktop Web / Browser: Render 100% standalone Doctor-Grade Multi-Page PDF Document
+        printCatDocument(cat);
       }
     });
   }
