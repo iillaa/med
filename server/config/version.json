@@ -1,19 +1,19 @@
 {
   "minVersion": "1.2.4",
-  "latestVersion": "1.7.7",
+  "latestVersion": "1.7.8",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.7.7 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.7.8 est disponible.",
   "releaseNotes": [
-    "Générateur d'impression et PDF médical haute densité (Fiche de poche 1-2 pages)",
-    "Rendu autonome isolé du DOM SPA (zéro artefact de capture d'écran)",
-    "Typographie clinique confortable (10.5pt - 14pt avec interlignage 1.45)",
-    "Intégration complète de toutes les sous-fiches (Sub-CATs) et ordonnances",
-    "Export presse-papier Android multi-sections ultra-rapide"
+    "Onglets de profils interactifs dans l'inspecteur du CAT Generator Lab (Master Hub + Sous-Fiches)",
+    "Correctif du parseur Markdown et suppression des astérisques orphelines et espaces superflus",
+    "Confinement de défilement (overscroll-behavior) et verrouillage dynamique de l'arrière-plan des modales",
+    "Intégration complète des sous-fiches d'urgence et pédiatrique pour la CAT Intoxication alimentaire",
+    "Nettoyage et rationalisation des flux du générateur IA"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "/download/drcat-latest.apk"
   },
-  "lastUpdated": "2026-08-11T16:41:00.000Z"
+  "lastUpdated": "2026-08-12T00:37:00.000Z"
 }
