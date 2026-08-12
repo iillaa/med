@@ -439,21 +439,6 @@
             <option value="Administratif">Administratif</option>
           </select>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div>
-            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">ID Parent Master Hub (Optionnel)</label>
-            <input type="number" id="single-parent-id" class="search-box" style="width: 100%;" placeholder="ex: 12 (pour HTA)">
-          </div>
-          <div>
-            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Type de Sous-Fiche</label>
-            <select id="single-sub-type" class="search-box" style="width: 100%;">
-              <option value="emergency">🚨 Urgence & Forme Aiguë</option>
-              <option value="terrain">🤰 Terrain (Grossesse, Âge)</option>
-              <option value="subtype">🔬 Sous-Type Clinique</option>
-              <option value="complication">⚠️ Complication</option>
-            </select>
-          </div>
-        </div>
         <button onclick="submitSingleCAT()" class="btn-success" id="single-submit-btn">🤖 Lancer la Synthèse IA Live</button>
       </div>
     </div>
@@ -712,7 +697,6 @@
           </td>
           <td style="white-space: nowrap;">
             <button onclick="run1TapPipelineSingle('${(c.title || '').replace(/'/g, "\\'")}', '${c.category}', ${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: #10b981; border-color: #10b981; font-weight: bold;" title="Web Fetch + IA Dual RAG + Approbation Auto en 1 Clic !">⚡ 1-Tap Auto</button>
-            <button onclick="openSubCatModal(${c.id}, '${(c.title || '').replace(/'/g, "\\'")}', '${c.category}')" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: #a855f7; border-color: #a855f7;" title="Créer une sous-fiche spécialisée rattachée à cette CAT">➕ Sous-Fiche</button>
             ${c.isV2 ? `<button onclick="inspectCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">👁️ Inspecter</button>` : ''}
             ${c.isV2 ? `<button onclick="promoteSingleCAT(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--success); border-color: var(--success);">💾 Promouvoir (1)</button>` : ''}
             ${c.isV2 ? `<button onclick="openEditModal(${c.id})" class="btn-outline" style="padding: 4px 8px; font-size: 11px; color: var(--primary); border-color: var(--primary);">✏️ Éditer</button>` : ''}
@@ -1088,29 +1072,18 @@
     function openSingleModal() {
       document.getElementById('single-title').value = '';
       document.getElementById('single-category').value = 'Gastro-entérologie';
-      const pInput = document.getElementById('single-parent-id');
-      if (pInput) pInput.value = '';
       document.getElementById('single-modal').classList.add('active');
-    }
-
-    function openSubCatModal(parentId, parentTitle, category) {
-      document.getElementById('single-title').value = `CAT devant ${parentTitle} chez ...`;
-      document.getElementById('single-category').value = category || 'Gastro-entérologie';
-      const pInput = document.getElementById('single-parent-id');
-      if (pInput) pInput.value = parentId;
-      document.getElementById('single-modal').classList.add('active');
+      syncModalBodyLock();
     }
 
     function closeSingleModal() {
       document.getElementById('single-modal').classList.remove('active');
+      syncModalBodyLock();
     }
 
     async function submitSingleCAT() {
       const title = document.getElementById('single-title').value.trim();
       const category = document.getElementById('single-category').value;
-      const parentIdVal = document.getElementById('single-parent-id')?.value;
-      const subTypeVal = document.getElementById('single-sub-type')?.value;
-      const parentId = parentIdVal ? Number(parentIdVal) : null;
 
       if (!title) {
         alert('Veuillez entrer un titre pour la CAT.');
@@ -1143,16 +1116,13 @@
           body: JSON.stringify({ 
             id: nextId, 
             title, 
-            category,
-            parent_id: parentId,
-            sub_cat_type: subTypeVal || 'emergency',
-            sub_cat_label: title
+            category
           })
         });
         const genData = await genRes.json();
         if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V3');
 
-        alert(`✨ Nouvelle fiche #${nextId} "${title}" générée avec succès en V3 ! ${parentId ? `(Rattachée au Master Hub #${parentId})` : ''}`);
+        alert(`✨ Nouvelle fiche #${nextId} "${title}" générée avec succès en V3 ! (Master Hub + Sous-Fiches intégrées)`);
         await loadData();
       } catch (err) {
         alert(`❌ Erreur Création Nouvelle CAT: ${err.message}`);
