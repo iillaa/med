@@ -343,8 +343,8 @@ export async function fetchCats(since) {
     return data;
   }
 
-  // 2. STATIC CDN (Cloudflare/Pages) or ANDROID_OFFLINE: Load cached synced database or static fallback instantly
-  if (mode === APP_MODES.ANDROID_OFFLINE || isStaticCdnHost()) {
+  // 2. STATIC CDN (Cloudflare/Pages) or ANDROID_OFFLINE: Load cached synced database or static fallback instantly (unless ANDROID_ONLINE mode is active)
+  if (mode === APP_MODES.ANDROID_OFFLINE || (mode !== APP_MODES.ANDROID_ONLINE && isStaticCdnHost())) {
     const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
       try {

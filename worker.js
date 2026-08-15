@@ -135,25 +135,46 @@ export default {
       }
     }
 
+    // Helper: fetch static asset with CORS headers and query string stripped
+    async function fetchStaticAsset(assetPath) {
+      try {
+        if (env && env.ASSETS) {
+          const assetUrl = new URL(request.url);
+          assetUrl.pathname = assetPath;
+          assetUrl.search = '';
+          const res = await env.ASSETS.fetch(assetUrl.toString());
+          const newRes = new Response(res.body, res);
+          newRes.headers.set('Access-Control-Allow-Origin', '*');
+          newRes.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+          newRes.headers.set('Access-Control-Allow-Headers', '*');
+          newRes.headers.set('Content-Type', 'application/json; charset=utf-8');
+          return newRes;
+        }
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+      }
+      return new Response(JSON.stringify({ error: 'Asset engine unavailable' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
     // 5. GET /api/cats -> Native Edge Serverless Alias for /data/cats_db.json
     if (url.pathname === '/api/cats') {
-      if (env && env.ASSETS) {
-        return env.ASSETS.fetch(new Request(new URL('/data/cats_db.json', request.url)));
-      }
+      return fetchStaticAsset('/data/cats_db.json');
     }
 
     // 6. GET /api/pdfs -> Native Edge Serverless Alias for /data/pdf_list.json
     if (url.pathname === '/api/pdfs') {
-      if (env && env.ASSETS) {
-        return env.ASSETS.fetch(new Request(new URL('/data/pdf_list.json', request.url)));
-      }
+      return fetchStaticAsset('/data/pdf_list.json');
     }
 
     // 7. GET /api/pdf-index-status -> Native Edge Serverless Alias for /data/pdf_index.json
     if (url.pathname === '/api/pdf-index-status') {
-      if (env && env.ASSETS) {
-        return env.ASSETS.fetch(new Request(new URL('/data/pdf_index.json', request.url)));
-      }
+      return fetchStaticAsset('/data/pdf_index.json');
     }
 
     // 8. GET /api/server-providers

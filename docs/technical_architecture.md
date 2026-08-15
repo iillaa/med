@@ -6,22 +6,22 @@ This document provides a deep dive into the architectural design, security mecha
 
 ## 🏗️ System Architecture Overview
 
-Dr. CAT operates in a **Dual-Mode Hybrid Architecture** across two runtime environments:
+Dr. CAT operates in a **Dual-Rail Hybrid Network Architecture** across edge CDN and local Node.js environments:
 
 ```text
-1. Node.js/Termux Server Web App (Online mode)
-   [Mobile Browser / APK WebView] <--- HTTP / REST ---> [Express.js Backend (server.js)]
-                                                               |
-                                                     [Local JSON Databases]
-                                                     [PDF index.json]
-                                                     [AsyncLock write queue]
+1. ⚡ 90% Mass Content Sync Rail (Cloudflare Worker Edge)
+   [Android APK / PWA Client] <--- HTTPS / Edge REST ---> [Cloudflare Worker (drcat.dr-cat.workers.dev)]
+                                                                |
+                                                      [Mature GitHub Production Database]
+                                                      [Static CDN Assets & PDF Lists]
 
-2. Standalone Capacitor Android Wrapper (Offline mode)
-   [Android WebView (Capacitor)] <---> [API Router (api.js)]
-                                              |
-                                    [localStorage overrides]
-                                    [Bundled data/ JSONs]
-                                    [server-providers.js sync]
+2. 🔒 10% Admin Control Rail (Termux Node.js Ngrok Server)
+   [Android APK / Admin Lab] <--- HTTPS Tunnel ---> [Termux Express Backend (server.js)]
+                                                            |
+                                                  [Security Lock Gate & Kill Switch]
+                                                  [Version Checker /api/version]
+                                                  [Suggestion Moderation & Active Learning]
+                                                  [V3 CAT Generator Engine]
 ```
 
 ### App Mode Detection
