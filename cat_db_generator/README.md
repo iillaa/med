@@ -1,8 +1,8 @@
-# 🩺 Dr. CAT — Database V2 Generator Engine & Lab UI
+# 🩺 Dr. CAT — Database V3 Generator Engine & Lab UI
 
-Welcome to the **Database V2 Generator Engine** for **Dr. CAT (Doctor Clinical Action Protocol)**.
+Welcome to the **Database V3 Generator Engine** for **Dr. CAT (Doctor Clinical Action Protocol)**.
 
-This engine converts raw clinical definitions into rich, production-grade 5-step clinical protocols using **Gemini 3.6 Flash**, **Live Web Research RAG**, **Offline PDF RAG (`pdf_index.json`)**, and **Human Active Learning Memory**.
+This engine converts raw clinical definitions into rich, production-grade 5-step clinical protocols using **Gemini 3.7 / 3.6 Flash**, **Live Web Research RAG**, **Offline PDF RAG (`pdf_index.json`)**, and **Human Active Learning Memory**.
 
 ---
 
@@ -17,7 +17,7 @@ This engine converts raw clinical definitions into rich, production-grade 5-step
    - Supports 1-click **"Force Re-fetch Web Data"**.
 
 2. **Dual RAG Synthesis Engine (`lib/llm-engine.js`)**:
-   - Powered by **`gemini-3.6-flash`**.
+   - Powered by **`Gemini 3.7 / 3.6 Flash`** with dynamic model discovery and automatic failover.
    - Assembles 3 knowledge channels into every prompt payload:
      - **Offline PDF RAG**: Matches pages from 77 indexed local medical reference books in `pdf_index.json`.
      - **Online Web Cache RAG**: Freshly scraped guidelines from Step 1 (`web_cache/`).
@@ -38,9 +38,9 @@ This engine converts raw clinical definitions into rich, production-grade 5-step
 
 4. **Standalone Admin Generator Lab UI (`/cat_generator_lab.html`)**:
    - Accessible via local admin dashboard link at `http://localhost:3000/cat_generator_lab.html`.
-   - Side-by-side V1 vs V2 inspector modal.
+   - Side-by-side V1 vs V3 inspector modal.
    - **Human-in-the-Loop Editor Modal (`#edit-modal`)**: Manually edit and polish generated CATs with 1-click update API.
-   - **1-Click Production Promoter**: Promotes `cats_db_v2_generated.json` into `cats_db.json` with automated backup (`cats_db.json.bak`).
+   - **1-Click Production Promoter**: Promotes `cats_db_v3_generated.json` into `cats_db.json` with automated backup (`cats_db.json.bak`).
 
 ---
 
@@ -70,12 +70,12 @@ node cat_db_generator/generate_cat_db_v2.js --discover
 cat_db_generator/
 ├── lib/
 │   ├── web-fetcher.js         # Step 1 Live Web Research & Disk Cacher
-│   ├── llm-engine.js          # Gemini 3.6 Flash Dual RAG & Active Learning Engine
+│   ├── llm-engine.js          # Gemini Dual RAG & Active Learning Engine
 │   ├── medical-validator.js   # 5-step clinical lock, admin lock & checksum validator
 │   ├── pdf-extractor.js       # Fast in-memory pdf_index.json RAG search
 │   └── medical-sources.js     # Target medical domains & online query builders
 ├── web_cache/                 # Local disk cache for scraped web guidelines
-├── cats_db_v2_generated.json  # Complete 55 CAT database output
+├── cats_db_v3_generated.json  # Complete 55 CAT V3 database output
 ├── generate_cat_db_v2.js      # Main CLI tool
 └── generate_all_55_v2.js      # Real batch wrapper
 ```

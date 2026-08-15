@@ -150,7 +150,7 @@ CAT Generation Triggered
 | `web_fetch_result` | Source name, URL, content length, preview snippet |
 | `pdf_dedicated_hit` | Dedicated short PDF matched (Full-doc injection triggered) |
 | `pdf_compilation_search` | Word-boundary tokens used, matching pages, section-anchor extracted |
-| `active_learning` | Status of doctor-edited memory in `cats_db_v2_generated.json` |
+| `active_learning` | Status of doctor-edited memory in `cats_db_v3_generated.json` |
 | `llm_prompt_built` | Exact system & user prompt character count and estimated token load |
 | `llm_model_try` | Dynamic model selected, attempt number, thinking budget applied |
 | `llm_response_raw` | First 500 chars of raw LLM output text |

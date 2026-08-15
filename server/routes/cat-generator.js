@@ -10,8 +10,16 @@ const { validateCAT } = require('../../cat_db_generator/lib/medical-validator');
 const { listAvailablePDFs } = require('../../cat_db_generator/lib/pdf-extractor');
 const debugEmitter = require('../../cat_db_generator/lib/debug-emitter');
 
-const PROD_DB_PATH = path.join(__dirname, '..', '..', 'cats_db.json');
-const V2_DB_PATH = path.join(__dirname, '..', '..', 'cat_db_generator', 'cats_db_v2_generated.json');
+const PROD_DB_PATH = process.env.CATS_DB_PATH || path.join(__dirname, '..', '..', 'cats_db.json');
+const V3_DB_PATH = path.join(__dirname, '..', '..', 'cat_db_generator', 'cats_db_v3_generated.json');
+const V2_DB_PATH_FALLBACK = path.join(__dirname, '..', '..', 'cat_db_generator', 'cats_db_v2_generated.json');
+
+function getV3DbPath() {
+  if (!fs.existsSync(V3_DB_PATH) && fs.existsSync(V2_DB_PATH_FALLBACK)) {
+    try { fs.renameSync(V2_DB_PATH_FALLBACK, V3_DB_PATH); } catch (_) {}
+  }
+  return fs.existsSync(V3_DB_PATH) ? V3_DB_PATH : V2_DB_PATH_FALLBACK;
+}
 
 function getNextIntegerId(dbArray) {
   if (!Array.isArray(dbArray) || dbArray.length === 0) return 1;
@@ -48,8 +56,9 @@ function registerCatGeneratorRoutes(app) {
       try { v1Cats = JSON.parse(fs.readFileSync(PROD_DB_PATH, 'utf8')); } catch (e) {}
     }
 
-    if (fs.existsSync(V2_DB_PATH)) {
-      try { v2Cats = JSON.parse(fs.readFileSync(V2_DB_PATH, 'utf8')); } catch (e) {}
+    const targetDbPath = getV3DbPath();
+    if (fs.existsSync(targetDbPath)) {
+      try { v2Cats = JSON.parse(fs.readFileSync(targetDbPath, 'utf8')); } catch (e) {}
     }
 
     const v2Validations = v2Cats.map(cat => ({
@@ -67,12 +76,14 @@ function registerCatGeneratorRoutes(app) {
       summary: {
         v1Total: v1Cats.length,
         v2Total: v2Cats.length,
+        v3Total: v2Cats.length,
         v2ValidCount: validCount,
         totalTokensConsumed: totalTokens,
         passRate: v2Cats.length > 0 ? Math.round((validCount / v2Cats.length) * 100) : 0
       },
       v1: v1Cats,
       v2: v2Cats,
+      v3: v2Cats,
       validations: v2Validations
     });
   });
@@ -155,8 +166,9 @@ function registerCatGeneratorRoutes(app) {
       }
 
       let db = [];
-      if (fs.existsSync(V2_DB_PATH)) {
-        try { db = JSON.parse(await fs.promises.readFile(V2_DB_PATH, 'utf8')); } catch (e) {}
+      const dbPath = getV3DbPath();
+      if (fs.existsSync(dbPath)) {
+        try { db = JSON.parse(await fs.promises.readFile(dbPath, 'utf8')); } catch (e) {}
       }
 
       const existingIdx = db.findIndex(c => Number(c.id) === targetId || normalizeTitle(c.title) === normalizeTitle(safeTitle));
@@ -168,7 +180,7 @@ function registerCatGeneratorRoutes(app) {
         db.push(result.cat);
       }
 
-      await fs.promises.writeFile(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
 
       res.json({
         success: true,
@@ -186,12 +198,13 @@ function registerCatGeneratorRoutes(app) {
   app.post('/api/admin/cat-generator/promote', async (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
 
-    if (!fs.existsSync(V2_DB_PATH)) {
-      return res.status(404).json({ error: 'Fichier cats_db_v2_generated.json introuvable.' });
+    const dbPath = getV3DbPath();
+    if (!fs.existsSync(dbPath)) {
+      return res.status(404).json({ error: 'Fichier cats_db_v3_generated.json introuvable.' });
     }
 
     try {
-      const v2Content = fs.readFileSync(V2_DB_PATH, 'utf8');
+      const v2Content = fs.readFileSync(dbPath, 'utf8');
       const v2Data = JSON.parse(v2Content);
 
       if (!Array.isArray(v2Data) || v2Data.length === 0) {
@@ -285,13 +298,14 @@ function registerCatGeneratorRoutes(app) {
       return res.status(400).json({ error: 'ID et Titre obligatoires.' });
     }
 
-    if (!fs.existsSync(V2_DB_PATH)) {
-      return res.status(404).json({ error: 'Fichier v2 introuvable.' });
+    const dbPath = getV3DbPath();
+    if (!fs.existsSync(dbPath)) {
+      return res.status(404).json({ error: 'Fichier V3 introuvable.' });
     }
 
     try {
       // Async read — avoids blocking the event loop on a large JSON file
-      let db = JSON.parse(await fs.promises.readFile(V2_DB_PATH, 'utf8'));
+      let db = JSON.parse(await fs.promises.readFile(dbPath, 'utf8'));
       const catIdx = db.findIndex(c => c.id === parseInt(id, 10));
 
       if (catIdx === -1) {
@@ -358,12 +372,13 @@ function registerCatGeneratorRoutes(app) {
       return res.status(400).json({ error: 'L\'ID de la fiche est obligatoire.' });
     }
 
-    if (!fs.existsSync(V2_DB_PATH)) {
-      return res.status(404).json({ error: 'Fichier v2 introuvable.' });
+    const dbPath = getV3DbPath();
+    if (!fs.existsSync(dbPath)) {
+      return res.status(404).json({ error: 'Fichier V3 introuvable.' });
     }
 
     try {
-      let db = JSON.parse(await fs.promises.readFile(V2_DB_PATH, 'utf8'));
+      let db = JSON.parse(await fs.promises.readFile(dbPath, 'utf8'));
       const initialCount = db.length;
       db = db.filter(c => c.id !== parseInt(id, 10));
 
@@ -371,8 +386,8 @@ function registerCatGeneratorRoutes(app) {
         return res.status(404).json({ error: `Fiche avec l'ID ${id} introuvable.` });
       }
 
-      await fs.promises.writeFile(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
-      res.json({ success: true, message: `Fiche #${id} supprimée de la base v2 générée.` });
+      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+      res.json({ success: true, message: `Fiche #${id} supprimée de la base V3 générée.` });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -430,7 +445,8 @@ function registerCatGeneratorRoutes(app) {
 
     // Run asynchronously in background
     (async () => {
-      let v2Db = fs.existsSync(V2_DB_PATH) ? JSON.parse(fs.readFileSync(V2_DB_PATH, 'utf8')) : [];
+      const dbPath = getV3DbPath();
+      let v2Db = fs.existsSync(dbPath) ? JSON.parse(fs.readFileSync(dbPath, 'utf8')) : [];
 
       for (let i = 0; i < prodDb.length; i++) {
         const cat = prodDb[i];
@@ -443,12 +459,8 @@ function registerCatGeneratorRoutes(app) {
         try {
           const resObj = await generateCATWithLLM(cat.title, cat.category);
           const fullCatObj = {
+            ...resObj.cat,
             id: cat.id,
-            category: resObj.cat.category,
-            title: resObj.cat.title,
-            summary: resObj.cat.summary,
-            red_flags: resObj.cat.red_flags,
-            ordonnance: resObj.cat.ordonnance,
             _execution_metrics: resObj.metrics
           };
 
@@ -456,7 +468,7 @@ function registerCatGeneratorRoutes(app) {
           if (idx >= 0) v2Db[idx] = fullCatObj;
           else v2Db.push(fullCatObj);
 
-          fs.writeFileSync(V2_DB_PATH, JSON.stringify(v2Db, null, 2), 'utf8');
+          fs.writeFileSync(dbPath, JSON.stringify(v2Db, null, 2), 'utf8');
 
           addProgressLog(`✅ [#${cat.id}] "${cat.title}" générée avec succès (${resObj.metrics.totalTokens} tok | ${resObj.metrics.latencyMs}ms)`, 'success');
         } catch (err) {
@@ -607,6 +619,53 @@ function registerCatGeneratorRoutes(app) {
         { title: "CAT devant corps étranger oculaire", category: "Ophtalmologie" }
       ]
     });
+  });
+  // POST /api/admin/cat-generator/pipeline-full (Centralized 1-Tap Pipeline: Web Fetch + Dual RAG IA + Auto V3 Store)
+  app.post('/api/admin/cat-generator/pipeline-full', async (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+
+    const { fetchAndCacheWebSources } = require('../../cat_db_generator/lib/web-fetcher');
+    const { generateCATWithLLM } = require('../../cat_db_generator/lib/llm-engine');
+    const { id, title, category, forceRefetch, searchKeywords } = req.body || {};
+
+    if (!title) {
+      return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
+    }
+
+    try {
+      console.log(`[1-Tap Pipeline] Executing Step 1 Web RAG + Step 2 IA Synthesis for: "${title}"...`);
+      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 6, searchKeywords });
+      const targetId = Number(id) || null;
+      const result = await generateCATWithLLM(title, category || 'Gastro-entérologie', { id: targetId });
+
+      if (result && result.cat) {
+        const dbPath = getV3DbPath();
+        let db = [];
+        if (fs.existsSync(dbPath)) {
+          try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8')); } catch (_) {}
+        }
+        const assignedId = targetId || result.cat.id || getNextIntegerId(db);
+        result.cat.id = assignedId;
+
+        const existingIdx = db.findIndex(c => Number(c.id) === assignedId || normalizeTitle(c.title) === normalizeTitle(title));
+        if (existingIdx >= 0) db[existingIdx] = result.cat;
+        else db.push(result.cat);
+
+        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8');
+      }
+
+      res.json({
+        success: true,
+        message: `Pipeline 1-Tap exécuté avec succès pour "${title}".`,
+        title: title,
+        sourcesCount: sources.length,
+        data: result.cat,
+        metrics: result.metrics
+      });
+    } catch (err) {
+      console.error('[1-Tap Pipeline Error]', err);
+      res.status(500).json({ error: err.message });
+    }
   });
 }
 

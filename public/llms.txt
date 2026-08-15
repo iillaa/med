@@ -1,0 +1,17 @@
+# Dr.CAT — Conduites à Tenir & Rappels Cliniques Médicaux
+
+> Application médicale et clinique conçue pour les médecins généralistes, résidents et étudiants en médecine. Auteur : Dr. Kibeche Ali Dia Eddine.
+
+## Aperçu
+Dr.CAT fournit des algorithmes décisionnels d'urgence, des fiches de conduite à tenir (CAT) structurées (symptômes, diagnostics différentiels, examens complémentaires, posologies et orientations), des calculateurs cliniques et un système de répétition espacée (Leitner) pour l'apprentissage continu.
+
+## URL Principale
+- Site Web & PWA : https://drcat.dr-cat.workers.dev
+- Dépôt de Référence : https://github.com/iillaa/med
+
+## Fonctionnalités Clés
+- Fiches Cliniques CAT interactives et hors-ligne
+- Système de Répétition Espacée Leitner
+- Arbres Décisionnels d'Urgence
+- Calculatrices Médicales Validées
+- Recherche Sémantique et Téléchargement PDF

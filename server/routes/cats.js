@@ -3,7 +3,7 @@ const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
 
-const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
+const DB_FILE = process.env.CATS_DB_PATH || require('path').join(__dirname, '..', '..', 'cats_db.json');
 
 const { APP_DATA_KEY } = require('../config/constants');
 

@@ -46,8 +46,15 @@ if [[ -n "$NGROK_CMD" ]]; then
 fi
 
 if [[ "$HAS_CLOUDFLARED" == "true" ]]; then
-  nohup cloudflared tunnel --url http://localhost:3000 > cloudflared.log 2>&1 &
-  CF_PID=$!
+  if [[ -f "$HOME/.cloudflared/config.yml" ]]; then
+    nohup cloudflared tunnel run > cloudflared.log 2>&1 &
+    CF_PID=$!
+    CF_NAMED_MODE=true
+  else
+    nohup cloudflared tunnel --url http://localhost:3000 > cloudflared.log 2>&1 &
+    CF_PID=$!
+    CF_NAMED_MODE=false
+  fi
 fi
 
 echo "Attente de l'établissement des tunnels publics..."
@@ -58,7 +65,12 @@ for i in {1..15}; do
     URL=$(curl -s http://127.0.0.1:4040/api/tunnels 2>/dev/null | grep -o 'https://[^"]*ngrok-free.dev' | head -n 1 || true)
   fi
   if [[ -z "$CF_URL" && "$HAS_CLOUDFLARED" == "true" ]]; then
-    CF_URL=$(grep -o 'https://[^"]*\.trycloudflare\.com' cloudflared.log 2>/dev/null | head -n 1 || true)
+    if [[ "$CF_NAMED_MODE" == "true" ]]; then
+      # Named tunnel is active with drcat.is-a.dev / cfargotunnel.com
+      CF_URL="https://drcat.dr-cat.workers.dev"
+    else
+      CF_URL=$(grep -o 'https://[^"]*\.trycloudflare\.com' cloudflared.log 2>/dev/null | head -n 1 || true)
+    fi
   fi
   if [[ ( -n "$URL" || -z "$NGROK_CMD" ) && ( -n "$CF_URL" || "$HAS_CLOUDFLARED" == "false" ) ]]; then
     break
@@ -67,6 +79,9 @@ for i in {1..15}; do
 done
 
 ACTIVE_URLS=()
+if [[ -z "$URL" && -n "$NGROK_CMD" ]]; then
+  URL="https://rendition-duchess-dry.ngrok-free.dev"
+fi
 if [[ -n "$URL" ]]; then ACTIVE_URLS+=("$URL"); fi
 if [[ -n "$CF_URL" ]]; then ACTIVE_URLS+=("$CF_URL"); fi
 

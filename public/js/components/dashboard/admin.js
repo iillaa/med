@@ -243,10 +243,10 @@ export function initAdminTabListeners(onSuggestionHandled) {
       document.body.appendChild(modal);
 
       const closeModal = () => closeModalAnimated(modal);
-      document.getElementById('review-modal-close').addEventListener('click', closeModal);
-      document.getElementById('review-btn-cancel').addEventListener('click', closeModal);
+      document.getElementById('review-modal-close')?.addEventListener('click', closeModal);
+      document.getElementById('review-btn-cancel')?.addEventListener('click', closeModal);
 
-      document.getElementById('review-btn-save').addEventListener('click', async () => {
+      document.getElementById('review-btn-save')?.addEventListener('click', async () => {
         try {
           const updatedData = {};
           if (sug.type === 'add') {

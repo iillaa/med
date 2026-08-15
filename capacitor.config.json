@@ -12,7 +12,11 @@
       "*.ngrok-free.dev",
       "*.ngrok-free.app",
       "*.ngrok.io",
-      "*.trycloudflare.com"
+      "*.trycloudflare.com",
+      "*.cfargotunnel.com",
+      "*.pages.dev",
+      "*.is-an.app",
+      "*.is-a.dev"
     ]
   },
   "android": {

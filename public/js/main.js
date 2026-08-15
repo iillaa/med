@@ -103,7 +103,7 @@ async function bootstrapApp() {
 
   // PWA Service Worker — disable in standalone Capacitor offline app & remote tunnel domains (ngrok) to prevent stale cache deadlocks & white pages
   if ('serviceWorker' in navigator) {
-    const isTunnelHost = location.hostname.includes('ngrok') || location.hostname.includes('loca.lt') || location.hostname.includes('trycloudflare.com');
+    const isTunnelHost = location.hostname.includes('ngrok') || location.hostname.includes('loca.lt') || location.hostname.includes('trycloudflare.com') || location.hostname.includes('cfargotunnel.com');
     if (api.isOfflineApp || isTunnelHost) {
       // Always unregister to avoid stale caches/ngrok warning page deadlocks
       navigator.serviceWorker.getRegistrations().then(regs => {
@@ -840,7 +840,12 @@ export async function runBackgroundSync() {
       // Check if any CATs were deleted on the server
       let hasDeletions = false;
       let activeIdsSet = null;
-      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      let customCats = [];
+      try {
+        customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      } catch (_) {
+        customCats = [];
+      }
       const customCatIds = new Set(customCats.map(c => c.id));
 
       if (freshCats.activeIds) {
@@ -962,7 +967,12 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
 
     // Handle deletions if we have the list of active IDs from the server
     if (activeIdsSet) {
-      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      let customCats = [];
+      try {
+        customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      } catch (_) {
+        customCats = [];
+      }
       const customCatIds = new Set(customCats.map(c => c.id));
       state.allCats = state.allCats.filter(c => {
         // Keep custom offline created cats
@@ -974,7 +984,13 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
   } else {
     // Full replacement merge
     const existingIds = new Set(freshCats.map(c => c.id));
-    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+    let rawCustom = [];
+    try {
+      rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    } catch (_) {
+      rawCustom = [];
+    }
+    const customCats = rawCustom
       .filter(c => !existingIds.has(c.id))
       .map(c => ({ ...c, isOffline: true }));
 

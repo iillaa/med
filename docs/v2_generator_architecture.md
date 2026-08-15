@@ -55,15 +55,15 @@ The system combines:
 
 2. **Step 2 Dual RAG Synthesis**:
    - Prompt assembly: Combines Web Cache RAG + PDF Index RAG + Human Edit Memory.
-   - LLM Call: REST POST to `generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent`.
+   - LLM Call: Dynamic discovery & failover via Gemini 3.7 / 3.6 Flash.
    - Checksum Validation: Evaluates schema locks, placeholder checks, pediatric dosage rules.
-   - Persistence: Writes output to `cat_db_generator/cats_db_v2_generated.json`.
+   - Persistence: Writes output to `cat_db_generator/cats_db_v3_generated.json`.
 
 3. **Human Active Learning Loop**:
    - User opens Lab UI -> Clicks `[ ✏️ Éditer ]` on a CAT row -> Modifies clinical text -> Clicks `[ 💾 Enregistrer ]`.
    - Backend endpoint `POST /api/admin/cat-generator/update` stamps `_human_edited: true` and `_last_edited_at`.
-   - On future regenerations of this CAT, `llm-engine.js` loads the user's manual edits and instructs Gemini 3.6 Flash to preserve all user corrections.
+   - On future regenerations of this CAT, `llm-engine.js` loads the user's manual edits and instructs Gemini to preserve all user corrections.
 
 4. **Production Database Promotion**:
-   - User clicks `[ 💾 Promote V2 to Production ]`.
-   - Endpoint `POST /api/admin/cat-generator/promote` creates `cats_db.json.bak` and atomic-writes `cats_db_v2_generated.json` to `cats_db.json`.
+   - User clicks `[ 💾 Promote V3 to Production ]`.
+   - Endpoint `POST /api/admin/cat-generator/promote` creates `cats_db.json.bak` and atomic-writes `cats_db_v3_generated.json` to `cats_db.json`.

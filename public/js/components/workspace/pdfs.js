@@ -2,10 +2,12 @@ import { state } from '../../state.js';
 import { getCleanPdfName, showToast } from '../../utils.js';
 
 export function createPdfCardElement(file, isGlobal = false) {
+  if (!file || typeof file !== 'string') return document.createElement('div');
   const cleanName = getCleanPdfName(file);
   const card = document.createElement('a');
-  const isDocx = file.toLowerCase().endsWith('.docx');
-  card.href = isDocx ? `pdfs/${encodeURIComponent(file)}` : `pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
+  const safeFile = String(file);
+  const isDocx = safeFile.toLowerCase().endsWith('.docx');
+  card.href = isDocx ? `pdfs/${encodeURIComponent(safeFile)}` : `pdf_viewer.html?file=${encodeURIComponent(safeFile)}&page=1`;
   if (isDocx) {
     card.target = '_blank';
   }
@@ -15,7 +17,7 @@ export function createPdfCardElement(file, isGlobal = false) {
     ? 'fa-regular fa-file-word text-primary'
     : (isGlobal ? 'fa-solid fa-book-open-reader' : 'fa-solid fa-file-pdf');
 
-  const statusInfo = (state.pdfIndexStatus && state.pdfIndexStatus[file]) || { status: 'red', pagesWithText: 0, totalPages: 0 };
+  const statusInfo = (state.pdfIndexStatus && state.pdfIndexStatus[safeFile]) || { status: 'red', pagesWithText: 0, totalPages: 0 };
   const dotColor = isDocx ? '#ef4444' : (statusInfo.status === 'green' ? '#10b981' : (statusInfo.status === 'orange' ? '#f59e0b' : '#ef4444'));
   const dotTitle = isDocx
     ? "Document Word (Non indexable, convertissez en PDF pour la recherche)"
@@ -50,17 +52,19 @@ export function createPdfCardElement(file, isGlobal = false) {
 
 export function renderAllPdfsList(allPdfs) {
   const allPdfsList = document.getElementById('all-pdfs-list');
-  if (!allPdfsList) return;
+  if (!allPdfsList || !Array.isArray(allPdfs)) return;
   allPdfsList.innerHTML = '';
   allPdfs.forEach(file => {
-    const cleanName = getCleanPdfName(file);
+    if (!file || typeof file !== 'string') return;
+    const safeFile = String(file);
+    const cleanName = getCleanPdfName(safeFile);
     const li = document.createElement('li');
 
-    const isDocx = file.toLowerCase().endsWith('.docx');
+    const isDocx = safeFile.toLowerCase().endsWith('.docx');
     const iconClass = isDocx ? 'fa-regular fa-file-word' : 'fa-solid fa-file-pdf';
-    const href = isDocx ? `pdfs/${encodeURIComponent(file)}` : `pdf_viewer.html?file=${encodeURIComponent(file)}&page=1`;
+    const href = isDocx ? `pdfs/${encodeURIComponent(safeFile)}` : `pdf_viewer.html?file=${encodeURIComponent(safeFile)}&page=1`;
 
-    const statusInfo = (state.pdfIndexStatus && state.pdfIndexStatus[file]) || { status: 'red', pagesWithText: 0, totalPages: 0 };
+    const statusInfo = (state.pdfIndexStatus && state.pdfIndexStatus[safeFile]) || { status: 'red', pagesWithText: 0, totalPages: 0 };
     const dotColor = isDocx ? '#ef4444' : (statusInfo.status === 'green' ? '#10b981' : (statusInfo.status === 'orange' ? '#f59e0b' : '#ef4444'));
     const dotTitle = isDocx
       ? "Document Word (Non indexable, convertissez en PDF pour la recherche)"
@@ -74,7 +78,7 @@ export function renderAllPdfsList(allPdfs) {
       <a href="${href}" ${isDocx ? 'target="_blank"' : ''} class="all-pdfs-list-item" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
         <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex-grow: 1;">
           <i class="${iconClass}"></i>
-          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName} (${file.toLowerCase().endsWith('.docx') ? 'Word' : 'PDF'})</span>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName} (${isDocx ? 'Word' : 'PDF'})</span>
         </div>
         <span class="pdf-status-dot" style="width: 8px; height: 8px; background-color: ${dotColor}; border-radius: 50%; flex-shrink: 0; margin-left: 8px;" title="${dotTitle}"></span>
       </a>

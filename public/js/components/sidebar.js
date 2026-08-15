@@ -183,6 +183,17 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
     });
   }
 
+  // APK Download Button visibility: show ONLY when running as web_client/PWA, hide when inside Android APK container
+  const apkDownloadBtn = document.getElementById('apk-download-btn');
+  if (apkDownloadBtn) {
+    const isNativeApk = !!window.Capacitor || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || (navigator.userAgent && navigator.userAgent.toLowerCase().includes('capacitor'));
+    if (isNativeApk) {
+      apkDownloadBtn.style.display = 'none';
+    } else {
+      apkDownloadBtn.style.display = 'inline-flex';
+    }
+  }
+
   // Phase 3.6: Pull-to-refresh on the CAT list (native feel).
   if (catList && onRefresh) setupPullToRefresh(catList, onRefresh);
 }

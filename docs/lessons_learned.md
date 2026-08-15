@@ -230,6 +230,22 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Relying on title text matching (or regex string stripping) to look up, update, or generate CAT records in `cats_db.json` was an anti-pattern. Titles can be customized freely by doctors (e.g. without `"CAT devant "`), causing title lookups to fail, generating timestamp IDs (`Date.now()`), and producing duplicate database rows.
 * **Solution**: Refactored all backend routes (`server/routes/cat-generator.js`), AI generation engines (`cat_db_generator/lib/llm-engine.js`), and frontend components (`admin/cat_generator_lab.html`) to operate EXCLUSIVELY by Primary Key (`id`). `Date.now()` primary keys are permanently banned; new records receive an integer sequence ID (`getNextIntegerId()`). Titles are preserved 100% verbatim as entered by the doctor without artificial mutation.
 
+### 45. Elimination of MutationObserver & CSS Opacity Animation Deadlocks (Android Lock Freezes)
+* **Problem**: When rendering a security lock screen overlay (`.update-lock-screen`), attaching a `MutationObserver` on `document.documentElement` combined with a CSS `@keyframes fadeInLock { from { opacity: 0; } }` animation created a catastrophic infinite recursion loop. The observer saw `opacity: 0` during the first animation frame, interpreted it as UI tampering, and called `renderLockScreen()` again. This ran 60 times/second, choked the JavaScript main thread at 100% CPU, completely froze the Android phone's touch events, and blocked all background network polling.
+* **Solution**: (1) Add an explicit singleton guard `if (document.getElementById('app-update-lock-overlay')) return;` at the top of `renderLockScreen()`. (2) Remove dangerous global `MutationObserver` opacity checks from production release builds. (3) Render lock screens with instant static visibility (`opacity: 1`) without zero-opacity entry keyframes.
+
+### 46. Touch Event Safety & Native Intent Handlers in Mobile WebViews
+* **Problem**: Intercepting `touchstart` globally with `e.preventDefault()` in the capture phase on Android WebViews completely cancels touch and click interactions across the entire screen, rendering action buttons dead. Additionally, standard `<a href="..." target="_blank">` tags can be silently ignored by WebViews.
+* **Solution**: (1) Never call `e.preventDefault()` on `touchstart` globally. (2) Bind explicit click event listeners to update action buttons that command native external browser opening via `window.Capacitor.Plugins.Browser.open({ url })` or `window.open(url, '_system')`.
+
+### 47. Dedicated Test Database Environment Variable (`CATS_DB_PATH`) vs. In-Place Rollbacks
+* **Problem**: Relying solely on asynchronous file copy rollbacks (`cats_db.json.bak`) during automated test suite execution left room for race conditions: when test child processes were terminated with asynchronous disk writes in flight, temporary test CATs could leak into the production database file.
+* **Solution**: Upgraded all database access layers (`server/index.js`, `server/routes/cats.js`, `server/routes/suggestions.js`, `server/routes/cat-generator.js`) to support `process.env.CATS_DB_PATH`. Test suites spawn child processes pointing strictly to temporary files (`cats_db_test_*.json`), guaranteeing that production `cats_db.json` is physically isolated and 100% immune from test modifications.
+
+### 48. Atomic Multi-Platform Version Bumper (`scripts/bump_version.js`)
+* **Problem**: Manually updating version numbers across multiple config files resulted in discrepancies (e.g., `package.json` at `1.7.9`, `build.gradle` at `1.7.8`, `version.json` at `1.7.8`).
+* **Solution**: Created `scripts/bump_version.js` (`npm run bump <version>`), which atomically updates `package.json`, `android/app/build.gradle` (`versionName` & `versionCode`), `server/config/version.json`, `public/index.html`, and `worker.js`, then stamps the production bundle with `npm run build` in one single command.
+
 
 
 

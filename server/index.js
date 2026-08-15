@@ -37,7 +37,7 @@ const spc = require('./services/server-providers-config');
 
 const INDEX_FILE = path.join(__dirname, '..', 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, '..', 'suggestions.json');
-const DB_FILE = path.join(__dirname, '..', 'cats_db.json');
+const DB_FILE = process.env.CATS_DB_PATH || path.join(__dirname, '..', 'cats_db.json');
 // APP_DATA_KEY is public (shipped in the client bundle) — server-side
 // validation has been removed. The key remains in the client for legacy
 // compatibility with Capacitor's static data fetch.
@@ -191,7 +191,11 @@ const corsOptions = {
       /^https?:\/\/[a-zA-Z0-9-]+\.ngrok-free\.app$/i.test(origin) ||
       /^https?:\/\/[a-zA-Z0-9-]+\.ngrok\.io$/i.test(origin) ||
       /^https?:\/\/[a-zA-Z0-9-]+\.trycloudflare\.com$/i.test(origin) ||
-      /^https?:\/\/[a-zA-Z0-9-]+\.loca\.lt$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.cfargotunnel\.com$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.pages\.dev$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9.-]+\.workers\.dev$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.is-an\.app$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.is-a\.dev$/i.test(origin) ||
       /^https?:\/\/[a-zA-Z0-9.-]+\.eu\.org$/i.test(origin) ||
       (allowedOriginsSvc && allowedOriginsSvc.allowedOrigins && allowedOriginsSvc.allowedOrigins.includes(origin));
 
@@ -255,7 +259,7 @@ app.use((req, res, next) => {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.ngrok-free.dev https://*.trycloudflare.com wss:",
+      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.ngrok-free.dev https://*.trycloudflare.com https://*.cfargotunnel.com https://*.pages.dev https://*.is-an.app https://*.is-a.dev wss:",
       "frame-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",

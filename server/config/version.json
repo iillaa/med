@@ -1,8 +1,8 @@
 {
-  "minVersion": "1.2.4",
-  "latestVersion": "1.7.8",
+  "minVersion": "1.9.0",
+  "latestVersion": "1.8.0",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.7.8 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.8.0 est disponible.",
   "releaseNotes": [
     "Onglets de profils interactifs dans l'inspecteur du CAT Generator Lab (Master Hub + Sous-Fiches)",
     "Correctif du parseur Markdown et suppression des astérisques orphelines et espaces superflus",
@@ -11,9 +11,9 @@
     "Nettoyage et rationalisation des flux du générateur IA"
   ],
   "downloadLinks": {
-    "uptodownUrl": "https://dr-cat.en.uptodown.com/android",
+    "uptodownUrl": "https://apkpure.com/p/com.drcat.app",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
-    "directServerUrl": "/download/drcat-latest.apk"
+    "directServerUrl": "https://apkpure.com/p/com.drcat.app"
   },
-  "lastUpdated": "2026-08-12T00:37:00.000Z"
+  "lastUpdated": "2026-08-14T15:54:48.254Z"
 }

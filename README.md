@@ -231,6 +231,23 @@ shortcuts/stop_med.sh     # Clean shutdown
 
 ---
 
+## ⚡ Architecture Serverless Cloudflare Edge & Protocole ACK (v1.7.9)
+
+### ☁️ Moteur Edge Cloudflare Workers (`worker.js` & `wrangler.jsonc`)
+- **Execution 24/7 sur Edge Cloudflare** : `https://drcat.dr-cat.workers.dev` exécute nativement les endpoints `/api/suggestions`, `/api/server-providers`, `/api/search-status`, et `/api/version` en ~90ms (**HTTP 200 OK**) sans nécessiter que le serveur Termux soit en ligne.
+- **Stockage Cloudflare KV (`SUGGESTIONS_KV`)** : Les suggestions soumises par les utilisateurs du monde entier sont enregistrées 24h/24 dans la base clé-valeur Cloudflare (`d569bf8299a545f182c9e6acedd4d6aa`).
+- **Serveurs Multi-Fournisseurs avec Basculement** :
+  - **Priorité 1 (Primaire)** : `https://drcat.dr-cat.workers.dev` (Cloudflare CDN Edge)
+  - **Priorité 2 (Secondaire)** : `https://rendition-duchess-dry.ngrok-free.dev` (Tunnel Ngrok Termux)
+
+### 🔄 Protocole de Synchronisation 2-Voies & Handshake ACK
+1. **Sync Automatique au Démarrage** : Dès le lancement de `shortcuts/start_med.sh` (ou à l'ouverture du Panneau Admin), Termux interroge `GET /api/suggestions` sur Cloudflare KV et fusionne automatiquement les nouvelles propositions dans `suggestions.json`.
+2. **Accusé de Réception ACK (`POST /api/suggestions/ack`)** : Immédiatement après la mise en cache locale, Termux envoie la liste des identifiants reçus (`{ ids: [...] }`) à Cloudflare. Le Worker nettoie la file cloud pour garantir qu'aucune proposition n'est envoyée en double.
+3. **Purge Cloud lors de l'Approbation/Rejet (`DELETE /api/suggestions/:id`)** : Lorsque l'administrateur valide ou rejette une proposition dans Termux, le serveur envoie un signal DELETE à Cloudflare KV pour purger définitivement la fiche du cloud.
+4. **Approbation Intelligente Anti-Doublons (Upsert)** : Lors de l'approbation d'une fiche, le serveur vérifie la présence d'une CAT existante par ID ou titre identique et met à jour la fiche existante in-place au lieu de créer une carte orpheline en double.
+
+---
+
 ## 📄 Documentation de Référence
 
 Consultez les fichiers suivants pour plus de détails techniques :

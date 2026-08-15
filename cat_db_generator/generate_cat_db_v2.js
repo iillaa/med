@@ -13,7 +13,7 @@ const { VALID_CATEGORIES, buildSearchQueries } = require('./lib/medical-sources'
 const { generateCATWithLLM } = require('./lib/llm-engine');
 
 const ROOT_DB_PATH = path.join(__dirname, '..', 'cats_db.json');
-const DEFAULT_V2_OUTPUT_PATH = path.join(__dirname, 'cats_db_v2_generated.json');
+const DEFAULT_V2_OUTPUT_PATH = path.join(__dirname, 'cats_db_v3_generated.json');
 const OUTPUT_DIR = path.join(__dirname, 'output');
 
 function parseArgs() {

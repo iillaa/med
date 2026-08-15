@@ -429,4 +429,21 @@ The following critical security patches were applied in v1.5.0:
   ```
   Guarantees 100% reliable delta sync detection across all Android APK versions and PWAs.
 
+---
+
+## ⚡ Serverless Cloudflare Edge API & Protocole ACK (v1.7.9)
+
+### 1. Engine Edge Serverless (`worker.js` & `wrangler.jsonc`)
+* **Execution Native Edge (24/7)** : `drcat.dr-cat.workers.dev` exécute nativement les endpoints de l'application (`POST /api/suggestions`, `GET /api/server-providers`, `GET /api/search-status`, `GET /api/version`) directement sur les serveurs Edge de Cloudflare (~90ms).
+* **Persistance Cloudflare KV (`SUGGESTIONS_KV`)** : Les propositions soumises par les utilisateurs web du monde entier sont enregistrées 24/7 dans la base clé-valeur Cloudflare (`d569bf8299a545f182c9e6acedd4d6aa`).
+* **Multi-Provider Failover Registry** :
+  - **Primary (Priority 1)** : `https://drcat.dr-cat.workers.dev` (Cloudflare Worker Edge)
+  - **Secondary (Priority 2)** : `https://rendition-duchess-dry.ngrok-free.dev` (Termux Backend Tunnel)
+
+### 2. Handshake ACK & Purge 2-Voies (`server/services/sync-suggestions.js`)
+* **Accusé de Réception (`POST /api/suggestions/ack`)** : Lors du démarrage de Termux ou de l'ouverture du Panneau d'Administration, le serveur local interroge Cloudflare KV, stocke les propositions dans `suggestions.json`, et envoie immédiatement un signal ACK (`{ ids: [...] }`) à Cloudflare pour purger les éléments reçus de la file d'attente du cloud.
+* **Purge lors de la Décision (`DELETE /api/suggestions/:id`)** : Lorsque l'administrateur valide ou rejette une proposition dans Termux, un appel DELETE purge définitivement la fiche de la base Cloudflare KV pour éviter toute réapparition en boucle.
+* **Smart Upsert Engine (`server/routes/suggestions.js`)** : Lors de l'approbation d'une proposition, le serveur vérifie la présence d'une CAT existante par ID ou titre identique. Si la carte existe, elle est mise à jour in-place (`"offline"` ➔ `"offlineh"`) sans générer de doublons orphelins dans la base de données.
+
+
 

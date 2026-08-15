@@ -52,6 +52,25 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 - **Hybrid RAG Reranker (BM25 + Keyword Priority)**: Rank local PDF extracts containing exact trade names or primary treatment protocols higher than generic diagnostic background text.
 - **Automated Validation Re-Prompting Guardrail**: If `validateCAT()` detects unseparated alternative drugs or missing 1ère INTENTION headers, feed validation errors back into Attempt 2 of LLM synthesis.
 
+### Phase 6: Web Fetcher Precision, Fast AI Discoverer & Human-in-the-Loop Integration
+- [ ] **Web Fetcher Precision Upgrades (`cat_db_generator/lib/web-fetcher.js`)**:
+  - Prioritize full medical phrases (e.g. `"colique hépatique"`) over single-word splits (`"colique"`).
+  - Strictly reject empty search listing shells (`SearchResults?query=`) to ensure only direct chapter URLs are saved.
+  - Enforce clinical topic relevance checks to discard off-topic PubMed abstracts.
+- [ ] **Fast AI Web Discoverer & Quality Filter (`gemini-2.0-flash`)**:
+  - Use fast light AI (~300ms) to dynamically generate doctor-grade search queries for DDG/PubMed.
+  - Run a 1-pass fast AI quality check on fetched web pages to filter out off-topic text before passing to heavy AI.
+- [ ] **Human-in-the-Loop Custom Link Injector**:
+  - Add custom URL input in Admin Generator Lab & Add CAT modal for doctors to paste niche/local medical links (`sante.gov.dz`, `cnpm.org.dz`, specific PDFs/blogs).
+  - Fetch custom links via Jina Reader and store them in the CAT web cache.
+  - Pass human-provided links and AI-discovered links with **equal weight** into Gemini 3.7 Flash context for smart medical synthesis.
+- [ ] **PDF RAG Fitness Inspector & Human TOC Indexer (`admin/pdf_lab.html`)**:
+  - Add live RAG Fitness Score badges (+90 pts TOC, +60 pts exact title, +20 pts anchors) in PDF Lab.
+  - Add 1-Click AI Prompt Generator from `GUIDE_PDF_RAG_STANDARDIZATION.md`.
+  - Add Human TOC GPS Indexer so doctors can paste index pages directly into `pdf_index.json`.
+- [x] **Database File & Reference Version Update (`v2` → `v3`)**:
+  - Safely migrated `cats_db_v2_generated.json` to `cats_db_v3_generated.json` and updated backend, generator, and UI references.
+
 ### 📚 Open-Source Medical AI Inspiration & Reference Projects (For V2 Research)
 - **[MedRAG](https://github.com/MedRAG/MedRAG)**: Academic benchmark framework for medical retrieval over PubMed, StatPearls & textbooks. *Key takeaway: Hybrid BM25 + dense vector reranking for drug name precision.*
 - **[Meditron](https://github.com/epfl-dlab/meditron)**: EPFL open-source medical LLMs fine-tuned on Clinical Practice Guidelines (CPGs). *Key takeaway: Prompting around clinical decision trees (Reasoning -> Red Flags -> 1st Line -> Alternatives).*

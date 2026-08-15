@@ -4,13 +4,17 @@ const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
 
 const SUGGESTIONS_FILE = require('path').join(__dirname, '..', '..', 'suggestions.json');
-const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
+const DB_FILE = process.env.CATS_DB_PATH || require('path').join(__dirname, '..', '..', 'cats_db.json');
 
 function registerSuggestionRoutes(app) {
-  app.get('/api/suggestions', (req, res) => {
+  app.get('/api/suggestions', async (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
+    try {
+      const { syncCloudflareSuggestions } = require('../services/sync-suggestions');
+      await syncCloudflareSuggestions();
+    } catch (_) {}
     res.json(cache.suggestionsCache);
   });
 
@@ -94,28 +98,20 @@ function registerSuggestionRoutes(app) {
 
         const sug = cache.suggestionsCache[index];
 
-        if (sug.type === 'add') {
-          const nextId = cache.catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
-          const newCat = {
-            id: nextId,
-            category: sug.data.category,
-            title: sug.data.title,
-            summary: sug.data.summary || '',
-            red_flags: sug.data.red_flags || '',
-            ordonnance: sug.data.ordonnance || '',
-            sub_cats: Array.isArray(sug.data.sub_cats) ? sug.data.sub_cats : undefined,
-            pdf_keywords: sug.data.pdf_keywords || [],
-            updatedAt: Date.now(),
-            history: [{
-              timestamp: Date.now(),
-              action: 'create',
-              detail: 'Créé via approbation d\'une proposition de fiche'
-            }]
-          };
-          cache.catsCache.push(newCat);
-          await safeWriteJsonAsync(DB_FILE, cache.catsCache);
-        } else if (sug.type === 'edit') {
-          const cat = cache.catsCache.find(c => c.id === parseInt(sug.catId));
+        // Smart matching: locate existing CAT by catId or by title to prevent duplicate creation
+        let existingCat = null;
+        if (sug.catId) {
+          existingCat = cache.catsCache.find(c => String(c.id) === String(sug.catId));
+        }
+        if (!existingCat && sug.data && sug.data.title) {
+          existingCat = cache.catsCache.find(c => 
+            c.title.trim().toLowerCase() === sug.data.title.trim().toLowerCase() ||
+            (sug.data.originalTitle && c.title.trim().toLowerCase() === String(sug.data.originalTitle).trim().toLowerCase())
+          );
+        }
+
+        if (sug.type === 'edit' || existingCat) {
+          const cat = existingCat || cache.catsCache.find(c => String(c.id) === String(sug.catId));
           if (cat) {
             const previousState = {};
             if (sug.data.summary !== undefined && cat.summary !== sug.data.summary) previousState.summary = cat.summary;
@@ -145,6 +141,26 @@ function registerSuggestionRoutes(app) {
           } else {
             return { notFound: true, message: 'Fiche CAT d\'origine introuvable.' };
           }
+        } else if (sug.type === 'add') {
+          const nextId = cache.catsCache.reduce((max, cat) => cat.id > max ? cat.id : max, 0) + 1;
+          const newCat = {
+            id: nextId,
+            category: sug.data.category || 'Général',
+            title: sug.data.title,
+            summary: sug.data.summary || '',
+            red_flags: sug.data.red_flags || '',
+            ordonnance: sug.data.ordonnance || '',
+            sub_cats: Array.isArray(sug.data.sub_cats) ? sug.data.sub_cats : undefined,
+            pdf_keywords: sug.data.pdf_keywords || [],
+            updatedAt: Date.now(),
+            history: [{
+              timestamp: Date.now(),
+              action: 'create',
+              detail: 'Créé via approbation d\'une proposition de fiche'
+            }]
+          };
+          cache.catsCache.push(newCat);
+          await safeWriteJsonAsync(DB_FILE, cache.catsCache);
         }
 
         cache.suggestionsCache.splice(index, 1);
@@ -156,6 +172,10 @@ function registerSuggestionRoutes(app) {
       if (result.notFound) {
         return res.status(404).json({ error: result.message || 'Proposition introuvable.' });
       }
+      try {
+        const { purgeCloudflareSuggestion } = require('../services/sync-suggestions');
+        purgeCloudflareSuggestion(sugId).catch(() => {});
+      } catch (_) {}
       logAuditEvent('suggestion_approve', { id: sugId }, req);
       res.json(result);
     } catch (err) {
@@ -185,6 +205,10 @@ function registerSuggestionRoutes(app) {
       if (result.notFound) {
         return res.status(404).json({ error: 'Proposition introuvable.' });
       }
+      try {
+        const { purgeCloudflareSuggestion } = require('../services/sync-suggestions');
+        purgeCloudflareSuggestion(sugId).catch(() => {});
+      } catch (_) {}
       logAuditEvent('suggestion_reject', { id: sugId }, req);
       res.json(result);
     } catch (err) {

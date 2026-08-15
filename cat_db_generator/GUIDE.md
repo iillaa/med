@@ -1,12 +1,12 @@
-# 🩺 Dr. CAT — Database Generator v2 (Medical Engine Guide)
+# 🩺 Dr. CAT — Database Generator v3 (Medical Engine Guide)
 
-Welcome to the **CAT Database Generator v2** (`cat_db_generator/`). This module is a state-of-the-art, anti-hallucination medical content generator designed to compile, validate, and manage clinical *Conduites à Tenir* (CATs) tailored for an **Algerian & French medical practice context**.
+Welcome to the **CAT Database Generator v3** (`cat_db_generator/`). This module is a state-of-the-art, anti-hallucination medical content generator designed to compile, validate, and manage clinical *Conduites à Tenir* (CATs) tailored for an **Algerian & French medical practice context**.
 
 ---
 
 ## 🏛️ Architecture Overview
 
-The v2 generator combines **local deep PDF extraction** (76 local textbooks), **official Algerian & French medical authority verification**, and **strict automated medical schema validation**:
+The v3 generator combines **local deep PDF extraction** (77 local textbooks), **official Algerian & French medical authority verification**, and **strict automated medical schema validation**:
 
 ```
 cat_db_generator/

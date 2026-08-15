@@ -1,7 +1,7 @@
 /**
  * Batch Generator for all 55 CATs
  * Delegates to the production LLM engine inside `cat_db_generator/generate_cat_db_v2.js`.
- * Outputs strictly to `cat_db_generator/cats_db_v2_generated.json`.
+ * Outputs strictly to `cat_db_generator/cats_db_v3_generated.json`.
  * Keeps main app `cats_db.json` untouched for user review.
  */
 

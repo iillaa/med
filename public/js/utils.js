@@ -736,7 +736,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
   }
 
   // Download action (native documents or browser link)
-  document.getElementById('univ-btn-download').addEventListener('click', async () => {
+  document.getElementById('univ-btn-download')?.addEventListener('click', async () => {
     try {
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
         const Plugins = window.Capacitor.Plugins;
@@ -784,7 +784,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
   });
 
   // Copy to clipboard action
-  document.getElementById('univ-btn-copy').addEventListener('click', async () => {
+  document.getElementById('univ-btn-copy')?.addEventListener('click', async () => {
     const success = await copyToClipboard(jsonStr);
     if (success) {
       showToast("Copié dans le presse-papiers !", "fa-copy", 4000);

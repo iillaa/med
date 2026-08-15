@@ -40,24 +40,24 @@ async function runTests() {
   fs.writeFileSync(PASSWORD_FILE, tempPassword, 'utf-8');
   
   const CATS_DB_FILE = path.join(ROOT, 'cats_db.json');
-  const CATS_DB_BAK = path.join(ROOT, 'cats_db.json.bak_auth_test');
+  const CATS_DB_TEST = path.join(ROOT, 'cats_db_test_auth.json');
 
-  if (fs.existsSync(CATS_DB_FILE)) {
-    fs.copyFileSync(CATS_DB_FILE, CATS_DB_BAK);
-  }
+  // Create isolated dedicated test database from master template
+  fs.copyFileSync(CATS_DB_FILE, CATS_DB_TEST);
 
   function cleanup() {
     if (serverProcess) {
-      try { serverProcess.kill(); } catch (_) {}
+      try {
+        serverProcess.kill('SIGKILL');
+      } catch (_) {}
     }
     if (originalPasswordContent) {
       fs.writeFileSync(PASSWORD_FILE, originalPasswordContent, 'utf-8');
     } else {
       try { fs.unlinkSync(PASSWORD_FILE); } catch (_) {}
     }
-    if (fs.existsSync(CATS_DB_BAK)) {
-      fs.copyFileSync(CATS_DB_BAK, CATS_DB_FILE);
-      try { fs.unlinkSync(CATS_DB_BAK); } catch (_) {}
+    if (fs.existsSync(CATS_DB_TEST)) {
+      try { fs.unlinkSync(CATS_DB_TEST); } catch (_) {}
     }
   }
 
@@ -65,11 +65,11 @@ async function runTests() {
   process.on('SIGINT', () => { cleanup(); process.exit(1); });
   process.on('SIGTERM', () => { cleanup(); process.exit(1); });
 
-  console.log('Starting test server...');
+  console.log('Starting test server (Isolated DB)...');
   serverProcess = spawn('node', ['server.js'], {
     cwd: ROOT,
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, NODE_ENV: 'test', PORT: PORT }
+    env: { ...process.env, NODE_ENV: 'test', PORT: PORT, CATS_DB_PATH: CATS_DB_TEST }
   });
 
   let serverReady = false;

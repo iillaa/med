@@ -27,11 +27,6 @@
     return metaVer || '1.0.0';
   })();
 
-  // Semantic versioning & Kill Switch is strictly for standalone Android APK native builds.
-  if (!isNativeApk) {
-    return;
-  }
-
   /**
    * Compare two semantic version strings numerically.
    * Returns:
@@ -113,6 +108,12 @@
     }
 
     const root = document.getElementById('security-root') || document.body;
+
+    // Prevent duplicate re-renders / recursive loops
+    if (document.getElementById('app-update-lock-overlay')) {
+      return;
+    }
+
     const config = currentVersionConfig || {};
     const links = config.downloadLinks || {};
     const notes = config.releaseNotes || [
@@ -125,29 +126,19 @@
 
     const notesHtml = notes.map(n => `<li>${n}</li>`).join('');
 
-    // Resolve the direct download URL: prefer server-provided absolute URL, then
-    // build one from the active tunnel so it works in Capacitor (localhost origin).
-    const rawDirectUrl = links.directServerUrl;
-    let directDownloadUrl;
-    if (rawDirectUrl && rawDirectUrl.startsWith('http')) {
-      directDownloadUrl = rawDirectUrl;
-    } else {
-      // In Capacitor the origin is https://localhost — build absolute URL from tunnel.
-      const remoteBase = (typeof window !== 'undefined' && window.__DRCAT_REMOTE_URLS__ && window.__DRCAT_REMOTE_URLS__[0]) || '';
-      directDownloadUrl = remoteBase
-        ? `${remoteBase.replace(/\/+$/, '')}/download/drcat-latest.apk`
-        : (rawDirectUrl || '/download/drcat-latest.apk');
-    }
+    const storeUrl = links.storeUrl || links.apkpureUrl || links.uptodownUrl || 'https://apkpure.com/p/com.drcat.app';
+    const telegramUrl = links.telegramUrl || 'https://t.me/DrCatOfficialApp';
+    const directUrl = links.directServerUrl || 'https://apkpure.com/p/com.drcat.app';
 
     const buttonsHtml = `
-      <a href="${links.uptodownUrl || 'https://dr-cat.en.uptodown.com/android'}" target="_blank" rel="noopener" class="btn-update uptodown" data-update-link="uptodown">
-        <i class="fa-solid fa-cloud-arrow-down"></i> Télécharger via Uptodown
+      <a href="${storeUrl}" target="_blank" rel="noopener" class="btn-update store" data-update-link="store" id="lock-btn-store">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Télécharger via App Store
       </a>
-      <a href="${links.telegramUrl || 'https://t.me/DrCatOfficialApp'}" target="_blank" rel="noopener" class="btn-update telegram" data-update-link="telegram">
+      <a href="${telegramUrl}" target="_blank" rel="noopener" class="btn-update telegram" data-update-link="telegram" id="lock-btn-telegram">
         <i class="fa-brands fa-telegram"></i> Canal Telegram Officiel
       </a>
-      <a href="${directDownloadUrl}" target="_blank" rel="noopener" class="btn-update direct" data-update-link="direct">
-        <i class="fa-solid fa-globe"></i> Lien Direct (Serveur Web)
+      <a href="${directUrl}" target="_blank" rel="noopener" class="btn-update direct" data-update-link="direct" id="lock-btn-direct">
+        <i class="fa-solid fa-globe"></i> Lien Direct (Mise à jour Web)
       </a>
     `;
 
@@ -190,59 +181,34 @@
 
     root.innerHTML = html;
 
+    // Attach active event listeners to buttons for guaranteed Android browser launching
+    const attachBtnHandler = (id, url) => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          try {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+              window.Capacitor.Plugins.Browser.open({ url });
+            } else {
+              window.open(url, '_system');
+            }
+          } catch (_) {
+            window.open(url, '_system');
+          }
+        });
+      }
+    };
+
+    attachBtnHandler('lock-btn-store', storeUrl);
+    attachBtnHandler('lock-btn-telegram', telegramUrl);
+    attachBtnHandler('lock-btn-direct', directUrl);
+
     const skipBtn = document.getElementById('skip-loading-btn');
     if (skipBtn) {
       skipBtn.style.display = 'none';
     }
-  }
-
-  /**
-   * Set up persistent MutationObserver attached to document.documentElement
-   */
-  function setupMutationObserver() {
-    const observer = new MutationObserver(() => {
-      if (isLocked) {
-        const lockEl = document.getElementById('app-update-lock-overlay');
-        if (!lockEl || getComputedStyle(lockEl).display === 'none' || getComputedStyle(lockEl).opacity === '0') {
-          console.warn('[VersionChecker] Lock screen DOM tampering detected! Re-locking...');
-          renderLockScreen();
-        }
-      }
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class', 'hidden']
-    });
-  }
-
-  /**
-   * Set up Global Event Capturing with Whitelist
-   */
-  function setupGlobalEventLockdown() {
-    const blockEvent = (e) => {
-      if (isLocked) {
-        const link = e.target.closest('a, button, [data-update-link], .btn-update');
-        if (link) {
-          const href = link.getAttribute('href');
-          if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
-            if (window.Capacitor && window.Capacitor.Commands && typeof window.Capacitor.Commands.openUrl === 'function') {
-              window.Capacitor.Commands.openUrl({ url: href });
-            } else {
-              window.open(href, '_system');
-            }
-          }
-          return;
-        }
-        e.stopImmediatePropagation();
-        e.preventDefault();
-      }
-    };
-
-    window.addEventListener('click', blockEvent, true);
-    window.addEventListener('touchstart', blockEvent, true);
   }
 
   /**
@@ -266,72 +232,101 @@
    */
   async function checkVersion() {
     try {
-      const getVersionEndpoint = () => {
-        if (window.api && typeof window.api.getApiUrl === 'function') {
-          return window.api.getApiUrl('/api/version');
+      const getCandidateUrls = () => {
+        if (window.api && typeof window.api.getConfiguredRemoteUrls === 'function') {
+          const list = window.api.getConfiguredRemoteUrls();
+          if (list && list.length) return list;
         }
-        const configuredUrl = localStorage.getItem('dr_cat_remote_server_url') || (window.REMOTE_SERVER_URLS && window.REMOTE_SERVER_URLS[0]) || 'https://rendition-duchess-dry.ngrok-free.dev';
-        if (!window.__DRCAT_REMOTE_URLS__) {
-          window.__DRCAT_REMOTE_URLS__ = [configuredUrl];
+        if (window.REMOTE_SERVER_URLS && Array.isArray(window.REMOTE_SERVER_URLS) && window.REMOTE_SERVER_URLS.length) {
+          return window.REMOTE_SERVER_URLS;
         }
-        const cleanUrl = String(configuredUrl).replace(/\/+$/, '');
-        return `${cleanUrl}/api/version`;
+        if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS)) {
+          return REMOTE_SERVER_URLS;
+        }
+        return ['https://rendition-duchess-dry.ngrok-free.dev', 'https://drcat.dr-cat.workers.dev'];
       };
 
-      const rawVersionUrl = getVersionEndpoint();
-      const versionUrl = rawVersionUrl.includes('?')
-        ? `${rawVersionUrl}&ngrok-skip-browser-warning=true`
-        : `${rawVersionUrl}?ngrok-skip-browser-warning=true`;
+      const candidateUrls = getCandidateUrls();
+      let versionCheckedOk = false;
+      let lastError = null;
 
-      const res = await fetch(versionUrl, {
-        headers: {
-          'X-App-Version': CLIENT_VERSION,
-          'x-app-key': 'drcat_pub_2f7a91c4e8',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        cache: 'no-store'
-      });
+      for (const serverBase of candidateUrls) {
+        try {
+          const cleanUrl = String(serverBase).replace(/\/+$/, '');
+          const endpoint = `${cleanUrl}/api/version`;
+          const versionUrl = (endpoint.includes('ngrok-free.dev') || endpoint.includes('ngrok'))
+            ? (endpoint.includes('?') ? `${endpoint}&ngrok-skip-browser-warning=true` : `${endpoint}?ngrok-skip-browser-warning=true`)
+            : endpoint;
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+          const res = await fetch(versionUrl, {
+            headers: {
+              'X-App-Version': CLIENT_VERSION,
+              'x-app-key': 'drcat_pub_2f7a91c4e8',
+              'ngrok-skip-browser-warning': 'true'
+            },
+            cache: 'no-store',
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) {
+            continue;
+          }
+
+          const config = await res.json();
+          currentVersionConfig = config;
+          versionCheckedOk = true;
+
+          if (config.forceUpdateActive && compareVersions(CLIENT_VERSION, config.minVersion) < 0) {
+            try {
+              localStorage.setItem(LOCK_STORAGE_KEY, JSON.stringify({
+                minVersion: config.minVersion,
+                latestVersion: config.latestVersion,
+                forceUpdateActive: true,
+                updateMessage: config.updateMessage,
+                releaseNotes: config.releaseNotes,
+                downloadLinks: config.downloadLinks,
+                lastChecked: Date.now()
+              }));
+            } catch (_) { /* no-op */ }
+
+            if (isNativeApk) {
+              console.warn(`[VersionChecker] Force update active on Android APK! Client (v${CLIENT_VERSION}) < Min (v${config.minVersion})`);
+              purgeStaleNetworkCacheOnLock();
+              renderLockScreen();
+            } else {
+              console.log('[VersionChecker] Soft update banner shown for Web/PWA mode.');
+              renderSoftPwaBanner(config);
+            }
+            return;
+          } else {
+            console.log(`[VersionChecker] Version check passed via ${serverBase}. Client v${CLIENT_VERSION} is authorized.`);
+            try {
+              localStorage.removeItem(LOCK_STORAGE_KEY);
+            } catch (_) {}
+
+            if (isLocked) {
+              isLocked = false;
+              console.log('[VersionChecker] Kill switch disabled on server. Restoring active UI...');
+              const secRoot = document.getElementById('security-root');
+              if (secRoot) secRoot.innerHTML = '';
+              const lockOverlay = document.getElementById('app-update-lock-overlay');
+              if (lockOverlay) lockOverlay.remove();
+              window.location.reload();
+              return;
+            }
+            return;
+          }
+        } catch (err) {
+          lastError = err;
+        }
       }
 
-      const config = await res.json();
-      currentVersionConfig = config;
-
-      if (config.forceUpdateActive && compareVersions(CLIENT_VERSION, config.minVersion) < 0) {
-        try {
-          localStorage.setItem(LOCK_STORAGE_KEY, JSON.stringify({
-            minVersion: config.minVersion,
-            latestVersion: config.latestVersion,
-            forceUpdateActive: true,
-            updateMessage: config.updateMessage,
-            releaseNotes: config.releaseNotes,
-            downloadLinks: config.downloadLinks,
-            lastChecked: Date.now()
-          }));
-        } catch (_) { /* no-op */ }
-
-        if (isNativeApk) {
-          console.warn(`[VersionChecker] Force update active on Android APK! Client (v${CLIENT_VERSION}) < Min (v${config.minVersion})`);
-          purgeStaleNetworkCacheOnLock();
-          renderLockScreen();
-        } else {
-          console.log('[VersionChecker] Soft update banner shown for Web/PWA mode.');
-          renderSoftPwaBanner(config);
-        }
-      } else {
-        console.log(`[VersionChecker] Version check passed. Client v${CLIENT_VERSION} is authorized.`);
-        try {
-          localStorage.removeItem(LOCK_STORAGE_KEY);
-        } catch (_) {}
-
-        if (isLocked) {
-          isLocked = false;
-          console.log('[VersionChecker] Kill switch disabled on server. Reloading app to restore active UI...');
-          window.location.reload();
-          return;
-        }
+      if (!versionCheckedOk && lastError) {
+        throw lastError;
       }
     } catch (err) {
       console.warn('[VersionChecker] Remote version check unreachable, using offline rules:', err.message || err);
@@ -357,9 +352,6 @@
     }
   }
 
-  setupMutationObserver();
-  setupGlobalEventLockdown();
-
   const safeCheck = () => checkVersion().catch(e => console.warn('[VersionChecker] Async check notice:', e.message || e));
 
   if (document.readyState === 'loading') {
@@ -369,4 +361,15 @@
   }
 
   window.addEventListener('online', safeCheck);
+
+  // ── Smart Adaptive Polling Loop (5s when locked for instant unfreeze, 15s during normal use) ──
+  function scheduleNextCheck() {
+    const delay = isLocked ? 5000 : 15000;
+    setTimeout(async () => {
+      await safeCheck();
+      scheduleNextCheck();
+    }, delay);
+  }
+
+  scheduleNextCheck();
 })();

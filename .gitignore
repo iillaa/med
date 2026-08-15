@@ -43,6 +43,7 @@ nohup.out
 
 # Suggestions database
 suggestions.json*
+!remote_server_config.json
 
 # Admin Password
 admin_password.txt*

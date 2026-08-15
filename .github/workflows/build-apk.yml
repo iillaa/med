@@ -23,6 +23,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Code
@@ -38,11 +40,17 @@ jobs:
         run: npm install
 
       - name: Generate Remote Server Config
-        if: env.REMOTE_SERVER_URL_SECRET != ''
         env:
           REMOTE_SERVER_URL_SECRET: ${{ secrets.REMOTE_SERVER_URL }}
         run: |
-          printf '%s' "$REMOTE_SERVER_URL_SECRET" | python3 -c 'import sys, json; print(json.dumps({"urls":[sys.stdin.read().strip()], "primaryProvider":"ngrok"}))' > remote_server_config.json
+          python3 -c '
+          import os, json
+          secret = os.environ.get("REMOTE_SERVER_URL_SECRET", "").strip()
+          primary_url = secret if secret else "https://rendition-duchess-dry.ngrok-free.dev"
+          urls = [primary_url, "https://drcat.dr-cat.workers.dev"]
+          with open("remote_server_config.json", "w") as f:
+              json.dump({"primaryProvider": "ngrok", "urls": urls}, f, indent=2)
+          '
 
       - name: Copy Databases & Build Static Client Assets
         run: npm run build
@@ -101,20 +109,56 @@ jobs:
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Determine Artifact Path
+      - name: Determine Artifact Path & Prepare Renamed APK
         id: artifact_path
         run: |
-          PATH_TO_UPLOAD="android/app/build/outputs/apk/release/*-unsigned.apk"
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          SRC_PATH="android/app/build/outputs/apk/release/*-unsigned.apk"
           if [ "${{ steps.build_config.outputs.build_type }}" = "debug" ]; then
-            PATH_TO_UPLOAD="android/app/build/outputs/apk/debug/app-debug.apk"
+            SRC_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
           elif [ "${{ steps.sign_app.outputs.signedReleaseFile }}" != "" ]; then
-            PATH_TO_UPLOAD="${{ steps.sign_app.outputs.signedReleaseFile }}"
+            SRC_PATH="${{ steps.sign_app.outputs.signedReleaseFile }}"
           fi
-          echo "path=$PATH_TO_UPLOAD" >> $GITHUB_OUTPUT
+
+          # Expand wildcard path if needed
+          SRC_FILE=$(ls $SRC_PATH 2>/dev/null | head -n 1)
+          
+          RENAMED_NAME="DrCAT-v${VERSION}.apk"
+          DEST_DIR="android/app/build/outputs/apk/publish"
+          mkdir -p $DEST_DIR
+          RENAMED_PATH="${DEST_DIR}/${RENAMED_NAME}"
+
+          cp "$SRC_FILE" "$RENAMED_PATH"
+
+          echo "path=$RENAMED_PATH" >> $GITHUB_OUTPUT
+          echo "renamed_name=$RENAMED_NAME" >> $GITHUB_OUTPUT
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.build_config.outputs.artifact_name }}
+          name: DrCAT-v${{ steps.artifact_path.outputs.version }}
           path: ${{ steps.artifact_path.outputs.path }}
+
+      - name: Publish GitHub Release (Unzipped APK)
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/beta-test-pr'
+        with:
+          tag_name: v${{ steps.artifact_path.outputs.version }}
+          name: Dr. CAT v${{ steps.artifact_path.outputs.version }}
+          body: |
+            🩺 **Dr. CAT — Application de Rappel Clinique (v${{ steps.artifact_path.outputs.version }})**
+
+            ### 📲 Téléchargement Direct
+            - Téléchargez le fichier **`DrCAT-v${{ steps.artifact_path.outputs.version }}.apk`** ci-dessous pour l'installer directement sur votre smartphone Android.
+
+            ### 🌐 Application Web Client
+            - Accessible 24h/24 via Cloudflare Edge : https://drcat.dr-cat.workers.dev
+          files: ${{ steps.artifact_path.outputs.path }}
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 

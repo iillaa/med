@@ -38,13 +38,13 @@ const PROVIDERS = [
   {
     id: 'cloudflare',
     name: 'Cloudflare Tunnel',
-    urlPattern: /^(?:https?:\/\/)?(?:[^\/]+\.)?trycloudflare\.com(?:[:\/]|$)/i,
+    urlPattern: /^(?:https?:\/\/)?(?:[^\/]+\.)?(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|is-an\.app|is-a\.dev)(?:[:\/]|$)/i,
     extraHeaders: {},
     managementPort: null,
     managementPath: null,
-    isDevHostname: (h) => /(?:^|\.)trycloudflare\.com$/i.test(h),
-    isTunnelOrigin: (o) => /(?:^|\.)trycloudflare\.com(?::\d+)?$/i.test(o.replace(/^https?:\/\//, '')),
-    tunnelLabel: 'Tunnel',
+    isDevHostname: (h) => /(?:^|\.)(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|is-an\.app|is-a\.dev)$/i.test(h),
+    isTunnelOrigin: (o) => /(?:^|\.)(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|is-an\.app|is-a\.dev)(?::\d+)?$/i.test(o.replace(/^https?:\/\//, '')),
+    tunnelLabel: 'Cloudflare',
   },
   {
     id: 'direct',

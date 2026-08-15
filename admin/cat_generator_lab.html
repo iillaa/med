@@ -715,25 +715,15 @@
       if (!confirm(`Lancer le pipeline 1-Tap Auto (Web Fetch + IA Dual RAG V3) pour : "${title}" ?`)) return;
 
       try {
-        // Step 1: Web Fetch
-        const webRes = await fetch('/api/admin/cat-generator/fetch-web', {
+        const res = await fetch('/api/admin/cat-generator/pipeline-full', {
           method: 'POST',
           headers: getAdminHeaders(),
-          body: JSON.stringify({ title, forceRefetch: false })
+          body: JSON.stringify({ id, title, category, forceRefetch: false })
         });
-        const webData = await webRes.json();
-        if (!webRes.ok || !webData.success) throw new Error(webData.error || 'Échec de la recherche web');
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Échec du pipeline 1-Tap');
 
-        // Step 2: Dual RAG Synthesis (writes strictly to cats_db_v2_generated.json)
-        const genRes = await fetch('/api/admin/cat-generator/single', {
-          method: 'POST',
-          headers: getAdminHeaders(),
-          body: JSON.stringify({ id, title, category })
-        });
-        const genData = await genRes.json();
-        if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V3');
-
-        alert(`⚡ Fiche #${id} "${title}" générée avec succès en V3 ! (${genData.metrics ? genData.metrics.model : 'Dual RAG'})`);
+        alert(`⚡ Fiche #${id} "${title}" générée avec succès en V3 ! (${data.metrics ? data.metrics.model : 'Dual RAG'})`);
         await loadData();
       } catch (err) {
         alert(`❌ Erreur 1-Tap Auto: ${err.message}`);
@@ -741,31 +731,38 @@
     }
 
     async function run1TapBatchPipeline() {
-      if (!confirm('Lancer le Batch 1-Tap Global (Web Fetch + Génération IA V3) pour TOUTES les fiches en attente ?')) return;
-
-      const ungenerated = (appData.v1 || []).filter(cat => {
-        return !appData.v2 || !appData.v2.some(v2 => Number(v2.id) === Number(cat.id));
-      });
-
-      if (ungenerated.length === 0) {
-        alert('Toutes les fiches sont déjà générées en V3 !');
+      const allProd = appData.v1 || [];
+      if (allProd.length === 0) {
+        alert('Aucune fiche disponible dans la base !');
         return;
       }
 
-      alert(`⚡ Démarrage du Batch 1-Tap Global pour ${ungenerated.length} fiches en attente...`);
+      const ungenerated = allProd.filter(cat => {
+        return !appData.v2 || !appData.v2.some(v2 => Number(v2.id) === Number(cat.id));
+      });
 
-      for (const cat of ungenerated) {
+      let targetList = ungenerated;
+
+      if (ungenerated.length > 0) {
+        const runOnlyPending = confirm(`Lancer le Batch 1-Tap Global pour les ${ungenerated.length} fiches en attente ?\n\n(Cliquez sur Annuler si vous préférez régénérer TOUTES les ${allProd.length} fiches).`);
+        if (!runOnlyPending) {
+          if (!confirm(`Confirmer la régénération 1-Tap Global pour TOUTES les ${allProd.length} fiches de la base ?`)) return;
+          targetList = allProd;
+        }
+      } else {
+        if (!confirm(`Toutes les fiches sont déjà en V3. Voulez-vous relancer le Batch 1-Tap Global (Web Fetch + Dual RAG IA V3) pour TOUTES les ${allProd.length} fiches ?`)) return;
+        targetList = allProd;
+      }
+
+      alert(`⚡ Démarrage du Batch 1-Tap Global pour ${targetList.length} fiches...`);
+
+      for (let i = 0; i < targetList.length; i++) {
+        const cat = targetList[i];
         try {
-          await fetch('/api/admin/cat-generator/fetch-web', {
+          await fetch('/api/admin/cat-generator/pipeline-full', {
             method: 'POST',
             headers: getAdminHeaders(),
-            body: JSON.stringify({ title: cat.title, forceRefetch: false })
-          });
-
-          await fetch('/api/admin/cat-generator/single', {
-            method: 'POST',
-            headers: getAdminHeaders(),
-            body: JSON.stringify({ id: cat.id, title: cat.title, category: cat.category })
+            body: JSON.stringify({ id: cat.id, title: cat.title, category: cat.category, forceRefetch: false })
           });
         } catch (e) {
           console.warn(`Error on "${cat.title}":`, e);
@@ -835,6 +832,7 @@
         if (!res.ok || !data.success) throw new Error(data.error || 'Échec du lancement du batch web');
 
         alert(`🌐 ${data.message}`);
+        pollProgress();
         await loadData();
       } catch (err) {
         alert(`❌ Erreur Batch Web Fetch: ${err.message}`);
@@ -1130,7 +1128,24 @@
     }
 
     async function regenerateSingleCAT(title, category, id) {
-      return run1TapPipelineSingle(title, category, id);
+      const isV2 = appData.v2 && appData.v2.some(c => Number(c.id) === Number(id));
+      const actionLabel = isV2 ? 'Régénérer' : 'Générer V3';
+      if (!confirm(`Lancer la synthèse IA Step 2 (Dual RAG V3) pour : "${title}" ?`)) return;
+
+      try {
+        const genRes = await fetch('/api/admin/cat-generator/single', {
+          method: 'POST',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({ id, title, category })
+        });
+        const genData = await genRes.json();
+        if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V3');
+
+        alert(`✨ Fiche #${id} "${title}" générée avec succès en V3 ! (${genData.metrics ? genData.metrics.model : 'Dual RAG'})`);
+        await loadData();
+      } catch (err) {
+        alert(`❌ Erreur ${actionLabel}: ${err.message}`);
+      }
     }
 
     async function deleteCAT(id, title) {
@@ -1178,7 +1193,7 @@
     }
 
     async function promoteV2() {
-      if (!confirm(`Attention: Voulez-vous remplacer TOUTE la base de production (cats_db.json) par l'ensemble des ${appData.v2.length} fiches V2 ?`)) return;
+      if (!confirm(`Attention: Voulez-vous remplacer TOUTE la base de production (cats_db.json) par l'ensemble des ${appData.v2.length} fiches V3 ?`)) return;
 
       try {
         const res = await fetch('/api/admin/cat-generator/promote', {
@@ -1192,24 +1207,6 @@
         await loadData();
       } catch (err) {
         alert(`❌ Erreur Promotion: ${err.message}`);
-      }
-    }
-
-    async function runStep1BatchWebFetch() {
-      if (!confirm('Lancer la recherche web Step 1 pour toutes les 55 fiches en arrière-plan ?')) return;
-
-      try {
-        const res = await fetch('/api/admin/cat-generator/batch-web', {
-          method: 'POST',
-          headers: getAdminHeaders()
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error || 'Échec de la recherche web batch');
-
-        alert(`🌐 ${data.message}`);
-        pollProgress();
-      } catch (err) {
-        alert(`❌ Erreur: ${err.message}`);
       }
     }
 

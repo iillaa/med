@@ -355,11 +355,51 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-version" content="1.7.8">
-  <meta name="app-build-version" content="2026.08.12.01.37">
-  <title>Dr.CAT — Rappel Clinique</title>
+  <meta name="app-version" content="1.8.0">
+  <meta name="app-build-version" content="2026.08.15.15.28">
+  <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
+  <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
+  <link rel="canonical" href="https://drcat.dr-cat.workers.dev/">
+  
+  <!-- Open Graph / Facebook / WhatsApp / Telegram -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://drcat.dr-cat.workers.dev/">
+  <meta property="og:site_name" content="Dr.CAT">
+  <meta property="og:title" content="Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales">
+  <meta property="og:description" content="Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique et calculateurs pour médecins.">
+  <meta property="og:image" content="https://drcat.dr-cat.workers.dev/icon-512.png">
+  <meta property="og:locale" content="fr_FR">
+
+  <!-- Twitter / X Cards -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="https://drcat.dr-cat.workers.dev/">
+  <meta name="twitter:title" content="Dr.CAT — Rappel Clinique">
+  <meta name="twitter:description" content="Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique et révision pour médecins.">
+  <meta name="twitter:image" content="https://drcat.dr-cat.workers.dev/icon-192.png">
+
+  <!-- Schema.org JSON-LD Structured Data Entity -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Dr.CAT",
+    "url": "https://drcat.dr-cat.workers.dev/",
+    "applicationCategory": "MedicalApplication",
+    "operatingSystem": "Web, Android",
+    "description": "Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.",
+    "author": {
+      "@type": "Person",
+      "name": "Dr. Kibeche Ali Dia Eddine"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
   <link rel="manifest" href="manifest.json">
   <!-- iOS PWA support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -396,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608120137" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608120137"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608151528" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608151528"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608120137" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608120137"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608151528" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608151528"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608120137" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608120137" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608120137">
+  <link rel="stylesheet" href="style.css?v=2608151528" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608151528" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608151528">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608120137">
-    <link rel="stylesheet" href="css/utilities.css?v=2608120137">
+    <link rel="stylesheet" href="style.css?v=2608151528">
+    <link rel="stylesheet" href="css/utilities.css?v=2608151528">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608120137"></script>
+  <script type="module" src="js/version-checker.js?v=2608151528"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -461,6 +501,9 @@ body {
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
+          <a id="apk-download-btn" href="https://apkpure.com/p/com.drcat.app" target="_blank" rel="noopener noreferrer" class="theme-toggle-btn" title="Télécharger l'application Android sur APKPure" aria-label="Télécharger l'APK Android sur APKPure" style="display: inline-flex; align-items: center; justify-content: center; color: #10b981; text-decoration: none;">
+            <i class="fa-brands fa-android" style="font-size: 15px;"></i>
+          </a>
           <button id="theme-toggle-btn" class="theme-toggle-btn" title="Changer le thème" aria-label="Changer le thème">
             <i class="fa-solid fa-moon" id="theme-toggle-icon"></i>
           </button>
@@ -1371,7 +1414,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-YFRJ2I4K.js"></script>
+  <script type="module" src="dist/app-D66PFVIT.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
