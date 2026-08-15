@@ -1073,16 +1073,16 @@
   },
   {
     "id": 59,
-    "category": "Cloud 01",
-    "title": "Cloud 01",
+    "category": "Cloud01",
+    "title": "Cloud01",
     "summary": "",
-    "red_flags": "Cloud10",
+    "red_flags": "",
     "ordonnance": "",
     "pdf_keywords": [],
-    "updatedAt": 1786809898229,
+    "updatedAt": 1786810977113,
     "history": [
       {
-        "timestamp": 1786809898229,
+        "timestamp": 1786810977113,
         "action": "create",
         "detail": "Créé directement par l'administrateur"
       }

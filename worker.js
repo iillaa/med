@@ -139,10 +139,8 @@ export default {
     async function fetchStaticAsset(assetPath) {
       try {
         if (env && env.ASSETS) {
-          const assetUrl = new URL(request.url);
-          assetUrl.pathname = assetPath;
-          assetUrl.search = '';
-          const res = await env.ASSETS.fetch(assetUrl.toString());
+          const assetUrl = new URL(assetPath, request.url);
+          const res = await env.ASSETS.fetch(assetUrl);
           const newRes = new Response(res.body, res);
           newRes.headers.set('Access-Control-Allow-Origin', '*');
           newRes.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
