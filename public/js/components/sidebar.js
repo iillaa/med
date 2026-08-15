@@ -385,7 +385,7 @@ function filterCats(onFilterTriggered) {
     const redFlagsStr = (cat.red_flags || '').toLowerCase();
     const categoryStr = (cat.category || '').toLowerCase();
     const notesStr = (cat.notes || '').toLowerCase();
-    const keywordsStr = Array.isArray(cat.pdf_keywords) ? cat.pdf_keywords.join(' ').toLowerCase() : (cat.pdf_keywords || '').toLowerCase();
+    const keywordsStr = Array.isArray(cat.pdf_keywords) ? cat.pdf_keywords.filter(k => k && typeof k === 'string').join(' ').toLowerCase() : (cat.pdf_keywords || '').toLowerCase();
     const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
 
     // Combine all fields into a single searchable text space

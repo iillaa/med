@@ -1070,22 +1070,5 @@
       "totalTokens": 9690,
       "timestamp": "2026-08-12T00:13:03.812Z"
     }
-  },
-  {
-    "id": 59,
-    "category": "Cloud1",
-    "title": "Cloud 01",
-    "summary": "",
-    "red_flags": "",
-    "ordonnance": "",
-    "pdf_keywords": [],
-    "updatedAt": 1786811927391,
-    "history": [
-      {
-        "timestamp": 1786811927391,
-        "action": "create",
-        "detail": "Créé directement par l'administrateur"
-      }
-    ]
   }
 ]

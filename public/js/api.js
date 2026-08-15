@@ -779,7 +779,7 @@ export async function searchPdfsContent(query) {
 
     // 1. Filename matches first (High Relevance)
     for (const doc of offlinePdfIndexCache) {
-      if (doc.pdf.toLowerCase().includes(cleanQuery)) {
+      if (doc.pdf && typeof doc.pdf === 'string' && doc.pdf.toLowerCase().includes(cleanQuery)) {
         results.push({
           pdf: doc.pdf,
           page: 1,

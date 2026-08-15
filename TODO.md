@@ -68,6 +68,13 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
   - Add live RAG Fitness Score badges (+90 pts TOC, +60 pts exact title, +20 pts anchors) in PDF Lab.
   - Add 1-Click AI Prompt Generator from `GUIDE_PDF_RAG_STANDARDIZATION.md`.
   - Add Human TOC GPS Indexer so doctors can paste index pages directly into `pdf_index.json`.
+- [ ] **Dedicated Cloudflare Deploy Branch (`cloudflare-deploy`)**:
+  - Create a separate `cloudflare-deploy` branch linked exclusively to Cloudflare Workers deployment.
+  - This branch acts as a **publish-only snapshot rail** — completely decoupled from `beta-test-pr` (work branch).
+  - Workflow: when ready to sync DB to Cloudflare, merge/force-push `beta-test-pr` → `cloudflare-deploy`. Cloudflare auto-deploys from this branch.
+  - **Benefit**: Zero git history pollution on the work branch. Can push `cloudflare-deploy` as many times as needed (e.g. after every CAT edit session) without spamming work branch commits.
+  - Add a simple `npm run cf-deploy` script that: builds → amends a single commit on `cloudflare-deploy` → force pushes. History stays flat on the deploy branch.
+
 - [x] **Database File & Reference Version Update (`v2` → `v3`)**:
   - Safely migrated `cats_db_v2_generated.json` to `cats_db_v3_generated.json` and updated backend, generator, and UI references.
 

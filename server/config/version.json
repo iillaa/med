@@ -1,7 +1,7 @@
 {
   "minVersion": "1.9.0",
   "latestVersion": "1.8.0",
-  "forceUpdateActive": false,
+  "forceUpdateActive": true,
   "updateMessage": "Une mise à jour de Dr.CAT v1.8.0 est disponible.",
   "releaseNotes": [
     "Onglets de profils interactifs dans l'inspecteur du CAT Generator Lab (Master Hub + Sous-Fiches)",
@@ -15,5 +15,5 @@
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "https://apkpure.com/p/com.drcat.app"
   },
-  "lastUpdated": "2026-08-14T15:54:48.254Z"
+  "lastUpdated": "2026-08-15T17:07:50.944Z"
 }
