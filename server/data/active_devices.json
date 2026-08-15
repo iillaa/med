@@ -53,10 +53,10 @@
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
       "firstSeen": "2026-08-03T22:12:43.913Z",
-      "requestCount": 1625,
+      "requestCount": 1808,
       "appVersion": "1.8.0",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-15T14:32:09.698Z",
+      "lastSeen": "2026-08-15T16:39:25.833Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
@@ -303,10 +303,10 @@
     "drcat-inst-acbd7870-f773-4e81-8efb-4aa24ade3439": {
       "installId": "drcat-inst-acbd7870-f773-4e81-8efb-4aa24ade3439",
       "firstSeen": "2026-08-14T14:07:17.021Z",
-      "requestCount": 11,
+      "requestCount": 25,
       "appVersion": "1.8.0",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-15T14:28:42.683Z",
+      "lastSeen": "2026-08-15T15:46:51.247Z",
       "lastIp": "154.121.155.209",
       "isAdminDevice": false
     },
@@ -343,13 +343,83 @@
     "drcat-inst-d2892a33-4e81-4eec-9761-3d08b04b6a08": {
       "installId": "drcat-inst-d2892a33-4e81-4eec-9761-3d08b04b6a08",
       "firstSeen": "2026-08-14T22:14:38.529Z",
-      "requestCount": 52,
+      "requestCount": 76,
       "appVersion": "1.8.0",
       "platform": "android_apk",
-      "lastSeen": "2026-08-15T13:21:44.043Z",
+      "lastSeen": "2026-08-15T15:11:07.565Z",
+      "lastIp": "154.121.155.209",
+      "isAdminDevice": false
+    },
+    "drcat-inst-de7d679c-e30b-4bb5-8d14-f6466eb7388a": {
+      "installId": "drcat-inst-de7d679c-e30b-4bb5-8d14-f6466eb7388a",
+      "firstSeen": "2026-08-15T15:26:26.380Z",
+      "requestCount": 16,
+      "appVersion": "1.8.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-15T15:29:04.964Z",
+      "lastIp": "154.121.155.209",
+      "isAdminDevice": false
+    },
+    "drcat-inst-3d430c1a-0e53-4961-9d2b-ac25c31fb47a": {
+      "installId": "drcat-inst-3d430c1a-0e53-4961-9d2b-ac25c31fb47a",
+      "firstSeen": "2026-08-15T15:42:53.719Z",
+      "requestCount": 10,
+      "appVersion": "1.8.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-15T15:44:53.736Z",
+      "lastIp": "154.121.155.209",
+      "isAdminDevice": false
+    },
+    "drcat-inst-ff75e30c-642c-4203-9057-df698df73802": {
+      "installId": "drcat-inst-ff75e30c-642c-4203-9057-df698df73802",
+      "firstSeen": "2026-08-15T15:46:27.733Z",
+      "requestCount": 17,
+      "appVersion": "1.8.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-15T15:56:37.949Z",
+      "lastIp": "154.121.155.209",
+      "isAdminDevice": false
+    },
+    "drcat-inst-54d88350-fac2-42e3-8701-01a847518c05": {
+      "installId": "drcat-inst-54d88350-fac2-42e3-8701-01a847518c05",
+      "firstSeen": "2026-08-15T15:57:50.474Z",
+      "requestCount": 13,
+      "appVersion": "1.8.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-15T16:00:54.271Z",
+      "lastIp": "154.121.155.209",
+      "isAdminDevice": false
+    },
+    "drcat-inst-09efe235-d434-41dd-9336-4d949f2efbd1": {
+      "installId": "drcat-inst-09efe235-d434-41dd-9336-4d949f2efbd1",
+      "firstSeen": "2026-08-15T16:01:19.188Z",
+      "requestCount": 16,
+      "appVersion": "1.8.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-15T16:14:15.296Z",
+      "lastIp": "154.121.155.209",
+      "isAdminDevice": false
+    },
+    "drcat-inst-80449769-8e35-4e40-ae2d-5a540bdfccc3": {
+      "installId": "drcat-inst-80449769-8e35-4e40-ae2d-5a540bdfccc3",
+      "firstSeen": "2026-08-15T16:14:21.462Z",
+      "requestCount": 20,
+      "appVersion": "1.8.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-15T16:28:46.063Z",
+      "lastIp": "154.121.155.209",
+      "isAdminDevice": false
+    },
+    "drcat-inst-380f0c28-5e9e-4960-8151-422dc115b1d8": {
+      "installId": "drcat-inst-380f0c28-5e9e-4960-8151-422dc115b1d8",
+      "firstSeen": "2026-08-15T16:28:50.352Z",
+      "requestCount": 10,
+      "appVersion": "1.8.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-15T16:30:49.803Z",
       "lastIp": "154.121.155.209",
       "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-08-15T14:32:14.047Z"
+  "lastUpdated": "2026-08-15T16:39:25.966Z"
 }

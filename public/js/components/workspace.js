@@ -886,7 +886,7 @@ export function loadRelatedPdfs(cat) {
 
   const keywords = Array.isArray(cat?.pdf_keywords) ? cat.pdf_keywords : [];
   const categoryName = cat?.category ? cat.category.toLowerCase() : '';
-  const tags = Array.isArray(cat?.tags) ? cat.tags.map(t => t.toLowerCase()) : [];
+  const tags = Array.isArray(cat?.tags) ? cat.tags.filter(t => t && typeof t === 'string').map(t => t.toLowerCase()) : [];
   
   // Broad clinical terms that define a "General Guide" (Urgencies, Therapeutics, Prescriptions, etc.)
   const clinicalGenerals = ['urgence', 'urgences', 'traitement', 'thérapeutique', 'ordonnance', 'ordonnances', 'manuel', 'guide'];
@@ -896,7 +896,7 @@ export function loadRelatedPdfs(cat) {
   const matchedFiles = state.allPdfs.filter(filename => {
     if (!filename) return false;
     const lowerName = filename.toLowerCase();
-    return keywords.some(kw => kw && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
+    return keywords.some(kw => kw != null && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
   });
 
   // Global PDFs matching category or tags (but not already caught by specific keywords)
@@ -905,7 +905,7 @@ export function loadRelatedPdfs(cat) {
     const lowerName = filename.toLowerCase();
     
     // Skip if it's already in the specific matched files
-    const isSpecific = keywords.some(kw => kw && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
+    const isSpecific = keywords.some(kw => kw != null && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
     if (isSpecific) return false;
 
     // Must match the category or tags

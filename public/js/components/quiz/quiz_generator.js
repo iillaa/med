@@ -159,6 +159,7 @@ function extractKeywords(text) {
 }
 
 export function checkMatchedKeywords(userAnswer, referenceText) {
+  if (!userAnswer || !referenceText) return [];
   const refKeywords = extractKeywords(referenceText);
   const cleanUserAnswer = userAnswer.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 

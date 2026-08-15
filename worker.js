@@ -135,29 +135,23 @@ export default {
       }
     }
 
-    // Helper: fetch static asset with CORS headers and query string stripped
+    // Helper: fetch static asset with CORS headers (query strings stripped via clean asset URL)
     async function fetchStaticAsset(assetPath) {
       try {
-        if (env && env.ASSETS) {
-          const assetUrl = new URL(assetPath, request.url);
-          const res = await env.ASSETS.fetch(assetUrl);
-          const newRes = new Response(res.body, res);
-          newRes.headers.set('Access-Control-Allow-Origin', '*');
-          newRes.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-          newRes.headers.set('Access-Control-Allow-Headers', '*');
-          newRes.headers.set('Content-Type', 'application/json; charset=utf-8');
-          return newRes;
-        }
+        const assetUrl = new URL(assetPath, request.url);
+        const res = await env.ASSETS.fetch(assetUrl);
+        const newRes = new Response(res.body, res);
+        newRes.headers.set('Access-Control-Allow-Origin', '*');
+        newRes.headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+        newRes.headers.set('Access-Control-Allow-Headers', '*');
+        newRes.headers.set('Content-Type', 'application/json; charset=utf-8');
+        return newRes;
       } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), {
           status: 500,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
         });
       }
-      return new Response(JSON.stringify({ error: 'Asset engine unavailable' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-      });
     }
 
     // 5. GET /api/cats -> Native Edge Serverless Alias for /data/cats_db.json
