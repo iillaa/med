@@ -31,12 +31,26 @@ function rebuildClientAssets() {
     fs.mkdirSync(publicDataDir, { recursive: true });
   }
 
-  // Copy cats_db.json (stripping version history and minifying JSON to optimize PWA client asset size)
+  // Copy cats_db.json (stripping internal AI metrics, history, search queries, and minifying JSON to optimize PWA client asset size & protect IP)
   try {
     const rawDb = fs.readFileSync(path.join(__dirname, 'cats_db.json'), 'utf-8');
     const db = JSON.parse(rawDb);
     const cleanDb = db.map(c => {
-      const { history, ...rest } = c;
+      const {
+        history,
+        _execution_metrics,
+        online_verification_queries,
+        sources,
+        _audit_trail,
+        _raw_llm_response,
+        ...rest
+      } = c;
+      if (Array.isArray(rest.sub_cats)) {
+        rest.sub_cats = rest.sub_cats.map(sub => {
+          const { _execution_metrics, online_verification_queries, sources, ...cleanSub } = sub;
+          return cleanSub;
+        });
+      }
       return rest;
     });
     fs.writeFileSync(
@@ -44,7 +58,7 @@ function rebuildClientAssets() {
       JSON.stringify(cleanDb),
       'utf-8'
     );
-    console.log("Copied cats_db.json (minified with history stripped) to public/data/");
+    console.log("Copied cats_db.json (minified with internal AI metrics & history stripped) to public/data/");
   } catch (err) {
     console.error("Error packaging cats_db.json during build:", err);
     throw err;

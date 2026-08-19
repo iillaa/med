@@ -324,7 +324,7 @@ node tests/test_cat_search.js
 * **Exclusion d'Assets (`public/.assetsignore`)** : Contient `_worker.js` pour empêcher Wrangler de traiter les scripts du serveur comme des ressources téléchargeables publiques.
 
 ### 3. Synchronisation Atomique de Version (`scripts/bump_version.js`)
-* **Commande Universelle** : `npm run bump <version>` (ex: `npm run bump 1.7.9`).
+* **Commande Universelle** : `node scripts/bump_version.js <version>` (ex: `node scripts/bump_version.js 1.8.1`).
 * **Fichiers synchronisés en une seule étape** :
   1. `package.json` (`version`)
   2. `android/app/build.gradle` (`versionName` et `versionCode`)
@@ -335,7 +335,14 @@ node tests/test_cat_search.js
 
 ### 4. Isolation Complète de la Base de Données de Test (`CATS_DB_PATH`)
 * **Principe** : Les suites de tests automatiques (`test_suggestions.js`, `test_auth.js`) s'exécutent sur une base temporaire isolée (`cats_db_test_*.json`) via la variable d'environnement `CATS_DB_PATH`.
-* **Garantie** : La base de production réelle `cats_db.json` (58 CATs cliniques) ne subit aucune écriture ni pollution lors des tests.
+* **Garantie** : La base de production réelle `cats_db.json` ne subit aucune écriture ni pollution lors des tests.
 
-
-
+### 5. Gestion de la Bibliothèque Clinique Tier 2 (`cat_db_generator/clinical_library/`)
+Pour ajouter de nouveaux guides d'aide à la décision sans toucher au code :
+* Déposez simplement un fichier `.md` ou `.json` dans l'un des sous-dossiers dédiés :
+  - `medg_fiches_cat/` : Arbres diagnostiques et CAT complètes.
+  - `antibioclic_decision_trees/` : Schémas d'antibiothérapie raisonnée.
+  - `sfmu_emergency_reflex/` : Fiches d'urgences vitales et gestes de réanimation.
+  - `pediadol_pediatric_protocols/` : Protocoles pédiatriques au poids.
+  - `crat_pregnancy_lactation/` : Fiches pharmacologiques grossesse & allaitement.
+* Le moteur `knowledge-library.js` détecte et indexe automatiquement le nouveau contenu à la volée.

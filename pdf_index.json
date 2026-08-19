@@ -646,7 +646,8 @@
         "content": "# Collection 150 Ordonnances Types\n\nC’est juste une collection des ordonnances types correspondant à des situations cliniques les plus courantes, rédigées de façon précise, avec les posologies ..\n\nElles constituent un aide-mémoire précieux pour les internes, les jeunes médecins et tous ceux qui sont amenés à prescrire, pour leur offrir une aide pratique immédiate ..\n\nB.Bilal\n\nPage 160"
       }
     ],
-    "mtime": 1784765528138.5042
+    "mtime": 1784765528138.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "1Anti-inflammatoires.pdf",
@@ -667,7 +668,8 @@
         "content": "# Diclofenac\n\n|            | Flovenac Lp | Gel | 75mg |\n| ---------- | ----------- | --- | ---- |\n| Diclofenac | Rapidus     | Cp  | 50mg |\n\n# Naproxéne\n\n| Nopain    | Cp | 275/550mg |\n| --------- | -- | --------- |\n| Narex     | Cp | 275mg     |\n| Apranax   |    |           |\n| Nhupain   | Cp | 550mg     |\n| Naprolgic | Cp | 55mg      |\n\n# Indometacine\n\n| Indomine  | Spp | 50-100mg |\n| --------- | --- | -------- |\n| Indomet   |     |          |\n| Indocid   |     |          |\n| Indogesic |     |          |\n\n# Acide méfenamique\n\n| Ketoproféne | Profen LP    | Cp       | 200 mg |           |\n| ----------- | ------------ | -------- | ------ | --------- |\n|             | 150-300mg /j | Profenid | Cp     | 200 mg LP |\n|             | 100mg        |          |        |           |\n|             | 1mg/ml       | enf      |        |           |\n|             | Profenid     | Spp      | 100 mg |           |\n|             | Alprofen     | Spp      | 100 mg |           |\n|             | Ketofen      |          |        |           |\n|             | Ketum        |          |        |           |\n\n# Piroxicam\n\n| Felden          | Inj      | 20mg  |      |\n| --------------- | -------- | ----- | ---- |\n| Contre indique  | Piroxene | Gel   | 0.5% |\n| enfant <1Sans   | Prixam   | Gel   | 0.5% |\n| 1 prise / jr au | Piroxal  | Spp   | 20mg |\n| cours du repas  | Orthcam  | Créme | 0.5% |\n| 20mg /j         | Felcam   | Gel   | 0.5% |\n| Pas dépasse     | Fenoxam  | Gel   | 0.5% |\n| 40mg/jr        "
       }
     ],
-    "mtime": 1784765528142.5042
+    "mtime": 1784765528142.5042,
+    "specialty": "Rhumatologie"
   },
   {
     "pdf": "1Antibiotiques.pdf",
@@ -720,7 +722,8 @@
         "content": "# FDP:\n\n- CP 250mg : Ad : 2cp --- 2 → 3*/jour -- NC : Fucidine\n- SP 250mg : Enf : 1C à M -- 2 → 3*/jour -- NC : Fucidine\n- Pde pour tout : 1app le soir - NC : Fucidine ; Zeta ; Fucidame ; Acifudal\n\n# Autres antibiotiques :\n\n- Nitroxoline (DCl) : n'a pas une famille = un DCI à seul :\n- - Ind :\n- - Infection urinaire (seulement)\n\nFDP : 50mg (ne plus existe pour l'instant)\n- CP 100mg : Ad : 2cp -- 2 → 3*/jour\n- NC : Naxolin ; Nibiol ; Nibyol forte\n\nCedroxyl : CP 1g : posologie selon le cas\n- Pyostacine : CP 500mg : posologie selon le cas\n- CP 300mg\n- Omnicef « céfdénir (DCl) : posologie selon le cas\n- - SP 125mg\n- CP 200mg\n\nAciclovir (DCI) : posologie selon le cas"
       }
     ],
-    "mtime": 1784765528146.5042
+    "mtime": 1784765528146.5042,
+    "specialty": "Infectiologie"
   },
   {
     "pdf": "1CAT Gynécologie_.pdf",
@@ -761,7 +764,8 @@
         "content": "Jaunatre\n\n# Vibramy Cine cp loomg\n\n# ote p 2xjr\n\n# Rouamycine Soomg\n\n| 84cp/j          | as ur |\n| --------------- | ----- |\n| safarel sol xir |       |\n\n# Tramsparente:\n\n| Rovamycine ep | (CP Lojs |\n| ------------- | -------- |\n| \\cp 2xjr      |          |\n| Saforellesol  |          |"
       }
     ],
-    "mtime": 1784765528146.5042
+    "mtime": 1784765528146.5042,
+    "specialty": "Gynécologie-Obstétrique"
   },
   {
     "pdf": "1Médicaments en Pédiatrie .pdf",
@@ -794,7 +798,8 @@
         "content": "# Adrenaline\n\n0,5 mg /kg\n\n# Valium\n\n0,5 x poids\n\n# Gardénal\n\n| NNE | 20 mg/kg |\n| --- | -------- |\n| NRS | 15 mg/kg |\n| Enf | 10 mg/kg |"
       }
     ],
-    "mtime": 1784765528150.5042
+    "mtime": 1784765528150.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "1Médicaments(1).pdf",
@@ -959,7 +964,8 @@
         "content": "# 4-Aminocide\n\n| Famille             | Indication       | Forme/Dosage/Posologie |\n| ------------------- | ---------------- | ---------------------- |\n| Gentamycine (D.C.1) | Infection        | Inj 40mg enf           |\n|                     | Urogénital       | 80mg Ad                |\n| Epigent             | Abcès dentaire   |                        |\n| Gentaxyn            | Poste opératoire | 1 inj en IM /J         |\n| Gentaline           | Infection rénal  |                        |\n\n# 6-Quinolone\n\n| Famille               | Indication       | Forme/Dosage/Posologie |\n| --------------------- | ---------------- | ---------------------- |\n| Ciproflxacine (D.C.J) | Infection        | 250mg                  |\n| Ciprolon              | Urogénital       | CP 500mg               |\n| Cipro                 | Poste opératoire | 750mg                  |\n| Ciprotek              | Pied diabétique  |                        |\n| Quincx                |                  |                        |\n\n# 6-Tetracycline\n\nInfection légère de la peau\n\n| Famille             | Indication | Forme/Dosage/Posologie |\n| ------------------- | ---------- | ---------------------- |\n| Doxycycline (D.C.1) |            | CP 1000mg Ad           |\n| Dotur               |            |                        |\n| Doxyline            |            |                        |\n| Vibramycine         |            |                        |"
       }
     ],
-    "mtime": 1784765528154.5042
+    "mtime": 1784765528154.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "1médicaments.pdf",
@@ -1056,7 +1062,8 @@
         "content": "# 10-biocalypthol : (NC)\n\n- SP - Ad lcas 3x/j\n\n# 11-bronchonet (NC)\n\n- Sucre\n- -Sp\n- Sans Sucre\n- -pastille Ad I cp 3x/j\n\n# Mal au gorge\n\n| 1 - Hexalyse : (N.C)        | 2 - Hexaspray : (N.C)                 |\n| --------------------------- | ------------------------------------- |\n| Cp a sucer Ad 1 cp 3 - 4x/j | Spray (collutoire 1 bouffet 3 - 4x/j) |\n| 3 - Thymoseptine (NC) :     | 4 - aamylase (DCI) :                  |\n| Sp - Ad I cas 3x/j          | - Cp Ad 1 cp 3x/j megamylase          |\n|                             | -sp enf 1 cac 3x/j maxilase/Ximalex   |\n\n# Les Bronchodilatateurs\n\nSont des medicaments destinés à traiter ou à prévenir de certains maladies telles que : Asthme et Bronchite\n\n| 1 - Salbutamol (DCI) : | 2 - Terbutaline (DCI) :   |\n| ---------------------- | ------------------------- |\n| - cp 2 mg selon le cas | A un effet retard         |\n| Nrs 1/2 cac 1 -2x/j    | - cp 5 mg Ip selon le cas |\n| Sp< enf ½/ cac 2-3x/j  | Nrs Vcac 1 -2x/j          |\n| spray Ad 1 cas 2 -3x/j | -sp enf 1V\\_2cac 2-3x/    |\n|                        | Ad 1 cas 2-3x/j           |\n\n- solution a inhaler Ex:(N.C)\n\n- Ventoline -Salbulam- Rabwalyse\n- Koxma - Asthalin\n\n# Autre:(Aéro)\n\n1. 1 - Clenil 250\n2. 2 - Budecort (100 -200)\n3. 3 - Flixotide (50- 125-250)\n4. 4 - Séretide (100 - 250 - 500)\n5. 5 - Pulmicon (200 - 400)\n6. 6 - Symbicont (100 -200- 400)"
       }
     ],
-    "mtime": 1784765528158.5042
+    "mtime": 1784765528158.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "2Médicaments.pdf",
@@ -1305,7 +1312,8 @@
         "content": "# Antidiarrhéiques:\n\n# 3. RACECADOTRIL\n\nIndications : traitement symptomatique de la diarrhée aigue\n\n# Forme, dose, posologie :\n\n| gel    | 100mg pour l'Ad  | 1 gel --- 2 → 3 fois/jour |\n| ------ | ---------------- | ------------------------- |\n| sachet | 10mg pour NRS    | 1 sac --- 2 → 3 fois/jour |\n|        | 30 mg pour l'Enf |                           |\n\n# Nom Commercial :\n\nTiorfan\n\nTIORFAN         TIORFAN TIORFAN\n\n10 mg    100 mg cellem         0 mg\n\nARMA GELULES\n\nENFANTS  bsiaprojes    NOURRISSONS"
       }
     ],
-    "mtime": 1784765528166.5042
+    "mtime": 1784765528166.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "3Médicaments .pdf",
@@ -1374,7 +1382,8 @@
         "content": "# Les Corticoides\n\n| La famille     | DCI           | Specialites         | La forme | Le dosage        |\n| -------------- | ------------- | ------------------- | -------- | ---------------- |\n| Corticoides    | Methyl        | Solu-Medrol//Medrol | Cp/lnj   | 40mg/2ml         |\n|                | Prednisolone  |                     |          | 40mg             |\n| (effet courte) | Lemod-Solu    |                     | Cp       | 20mg             |\n|                | Prednol       |                     | Cp       | 40mg             |\n| Suppressent    | Lisamethyle   | Solupréd            | Cp       | 20mg             |\n| l'inflamation  | Prednisolone  |                     |          |                  |\n| Effet courte   |               |                     |          | 0.35-1.2mg       |\n| Immuno-        | Akgjr         | Pridnisone          |          |                  |\n|                |               | Precortyl           |          |                  |\n|                |               | Cortancyl           |          |                  |\n| Acetonide de   | Triancinolone |                     |          |                  |\n| Effet          | Dexamethasone |                     |          |                  |\n| intermidiaire  | Dexol         |                     |          |                  |\n|                | Desacrovis    |                     |          |                  |\n| Bethametasone  |               | Diprostene          | Inj      |                  |\n| "
       }
     ],
-    "mtime": 1784765528166.5042
+    "mtime": 1784765528166.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "ASP.pdf",
@@ -1403,7 +1412,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528170.5042
+    "mtime": 1784765528170.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Antibiotiques .pdf",
@@ -1536,7 +1546,8 @@
         "content": "# Isoniazide\n\nCp 100mg [50mg - 150mg]\n\n# Rifampicine + Isoniazide\n\nCp 150mg / 75mg\n\nRifampin 150 mg and Isoniazid 75 mg Tublets\n\n# AKuriT Kid\n\nWilanigain anl J-\n\n# AKuriT-Z\n\nRifampicine + Isoniazide + Pyrazinamide Cp\n\n# AKuriT-Z CommanHee\n\nHaca PyarT US.\n\n# AKuriT-4\n\nRifampicine + Isoniazide + Pyrazinamide + Ethambutol Cp"
       }
     ],
-    "mtime": 1784765528174.5042
+    "mtime": 1784765528174.5042,
+    "specialty": "Infectiologie"
   },
   {
     "pdf": "Antibiotiques 1.pdf",
@@ -1569,7 +1580,8 @@
         "content": "# Enfants\n\nSrés de 2 ans et plus : 2.5 mt (correspondant à un dispositif de mesure rempli au trait supérieur) appliqués 4 fois par jour après les repas\n\n# Adultes\n\n5 ml (correspondant à deux dispositifs de mesure remplis au trait supérieur) appliqués 4 fois par jour après les repas.\n\n# A USAGE LOCAL\n\n# Terbunafine: Lamisil* Crème 1%\n\nPosologie : 1 à 2 applications par jour\n\n# Sertaconazole: Dermofix* Gel\n\nPosologie : 1 à 2 applications par jour\n\n# ANTIPARASITAIRE:\n\n# Mitronidazote: Flagyl\n\nPrésentation: Cp : 250- 500 mg sirops : 125 mg\n\nPosologie:\n\n- Adultes: 500 mg 3x/j\n- Enfants : 30 à 40 mg/kg/jour en trois prises.\n\n# ANTILEICHMANIENS\n\nAntimoniate de meglumine: Glucantine*\n\n# ANTIHELMENTHIQUES\n\n# Flubendazole: Fluvermat*\n\nPrésentation: sirop : 100 mg/cac Cp: 100 mg\n\nPosologie: Adulte et enfant:\n\n- Oxyurose: A et E: 1 à 2 cac (Cp) en 1 seule prise à j1. [2, 3, renouvelée à j15, j16.]\n- Autres nématodoses : A et E: 1 chc (Cp) matin et soir pendant 3 jours (j1, j2, j3)\n\n+ TRT de l'entourage + désinfection de la literie + brossage régulier des ongles\n\n# Pyrantel: Combantrin*\n\nPrésentation: Cp: 125-250 mg Sirop\n\nPosologie:\n\n- Enfant : 2 comprimés ou 1 cuillère-mesure de solution buvable par 10 kg de poids\n- En cas d'oxyures ou d'ascaris : une seule prise, à renouveler au bout de 15 à 20 jours pour éviter une réinfestation par les œufs qui ne sont pas détruits par le médicament."
       }
     ],
-    "mtime": 1784765528178.5042
+    "mtime": 1784765528178.5042,
+    "specialty": "Infectiologie"
   },
   {
     "pdf": "Antibiotiques1.pdf",
@@ -1690,7 +1702,8 @@
         "content": "# ANTIHISTAMINIQUES\n\n# A.H ANTICHOLINERGIQUES ET SEDATIFS\n\n| dérives alkyl amines      | Brompbeniramine     | Dimegan'                |\n| ------------------------- | ------------------- | ----------------------- |\n|                           | Dexchlorpheniramine | Polaramine\\*            |\n|                           | Histagan\\*          | Doramim\\*Cp2 Sp         |\n| dérives de/'ethanol amine | Carbinoxamine       | Allergifon\\*            |\n|                           | Dinenhydrate        | Dramamine\\*             |\n|                           | Diphenhydramine     | Nautamine\\*             |\n| derives de pipernzine     | Buclizine           | Aphilan\\*               |\n|                           | Hydroxyzine         | Atarax\\*                |\n|                           | Meclozine           | Agyrax\\*Cp25            |\n| derives de pipéridine     | Cyproheptadine      | Periactine\\*            |\n|                           | Modestamine\\*       | Heptagyl\\*              |\n|                           | Cerodine\\*          | Ciptadine\\*             |\n|                           | Cyproheptadine\\*    | Cp4 Sp                  |\n| divers                    | Doxylamine          | Mereprine\\*             |\n|                           | Alimemazine         | Théralene\\*             |\n|                           | Proniethazine       | Phenergan\\* Cp25 Sp Inj |\n|                           | Isothipendyl        | Istamyl\\*               |\n\n# ANTIHSITAMINIQUES NON ANTICHOLINER"
       }
     ],
-    "mtime": 1784765528182.5042
+    "mtime": 1784765528182.5042,
+    "specialty": "Infectiologie"
   },
   {
     "pdf": "Autres CAT.pdf",
@@ -1775,7 +1788,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528182.5042
+    "mtime": 1784765528182.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Bilans_medicale.pdf",
@@ -1832,7 +1846,8 @@
         "content": "# BILAN D'ALLERGIE :\n\n| -IGE TOTAL         |   |\n| ------------------ | - |\n| -IGE RESPIRATOIRE  |   |\n| -IGE ALIMENTAIRE   |   |\n| -IGE PÉDIATRIQUE   |   |\n| SHICR              | N |\n| UPIOLORIATEMEOICAL |   |\n| SS PIC COLLAGE     |   |"
       }
     ],
-    "mtime": 1784765528186.5042
+    "mtime": 1784765528186.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "CAT Dermatologie_(1).pdf",
@@ -1917,7 +1932,8 @@
         "content": "# Herpes Simplex\n\nVesicle on erythematous base\n\n# Impetigo\n\nHoney-colored crusting lesions in a perioral distribution\n\n# Aphthous Ulcer\n\nShallow, round, painful ulceration with yellow center surrounded by erythema\n\n# Dyshidrotic Eczema\n\nTapioca\n\nSmall, \"tapioca-like\", deep vesicles, appear in clusters"
       }
     ],
-    "mtime": 1784765528190.5042
+    "mtime": 1784765528190.5042,
+    "specialty": "Dermatologie"
   },
   {
     "pdf": "CAT Dermatologie_.pdf",
@@ -1990,7 +2006,8 @@
         "content": "CAT EN MEDECINE GENERAL\n\n# Ordonnance\n\n| BETSOL (Diprosone) LOTION  | Olapp/j pdt 10j | lapp 01j/2 pdt 20j |\n| -------------------------- | --------------- | ------------------ |\n| M2 SHAMPOING               | O2BTES          | OIAPP\\*2/SEM       |\n| BETACYL (Diprosalic) crème | Olapp/j pdt 10j | A                  |\n| lapp 01j/2 pdt 20j         | DEXERYL SOL     | Ol app\\*2/j        |"
       }
     ],
-    "mtime": 1784765528194.5042
+    "mtime": 1784765528194.5042,
+    "specialty": "Dermatologie"
   },
   {
     "pdf": "CAT Dr_Abouimed_.pdf",
@@ -2347,7 +2364,8 @@
         "content": "Pndbatalte Porte = Angroscumer si-)=\n\nechodopper\n\n= Postian dei assise O qs spo 5\n\nWPbilam tnbe ancmt antongulnt\n\nHBP ens/c umohep 15 Ul1kga 1inglj\n\nou 2avenox 100U1 1-y 2xlg\n\nOAP= rils aigitant, othopnee, dymnee\n\nRadio: sile de papillon\n\npos donleanr, Notiond HiA an Co puth\n\nEP= TVP /immdihintion /gsese/ Ne\n\nRx= N  D Dneies positif (+)\n\ndaden baithinige , hemopfsie\n\n1DH= Dalen cnstictine, EG et toponine\n\n11+)\n\n87"
       }
     ],
-    "mtime": 1784765528210.5042
+    "mtime": 1784765528210.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "CAT Dr_Boughoufala.pdf",
@@ -2480,7 +2498,8 @@
         "content": "Choc Hemorragique\n# Prise en charge (suite)\n\nObjectifs : il faut avoir um objectif de :\n\n- Hb : entre 7-9 g/dL. (9-10 g/dl si TC associé, coronarien, malade sous BB)\n- CUP : Garder um taux des Plaquettes > 50 G/L et >100 G/L (si TC associé) ou CPS (01 CPS/7Kg)\n- TP > 50% PFC=10-20 ml/kg\n- CALCIUM si transfusion massive: ratio: O1 g : 3CGR (et/ou PFC) pour maintien (cat+ entre 1.1-1.2 m mol /L)\n- ACIDE TRANEXAMIQUE (EXACYL) 1g en bolus IVL en 10 min suivi de 1g sur OS h\n- CONCENTRÉ DE FIBRINOGENE (CLOTTAFACT®): 03 g POUR UM adUIe de 7Okg\n\nObjectif: Fibrinogénémie= 1,5-2g/L\n\nNovaSEVEN (RFVIlA): ne doit etre envisage que si le saignement ne peut pas etre controle par la chirurgie et/ou l'arterio-embolisation.\n\nLa posologie initiale est de 80 μg/kg et de 200 μg/kg en traumatologie.\n\n# Patients en choc hemorragique traités par des agents antiplaqueffaires ou anti vitamines K (Avk) ou anticoagulants oraux directs (AOD)\n\n1. Chez les patients traités par AAp -Ticagrelor ou prasugel:\n- il faut transfuser des plaquettes meme si l'efficacite n'a pas éte démontree.\n2. Chez les patients traites par -AvK:\n- il faut administrer sans délai des concentrés de complexe prothrombinique (CCP) a la dose de 25 U/kg ou adaptee à l'INR, associes a 10 mg de vit K\n3. Chez les patients traités par -Aod (dabigatran, rivaroxaban, apixaban):\n- il faut tenter ume neutralisation immédiate par FEIBA 30-50 U/kg ou CCP 50 U/kg, éventuellement renouvelé 1 fois i 8 h d'intervalle\n\nNB: Choc hémorragique (MAPAR 201"
       }
     ],
-    "mtime": 1784765528218.5042
+    "mtime": 1784765528218.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "CAT Dr_Kacem.pdf",
@@ -2605,7 +2624,8 @@
         "content": "# Gynécologie\n\n# Nare Cate\n\n# Adcress\n\nRegles abondantes\n\n| Dicynone cp         | 1 bte | 2 cp 3/jr  |\n| ------------------- | ----- | ---------- |\n| ferro sanol gyn gel | 2 bte | 1 gel 2/jr |\n\n# Bilan\n\nBHCG, FNS\n\n| 6 LNVLASES | g                 | Beta hCG Test | Dicynone®500 |\n| ---------- | ----------------- | ------------- | ------------ |\n| MONEKLISR  |                   | Beta          | hCG          |\n| LANFS      | numerationformule | sanguine      | phoy         |\n| TEace'les  |                   |               |              |\n\n# Refis\n\nR No\n\nSigrature"
       }
     ],
-    "mtime": 1784765528222.5042
+    "mtime": 1784765528222.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "CAT Gynécologie_(1).pdf",
@@ -2662,7 +2682,8 @@
         "content": "# ORDONNANCE\n\n# salpingite\n\n| Flagyle cp 500mg     | Qsp21jr | 1cp3/jr |\n| -------------------- | ------- | ------- |\n| Augmentin cp 1g      |         | 3/jr    |\n| Doxycycline cp 100mg |         | 1cp2/jr |\n\nikhlas"
       }
     ],
-    "mtime": 1784765528226.5042
+    "mtime": 1784765528226.5042,
+    "specialty": "Gynécologie-Obstétrique"
   },
   {
     "pdf": "CAT Gynécologie_(2).pdf",
@@ -2707,7 +2728,8 @@
         "content": "Dr. Kacem Hadji Seif\n\n@dr.kacem.seif\n\n@dr...kacem.seif\n\nGynecologie\n\nDate\n\n# Syndrome grippal\n\n# Rx\n\n| Amoxicilline cp 1g | Qsp 10 jr | 1 cp 3/jr |\n| ------------------ | --------- | --------- |\n| Doliprane cp 500mg | 1 cp 3/jr |           |\n| Amexicilline EG    | 1g        |           |\n| Vit C              |           |           |\n\n# BIOMAX\n\n| VITAMINE C   | Doliprane | PARACETAMOL                 |\n| ------------ | --------- | --------------------------- |\n| 30           | 500 mg    | do 27 is douleurs et fièvre |\n| 16 comprimés | SANOFI    |                             |"
       }
     ],
-    "mtime": 1784765528230.5042
+    "mtime": 1784765528230.5042,
+    "specialty": "Gynécologie-Obstétrique"
   },
   {
     "pdf": "CAT Gynécologie_(3).pdf",
@@ -3140,7 +3162,8 @@
         "content": "106"
       }
     ],
-    "mtime": 1784765528230.5042
+    "mtime": 1784765528230.5042,
+    "specialty": "Gynécologie-Obstétrique"
   },
   {
     "pdf": "CAT ORL.pdf",
@@ -3301,7 +3324,8 @@
         "content": "# MDE Precautions\n\nRhinccort damet\n\nTroubles de APrineeps\n\nCre ave activite prsole Fr 829\n\nSulpention anti-inf marquit conpulation Risque\n\npr pulv Sur les muquuses Saigniment de Malfos\n\n$1(120doss) siutilesotion pnle duhet A\n\nTband fragilisation Herpes\n\nde lo muqueuse N buccal ou Apres Mouctange\n\nDurce Nest pes Recomm phtalmi0\n\neufd'expo6 Uceration Nalal Effe5 soignak\n\na l Allegin Recemmentop FRequnt: IRRitation + Atsechemt\n\ndu net ou sinud\n\nvewfer lehot\n\nmAtdaction + Saiginement olunez lente n'et des mucquse\n\n- peu frequnt : champes musaulairs\n\nprus adapte IRlitation ou Bares: per foration de la cleison\n\nau TRt ole Sechrelse Anormy Nasak, mooli fications delavoi\n\nRhinite Aifue Dosc+ longua Allengie tenhion intraoculaike\n\nSeules prises pelionis frequince Inditerminee:\n\nRefuliews er = effet geniraun Glaulome - cataracte-\n\nprligiws (eufont suivi obtenir de la cRoihance candidose tunet phorynx\n\nlamekomton W Intemuption\n\nTe lfost Anti Ristam - Precantion-effet Princep 30\n\nCp120_180mAnk AllergiQue mal connu Atgu\n\n90 daction prolongi IR IHepaprudine\n\nRhonit uakcaine≠ auxautre Malbearoliadaconaille\n\nAllegQ antihert pas\n\n712an d'effes sedany\n\n(yAbny ou Atrop hiGu USTR antittistaminiQues\n\nà la potologie peuvent fausser ls Renllat\n\n1u1jr Recommander des terts cutanes d'Allegu\n\nRecommander d'arreter la prise Pon mat qlg jrs 24) entre la prise tefastet panment difestf\n\nP(xdh lum +my+)"
       }
     ],
-    "mtime": 1784765528234.5042
+    "mtime": 1784765528234.5042,
+    "specialty": "ORL"
   },
   {
     "pdf": "CAT Ophtalmologie_.pdf",
@@ -3346,7 +3370,8 @@
         "content": "# CHALAZION\n\n| Chibrocadron / maxidrol | collyre | 01 goutte x 3/ j |\n| ----------------------- | ------- | ---------------- |\n| Sterdex / maxidrol      | pmd     | OI app /le soir  |\n\nYassine Boughoufala\n\nthe.happy.7"
       }
     ],
-    "mtime": 1784765528238.5042
+    "mtime": 1784765528238.5042,
+    "specialty": "Ophtalmologie"
   },
   {
     "pdf": "CAT Pédiatrie_(1).pdf",
@@ -3415,7 +3440,8 @@
         "content": "# ORDONNANCE\n\n# Orchiepidimite\n\norigine virale rarement bactérienne..\n\n* Avis cci : éliminer une torsion de cordon.\n\nRepos au lit, antalgique\n\nAtb : Keforal 50 mg/kg/jr en 2 prises pdt 10 jr\n\nsirop: 125mg, 250 mg\n\ncp: 500 mg\n\nikhlas"
       }
     ],
-    "mtime": 1784765528242.5042
+    "mtime": 1784765528242.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "CAT Pédiatrie_(2).pdf",
@@ -3436,7 +3462,8 @@
         "content": "FICHE MEMO : MEDICAMENTS EN PEDIATRIE\n\n# Corticothérapie (courte)\n\n# Fer et vit\n\n| Traitement de charge : Parentéral           | < 1ans : gtt                                                       |\n| ------------------------------------------- | ------------------------------------------------------------------ |\n| *Ex1 : l’urticaire*                         | 10 gtt/j en 1 prise (dose préventif)                               |\n| ► Méthylprednisolone (Solumédrol ®)         | 20 gtt/ j en 2 prises (dose thérapeutique)                         |\n| 1 à 2 mg/kg en IM.                          | 10, 20, 30, 40 mg inj IM                                           |\n| \\* Si pas d’amélioration en 20 min :        | ► Hydrocortisone (HHC)                                             |\n| 5mg/kg en IV.                               | \\* Si pas d’amélioration (1h) : renouvelé.                         |\n| \\* si pas d’amélioration (1h) : adrénaline. | TRT de sortie : ANTI H1 + corticoide.                              |\n| *Ex2 : laryngite sévère = striduleuse.*     | 1 cc d’adrénaline + 2cc de déxaméthasone + 3 cc SSI en IVL (20min) |\n\n# Corticoïde oral\n\nEx : laryngite modéré, +/- bronchite, urticaire..\n\n| Si < 10 kg                                 | ► Bétamétazone (Célestène ®) solu buv 0,05% |\n| ------------------------------------------ | ------------------------------------------- |\n| 10 gouttes/kg/j à 08:00 h matin            | Si > 10 kg                                  |\n| ► Prednisolone"
       }
     ],
-    "mtime": 1784765528246.5042
+    "mtime": 1784765528246.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "CAT Pédiatrie_(3).pdf",
@@ -3577,7 +3604,8 @@
         "content": "# Conclusion\n\n# L(Nne <imeis=< h2=\"\">\n# Gordinal en Pesfuarion\n\n(pheno babilall oLo ng l ky dilue ds 6occ d SSI en IVL pAt 2omin)\n\n# LNRS\n\n© A\n\nValium (Dinzepam) = en IV poidal 2 = dilué ds un o3 cc de SSI (samo diposse so mg max)\n\nai vepeted s a 3 foio l pao pu +++\n\n# Conclbion felorile 2 9mots PL\n\nono pa besin de faire foud d'oil comme Pour ad ullte\n\n31"
       }
     ],
-    "mtime": 1784765528246.5042
+    "mtime": 1784765528246.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "CAT Pédiatrie_(4).pdf",
@@ -3610,7 +3638,8 @@
         "content": "DEVELOPPEMENT PSYCHO MOTEUR\n\n# Développement moteur:\n\n- 7 à 9 mois : position assise.\n- 9 à 10 mois : marche à 4 pattes.\n- 10 mois : position debout.\n- 11 à 12 mois : marche.\n\n# Développement du langage:\n\n- 12 mois : Double syllabe (baba, mama, tata,)\n- 18 à 20 mois : apparition des mots.\n\n# Repères de croissance\n\n# Poids\n\nPoids normal: 3400 g.\n\ngarçon : 3200 g.\n\nPoids normal:\n\n- x2: à 5 mois.\n- x3: à 12 mois.\n- x4: à 30 mois.\n\n(3 à 6 mois : 6 à 10 kg)\n\n(1 à 6 ans : 10 à 22 kg)\n\n(6 à 12 ans : 22 à 38 kg)\n\n# Taille\n\nTaille normale: garçon 51 cm, fille 49 cm.\n\nAugmente de 25 cm la 1ère année et de 12 cm la 2ème année et de 6 cm par an ensuite.\n\nTaille en cm = (Age x 6) + 80.\n\nPerimètre crânien normal = 35 cm.\n\nAugmente de 8 cm le 1er semestre et de 3 cm le 2ème semestre.\n\n# Détresse respiratoire\n\nOn parle de syndrome de détresse respiratoire lorsqu'ils sont réunis 2 des 5 critères suivants:\n\n- FR > 60 cycles/min.\n- Cyanose sous air ambiant.\n- Battement des ailes du nez.\n- Tirage intercostal, sus et sous sternal.\n- Geignement expiratoire.\n- Entonnoir xiphoïdien.\n- Balancement thoraco-abdominal.\n\n# Crises convulsives fébriles\n\ndites simples :\n\n- Survient entre 1 an et 5 ans.\n- Durées brèves &#x3C; 15 min.\n- Crises généralisées.\n- Examen neurologique normal au décours.\n- Pas d'antécédent neurologique.\n- Pas d'indication d'EEG.\n- Pas de traitement préventif.\n- NB: récidive possible.\n\ndites complexes si:\n\n- Surviennent avant 1 an.\n- Répétées / prolongées (> 15 min).\n- Crise partiell"
       }
     ],
-    "mtime": 1784765528250.5042
+    "mtime": 1784765528250.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "CAT Pédiatrie_.pdf",
@@ -3655,7 +3684,8 @@
         "content": "# FICHE DE LA CIRCONCISION\n\nIdentification de l'enfant: CHU DE SETIF 670\n\nLENMARATH SAFEMDiNE SERVICE DE CHIRURGIE PEDIATRIQUE\n\nNom et Prenom: Pr Z.SOUALILI\n\nAge: 0Iaus 0697625058\n\nAdresse: Dcarici'a\n\n# Examen clinique de l'appareil genital:\n\n| Aspect photo!                               | 24an                    |                                         |                 |                      |          |\n| ------------------------------------------- | ----------------------- | --------------------------------------- | --------------- | -------------------- | -------- |\n| Examen de la verge en position demi-assise: |                         | Normale X                               |                 |                      |          |\n| Retractee                                   | Gor                     |                                         |                 |                      |          |\n| Enfoule                                     | Retractie               |                                         |                 |                      |          |\n| Examen osion                                | Normale K               |                                         |                 |                      |          |\n| Aspect du prépuce:                          | Long                    | Moyen                                   | Court           | Importante           | 4 Pauvre |\n| Visibilité du meat:                         | Oui                     | Ritract"
       }
     ],
-    "mtime": 1784765528250.5042
+    "mtime": 1784765528250.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "CAT Pédiatrie_1.pdf",
@@ -3744,7 +3774,8 @@
         "content": "20"
       }
     ],
-    "mtime": 1784765528254.5042
+    "mtime": 1784765528254.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "CAT Urgences(1).pdf",
@@ -3853,7 +3884,8 @@
         "content": "# ANTIDOTES\n\n| ANTIDOTE                   | INTOXICATION                 | INDICATION                                        |\n| -------------------------- | ---------------------------- | ------------------------------------------------- |\n| Atropine                   | Anticholinestérasique        | Syndrome muscarinique                             |\n| flumazénil                 | Benzodiazépines              | coma pures                                        |\n| Pralidoxime                | Organo-phosphorés            | Signes nicotiniques                               |\n| Naloxone                   | opiaces                      | Détresse respiratoire                             |\n| Fragment Fab               | digitaliques                 | K+, troubles de rythme, trouble de la conduction. |\n| Lactates de sodium molaire | Antidépresseurs tricycliques | QRS large, collapsus cardiovasculaire.            |\n| Bleu de méthylène          | Agents méthémoglobinisants   | cyanose                                           |\n| Glucagon, cathécolamines   | Béta-bloquants               | Collapsus, bradycardie avec BAV                   |\n| propranolol                | trichloréthylène             | Hyperexcitabilite ventriculaire.                  |\n| Vitamine B6                | Hydrazine et ses derives     | convulsions                                       |\n| hydroxocobalamine          | Intoxication cyanhydrique    | Acidose métabolique, collapsus.                   |\n| Sel"
       }
     ],
-    "mtime": 1784765528254.5042
+    "mtime": 1784765528254.5042,
+    "specialty": "Urgences / Réanimation"
   },
   {
     "pdf": "CAT Urgences1.pdf",
@@ -3894,7 +3926,8 @@
         "content": "# Recherche la prise d’anticoagulant ou AVK\n\n# Faire TP, INR ===> Avis de cardio\n\nLieux de consultation :\n- Consultation de néphro et uro = 08 mai 1945\n- Consultation de cardio = Loussafna\n- Consultation de neuro-méd = Astreinte au service + 8 -05 -1945\n- Consultation d’endocrino = Astreinte au service +c de santé\n- Consultation de gastro = Astreinte au service + ????\n\nFonction rénale perturbée au bilan 🡺 Demander de néphrologue"
       }
     ],
-    "mtime": 1784765528258.5042
+    "mtime": 1784765528258.5042,
+    "specialty": "Urgences / Réanimation"
   },
   {
     "pdf": "Cardiologie_1.pdf",
@@ -4155,7 +4188,8 @@
         "content": "# Echodoppler des MI\n\nSelon le diamètre de la veine saphène:\n\n| Si < 0,8mm | hygiène de vie + bas de contention |\n| ---------- | ---------------------------------- |\n| Si > 0,8mm | Traitement chirurgical             |"
       }
     ],
-    "mtime": 1784765528258.5042
+    "mtime": 1784765528258.5042,
+    "specialty": "Cardiologie"
   },
   {
     "pdf": "Certificats_.pdf",
@@ -4220,7 +4254,8 @@
         "content": "# Modèles de certificats médicaux\n\n# L'examen anal:\n\n(lésions traumatiques décelables)\n\n# Les examens complémentaires pratiqués :\n\n(nature, siège et nombre d'écouvillons)\n\n# Évaluer le risque de grossesse:\n\n# Sur le plan psychologique, il (elle) présente :\n\n# Les traitements prescrits:\n\nbsuivants\n\n# En conclusion, Mme, Mr. L'enfant .\n\nprésente des lésions sexuelles... et une réaction psychique compatible avec l'agression qu'il (elle) dit avoir subie.\n\nL'incapacité de Travail Personnel (ITP) pour les violences physiques pourrait être de .  ..……...........u réserve de complications.\n\nCertificat fait ce jour et remis en mains propres à l'intéressé(e)\n\n16"
       }
     ],
-    "mtime": 1784765528262.5042
+    "mtime": 1784765528262.5042,
+    "specialty": "Médecine Légale / Administratif"
   },
   {
     "pdf": "Contraception_.pdf",
@@ -4589,7 +4624,8 @@
         "content": "# Conclusion:"
       }
     ],
-    "mtime": 1784765528266.5042
+    "mtime": 1784765528266.5042,
+    "specialty": "Gynécologie-Obstétrique"
   },
   {
     "pdf": "Dermatologie_.pdf",
@@ -5062,7 +5098,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528266.5042
+    "mtime": 1784765528266.5042,
+    "specialty": "Dermatologie"
   },
   {
     "pdf": "Dermatologie_1.pdf",
@@ -5319,7 +5356,8 @@
         "content": "# Dérmatophyte :\n\nmycose en plaque a dermatophytes transmise par un animal de compagnie\n\n# Éczema atopique :"
       }
     ],
-    "mtime": 1784765528270.5042
+    "mtime": 1784765528270.5042,
+    "specialty": "Dermatologie"
   },
   {
     "pdf": "ECG.pdf",
@@ -5864,7 +5902,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528278.5042
+    "mtime": 1784765528278.5042,
+    "specialty": "Cardiologie"
   },
   {
     "pdf": "Endocrinologie_.pdf",
@@ -6029,7 +6068,8 @@
         "content": "# Que faire en cas de déficit / insuffisance en vitamine D ?\n\n| Poids de l'enfant | Taux de 25OH vitamine D        | Dose de cholecalciférol                                                   |\n| ----------------- | ------------------------------ | ------------------------------------------------------------------------- |\n| <20 kg            | <30 ng/ml (< 75 nmol/L)        | 100 000 UI                                                                |\n|                   | <10 ng/ml (< 25 nmol/L)        | 100 000 UI par mois pendant 2 mois (200 000 UI au total)                  |\n| 20 - 60 kg        | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 6 semaines pendant 2 mois (200 000 UI au total)     |\n|                   | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI                                                                |\n|                   | <10 ng/ml (< 25 nmol/L)        | 100 000 UI toutes les 2 semaines pendant 2 mois (400 000 UI au total)     |\n| >60 kg            | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 2 semaines pendant 6 semaines (300 000 UI au total) |\n|                   | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI toutes les 2 semaines pendant 4 semaines (200 000 UI au total) |\n\nAumde ot at European Journal of Pedisines (2020)"
       }
     ],
-    "mtime": 1784765528278.5042
+    "mtime": 1784765528278.5042,
+    "specialty": "Endocrinologie"
   },
   {
     "pdf": "Entretiens_.pdf",
@@ -6738,7 +6778,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528282.5042
+    "mtime": 1784765528282.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Formes d_administration des médicaments.pdf",
@@ -6787,7 +6828,8 @@
         "content": "# LESFORMES D'ADMINISTRATION DES MÉDICAMENTS\n\nBy @medecinefiche\n\n# 10. Administration Nasale\n\nDescription: Instillation dans le nez (sprays gouttes).\n\nAvantages: Effet local rapide ou systémique.\n\nInconvénients: Irritation locale.\n\n@Medecine_fiche\n\nExemples: Décongestionnants (rhume), desmopressine (diabète insipide).\n\n# Conclusion\n\nLe choix de la forme d'administration dépend de plusieurs facteurs :\n\n- Rapidité d'action nécessaire.\n- Localisation de la pathologie.\n- Confort et préférence du patient.\n- État physiologique (vomissements, dysphagie, etc.).\n\nM F Medecine_fiche"
       }
     ],
-    "mtime": 1784765528286.5042
+    "mtime": 1784765528286.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Gastrologie_.pdf",
@@ -7160,7 +7202,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528286.5042
+    "mtime": 1784765528286.5042,
+    "specialty": "Gastro-entérologie"
   },
   {
     "pdf": "Gynécologie_1.pdf",
@@ -7445,7 +7488,8 @@
         "content": "# CAT\n\n- Régime alimentaire sans sucre\n- Activité physique\n- Traitement hormonal ➡️ Gynécologie\n- Si Hirsutisme ➡️ Endocrinologie"
       }
     ],
-    "mtime": 1784765528290.5042
+    "mtime": 1784765528290.5042,
+    "specialty": "Gynécologie-Obstétrique"
   },
   {
     "pdf": "Hématologie.pdf",
@@ -7578,7 +7622,8 @@
         "content": "# CI\n\nAINS, Aspirine, anticoagulants, antiagrégants plaquettaires, injections IM, avulsions dentaires"
       }
     ],
-    "mtime": 1784765528290.5042
+    "mtime": 1784765528290.5042,
+    "specialty": "Hématologie"
   },
   {
     "pdf": "Infectieux_.pdf",
@@ -7807,7 +7852,8 @@
         "content": "# Enfant :\n\n1. Chlorhexidine/Eosine aqueuse\n2. Deslor\n3. Doliprane\n\n+/_ Aciclovir gel 1app 2/j matin et nuit\n\n# Zona"
       }
     ],
-    "mtime": 1784765528294.5042
+    "mtime": 1784765528294.5042,
+    "specialty": "Infectiologie"
   },
   {
     "pdf": "Maladies éruptives.pdf",
@@ -7864,7 +7910,8 @@
         "content": "# Symptôme de la méningite chez l'enfant et l'adulte\n\n| Vomissements        | Fièvre                         | Céphalées             | Photophobie |\n| ------------------- | ------------------------------ | --------------------- | ----------- |\n| Raideur de la nuque | Etat de somnolence, de torpeur | Douleurs articulaires | Tétanie     |\n\nTous ces symptômes ne sont pas forcément présents simultanément."
       }
     ],
-    "mtime": 1784765528294.5042
+    "mtime": 1784765528294.5042,
+    "specialty": "Dermatologie"
   },
   {
     "pdf": "Médecine interne_.pdf",
@@ -7945,7 +7992,8 @@
         "content": "# Sécheresse buccale Xérostomie\n\n# Causes :\n\n- Maladie de système\n- Syndrome sec Gougerot Sjögren secondaire au Polyarthrite rhumatoïde ou LES\n- Médicaments : Atropine, Antidépresseurs, Radiothérapie\n\n# Bilan :\n\nimmunologique\n\n# Traitement :\n\nSulfarem 25mg"
       }
     ],
-    "mtime": 1784765528298.5042
+    "mtime": 1784765528298.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Médicaments 02.pdf",
@@ -8046,7 +8094,8 @@
         "content": "# La forme galenique\n\n| DCI                 | NC (Nom commercial) | La forme galénique |\n| ------------------- | ------------------- | ------------------ |\n| pluar               | Granocyte           |                    |\n| Lénograstime        | Neupagen            |                    |\n| Filgrastime         | Leucomax            |                    |\n| Molgramostime       | Roferon             |                    |\n| Interéron Alpha Za  | Introna             |                    |\n| Interféron Alpha 2b | Viraferon           |                    |\n| Alpha 2a + alpha2b  | Laroferon           |                    |\n| Interferon Beta 1a  | Avonex              |                    |\n| Interferon Beta ab  | Betaferon           |                    |\n\n# Contraception hormonale:\n\n| DCI                            | NC (Nom commercial) | La forme galénique                 |\n| ------------------------------ | ------------------- | ---------------------------------- |\n| Ethinylestradiol+ evenogestrel | adepal              | (30\\_40ug+150\\_200)                |\n|                                | eval                |                                    |\n|                                | minidril            | (30ug+150)                         |\n|                                | microgynon          |                                    |\n| 2-P/ pdorakcon                 | 2hh                 | triordioj (30\\_40ug+50\\_75\\_125ug) |\n|                                | Togynon            "
       }
     ],
-    "mtime": 1784765528298.5042
+    "mtime": 1784765528298.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Médicaments des Urgences_1.pdf",
@@ -8283,7 +8332,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528302.5042
+    "mtime": 1784765528302.5042,
+    "specialty": "Urgences / Réanimation"
   },
   {
     "pdf": "Médicaments des urgences .pdf",
@@ -8364,7 +8414,8 @@
         "content": "# ATROPINE\n\nSulfate d'atropine ATROPINE : 0,25 mg, 1 mg/1 ml\n\n- Anticholinergique, parasympathicolytique\n\n# Actions :\n\n- Antagoniste compétitif de l'Ach : récepteurs muscariniques\n- Effet tachycardisant\n- Effets antisecrétoires salivaire, bronchique, gastrique, sudoripare\n- Effet mydriatique\n- Effet antispasmodique\n\n# Indications et posologies\n\n10-15 μ/kg IVD\n\nBradycardie sinusale : 0,5 à 1 mg IVD\n\nIntoxication par les anticholinestérasiques organo-phosphorés : 1 à 2 mg/5 mn IVD\n\n# Contre-indications :\n\n- Glaucome à angle ferme\n- Iléus paralytique\n- Hypertrophie prostatique\n\nDr YASSINE.B"
       }
     ],
-    "mtime": 1784765528302.5042
+    "mtime": 1784765528302.5042,
+    "specialty": "Urgences / Réanimation"
   },
   {
     "pdf": "Médicaments des urgences1.pdf",
@@ -8421,7 +8472,8 @@
         "content": "# DIAZEPAM\n\n# Indications\n\n1. crise convulsive.\n2. agitation, angoisse.\n3. delirium tremens.\n4. intoxication à la chloroquine.\n\n# Contre-indications\n\n1. insuffisance respiratoire.\n2. myasthénie.\n\n# Posologie\n\nampoule = 10mg/2ml.\n\n# ✓Convulsions:\n\nAdulte : 10 à 20mg en IV lente (1mg/minute) jusqu'à l'arrêt des convulsions.\n\nEnfant = 0.5mg/kg en IR à renouveler si besoin.\n\nIntoxication à la chloroquine = 2mg/kg en IV lent puis relais 2 à 4mg/kg/24 heures.\n\n# ✓Autres indications\n\n5 à 20 mg en IV lent.\n\nNB : injection dans une grande veine.\n\n# FLUMAZENIL (ANEXATE)\n\n# Indication\n\nantidote dans les surdosages aux BZD.\n\n# Contre-indications\n\n1. épilepsie.\n2. intoxication polymédicamenteuse.\n\n# Posologie\n\nampoule de 0.5mg/5ml et 1mg/1ml.\n\n0.2 à 0.3 mg/minute en IV jusqu'au réveil complet (dose maximale = 2mg).\n\nRelais au PSE à la dose de 0.1 à 0.4mg/heure."
       }
     ],
-    "mtime": 1784765528310.5042
+    "mtime": 1784765528310.5042,
+    "specialty": "Urgences / Réanimation"
   },
   {
     "pdf": "Médicaments en Gastrologie.pdf",
@@ -8498,7 +8550,8 @@
         "content": "# Intolerance aux constituants dont diarrhée ou hépatite\n\n# Effets indésirables et Précautions d'emploi\n\nPossibilité de diarrhée chronique parfois sévère et d'hépatite : arrêt immédiat et définitif du traitement. Suppression des facteurs déclenchants (constipation, alcool, épices), incision, sclérose ou traitement.\n\n# Indication\n\nTraitement des hémorroïdes, dont poussée aiguë. Posologie : doses maximales indiquées.\n\n# VIII\n\n# B- Les antihémorroïdaires locaux ou topiques antihémorroïdaires\n\n# Spécialité\n\nDELIPROCT°, ULTRAPROCT, PROCTOLOG\n\nPrésentation : suppositoire et crème\n\n# Propriétés\n\nAssociation de produits à action anti-inflammatoire (corticoïde), antalgique, antiprurigineuse (anesthésiques) et veinotonique (esculoside, ruscogénines).\n\n# Contre-indications\n\nAllergie aux constituants.\n\n# Précautions d'emploi\n\nSuppression des facteurs déclenchants (constipation, alcool, épices). Associé à un traitement antibactérien adapté et/ou antifongique en cas de lésion surinfectée.\n\n# Indications\n\nTraitement des hémorroïdes, dont poussée aiguë.\n\n# VIII\n\n# C- Les sclérosants hémorroïdaires\n\n# Spécialité\n\nKINUREAHP\n\nPrésentation : ampoule\n\n# Propriétés\n\nSclérose.\n\n# Contre-indications\n\nIntolérance, névrites optiques et grossesse.\n\n# Effets indésirables\n\nRares. Douleurs lors de l'injection, douleurs rectales, rectorragies minimes.\n\n# Précautions d'emploi\n\nNécessite une compétence technique spécialisée.\n\n# Posologie\n\n4 à 6 injections à raison d'une par semaine (intervalle de 4 jours min"
       }
     ],
-    "mtime": 1784765528314.5042
+    "mtime": 1784765528314.5042,
+    "specialty": "Gastro-entérologie"
   },
   {
     "pdf": "Médicaments en Gastrologie_.pdf",
@@ -8535,7 +8588,8 @@
         "content": "# Omeprazole\n\n# Présentation\n\ngel 10 mg 20 mg\n\n# Posologie\n\n1mg/kg/j\n\n# Adulte\n\n1 gélule à 20 mg par jour\n\n# Enfants de plus de 20 kg\n\n1 gélule à 20 mg par jour\n\n# Enfant de 10 a 20 kg\n\n1 gélule à 10 mg par jour\n\n# Omeprazole injectable\n\n# Présentation\n\n40 mg\n\n# Posologie\n\n1mg/kg/j"
       }
     ],
-    "mtime": 1784765528314.5042
+    "mtime": 1784765528314.5042,
+    "specialty": "Gastro-entérologie"
   },
   {
     "pdf": "Médicaments en Pédiatrie .pdf",
@@ -8568,7 +8622,8 @@
         "content": "# Oxyurase : 1cam en prise\n\n| Fluvermal                   | Flubendazole            | unique à renouveler apres 1s a | Oxvurose Ascaridiase.           |\n| --------------------------- | ----------------------- | ------------------------------ | ------------------------------- |\n| TRT de I'entourage +        | 2% 58                   | 20 jours après.                | Trichocephalose, Ankylostomiase |\n| Ascaridiase, Tricho, Ankyl: | 1cam 2f/jr pdt 3 jours. |                                |                                 |\n\n# Benzoate de\n\n| Ascabiol | benzyle, lotion |                                                                          |                     |\n| -------- | --------------- | ------------------------------------------------------------------------ | ------------------- |\n|          | sulfiram        | Apres un bain, se secher, application a I'aide d'un pinceau plat en Iou2 | TRT de I'entourage. |\n|          |                 | Le prurit peut persister 10                                              | a 15 jours.         |\n|          |                 | Desinfection du linge.                                                   |                     |\n\n# Dauce plus\n\n| Hulle de foie morut | Couche epaisse apres chg change si necessaire sur une peau nan infectee |                                                                      |                                           |\n| ------------------- | ----------------------------------------------------------------"
       }
     ],
-    "mtime": 1784765528318.5042
+    "mtime": 1784765528318.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "Médicaments en Pédiatrie 01.pdf",
@@ -8597,7 +8652,8 @@
         "content": "# Dr:Cherif Amairia Autres :\n\n| Ferrosanol ⑧ : | suspension buvable (Gouttes : 3 mg/ml) si anémie: |\n| -------------- | ------------------------------------------------- |\n| < 30 kg :      | 10 mg/kg                                          |\n| > 30 kg :      | 100 mg/i                                          |\n\n| Ferrostane : | Sirop, 5 - 10 mg/kg/j en 2 prises en dehors des repas pendant 2 mois: |\n| ------------ | --------------------------------------------------------------------- |\n| 1 cac        | = 34 mg (si anémie).                                                  |\n\n| Fumafer : | Poudre orale, 5 - 10 mg/kg/j en 2 prises en dehors des repas pendant 2 mois: |\n| --------- | ---------------------------------------------------------------------------- |\n| dose      | = 33 mg (si anémie).                                                         |\n\n| Ascofer : | Gélule, 5 - 10 mg/kg/j en 2 prises en dehors des repas pendant 2 mois: |\n| --------- | ---------------------------------------------------------------------- |\n| gel       | = 33 mg (si anémie).                                                   |\n\n| Fucidine: | ATB, antistaph:        |\n| --------- | ---------------------- |\n| Sirop :   | Doses / poids.         |\n| Pommade : | 1 application le soir. |\n\n| Gaviscon : | Anti-reflux, solution buvable si RGO: |\n| ---------- | ------------------------------------- |\n| NRS :      | 4 cam ½ h avant les repas 3x /j.      |\n| Enf :      | 1 cam % h avant les repas 3x/         "
       }
     ],
-    "mtime": 1784765528318.5042
+    "mtime": 1784765528318.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "Médicaments et Grossesse.pdf",
@@ -8642,7 +8698,8 @@
         "content": "Les classes d'antibiotiques contre indiquées chez la femme enceinte\n\n# Les classes d'antibiotiques\n\n# contre indiquées chez la femme enceinte\n\n| Staph-Q(coque) | T Tétracyclines | A Aminosides | Q Quinolones | S Sulfamides | Ph phéNicolés |\n| -------------- | --------------- | ------------ | ------------ | ------------ | ------------- |"
       }
     ],
-    "mtime": 1784765528322.5042
+    "mtime": 1784765528322.5042,
+    "specialty": "Gynécologie-Obstétrique"
   },
   {
     "pdf": "Médicaments et le jeune.pdf",
@@ -8667,7 +8724,8 @@
         "content": "| Transfusions sanguines                 | Transfusion de sang entier, de plasma, ou de plaquettes | Rupture du jeune                                                          | La transfusion est consideree comme une forme de nutrition ou de remplacement de fluides corporels, ce gui annule le jeúne. |\n| -------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |\n| Injections intra-articulaires          | Infiltrations de corticoides pour arthrose              | Ne rompt pas le jeüne                                                     | I s'agit d'un traitement local sans apport nutritif.                                                                        |\n| Gargarismes et bains de bouche         | Chlorexidine, bains de bouche post opératoires          | Ne rompt pas le jeúne                                                     | Il faut cecracher tout le liquide pour éviter de rompre le jeune                                                            |\n| Tests respiratoires                    | Test à l'urease pour Helicobacter pylori                | Ne rompt pas le jeúne                                                     | Ces tests ne necessitent pas d'ingestion d'un liquide nutritif                                                 "
       }
     ],
-    "mtime": 1784765528326.5042
+    "mtime": 1784765528326.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Médicaments1 .pdf",
@@ -8800,7 +8858,8 @@
         "content": "# 6\n\n# Chlorhydrate de triprolidine + Chlorhydrate de pseudoéphédrine + Paracetamol(da)\n\n*Rhumafed RHUMAED\n\n1 comprimés 1 à 3 fois par jours 20\n\n# Paracetamol/pherylephrine/pheniramine/cafeinea\n\n*Rynza sachet\n\n# RYNZA Rynza\n\nGrippe\n\nGrippe st\n\nRhume\n\nRhume\n\nYouPharm Dz"
       }
     ],
-    "mtime": 1784765528330.5042
+    "mtime": 1784765528330.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Médicaments1.pdf",
@@ -8953,7 +9012,8 @@
         "content": "# Traitements Ophtalmiques\n\n| Tobramycine/ Optidex-T                                  | 1 à 2 gouttes dans l'œil (les yeux) atteint 3 fois par jour.                                                                                                    |\n| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Dexamethasone - collyre                                 |                                                                                                                                                                 |\n| Frakidex                                                | Collyre : 1 goutte dans l'œil malade : toutes les heures en début de traitement dans les affections aiguës sévères, - 3 à 6 fois par jour, dans les autres cas. |\n| Pommade ophtalmique                                     | Pommade opht : 1 à 3 applications par jour. Pendant 7 jours                                                                                                     |\n| Dexamethasone/ Maxidrol                                 | Collyre : 1 goutte dans l'œil traité 4 à 6 fois par jour                                                                                                        |\n| Sulfate de neomycine / Maxilodre                        | Sulfate de polymyxine s P.N.D                                                   "
       }
     ],
-    "mtime": 1784765528334.5042
+    "mtime": 1784765528334.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Médicaments_3.pdf",
@@ -9270,7 +9330,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528334.5042
+    "mtime": 1784765528334.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Neurologie.pdf",
@@ -9455,7 +9516,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528338.5042
+    "mtime": 1784765528338.5042,
+    "specialty": "Neurologie"
   },
   {
     "pdf": "ORL.pdf",
@@ -9680,7 +9742,8 @@
         "content": "# Vaccin des sujets à risque :\n\n0.5ml en Sc en automne en dehors de toute infection ou congestion ORL\n\n- Éviter l’exposition prolongée au soleil\n- Repos, Tisanes.."
       }
     ],
-    "mtime": 1784765528338.5042
+    "mtime": 1784765528338.5042,
+    "specialty": "ORL"
   },
   {
     "pdf": "Ophtalmologie_.pdf",
@@ -9813,7 +9876,8 @@
         "content": "▪️Si ID : Aciclovir en IV 10mg/kg tt 8h pdt 7_10j\n\nVirgan collyre 3_4/j\n\n▪️Contrôle ophtalmologie à j30\n\n# Zona ophtalmique"
       }
     ],
-    "mtime": 1784765528342.5042
+    "mtime": 1784765528342.5042,
+    "specialty": "Ophtalmologie"
   },
   {
     "pdf": "Pneumologie_.pdf",
@@ -9942,7 +10006,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528346.5042
+    "mtime": 1784765528346.5042,
+    "specialty": "Pneumologie"
   },
   {
     "pdf": "Psychotropes .pdf",
@@ -9971,7 +10036,8 @@
         "content": "# IV- Les Thymorégulateurs:\n\nL'action normothymique ou thymoregulatrice est une action regulatrice de l'humeur.\n\nLes indications sont majoritairement les troubles bipolaires."
       }
     ],
-    "mtime": 1784765528346.5042
+    "mtime": 1784765528346.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Pédiatrie_.pdf",
@@ -10236,7 +10302,8 @@
         "content": "# Viroses\n\n# Rubéole/Rougeole/Varicelle\n\n1. Histagan sirop 1cam 2/j\n2. Chlorhexidine/Eosine aqueuse 1app 3/j\n3. Paracétamol\n\n# Surinfection :\n\n1. Keforal sirop 1ddp 3/j\n2. Zeta crème 1app 2/j\n3. Chlorhexidine/Eosine aqueuse 1app 3/j"
       }
     ],
-    "mtime": 1784765528350.5042
+    "mtime": 1784765528350.5042,
+    "specialty": "Pédiatrie"
   },
   {
     "pdf": "Radio thoracique_.pdf",
@@ -10285,7 +10352,8 @@
         "content": "# ATÉLECTASIE :\n\n= condensation alvéolaire rétractile\n\nDisparition de l'air alvéolaire due à un collapsus complet des alvéoles\n\nOpacité pulmonaire systématisée rétractile"
       }
     ],
-    "mtime": 1784765528350.5042
+    "mtime": 1784765528350.5042,
+    "specialty": "Pneumologie"
   },
   {
     "pdf": "Radiographies_.pdf",
@@ -10558,7 +10626,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528354.5042
+    "mtime": 1784765528354.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Rhumatologie_.pdf",
@@ -10855,7 +10924,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528358.5042
+    "mtime": 1784765528358.5042,
+    "specialty": "Rhumatologie"
   },
   {
     "pdf": "Réanimation_.pdf",
@@ -11036,7 +11106,8 @@
         "content": "NO_CONTENT_HERE"
       }
     ],
-    "mtime": 1784765528362.5042
+    "mtime": 1784765528362.5042,
+    "specialty": "Urgences / Réanimation"
   },
   {
     "pdf": "Réflexes.pdf",
@@ -11097,7 +11168,8 @@
         "content": "# Réflexe A\n\nUne crise d'asthme (dyspnée sifflante) chez un sujet agé non connu asthmatiqu est un OAP Cardiogénique jusqu'à preuve du contraire.\n\nOn doit faire un ECG pour chercher un IDM.\n\n#Radius\n\nRoyaume Radiusien Artistique Médical"
       }
     ],
-    "mtime": 1784765528362.5042
+    "mtime": 1784765528362.5042,
+    "specialty": "Neurologie"
   },
   {
     "pdf": "Signes pathognomoniques.pdf",
@@ -11158,7 +11230,8 @@
         "content": "club scirntinque Nour\n# Signe de Murphy\n\nc'est une douleur provoquée lors d'une inspiration profonde, par la palpation sous le rebord costal droit (alre vésiculaire) signe d'une cholécystite Aigue"
       }
     ],
-    "mtime": 1784765528366.5042
+    "mtime": 1784765528366.5042,
+    "specialty": "Médecine Générale / Multi-Spécialités"
   },
   {
     "pdf": "Troubles ioniques.pdf",
@@ -11243,7 +11316,8 @@
         "content": "# CAT devant une hyperkaliémie :\n\n# Diagnostic :\n\n- Onde T ample et >pointue\n- Hyperkaliémie 5.5 mmol/l\n\n# CAT :\n\n- Donner immédiatement 1-2 amp de Ca*de 120mg (si I.renale : à refaire si persistance)\n- Selon l'importance de hyperkaliémie : 2cam de Kayexalate dans un grand bol d'eau ou bien sérum glucosé à 30% + 30 UI d'lO ou bien hémodialyse si K*>7 mmol/l +IRCT"
       }
     ],
-    "mtime": 1784765528370.5042
+    "mtime": 1784765528370.5042,
+    "specialty": "Urgences / Réanimation"
   },
   {
     "pdf": "Trt Anémie_.pdf",
@@ -11276,7 +11350,8 @@
         "content": "# Conseils et precautions d'emploi\n\nLe diagnostic de l'anemie se fait apres examens clinique ou à laide des analyses biologiques (FNS, Fer serique, Ferritinite...)\n\n# Les formes galéniques\n\nPour l'adulte : Cp. gelules, Amp buvable, ini IV\n\nPour enfants et nourrissons : Sirop, Gouttes\n\n# Methotrexate et acide folique\n\nLe corps humain a besoin de folates pour effectuer de nombreuses fonctions, y compris la division cellulaire, la croissance et la production de nouveaux globules rouges.\n\nLe Méthotrexate (un medicament couramment prescrit pour traiter l'arthrite rhumatoide) agit en bloquant certains des effets de l'acide folique. Une carence en folates peut entrainer des effets secondaires tels que des ulcères dans la bouche, des problèmes d'estomac comme des nausées ou des douleurs abdominales, des problèmes de foie ou des problèmes avec la production de globules. Ces effets secondaires sont parfois tellement gênants qu'ils amènent les patients à arrêter la prise de MTX (abandon de traitement)."
       }
     ],
-    "mtime": 1784765528370.5042
+    "mtime": 1784765528370.5042,
+    "specialty": "Hématologie"
   },
   {
     "pdf": "Urologie_.pdf",
@@ -11489,7 +11564,8 @@
         "content": "# Traitement :\n\n1. Ciprolon cp 500mg 1cp 2/j pdt 15j\n\nOu Rocéphine sol inj 1inj/j en IM pdt 5j\n\nOu Oroken cp 200mg 1cp 2/j pdt 4j\n\n+/_ Gentamycine 80mg 2/j si sujet taré\n2. Macrolide"
       }
     ],
-    "mtime": 1784765528374.5042
+    "mtime": 1784765528374.5042,
+    "specialty": "Urologie"
   },
   {
     "pdf": "certificat accident travail.pdf",
@@ -11502,6 +11578,7 @@
         "content": "SECURITE SOCIALE                                          Accidents du Travail\n\n# CERTIFICAT MEDICAL\n\n# INITIAL OU DE PROLONGATION\n\nCentre de paiement &#x26; établir en 2 exemplaires :\n\n- Original destiné &#x26; la Securite Sociale\n- Double à remettre à la victime.\n\nJe soussigné, Docteur (en lettres d'imprimerie)\n\nGrade et Spécialité\n\nAdresse\n\naprès avoir examiné M (en lettres d'imprimerie)\n\nné (e) le (en lettres d'imprimerie)\n\nNuméro d'immatriculation\n\ndemeurant à:\n\nlequel m'a déclaré avoir été victime d'un accident du travail le heures au service de :\n\nNom et raison sociale :\n\nNuméro d'immatriculation\n\n# constate et certifie ce qui suit :\n\na) siège des lésions :\n\n……………………………………………………………………………………………..\n\nb) nature des lésions:\n\nc) pronostic:\n\nEn conséquence de quoi je lui prescris.\n\n- (1) un arrêt de travail de jours à compter du\n- (1) de prolonger de jours l'arrêt de travail prescrit par le certificat du\n- (1) de continuer le travail avec soins perdant jours\n- (1) il y a lieu de prévoir une incapacité permanente.\n- (1) il n'y a pas lieu de prévoir une incapacité permanente.\n\nFait à le\n\nCachet et Signature du Médecin\n\n(1) Mettre une croix dans la case correspondante."
       }
     ],
-    "mtime": 1784765528374.5042
+    "mtime": 1784765528374.5042,
+    "specialty": "Médecine Légale / Administratif"
   }
 ]

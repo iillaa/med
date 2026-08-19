@@ -137,19 +137,25 @@ Voici le document médical à transformer :
 
 ---
 
-## 🔄 WORKFLOW APRÈS FORMATAGE DU PDF
+## 🔄 WORKFLOW APRÈS FORMATAGE DANS PDF LAB 2.0
 
-Une fois votre document rédigé ou re-généré :
+Grâce à **PDF Lab 2.0**, le processus est entièrement automatisé dans votre navigateur :
 
 ```
-1. Enregistrez le document en format PDF (ex: CAT_Asthme_Aigu.pdf)
-                       ↓
-2. Placez-le dans : data/pdf_masters/
-                       ↓
-3. Dans Termux, lancez la commande :
-   npm run reindex
-   (ou utilisez le PDF Lab dans l'application)
-                       ↓
-4. Le fichier est automatiquement analysé, indexé dans pdf_index.json
-   et prêt à 100% pour le générateur V3 !
+1. OPTION A (Découpage Visuel) :
+   • Ouvrez PDF Lab 2.0 (Tab 2: Découpeur Visuel).
+   • Ajustez les curseurs haut/bas sur la page de votre manuel.
+   • Cliquez sur "Découper et Enregistrer dans le Staging".
+   
+   OPTION B (Import Texte / Markdown) :
+   • Collez le texte généré par l'IA externe dans un fichier .md ou .txt.
+   • Uploadez-le directement dans PDF Lab 2.0 (Tab 1: Staging).
+                        ↓
+2. AUDIT & ÉDITION EN DIRECT :
+   • Visualisez la note d'audit (Grade A/B/C) dans l'espace Staging.
+   • Éditez le texte à la volée avec l'éditeur Markdown intégré si nécessaire.
+                        ↓
+3. PROMOTION EN 1-CLIC :
+   • Cliquez sur "💎 Promouvoir dans Master Index".
+   • Le fichier rejoint instantanément le Master Corpus (pdf_index.json) avec priorité Pure Signal !
 ```

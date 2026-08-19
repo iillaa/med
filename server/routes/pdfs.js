@@ -168,7 +168,9 @@ function registerPdfRoutes(app, cache) {
           masterSize,
           publicSize,
           savedPercent,
-          pageStats
+          pageStats,
+          tocCount: (doc.toc || []).length,
+          toc: doc.toc || []
         };
       });
       res.json({ success: true, files: summary });
@@ -227,6 +229,414 @@ function registerPdfRoutes(app, cache) {
     } catch(err) {
       console.error('[Lab Error]', err);
       res.status(500).json({ error: "Failed to fetch JSON" });
+    }
+  });
+
+  // POST /api/admin/save-pdf-toc
+  // Saves Human-Indexed Table of Contents (Sommaire GPS) to pdf_index.json
+  app.post('/api/admin/save-pdf-toc', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { filename, toc } = req.body;
+      if (!filename || !Array.isArray(toc)) {
+        return res.status(400).json({ error: 'filename and toc array are required.' });
+      }
+
+      const doc = cache.pdfIndex.find(d => d.pdf === filename);
+      if (!doc) return res.status(404).json({ error: 'File not found in index' });
+
+      // Clean & validate TOC items
+      doc.toc = toc
+        .filter(item => item && item.title && !isNaN(parseInt(item.page, 10)))
+        .map(item => ({
+          title: String(item.title).trim(),
+          page: parseInt(item.page, 10)
+        }));
+
+      const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
+      await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+      console.log(`[TOC Indexer] Saved ${doc.toc.length} TOC entries for ${filename}`);
+
+      res.json({ success: true, message: `Sommaire GPS enregistré avec ${doc.toc.length} chapitres.`, toc: doc.toc });
+    } catch(err) {
+      console.error('[TOC Save Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to save TOC' });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 🧪 TWO-TIER STAGING & INGESTION WORKBENCH (Idea 11)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  const STAGING_INDEX_PATH = path.join(__dirname, '..', '..', 'data', 'pdf_staging_index.json');
+  const { cleanOcrText } = require('../../cat_db_generator/lib/ocr-cleaner');
+  const { searchLocalPDFs } = require('../../cat_db_generator/lib/pdf-extractor');
+
+  function loadStagingData() {
+    try {
+      if (fs.existsSync(STAGING_INDEX_PATH)) {
+        return JSON.parse(fs.readFileSync(STAGING_INDEX_PATH, 'utf8'));
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  function saveStagingData(data) {
+    const dir = path.dirname(STAGING_INDEX_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(STAGING_INDEX_PATH, JSON.stringify(data, null, 2), 'utf8');
+  }
+
+  function auditStagingDoc(doc) {
+    const pages = doc.pages || [];
+    const hasSpecialty = Boolean(doc.specialty && doc.specialty.trim() !== '');
+    const isSingleDoc = pages.length <= 15;
+    const hasTOC = Array.isArray(doc.toc) && doc.toc.length > 0;
+
+    let hasMedicalContent = false;
+    let totalChars = 0;
+    let cutWarningCount = 0;
+
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      const text = (p.content || '').trim();
+      totalChars += text.length;
+
+      // Checks for any clinical / academic substance (diagnosis, signs, treatment, examens, biology, clinic)
+      if (/(?:traitement|diagnostic|clinique|signes|examens|posologie|ordonnance|biologie|physiopathologie|étiologie|prise\s+en\s+charge|sympt[oô]mes)/i.test(text)) {
+        hasMedicalContent = true;
+      }
+
+      if (i < pages.length - 1 && text.length > 300) {
+        const lastChar = text.slice(-1);
+        if (!['.', '!', '?', ':', ';'].includes(lastChar)) {
+          cutWarningCount++;
+        }
+      }
+    }
+
+    let score = 0;
+    if (hasSpecialty) score += 30;
+    if (hasMedicalContent) score += 30;
+    if (totalChars > 150) score += 20;
+    if (hasTOC || isSingleDoc) score += 20;
+
+    let grade = 'C';
+    if (score >= 70) grade = 'A';
+    else if (score >= 50) grade = 'B';
+
+    return {
+      score,
+      grade,
+      checks: {
+        hasSpecialty,
+        hasMedicalContent,
+        isSingleDoc,
+        cutWarningCount,
+        totalPages: pages.length,
+        totalChars
+      }
+    };
+  }
+
+  // GET /api/admin/staging-list
+  app.get('/api/admin/staging-list', (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    const staging = loadStagingData().map(doc => ({
+      ...doc,
+      audit: auditStagingDoc(doc)
+    }));
+    res.json({ success: true, files: staging });
+  });
+
+  // POST /api/admin/staging-save
+  app.post('/api/admin/staging-save', (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const doc = req.body;
+      if (!doc || !doc.pdf) {
+        return res.status(400).json({ error: 'Field "pdf" filename is required.' });
+      }
+
+      const staging = loadStagingData();
+      const existingIdx = staging.findIndex(d => d.pdf === doc.pdf || d.id === doc.id);
+
+      const record = {
+        id: doc.id || `staging_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        pdf: doc.pdf,
+        specialty: doc.specialty || '',
+        quality: doc.quality || 'staging',
+        timestamp: doc.timestamp || new Date().toISOString(),
+        status: doc.status || 'draft',
+        toc: Array.isArray(doc.toc) ? doc.toc : [],
+        pages: Array.isArray(doc.pages) ? doc.pages : []
+      };
+
+      if (existingIdx >= 0) {
+        staging[existingIdx] = record;
+      } else {
+        staging.unshift(record);
+      }
+
+      saveStagingData(staging);
+      res.json({ success: true, message: `Fiche de staging ${doc.pdf} enregistrée.`, doc: record, audit: auditStagingDoc(record) });
+    } catch (err) {
+      console.error('[Staging Save Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to save staging document' });
+    }
+  });
+
+  // POST /api/admin/staging-clean-ocr
+  app.post('/api/admin/staging-clean-ocr', (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { id, pdf } = req.body;
+      const staging = loadStagingData();
+      const doc = staging.find(d => d.id === id || d.pdf === pdf);
+      if (!doc) return res.status(404).json({ error: 'Document introuvable dans le staging.' });
+
+      let cleanedCount = 0;
+      doc.pages = (doc.pages || []).map(p => {
+        const original = p.content || '';
+        const cleaned = cleanOcrText(original);
+        if (cleaned !== original) cleanedCount++;
+        return { ...p, content: cleaned };
+      });
+
+      saveStagingData(staging);
+      res.json({ success: true, message: `Nettoyage OCR terminé (${cleanedCount} page(s) corrigée(s)).`, doc });
+    } catch (err) {
+      res.status(500).json({ error: err.message || 'Failed to clean OCR in staging' });
+    }
+  });
+
+  // DELETE /api/admin/staging-delete
+  app.post('/api/admin/staging-delete', (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { id, pdf } = req.body;
+      let staging = loadStagingData();
+      const initialLen = staging.length;
+      staging = staging.filter(d => d.id !== id && d.pdf !== pdf);
+
+      if (staging.length === initialLen) {
+        return res.status(404).json({ error: 'Document non trouvé dans le staging.' });
+      }
+
+      saveStagingData(staging);
+      res.json({ success: true, message: 'Document supprimé du staging.' });
+    } catch (err) {
+      res.status(500).json({ error: err.message || 'Failed to delete from staging' });
+    }
+  });
+
+  // POST /api/admin/staging-promote
+  // Promotes a staging document to the Master Concrete Index (pdf_index.json)
+  app.post('/api/admin/staging-promote', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { id, pdf } = req.body;
+      const staging = loadStagingData();
+      const doc = staging.find(d => d.id === id || d.pdf === pdf);
+      if (!doc) return res.status(404).json({ error: 'Document introuvable dans le staging.' });
+
+      const audit = auditStagingDoc(doc);
+      if (audit.score < 50) {
+        return res.status(400).json({
+          error: `Qualité insuffisante pour promotion (Score: ${audit.score}/100, Grade: ${audit.grade}). Complétez la spécialité et vérifiez les pages.`
+        });
+      }
+
+      // Add or replace in master index
+      const masterIdx = cache.pdfIndex.findIndex(d => d.pdf === doc.pdf);
+      const masterRecord = {
+        pdf: doc.pdf,
+        specialty: doc.specialty || 'Médecine Générale',
+        quality: 'curated_master',
+        hash: doc.hash || `master_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        toc: doc.toc || [],
+        pages: doc.pages || []
+      };
+
+      if (masterIdx >= 0) {
+        cache.pdfIndex[masterIdx] = masterRecord;
+      } else {
+        cache.pdfIndex.push(masterRecord);
+      }
+
+      // Save to disk
+      const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
+      const PUBLIC_INDEX_FILE = path.join(__dirname, '..', '..', 'public', 'data', 'pdf_index.json');
+      await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+      if (fs.existsSync(path.dirname(PUBLIC_INDEX_FILE))) {
+        await fs.promises.writeFile(PUBLIC_INDEX_FILE, JSON.stringify(cache.pdfIndex), 'utf8');
+      }
+
+      // Update staging status
+      doc.status = 'promoted';
+      saveStagingData(staging);
+
+      console.log(`[Promotion] Promoted ${doc.pdf} into Master PDF Index.`);
+      res.json({ success: true, message: `✅ ${doc.pdf} promu avec succès dans le Master Index !`, masterRecord });
+    } catch (err) {
+      console.error('[Staging Promote Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to promote staging document' });
+    }
+  });
+
+  // POST /api/admin/rag-simulate
+  // Live RAG Simulator Sandbox endpoint
+  app.post('/api/admin/rag-simulate', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { query, specialty, maxResults } = req.body;
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: 'Query string is required.' });
+      }
+
+      const results = await searchLocalPDFs(query, {
+        maxResults: maxResults || 5,
+        maxMatchesPerFile: 3
+      });
+
+      res.json({
+        success: true,
+        query,
+        count: results.length,
+        results
+      });
+    } catch (err) {
+      console.error('[RAG Simulate Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to simulate RAG' });
+    }
+  });
+
+  // POST /api/admin/slice-pdf
+  // Visual Slicer & Image Cropper endpoint (Idea 6+ / Visual Curation)
+  const { PDFDocument } = require('pdf-lib');
+  app.post('/api/admin/slice-pdf', pdfUploadBodyParser, async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { 
+        sourceFilename, 
+        base64Data, 
+        mode, // 'page_range' | 'image_crop'
+        startPage, 
+        endPage, 
+        croppedImageBase64, 
+        title, 
+        specialty, 
+        pathology, 
+        extractedText 
+      } = req.body;
+
+      if (!title) return res.status(400).json({ error: 'Le titre est obligatoire.' });
+
+      let cleanTitle = path.basename(title).replace(/[^a-zA-Z0-9_\-\.\s]/g, '_').trim();
+      if (!cleanTitle.toLowerCase().endsWith('.pdf')) cleanTitle += '.pdf';
+
+      const newMasterPath = path.join(PDF_MASTERS_DIR, cleanTitle);
+      const newPublicPath = path.join(PUBLIC_PDF_DIR, cleanTitle);
+
+      let newPdfBuffer = null;
+
+      if (mode === 'image_crop' && croppedImageBase64) {
+        // Build a PDF from the cropped canvas image (with safety margin)
+        const imgBuffer = Buffer.from(croppedImageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        const newDoc = await PDFDocument.create();
+        const img = await newDoc.embedPng(imgBuffer);
+        const page = newDoc.addPage([img.width, img.height]);
+        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        newPdfBuffer = Buffer.from(await newDoc.save());
+      } else if (sourceFilename || base64Data) {
+        // Extract pages using pdf-lib
+        let srcBuffer = null;
+        if (base64Data) {
+          srcBuffer = Buffer.from(base64Data, 'base64');
+        } else {
+          const srcPath = path.join(PDF_MASTERS_DIR, path.basename(sourceFilename));
+          if (fs.existsSync(srcPath)) srcBuffer = fs.readFileSync(srcPath);
+        }
+
+        if (srcBuffer) {
+          const srcDoc = await PDFDocument.load(srcBuffer);
+          const newDoc = await PDFDocument.create();
+          const totalPages = srcDoc.getPageCount();
+          const sPage = Math.max(1, Math.min(parseInt(startPage, 10) || 1, totalPages));
+          const ePage = Math.max(sPage, Math.min(parseInt(endPage, 10) || sPage, totalPages));
+          
+          const pageIndices = [];
+          for (let p = sPage - 1; p <= ePage - 1; p++) pageIndices.push(p);
+
+          const copiedPages = await newDoc.copyPages(srcDoc, pageIndices);
+          copiedPages.forEach(p => newDoc.addPage(p));
+          newPdfBuffer = Buffer.from(await newDoc.save());
+        }
+      }
+
+      if (newPdfBuffer) {
+        if (!fs.existsSync(PDF_MASTERS_DIR)) fs.mkdirSync(PDF_MASTERS_DIR, { recursive: true });
+        if (!fs.existsSync(PUBLIC_PDF_DIR)) fs.mkdirSync(PUBLIC_PDF_DIR, { recursive: true });
+
+        await fs.promises.writeFile(newMasterPath, newPdfBuffer);
+        compressPdfFile(newMasterPath, newPublicPath);
+      }
+
+      // Build staging document record
+      const staging = loadStagingData();
+      const stagingPages = [];
+      if (extractedText && typeof extractedText === 'string' && extractedText.trim()) {
+        const rawPages = extractedText.split(/(?:\n\s*---\s*\n|\n\s*##\s*Page\s*\d+)/i).filter(p => p.trim());
+        rawPages.forEach((txt, idx) => {
+          stagingPages.push({ page: idx + 1, content: txt.trim() });
+        });
+      } else {
+        stagingPages.push({
+          page: 1,
+          content: `# ${title}\n\n**Spécialité :** ${specialty || 'Médecine Générale'}\n**Pathologie :** ${pathology || ''}\n\n[Extrait du document source ${sourceFilename || ''} (Pages ${startPage || 1} à ${endPage || 1})]`
+        });
+      }
+
+      const stagingDoc = {
+        id: `staging_slice_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        pdf: cleanTitle,
+        specialty: specialty || 'Médecine Générale',
+        pathology: pathology || '',
+        quality: 'staging_sliced',
+        timestamp: new Date().toISOString(),
+        status: 'draft',
+        pages: stagingPages
+      };
+
+      staging.unshift(stagingDoc);
+      saveStagingData(staging);
+
+      res.json({
+        success: true,
+        message: `Fiche "${cleanTitle}" découpée et enregistrée dans le Staging !`,
+        filename: cleanTitle,
+        stagingDoc
+      });
+    } catch (err) {
+      console.error('[Slice PDF Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to slice PDF' });
     }
   });
 

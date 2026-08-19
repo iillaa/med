@@ -152,9 +152,11 @@ async function fetchMSDProfessionalJina(cleanTitle) {
       }
     }
 
-    // Fallback: If DDG was throttled, try search URL directly
-    const targetUrl = directArticleUrl || `https://www.msdmanuals.com/fr/professional/SearchResults?query=${encodeURIComponent(cleanTitle)}`;
-    const jinaUrl = `https://r.jina.ai/${targetUrl}`;
+    if (!directArticleUrl || directArticleUrl.includes('SearchResults') || directArticleUrl.includes('search?q=')) {
+      return null;
+    }
+
+    const jinaUrl = `https://r.jina.ai/${directArticleUrl}`;
 
     const jController = new AbortController();
     const jTimeout = setTimeout(() => jController.abort(), 9000);
@@ -188,7 +190,7 @@ async function fetchMSDProfessionalJina(cleanTitle) {
       domain: 'msdmanuals.com',
       sourceId: `msd_pro_${cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
       sourceName: `Manuel MSD Professionnel (${articleTitle.substring(0, 45)}...)`,
-      sourceUrl: targetUrl,
+      sourceUrl: directArticleUrl,
       fetchedAt: new Date().toISOString(),
       isHighDensity: isHighDensity,
       content: cleanText.substring(0, 4500)
@@ -268,14 +270,55 @@ async function fetchMedGConsensus(cleanTitle) {
     if (!res.ok) return null;
 
     const xml = await res.text();
-    const cleanText = cleanTextContent(xml);
+    
+    // Extract items from RSS XML
+    const itemMatches = xml.match(/<item[\s\S]*?<\/item>/gi) || [];
+    let extractedClinicalText = '';
 
-    if (cleanText.length < 250) return null;
+    if (itemMatches.length > 0) {
+      const queryTokens = cleanTitle.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .split(/\s+/).filter(w => w.length >= 3);
+
+      for (const item of itemMatches.slice(0, 5)) {
+        const itemTitleMatch = item.match(/<title>([\s\S]*?)<\/title>/i);
+        const itemDescMatch = item.match(/<content:encoded>([\s\S]*?)<\/content:encoded>/i) || item.match(/<description>([\s\S]*?)<\/description>/i);
+        
+        const itemTitle = cleanTextContent(itemTitleMatch ? itemTitleMatch[1] : '');
+        const itemDesc = cleanTextContent(itemDescMatch ? itemDescMatch[1] : '');
+        const titleNorm = itemTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        // Strictly ensure the item title is relevant to the query topic
+        const isTitleRelevant = queryTokens.some(tok => titleNorm.includes(tok));
+        if (!isTitleRelevant) continue;
+
+        if (itemTitle || itemDesc) {
+          extractedClinicalText += `### Fiche MedG : ${itemTitle}\n${itemDesc}\n\n`;
+        }
+      }
+    } else {
+      extractedClinicalText = cleanTextContent(xml);
+    }
+
+    // Decode HTML entities
+    extractedClinicalText = extractedClinicalText
+      .replace(/&#039;|&rsquo;|&#8217;/g, "'")
+      .replace(/&lsquo;|&#8216;/g, "'")
+      .replace(/&quot;|&ldquo;|&rdquo;|&#8220;|&#8221;/g, '"')
+      .replace(/&amp;/g, '&')
+      .replace(/&ndash;|&#8211;/g, '-')
+      .replace(/&mdash;|&#8212;/g, '—')
+      .replace(/&hellip;|&#8230;/g, '...')
+      .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (extractedClinicalText.length < 150) return null;
 
     const queryTokens = cleanTitle.toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .split(/\s+/).filter(w => w.length >= 3);
-    const textLower = cleanText.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const textLower = extractedClinicalText.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const isRelevant = queryTokens.some(tok => textLower.includes(tok));
     if (!isRelevant) return null;
 
@@ -285,8 +328,8 @@ async function fetchMedGConsensus(cleanTitle) {
       sourceName: `MedG (Consensus: ${cleanTitle})`,
       sourceUrl: url,
       fetchedAt: new Date().toISOString(),
-      isHighDensity: isHighClinicalDensity(cleanText),
-      content: cleanText.substring(0, 3500)
+      isHighDensity: isHighClinicalDensity(extractedClinicalText),
+      content: extractedClinicalText.substring(0, 3500)
     };
   } catch (err) {
     return null;
@@ -294,7 +337,57 @@ async function fetchMedGConsensus(cleanTitle) {
 }
 
 /**
+ * 5. Custom Doctor-Provided Medical Link Fetcher via Jina Reader
+ */
+async function fetchCustomDoctorUrl(url) {
+  try {
+    if (!url || !/^https?:\/\//i.test(url)) return null;
+    const jinaUrl = `https://r.jina.ai/${url}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(jinaUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'Accept': 'text/plain, text/markdown'
+      }
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return null;
+
+    const raw = await res.text();
+    const clean = raw
+      .replace(/\[honeypot link\][^\n]*/gi, '')
+      .replace(/\[skip to main content\][^\n]*/gi, '')
+      .trim();
+
+    if (clean.length < 150) return null;
+
+    let domain = 'custom-source';
+    try {
+      domain = new URL(url).hostname.replace(/^www\./, '');
+    } catch (_) {}
+
+    const titleMatch = clean.match(/^Title:\s*(.+)$/m);
+    const pageTitle = titleMatch ? titleMatch[1].trim() : `Doc Source (${domain})`;
+
+    return {
+      domain: domain,
+      sourceId: `custom_${domain.replace(/[^a-z0-9]+/g, '_')}_${Date.now()}`,
+      sourceName: `Doctor Custom Link: ${pageTitle.substring(0, 45)} (${domain})`,
+      sourceUrl: url,
+      fetchedAt: new Date().toISOString(),
+      isHighDensity: isHighClinicalDensity(clean),
+      content: clean.substring(0, 5000)
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
  * Smart Keyword Normalizer & Extractor
+ * Prioritizes full multi-word clinical phrases over chopped single words.
  */
 function extractSmartKeywords(title, customKeywords) {
   if (Array.isArray(customKeywords) && customKeywords.length > 0) {
@@ -307,21 +400,29 @@ function extractSmartKeywords(title, customKeywords) {
   const clean = title
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/^cat\s+devant\s+(l[a'’]|le|les|un|une)?\s*/i, '')
-    .replace(/^redaction\s+d[a'’]\s*(un|une|la)?\s*/i, '')
-    .replace(/chez\s+(l[a'’]|le|les|adulte|enfant|nourrisson|femme\s+enceinte).*/i, '')
+    .replace(/^cat\s+devant\s+(?:l[a'’]|le|les|une|un)?\s*/i, '')
+    .replace(/^redaction\s+d[a'’]\s*(?:une|un|la)?\s*/i, '')
+    .replace(/chez\s+(?:l[a'’]|le|les|adulte|enfant|nourrisson|femme\s+enceinte).*/i, '')
+    .replace(/\([^)]+\)/g, '')
     .trim();
 
   const parts = clean.split(/[\/\,\&]/).map(p => p.trim()).filter(p => p.length > 2);
   const keywords = [];
 
   if (parts.length > 0) {
+    // 1. Full phrase priority (e.g. "colique hepatique", "otite moyenne aigue")
+    keywords.push(parts[0]);
+
+    // 2. Individual primary word fallback
     const primaryWord = parts[0].split(/\s+/)[0];
-    if (primaryWord.length >= 3) keywords.push(primaryWord);
-    if (parts[0] !== primaryWord) keywords.push(parts[0]);
+    if (primaryWord.length >= 3 && primaryWord !== parts[0]) {
+      keywords.push(primaryWord);
+    }
 
     for (let i = 1; i < parts.length; i++) {
-      if (parts[i].length >= 3) keywords.push(parts[i]);
+      keywords.push(parts[i]);
+      const w = parts[i].split(/\s+/)[0];
+      if (w.length >= 3 && w !== parts[i]) keywords.push(w);
     }
   }
 
@@ -371,9 +472,9 @@ function getCachedWebSources(title, maxAgeDays = CACHE_TTL_DAYS) {
 }
 
 /**
- * Searches and fetches clinical guidelines across 4 verified medical sources.
+ * Searches and fetches clinical guidelines across verified medical sources.
  * @param {string} title CAT Title
- * @param {object} options Options { forceRefetch: boolean, maxSources: number, searchKeywords: string|Array }
+ * @param {object} options Options { forceRefetch: boolean, maxSources: number, searchKeywords: string|Array, customUrls: Array|string }
  */
 async function fetchAndCacheWebSources(title, options = {}) {
   const sanitizedDirName = sanitizeTitleForDir(title);
@@ -407,6 +508,25 @@ async function fetchAndCacheWebSources(title, options = {}) {
 
   const fetchedSources = [...existingCache];
   const fetchedKeys = new Set(existingCache.map(s => s.sourceId));
+
+  // Process any custom Doctor URLs provided with equal high priority
+  const rawCustomUrls = Array.isArray(options.customUrls)
+    ? options.customUrls
+    : (typeof options.customUrls === 'string' ? options.customUrls.split(/[\n,]/).map(u => u.trim()).filter(Boolean) : []);
+
+  for (const cUrl of rawCustomUrls) {
+    if (fetchedSources.length >= targetMax) break;
+    console.log(`   - Fetching custom Doctor URL via Jina: ${cUrl}...`);
+    const customData = await fetchCustomDoctorUrl(cUrl);
+    if (customData && !fetchedKeys.has(customData.sourceId)) {
+      fetchedKeys.add(customData.sourceId);
+      fetchedSources.push(customData);
+      const fileName = `${customData.sourceId}_${Date.now()}.json`;
+      fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(customData, null, 2), 'utf8');
+      console.log(`     ✅ [Doctor Custom Link] Cached: ${customData.sourceName}`);
+    }
+  }
+
   const smartKeywords = extractSmartKeywords(title, options.searchKeywords);
 
   console.log(`🌐 [Step 1 Web Research] ${existingCache.length > 0 ? `Top-up mode (${existingCache.length}/${targetMax} cached)` : 'Fetching live sources'} for "${title}" using ${smartKeywords.length} keyword(s)...`);

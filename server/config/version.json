@@ -1,19 +1,19 @@
 {
   "minVersion": "1.9.0",
-  "latestVersion": "1.8.0",
-  "forceUpdateActive": true,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.8.0 est disponible.",
+  "latestVersion": "1.8.3",
+  "forceUpdateActive": false,
+  "updateMessage": "Dr.CAT v1.8.3 est disponible avec le nouveau PDF Lab 2.0 (Découpeur Visuel & Ingestion Multi-Formats).",
   "releaseNotes": [
-    "Onglets de profils interactifs dans l'inspecteur du CAT Generator Lab (Master Hub + Sous-Fiches)",
-    "Correctif du parseur Markdown et suppression des astérisques orphelines et espaces superflus",
-    "Confinement de défilement (overscroll-behavior) et verrouillage dynamique de l'arrière-plan des modales",
-    "Intégration complète des sous-fiches d'urgence et pédiatrique pour la CAT Intoxication alimentaire",
-    "Nettoyage et rationalisation des flux du générateur IA"
+    "🔬 PDF Lab 2.0 : Découpeur Visuel de PDF (Visual Slicer) avec recadrage par canvas et marges de sécurité (+15px)",
+    "🧪 Espace de travail à deux niveaux : Sandbox de Staging & Ingestion multi-formats (.pdf, .md, .txt)",
+    "🛡️ Bouclier pharmacologique & plafonds de toxicité (Doses max adultes, pédiatrie mg/kg/j, contre-indications CRAT)",
+    "⚡ Moteur 100% Hors-Ligne ultra-rapide (3s) avec support d'URL manuelle officielle médecin",
+    "🔍 Simulateur de requêtes RAG en direct avec détection des coupures de phrases et scoring clinique"
   ],
   "downloadLinks": {
     "uptodownUrl": "https://apkpure.com/p/com.drcat.app",
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "https://apkpure.com/p/com.drcat.app"
   },
-  "lastUpdated": "2026-08-15T17:07:50.944Z"
+  "lastUpdated": "2026-08-18T23:03:00.000Z"
 }

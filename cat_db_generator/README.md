@@ -1,46 +1,66 @@
-# 🩺 Dr. CAT — Database V3 Generator Engine & Lab UI
+# 🩺 Dr. CAT — Database V3.5 Generator Engine & Clinical Knowledge Lab
 
-Welcome to the **Database V3 Generator Engine** for **Dr. CAT (Doctor Clinical Action Protocol)**.
+Welcome to the **Database V3.5 Generator Engine** for **Dr. CAT (Doctor Clinical Action Protocol)**.
 
-This engine converts raw clinical definitions into rich, production-grade 5-step clinical protocols using **Gemini 3.7 / 3.6 Flash**, **Live Web Research RAG**, **Offline PDF RAG (`pdf_index.json`)**, and **Human Active Learning Memory**.
+This engine converts raw clinical definitions into rich, production-grade 5-step clinical protocols using **Gemini 3.7 / 3.6 Flash**, **Dual-Tier Offline Clinical Knowledge Libraries**, **5-Field Metadata Precision RAG**, **Pure Signal Slicing Isolation**, **Official French & Algerian Big Data Pharmacopeias**, and **Human Active Learning Memory**.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Architecture & 5 Knowledge Streams
 
-1. **2-Step Live Web Research & Caching (`lib/web-fetcher.js`)**:
-   - **Step 1**: Scrapes live clinical guidelines from target authorities:
-     - 🇩🇿 **Algeria**: `sante.gov.dz`, `cnpm.org.dz`, `samidz.com`
-     - 🇫🇷 **France**: `vidal.fr`, `has-sante.fr`, `sfmu.org`, `ansm.sante.fr`, `medicalguidelines.msf.org`
-     - 🇬🇧 **International**: `who.int`, `msdmanuals.com`, `guideline.care`
-   - Cleans HTML text and saves structured JSON files locally under `cat_db_generator/web_cache/<sanitized_title>/`.
-   - Supports 1-click **"Force Re-fetch Web Data"**.
+```mermaid
+graph TD
+    A["Stream 1: Doctor Custom Links<br/>(Pasted URLs via Jina Reader)"] --> E["Gemini Flash<br/>Synthesis Engine"]
+    B["Stream 2: Automated Web Fetch<br/>(PubMed, MSD Manuals, Vidal, HAS)"] --> E
+    C["Stream 3a: Tier 1 Core Corpus (PDF Index + Slices)<br/>Stream 3b: Tier 2 Clinical Decision Library<br/>(MedG, Antibioclic, SFMU, Pédiadol, MSF, CRAT)"] --> E
+    D["Stream 4: Active Learning Memory<br/>(Doctor's Previous Manual Edits)"] --> E
+    H["Stream 5: Big Data Pharmacopeias<br/>(French BDPM 15.8k + Algerian Nomenclature 4.6k)"] --> F
+    
+    E --> F["Deterministic 8-Layer Medical Validator<br/>(Drug Safety Rules, Dosage Ceilings, Anti-Hallucination, Unit Typos)"]
+    F -->|Pass| G["✨ Validated CAT Database (Sanitized for APK)"]
+    F -->|Fail (Self-Correction)| E
+```
 
-2. **Dual RAG Synthesis Engine (`lib/llm-engine.js`)**:
-   - Powered by **`Gemini 3.7 / 3.6 Flash`** with dynamic model discovery and automatic failover.
-   - Assembles 3 knowledge channels into every prompt payload:
-     - **Offline PDF RAG**: Matches pages from 77 indexed local medical reference books in `pdf_index.json`.
-     - **Online Web Cache RAG**: Freshly scraped guidelines from Step 1 (`web_cache/`).
-     - **Human Edit Memory**: Loads your previous manual edits (`_human_edited: true`) as high-priority instructions so Gemini 3.6 Flash **learns from human corrections over time**.
+---
 
-3. **Strict Medical & Administrative Schema Locks (`lib/medical-validator.js`)**:
-   - **5-Step Clinical Lock**:
-     1. `1. Évaluation initiale & Diagnostic`
-     2. `2. Conduite à tenir`
-     3. `3. Traitement`
-     4. `4. Examens complémentaires`
-     5. `5. Orientation / Avis Spécialisé`
-   - **3-Step Administrative Lock** (for certificates, attestations, liaison letters):
-     1. `1. Principes de rédaction`
-     2. `2. Structure type`
-     3. `3. Cadre réglementaire`
-   - **Automated Anti-Hallucination Checksum**: Rejects placeholder text (`lorem ipsum`, `todo`, `à compléter`, `sample text`), verifies pediatric dosage compliance (`mg/kg/j` or `dose-poids`), and logs token metrics.
+## 🚀 Key Modules & Capabilities
 
-4. **Standalone Admin Generator Lab UI (`/cat_generator_lab.html`)**:
-   - Accessible via local admin dashboard link at `http://localhost:3000/cat_generator_lab.html`.
-   - Side-by-side V1 vs V3 inspector modal.
-   - **Human-in-the-Loop Editor Modal (`#edit-modal`)**: Manually edit and polish generated CATs with 1-click update API.
-   - **1-Click Production Promoter**: Promotes `cats_db_v3_generated.json` into `cats_db.json` with automated backup (`cats_db.json.bak`).
+### 1. 🏛️ Dual-Tier Offline Clinical Knowledge Architecture (`lib/knowledge-library.js`)
+- **Tier 1: Core Reference Corpus (`pdf_index.json` & `data/pdf_staging_index.json`)**:
+  - Full-text page indexing across medical textbooks, university course manuals, and dedicated PDF Lab 2.0 slices.
+  - **5-Field Metadata Scoring**: Evaluates *Title, Specialty, Keywords, TOC GPS Page Pointers, and Page Content*.
+  - **Pure Signal Isolation**: Mutes general 500-page textbooks when a high-confidence dedicated slice exists.
+- **Tier 2: Standard Clinical Decision Library (`clinical_library/`)**:
+  - 📑 **`medg_fiches_cat/`**: MedG.fr Diagnostic & Therapeutic CAT Decision Trees.
+  - 💊 **`antibioclic_decision_trees/`**: Antibioclic / SPILF 1st/2nd-line antibiotic regimens.
+  - 🚨 **`sfmu_emergency_reflex/`**: SFMU Emergency & Resuscitation Reflex Cards.
+  - 👶 **`pediadol_pediatric_protocols/`**: Pédiadol Weight-Based Pediatric Emergency Memos.
+  - 🏥 **`msf_pocket_clinical_guides/`**: MSF Dispensary & Primary Care Action Protocols.
+  - 🧬 **`orphanet_urgences_reflex/`**: Orphanet On-Call Complex & Genetic Reflex Cards.
+  - 🤰 **`crat_pregnancy_lactation/`**: CRAT Pregnancy & Breastfeeding Safety Rules.
+
+### 2. 🇩🇿 Official Algerian Drug Nomenclature (`data/algerian_nomenclature.json`)
+- Ingested from the Ministère de la Santé / Chifa database: **4,627 registered pharmaceutical products** and **1,358 DCIs** with commercial brand names (*Saidal, El Kendi, Biogalenic, HUP...*), dosages, galenic forms, and CNAS reimbursement status.
+
+### 3. 🇫🇷 Official French Pharmacopeia (`data/bdpm_pharmacology.json`)
+- Ingested from the Base de Données Publique des Médicaments (ANSM): **15,857 authorized medications**, **4,474 DCIs**, and **8,206 generic group mappings**.
+
+### 4. 🛡️ Clinical Drug Posology & Toxic Ceilings Database (`lib/clinical_drug_ceilings.json`)
+- Offline pharmacological ceiling matrix compiled from authoritative clinical databases:
+  - **`FDAMDD` (EPA / PubChem MRDD)**: Maximum Recommended Daily Dose thresholds for active pharmaceutical ingredients.
+  - **`ANSM RCP`**: Official maximum posologies, contraindications, and organ clearance warnings.
+  - **`CRAT`**: Absolute teratogenic blacklists (Valproate, Méthotrexate, Isotrétinoïne, NSAIDs at T2/T3, ACEi/ARBs).
+  - **`GPIP / Antibioclic`**: Pediatric weight-based safety bounds (`mg/kg/jour` and single-dose limits).
+
+### 5. 🌐 Web Research & Doctor Link Injector (`lib/web-fetcher.js`)
+- **Exact Full-Phrase Matching**: Searches for complete clinical entities (e.g. `"colique hépatique"`) rather than fragmented keywords.
+- **SERP Listing Shell Rejection**: Automatically discards empty search engine listing pages (`SearchResults?`, `search?q=`).
+- **Doctor Link Input**: Custom URL input field in Admin Lab (`#single-custom-urls`) that processes pasted links via **Jina Reader** (`r.jina.ai`) into clean markdown.
+
+### 6. 🔁 Self-Correcting 8-Layer Medical Validator (`lib/medical-validator.js`)
+- **Deterministic JavaScript & JSON Rules**: The AI never grades its own work. Codebase rules evaluate dosage limits, contraindications, and schema.
+- **Unit Typo Interceptor**: Detects lethal typing errors (e.g. `500g` or `1000g` of oral medications).
+- **Automated Feedback Loop**: If validation fails (e.g. Paracetamol > 4g/day or Aspirin in pediatric varicella), the exact rule error is injected into the next prompt for automatic self-correction (up to 3 attempts).
 
 ---
 
@@ -55,7 +75,7 @@ node cat_db_generator/generate_cat_db_v2.js --title "CAT devant insolation" --ca
 # 2. Force re-fetch Step 1 Web Data before AI synthesis
 node cat_db_generator/generate_cat_db_v2.js --title "CAT devant insolation" --fetch-web
 
-# 3. Batch generate all 55 CATs
+# 3. Batch generate all CATs
 node cat_db_generator/generate_cat_db_v2.js --batch
 
 # 4. Discover unindexed PDF topics and propose new CAT candidates
@@ -68,14 +88,25 @@ node cat_db_generator/generate_cat_db_v2.js --discover
 
 ```text
 cat_db_generator/
+├── clinical_library/          # Tier 2 Action-Oriented Decision Libraries
+│   ├── medg_fiches_cat/       # MedG.fr CAT Trees
+│   ├── antibioclic_decision_trees/ # Antibioclic SPILF Regimens
+│   ├── sfmu_emergency_reflex/ # SFMU Emergency Reflex Cards
+│   ├── pediadol_pediatric_protocols/ # Pédiadol Pediatric Memos
+│   ├── msf_pocket_clinical_guides/   # MSF Primary Care Guides
+│   ├── orphanet_urgences_reflex/     # Orphanet On-Call Complex Reflex Cards
+│   └── crat_pregnancy_lactation/     # CRAT Pregnancy & Lactation Pharmacology
 ├── lib/
-│   ├── web-fetcher.js         # Step 1 Live Web Research & Disk Cacher
-│   ├── llm-engine.js          # Gemini Dual RAG & Active Learning Engine
-│   ├── medical-validator.js   # 5-step clinical lock, admin lock & checksum validator
+│   ├── knowledge-library.js   # Fast sub-millisecond local clinical library reader
+│   ├── algerian_drug_matrix.json # Algerian trade names & posology matrix
+│   ├── drug-safety-rules.json # Dynamic drug toxicity ceilings & contraindication rules
+│   ├── web-fetcher.js         # Anti-SERP web scraper & Jina Reader link processor
+│   ├── llm-engine.js          # Gemini Flash Dual-RAG & Self-Correcting Prompt Engine
+│   ├── medical-validator.js   # Deterministic safety checksum & dosage validator
 │   ├── pdf-extractor.js       # Fast in-memory pdf_index.json RAG search
 │   └── medical-sources.js     # Target medical domains & online query builders
 ├── web_cache/                 # Local disk cache for scraped web guidelines
-├── cats_db_v3_generated.json  # Complete 55 CAT V3 database output
+├── cats_db_v3_generated.json  # Complete V3 database output
 ├── generate_cat_db_v2.js      # Main CLI tool
 └── generate_all_55_v2.js      # Real batch wrapper
 ```

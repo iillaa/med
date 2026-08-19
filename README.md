@@ -53,9 +53,39 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - Neutralisation des délais tactiles (300ms) via CSS touch rules & `requestAnimationFrame` gesture throttling.
 - Event Delegation sur la liste des fiches (`#cat-list`) pour minimiser la consommation RAM/CPU.
 
-### 👤 Système Collaboratif & Lab Admin
+### 🔬 PDF Lab 2.0 — Visual Ingestion & Curation Workbench (v1.8.9)
+- **✂️ Découpage Visuel Interactif (Visual Slicer)** : Découpe de chapitres médicaux en fiches dédiées de 1 à 3 pages avec ajustement des curseurs haut/bas (+15px de marge de sécurité visuelle).
+- **🎯 Sommaire GPS & Pointeur de Page (+90 pts)** : Algorithme de navigation directe reliant les pointillés du sommaire (`..... p.48`) aux pages exactes du chapitre.
+- **📄 Ingestion Directe Markdown & Texte** : Import direct de cours et fiches de synthèse `.md` ou `.txt` créées avec le prompt de standardisation IA.
+- **🧪 Espace Staging & Brouillons (`pdf_staging_index.json`)** : Sandbox sécurisée permettant d'éditer, auditer et tester les documents découpés avant leur promotion en production.
+
+### 🏛️ Architecture RAG & Moteur de Synthèse V3.5 (v1.8.9)
+- **🎯 Isolation "Pure Signal"** : Priorité absolue aux fiches dédiées et découpées. Lorsqu'un extrait précis existe, le moteur met en sourdine les gros manuels généralistes de 500 pages pour éliminer le bruit.
+- **🧬 Précision RAG à 5 Champs Métadonnées** : Évaluation conjointe du *Titre*, de la *Spécialité*, des *Mots-clés médicaux*, des *Pointeurs Sommaire GPS*, et du *Contenu textuel*.
+- **🌐 Recherche Web RAG & Lien Manuel Médecin** : Scraping ciblé PubMed / MSD Manuals / MedG / Vidal avec injection possible d'une URL personnalisée par le praticien.
+- **🧠 Mémoire Active Learning** : Réinjection systématique des corrections et formulations manuelles du médecin dans le prompt Gemini lors des régénérations.
+
+### 🛡️ Moteur de Validation Médicale & Big Data Pharmacopées (v1.8.9)
+- **🇫🇷 Base de Données Publique des Médicaments (BDPM)** : Indexation de **15 857 spécialités pharmaceutiques autorisées** et **4 474 DCI** officielles.
+- **🇩🇿 Nomenclature Algérienne des Médicaments (MSPRH / Chifa)** : Indexation de **4 627 médicaments commercialisés** (*Saidal, El Kendi, Biogalenic...*) avec formes galéniques et statut de remboursement.
+- **👶 Plafonds Posologiques Pédiatriques (GPIP / HAS / Antibioclic)** : Contrôle strict des posologies au poids (`mg/kg/j`) et des limites d'âge (*Cyclines < 8 ans, Céfixime < 6 mois*).
+- **🤰 Pare-feu Tératogène CRAT** : Blocage immédiat des prescriptions à risque majeur (*Valproate, Méthotrexate, Isotrétinoïne, AINS dès 24 SA, IEC/ARA2*).
+- **⚠️ Intercepteur de Coquilles Létales** : Détection des erreurs de frappe mortelles (ex: *"500g"* au lieu de *"500mg"*).
+- **🔒 Assainissement des Données de Production** : Filtrage strict de la télémétrie IA et de l'historique dans `cats_db.json` client pour protéger la propriété intellectuelle.
+
+### 💾 SafeStorage & Protection des Données Utilisateur (v1.8.9)
+- **Protection Anti-Suppression** : Les notes personnelles (`dr_cat_notes_*`), la progression d'apprentissage (`dr_cat_user_progress`), les révisions espacées Leitner (`dr_cat_leitner`) et les streaks de révision (`dr_cat_streak`) sont protégées par regex et **ne sont jamais effacées**.
+- **Éviction LRU Automatique** : En cas de saturation du quota `localStorage` (5 MB), le système purge silencieusement les caches réseau transitoires (`dr_cat_synced_database*`) sans affecter les données cliniques du médecin.
+
+### ⚡ Recherche Instantanée Pré-Indexée (v1.8.9)
+- **Zéro Allocation Mémoire** : Pré-calcul de `cat._searchTokenStr` sur l'ensemble des 55+ fiches et sous-profils.
+- **Recherche Multi-Mots Fluide à 60 FPS** : Filtrage sans saccades ni saccades tactiles lors de la frappe de requêtes composées (ex: *"colique spasfon"*, *"otite orl"*).
+
+### 👤 Système Collaboratif & Lab Admin V3.5
 - Les **utilisateurs non-admin** peuvent proposer des modifications ou ajouts de fiches (via un système de suggestions).
 - L'**administrateur** valide ou rejette les suggestions depuis le panneau de modération sur le tableau de bord.
+- **Dr. CAT Generator Lab V3.5 (`admin/cat_generator_lab.html`)** : Télémétrie SSE temps réel, éditeur Markdown interactif, et promotion 1-clic vers la production.
+- **1-Tap Prompt Copy** : Boutons intégrés pour copier instantanément le Prompt Maître ou le Prompt de Standardisation dans le presse-papier.
 - **Dr. CAT PDF Inspector** : Un laboratoire admin pour inspecter l'index PDF, voir et télécharger les structures JSON extraites, et forcer une ré-extraction AI ciblée.
 - Mode admin activé par un token de session sécurisé, jamais stocké en clair côté serveur.
 

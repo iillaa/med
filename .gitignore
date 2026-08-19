@@ -36,6 +36,10 @@ remote_server_config.json
 
 # Local web research cache
 cat_db_generator/web_cache/
+data/web_cache/
+scratch/
+data/*_bdpm.txt
+data/*.csv
 
 # Logs
 *.log

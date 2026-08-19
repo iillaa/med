@@ -19,12 +19,51 @@ try {
   console.warn('[Medical Validator] Could not load drug-safety-rules.json:', e.message);
 }
 
+// Load comprehensive clinical drug toxicity ceilings database
+let CLINICAL_CEILINGS = {};
+try {
+  const ceilingsPath = path.join(__dirname, '..', 'data', 'clinical_drug_ceilings.json');
+  const fallbackPath = path.join(__dirname, 'clinical_drug_ceilings.json');
+  const targetPath = fs.existsSync(ceilingsPath) ? ceilingsPath : fallbackPath;
+  if (fs.existsSync(targetPath)) {
+    CLINICAL_CEILINGS = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+  }
+} catch (e) {
+  console.warn('[Medical Validator] Could not load clinical_drug_ceilings.json:', e.message);
+}
+
+// Load official French BDPM / ANSM Pharmacopeia Database (15,857 medicines & 4,474 DCIs)
+let BDPM_PHARMACOLOGY = null;
+try {
+  const bdpmPath = path.join(__dirname, '..', 'data', 'bdpm_pharmacology.json');
+  const fallbackPath = path.join(__dirname, 'data', 'bdpm_pharmacology.json');
+  const targetPath = fs.existsSync(bdpmPath) ? bdpmPath : fallbackPath;
+  if (fs.existsSync(targetPath)) {
+    BDPM_PHARMACOLOGY = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+  }
+} catch (e) {
+  console.warn('[Medical Validator] Could not load bdpm_pharmacology.json:', e.message);
+}
+
+// Load official Algerian Drug Nomenclature Database (4,627 registered products & 1,358 DCIs)
+let ALGERIAN_NOMENCLATURE = null;
+try {
+  const algPath = path.join(__dirname, '..', 'data', 'algerian_nomenclature.json');
+  const fallbackPath = path.join(__dirname, 'data', 'algerian_nomenclature.json');
+  const targetPath = fs.existsSync(algPath) ? algPath : fallbackPath;
+  if (fs.existsSync(targetPath)) {
+    ALGERIAN_NOMENCLATURE = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+  }
+} catch (e) {
+  console.warn('[Medical Validator] Could not load algerian_nomenclature.json:', e.message);
+}
+
 const CLINICAL_REQUIRED_SECTION_PATTERNS = [
   { name: '1. Évaluation initiale & Diagnostic', regex: /(?:1\.|#+ 1\.)\s*(?:Évaluation initiale|Définition|Diagnostic)/i },
-  { name: '2. Drapeaux Rouges / Signes de Gravité', regex: /(?:2\.|#+ 2\.)\s*(?:Drapeaux Rouges|Signes de Gravité|Conduite à tenir)/i },
+  { name: '2. Conduite immédiate si drapeau rouge / Signes de Gravité', regex: /(?:2\.|#+ 2\.)\s*(?:Drapeaux?\s*Rouges?|Signes?\s*de\s*Gravité|Conduite|Mesures?\s*urgentes?)/i },
   { name: '3. Examens complémentaires', regex: /(?:3\.|#+ 3\.)\s*(?:Examens complémentaires|Bilan)/i },
-  { name: '4. Prise en charge & Conduite à tenir', regex: /(?:4\.|#+ 4\.|3\.)\s*(?:Prise en charge|Conduite à tenir|Traitement)/i },
-  { name: '5. Orientation & Suivi', regex: /(?:5\.|#+ 5\.)\s*(?:Orientation|Suivi|Avis Spécialisé)/i }
+  { name: '4. Prise en charge & Stratégie Thérapeutique', regex: /(?:4\.|#+ 4\.|3\.)\s*(?:Prise en charge|Conduite à tenir|Traitement|Stratégie)/i },
+  { name: '5. Orientation & Suivi', regex: /(?:5\.|#+ 5\.)\s*(?:Orientation|Suivi|Avis Spécialisé|Volet Médico-Légal)/i }
 ];
 
 const ADMIN_REQUIRED_SECTION_PATTERNS = [
@@ -42,11 +81,10 @@ const FORBIDDEN_PLACEHOLDERS = [
   'tbd',
   'sample text',
   'texte d\'exemple',
-  'sans objet',
-  'non disponible',
   '[remplir',
   '<remplir',
-  'insérer ici'
+  'insérer ici',
+  'insérer texte'
 ];
 
 const DOSAGE_UNITS_REGEX = /(?:mg|g|gélule|comprimé|sachet|ampoule|cuillère|flacon|ui|ml|gouttes|application|injection|suppositoire|mg\/kg|dose-poids)/i;
@@ -211,6 +249,57 @@ function validateCAT(cat) {
             }
           }
         }
+      }
+    }
+
+    // --- 7c. COMPREHENSIVE PHARMACOLOGICAL CEILINGS & TOXICITY FIREWALL ---
+    const allPrescriptionTexts = [ordTextLower];
+    if (Array.isArray(cat.sub_cats)) {
+      cat.sub_cats.forEach(s => {
+        if (s.ordonnance) allPrescriptionTexts.push(s.ordonnance.toLowerCase());
+      });
+    }
+
+    const isPregnancyContext = /(?:grossesse|enceinte|femme enceinte|gravidique|obstétrique)/i.test(`${cat.title || ''} ${cat.category || ''}`);
+
+    for (const [key, drug] of Object.entries(CLINICAL_CEILINGS)) {
+      const brandPatterns = [drug.dci, ...(drug.algerian_brands || [])]
+        .map(b => b.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('|');
+      const drugDetectRx = new RegExp(`(?:^|[^a-z0-9à-ÿ])(?:${brandPatterns})(?:$|[^a-z0-9à-ÿ])`, 'i');
+
+      for (const pText of allPrescriptionTexts) {
+        if (drugDetectRx.test(pText)) {
+          // Check adult max daily ceiling in mg
+          if (drug.adult_max_daily_ceiling_mg > 0) {
+            // Pattern: [Drug] ... [number] mg ... [number] fois/j
+            const mgFreqMatch = pText.match(new RegExp(`(?:${brandPatterns})[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*mg[^.\\n]*?(\\d+)\\s*(?:fois|x|cp|gélules?|prises?)\\/?(?:j|jour)?`, 'i'));
+            if (mgFreqMatch && mgFreqMatch[1] && mgFreqMatch[2]) {
+              const singleDose = parseFloat(mgFreqMatch[1].replace(',', '.'));
+              const freq = parseInt(mgFreqMatch[2], 10);
+              const totalDose = singleDose * freq;
+              if (totalDose > drug.adult_max_daily_ceiling_mg) {
+                errors.push(`[Plafond Toxique] ${drug.dci} : la dose calculée de ${totalDose} mg/j dépasse le plafond toxique absolu de ${drug.adult_max_daily_ceiling_mg} mg/j.`);
+              }
+            }
+          }
+
+          // Pregnancy Contraindication Check
+          if (isPregnancyContext && drug.pregnancy_safe === false) {
+            const hasWarningClause = /(?:contre-indiqu[eé]|ne\s+pas|pas\s+de|[eé]viter|attention|ne\s+jamais|interdit|proscrit|proscrire)/i.test(pText);
+            if (!hasWarningClause) {
+              errors.push(`[Contre-indication Grossesse] ${drug.dci} (${drug.classe}) est formellement contre-indiqué en contexte obstétrique / grossesse.`);
+            }
+          }
+        }
+      }
+    }
+
+    // --- 7d. DANGEROUS UNIT TYPO SAFEGUARD (mg vs g typographical confusion) ---
+    for (const pText of allPrescriptionTexts) {
+      const lethalGramTypoMatch = pText.match(/(?:parac[eé]tamol|amoxicilline|ibuprof[eè]ne|m[eé]tronidazole|c[eé]tirizine|azithromycine|clarithromycine|ciprofloxacine|ramipril|amlodipine)\s*(?:[^\n.]*?)(\d{2,4})\s*g\b(?!\s*\/\s*(?:l|100ml|kg))/i);
+      if (lethalGramTypoMatch && parseFloat(lethalGramTypoMatch[1]) >= 10) {
+        errors.push(`[Erreur Typographique Unité] Posologie aberrante détectée : "${lethalGramTypoMatch[0]}". Confusion probable entre "mg" et "g". Corriger l'unité en mg.`);
       }
     }
   }

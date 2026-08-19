@@ -17,86 +17,74 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── cats_db.json.bak             # Automatic database backup (created before writes)
 ├── suggestions.json             # Moderation suggestions queue
 ├── pdf_index.json               # Master indexed PDF page text database
-├── remote_server_config.json    # Active tunnel/provider URL config (⚠️ Git-ignored)
-├── admin_password.txt           # PBKDF2-hashed admin password (⚠️ Git-ignored)
-├── capacitor.config.json        # Capacitor native wrapper configuration
-├── package.json                 # Node dependencies, version (1.1.6), and build scripts
+├── cats_db.json                 # JSON database of clinical fiches (CATs)
+├── cats_db.json.bak             # Automatic database backup (created before writes)
+├── suggestions.json             # Moderation suggestions queue
+├── pdf_index.json               # Master indexed PDF page text database
+├── package.json                 # Node dependencies, version (1.8.9), and build scripts
 ├── README.md                    # Project landing, features, security and performance overview
+│
+├── cat_db_generator/            # Database V3.5 Generator Engine & Clinical Labs
+│   ├── generate_cat_db_v2.js   # CLI generator engine
+│   ├── GUIDE.md                # V3.5 Generator & Validator documentation
+│   ├── GUIDE_PDF_RAG_STANDARDIZATION.md # Medical lesson formatting guide
+│   ├── clinical_library/       # Tier 2 Action Decision Trees (MedG, Antibioclic, SFMU, Pédiadol, MSF, CRAT)
+│   └── lib/
+│       ├── llm-engine.js       # Gemini Flash Dual RAG & Active Learning engine
+│       ├── pdf-extractor.js    # 5-field metadata precision RAG scanner with Pure Signal isolation
+│       ├── web-fetcher.js      # Web RAG scraper with Doctor Custom URL injector
+│       ├── medical-validator.js# Deterministic 8-layer medical & dosage ceiling validator
+│       ├── debug-emitter.js    # Real-time SSE telemetry logger
+│       └── knowledge-library.js# Sub-millisecond clinical library reader
+│
+├── data/                        # Server Data & Pharmacopeias
+│   ├── pdf_masters/             # Uncompressed master original PDFs for AI indexing
+│   ├── pdf_staging_index.json   # Staging drafts and sliced fiches sandbox
+│   ├── bdpm_pharmacology.json   # French BDPM Database (15,857 authorized drugs, 4,474 DCIs)
+│   ├── algerian_nomenclature.json# Algerian Nomenclature (4,627 registered commercial brands)
+│   └── web_cache/               # Cached medical web guidelines and doctor links
 │
 ├── server/                      # Server Modules & Services Architecture
 │   ├── index.js                 # Server routes & middleware bootstrap
-│   ├── config/
-│   │   ├── constants.js         # Security keys & constants
-│   │   └── version.json         # Master version config (minVersion, latestVersion, forceUpdateActive)
-│   ├── data/
-│   │   └── active_devices.json  # Persistent store for anonymous device tokens & telemetry
-│   ├── middleware/
-│   │   ├── rate-limit.js        # Express WAF & IP rate limiter (80 req/min critical, 180 req/min API)
-│   │   └── version-guard.js     # Numeric version check & HTTP 426 Upgrade Required middleware
 │   ├── routes/
-│   │   ├── admin-analytics.js   # GET /api/admin/active-devices analytics endpoint
-│   │   ├── search.js            # PDF search & index status routes
-│   │   ├── server-providers.js  # Server provider discovery & CORS management routes
-│   │   └── version.js           # GET /api/version & PUT /api/admin/version config endpoints
-│   ├── services/
-│   │   ├── active-devices.js    # Device telemetry service (DAU, MAU, version distribution)
-│   │   ├── allowed-origins.js   # Dynamic CORS allowlist service
-│   │   ├── auth-service.js      # Session token validation service
-│   │   └── data-store.js        # Safe async JSON read/write queues
-│   └── utils/
-│       └── request.js           # Loopback IP & reverse-proxy request helpers
+│   │   ├── cat-generator.js     # V3.5 Generator Lab endpoints & SSE telemetry
+│   │   ├── pdfs.js              # PDF Lab 2.0 Ingestion, Visual Slicer, GPS Sommaire & Staging API
+│   │   ├── cats.js              # CAT CRUD API with client IP protection sanitization
+│   │   ├── search.js            # High-speed PDF search routes
+│   │   └── version.js           # Version checker & Kill Switch API
+│   └── services/
+│       └── data-store.js        # Safe async JSON read/write queues
 │
-├── data/                        # Server Data & PDF Master Store
-│   ├── pdf_masters/             # Uncompressed master original PDFs for AI indexing (⚠️ Git-ignored)
-│   └── pdf_cache/               # Cached SHA-256 JSON extractions from LlamaParse/Gemini
+├── admin/                       # Admin Workbench Interfaces
+│   ├── cat_generator_lab.html   # V3.5 Generator Lab (SSE telemetry, Diff Inspector, 1-Tap Promote)
+│   └── pdf_lab.html             # PDF Lab 2.0 (Staging Sandbox, Visual Slicer Canvas, GPS Sommaire)
 │
 ├── scripts/                     # Utility & Optimization Scripts
-│   └── compress_pdfs.js         # Ghostscript ultra-compressor (96 DPI + JPEGQ 60 + Bicubic downsampling)
+│   ├── clean_android_assets.js  # Android asset stripper (anti-decompilation protection)
+│   └── compress_pdfs.js         # Ghostscript ultra-compressor
 │
 ├── tests/                       # Automated Verification & Test Suite
-│   ├── run_all_tests.js         # Master test runner
+│   ├── run_all_tests.js         # Master test runner (8 sub-suites)
 │   ├── test_api.js              # Server API smoke tests
-│   ├── test_auth.js             # Authentication & protected route tests
-│   ├── test_suggestions.js      # Full suggestion lifecycle tests
-│   ├── test_version.js          # Numeric version comparison & route exclusion unit tests
-│   ├── test_analytics.js        # Device telemetry & DAU/MAU calculation unit tests
-│   ├── test_cat_search.js       # Deep multi-token CAT content search unit tests
-│   ├── test_resume.mjs          # "Reprendre la révision" tests
-│   └── test_prescription.mjs    # Prescription rendering tests
-│
-├── todo/                        # Active Decision Trees & Flowcharts
-│   ├── arbre_decisionnelle/     # Decision tree data assets
-│   └── arbre_decisionnelle_project.md # Interactive Decision Tree specification
+│   ├── test_auth.js             # Authentication tests
+│   └── test_suggestions.js      # Suggestion lifecycle tests
 │
 ├── docs/                        # Active Core Documentation
 │   ├── codemap.md               # Structural codebase map (this file)
 │   ├── developer_guide.md       # Developer setup, commands, testing & CI/CD workflow
 │   ├── technical_architecture.md# Deep-dive system architecture, security & telemetry specs
-│   └── lessons_learned.md       # Engineering log: pitfalls, fixes, bugs avoided (36 items)
+│   ├── v2_generator_architecture.md # V3.5 Generator & PDF Lab 2.0 technical blueprint
+│   └── lessons_learned.md       # Engineering log: pitfalls, fixes, bugs avoided
 │
-├── archive/                     # Archived Historical Specifications & Reports
-│   ├── ARCHIVE_NOTICE.md        # AI agent / bot warning notice against reading obsolete specs
-│   ├── README.md                # Archive directory notice
-│   ├── docs/                    # Archived specs (premium-todo, plan-progress, perf-baseline, etc.)
-│   └── todo/                    # Archived legacy todo items
-│
-├── .github/
-│   └── workflows/
-│       └── build-apk.yml        # CI/CD compiler to build standalone Android APK on push
-│
-└── public/                      # App Frontend Root
+└── public/                      # App Frontend Root (Packaged into APK)
     ├── index.html               # Main single-page application structure
     ├── pdf_viewer.html          # Custom offline-ready PDF.js-based reader
-    ├── pdf_lab.html             # Standalone PDF Inspector & Extraction Lab (Localhost protected)
-    ├── analytics_lab.html       # Standalone Analytics & Device Telemetry Lab (Localhost protected)
     ├── style.css                # CSS entry point
-    ├── css/                     # Modular CSS stylesheets
-    │   ├── utilities.css        # Extracted utility classes
-    │   └── update-modal.css     # Hard Kill Switch lock screen overlay styles
-    ├── data/                    # Bundled offline database copies (generated by build.js)
-    │   ├── cats_db.json
-    │   ├── pdf_index.json
-    │   └── pdf_list.json
+    ├── dist/                    # Production minified JS bundle (app-*.js)
+    └── data/                    # Sanitized offline database copies (stripped of AI metrics)
+        ├── cats_db.json
+        ├── pdf_index.json
+        └── pdf_list.json
     ├── manifest.json            # PWA app description file
     ├── service-worker.js        # PWA asset cacher and offline routing service
     │

@@ -32,8 +32,21 @@ function registerCatRoutes(app) {
 
     if (!isAdmin) {
       result = result.map(c => {
-        const rest = { ...c };
-        delete rest.history;
+        const {
+          history,
+          _execution_metrics,
+          online_verification_queries,
+          sources,
+          _audit_trail,
+          _raw_llm_response,
+          ...rest
+        } = c;
+        if (Array.isArray(rest.sub_cats)) {
+          rest.sub_cats = rest.sub_cats.map(sub => {
+            const { _execution_metrics, online_verification_queries, sources, ...cleanSub } = sub;
+            return cleanSub;
+          });
+        }
         return rest;
       });
     }

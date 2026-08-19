@@ -1,41 +1,57 @@
-# 🩺 Dr. CAT — Database Generator v3 (Medical Engine Guide)
+# 🩺 Dr. CAT — Database Generator v3.5 (Medical Engine Guide)
 
-Welcome to the **CAT Database Generator v3** (`cat_db_generator/`). This module is a state-of-the-art, anti-hallucination medical content generator designed to compile, validate, and manage clinical *Conduites à Tenir* (CATs) tailored for an **Algerian & French medical practice context**.
+Welcome to the **CAT Database Generator v3.5** (`cat_db_generator/`). This module is a state-of-the-art, anti-hallucination medical content generator designed to compile, validate, and manage clinical *Conduites à Tenir* (CATs) tailored for an **Algerian & French medical practice context**.
 
 ---
 
 ## 🏛️ Architecture Overview
 
-The v3 generator combines **local deep PDF extraction** (77 local textbooks), **official Algerian & French medical authority verification**, and **strict automated medical schema validation**:
+The v3.5 generator combines **5-field metadata precision RAG** (PDF Index, dedicated PDF Lab 2.0 slices, and staging drafts), **official French BDPM (15.8k medicines) and Algerian Nomenclature (4.6k medicines)**, **live web guidelines**, and **strict 8-layer deterministic medical schema validation**:
 
 ```
 cat_db_generator/
 ├── generate_cat_db_v2.js       # Main CLI & Generator Executable Engine
 ├── GUIDE.md                    # Detailed User & Developer Guide
+├── clinical_library/           # Tier 2 Action-Oriented Decision Libraries (HAS, SFMU, Pédiadol, MedG)
 └── lib/
     ├── medical-sources.js      # Registry of reputable medical authorities (Algerian, French, International)
-    ├── pdf-extractor.js        # High-performance local PDF deep content scanner
-    └── medical-validator.js    # Strict Anti-Hallucination & 5-step schema validator
+    ├── pdf-extractor.js        # 5-field metadata precision scanner with Pure Signal isolation
+    ├── web-fetcher.js          # Web RAG scraper with Doctor Custom URL injector
+    ├── llm-engine.js           # Gemini Flash reasoning engine with self-correcting feedback loops
+    └── medical-validator.js    # 8-Layer deterministic validator with BDPM & Algerian Big Data
 ```
 
 ---
 
-## 🛡️ Anti-Hallucination & Medical Safety System
+## 🛡️ Anti-Hallucination & Medical Safety System (8 Layers)
 
-Because Dr. CAT contains clinical information used at the bedside, **data integrity is critical**. Generator v2 enforces strict safety rules:
+Because Dr. CAT contains clinical information used at the bedside, **data integrity is critical**. Generator v3.5 enforces strict safety rules:
 
-1. **Mandatory 5-Step Clinical Structure**:
+1. **Modular 5-Step Clinical Structure (Zero Filler)**:
+   - `0. Stabilisation Immédiate & ABCDE` *(Omettre si non-urgent)*
    - `1. Évaluation initiale & Diagnostic`
-   - `2. Conduite à tenir`
-   - `3. Traitement`
-   - `4. Examens complémentaires`
-   - `5. Orientation / Avis Spécialisé`
-2. **Mandatory Red Flags (`red_flags`)**:
-   - Every CAT must explicitly list emergency danger signs (e.g., high fever, severe dyspnea, anaphylactic shock, neurological deficits, severe bleeding).
-3. **Valid Prescription Models (`ordonnance`)**:
-   - Every prescription model must contain explicit drug names, exact dosages, and unit measurements (`mg`, `gélule`, `sachet`, `comprimé`, `flacon`, `UI`, `gouttes`).
-4. **Placeholder Rejection**:
-   - Automatically rejects dummy text ("Lorem ipsum", "TODO", "à compléter", "non disponible").
+   - `2. Conduite immédiate si drapeau rouge` *(Mesures urgentes, pas de redondance avec le champ red_flags)*
+   - `3. Examens complémentaires`
+   - `3bis. Terrain, Comorbidités & Contrôle Iatrogène` *(Omettre si sans objet)*
+   - `4. Prise en charge & Stratégie Thérapeutique` *(DCI cibles académiques)*
+   - `5. Orientation, Suivi & Volet Médico-Légal`
+2. **Mandatory Danger Signs (`red_flags`)**:
+   - Every CAT must explicitly list emergency signs requiring urgent specialized intervention.
+3. **Structured 4-Section Prescription Pad (`ordonnance`)**:
+   - `TRAITEMENT NON MÉDICAMENTEUX & RHD`
+   - `1ère INTENTION` (DCI, posologie journalière concrète)
+   - `ALTERNATIVES [OU]` (Motifs d'allergie ou intolérance)
+   - `TRAITEMENT SYMPTOMATIQUE / ADJUVANT`
+4. **Pharmacological Ceilings & Big Data Cross-Check**:
+   - Evaluated in < 0.1ms against **15,857 French medicines (BDPM)** + **4,627 Algerian medicines (Chifa)**.
+5. **GPIP Pediatric Weight Dose Ceilings**:
+   - Enforces `mg/kg/j` targets and age contraindications (*Cyclines < 8 ans, Céfixime < 6 mois*).
+6. **CRAT Teratogenic Firewall**:
+   - Blocks high-risk molecules (*Valproate, Méthotrexate, Isotrétinoïne, NSAIDs at 24 SA, ACEi/ARBs*).
+7. **Lethal Unit Typo Interceptor**:
+   - Intercepts accidental keyboard typos (*500g* instead of *500mg*).
+8. **Automated 3-Attempt Retry Feedback Loop**:
+   - Injects pointed validator feedback into Gemini for automated self-correction.
 
 ---
 

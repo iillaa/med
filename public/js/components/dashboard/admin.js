@@ -90,8 +90,9 @@ export function initAdminTabListeners(onSuggestionHandled) {
         const res = await fetch(api.getApiUrl('/api/admin/cat-generator/single'), {
           method: 'POST',
           headers: api.getHeaders(),
-          body: JSON.stringify({ title, category })
+          body: JSON.stringify({ title })
         });
+
 
         const data = await res.json();
         if (!res.ok || !data.success) {

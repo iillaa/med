@@ -155,9 +155,12 @@ function registerCatGeneratorRoutes(app) {
       }
 
       const targetId = targetCat ? Number(targetCat.id) : (reqIdNum !== null && !isNaN(reqIdNum) ? reqIdNum : getNextIntegerId(prodDb));
-      const targetTitle = targetCat ? targetCat.title : safeTitle;
-
-      const result = await generateCATWithLLM(safeTitle, category || 'Gastro-entérologie', { id: targetId, originalTitle: targetTitle });
+      const result = await generateCATWithLLM(safeTitle, category || 'Gastro-entérologie', {
+        id: targetId,
+        originalTitle: targetTitle,
+        offlineOnly: req.body.offlineOnly === true,
+        customUrls: req.body.customUrls || []
+      });
       result.cat.id = targetId;
       if (req.body.parent_id !== undefined && req.body.parent_id !== null && req.body.parent_id !== '') {
         result.cat.parent_id = Number(req.body.parent_id);
@@ -218,6 +221,22 @@ function registerCatGeneratorRoutes(app) {
       await safeWriteJsonAsync(PROD_DB_PATH, v2Data);
       cache.catsCache = v2Data;
 
+      // Sync sanitized public/data/cats_db.json for offline PWA clients
+      const publicDataFile = path.join(__dirname, '..', '..', 'public', 'data', 'cats_db.json');
+      if (fs.existsSync(path.dirname(publicDataFile))) {
+        const cleanDb = v2Data.map(c => {
+          const { history, _execution_metrics, online_verification_queries, sources, _audit_trail, _raw_llm_response, ...rest } = c;
+          if (Array.isArray(rest.sub_cats)) {
+            rest.sub_cats = rest.sub_cats.map(sub => {
+              const { _execution_metrics, online_verification_queries, sources, ...cleanSub } = sub;
+              return cleanSub;
+            });
+          }
+          return rest;
+        });
+        await safeWriteJsonAsync(publicDataFile, cleanDb);
+      }
+
       await logAuditEvent('PROMOTE_V2_CATS_DATABASE', {
         count: v2Data.length,
         timestamp: new Date().toISOString()
@@ -225,7 +244,7 @@ function registerCatGeneratorRoutes(app) {
 
       res.json({
         success: true,
-        message: `Base V2 promue avec succès en production (${v2Data.length} fiches).`,
+        message: `Base V3.5 promue avec succès en production (${v2Data.length} fiches).`,
         count: v2Data.length
       });
     } catch (err) {
@@ -271,6 +290,22 @@ function registerCatGeneratorRoutes(app) {
 
       await safeWriteJsonAsync(PROD_DB_PATH, prodData);
       cache.catsCache = prodData;
+
+      // Sync sanitized public/data/cats_db.json for offline PWA clients
+      const publicDataFile = path.join(__dirname, '..', '..', 'public', 'data', 'cats_db.json');
+      if (fs.existsSync(path.dirname(publicDataFile))) {
+        const cleanDb = prodData.map(c => {
+          const { history, _execution_metrics, online_verification_queries, sources, _audit_trail, _raw_llm_response, ...rest } = c;
+          if (Array.isArray(rest.sub_cats)) {
+            rest.sub_cats = rest.sub_cats.map(sub => {
+              const { _execution_metrics, online_verification_queries, sources, ...cleanSub } = sub;
+              return cleanSub;
+            });
+          }
+          return rest;
+        });
+        await safeWriteJsonAsync(publicDataFile, cleanDb);
+      }
 
       await logAuditEvent('PROMOTE_SINGLE_CAT', {
         title: updatedCat.title,
@@ -543,15 +578,15 @@ function registerCatGeneratorRoutes(app) {
     if (!verifyAdminAccess(req, res)) return;
 
     const { fetchAndCacheWebSources } = require('../../cat_db_generator/lib/web-fetcher');
-    const { title, forceRefetch, searchKeywords } = req.body || {};
+    const { title, forceRefetch, searchKeywords, customUrls } = req.body || {};
 
     if (!title) {
       return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
     }
 
     try {
-      console.log(`[API Step 1 Web Fetch] Fetching live medical guidelines for: "${title}"...`);
-      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 6, searchKeywords });
+      console.log(`[API Step 1 Web Fetch] Fetching live medical guidelines for: "${title}" (with custom URLs: ${customUrls || 'none'})...`);
+      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 6, searchKeywords, customUrls });
 
       res.json({
         success: true,
@@ -626,15 +661,15 @@ function registerCatGeneratorRoutes(app) {
 
     const { fetchAndCacheWebSources } = require('../../cat_db_generator/lib/web-fetcher');
     const { generateCATWithLLM } = require('../../cat_db_generator/lib/llm-engine');
-    const { id, title, category, forceRefetch, searchKeywords } = req.body || {};
+    const { id, title, category, forceRefetch, searchKeywords, customUrls } = req.body || {};
 
     if (!title) {
       return res.status(400).json({ error: 'Le titre de la CAT est obligatoire.' });
     }
 
     try {
-      console.log(`[1-Tap Pipeline] Executing Step 1 Web RAG + Step 2 IA Synthesis for: "${title}"...`);
-      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 6, searchKeywords });
+      console.log(`[1-Tap Pipeline] Executing Step 1 Web RAG + Step 2 IA Synthesis for: "${title}" (with custom URLs)...`);
+      const sources = await fetchAndCacheWebSources(title, { forceRefetch: !!forceRefetch, maxSources: 6, searchKeywords, customUrls });
       const targetId = Number(id) || null;
       const result = await generateCATWithLLM(title, category || 'Gastro-entérologie', { id: targetId });
 

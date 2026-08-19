@@ -13,28 +13,53 @@
 const fs = require('fs');
 const path = require('path');
 const debugEmitter = require('./debug-emitter');
+const { expandMedicalTokens } = require('./medical-synonyms');
+const { cleanOcrText } = require('./ocr-cleaner');
 
 const PDF_INDEX_PATH = path.join(__dirname, '..', '..', 'pdf_index.json');
+const STAGING_INDEX_PATH = path.join(__dirname, '..', '..', 'data', 'pdf_staging_index.json');
 let cachedPdfIndex = null;
+let lastIndexLoadTime = 0;
 
 /**
- * Loads and caches the ready pre-extracted PDF index in memory
+ * Loads and caches the pre-extracted PDF index, seamlessly merging master and staging drafts
  */
-function getPdfIndex() {
-  if (cachedPdfIndex) return cachedPdfIndex;
+function getPdfIndex(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && cachedPdfIndex && (now - lastIndexLoadTime < 10000)) {
+    return cachedPdfIndex;
+  }
+
+  let masterDocs = [];
   if (fs.existsSync(PDF_INDEX_PATH)) {
     try {
-      const raw = fs.readFileSync(PDF_INDEX_PATH, 'utf8');
-      cachedPdfIndex = JSON.parse(raw);
-      console.log(`📑 Loaded pre-built PDF Index (${cachedPdfIndex.length} indexed documents ready).`);
-      return cachedPdfIndex;
+      masterDocs = JSON.parse(fs.readFileSync(PDF_INDEX_PATH, 'utf8'));
     } catch (e) {
       console.warn(`⚠️ Failed to parse pdf_index.json: ${e.message}`);
     }
-  } else {
-    console.warn(`⚠️ pdf_index.json not found at ${PDF_INDEX_PATH}`);
   }
-  return [];
+
+  let stagingDocs = [];
+  if (fs.existsSync(STAGING_INDEX_PATH)) {
+    try {
+      stagingDocs = JSON.parse(fs.readFileSync(STAGING_INDEX_PATH, 'utf8'));
+    } catch (e) {
+      console.warn(`⚠️ Failed to parse pdf_staging_index.json: ${e.message}`);
+    }
+  }
+
+  // Merge: Staging drafts take precedence
+  const merged = [...stagingDocs];
+  for (const doc of masterDocs) {
+    if (!merged.some(s => s.pdf === doc.pdf)) {
+      merged.push(doc);
+    }
+  }
+
+  cachedPdfIndex = merged;
+  lastIndexLoadTime = now;
+  console.log(`📑 Loaded merged PDF Index (${masterDocs.length} master + ${stagingDocs.length} staging documents ready).`);
+  return cachedPdfIndex;
 }
 
 /**
@@ -54,13 +79,14 @@ function hasExactWord(text, word) {
 function cleanQueryTerm(rawQuery) {
   const cleaned = (rawQuery || '')
     .toLowerCase()
-    .replace(/^cat\s+devant\s+(?:l[a'’]|le|les|un|une)?\s*/i, '')
+    .replace(/^cat\s+devant\s+(?:l[a'’]|le|les|une|un)?\s*/i, '')
     .replace(/^cat\s+/i, '')
     .replace(/^la\s+gale/i, 'gale')
-    .replace(/^conduite\s+à\s+tenir\s+devant\s+(?:l[a'’]|le|les|un|une)?\s*/i, '')
-    .replace(/^conduite\s+a\s+tenir\s+devant\s+(?:l[a'’]|le|les|un|une)?\s*/i, '')
+    .replace(/^conduite\s+à\s+tenir\s+devant\s+(?:l[a'’]|le|les|une|un)?\s*/i, '')
+    .replace(/^conduite\s+a\s+tenir\s+devant\s+(?:l[a'’]|le|les|une|un)?\s*/i, '')
     .replace(/^prise\s+en\s+charge\s+d[eu'’]\s+/i, '')
     .replace(/\b(?:chez\s+l[’']|chez\s+l[ae]|chez\s+les|chez\s+un[e]?|chez)\b/gi, ' ')
+    .replace(/\([^)]+\)/g, '')
     .replace(/[`'’"“”«»]/g, ' ')
     .replace(/[-_/]/g, ' ')
     .replace(/\s+/g, ' ')
@@ -130,11 +156,29 @@ function extractSubstantiveClinicalBlock(pageText, nextPageText = '', queryInfo)
 }
 
 /**
- * Scans the first 10 pages for Table of Contents (Sommaire) lines pointing to exact target page numbers.
- * E.g. "- Intoxication alimentaire ............ 94" -> resolves to Page 94 directly.
+ * Scans for Table of Contents (Sommaire) pointers targeting exact page numbers.
+ * Supports:
+ *   1. Human-Indexed doc.toc arrays (Highest Infallible Accuracy).
+ *   2. Dotted leaders regex matching from pages 1 to 10 (Algorithmic text fallback).
  */
-function findTocPointers(pages, queryInfo) {
+function findTocPointers(pages, queryInfo, docToc = []) {
   const targetPages = new Set();
+
+  // 0. Check Human-Indexed TOC entries first (100% Infallible GPS Navigation)
+  if (docToc && Array.isArray(docToc)) {
+    for (const entry of docToc) {
+      if (!entry || !entry.title || !entry.page) continue;
+      const normalizedTitle = entry.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const cleanPhraseNorm = queryInfo.fullPhrase.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      
+      const hasTitleMatch = hasExactWord(normalizedTitle, cleanPhraseNorm) || 
+                            (queryInfo.tokens.length > 0 && queryInfo.tokens.every(t => hasExactWord(normalizedTitle, t)));
+      if (hasTitleMatch) {
+        targetPages.add(entry.page);
+      }
+    }
+  }
+
   const firstPages = (pages || []).slice(0, 10);
 
   for (const p of firstPages) {
@@ -180,14 +224,17 @@ function findTocPointers(pages, queryInfo) {
 async function searchLocalPDFs(queryTerm, options = {}) {
   const maxMatchesPerFile = options.maxMatchesPerFile || 3;
   const maxTotalDocuments = options.maxTotalDocuments || 8;
+  const targetCategory = (options.category || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const pdfIndex = getPdfIndex();
 
   const queryInfo = cleanQueryTerm(queryTerm);
+  const { expandedTokens, relatedTerms } = expandMedicalTokens(queryInfo.fullPhrase, queryInfo.tokens);
 
   debugEmitter.emitEvent('pdf_search_start', {
     queryTerm,
     cleanPhrase: queryInfo.fullPhrase,
     tokens: queryInfo.tokens,
+    expandedTokens,
     totalDocuments: pdfIndex ? pdfIndex.length : 0
   });
 
@@ -202,22 +249,41 @@ async function searchLocalPDFs(queryTerm, options = {}) {
     const fileName = doc.pdf || 'Unknown.pdf';
     const pages = doc.pages || [];
     const scoredPages = [];
+    const docSpecialty = doc.specialty || 'Médecine Générale';
+    const docSpecialtyNorm = docSpecialty.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    // Document-level boost: Check if filename itself contains the full phrase or key tokens
-    const filenameLower = fileName.toLowerCase();
-    const isDedicatedFile = (pages.length <= 8) && (
-      hasExactWord(filenameLower, queryInfo.fullPhrase) ||
-      queryInfo.tokens.every(t => hasExactWord(filenameLower, t))
+    const isSpecialtyMatch = targetCategory && docSpecialtyNorm && (
+      docSpecialtyNorm.includes(targetCategory) || targetCategory.includes(docSpecialtyNorm)
     );
 
-    // 0. Smart Table of Contents (Sommaire) Page Pointer Resolution
-    const tocTargetPages = findTocPointers(pages, queryInfo);
+    // 1. Document Title & Filename Match (Field 1)
+    const docTitle = (doc.title || fileName || '').toLowerCase();
+    const isTitleMatch = hasExactWord(docTitle, queryInfo.fullPhrase) ||
+                         (queryInfo.tokens.length > 0 && queryInfo.tokens.every(t => hasExactWord(docTitle, t)));
+
+    // 2. Metadata Medical Keywords Match (Field 3)
+    const rawKeywords = Array.isArray(doc.keywords) 
+      ? doc.keywords.join(' ') 
+      : (typeof doc.keywords === 'string' ? doc.keywords : '');
+    const keywordsLower = rawKeywords.toLowerCase();
+    const isKeywordMatch = keywordsLower.length > 0 && (
+      hasExactWord(keywordsLower, queryInfo.fullPhrase) ||
+      queryInfo.tokens.some(t => hasExactWord(keywordsLower, t))
+    );
+
+    const isDedicatedFile = (pages.length <= 8) && (isTitleMatch || isKeywordMatch);
+
+    // 0. Smart Table of Contents (Sommaire) Page Pointer Resolution (Field 4: doc.toc)
+    const tocTargetPages = findTocPointers(pages, queryInfo, doc.toc || []);
 
     for (let i = 0; i < pages.length; i++) {
       const p = pages[i];
       const pageNum = p.page || (i + 1);
-      const pageText = p.content || '';
-      if (!pageText || pageText.length < 40) continue;
+      const rawPageText = p.content || '';
+      if (!rawPageText || rawPageText.length < 40) continue;
+
+      // Clean OCR artifacts before token analysis
+      const pageText = cleanOcrText(rawPageText);
 
       let score = 0;
       const matchedTokens = [];
@@ -229,13 +295,28 @@ async function searchLocalPDFs(queryTerm, options = {}) {
         score += 90;
       }
 
+      // Field 2: Specialty Match Bonus
+      if (isSpecialtyMatch) {
+        score += 35;
+      }
+
+      // Field 1: Title Match Bonus
+      if (isTitleMatch) {
+        score += 40;
+      }
+
+      // Field 3: Keywords Match Bonus
+      if (isKeywordMatch) {
+        score += 30;
+      }
+
       // 1. Full-Phrase exact match (Highest Priority)
       const hasFullPhrase = queryInfo.fullPhrase.length > 3 && hasExactWord(pageText, queryInfo.fullPhrase);
       if (hasFullPhrase) {
         score += 60;
       }
 
-      // 2. Individual Token Matches with Word-Boundaries
+      // 2. Individual Primary Token Matches with Word-Boundaries
       for (const tok of queryInfo.tokens) {
         if (hasExactWord(pageText, tok)) {
           matchedTokens.push(tok);
@@ -243,23 +324,42 @@ async function searchLocalPDFs(queryTerm, options = {}) {
         }
       }
 
-      // 3. Proximity Bonus: If all query tokens appear on the page
-      if (queryInfo.tokens.length > 1 && matchedTokens.length === queryInfo.tokens.length) {
+      let hasSynonymMatch = false;
+      // 3. Synonym & Expanded Clinical Term Matches
+      for (const syn of expandedTokens) {
+        if (!queryInfo.tokens.includes(syn) && hasExactWord(pageText, syn)) {
+          matchedTokens.push(syn);
+          score += 10;
+          hasSynonymMatch = true;
+        }
+      }
+
+      const hasTopicMatch = hasFullPhrase || matchedTokens.length > 0 || isDirectTocTarget || hasSynonymMatch;
+      if (!hasTopicMatch) {
+        // Zero points if the page does not match the clinical topic at all
+        continue;
+      }
+
+      // 4. Proximity Bonus: If all primary query tokens appear on the page
+      if (queryInfo.tokens.length > 1 && matchedTokens.length >= queryInfo.tokens.length) {
         score += 25;
       }
 
-      // 4. Clinical Content Anchors Bonus
+      // 5. Clinical Content Anchors Bonus
       const hasClinicalAnchors = /(?:traitement|posologie|ordonnance|prise\s+en\s+charge|signes\s+de\s+gravit[eé]|drapeaux\s+rouges)/i.test(pageText);
       if (hasClinicalAnchors) {
         score += 20;
       }
 
-      // 5. Dedicated Single-Topic File Bonus
+      // 6. Dedicated Single-Topic File & PDF Lab 2.0 Slice Bonus
       if (isDedicatedFile) {
         score += 40;
       }
+      if (doc.quality === 'staging' || doc.isSlice) {
+        score += 50;
+      }
 
-      // 6. Demote Table of Contents pages
+      // 7. Demote Table of Contents pages
       if (isTOC) {
         score -= 50;
       }
@@ -269,7 +369,7 @@ async function searchLocalPDFs(queryTerm, options = {}) {
         score += 10;
       }
 
-      // If page is clinically relevant (score >= 35 or full phrase hit or direct TOC target)
+      // If page is clinically relevant
       if (score >= 35 || isDirectTocTarget || (hasFullPhrase && !isTOC)) {
         const nextPageText = (i + 1 < pages.length) ? (pages[i + 1].content || '') : '';
         const richSnippet = extractSubstantiveClinicalBlock(pageText, nextPageText, queryInfo);
@@ -296,6 +396,7 @@ async function searchLocalPDFs(queryTerm, options = {}) {
         pdfFile: fileName,
         totalPages: pages.length,
         isDedicatedFile: isDedicatedFile,
+        quality: doc.quality || 'master',
         docScore: totalDocScore,
         matchCount: topPages.length,
         matches: topPages
@@ -310,20 +411,27 @@ async function searchLocalPDFs(queryTerm, options = {}) {
           matchedTokens: tp.matchedTokens,
           hasFullPhrase: tp.hasFullPhrase,
           snippetPreview: tp.snippet.slice(0, 220),
-          quality: doc.quality || 'online'
+          quality: doc.quality || 'master'
         });
       }
     }
   }
 
-  // Rank documents: Dedicated files & highest clinical scores first
-  scoredDocuments.sort((a, b) => {
-    if (a.isDedicatedFile && !b.isDedicatedFile) return -1;
-    if (!a.isDedicatedFile && b.isDedicatedFile) return 1;
-    return b.docScore - a.docScore;
-  });
+  // 1. Check for High-Signal Dedicated Slices / Curated Files (PDF Lab 2.0 Slices & Small Fiches)
+  const dedicatedSlices = scoredDocuments.filter(d => 
+    (d.isDedicatedFile || d.quality === 'staging' || d.totalPages <= 8) && d.docScore >= 70
+  );
 
-  const finalResults = scoredDocuments.slice(0, maxTotalDocuments);
+  let finalResults;
+  if (dedicatedSlices.length >= 1) {
+    dedicatedSlices.sort((a, b) => b.docScore - a.docScore);
+    console.log(`🎯 [Tier 1A Pure Signal] Found ${dedicatedSlices.length} dedicated slice(s). Muting general textbooks to eliminate noise!`);
+    finalResults = dedicatedSlices.slice(0, 4);
+  } else {
+    // 2. Fallback: Query all general multi-chapter textbooks
+    scoredDocuments.sort((a, b) => b.docScore - a.docScore);
+    finalResults = scoredDocuments.slice(0, maxTotalDocuments);
+  }
 
   debugEmitter.emitEvent('pdf_search_done', {
     queryTerm,

@@ -1227,5 +1227,120 @@
       "totalTokens": 17416,
       "timestamp": "2026-08-12T00:13:15.804Z"
     }
+  },
+  {
+    "category": "Cardiologie",
+    "title": "CAT devant une Hypertension Artérielle (HTA)",
+    "search_keywords": [
+      "hypertension arterielle",
+      "HTA essentielle",
+      "urgence hypertensive",
+      "poussée hypertensive",
+      "HTA gravidique",
+      "inhibiteur calcique",
+      "IEC",
+      "ARA2"
+    ],
+    "summary": "**0. Stabilisation Immédiate & ABCDE (Si urgence vitale) :**\n- **A/B :** Libération des voies aériennes, oxygénothérapie si SpO2 < 92% ou dyspnée aiguë.\n- **C :** Prise de PA aux deux bras, monitorage scopique (FC, PA, SpO2). Pose d'une voie veineuse périphérique (VVP).\n- **Distinction capitale :**\n  * **Urgence Hypertensive (PA ≥ 180/110 mmHg + souffrance d'organe cible) :** Nécessite une baisse progressive de la PA en milieu hospitalier/USIC par antihypertenseurs IV. [🚨 Ouvrir la Sous-Fiche Urgence Hypertensive / Crise Hypertensive](subcat:1)\n  * **Poussée Hypertensive asymptomatique :** Pas de baisse brutale IV ! Repos en chambre calme pendant 30-60 min, réévaluation, puis adaptation du traitement oral ambulatoire.\n\n**1. Évaluation initiale & Diagnostic :**\n- **Définition :** PAS ≥ 140 mmHg et/ou PAD ≥ 90 mmHg mesurée au cabinet médical à plusieurs reprises lors de 2 à 3 consultations successives sur 3 à 6 mois.\n- **Confirmation :** Par Automesure Tensionnelle (AMT : ≥ 135/85 mmHg) ou Mesure Ambulatoire de la Pression Artérielle sur 24h (MAPA : moy/24h ≥ 130/80 mmHg).\n- **Interrogatoire :** Ancienneté de l'HTA, antécédents cardiovasculaires familiaux et personnels, habitudes de vie (sel, alcool, tabac, sédentarité), recherche de signes fonctionnels de souffrance d'organe (céphalées, phosphènes, acouphènes, vertiges, dyspnée, précordialgies).\n- **Examen clinique :** Auscultation cardiaque et vasculaire (souffles carotidiens, fémoraux, rénamx), palpation des pouls périphériques, recherche d'œdèmes des membres inférieurs, calcul de l'IMC et du périmètre abdominal.\n\n**2. Drapeaux Rouges & Signes de Gravité :**\n- **Souffrance cérébrale :** Céphalées violentes, déficits neurologiques focaux, confusion, crise convulsive, troubles visuels (AVC, encéphalopathie hypertensive).\n- **Souffrance cardiaque :** Douleur thoracique constrictive (Syndrome coronarien aigu, dissection aortique), dyspnée aiguë d'effort ou de décubitus, râles crépitants bilatéraux (OAP cardiogénique).\n- **Souffrance rénale :** Oligurie, anurie, hématurie macroscopique.\n- **Femme enceinte :** PAS ≥ 140/90 mmHg avec barres épigastriques ou protéinurie (Pré-éclampsie/Éclampsie). [🤰 Ouvrir la Sous-Fiche HTA Gravidique & Pré-éclampsie](subcat:2)\n\n**3. Examens complémentaires :**\n- **Bilan d'évaluation initiale minimal (Systématique) :**\n  * Biologie : Créatininémie avec calcul du DFG (eGFR), Ionogramme sanguin (K+, Na+), Glycémie à jeun, Bilan lipidique complet (EAL : Cholestérol total, HDL, LDL, Triglycérides), Uricémie.\n  * Urine : Bandelette urinaire (recherche de protéinurie et d'hématurie) ou rapport Protéinurie/Créatininurie sur échantillon.\n  * ECG de repos 12 dérivations : Recherche d'une Hypertrophie Ventriculaire Gauche (HVG), de troubles du rythme ou de la conduction, d'anomalies coronariennes.\n- **Bilan de 2nde intention (si suspicion d'HTA secondaire) :** Doppler des artères rénales, aldostéronémie/réninémie, catécholamines urinaire, polysomnographie (apnée du sommeil).\n\n**3bis. Terrain, Comorbidités & Contrôle Iatrogène :**\n- **Filtre Iatrogène :** Éliminer une cause d'HTA iatrogène (AINS, corticoïdes, œstroprogestatifs, sympathomimétiques/décongestionnants nasaux, réglisse/antacides, érythropoïétine).\n- **Grossesse :** IEC, ARA2 et Inhibiteurs de la Rénine sont FORMELLEMENT CONTRE-INDIQUÉS (fœtotoxicité, agénésie rénale).\n- **Insuffisance Rénale / Asthme :** Adapter les IEC/ARA2 selon la créatinine/kaliémie. Bêtabloquants contre-indiqués si asthme évolutif ou BAV de haut degré.\n\n**4. Prise en charge & Conduite à tenir :**\n- **Stratégie Thérapeutique :**\n  * **HTA Grade 1 (PAS 140-159 / PAD 90-99) à bas/moyen risque CV :** Règles Hygiéno-Diététiques (RHD) seules pendant 3 à 6 mois. Si non contrôle ➔ Pharmacothérapie.\n  * **HTA Grade 1 haut risque CV ou HTA Grade 2 (≥ 160/100) / Grade 3 (≥ 180/110) :** RHD + Traitement médicamenteux d'emblée.\n- **Choix Moléculaire :** Bithérapie fixe d'emblée recommandée (IEC ou ARA2 + Inhibiteur Calcique ou Diurétique Thiazidique). Chez le sujet très âgé (> 80 ans) ou fragile, démarrer par une monothérapie progressive.\n\n**5. Orientation, Suivi & Volet Médico-Légal :**\n- **Suivi ambulatoire :** Consultation de contrôle à 1 mois après initiation ou modification de traitement (évaluation de l'efficacité, tolérance, kaliémie et créatinine si IEC/ARA2/Diurétique).\n- **Objectif tensionnel :** PA < 130/80 mmHg chez la majorité des patients (< 140/90 mmHg chez le sujet âgé > 75-80 ans).\n- **Volet Médico-Légal & Éducation :** ALD 30 si HTA sévère compliquée. Éducation à l'automesure tensionnelle (règle des 3/3/3 : 3 mesures le matin, 3 le soir, 3 jours de suite avant consultation).",
+    "red_flags": "PAS ≥ 180 mmHg ou PAD ≥ 110 mmHg associée à un signe de souffrance viscérale : déficit neurologique focal, céphalée en coup de tonnerre, œdème papillaire, douleur thoracique constrictive, dyspnée d'OAP, anurie, ou HTA chez une femme enceinte de > 20 SA.",
+    "ordonnance": "**TRAITEMENT NON MÉDICAMENTEUX & RHD (Prise en charge globale) :**\n- Réduction des apports sodés : < 6 g de sel/jour (ne pas resaler les plats, éviter charcuteries, confections industrielles, eaux gazeuses sodées).\n- Activité physique régulière : Au moins 30 minutes d'activité aérobique modérée 5 fois par semaine (marche rapide, natation, vélo).\n- Mesures diététiques : Régime méditerranéen (riche en fruits, légumes, fibres et pauvre en graisses saturées).\n- Contrôle pondéral : Cible d'IMC < 25 kg/m² ou réduction d'au moins 5 à 10% du poids initial si surpoids.\n- Arrêt impératif du tabac et modération de l'alcool (< 2 verres/jour chez l'homme et la femme, maximum 10 verres/semaine).\n- Automesure tensionnelle à domicile : Relever les chiffres tensionnels matin et soir 3 jours consécutifs.\n\n**1ère INTENTION (Traitement médicamenteux de choix) :**\n- ⚠️ Vérifier l'absence de grossesse, de sténose bilatérale des artères rénales, d'hyperkaliémie (> 5 mmol/L) et d'allergie aux composants.\n- Bithérapie antihypertensive fixe en 1 prise quotidienne le matin :\n  * Perindopril / Amlodipine 5 mg / 5 mg (ex: Coveram 5/5 ou équivalent générique) : 1 comprimé le matin au petit-déjeuner pendant 1 mois.\n\n**ALTERNATIVES [OU] (En cas d'échec, contre-indication, intolérance ou terrain spécifique) :**\n- [OU] Alternative (si toux sous IEC) : ARA2 + Inhibiteur Calcique ➔ Valsartan / Amlodipine 80 mg / 5 mg : 1 comprimé le matin.\n- [OU] Alternative (si contre-indication aux inhibiteurs calciques / œdèmes sévères) : IEC + Diurétique thiazidique ➔ Perindopril / Indapamide 2.5 mg / 0.625 mg : 1 comprimé le matin.\n- [OU] Alternative (Sujet âgé fragile de > 80 ans ou HTA Grade 1 isolée) : Monothérapie ➔ Amlodipine 5 mg : 1 comprimé le matin (adapter jusqu'à 10 mg/j si besoin).\n- ⚠️ ALTERNATIVE : Ne jamais associer un IEC avec un ARA2 en première ou seconde intention (risque majeur d'insuffisance rénale aiguë et d'hyperkaliémie).\n\n**TRAITEMENT SYMPTOMATIQUE / ADJUVANT (Si besoin / En option) :**\n- En cas de céphalées banales tensionnelles associées (sans signe d'alarme) : Paracétamol 1g comprimé : 1 comprimé en cas de besoin, maximum 3g par jour.\n- Si risque cardiovasculaire global très élevé (ex: diabétique, coronarien) : Statine (Atorvastatine 20 mg : 1 cp le soir) selon le bilan lipidique.",
+    "sub_cats": [
+      {
+        "label": "🚨 Urgence Hypertensive & Crise Aiguë (Atteinte d'organe cible)",
+        "summary": "**0. Stabilisation Immédiate & ABCDE :**\n- Hospitalisation immédiate en SAUV / Réanimation / USIC.\n- Position demi-assise, VVP, Monitorage continu (Scope, SpO2, PA non invasive toutes les 5 min).\n- Baisse progressive de la PA : Réduire la PAS de maximum 20 à 25% la 1ère heure (sauf Dissection Aortique : cible PAS < 120 mmHg en 20 min ; ou AVC ischémique : respecter la PA sauf si > 220/120 mmHg).\n\n**1. Diagnostic :**\n- PA ≥ 180/110 mmHg + preuve clinique/paraclinique d'une atteinte d'organe cible (Encéphalopathie, OAP, SCA, Dissection Aortique, Eclampsie, Insuffisance rénale aiguë).\n\n**2. Traitement d'urgence IV :**\n- Antihypertenseur IV à la pousse-seringue électrique (PSE).\n- Premier choix : Nicardipine (Loxen) IV.",
+        "red_flags": "Céphalées en coup de tonnerre, déficit focal, œdème aigu du poumon (râles crépitants, expectorations mousseuses), douleur thoracique déchirante irradiant dans le dos, protéinurie + anurie.",
+        "ordonnance": "**1ère INTENTION (En milieu hospitalier / SAUV) :**\n- Nicardipine (Loxen ampoules 10 mg/10 ml IV) :\n  * Administration en bolus IVL : 1 à 2.5 mg (sur 5 min) ou perfusion continue IVSE à la vitesse de 8 à 15 mg/h pendant 30 min.\n  * Dès l'obtention de la cible tensionnelle, réduire le débit pour titration de maintien (2 à 4 mg/h).\n- Relais per os dès stabilisation (Loxen LP 50 mg : 1 gélule 2 fois par jour).\n\n**ALTERNATIVES [OU] (Selon le tableau clinique d'atteinte d'organe) :**\n- [OU] Alternative (si OAP cardiogénique associé) : Furosémide (Lasilix) 40 à 80 mg IVD + Dinitrate d'Isosorbide (Risordan) 1 à 8 mg/h au PSE.\n- [OU] Alternative (si Dissection Aortique) : Labétalol (Trandate) IV : bolus de 20 à 50 mg puis 20 à 160 mg/h au PSE (cible FC < 60/min et PAS < 120 mmHg)."
+      },
+      {
+        "label": "🤰 HTA Gravidique & Pré-éclampsie",
+        "summary": "**0. Stabilisation & Évaluation Materno-Fœtale :**\n- Définition HTA gravidique : PAS ≥ 140 mmHg et/ou PAD ≥ 90 mmHg apparaissant après 20 semaines d'aménorrhée (SA).\n- Recherche de Pré-éclampsie : HTA + Protéinurie ≥ 300 mg/24h (ou ≥ 2+ à la bandelette).\n\n**1. Diagnostic & Surveillance :**\n- Bilan pré-éclampsie : FNS/Plaquettes (schizocytes), Bilan hépatique (ASAT/ALAT pour HELLP syndrome), Urée/Créatinine, Acide urique, Protéinurie des 24h.\n- Bilan fœtal : Échographie obstétricale, Doppler ombilical, Enregistrement RCF (Rythme Cardiaque Fœtal).\n\n**2. Contre-indications strictes :**\n- ⚠️ IEC, ARA2 et Inhibiteurs de la Rénine sont FORMELLEMENT CONTRE-INDIQUÉS pendant toute la grossesse.",
+        "red_flags": "Barre épigastrique intense (hématome sous-capsulaire du foie / HELLP), céphalées pulsatiles rebelles, phosphenes/acouphènes, ROT hyperréflexiques, prise de poids rapide avec œdèmes massifs, baisse des mouvements fœtaux.",
+        "ordonnance": "**TRAITEMENT NON MÉDICAMENTEUX :**\n- Repos au calme en décubitus latéral gauche (DLG).\n- Ne PAS instaurer de régime sans sel strict chez la femme enceinte.\n\n**1ère INTENTION (Antihypertenseurs autorisés pendant la grossesse) :**\n- Méthyldopa (Aldomet) 250 mg : 1 comprimé 2 à 3 fois par jour per os (max 2g/jour).\n\n**ALTERNATIVES [OU] (En cas d'intolérance ou d'efficacité insuffisante) :**\n- [OU] Alternative (Bêtabloquant à action alpha) : Labétalol (Trandate) 100 mg à 200 mg : 1 comprimé 2 à 3 fois par jour per os.\n- [OU] Alternative (Inhibiteur Calcique) : Nicardipine (Loxen) 20 mg : 1 comprimé 3 fois par jour OU Loxen LP 50 mg : 1 gélule 2 fois par jour.\n- ⚠️ CONTRE-INDICATION ABSOLUE : Les IEC (Ramipril, Captopril, etc.) et les ARA2 (Valsartan, Losartan, etc.) sont totalement proscrits."
+      }
+    ],
+    "id": 59,
+    "pdf_keywords": [
+      "Cardiologie_1",
+      "ECG",
+      "CAT Gynécologie_(3)",
+      "CAT Dr_Boughoufala"
+    ],
+    "online_verification_queries": [
+      "https://www.google.com/search?q=une%20Hypertension%20Art%C3%A9rielle%20(HTA)%20site%3Asante.gov.dz",
+      "https://www.google.com/search?q=une%20Hypertension%20Art%C3%A9rielle%20(HTA)%20site%3Acnpm.org.dz",
+      "https://www.google.com/search?q=une%20Hypertension%20Art%C3%A9rielle%20(HTA)%20site%3Asamidz.com"
+    ],
+    "sources": [
+      {
+        "type": "pdf",
+        "name": "Cardiologie_1.pdf"
+      },
+      {
+        "type": "pdf",
+        "name": "ECG.pdf"
+      },
+      {
+        "type": "pdf",
+        "name": "CAT Gynécologie_(3).pdf"
+      },
+      {
+        "type": "pdf",
+        "name": "CAT Dr_Boughoufala.pdf"
+      },
+      {
+        "type": "pdf",
+        "name": "150 Ordonnances types.pdf"
+      },
+      {
+        "type": "pdf",
+        "name": "Médicaments des urgences .pdf"
+      },
+      {
+        "type": "pdf",
+        "name": "Entretiens_.pdf"
+      },
+      {
+        "type": "pdf",
+        "name": "ORL.pdf"
+      },
+      {
+        "type": "clinical_library",
+        "name": "HAS FICHES MÉMO (has_bonnes_pratiques_ambulatoires.md)",
+        "category": "has_clinical_memos",
+        "score": 184
+      },
+      {
+        "type": "clinical_library",
+        "name": "MEDG.FR — CONDUITE À TENIR (medg_syntheses_cat_essentielles.md)",
+        "category": "medg_fiches_cat",
+        "score": 18
+      },
+      {
+        "type": "clinical_library",
+        "name": "CRAT GROSSESSE & ALLAITEMENT (crat_pharmacologie_grossesse.md)",
+        "category": "crat_pregnancy_lactation",
+        "score": 16
+      },
+      {
+        "type": "web_cache",
+        "name": "medg.fr"
+      },
+      {
+        "type": "web_cache",
+        "name": "msdmanuals.com"
+      },
+      {
+        "type": "web_cache",
+        "name": "ncbi.nlm.nih.gov"
+      }
+    ],
+    "_execution_metrics": {
+      "model": "gemini-3.6-flash",
+      "latencyMs": 42550,
+      "promptTokens": 10272,
+      "completionTokens": 3755,
+      "totalTokens": 17139,
+      "timestamp": "2026-08-17T22:17:45.815Z"
+    }
   }
 ]

@@ -5,6 +5,8 @@ export function renderSummary(text, cat, subProfileLabel) {
   const summaryView = document.getElementById('summary-view');
   if (!summaryView) return;
 
+  const contentText = text || cat?.summary || cat?.synthese || '';
+
   let bannerHtml = '';
   if (state.activeSubCatIndex > 0 && subProfileLabel) {
     bannerHtml = `
@@ -19,7 +21,8 @@ export function renderSummary(text, cat, subProfileLabel) {
     `;
   }
 
-  summaryView.innerHTML = bannerHtml + parseSummaryMarkdown(text);
+  summaryView.innerHTML = bannerHtml + parseSummaryMarkdown(contentText);
+
 
   if (state.isAdmin && cat && cat.history && cat.history.length > 0) {
     let historyHtml = '<div class="cat-history-section" style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:14px; pointer-events:none;">';

@@ -38,28 +38,49 @@ The mode can switch dynamically at runtime via `api.setAppMode()`, which dispatc
 
 ---
 
-## 🧠 4-Stream Knowledge & Human Active Learning Engine (v1.7.0)
+## 🧠 5-Stream Knowledge & Self-Correcting Medical Engine (v1.8.9)
 
-Dr. CAT's V2 Dual RAG generation engine synthesizes medical protocols using 4 distinct, prioritized knowledge streams:
+Dr. CAT's V3.5 Dual RAG generation engine synthesizes medical protocols using 5 prioritized knowledge streams:
 
 | Stream | Source | Role & Priority |
 |---|---|---|
-| **Stream 1** | **Offline PDF RAG Index (`pdf_index.json`)** | **Priority 1 (Baseline)**: Local Algerian drug monograms, brand names (Ascabiol, Spasfon, Tiorfan, Smecta), and regional emergency protocols. |
-| **Stream 2** | **Web RAG Live Cache (`web_cache/`)** | **Priority 2 (Enrichment)**: Live guidelines from NCBI PubMed, MSD Manuals, MedG, HAS, and legal certificate requirements. |
-| **Stream 3** | **Gemini AI Synthesis Engine** | **Priority 3 (Reasoning)**: Clinical prose formatting, posology precision, and strict Schema Lock enforcement (5-Step Clinical vs 3-Step Administrative). |
-| **Stream 4** | **Human Active Learning Memory** | **Absolute Priority Over Ride**: Learns from manual doctor edits (`✏️ Éditer` in Generator Lab UI). Stamps `_human_edited: true` in V2 DB and injects previous doctor corrections into future AI synthesis prompts. |
+| **Stream 1: Tier 1 Core Corpus** | **PDF Index & Staging Slices (`pdf_index.json` & `pdf_staging_index.json`)** | **Priority 1 (Pure Signal Slices)**: Dedicated 1–3 page clinical slices created in PDF Lab 2.0, university manuals, and local textbooks. When a dedicated slice is matched, general 500-page textbooks are muted. |
+| **Stream 2: Tier 2 Clinical Library** | **Standard Clinical Decision Library (`clinical_library/`)** | **Priority 2 (Action Protocols)**: Concise CAT decision trees from MedG.fr, Antibioclic/SPILF, SFMU Urgences, Pédiadol, MSF Guides, Orphanet Urgences, and CRAT. |
+| **Stream 3: Doctor Custom Links** | **Jina Reader Link Injector (`data/web_cache/`)** | **Priority 3 (Specialized Links)**: Custom URLs pasted by doctors (`sante.gov.dz`, `cnpm.org.dz`, specific guidelines) converted to clean markdown via Jina Reader. |
+| **Stream 4: Online Web Research** | **Web RAG Live Cache (`web_cache/`)** | **Priority 4 (Enrichment)**: Full-phrase search on PubMed, MSD Manuals, and Vidal (with automatic SERP shell rejection). |
+| **Stream 5: Active Learning** | **Human Active Learning Memory** | **Absolute Priority Override**: Retains manual doctor edits (`✏️ Éditer` in Generator Lab UI). Stamps `_human_edited: true` and injects exact doctor preferences into future AI prompts. |
 
 ```text
-  [1. Offline PDF Index]   [2. Web RAG Cache]   [3. Gemini 3.6 Flash]   [4. Human Active Learning Memory]
-             \                     |                      |                     /
-              \                    |                      |                    /
-               ▼                   ▼                      ▼                   ▼
-           ┌──────────────────────────────────────────────────────────────────┐
-           │     DUAL RAG + HUMAN ACTIVE LEARNING SYNTHESIS ENGINE           │
-           │     - Enforces 5-Step Clinical / 3-Step Administrative Locks    │
-           │     - Preserves 100% of Doctor Modifications & Preferences      │
-           └──────────────────────────────────────────────────────────────────┘
+  [1. Tier 1 Core Slices]   [2. Tier 2 Guidelines]   [3. Doctor Links]   [4. Web RAG]   [5. Active Learning]
+            \                       \                     |                    /                 /
+             \                       \                    |                   /                 /
+              ▼                       ▼                   ▼                  ▼                 ▼
+          ┌────────────────────────────────────────────────────────────────────────────────────────┐
+          │                  DUAL RAG V3.5 SYNTHESIS ENGINE (GEMINI FLASH)                         │
+          │                  - 5-Field Metadata Precision Scoring (Title, Specialty, Keywords, TOC)│
+          │                  - Pure Signal Isolation (Mutes multi-chapter textbooks on slice hit)  │
+          │                  - 5-Step Invariant Clinical Structure with Conditional ABCDE & Terrain│
+          │                  - Academic DCI Target Ranges in Summary vs Real-Life 4-Part Ordonnance│
+          └───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                                      │
+                                                      ▼
+          ┌────────────────────────────────────────────────────────────────────────────────────────┐
+          │             DETERMINISTIC 8-LAYER MEDICAL VALIDATOR & PHARMACOPEIA FIREWALL            │
+          │             - French BDPM Pharmacopeia (15,857 authorized drugs & 4,474 DCIs)          │
+          │             - Algerian Drug Nomenclature (4,627 commercial brands & Chifa status)      │
+          │             - GPIP / Antibioclic Pediatric Weight Ceilings (mg/kg/j) & Age Bounds      │
+          │             - CRAT Absolute Teratogenic Block (Valproate, MTX, Isotretinoin, NSAIDs)   │
+          │             - Lethal Unit Typo Interceptor (500g vs 500mg)                             │
+          │             - Anti-Hallucination Token Firewall & Automated 3-Attempt Retry Feedback   │
+          └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### 🛡️ Pharmacological Toxic Ceilings & Big Data Safety Shield (`lib/clinical_drug_ceilings.json`)
+The validation engine enforces deterministic dosage bounds and contraindication checks compiled from authoritative clinical databases:
+* **`BDPM France` (Base de Données Publique des Médicaments)**: Ingested 15,857 authorized pharmaceutical products, 4,474 DCIs, and 8,206 generic associations (`data/bdpm_pharmacology.json`).
+* **`MSPRH / Chifa Algérie` (Nomenclature Nationale)**: Ingested 4,627 registered commercial brand names, dosages, and galenic forms (`data/algerian_nomenclature.json`).
+* **`CRAT` (Centre de Référence sur les Agents Tératogènes)**: Systematic blocking of teratogenic/fœtotoxic molecules (Valproate, Methotrexate, Isotretinoin, NSAIDs after 24 SA, ACE inhibitors, ARBs) in pregnancy contexts.
+* **`GPIP` / `Antibioclic` / `Pédiadol`**: Strict weight-based pediatric bounds (`mg/kg/jour` and single-dose limits).
 
 ---
 
@@ -90,6 +111,17 @@ To keep track of modifications without overloading client devices:
 * **Change Log Archiving**: Whenever an admin directly edits a CAT or approves an edit suggestion, the server records the change type, timestamp, and a copy of the previous text values (`previousState`) inside a `history` array in `cats_db.json`.
 * **Non-Admin API Stripping**: To protect bandwidth during synchronization, the GET `/api/cats` API endpoint strips the `history` fields from responses unless the request is authenticated with an admin token.
 * **Offline Client Build Pruning**: During compilation (`npm run build` / `node build.js`), the build script parses the database and deletes the `history` property from all items before writing them to the web assets folder. This guarantees that the offline standalone APK package remains extremely lightweight.
+
+### 5. SafeStorage & Protected Key Policy Subsystem (`safeStorage.js` v1.8.1)
+Browser `localStorage` is restricted to ~5 MB per origin. When storage pressure occurs:
+* **Regex Protection Engine**: Keys matching `PROTECTED_KEY_PATTERNS` (`/^dr_cat_notes_/`, `/^dr_cat_user_progress$/`, `/^dr_cat_leitner$/`, `/^dr_cat_streak$/`, `/^dr_cat_custom_/`) are strictly safeguarded and **never deleted**.
+* **Intelligent LRU Pruning**: On `QuotaExceededError` (code 22), the engine sorts evictable keys by priority (transient network sync caches `dr_cat_synced_database*` purged first, then temporary search caches) to free space immediately without touching doctor study data.
+* **Safe JSON Parsing**: `safeParseJSON` handles malformed or truncated inputs gracefully with fallback defaults.
+
+### 6. Pre-Cached Zero-Allocation Search Indexing (`sidebar.js` v1.8.1)
+Traditional search filtering creates string lowercase copies and concatenations on every keystroke:
+* **One-Pass Token Cache**: Each CAT lazily compiles a normalized composite string `cat._searchTokenStr` (combining ID, title, category, summary, red flags, and sub-category titles).
+* **Zero GC Pressure at 60 FPS**: Subsequent multi-keyword queries execute simple array `.every(token => cat._searchTokenStr.includes(token))` checks directly in RAM with zero string object allocations during rapid typing.
 
 ---
 

@@ -378,21 +378,27 @@ function filterCats(onFilterTriggered) {
   const filtered = state.allCats.filter(cat => {
     if (!cat) return false;
 
-    // Deep search across title, summary, ordonnance/prescription, red flags, category, keywords, and notes
-    const titleStr = (cat.title || '').toLowerCase();
-    const summaryStr = (cat.summary || cat.customSummary || '').toLowerCase();
-    const ordonnanceStr = (cat.ordonnance || cat.customOrdonnance || '').toLowerCase();
-    const redFlagsStr = (cat.red_flags || '').toLowerCase();
-    const categoryStr = (cat.category || '').toLowerCase();
-    const notesStr = (cat.notes || '').toLowerCase();
-    const keywordsStr = Array.isArray(cat.pdf_keywords) ? cat.pdf_keywords.filter(k => k && typeof k === 'string').join(' ').toLowerCase() : (cat.pdf_keywords || '').toLowerCase();
-    const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
+    // Use pre-cached searchable text index string to avoid string allocations during typing
+    if (!cat._searchTokenStr) {
+      const titleStr = (cat.title || '').toLowerCase();
+      const summaryStr = (cat.summary || cat.customSummary || '').toLowerCase();
+      const ordonnanceStr = (cat.ordonnance || cat.customOrdonnance || '').toLowerCase();
+      const redFlagsStr = (cat.red_flags || '').toLowerCase();
+      const categoryStr = (cat.category || '').toLowerCase();
+      const notesStr = (cat.notes || '').toLowerCase();
+      const keywordsStr = Array.isArray(cat.pdf_keywords)
+        ? cat.pdf_keywords.filter(k => k && typeof k === 'string').join(' ').toLowerCase()
+        : (cat.pdf_keywords || '').toLowerCase();
+      const subCatsStr = Array.isArray(cat.sub_cats)
+        ? cat.sub_cats.map(s => `${s.label || ''} ${s.summary || ''} ${s.ordonnance || ''}`).join(' ').toLowerCase()
+        : '';
+      const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
 
-    // Combine all fields into a single searchable text space
-    const fullCatText = `${idStr} ${titleStr} ${categoryStr} ${summaryStr} ${ordonnanceStr} ${redFlagsStr} ${keywordsStr} ${notesStr}`;
+      cat._searchTokenStr = `${idStr} ${titleStr} ${categoryStr} ${summaryStr} ${ordonnanceStr} ${redFlagsStr} ${keywordsStr} ${notesStr} ${subCatsStr}`;
+    }
 
     // 1. Search text match (every search token must appear somewhere in the CAT content)
-    const matchesQuery = queryTokens.length === 0 || queryTokens.every(token => fullCatText.includes(token));
+    const matchesQuery = queryTokens.length === 0 || queryTokens.every(token => cat._searchTokenStr.includes(token));
 
     // 2. Category filter match
     const matchesCategory = selectedCat === 'all' || cat.category === selectedCat;
@@ -403,6 +409,7 @@ function filterCats(onFilterTriggered) {
     else if (state.activeStatusFilter === 'doing') matchesStatus = cat.status === 'doing';
     else if (state.activeStatusFilter === 'done') matchesStatus = cat.status === 'done';
     else if (state.activeStatusFilter === 'redflags') {
+      const redFlagsStr = (cat.red_flags || '').toLowerCase();
       matchesStatus = redFlagsStr.length > 0 && 
                       !redFlagsStr.includes("aucun signe de gravité") && 
                       !redFlagsStr.includes("aucun");
@@ -415,3 +422,4 @@ function filterCats(onFilterTriggered) {
     onFilterTriggered(filtered);
   }
 }
+

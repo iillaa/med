@@ -314,18 +314,23 @@ async function generateCATWithLLM(title, category, options = {}) {
   const catObjPlaceholder = { title: cleanTitle, category: category || 'Gastro-entérologie' };
   const isAdmin = isAdministrativeCAT(catObjPlaceholder);
 
-  // 1. Offline RAG Search inside ready pdf_index.json
-  console.log(`🔍 [Offline RAG] Searching pre-extracted pdf_index.json for "${cleanTitle}"...`);
-  const pdfMatches = await searchLocalPDFs(cleanTitle, { maxMatchesPerFile: 3 });
-  const ragSnippets = pdfMatches.flatMap(p => p.matches.map(m => `[PDF Index: ${p.pdfFile}] ${m.snippet}`)).join('\n');
+  // 1. Tier 1: Core Curated Reference Documents (PDF Index)
+  console.log(`🔍 [Tier 1 Core References] Searching pdf_index.json for "${cleanTitle}" (category: ${category})...`);
+  const pdfMatches = await searchLocalPDFs(cleanTitle, { maxMatchesPerFile: 3, category });
+  const ragSnippets = pdfMatches.flatMap(p => p.matches.map(m => `[Core Reference: ${p.pdfFile}] ${m.snippet}`)).join('\n');
   const pdfKeywords = pdfMatches.map(p => p.pdfFile.replace(/\.pdf$/i, '')).slice(0, 4);
 
+  // 1bis. Tier 2: Standard Clinical Guidelines Library (MSF, HAS, SFMU, Colleges)
+  const { queryClinicalLibrary } = require('./knowledge-library');
+  const libraryMatches = queryClinicalLibrary(cleanTitle, options.search_keywords);
+  const librarySnippets = libraryMatches.map(l => `[Standard Clinical Library: ${l.source} (${l.file})]\n${l.snippet}`).join('\n\n');
+
   // 2. Online RAG Web Cache Fetching
-  let webSources = getCachedWebSources(cleanTitle);
-  if (webSources.length === 0 && options.autoFetchWeb !== false) {
+  let webSources = options.offlineOnly ? [] : getCachedWebSources(cleanTitle);
+  if (!options.offlineOnly && webSources.length === 0 && options.autoFetchWeb !== false) {
     console.log(`🌐 [Online RAG] Step 1: Web cache missing for "${cleanTitle}". Fetching live web sources...`);
     try {
-      webSources = await fetchAndCacheWebSources(cleanTitle, { maxSources: 3 });
+      webSources = await fetchAndCacheWebSources(cleanTitle, { maxSources: 3, customUrls: options.customUrls });
     } catch (e) {
       console.warn(`⚠️ Web fetch fallback error: ${e.message}`);
     }
@@ -356,52 +361,52 @@ DIRECTIVE ABSOLUE : Conserve impérativement les préférences de prescription, 
 
   // 5. Formulate System Prompt with Master Clinical Logic & Strict Schema Lock
   let systemPrompt = `Tu es le moteur d'intelligence médicale de Dr. CAT (Doctor Clinical Action Protocol) alimenté par Gemini 3.6 Flash (Dual RAG + Human Active Learning Engine).
-Ta mission est de synthétiser et de structurer une conduite à tenir (CAT) clinique ou administrative hautement précise, vérifiée et conforme aux recommandations médicales.
+Ta mission est de synthétiser et de structurer une conduite à tenir (CAT) clinique ou administrative hautement précise, vérifiée et conforme aux recommandations médicales actuelles.
 
-SOURCES ET RÉFÉRENCES À SYNTHÉTISER (4 ANCRES DE VÉRITÉ MÉDICALE) :
+SOURCES ET RÉFÉRENCES (4 ANCRES DE VÉRITÉ MÉDICALE) :
 ${sourcesSummary}
 - Algérie : Ministère de la Santé (sante.gov.dz), CNPM (cnpm.org.dz), SAMI (samidz.com).
 - France & International : Vidal, HAS, SFMU, ANSM, MSF, WHO/OMS, CRAT.
 
-1. HIÉRARCHIE STRICTE DES SOURCES DE CONNAISSANCES :
-   - PRIORITÉ 1 (SOURCE PRIMAIRE LOCALE - BASELINE) : EXTRAITS PDF LOCAUX (PDF Index)
-     * Détermine les molécules disponibles localement, les posologies usuelles et les habitudes de prescription (ex: Ascabiol/Benzoate de benzyle, Spasfon/Phloroglucinol, Tiorfan/Racécadotril, Smecta/Diosmectite).
-     * Ne masque JAMAIS un traitement local de premier recours au profit d'une molécule internationale indisponible localement.
-   - PRIORITÉ 2 (ENRICHISSEMENT ET SÉCURITÉ EN LIGNE) : DONNÉES WEB RAG (StatPearls NCBI, MSD Manuals, MedG Consensus, Wiki FR)
+1. HIÉRARCHIE DES SOURCES DE CONNAISSANCES :
+   - PRIORITÉ 1 (SOCLE CLINIQUE DE RÉFÉRENCE) : FICHES DÉDIÉES DU CORPUS LOCAL (PDF Index)
+     * Utilise les molécules disponibles localement, les posologies usuelles et les habitudes de prescription comme ancre thérapeutique prioritaire.
+   - PRIORITÉ 2 (ENRICHISSEMENT CLINIQUE EN LIGNE) : DONNÉES WEB RAG (PubMed/NCBI, MSD Manuals, MedG, Wiki FR)
      * Fournit les critères diagnostiques récents, les scores pronostiques et les bilans paracliniques recommandés.
-   - PRIORITÉ 3 (MÉMOIRE MÉDICALE ACTIVE) : CORRECTIONS ET ÉDITIONS MANUELLES DE L'UTILISATEUR MÉDECIN
-   - PRIORITÉ 4 (SYNTHÈSE ET VALIDATION) : MOTEUR DE RAISONNEMENT GEMINI (Synthèse, mise en page et anti-hallucination).
+   - PRIORITÉ 3 (MÉMOIRE MÉDICALE ACTIVE) : Corrections et préférences de l'utilisateur médecin.
+   - PRIORITÉ 4 (SYNTHÈSE ET VALIDATION) : Moteur de raisonnement Gemini (structuration élégante, fluidité médicale et anti-hallucination).
 
-2. RÈGLE STRICTE DE RÉDACTION DE L'ORDONNANCE (ANTI-POLYPHARMACIE & LEDGER STRUCTURÉ EN 4 SECTIONS) :
-   - INTERDICTION ABSOLUE DE LA LISTE PLATE NUMÉROTÉE (1, 2, 3, 4) faisant croire que tous les médicaments doivent être pris ensemble !
-   - Le champ "ordonnance" DOIT OBLIGATOIREMENT être structuré avec les 4 rubriques suivantes en Markdown :
+2. RÈGLE DE RÉDACTION DE L'ORDONNANCE (RÉPLIQUE RÉELLE EN 4 SECTIONS) :
+   - Le champ "ordonnance" est une RÉPLIQUE CONCRÈTE D'ORDONNANCE DE CABINET prête à être imprimée/copiée.
+   - Interdiction formelle de la liste plate numérotée (1, 2, 3, 4) confondant traitements et alternatives.
+   - Structuration obligatoire en Markdown :
 
-   **TRAITEMENT NON MÉDICAMENTEUX & RHD (Prise en charge globale) :**
-   - Mesures diététiques précises, activité physique adaptée, kinésithérapie/rééducation, sevrage des toxiques et éducation thérapeutique du patient.
+   **TRAITEMENT NON MÉDICAMENTEUX & RHD :**
+   - Mesures diététiques, hydratation, repos, kinésithérapie, éviction des toxiques et éducation du patient.
 
    **1ère INTENTION (Traitement médicamenteux de choix) :**
-   - Nom de la molécule, forme galénique, posologie exacte, mode, rythme et durée d'administration (ex: Paracétamol 1g : 1 cp toutes les 8h si douleur, max 3g/j).
-   - ⚠️ Micro-filtre d'allergie systématique : Mentionne le rappel d'allergie préalable si pertinent (ex: 'Vérifier l'absence d'allergie aux pénicillines/bêta-lactamines').
+   - DCI et/ou nom commercial usuel, forme galénique exacte (cp, sirop, sachet), posologie journalière concrète (ex: 1 cp matin, midi et soir au milieu des repas pendant 7 jours).
+   - ⚠️ Mentionner le rappel d'allergie préalable si pertinent (ex: 'Vérifier l'absence d'allergie aux pénicillines/bêta-lactamines').
 
-   **ALTERNATIVES [OU] (En cas d'échec, contre-indication, intolérance ou terrain spécifique) :**
-   - Précède TOUJOURS chaque traitement alternatif par la mention claire '[OU] Alternative' ou '2ème intention' avec le motif clinique (ex: '[OU] Alternative (si allergie aux bêta-lactamines) : Azithromycine 500 mg à J1 puis 250 mg/j de J2 à J5').
-   - Si deux traitements sont des alternatives exclusives, ajoute l'avertissement formel : '⚠️ ALTERNATIVE : Ne pas associer en première intention'.
+   **ALTERNATIVES [OU] (En cas d'allergie, échec, intolérance ou terrain spécifique) :**
+   - Précéder TOUJOURS par la mention claire '[OU] Alternative' ou '2ème intention' avec le motif clinique (ex: '[OU] Alternative si allergie aux pénicillines : Azithromycine 500 mg à J1 puis 250 mg/j de J2 à J5').
+   - Si deux traitements sont des alternatives exclusives, ajouter : '⚠️ ALTERNATIVE : Ne pas associer en première intention'.
 
    **TRAITEMENT SYMPTOMATIQUE / ADJUVANT (Si besoin / En option) :**
-   - Traitements de confort ciblés uniquement sur les symptômes associés (ex: 'Uniquement en cas de prurit intense : Anti-histaminique H1...').
+   - Traitements de confort ciblés uniquement sur les symptômes associés (ex: 'Uniquement si fièvre > 38.5°C : Paracétamol 1g...').
 
 3. RÈGLES DE SÉCURITÉ CLINIQUE PAR TERRAIN :
-   - Pédiatrie : Posologies obligatoirement exprimées en dose-poids (mg/kg/j ou cuillères-mesures selon le poids). Rappel du seuil néonatal (< 2 mois = avis spécialisé/hospitalier).
-   - Grossesse / Allaitement : Respect strict des données du CRAT. Mentionner les contre-indications absolues (ex: IEC/ARA2, AINS aux 2ème/3ème trimestres).
-   - Insuffisance Rénale / Gériatrie : Adapter les doses selon le DFG (Cockcroft / CKD-EPI) et éliminer les molécules néphrotoxiques.
+   - Pédiatrie : Posologies obligatoirement exprimées en dose-poids (mg/kg/j ou cuillère-mesure selon le poids). Rappel du seuil néonatal (< 2 mois = avis spécialisé/hospitalier).
+   - Grossesse / Allaitement : Respect strict des données du CRAT. Mentionner les contre-indications absolues (ex: IEC/ARA2, AINS aux T2/T3).
+   - Insuffisance Rénale / Gériatrie : Adapter les doses selon le DFG (Cockcroft) et éliminer les molécules néphrotoxiques.
    - Psychiatrie & Interactions : Alerte sur le risque de syndrome sérotoninergique (ISRS + Tramadol) et d'allongement du QTc.
-   - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie et les sources ne la concernent pas.
+   - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie ne la concerne pas.
 
 4. SOUS-PROFILS CLINIQUES ET SUB-CATS DÉDIÉS (Pour les pathologies complexes ou à sous-types critiques) :
    - Si la pathologie présente des complications aiguës majeures ou des formes cliniques distinctes nécessitant une prise en charge/réanimation dédiée (ex: Diabète ➔ Acidocétose diabétique, Diabète gestationnel ; Diarrhée ➔ Forme glairo-sanglante, Nourrisson/SRO ; HTA ➔ Urgence hypertensive, HTA gravidique ; Asthme ➔ Asthme aigu grave) :
    - A. DANS LE TEXTE "summary" PRINCIPAL : Insère un lien contextuel naturel vers la sous-fiche avec la syntaxe markdown :
      [🚨 Ouvrir la Sous-Fiche Acidocétose Diabétique](subcat:1) ou [👶 Ouvrir la Sous-Fiche Nourrisson / SRO](subcat:2)
-   - B. DANS LE TABLEAU "sub_cats" DU JSON : Fournis la sous-fiche complète avec ses 5 étapes modulaires, ses red_flags et son ordonnance dédiée.
+   - B. DANS LE TABLEAU "sub_cats" DU JSON : Fournis la sous-fiche complète avec ses étapes modulaires, ses red_flags et son ordonnance dédiée.
    - Si la pathologie est simple ou univoque (ex: Constipation banale, Furoncle simple), ne génère pas de sub_cats (tableau vide ou absent).
 `;
 
@@ -433,21 +438,14 @@ LE CHAMP "ordonnance" DOIT CONTENIR : "Modèle de Rédaction / Formule Type Prê
 `;
   } else {
     systemPrompt += `
-STRUCTURE MODULAIRE CLINIQUE DU CHAMP "summary" (EXACTEMENT CES TITRES EN MARKDOWN) :
-**0. Stabilisation Immédiate & ABCDE (Si urgence vitale) :**
-(Si détresse respiratoire, hémodynamique ou neurologique : Airway, Breathing, Circulation, Dextro/Glasgow avant de poser le diagnostic)
-**1. Évaluation initiale & Diagnostic :**
-(Interrogatoire, sémiologie clinique fine, critères diagnostiques positifs)
-**2. Drapeaux Rouges & Signes de Gravité :**
-(Signes d'alarme imposant une hospitalisation d'urgence ou un avis spécialisé immédiat)
-**3. Examens complémentaires :**
-(Bilan de 1ère intention et 2nde intention, imagerie, biologie, ECG)
-**3bis. Terrain, Comorbidités & Contrôle Iatrogène :**
-(Filtre Allergies, adaptation au DFG/clairance, précautions grossesse/pédiatrie, évitement des interactions médicamenteuses à risque)
-**4. Prise en charge & Conduite à tenir :**
-(Mesures immédiates, surveillance, règles de prescription)
-**5. Orientation, Suivi & Volet Médico-Légal :**
-(Suivi ambulatoire vs hospitalier, éviction scolaire/collective, MDO - Maladies à Déclaration Obligatoire, aptitude à la conduite, ALD 30, arrêt de travail)
+STRUCTURE MODULAIRE CLINIQUE DU CHAMP "summary" (Inclure uniquement les étapes pertinentes. Ne JAMAIS écrire "sans objet" ou "non disponible" ; si une étape n'est pas pertinente, l'omettre entièrement) :
+- **0. Stabilisation Immédiate & ABCDE :** (Uniquement en cas d'urgence vitale détresse respiratoire/choc/coma. Omettre si non-urgent).
+- **1. Évaluation initiale & Diagnostic :** (Interrogatoire, sémiologie clinique fine, critères diagnostiques positifs).
+- **2. Conduite immédiate si drapeau rouge :** (Mesures urgentes : transfert SMUR, hospitalisation, isolement, arrêt du traitement suspect. Ne pas dupliquer la liste descriptive des symptômes qui figure dans le champ red_flags).
+- **3. Examens complémentaires :** (Bilan de 1ère intention et 2nde intention, imagerie, biologie, ECG).
+- **3bis. Terrain, Comorbidités & Contrôle Iatrogène :** (Filtre Allergies, adaptation au DFG/clairance, précautions grossesse/pédiatrie, évitement des interactions médicamenteuses à risque. Omettre entièrement si sans objet).
+- **4. Prise en charge & Stratégie Thérapeutique :** (Stratégie thérapeutique globale, mesures d'hygiène/RHD, et DCI académiques de référence avec leurs fourchettes posologiques cibles ex: Amoxicilline 50-80 mg/kg/j).
+- **5. Orientation, Suivi & Volet Médico-Légal :** (Suivi ambulatoire vs hospitalier, éviction scolaire/collective, MDO - Maladies à Déclaration Obligatoire, aptitude à la conduite, ALD 30, arrêt de travail).
 `;
   }
 
@@ -458,8 +456,8 @@ FORMAT DE RÉPONSE ATTENDU (EXCLUSIVEMENT DU JSON VALIDE) :
   "title": "${cleanTitle}",
   "search_keywords": ["mot-clé 1", "mot-clé 2"],
   "summary": "...",
-  "red_flags": "Critères de gravité / Signes d'alarme...",
-  "ordonnance": "Modèle de prescription type structuré en 4 parties...",
+  "red_flags": "Critères de gravité / Signes d'alarme cliniques (liste à puces)...",
+  "ordonnance": "Réplique d'ordonnance de cabinet en 4 sections...",
   "sub_cats": [
     {
       "label": "🚨 Nom de la sous-fiche spécialisée",
@@ -478,14 +476,18 @@ ${activeLearningText}
 --- 🌐 DUAL RAG CHANNEL 1: DONNÉES WEB RECUEILLIES (STEP 1 WEB FETCH) ---
 ${webSnippets || 'Aucune donnée web en cache.'}
 
---- 📚 DUAL RAG CHANNEL 2: EXTRAITS DES MANUELS PDF (PDF INDEX) ---
-${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
+--- 📚 DUAL RAG CHANNEL 2 (TIER 1): DOCUMENTS DE RÉFÉRENCE CORPUS (PDF INDEX) ---
+${ragSnippets || 'Aucun extrait PDF trouvé directement.'}
+
+--- 🏛️ DUAL RAG CHANNEL 2 (TIER 2): GUIDES CLINIQUES STANDARDS (MSF / HAS / SFMU / COLLÈGES) ---
+${librarySnippets || 'Aucun guide standard spécifique trouvé pour cette pathologie.'}`;
 
   // 4. Execution & Automated Anti-Hallucination Validation Checksum Loop (Up to 3 Attempts)
   let attempts = 0;
   const maxAttempts = 3;
   let catResult = null;
   let executionMetrics = null;
+  let previousValidationErrors = [];
   const { extractSmartKeywords } = require('./web-fetcher');
 
   debugEmitter.emitEvent('llm_prompt_built', {
@@ -502,11 +504,20 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
     attempts++;
     console.log(`🤖 LLM Generation Attempt ${attempts}/${maxAttempts} for "${cleanTitle}"...`);
     
-    const apiResult = await callLLMApi(systemPrompt, userPrompt, options);
+    let currentPrompt = userPrompt;
+    if (previousValidationErrors.length > 0) {
+      currentPrompt += `\n\n🚨 ATTENTION — TENTATIVE PRÉCÉDENTE REJETÉE PAR LE VALIDATEUR CLINIQUE :\n` +
+        previousValidationErrors.map(e => `- ${e}`).join('\n') +
+        `\n👉 INSTRUCTION DE CORRECTION : Corrige STRICTEMENT ces erreurs médicales/structurelles dans ta nouvelle réponse JSON !`;
+    }
+
+    const apiResult = await callLLMApi(systemPrompt, currentPrompt, options);
     executionMetrics = apiResult.metrics;
 
     try {
       catResult = safeParseLLMJson(apiResult.text);
+      catResult._raw_llm_response = apiResult.text;
+      catResult._raw_prompts = { systemPrompt, userPrompt: currentPrompt };
 
       // Automated Markdown Sanitizer (Strips dangling **, unclosed tags, cleans headers)
       const sanitizeMarkdownText = (text) => {
@@ -558,6 +569,18 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
       catResult.pdf_keywords = pdfKeywords;
       catResult.online_verification_queries = buildSearchQueries(cleanTitle).map(q => q.queryUrl).slice(0, 3);
 
+      // Attach structured source attribution list
+      catResult.sources = [];
+      for (const m of (pdfMatches || [])) {
+        catResult.sources.push({ type: 'pdf', name: m.pdfFile, page: m.page, specialty: m.specialty, score: m.score });
+      }
+      for (const lib of (libraryMatches || [])) {
+        catResult.sources.push({ type: 'clinical_library', name: `${lib.source} (${lib.file})`, category: lib.category, score: lib.score });
+      }
+      for (const web of (webSources || [])) {
+        catResult.sources.push({ type: web.source === 'Doctor Provided' ? 'doctor_custom_url' : 'web_cache', name: web.domain || web.source, category: web.source });
+      }
+
       // Validate using Medical Validator
       const validation = validateCAT(catResult);
       debugEmitter.emitEvent('validation_result', {
@@ -581,6 +604,7 @@ ${ragSnippets || 'Aucun extrait PDF trouvé directement.'}`;
         return { cat: catResult, validation, metrics: executionMetrics };
       } else {
         console.warn(`❌ Medical Validation Checksum Failed (Attempt ${attempts}):`, validation.errors);
+        previousValidationErrors = validation.errors;
       }
     } catch (parseErr) {
       console.warn(`⚠️ JSON parse error on attempt ${attempts}: ${parseErr.message}`);

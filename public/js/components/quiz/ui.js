@@ -32,6 +32,17 @@ let wakeLock = null;
 
 let globalOnOpenCatCard = null;
 
+export function cleanupQuizTimers() {
+  if (timerIntervalId) {
+    clearInterval(timerIntervalId);
+    timerIntervalId = null;
+  }
+  if (wakeLock) {
+    releaseWakeLock(wakeLock);
+    wakeLock = null;
+  }
+}
+
 export function initQuiz(onOpenCatCard) {
   globalOnOpenCatCard = onOpenCatCard;
 

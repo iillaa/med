@@ -1,0 +1,30 @@
+[
+  {
+    "id": "staging_sample_hta",
+    "pdf": "Cardiologie_HTA_Fiche.pdf",
+    "specialty": "Cardiologie",
+    "quality": "staging",
+    "timestamp": "2026-08-18T21:36:36.545Z",
+    "status": "draft",
+    "toc": [
+      {
+        "title": "HTA Essentielle",
+        "page": 1
+      },
+      {
+        "title": "Urgence Hypertensive",
+        "page": 2
+      }
+    ],
+    "pages": [
+      {
+        "page": 1,
+        "content": "# Conduite à tenir devant une Hypertension Artérielle (HTA)\n\n## 1. Évaluation initiale & Diagnostic\n- PA >= 140/90 mmHg confirmée en consultation.\n\n## 2. Drapeaux Rouges\n- Céphalées pulsatiles, phosphènes, acouphènes, épistaxis.\n\n## 4. Traitement & Posologie\n- Ramipril 5 mg : 1 comprimé le matin.\n- RHD : Régime hyposodé (< 5g/j de sel)."
+      },
+      {
+        "page": 2,
+        "content": "## Urgence Hypertensive\n- PA >= 180/120 mmHg avec souffrance viscérale (OAP, AVC, dissection aortique).\n- Traitement IV : Nicardipine (Loxen) 10-15 mg/h IVSE."
+      }
+    ]
+  }
+]

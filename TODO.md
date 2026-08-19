@@ -52,28 +52,54 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
 - **Hybrid RAG Reranker (BM25 + Keyword Priority)**: Rank local PDF extracts containing exact trade names or primary treatment protocols higher than generic diagnostic background text.
 - **Automated Validation Re-Prompting Guardrail**: If `validateCAT()` detects unseparated alternative drugs or missing 1ère INTENTION headers, feed validation errors back into Attempt 2 of LLM synthesis.
 
-### Phase 6: Web Fetcher Precision, Fast AI Discoverer & Human-in-the-Loop Integration
-- [ ] **Web Fetcher Precision Upgrades (`cat_db_generator/lib/web-fetcher.js`)**:
-  - Prioritize full medical phrases (e.g. `"colique hépatique"`) over single-word splits (`"colique"`).
-  - Strictly reject empty search listing shells (`SearchResults?query=`) to ensure only direct chapter URLs are saved.
-  - Enforce clinical topic relevance checks to discard off-topic PubMed abstracts.
-- [ ] **Fast AI Web Discoverer & Quality Filter (`gemini-2.0-flash`)**:
-  - Use fast light AI (~300ms) to dynamically generate doctor-grade search queries for DDG/PubMed.
-  - Run a 1-pass fast AI quality check on fetched web pages to filter out off-topic text before passing to heavy AI.
-- [ ] **Human-in-the-Loop Custom Link Injector**:
-  - Add custom URL input in Admin Generator Lab & Add CAT modal for doctors to paste niche/local medical links (`sante.gov.dz`, `cnpm.org.dz`, specific PDFs/blogs).
+### 🩺 Dr.CAT Generator Master Implementation Plan (`cat_db_generator/todo4catgenerator.md`)
+> *Detailed architecture, strategy, and execution steps are consolidated in [todo4catgenerator.md](file:///data/data/com.termux/files/home/med/cat_db_generator/todo4catgenerator.md).*
+
+- [x] **Phase A: Web Fetcher Precision & Fast AI Discoverer (`cat_db_generator/lib/web-fetcher.js`)**:
+  - Implement dynamic token & synonym expansion for pathologies.
+  - Implement dual-tier cumulative search (Dedicated PDFs + Multi-Topic Compilations in parallel).
+  - Add strict word-boundary regex matching (`hasExactWord` with `\b`) to eliminate partial word false hits.
+  - Add clinical section anchor extraction (`extractSubstantiveClinicalBlock` for Treatment, Posologies, Red Flags).
+- [x] **Web RAG V3 Full Article Content (`cat_db_generator/lib/web-fetcher.js`)**:
+  - PubMed PMC `efetch` API integration for downloading real peer-reviewed clinical abstracts.
+  - MSD Manuals Professional article scraper via Jina Reader & DDG discovery.
+  - High clinical density check (`isHighClinicalDensity`) and 30-day cache freshness TTL (`CACHE_TTL_DAYS = 30`).
+- [x] **Real-Time Diagnostic SSE Telemetry & Debug Panel (`cat_db_generator/lib/debug-emitter.js`)**:
+  - Connect `DebugEmitter` singleton to stream live RAG events, token counts, and LLM reasoning steps to `/api/admin/cat-generator/debug-stream`.
+- [x] **Human-in-the-Loop Custom Link Injector**:
+  - Add custom URL input in Admin Generator Lab (`cat_generator_lab.html`) for doctors to paste niche/local medical links (`sante.gov.dz`, `cnpm.org.dz`, specific PDFs/blogs).
   - Fetch custom links via Jina Reader and store them in the CAT web cache.
-  - Pass human-provided links and AI-discovered links with **equal weight** into Gemini 3.7 Flash context for smart medical synthesis.
-- [ ] **PDF RAG Fitness Inspector & Human TOC Indexer (`admin/pdf_lab.html`)**:
+  - Pass human-provided links and AI-discovered links with **equal weight** into Gemini Flash context for smart medical synthesis.
+- [x] **PDF RAG Fitness Inspector & Human TOC Indexer (`admin/pdf_lab.html`)**:
   - Add live RAG Fitness Score badges (+90 pts TOC, +60 pts exact title, +20 pts anchors) in PDF Lab.
   - Add 1-Click AI Prompt Generator from `GUIDE_PDF_RAG_STANDARDIZATION.md`.
   - Add Human TOC GPS Indexer so doctors can paste index pages directly into `pdf_index.json`.
+- [x] **Dual-Tier Offline Clinical Knowledge Library (`cat_db_generator/clinical_library/`)**:
+  - Integrated 7 specialized decision support packs: MedG.fr, Antibioclic/SPILF, SFMU Urgences, Pédiadol, MSF, Orphanet, CRAT.
+- [x] **Algerian Clinical Drug Matrix (`cat_db_generator/lib/algerian_drug_matrix.json`)**:
+  - Mapped DCIs to local Algerian commercial trade names (*Augmentin, Clavulin, Tiorfan, Spasfon, Ascabiol, Smecta, Solupred, Célestène, Ventoline*).
+- [x] **PDF Lab 2.0 Visual Slicer, GPS Sommaire & Staging Ingestion (v1.8.9)**:
+  - Interactive Visual Slicer with canvas boundary sliders and +15px visual margins.
+  - Automatic Sommaire GPS parser with dotted leader page matching (+90 pts).
+  - Direct `.md` and `.txt` ingestion with in-browser Markdown editor and RAG simulator.
+  - Staging draft sandbox (`pdf_staging_index.json`) with 1-click promotion to Master.
+
+- [x] **Official European (BDPM) & Algerian Pharmacopeia Ingestion (v1.8.9)**:
+  - Ingested 15,857 authorized pharmaceutical products & 4,474 DCIs from French BDPM (`data/bdpm_pharmacology.json`).
+  - Ingested 4,627 registered Algerian products from Ministère de la Santé / Chifa (`data/algerian_nomenclature.json`).
+
+- [x] **5-Field Metadata Precision RAG & Pure Signal Slicing (v1.8.9)**:
+  - Evaluates Title, Specialty, Keywords, TOC GPS, and Page Text simultaneously.
+  - Pure Signal Isolation: Mutes noisy 500-page textbooks when a dedicated slice exists.
+
+- [x] **Deterministic 8-Layer Medical Validator & IP Protection Firewall (v1.8.9)**:
+  - Strict daily drug ceilings, GPIP pediatric weight bounds (`mg/kg/j`), CRAT teratogenic firewall, lethal unit typo interceptor.
+  - Production Sanitizer: Strips proprietary AI tokens, latency metrics, and search queries from public client database.
+
 - [ ] **Dedicated Cloudflare Deploy Branch (`cloudflare-deploy`)**:
   - Create a separate `cloudflare-deploy` branch linked exclusively to Cloudflare Workers deployment.
-  - This branch acts as a **publish-only snapshot rail** — completely decoupled from `beta-test-pr` (work branch).
-  - Workflow: when ready to sync DB to Cloudflare, merge/force-push `beta-test-pr` → `cloudflare-deploy`. Cloudflare auto-deploys from this branch.
-  - **Benefit**: Zero git history pollution on the work branch. Can push `cloudflare-deploy` as many times as needed (e.g. after every CAT edit session) without spamming work branch commits.
-  - Add a simple `npm run cf-deploy` script that: builds → amends a single commit on `cloudflare-deploy` → force pushes. History stays flat on the deploy branch.
+  - Workflow: when ready to sync DB to Cloudflare, force-push `beta-test-pr` → `cloudflare-deploy`.
+  - Add `npm run cf-deploy` script: build → amend single commit → force push (zero git history pollution).
 
 - [x] **Database File & Reference Version Update (`v2` → `v3`)**:
   - Safely migrated `cats_db_v2_generated.json` to `cats_db_v3_generated.json` and updated backend, generator, and UI references.
