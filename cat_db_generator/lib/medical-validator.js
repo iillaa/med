@@ -404,6 +404,16 @@ function validateCAT(cat) {
     }
   }
 
+  // 10. Psychiatric & Mental Health Safety Guidance (RUD Check)
+  const isPsychTopic = /(?:d[eé]pressi|suicid|angoisse|panique|bipolair|psychos|schizophr|m[eé]lancol|anxi[eé]t|insomni|agitation|sevrage)/i.test(`${cat.title || ''} ${cat.category || ''}`);
+  if (isPsychTopic) {
+    const fullText = `${cat.summary || ''} ${cat.red_flags || ''} ${JSON.stringify(cat.sub_cats || [])}`;
+    const mentionsSuicideOrRUD = /(?:suicid|r\.?u\.?d|dangerosit[eé]|urgence\s+suicidaire|risque\s+de\s+passage\s+[aà]\s+l'acte|id[eé]es\s+noires)/i.test(fullText);
+    if (!mentionsSuicideOrRUD && /(?:d[eé]pressi|m[eé]lancol|bipolair|anxi[eé]t[eé]\s+s[eé]v[eè]re)/i.test(cat.title || '')) {
+      warnings.push('[Psychiatrie Alert] Évaluation du Risque Suicidaire (Grille RUD : Risque / Urgence / Dangerosité) recommandée dans les sections d\'évaluation clinique ou drapeaux rouges.');
+    }
+  }
+
   const uniqueErrors = Array.from(new Set(errors));
   const uniqueWarnings = Array.from(new Set(warnings));
 

@@ -399,7 +399,13 @@ ${sourcesSummary}
    - Pédiatrie : Posologies obligatoirement exprimées en dose-poids (mg/kg/j ou cuillère-mesure selon le poids). Rappel du seuil néonatal (< 2 mois = avis spécialisé/hospitalier).
    - Grossesse / Allaitement : Respect strict des données du CRAT. Mentionner les contre-indications absolues (ex: IEC/ARA2, AINS aux T2/T3).
    - Insuffisance Rénale / Gériatrie : Adapter les doses selon le DFG (Cockcroft) et éliminer les molécules néphrotoxiques.
-   - Psychiatrie & Interactions : Alerte sur le risque de syndrome sérotoninergique (ISRS + Tramadol) et d'allongement du QTc.
+   - Psychiatrie & Psychologie (Santé Mentale) :
+     * Évaluer SYSTÉMATIQUEMENT le risque suicidaire selon la grille RUD (Risque / Urgence / Dangerosité) dans toute pathologie dépressive, anxieuse ou psychotique.
+     * Durée maximale des Benzodiazépines : 12 semaines MAX pour les anxiolytiques (calendrier de décroissance inclus), 4 semaines MAX pour les hypnotiques. Pas de prescription au long cours sans réévaluation.
+     * Antidépresseurs (ISRS) : Prévenir impérativement du délai d'action thérapeutique (2 à 4 semaines) et de la vigilance sur la levée d'inhibition suicidaire à l'initiation chez le sujet jeune.
+     * Sujet âgé : Proscrire les BZD à demi-vie longue (Diazépam, Bromazépam ➔ risque majeur de chutes et syndrome confusionnel) ; privilégier l'Oxazépam (Séresta), l'Hydroxyzine (Atarax) ou la psychothérapie.
+     * Pédopsychiatrie : Posologies strictes en mg/kg/j, formulations sirops/gouttes pédiatriques.
+     * Interactions critiques : Alerte formelle sur le syndrome sérotoninergique (ISRS + Tramadol/Triptans), l'intoxication au Lithium (Lithium + AINS), et l'allongement du QTc (Neuroleptiques + Macrolides/Quinolones).
    - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie ne la concerne pas.
 
 4. SOUS-PROFILS CLINIQUES ET SUB-CATS DÉDIÉS (Pour les pathologies complexes ou à sous-types critiques) :
