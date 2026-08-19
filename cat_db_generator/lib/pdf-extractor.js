@@ -417,25 +417,16 @@ async function searchLocalPDFs(queryTerm, options = {}) {
     }
   }
 
-  // 1. Check for High-Signal Dedicated Slices / Curated Files (PDF Lab 2.0 Slices & Small Fiches)
-  const dedicatedSlices = scoredDocuments.filter(d => 
-    (d.isDedicatedFile || d.quality === 'staging' || d.totalPages <= 8) && d.docScore >= 70
-  );
+  // Sort all scored documents strictly by clinical relevance score descending
+  scoredDocuments.sort((a, b) => b.docScore - a.docScore);
+  const finalResults = scoredDocuments.slice(0, maxTotalDocuments);
 
-  let finalResults;
-  if (dedicatedSlices.length >= 1) {
-    dedicatedSlices.sort((a, b) => b.docScore - a.docScore);
-    console.log(`🎯 [Tier 1A Pure Signal] Found ${dedicatedSlices.length} dedicated slice(s). Muting general textbooks to eliminate noise!`);
-    debugEmitter.emitEvent('pdf_pure_signal_isolated', {
-      count: dedicatedSlices.length,
-      slices: dedicatedSlices.map(s => s.pdfFile),
-      reason: 'Fiche(s) dédiée(s) PDF Lab 2.0 prioritaire(s)'
+  const topSlices = finalResults.filter(d => d.isDedicatedFile || d.quality === 'staging' || d.totalPages <= 8);
+  if (topSlices.length > 0) {
+    debugEmitter.emitEvent('pdf_top_slice_matched', {
+      count: topSlices.length,
+      slices: topSlices.map(s => s.pdfFile)
     });
-    finalResults = dedicatedSlices.slice(0, 4);
-  } else {
-    // 2. Fallback: Query all general multi-chapter textbooks
-    scoredDocuments.sort((a, b) => b.docScore - a.docScore);
-    finalResults = scoredDocuments.slice(0, maxTotalDocuments);
   }
 
   debugEmitter.emitEvent('pdf_search_done', {

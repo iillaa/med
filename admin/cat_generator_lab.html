@@ -1422,8 +1422,8 @@
           detailsHtml = `Scan Index PDF pour <strong>"${p.queryTerm}"</strong> | Tokens: <code>[${(p.tokens || []).join(', ')}]</code> (${p.totalDocuments} manuels indexés)`;
         } else if (type === 'pdf_match_found') {
           detailsHtml = `<span style="color: #F59E0B;">📄 Extrait PDF Trouvé:</span> <strong>${p.pdfFile}</strong> (Page ${p.page}) [Qualité: ${p.quality}]<br><span style="color: #94A3B8; font-size: 10.5px; font-style: italic;">"${(p.snippetPreview || '').replace(/</g, '&lt;')}"</span>`;
-        } else if (type === 'pdf_pure_signal_isolated') {
-          detailsHtml = `<span style="color: #10B981; font-weight: bold;">🎯 [Pure Signal RAG Isolée]</span> <strong>${p.count} fiche(s) dédiée(s) trouvée(s) :</strong> <code>${(p.slices || []).join(', ')}</code> <span style="color: #F59E0B; font-size: 11px;">(Manuels 500p mis en sourdine)</span>`;
+        } else if (type === 'pdf_top_slice_matched') {
+          detailsHtml = `<span style="color: #10B981; font-weight: bold;">⭐ [Fiche Ciblée Détectée]</span> <strong>${p.count} document(s) dédié(s) :</strong> <code>${(p.slices || []).join(', ')}</code>`;
         } else if (type === 'pdf_search_done') {
           detailsHtml = `Scan PDF terminé pour "${p.queryTerm}" : <strong>${p.matchedDocumentsCount} document(s) pertinent(s)</strong> extraits.`;
         } else if (type === 'active_learning_checked') {
