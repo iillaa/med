@@ -615,19 +615,18 @@ ${librarySnippets || 'Aucun guide standard spécifique trouvé pour cette pathol
     }
   }
 
-  if (catResult) {
-    catResult._execution_metrics = executionMetrics;
-    const finalValidation = validateCAT(catResult);
-    debugEmitter.emitEvent('generation_done', {
-      title: cleanTitle,
-      status: 'fallback_accepted',
-      attempts: maxAttempts,
-      validation: finalValidation
-    });
-    return { cat: catResult, validation: finalValidation, metrics: executionMetrics };
-  }
+  // If all attempts failed to produce a valid CAT:
+  const failureReason = previousValidationErrors.length > 0
+    ? `Règles de sécurité clinique non résolues après ${maxAttempts} tentatives :\n` + previousValidationErrors.map(e => `• ${e}`).join('\n')
+    : `Échec de réponse API / Quota dépassé après ${maxAttempts} tentatives (vérifiez vos quotas Google AI Studio ou réessayez ultérieurement).`;
 
-  throw new Error(`Failed to generate valid CAT for "${cleanTitle}" after ${maxAttempts} attempts.`);
+  debugEmitter.emitEvent('generation_failed', {
+    title: cleanTitle,
+    attempts: maxAttempts,
+    reason: failureReason
+  });
+
+  throw new Error(failureReason);
 }
 
 module.exports = {
