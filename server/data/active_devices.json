@@ -53,10 +53,10 @@
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
       "firstSeen": "2026-08-03T22:12:43.913Z",
-      "requestCount": 2164,
+      "requestCount": 2204,
       "appVersion": "1.8.10",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-19T19:55:53.253Z",
+      "lastSeen": "2026-08-19T20:01:03.290Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
@@ -429,7 +429,17 @@
       "lastSeen": "2026-08-15T17:08:34.364Z",
       "lastIp": "154.121.155.209",
       "isAdminDevice": false
+    },
+    "drcat-inst-89355e90-d496-4c38-8470-e4d1fc2cb818": {
+      "installId": "drcat-inst-89355e90-d496-4c38-8470-e4d1fc2cb818",
+      "firstSeen": "2026-08-19T20:00:20.590Z",
+      "requestCount": 9,
+      "appVersion": "1.8.10",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-19T20:01:21.244Z",
+      "lastIp": "::1",
+      "isAdminDevice": true
     }
   },
-  "lastUpdated": "2026-08-19T19:56:02.532Z"
+  "lastUpdated": "2026-08-19T20:01:22.604Z"
 }

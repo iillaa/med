@@ -7,8 +7,32 @@ const DB_FILE = process.env.CATS_DB_PATH || require('path').join(__dirname, '..'
 
 const { APP_DATA_KEY } = require('../config/constants');
 
+let lastDbMtimeMs = 0;
+
+function syncCatsCacheWithDisk() {
+  try {
+    const fs = require('fs');
+    if (fs.existsSync(DB_FILE)) {
+      const stats = fs.statSync(DB_FILE);
+      if (stats.mtimeMs > lastDbMtimeMs || cache.catsCache.length === 0) {
+        const raw = fs.readFileSync(DB_FILE, 'utf8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          cache.catsCache = parsed;
+          lastDbMtimeMs = stats.mtimeMs;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[cats.js] Cache sync error:', err.message);
+  }
+}
+
 function registerCatRoutes(app) {
   app.get('/api/cats', (req, res) => {
+    // Ensure in-memory cache matches disk if cats_db.json was updated
+    syncCatsCacheWithDisk();
+
     // Simple x-app-key check to stop casual data grabs (the client always sends this)
     const requestKey = req.headers['x-app-key'];
     if (!requestKey || requestKey !== APP_DATA_KEY) {
