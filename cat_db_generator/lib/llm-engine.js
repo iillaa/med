@@ -404,9 +404,15 @@ ${sourcesSummary}
 
 4. SOUS-PROFILS CLINIQUES ET SUB-CATS DÉDIÉS (Pour les pathologies complexes ou à sous-types critiques) :
    - Si la pathologie présente des complications aiguës majeures ou des formes cliniques distinctes nécessitant une prise en charge/réanimation dédiée (ex: Diabète ➔ Acidocétose diabétique, Diabète gestationnel ; Diarrhée ➔ Forme glairo-sanglante, Nourrisson/SRO ; HTA ➔ Urgence hypertensive, HTA gravidique ; Asthme ➔ Asthme aigu grave) :
-   - A. DANS LE TEXTE "summary" PRINCIPAL : Insère un lien contextuel naturel vers la sous-fiche avec la syntaxe markdown :
-     [🚨 Ouvrir la Sous-Fiche Acidocétose Diabétique](subcat:1) ou [👶 Ouvrir la Sous-Fiche Nourrisson / SRO](subcat:2)
-   - B. DANS LE TABLEAU "sub_cats" DU JSON : Fournis la sous-fiche complète avec ses étapes modulaires, ses red_flags et son ordonnance dédiée.
+   - Le tableau "sub_cats" du JSON contiendra UNIQUEMENT les sous-fiches pertinentes. En pratique, ne générer JAMAIS plus de 2 sous-fiches par CAT.
+   - Pour CHAQUE sous-fiche, le champ "summary" DOIT suivre ce format condensé en 4 étapes :
+
+     **0. Spécificités & Urgence du Profil :** (Mesures réflexes, détresse, seuils d'alerte vitale)
+     **1. Diagnostic & Particularités Cliniques :** (Formes atypiques, examens spécifiques à ce profil)
+     **2. Prise en Charge & Adaptation Thérapeutique :** (Molécules autorisées, posologies adaptées mg/kg/j ou DFG, exclusions)
+     **3. Surveillance, Hospitalisation & Suivi :** (Critères d'admission, délai de contrôle)
+
+   - NE PAS générer de liens markdown type [🚨 Ouvrir la Sous-Fiche ...](subcat:1) dans le summary principal. L'application affiche automatiquement des onglets interactifs et des encarts cliquables.
    - Si la pathologie est simple ou univoque (ex: Constipation banale, Furoncle simple), ne génère pas de sub_cats (tableau vide ou absent).
 `;
 
@@ -461,7 +467,7 @@ FORMAT DE RÉPONSE ATTENDU (EXCLUSIVEMENT DU JSON VALIDE) :
   "sub_cats": [
     {
       "label": "🚨 Nom de la sous-fiche spécialisée",
-      "summary": "**0. Stabilisation...**\\n**1. Diagnostic...**\\n**2. Traitement...**",
+      "summary": "**0. Spécificités & Urgence du Profil :** ...\\n**1. Diagnostic & Particularités Cliniques :** ...\\n**2. Prise en Charge & Adaptation Thérapeutique :** ...\\n**3. Surveillance, Hospitalisation & Suivi :** ...",
       "red_flags": "Drapeaux rouges spécifiques au sous-profil...",
       "ordonnance": "Prescription dédiée pour ce sous-profil..."
     }

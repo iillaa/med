@@ -387,11 +387,14 @@ function validateCAT(cat) {
     if (!Array.isArray(cat.sub_cats)) {
       errors.push('Field "sub_cats" must be an array of specialized profile objects.');
     } else {
+      if (cat.sub_cats.length > 2) {
+        warnings.push(`Too many sub-profiles (${cat.sub_cats.length}). Maximum recommended is 2 specialized sub-CATs.`);
+      }
       cat.sub_cats.forEach((sub, sIdx) => {
         if (!sub.label || typeof sub.label !== 'string') {
           errors.push(`Sub-CAT #${sIdx + 1}: Missing "label" field.`);
         }
-        if (!sub.summary || typeof sub.summary !== 'string' || sub.summary.length < 50) {
+        if (!sub.summary || typeof sub.summary !== 'string' || sub.summary.length < 30) {
           errors.push(`Sub-CAT #${sIdx + 1} ("${sub.label || 'Sans nom'}"): "summary" is required and must contain structured markdown.`);
         }
         if (!sub.ordonnance || typeof sub.ordonnance !== 'string' || sub.ordonnance.length < 15) {
