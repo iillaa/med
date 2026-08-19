@@ -426,6 +426,11 @@ async function searchLocalPDFs(queryTerm, options = {}) {
   if (dedicatedSlices.length >= 1) {
     dedicatedSlices.sort((a, b) => b.docScore - a.docScore);
     console.log(`🎯 [Tier 1A Pure Signal] Found ${dedicatedSlices.length} dedicated slice(s). Muting general textbooks to eliminate noise!`);
+    debugEmitter.emitEvent('pdf_pure_signal_isolated', {
+      count: dedicatedSlices.length,
+      slices: dedicatedSlices.map(s => s.pdfFile),
+      reason: 'Fiche(s) dédiée(s) PDF Lab 2.0 prioritaire(s)'
+    });
     finalResults = dedicatedSlices.slice(0, 4);
   } else {
     // 2. Fallback: Query all general multi-chapter textbooks
