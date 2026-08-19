@@ -252,12 +252,16 @@ function validateCAT(cat) {
       }
     }
 
-    // --- 7c. COMPREHENSIVE PHARMACOLOGICAL CEILINGS & TOXICITY FIREWALL ---
+    // --- 7c. COMPREHENSIVE PHARMACOLOGICAL CEILINGS & POSOLOGY BOUNDS ENGINE ---
     const allPrescriptionTexts = [ordTextLower];
     if (Array.isArray(cat.sub_cats)) {
       cat.sub_cats.forEach(s => {
         if (s.ordonnance) allPrescriptionTexts.push(s.ordonnance.toLowerCase());
       });
+    }
+    // Also include treatment section from summary
+    if (cat.summary) {
+      allPrescriptionTexts.push(cat.summary.toLowerCase());
     }
 
     const isPregnancyContext = /(?:grossesse|enceinte|femme enceinte|gravidique|obstétrique)/i.test(`${cat.title || ''} ${cat.category || ''}`);
@@ -270,21 +274,61 @@ function validateCAT(cat) {
 
       for (const pText of allPrescriptionTexts) {
         if (drugDetectRx.test(pText)) {
-          // Check adult max daily ceiling in mg
+          // A. Adult Daily Ceiling Check (in mg/j and g/j)
           if (drug.adult_max_daily_ceiling_mg > 0) {
-            // Pattern: [Drug] ... [number] mg ... [number] fois/j
+            // Pattern 1: [Drug] ... [number] mg ... [number] fois/j
             const mgFreqMatch = pText.match(new RegExp(`(?:${brandPatterns})[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*mg[^.\\n]*?(\\d+)\\s*(?:fois|x|cp|gélules?|prises?)\\/?(?:j|jour)?`, 'i'));
             if (mgFreqMatch && mgFreqMatch[1] && mgFreqMatch[2]) {
               const singleDose = parseFloat(mgFreqMatch[1].replace(',', '.'));
               const freq = parseInt(mgFreqMatch[2], 10);
               const totalDose = singleDose * freq;
               if (totalDose > drug.adult_max_daily_ceiling_mg) {
-                errors.push(`[Plafond Toxique] ${drug.dci} : la dose calculée de ${totalDose} mg/j dépasse le plafond toxique absolu de ${drug.adult_max_daily_ceiling_mg} mg/j.`);
+                errors.push(`[Plafond Posologique Adulte] ${drug.dci} : la dose calculée de ${totalDose} mg/j dépasse le plafond maximal absolu de ${drug.adult_max_daily_ceiling_mg} mg/j.`);
+              }
+            }
+
+            // Pattern 2: [Drug] ... [number] g/j or [number] g par jour
+            const gDayMatch = pText.match(new RegExp(`(?:${brandPatterns})[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*g(?:\\/j|\\/jour|\\s+par\\s+jour)`, 'i'));
+            if (gDayMatch && gDayMatch[1]) {
+              const totalGrams = parseFloat(gDayMatch[1].replace(',', '.'));
+              const totalMg = totalGrams * 1000;
+              if (totalMg > drug.adult_max_daily_ceiling_mg) {
+                errors.push(`[Plafond Posologique Adulte] ${drug.dci} : la dose de ${totalGrams} g/j (${totalMg} mg/j) dépasse le plafond maximal de ${drug.adult_max_daily_ceiling_mg} mg/j.`);
               }
             }
           }
 
-          // Pregnancy Contraindication Check
+          // B. Pediatric mg/kg/j Daily Bounds Check
+          if (drug.pediatric_mg_per_kg_day && drug.pediatric_mg_per_kg_day.max_mg_kg > 0) {
+            const pediaDailyMatch = pText.match(new RegExp(`(?:${brandPatterns})[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*mg\\s*\\/\\s*kg(?:\\s*\\/\\s*j|\\s*\\/\\s*jour|\\s+par\\s+jour)?`, 'i'));
+            if (pediaDailyMatch && pediaDailyMatch[1]) {
+              const parsedMgKg = parseFloat(pediaDailyMatch[1].replace(',', '.'));
+              if (parsedMgKg > drug.pediatric_mg_per_kg_day.max_mg_kg) {
+                errors.push(`[Posologie Pédiatrique Excessive] ${drug.dci} : ${parsedMgKg} mg/kg/j dépasse la dose pédiatrique maximale recommandée de ${drug.pediatric_mg_per_kg_day.max_mg_kg} mg/kg/j (dose usuelle : ${drug.pediatric_mg_per_kg_day.usual} mg/kg/j).`);
+              }
+            }
+          }
+
+          // C. Pediatric Single Dose (mg/kg/prise) Check
+          if (drug.pediatric_mg_per_kg_day && drug.pediatric_mg_per_kg_day.single_dose_mg_kg > 0) {
+            const pediaSingleMatch = pText.match(new RegExp(`(?:${brandPatterns})[^.\\n]*?(\\d+(?:[.,]\\d+)?)\\s*mg\\s*\\/\\s*kg\\s*(?:\\/\\s*prise|\\s+par\\s+prise)`, 'i'));
+            if (pediaSingleMatch && pediaSingleMatch[1]) {
+              const parsedSingle = parseFloat(pediaSingleMatch[1].replace(',', '.'));
+              if (parsedSingle > drug.pediatric_mg_per_kg_day.single_dose_mg_kg * 1.15) {
+                errors.push(`[Dose Pédiatrique Unitaire Excessive] ${drug.dci} : ${parsedSingle} mg/kg/prise dépasse la limite unitaire de ${drug.pediatric_mg_per_kg_day.single_dose_mg_kg} mg/kg/prise.`);
+              }
+            }
+          }
+
+          // D. Pediatric Age Minimum Contraindications
+          if (isPediatric && drug.pediatric_mg_per_kg_day === null) {
+            const hasWarningClause = /(?:contre-indiqu[eé]|ne\s+pas|pas\s+de|[eé]viter|attention|ne\s+jamais|interdit|proscrit|proscrire|r[eé]serv[eé]|adulte)/i.test(pText);
+            if (!hasWarningClause && (drug.dci.includes('quinolone') || drug.dci.includes('cycline') || key === 'tramadol' || key === 'codeine' || key === 'ciprofloxacine' || key === 'doxycycline')) {
+              errors.push(`[Contre-indication Pédiatrique] ${drug.dci} est contre-indiqué en population pédiatrique sans indication spécialisée stricte.`);
+            }
+          }
+
+          // E. Pregnancy Contraindication Check
           if (isPregnancyContext && drug.pregnancy_safe === false) {
             const hasWarningClause = /(?:contre-indiqu[eé]|ne\s+pas|pas\s+de|[eé]viter|attention|ne\s+jamais|interdit|proscrit|proscrire)/i.test(pText);
             if (!hasWarningClause) {
@@ -328,10 +372,13 @@ function validateCAT(cat) {
     }
   }
 
+  const uniqueErrors = Array.from(new Set(errors));
+  const uniqueWarnings = Array.from(new Set(warnings));
+
   return {
-    valid: errors.length === 0,
-    errors,
-    warnings
+    valid: uniqueErrors.length === 0,
+    errors: uniqueErrors,
+    warnings: uniqueWarnings
   };
 }
 
