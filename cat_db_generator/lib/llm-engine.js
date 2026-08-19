@@ -402,8 +402,10 @@ ${sourcesSummary}
    - Psychiatrie & Psychologie (Santé Mentale) :
      * Évaluer SYSTÉMATIQUEMENT le risque suicidaire selon la grille RUD (Risque / Urgence / Dangerosité) dans toute pathologie dépressive, anxieuse ou psychotique.
      * Durée maximale des Benzodiazépines : 12 semaines MAX pour les anxiolytiques (calendrier de décroissance inclus), 4 semaines MAX pour les hypnotiques. Pas de prescription au long cours sans réévaluation.
-     * Antidépresseurs (ISRS) : Prévenir impérativement du délai d'action thérapeutique (2 à 4 semaines) et de la vigilance sur la levée d'inhibition suicidaire à l'initiation chez le sujet jeune.
-     * Sujet âgé : Proscrire les BZD à demi-vie longue (Diazépam, Bromazépam ➔ risque majeur de chutes et syndrome confusionnel) ; privilégier l'Oxazépam (Séresta), l'Hydroxyzine (Atarax) ou la psychothérapie.
+     * Antidépresseurs (ISRS) : Prévenir impérativement du délai d'action thérapeutique (2 à 4 semaines, dose max Sertraline 200 mg/j) et de la vigilance sur la levée d'inhibition suicidaire à l'initiation chez l'adolescent et le jeune adulte.
+     * Sédation de l'Agitation Aiguë : Monothérapie séquentielle en 1ère intention (Cyamémazine OU Loxapine en dose unique, réévaluation à 15-30 min). Ne JAMAIS combiner simultanément plusieurs sédatifs majeurs d'emblée. Éviter le Diazépam IM (absorption erratique) ; privilégier la voie orale ou Diazépam IV lent / Midazolam IM sous surveillance de la ventilation (SpO2/FR).
+     * Sujet âgé : Proscrire les BZD à demi-vie longue (Diazépam, Bromazépam ➔ chutes, confusion). Attention à l'Hydroxyzine chez le sujet âgé fragile (effet anticholinergique ➔ risque de rétention urinaire et confusion) ; privilégier l'Oxazépam (Séresta) à faible dose ou la psychothérapie.
+     * Volet Médico-Légal (Législation Sanitaire Algérienne) : Utiliser les termes légaux « Hospitalisation Libre » ou « Hospitalisation Sans Consentement / Soins Psychiatriques sous Contrainte (Placement d'Office) » avec certificat médical initial circonstancié.
      * Pédopsychiatrie : Posologies strictes en mg/kg/j, formulations sirops/gouttes pédiatriques.
      * Interactions critiques : Alerte formelle sur le syndrome sérotoninergique (ISRS + Tramadol/Triptans), l'intoxication au Lithium (Lithium + AINS), et l'allongement du QTc (Neuroleptiques + Macrolides/Quinolones).
    - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie ne la concerne pas.
