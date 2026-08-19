@@ -58,6 +58,20 @@ try {
   console.warn('[Medical Validator] Could not load algerian_nomenclature.json:', e.message);
 }
 
+// Load official ANSM / HAS dangerous drug interactions database
+let DANGEROUS_INTERACTIONS = [];
+try {
+  const interPath = path.join(__dirname, '..', 'data', 'dangerous_drug_interactions.json');
+  const fallbackPath = path.join(__dirname, 'dangerous_drug_interactions.json');
+  const targetPath = fs.existsSync(interPath) ? interPath : fallbackPath;
+  if (fs.existsSync(targetPath)) {
+    const interData = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+    DANGEROUS_INTERACTIONS = interData.rules || [];
+  }
+} catch (e) {
+  console.warn('[Medical Validator] Could not load dangerous_drug_interactions.json:', e.message);
+}
+
 const CLINICAL_REQUIRED_SECTION_PATTERNS = [
   { name: '1. Évaluation initiale & Diagnostic', regex: /(?:1\.|#+ 1\.)\s*(?:Évaluation initiale|Définition|Diagnostic)/i },
   { name: '2. Conduite immédiate si drapeau rouge / Signes de Gravité', regex: /(?:2\.|#+ 2\.)\s*(?:Drapeaux?\s*Rouges?|Signes?\s*de\s*Gravité|Conduite|Mesures?\s*urgentes?)/i },
@@ -344,6 +358,21 @@ function validateCAT(cat) {
       const lethalGramTypoMatch = pText.match(/(?:parac[eé]tamol|amoxicilline|ibuprof[eè]ne|m[eé]tronidazole|c[eé]tirizine|azithromycine|clarithromycine|ciprofloxacine|ramipril|amlodipine)\s*(?:[^\n.]*?)(\d{2,4})\s*g\b(?!\s*\/\s*(?:l|100ml|kg))/i);
       if (lethalGramTypoMatch && parseFloat(lethalGramTypoMatch[1]) >= 10) {
         errors.push(`[Erreur Typographique Unité] Posologie aberrante détectée : "${lethalGramTypoMatch[0]}". Confusion probable entre "mg" et "g". Corriger l'unité en mg.`);
+      }
+    }
+
+    // --- 7e. DANGEROUS DRUG INTERACTIONS & RED-PAIR FIREWALL (ANSM / Vidal) ---
+    const combinedPrescription = allPrescriptionTexts.join('\n');
+    for (const rule of DANGEROUS_INTERACTIONS) {
+      const rxA = new RegExp(`(?:^|[^a-z0-9à-ÿ])(?:${rule.drug_a_pattern})(?:$|[^a-z0-9à-ÿ])`, 'i');
+      const rxB = new RegExp(`(?:^|[^a-z0-9à-ÿ])(?:${rule.drug_b_pattern})(?:$|[^a-z0-9à-ÿ])`, 'i');
+
+      if (rxA.test(combinedPrescription) && rxB.test(combinedPrescription)) {
+        // Check if there is an explicit interaction warning clause
+        const hasInteractionWarning = /(?:ne\s+pas\s+(?:associer|combiner|co-prescrire|donner|administrer|prendre)|association\s+(?:contre-indiqu[eé]e|d[eé]conseill[eé]e|interdite|proscrite)|[eé]viter\s+(?:l'association|d'associer|la\s+co-prescription|de\s+combiner)|ne\s+jamais\s+associer|interdit\s+d'associer|danger\s+d'association)/i.test(combinedPrescription);
+        if (!hasInteractionWarning) {
+          errors.push(`[Interaction Médicamenteuse Majeure - ${rule.category}] ${rule.name} : ${rule.clinical_risk} ${rule.recommendation}`);
+        }
       }
     }
   }
