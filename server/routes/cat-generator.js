@@ -5,7 +5,7 @@ const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { state: cache } = require('../services/cache');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
 
-const { generateCATWithLLM } = require('../../cat_db_generator/lib/llm-engine');
+const { generateCATWithLLM, generateSubCATWithLLM } = require('../../cat_db_generator/lib/llm-engine');
 const { validateCAT } = require('../../cat_db_generator/lib/medical-validator');
 const { listAvailablePDFs } = require('../../cat_db_generator/lib/pdf-extractor');
 const debugEmitter = require('../../cat_db_generator/lib/debug-emitter');
@@ -157,9 +157,10 @@ function registerCatGeneratorRoutes(app) {
       const targetId = targetCat ? Number(targetCat.id) : (reqIdNum !== null && !isNaN(reqIdNum) ? reqIdNum : getNextIntegerId(prodDb));
       const result = await generateCATWithLLM(safeTitle, category || 'Gastro-entérologie', {
         id: targetId,
-        originalTitle: targetTitle,
         offlineOnly: req.body.offlineOnly === true,
-        customUrls: req.body.customUrls || []
+        customUrls: req.body.customUrls || [],
+        requestedSubCats: Array.isArray(req.body.requestedSubCats) ? req.body.requestedSubCats : [],
+        standardSingleOnly: req.body.standardSingleOnly === true
       });
       result.cat.id = targetId;
       if (req.body.parent_id !== undefined && req.body.parent_id !== null && req.body.parent_id !== '') {
@@ -398,6 +399,133 @@ function registerCatGeneratorRoutes(app) {
     }
   });
 
+  // POST /api/admin/cat-generator/subcat (Targeted Sub-CAT Generation)
+  app.post('/api/admin/cat-generator/subcat', async (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+
+    const { id, title, subProfileType, customPrompt } = req.body || {};
+    const profileReq = (subProfileType || customPrompt || '').trim();
+    if (!profileReq) {
+      return res.status(400).json({ error: 'Le profil ou la demande de sous-fiche est requis.' });
+    }
+
+    const dbPath = getV3DbPath();
+    if (!fs.existsSync(dbPath)) {
+      return res.status(404).json({ error: 'Base de données V3 introuvable.' });
+    }
+
+    try {
+      let db = JSON.parse(await fs.promises.readFile(dbPath, 'utf8'));
+      let targetCat = null;
+      let targetIdx = -1;
+
+      if (id !== undefined && id !== null && id !== '') {
+        targetIdx = db.findIndex(c => Number(c.id) === Number(id));
+      }
+      if (targetIdx === -1 && title) {
+        targetIdx = db.findIndex(c => normalizeTitle(c.title) === normalizeTitle(title));
+      }
+
+      if (targetIdx === -1) {
+        if (fs.existsSync(PROD_DB_PATH)) {
+          try {
+            const prodDb = JSON.parse(fs.readFileSync(PROD_DB_PATH, 'utf8'));
+            targetCat = prodDb.find(c => Number(c.id) === Number(id) || normalizeTitle(c.title) === normalizeTitle(title));
+          } catch (_) {}
+        }
+      } else {
+        targetCat = db[targetIdx];
+      }
+
+      if (!targetCat) {
+        return res.status(404).json({ error: `Fiche parente introuvable pour ID/Titre "${id || title}".` });
+      }
+
+      console.log(`[CAT Generator Lab] Generating targeted Sub-CAT for "${targetCat.title}" -> "${profileReq}"...`);
+
+      const result = await generateSubCATWithLLM(targetCat, profileReq, {
+        offlineOnly: req.body.offlineOnly === true
+      });
+
+      if (!Array.isArray(targetCat.sub_cats)) {
+        targetCat.sub_cats = [];
+      }
+
+      const cleanNewSubLabel = (result.sub_cat.label || profileReq).toLowerCase().trim();
+      const existingSubIdx = targetCat.sub_cats.findIndex(s => (s.label || '').toLowerCase().trim() === cleanNewSubLabel);
+
+      if (existingSubIdx >= 0) {
+        targetCat.sub_cats[existingSubIdx] = result.sub_cat;
+      } else {
+        targetCat.sub_cats.push(result.sub_cat);
+      }
+
+      if (targetIdx >= 0) {
+        db[targetIdx] = targetCat;
+      } else {
+        db.push(targetCat);
+      }
+      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+
+      const validation = validateCAT(targetCat);
+
+      res.json({
+        success: true,
+        cat: targetCat,
+        sub_cat: result.sub_cat,
+        validation: validation,
+        metrics: result.metrics
+      });
+    } catch (err) {
+      console.error('[CAT Generator Lab Sub-CAT Error]', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // DELETE /api/admin/cat-generator/subcat (Remove a Sub-CAT)
+  app.delete('/api/admin/cat-generator/subcat', async (req, res) => {
+    if (!verifyAdminAccess(req, res)) return;
+
+    const { id, subIndex, label } = req.body || {};
+    if (id === undefined || id === null) {
+      return res.status(400).json({ error: 'ID de la CAT obligatoire.' });
+    }
+
+    const dbPath = getV3DbPath();
+    if (!fs.existsSync(dbPath)) {
+      return res.status(404).json({ error: 'Base de données V3 introuvable.' });
+    }
+
+    try {
+      let db = JSON.parse(await fs.promises.readFile(dbPath, 'utf8'));
+      const catIdx = db.findIndex(c => Number(c.id) === Number(id));
+      if (catIdx === -1) {
+        return res.status(404).json({ error: `Fiche #${id} introuvable.` });
+      }
+
+      const targetCat = db[catIdx];
+      if (Array.isArray(targetCat.sub_cats)) {
+        if (subIndex !== undefined && subIndex !== null && !isNaN(Number(subIndex))) {
+          targetCat.sub_cats.splice(Number(subIndex), 1);
+        } else if (label) {
+          targetCat.sub_cats = targetCat.sub_cats.filter(s => (s.label || '').trim() !== String(label).trim());
+        }
+      }
+
+      db[catIdx] = targetCat;
+      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+
+      res.json({
+        success: true,
+        message: 'Sous-fiche supprimée avec succès.',
+        cat: targetCat,
+        validation: validateCAT(targetCat)
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // POST /api/admin/cat-generator/delete
   app.post('/api/admin/cat-generator/delete', async (req, res) => {
     if (!verifyAdminAccess(req, res)) return;
@@ -492,7 +620,9 @@ function registerCatGeneratorRoutes(app) {
         addProgressLog(`[${i + 1}/${prodDb.length}] Synthèse Dual RAG Gemini 3.6 Flash pour : "${cat.title}"...`, 'info');
 
         try {
-          const resObj = await generateCATWithLLM(cat.title, cat.category);
+          const resObj = await generateCATWithLLM(cat.title, cat.category, {
+            offlineOnly: req.body.offlineOnly === true
+          });
           const fullCatObj = {
             ...resObj.cat,
             id: cat.id,

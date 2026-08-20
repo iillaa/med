@@ -191,10 +191,48 @@
 
 ---
 
+### 💡 Idea 12: Human-in-the-Loop Targeted Sub-CATs & Sub-Logics Generation
+- **Origin Session**: Post-Psychiatry Review & Clinical Flexibility Session.
+- **Problem Observed**:
+  - Full automation generated monolithic CATs that were either too sparse or attempted to cover every rare complication in the main text. Simple fiches (angine, furoncle) don't need 5 profiles, while complex fiches (dépression, diabète, HTA) require deep, safe specialized branches (grossesse, gériatrie, réanimation).
+- **Proposed Solution**:
+  - Implement a Human-in-the-Loop on-demand generator:
+    1. Keep master CATs lean, fast, and structured in 5 steps.
+    2. Add interactive 1-click clinical presets (*Grossesse & Allaitement / CRAT, Sujet Âgé / Start low go slow, Pédiatrie mg/kg, Forme Aiguë, Insuffisance Rénale, Psychiatrie / Loi 18-11*) + custom profile input.
+    3. Use a laser-focused micro-prompt with anti-contradiction and non-repetition rules, validated via 3-attempt checksum loops.
+- **Doctor Status**: ✅ `[Implemented & Validated in v1.9.0]`
+
+---
+
+### 💡 Idea 13: Architectural Decoupling & Codebase Modular Refactor (Anti-Spaghetti Blueprint)
+- **Origin Session**: Codebase Line-Count & Structural Health Audit (~28,180 total lines).
+- **Problem Observed**:
+  - Several core files are approaching or exceeding 1,000 to 1,800 lines, mixing multiple concerns (UI routing, DOM helpers, keyboard listeners, large embedded HTML scripts).
+- **Proposed Solution**:
+  - Execute a clean, non-breaking modular decomposition pass:
+    1. **`admin/cat_generator_lab.html` (1,780 lines)**:
+       - Extract client-side logic to `admin/js/cat_generator_lab.js`.
+       - Extract styles to `admin/css/cat_generator_lab.css`.
+    2. **`public/js/main.js` (1,219 lines)**:
+       - Extract keyboard navigation & hotkeys to `public/js/shortcuts.js`.
+       - Extract modal lifecycle & backdrop isolation to `public/js/modals.js`.
+    3. **`public/js/utils.js` (1,026 lines)**:
+       - Split into `public/js/utils/dom.js` (element builders, sanitizers) and `public/js/utils/formatters.js` (dates, text parsing, search tokenizers).
+    4. **`public/css/workspace.css` (1,645 lines)**:
+       - Partition into modular stylesheet imports (`workspace-reading.css`, `workspace-split.css`, `workspace-mobile.css`).
+- **Impact & Feasibility**:
+  - **Impact**: ⭐⭐⭐⭐⭐ (Guarantees long-term codebase clarity, testability, and zero regression risk as the app expands).
+  - **Feasibility**: High (Standard modular refactoring without API or schema changes).
+- **Doctor Status**: ⏳ `[Queued for Next Refactoring Pass]`
+
+---
+
 ## 📊 Summary & Comparison Matrix
 
 | Idea # | Focus Area | Core Benefit | Complexity | Live Status |
-| :---: | :--- | :--- | :---: | :---: |
+| :---: | :--- | :--- | :--- | :---: |
+| **Idea 13** | Code Modularization | Decouple 1,000+ line files (main.js, utils.js, lab HTML, CSS). | Medium | ⏳ **Queued (Next Pass)** |
+| **Idea 12** | Targeted Sub-CATs (HITL) | 1-Click clinical presets + custom sub-CAT micro-prompts. | Medium | ✅ **Implemented (v1.9.0)** |
 | **Idea 11** | Staging Ingestion Workbench | 2-Tier workspace (Staging Sandbox ➔ Verified Master Corpus). | Medium | ✅ **Implemented** |
 | **Idea 6** | Visual PDF Slicer & Splitter | Interactive visual canvas + drag crop lines + auto +15px margins. | High | ✅ **Implemented** |
 | **Idea 10** | Pharmacology & Ceilings | Comprehensive toxic dose ceilings & safety rules (Vidal/ANSM). | Medium | ✅ **Implemented** |
@@ -211,6 +249,6 @@
 
 ## 📝 Document History
 - **Created**: 2026-08-18
-- **Updated**: Added Idea 10 (Comprehensive Drug Ceilings & Toxic Dosage Firewall).
+- **Updated**: 2026-08-19 (Added Idea 12: Sub-CATs HITL and Idea 13: Codebase Modular Refactor).
 - **Author**: Dr. Kibeche Ali Dia Eddine
 - **File**: `todosuggestion.md`

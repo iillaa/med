@@ -84,6 +84,29 @@ The validation engine enforces deterministic dosage bounds and contraindication 
 
 ---
 
+## 🧩 Targeted Sub-CATs & Option C Architecture (v1.10.0)
+
+Dr. CAT v1.10.0 decouples the high-density Master Hub (for 80% of routine outpatient consultations) from specialized, high-yield clinical sub-profiles (for 20% complex terrains) via a dual-path pipeline:
+
+### 1. Creation Modal Pre-Configuration (Option C)
+During CAT creation or full re-synthesis in `admin/cat_generator_lab.html`:
+* **Mode ⚡ Standard (1-Tab Rapide)**: Generates a lean, dense Master Hub with `sub_cats: []`.
+* **Mode 🧩 Multi-Profils & Sous-Fiches**: Pre-selects multiple clinical presets (`🤰 Grossesse & Allaitement`, `👴 Sujet Âgé`, `👶 Pédiatrie`, `🚨 Forme Aiguë`, `🫘 Insuffisance Rénale`, `🧠 Psychiatrie / RUD`) plus custom profiles (e.g. *Salmonella*, *Dépression résistante*).
+* **Unified Single-Pass Synthesis**: The backend passes `requestedSubCats` into `generateCATWithLLM`, synthesizing the Master Hub and all child sub-CATs simultaneously with full internal consistency.
+
+### 2. Inspector Drawer (On-Demand Post-Creation)
+Doctors can generate targeted sub-profiles anytime from the Inspector Modal via `generateSubCATWithLLM(parentCat, subProfileDescription)` without modifying or bloating the parent summary text.
+
+### 3. Segmented Pill Navigation Bar
+In the Workspace view (`public/js/components/workspace.js`), the top `#subcat-selector-bar` dynamically renders interactive pills:
+* `⭐ Fiche Principale`
+* `🤰 Grossesse & Allaitement`
+* `👴 Sujet Âgé`
+Clicking any pill triggers `window.switchToSubProfile(idx)`, instantly re-rendering the summary, red flags, and dedicated prescription without full page reloads.
+
+### 4. 8-Layer Automated Checksum Loop
+Sub-CATs pass through the complete medical validation pipeline (`validateCAT`), enforcing daily drug ceilings, dangerous interactions, CRAT rules, and pediatric dosing with an automated 3-attempt retry loop on validation failure.
+
 ## 💾 Data Management & Integrity
 
 To guarantee zero data loss on device power cuts or concurrent accesses, the application implements the following write-path:

@@ -97,3 +97,21 @@ The UI dynamically renders:
    - Prompt: *"You are generating a specialized deep-dive child sub-fiche for [Parent: CAT devant HTA]. Focus 100% on acute management, intravenous drug titration, and emergency triage for this specific scenario."*
 3. The generated child JSON is saved with `parent_id: 12` in `cats_db.json`.
 4. The main app and Admin Lab immediately discover the relationship **without touching a single line of application code**.
+
+---
+
+## 6. 🧩 Targeted Sub-CATs Micro-Engine & Option C Pre-Configuration (v1.10.0)
+
+### Evolution & Decoupling
+In v1.10.0, the Sub-CAT system evolved to support both **pre-configured single-pass synthesis** and **on-demand post-creation generation**:
+
+1. **Option C Pre-Configuration Panel**:
+   - During creation, doctors select either **⚡ Standard (1-Tab)** or **🧩 Multi-Profils & Sous-Fiches**.
+   - 6 1-click clinical presets: `🤰 Grossesse CRAT`, `👴 Sujet Âgé (Start low go slow)`, `👶 Pédiatrie (mg/kg/j)`, `🚨 Urgence`, `🫘 Rénal`, `🧠 Psychiatrie RUD (Loi 18-11)`.
+   - Saisies libres personnalisées (ex: *Salmonella*, *Résistante*).
+2. **Targeted Micro-Engine (`generateSubCATWithLLM`)**:
+   - Generates sub-fiches using a 4-step summary (`0. Spécificités`, `1. Diagnostic`, `2. Prise en Charge`, `3. Surveillance`) and 4-section ordonnance without modifying parent summary text.
+3. **Segmented Pill Navigation Bar (`subcat-selector-bar`)**:
+   - Fluid horizontal pills (`⭐ Fiche Principale`, `🤰 Grossesse`, etc.) dynamically switching view contexts with zero DOM redraw delays.
+4. **Automated 8-Layer Medical Checksum**:
+   - Tests every generated sub-CAT against pharmacological ceilings and drug interactions with a 3-attempt automated retry loop.

@@ -956,28 +956,59 @@ export function loadRelatedPdfs(cat) {
 /**
  * Render fluid Sub-CAT / Clinical Profile Segmented Bar
  */
-/**
- * Sub-CAT Navigation Handler
- * 100% Inlined Contextual Navigation directly inside Fiche de Synthèse (Zero top header clutter).
- */
 function renderSubCatBar(cat) {
   const subCatBar = document.getElementById('subcat-selector-bar');
-  if (subCatBar) {
+  if (!subCatBar) return;
+
+  const subCats = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? cat.sub_cats : [];
+  if (subCats.length === 0) {
     subCatBar.style.display = 'none';
     subCatBar.innerHTML = '';
+    return;
   }
+
+  subCatBar.style.display = 'flex';
+  subCatBar.innerHTML = '';
+
+  const profiles = [
+    {
+      label: '⭐ Fiche Principale',
+      summary: cat.summary,
+      red_flags: cat.red_flags,
+      ordonnance: cat.ordonnance
+    },
+    ...subCats
+  ];
+
+  profiles.forEach((prof, idx) => {
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = `subcat-pill ${state.activeSubCatIndex === idx ? 'active' : ''}`;
+    pill.setAttribute('role', 'tab');
+    pill.setAttribute('aria-selected', state.activeSubCatIndex === idx ? 'true' : 'false');
+    
+    const iconClass = getSubCatIcon(prof.label);
+    pill.innerHTML = `<i class="fa-solid ${iconClass} subcat-pill-icon"></i> <span>${escapeHTML(prof.label || `Profil ${idx}`)}</span>`;
+    
+    pill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.switchToSubProfile(idx);
+    });
+
+    subCatBar.appendChild(pill);
+  });
 }
 
 /**
  * Global In-Place Sub-Profile Switcher
- * Callable directly by contextual in-text badges inside Fiche de Synthèse!
+ * Callable directly by contextual in-text badges or top segmented bar!
  */
 window.switchToSubProfile = function(idx) {
   if (!state.activeCat) return;
   const subCats = Array.isArray(state.activeCat.sub_cats) && state.activeCat.sub_cats.length > 0 ? state.activeCat.sub_cats : [];
   const profiles = [
     {
-      label: '🩺 Standard (Adulte)',
+      label: '⭐ Fiche Principale',
       summary: state.activeCat.summary,
       red_flags: state.activeCat.red_flags,
       ordonnance: state.activeCat.ordonnance
@@ -996,6 +1027,20 @@ window.switchToSubProfile = function(idx) {
   renderSummary(prof.summary || state.activeCat.summary, state.activeCat, targetIdx > 0 ? prof.label : null);
   renderPrescription(prof.ordonnance || state.activeCat.ordonnance);
   triggerHaptic(true);
+
+  // Update active pill styling
+  const subCatBar = document.getElementById('subcat-selector-bar');
+  if (subCatBar) {
+    subCatBar.querySelectorAll('.subcat-pill').forEach((p, pIdx) => {
+      if (pIdx === targetIdx) {
+        p.classList.add('active');
+        p.setAttribute('aria-selected', 'true');
+      } else {
+        p.classList.remove('active');
+        p.setAttribute('aria-selected', 'false');
+      }
+    });
+  }
 
   // Smooth scroll back to top of summary view
   const summaryView = document.getElementById('summary-view');

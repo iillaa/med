@@ -168,3 +168,41 @@ CAT Generation Triggered
 | **Phase 2 (P2)** | **Dynamic Cumulative PDF Engine & Word-Boundary Matching**<br>• Implement `matchExactWord()` with `\b` regex in `pdf-extractor.js`<br>• Add Dynamic Token/Synonym expansion<br>• Add Parallel Dedicated File Matcher + Multi-Topic Compilation Searcher<br>• Add Clinical Section-Anchor extraction (`Traitement:`, `Posologie:`)<br>• Create `scripts/build_cat_pdf_index.js` for dedicated `cat_pdf_index.json` | 🟠 HIGH: Eliminates PDF noise & extracts actual prescriptions across all sources |
 | **Phase 3 (P3)** | **Web RAG Full Article Content**<br>• Switch PubMed to `efetch` (abstract text)<br>• Add MSD direct article link extractor<br>• Add 30-day cache staleness TTL check<br>• Delete dead `fetchMSDManuals()` code | 🟡 HIGH: Feeds genuine clinical text instead of search listings |
 | **Phase 4 (P4)** | **RAG Faithfulness Test Suite & Verification**<br>• Benchmark test with injected controlled parameters<br>• Verify end-to-end V3 generation on sample CATs (#56 Gale, #57 Hémorragie digestive) | 🟢 VALIDATION: Guarantees True V3 quality standard |
+| **Phase 5 (P5)** | **Targeted Sub-CATs Micro-Engine & Option C (v1.10.0)**<br>• Implement `generateSubCATWithLLM` with laser-focused micro-prompt<br>• Add Option C Pre-Configuration panel in Creation Modal (Standard 1-Tab vs Multi-Profils)<br>• Add 6 1-click clinical presets (CRAT, Start Low Go Slow, mg/kg/j, Urgence, DFG, RUD)<br>• Integrate 8-layer medical validator with 3-attempt automated checksum loop<br>• Re-enable Segmented Pill Bar in Workspace view | 🟢 COMPLETED: Full human-in-the-loop clinical flexibility |
+
+---
+
+## 🧩 PART 6 — TARGETED SUB-CATS & OPTION C SPECIFICATIONS (v1.10.0)
+
+### 6.1 Architectural Objective
+Eliminate both monolithic "800-page book" CAT bloat and information starvation by decoupling the lean Master Hub (80% standard consultations) from specialized, high-yield clinical sub-profiles (20% complex terrains) via a dual-path pipeline:
+1. **Creation Modal (Option C Pre-Configuration)**:
+   - *Mode 1 (Standard 1-Tab)*: Dense, rapid, single-tab CAT with `sub_cats: []`.
+   - *Mode 2 (Multi-Profils)*: Pre-select multiple clinical terrain presets (`🤰 Grossesse`, `👴 Gériatrie`, `👶 Pédiatrie`, `🚨 Urgence`, `🫘 Rénal`, `🧠 RUD`) + custom text. Synthesizes Master + Sub-CATs simultaneously in one cohesive pass.
+2. **Inspector Drawer (On-Demand Post-Creation)**:
+   - Expandable drawer in `admin/cat_generator_lab.html` calling `POST /api/admin/cat-generator/subcat` to synthesize a targeted child profile in 3s with zero pollution to the master text.
+
+### 6.2 Sub-CAT Schema & Safety Contract
+```json
+{
+  "label": "🤰 Grossesse & Allaitement (CRAT, Tératogénicité)",
+  "summary": "**0. Spécificités & Urgence :** ...\n**1. Diagnostic :** ...\n**2. Prise en Charge :** ...\n**3. Surveillance :** ...",
+  "red_flags": "Specific acute warnings...",
+  "ordonnance": "**TRAITEMENT NON MÉDICAMENTEUX & RHD :** ...\n**1ère INTENTION :** ...\n**ALTERNATIVES [OU] :** ...\n**TRAITEMENT SYMPTOMATIQUE / ADJUVANT :** ...",
+  "_manually_requested": true,
+  "_profile_query": "Grossesse",
+  "_generated_at": "ISO_TIMESTAMP"
+}
+```
+
+### 6.3 8-Layer Automated Medical Checksum
+Every generated Sub-CAT is synthetically tested via `validateCAT()` against:
+1. Exact 4-step summary markdown headers.
+2. Exact 4-section uppercase prescription headings.
+3. Daily toxic dosage ceilings (`clinical_drug_ceilings.json`).
+4. Dangerous drug-drug interaction matrix (`dangerous_drug_interactions.json`).
+5. Pediatric weight-based dosing assertions (`mg/kg/j`).
+6. CRAT teratogenicity rules.
+7. Anti-hallucination forbidden placeholder assertions.
+8. Anti-contradiction with parent Master CAT.
+*(Auto-retries up to 3 times feeding validator error diagnostics back into Gemini on failure).*

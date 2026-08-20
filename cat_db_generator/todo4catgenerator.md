@@ -42,6 +42,18 @@ The Dr.CAT Generator is designed to produce **Doctor-Grade Clinical Action Templ
 - [x] **Human TOC GPS Indexer**:
   - Provide UI for doctors to paste table of contents pages directly into `pdf_index.json` to anchor chapter locations.
 
+---
+
+### 🧩 Phase E: Human-in-the-Loop Targeted Sub-CATs & Option C Architecture (v1.10.0)
+- [x] **Option C Pre-Configuration Panel (`admin/cat_generator_lab.html`)**:
+  - Radio toggle between Standard (1-Tab Rapide) and Multi-Profils (Master + Sous-Fiches).
+  - 6 1-click clinical presets (CRAT, Start Low Go Slow, mg/kg/j, Urgence, DFG, RUD) + custom text input.
+- [x] **Targeted Sub-CAT Micro-Prompt Engine (`generateSubCATWithLLM`)**:
+  - Strict 4-step summary (`0. Spécificités`, `1. Diagnostic`, `2. Prise en Charge`, `3. Surveillance`) and 4-section ordonnance with non-contradiction rules.
+- [x] **8-Layer Automated Medical Checksum Loop**:
+  - Verifies daily drug ceilings, dangerous interactions, CRAT safety, and pediatric dosing with 3-attempt automated retry loop.
+- [x] **Segmented Pill Navigation Bar (`public/js/components/workspace.js`)**:
+  - Interactive top pill bar dynamically switching summary, red flags, and ordonnance in real time.
 
 ---
 

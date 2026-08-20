@@ -244,6 +244,7 @@
         <p>Real-time AI Synthesis Inspector, PDF GPS RAG Verification & Production Database Promoter</p>
       </div>
       <div class="btn-group">
+        <button onclick="openSingleModal()" class="btn-success" style="background: #0284c7; color: white; font-weight: bold;" title="Générer une nouvelle CAT personnalisée (Mode Standard ou Multi-Profils Option C)">➕ Générer 1 Nouvelle CAT</button>
         <button onclick="run1TapBatchPipeline()" class="btn-success" style="background: linear-gradient(135deg, #10b981, #06b6d4); color: white;" title="Étape 1 (Web Fetch) + Étape 2 (Dual RAG IA) + Étape 3 (Approbation Auto) en 1-Tap !">⚡ 1-Tap Batch Global (Tout FAIRE)</button>
         <button onclick="runStep1BatchWebFetch(false)" class="btn-outline" style="color: var(--primary); border-color: var(--primary);" title="Mode Incrémental : Réutilise le cache et complète les fiches ayant des sources manquantes">🌐 Step 1: Web Fetch (<span class="lbl-total-count">...</span>)</button>
         <button onclick="runStep1BatchWebFetch(true)" class="btn-outline" style="color: #38bdf8; border-color: #38bdf8;" title="Forcer la recherche en ligne pour toutes les fiches (remplace le cache)">🔄 Recharger Web Global</button>
@@ -329,13 +330,13 @@
     <div style="display: flex; flex-direction: column; gap: 10px;">
       <div style="display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap;">
         <label style="font-size: 13px; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <input type="checkbox" id="chk-enable-web" onchange="toggleWebFetchOptions()" />
+          <input type="checkbox" id="chk-enable-web" checked onchange="toggleWebFetchOptions(true)" />
           🌐 Activer Web Fetch
-          <span id="web-mode-badge" style="font-size: 11px; color: var(--success); font-weight: normal;">(Actuellement : ⚡ 100% Hors-Ligne — Rapide 3s)</span>
+          <span id="web-mode-badge" style="font-size: 11px; color: var(--primary); font-weight: normal;">(Actuellement : 🌐 Web Fetch Activé — Dual RAG Web + PDFs)</span>
         </label>
-        <div id="custom-url-container" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 300px; opacity: 0.4; pointer-events: none; transition: opacity 0.2s;">
+        <div id="custom-url-container" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 300px; opacity: 1; pointer-events: auto; transition: opacity 0.2s;">
           <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">🔗 Lien Web Manuel (Optionnel) :</span>
-          <input type="text" id="custom-urls-input" placeholder="Ex: https://sante.gov.dz/guidelines ou https://has-sante.fr/hta" style="flex: 1; background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 5px 8px; border-radius: 4px; font-size: 12px;" disabled />
+          <input type="text" id="custom-urls-input" placeholder="Ex: https://sante.gov.dz/guidelines ou https://has-sante.fr/hta" style="flex: 1; background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 5px 8px; border-radius: 4px; font-size: 12px;" />
         </div>
       </div>
 
@@ -402,13 +403,40 @@
             <span>⚡ Tokens: <strong id="metric-tokens">-</strong></span>
           </div>
 
-          <!-- Sub-CAT Switcher Tabs -->
-          <div id="inspector-subcat-section" style="margin-top: 6px; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px;">
-            <div style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <!-- Sub-CAT Switcher Tabs & Live Generator -->
+          <div id="inspector-subcat-section" style="margin-top: 6px; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px;">
+            <div style="font-size: 11px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
               <span>🧩 PROFILS & SOUS-FICHES RATTACHÉES :</span>
-              <span id="inspector-subcat-count" class="badge" style="font-size: 10px; background: rgba(168,85,247,0.15); color: #c084fc;">0 sous-fiches</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="inspector-subcat-count" class="badge" style="font-size: 10px; background: rgba(168,85,247,0.15); color: #c084fc;">0 sous-fiches</span>
+                <button type="button" onclick="toggleSubCatDrawer()" class="btn-outline" style="padding: 2px 8px; font-size: 10.5px; color: #38bdf8; border-color: #38bdf8;" title="Ouvrir le panneau de génération ciblée">➕ Générer Sous-Fiche IA</button>
+              </div>
             </div>
-            <div id="inspector-subcat-tabs" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+
+            <!-- Tab list -->
+            <div id="inspector-subcat-tabs" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;"></div>
+
+            <!-- Sub-CAT Generator Drawer (Collapsible) -->
+            <div id="subcat-generator-drawer" style="display: none; margin-top: 10px; padding: 10px; background: rgba(14,165,233,0.05); border: 1px dashed var(--primary); border-radius: 6px;">
+              <div style="font-size: 11.5px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">⚡ Générateur de Sous-Fiche Ciblée (Micro-Prompt IA)</div>
+              
+              <!-- Quick Presets -->
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Presets Cliniques Recommandés :</div>
+              <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                <button type="button" onclick="setSubCatPreset('🤰 Grossesse & Allaitement (CRAT, Tératogénicité)')" class="btn-outline" style="padding: 2px 6px; font-size: 10.5px;">🤰 Grossesse & Allaitement</button>
+                <button type="button" onclick="setSubCatPreset('👴 Sujet Âgé / Gériatrie (Start Low Go Slow, DFG Cockcroft, Éviter Anticholinergiques)')" class="btn-outline" style="padding: 2px 6px; font-size: 10.5px;">👴 Sujet Âgé</button>
+                <button type="button" onclick="setSubCatPreset('👶 Pédiatrie & Nourrisson (Doses mg/kg/j, Formes Sirops)')" class="btn-outline" style="padding: 2px 6px; font-size: 10.5px;">👶 Pédiatrie</button>
+                <button type="button" onclick="setSubCatPreset('🚨 Forme Aiguë & Complication Urgente (Détresse, Réanimation)')" class="btn-outline" style="padding: 2px 6px; font-size: 10.5px;">🚨 Urgence / Complication</button>
+                <button type="button" onclick="setSubCatPreset('🫘 Insuffisance Rénale & Hépatique (Adaptation DFG/Clairance)')" class="btn-outline" style="padding: 2px 6px; font-size: 10.5px;">🫘 Insuffisance Rénale</button>
+                <button type="button" onclick="setSubCatPreset('🧠 Urgence Psychiatrique & Contexte Légal (Loi 18-11, RUD, Sédation)')" class="btn-outline" style="padding: 2px 6px; font-size: 10.5px;">🧠 Psychiatrie / RUD</button>
+              </div>
+
+              <!-- Custom Sub-CAT Input -->
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="custom-subcat-input" placeholder="Ex: Dépression résistante après 2 échecs d'ISRS..." class="search-box" style="flex: 1; padding: 4px 8px; font-size: 12px;" />
+                <button type="button" id="btn-submit-subcat" onclick="submitGenerateSubCat()" class="btn-success" style="padding: 4px 12px; font-size: 11.5px; white-space: nowrap;">⚡ Générer</button>
+              </div>
+            </div>
           </div>
 
           <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-top: 6px;" id="v2-active-profile-header">⭐ Fiche Principale (Master Hub)</div>
@@ -425,13 +453,14 @@
   </div>
 
   <!-- Single CAT Modal -->
+  <!-- Single CAT Modal -->
   <div id="single-modal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 550px;">
+    <div class="modal-card" style="max-width: 600px;">
       <div class="modal-header">
-        <h3 style="margin: 0;">⚡ Générer ou Mettre à jour 1 CAT</h3>
+        <h3 style="margin: 0;">⚡ Synthèse & Création de CAT</h3>
         <button onclick="closeSingleModal()" class="btn-outline">✕</button>
       </div>
-      <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+      <div style="padding: 20px; display: flex; flex-direction: column; gap: 14px; max-height: 85vh; overflow-y: auto;">
         <div>
           <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Titre de la CAT</label>
           <input type="text" id="single-title" class="search-box" style="width: 100%;" placeholder="ex: CAT devant insolation et coup de chaleur">
@@ -454,14 +483,80 @@
             <option value="Administratif">Administratif</option>
           </select>
         </div>
+
+        <!-- Mode Selector (Option C Architecture) -->
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-bottom: 8px;">
+            🧩 Mode de Génération :
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+            <label style="flex: 1; min-width: 140px; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer;">
+              <input type="radio" name="gen-mode" value="auto" checked onchange="toggleGenMode()" />
+              <span style="font-size: 11.5px; font-weight: 600;">🤖 Auto (IA Décide 0-3)</span>
+            </label>
+            <label style="flex: 1; min-width: 150px; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer;">
+              <input type="radio" name="gen-mode" value="multi" onchange="toggleGenMode()" />
+              <span style="font-size: 11.5px; font-weight: 600;">🧩 Multi-Profils Contrôlé</span>
+            </label>
+            <label style="flex: 1; min-width: 130px; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer;">
+              <input type="radio" name="gen-mode" value="single_only" onchange="toggleGenMode()" />
+              <span style="font-size: 11.5px; font-weight: 600;">📄 Fiche Unique (0)</span>
+            </label>
+          </div>
+
+          <!-- Sub-CATs Selection Panel (Visible when multi-mode active) -->
+          <div id="subcats-config-panel" style="display: none; border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 8px;">
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">1. Presets Cliniques (Cochez pour inclure) :</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+              <label style="font-size: 11px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="subcat-chk" value="🤰 Grossesse & Allaitement (CRAT, Tératogénicité)" />
+                🤰 Grossesse & Allaitement
+              </label>
+              <label style="font-size: 11px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="subcat-chk" value="👴 Sujet Âgé / Gériatrie (Start Low Go Slow, DFG Cockcroft, Éviter Anticholinergiques)" />
+                👴 Sujet Âgé / Gériatrie
+              </label>
+              <label style="font-size: 11px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="subcat-chk" value="👶 Pédiatrie & Nourrisson (Doses mg/kg/j, Formes Sirops)" />
+                👶 Pédiatrie / Nourrisson
+              </label>
+              <label style="font-size: 11px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="subcat-chk" value="🚨 Forme Aiguë & Complication Urgente (Détresse, Réanimation)" />
+                🚨 Forme Aiguë / Urgence
+              </label>
+              <label style="font-size: 11px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="subcat-chk" value="🫘 Insuffisance Rénale & Hépatique (Adaptation DFG/Clairance)" />
+                🫘 Insuffisance Rénale
+              </label>
+              <label style="font-size: 11px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="subcat-chk" value="🧠 Urgence Psychiatrique & Contexte Légal (Loi 18-11, RUD, Sédation)" />
+                🧠 Psychiatrie / RUD
+              </label>
+            </div>
+
+            <!-- Custom Tags Multi-Adder -->
+            <div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px;">2. Profils Personnalisés Additionnels (Entrée ou virgule) :</div>
+              <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                <input type="text" id="single-custom-subcat-input" class="search-box" style="flex: 1; font-size: 11.5px; padding: 5px 8px;" placeholder="Ex: Salmonella, Dépression résistante, Terrain AVK..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSubCatTag();}" />
+                <button type="button" onclick="addCustomSubCatTag()" class="btn-outline" style="padding: 4px 10px; font-size: 11.5px; white-space: nowrap; color: #38bdf8; border-color: #38bdf8;">➕ Ajouter</button>
+              </div>
+              <div id="custom-subcats-tags-list" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 20px;"></div>
+            </div>
+          </div>
+        </div>
+
         <div>
           <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">
             🔗 Liens Médicaux Personnalisés (Optionnel — Jina Reader RAG)
           </label>
-          <input type="text" id="single-custom-urls" class="search-box" style="width: 100%;" placeholder="ex: https://sante.gov.dz/guide.pdf, https://cnpm.org.dz/...">
+          <input type="text" id="single-custom-urls" class="search-box" style="width: 100%; font-size: 12px;" placeholder="ex: https://sante.gov.dz/guide.pdf, https://cnpm.org.dz/...">
           <small style="font-size: 10.5px; color: #94a3b8; display: block; margin-top: 3px;">Collez des URLs médicales ou locales spécifiques pour les injecter dans la recherche IA.</small>
         </div>
-        <button onclick="submitSingleCAT()" class="btn-success" id="single-submit-btn">🤖 Lancer la Synthèse IA Live</button>
+
+        <button onclick="submitSingleCAT()" class="btn-success" id="single-submit-btn" style="padding: 10px; font-weight: bold; font-size: 13px;">🤖 Lancer la Synthèse IA Live</button>
       </div>
     </div>
   </div>
@@ -883,6 +978,113 @@
     let currentInspectedV2 = null;
     let activeInspectorSubCatIdx = -1;
 
+    function toggleSubCatDrawer() {
+      const drawer = document.getElementById('subcat-generator-drawer');
+      if (drawer) {
+        drawer.style.display = drawer.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    function setSubCatPreset(preset) {
+      const input = document.getElementById('custom-subcat-input');
+      if (input) {
+        input.value = preset;
+        input.focus();
+      }
+    }
+
+    async function submitGenerateSubCat() {
+      if (!currentInspectedV2 || !currentInspectedV2.id) {
+        alert('Veuillez inspecter une fiche valide.');
+        return;
+      }
+      const input = document.getElementById('custom-subcat-input');
+      const profile = (input ? input.value : '').trim();
+      if (!profile) {
+        alert('Veuillez choisir un preset ou saisir un profil clinique.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-subcat');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Synthèse IA...';
+      }
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/subcat', {
+          method: 'POST',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({
+            id: currentInspectedV2.id,
+            title: currentInspectedV2.title,
+            subProfileType: profile
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Échec de génération de la sous-fiche');
+        }
+
+        // Update in-memory data
+        const catIdx = appData.v2.findIndex(c => c.id === currentInspectedV2.id);
+        if (catIdx >= 0) {
+          appData.v2[catIdx] = data.cat;
+        }
+        currentInspectedV2 = data.cat;
+        activeInspectorSubCatIdx = (data.cat.sub_cats || []).length - 1;
+
+        if (input) input.value = '';
+        renderInspectorTabs(data.cat);
+        updateInspectorProfile(data.cat);
+
+        alert(`✅ Sous-fiche "${data.sub_cat.label || profile}" générée avec succès !`);
+      } catch (err) {
+        alert(`❌ Erreur: ${err.message}`);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      }
+    }
+
+    async function deleteSubCatFromInspector(e, idx, label) {
+      if (e) e.stopPropagation();
+      if (!currentInspectedV2 || !currentInspectedV2.id) return;
+      if (!confirm(`Supprimer définitivement la sous-fiche "${label || idx + 1}" ?`)) return;
+
+      try {
+        const res = await fetch('/api/admin/cat-generator/subcat', {
+          method: 'DELETE',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({
+            id: currentInspectedV2.id,
+            subIndex: idx
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Échec de suppression');
+        }
+
+        const catIdx = appData.v2.findIndex(c => c.id === currentInspectedV2.id);
+        if (catIdx >= 0) {
+          appData.v2[catIdx] = data.cat;
+        }
+        currentInspectedV2 = data.cat;
+        activeInspectorSubCatIdx = -1;
+
+        renderInspectorTabs(data.cat);
+        updateInspectorProfile(data.cat);
+      } catch (err) {
+        alert(`❌ Erreur: ${err.message}`);
+      }
+    }
+
     function renderInspectorTabs(v2Cat) {
       const container = document.getElementById('inspector-subcat-tabs');
       const countEl = document.getElementById('inspector-subcat-count');
@@ -904,18 +1106,31 @@
       };
       container.appendChild(mainBtn);
 
-      // Sub-CAT Tab Buttons
+      // Sub-CAT Tab Buttons (with delete action)
       subs.forEach((sub, idx) => {
+        const btnWrapper = document.createElement('div');
+        btnWrapper.style.cssText = 'display: inline-flex; align-items: center; border-radius: 6px; overflow: hidden;';
+
         const btn = document.createElement('button');
         btn.className = `btn-outline ${activeInspectorSubCatIdx === idx ? 'btn-success' : ''}`;
-        btn.style.cssText = 'padding: 4px 10px; font-size: 11px; font-weight: 600;';
+        btn.style.cssText = 'padding: 4px 8px; font-size: 11px; font-weight: 600; border-top-right-radius: 0; border-bottom-right-radius: 0;';
         btn.innerHTML = `🏷️ ${escapeHTML(sub.label || `Option ${idx + 1}`)}`;
         btn.onclick = () => {
           activeInspectorSubCatIdx = idx;
           updateInspectorProfile(v2Cat);
           renderInspectorTabs(v2Cat);
         };
-        container.appendChild(btn);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-outline';
+        delBtn.style.cssText = 'padding: 4px 6px; font-size: 10px; color: var(--danger); border-left: none; border-top-left-radius: 0; border-bottom-left-radius: 0;';
+        delBtn.title = 'Supprimer cette sous-fiche';
+        delBtn.innerHTML = '✕';
+        delBtn.onclick = (e) => deleteSubCatFromInspector(e, idx, sub.label);
+
+        btnWrapper.appendChild(btn);
+        btnWrapper.appendChild(delBtn);
+        container.appendChild(btnWrapper);
       });
     }
 
@@ -1005,16 +1220,6 @@
       syncModalBodyLock();
     }
 
-    function openSingleModal() {
-      document.getElementById('single-modal').classList.add('active');
-      syncModalBodyLock();
-    }
-
-    function closeSingleModal() {
-      document.getElementById('single-modal').classList.remove('active');
-      syncModalBodyLock();
-    }
-
     function openEditModal(id) {
       const cat = appData.v2.find(c => c.id === id);
       if (!cat) {
@@ -1089,11 +1294,67 @@
       }
     }
 
+    let customSubCatTags = [];
+
+    function renderCustomSubCatTags() {
+      const container = document.getElementById('custom-subcats-tags-list');
+      if (!container) return;
+      if (customSubCatTags.length === 0) {
+        container.innerHTML = '<span style="font-size: 10.5px; color: var(--text-muted); font-style: italic;">Aucun profil personnalisé ajouté pour le moment.</span>';
+        return;
+      }
+      container.innerHTML = customSubCatTags.map((tag, idx) => `
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 2px 7px; border-radius: 12px; font-size: 11px;">
+          <span>${escapeHTML(tag)}</span>
+          <button type="button" onclick="removeCustomSubCatTag(${idx})" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 0 2px; font-size: 11px; line-height: 1;">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addCustomSubCatTag() {
+      const input = document.getElementById('single-custom-subcat-input');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) return;
+      
+      const parts = val.split(',').map(s => s.trim()).filter(Boolean);
+      parts.forEach(p => {
+        if (!customSubCatTags.includes(p)) customSubCatTags.push(p);
+      });
+      input.value = '';
+      renderCustomSubCatTags();
+      input.focus();
+    }
+
+    function removeCustomSubCatTag(idx) {
+      customSubCatTags.splice(idx, 1);
+      renderCustomSubCatTags();
+    }
+
+    function toggleGenMode() {
+      const mode = document.querySelector('input[name="gen-mode"]:checked')?.value || 'auto';
+      const panel = document.getElementById('subcats-config-panel');
+      if (panel) {
+        panel.style.display = mode === 'multi' ? 'block' : 'none';
+      }
+    }
+
     function openSingleModal() {
       document.getElementById('single-title').value = '';
       document.getElementById('single-category').value = 'Gastro-entérologie';
       const customUrlsEl = document.getElementById('single-custom-urls');
       if (customUrlsEl) customUrlsEl.value = '';
+
+      // Reset generation mode to auto
+      const autoRadio = document.querySelector('input[name="gen-mode"][value="auto"]');
+      if (autoRadio) autoRadio.checked = true;
+      document.querySelectorAll('.subcat-chk').forEach(c => c.checked = false);
+      const customSubInput = document.getElementById('single-custom-subcat-input');
+      if (customSubInput) customSubInput.value = '';
+      customSubCatTags = [];
+      renderCustomSubCatTags();
+      toggleGenMode();
+
       document.getElementById('single-modal').classList.add('active');
       syncModalBodyLock();
     }
@@ -1114,6 +1375,43 @@
         return;
       }
 
+      const mode = document.querySelector('input[name="gen-mode"]:checked')?.value || 'auto';
+      let requestedSubCats = [];
+      let standardSingleOnly = false;
+
+      if (mode === 'multi') {
+        // Collect checked presets
+        document.querySelectorAll('.subcat-chk:checked').forEach(c => {
+          if (c.value && !requestedSubCats.includes(c.value)) requestedSubCats.push(c.value);
+        });
+
+        // Also check if any unsubmitted text remains in the custom input
+        const remainingInput = document.getElementById('single-custom-subcat-input')?.value.trim();
+        if (remainingInput) {
+          const parts = remainingInput.split(',').map(s => s.trim()).filter(Boolean);
+          parts.forEach(p => {
+            if (!customSubCatTags.includes(p)) customSubCatTags.push(p);
+          });
+        }
+
+        // Add all custom tags
+        customSubCatTags.forEach(t => {
+          if (t && !requestedSubCats.includes(t)) requestedSubCats.push(t);
+        });
+
+        if (requestedSubCats.length === 0) {
+          if (!confirm("Aucun profil ni sous-fiche n'a été coché ou ajouté. Voulez-vous continuer en mode Automatique standard ?")) {
+            return;
+          }
+        }
+      } else if (mode === 'single_only') {
+        standardSingleOnly = true;
+      } else {
+        // 'auto' mode: standardSingleOnly is false, requestedSubCats is []
+        standardSingleOnly = false;
+        requestedSubCats = [];
+      }
+
       // Compute next available ID from v1 and v2
       const existingIds = [
         ...(appData.v1 || []).map(c => Number(c.id) || 0),
@@ -1124,16 +1422,21 @@
       closeSingleModal();
 
       try {
-        // Step 1: Web Fetch with custom doctor URLs
-        const webRes = await fetch('/api/admin/cat-generator/fetch-web', {
-          method: 'POST',
-          headers: getAdminHeaders(),
-          body: JSON.stringify({ title, forceRefetch: false, customUrls })
-        });
-        const webData = await webRes.json();
-        if (!webRes.ok || !webData.success) throw new Error(webData.error || 'Échec de la recherche web');
+        const isWebEnabled = document.getElementById('chk-enable-web')?.checked !== false;
+        const offlineOnly = !isWebEnabled;
 
-        // Step 2: Dual RAG Single Generation (writes strictly to cats_db_v2_generated.json under nextId)
+        // Step 1: Web Fetch with custom doctor URLs (only if web fetch enabled)
+        if (isWebEnabled) {
+          const webRes = await fetch('/api/admin/cat-generator/fetch-web', {
+            method: 'POST',
+            headers: getAdminHeaders(),
+            body: JSON.stringify({ title, forceRefetch: false, customUrls })
+          });
+          const webData = await webRes.json();
+          if (!webRes.ok || !webData.success) throw new Error(webData.error || 'Échec de la recherche web');
+        }
+
+        // Step 2: Dual RAG Single Generation
         const genRes = await fetch('/api/admin/cat-generator/single', {
           method: 'POST',
           headers: getAdminHeaders(),
@@ -1141,37 +1444,59 @@
             id: nextId, 
             title, 
             category,
-            customUrls
+            offlineOnly,
+            customUrls,
+            requestedSubCats,
+            standardSingleOnly
           })
         });
         const genData = await genRes.json();
         if (!genRes.ok || !genData.success) throw new Error(genData.error || 'Échec de la génération V3');
 
-        alert(`✨ Nouvelle fiche #${nextId} "${title}" générée avec succès en V3 ! (Master Hub + Sous-Fiches intégrées)`);
+        const subInfo = requestedSubCats.length > 0 
+          ? ` (${requestedSubCats.length} sous-fiches incluses)` 
+          : (standardSingleOnly ? ' (Fiche unique 1-tab)' : ' (Mode Auto)');
+        alert(`✨ Nouvelle fiche #${nextId} "${title}" générée avec succès en V3 !${subInfo}`);
         await loadData();
       } catch (err) {
         alert(`❌ Erreur Création Nouvelle CAT: ${err.message}`);
       }
     }
 
-    function toggleWebFetchOptions() {
-      const enabled = document.getElementById('chk-enable-web')?.checked || false;
+    function initWebFetchOption() {
+      const saved = localStorage.getItem('dr_cat_web_fetch_enabled');
+      const chk = document.getElementById('chk-enable-web');
+      if (chk) {
+        // Default to true (enabled) unless admin explicitly disabled it
+        chk.checked = saved !== 'false';
+        toggleWebFetchOptions(false);
+      }
+    }
+
+    function toggleWebFetchOptions(save = true) {
+      const chk = document.getElementById('chk-enable-web');
+      const enabled = chk ? chk.checked : true;
+      if (save) {
+        localStorage.setItem('dr_cat_web_fetch_enabled', enabled ? 'true' : 'false');
+      }
       const container = document.getElementById('custom-url-container');
       const input = document.getElementById('custom-urls-input');
       const badge = document.getElementById('web-mode-badge');
 
       if (enabled) {
-        container.style.opacity = '1';
-        container.style.pointerEvents = 'auto';
-        input.disabled = false;
-        badge.textContent = '(Actuellement : 🌐 Web Fetch Activé)';
-        badge.style.color = 'var(--primary)';
+        if (container) { container.style.opacity = '1'; container.style.pointerEvents = 'auto'; }
+        if (input) input.disabled = false;
+        if (badge) {
+          badge.textContent = '(Actuellement : 🌐 Web Fetch Activé — Dual RAG Web + PDFs)';
+          badge.style.color = 'var(--primary)';
+        }
       } else {
-        container.style.opacity = '0.4';
-        container.style.pointerEvents = 'none';
-        input.disabled = true;
-        badge.textContent = '(Actuellement : ⚡ 100% Hors-Ligne — Rapide 3s)';
-        badge.style.color = 'var(--success)';
+        if (container) { container.style.opacity = '0.4'; container.style.pointerEvents = 'none'; }
+        if (input) input.disabled = true;
+        if (badge) {
+          badge.textContent = '(Actuellement : ⚡ 100% Hors-Ligne — Rapide 3s, PDFs uniquement)';
+          badge.style.color = 'var(--success)';
+        }
       }
     }
 
@@ -1624,6 +1949,7 @@ FORMAT DE RÉPONSE ATTENDU (EXCLUSIVEMENT DU JSON VALIDE) :
     setInterval(pollProgress, 2000);
 
     // Initializations
+    initWebFetchOption();
     loadData();
     pollProgress();
     initDebugSSE();

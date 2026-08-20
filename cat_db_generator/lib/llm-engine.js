@@ -395,34 +395,47 @@ ${sourcesSummary}
    **TRAITEMENT SYMPTOMATIQUE / ADJUVANT (Si besoin / En option) :**
    - Traitements de confort ciblés uniquement sur les symptômes associés (ex: 'Uniquement si fièvre > 38.5°C : Paracétamol 1g...').
 
-3. RÈGLES DE SÉCURITÉ CLINIQUE PAR TERRAIN :
+   **RÈGLE UNIVERSELLE ZÉRO POSOLOGIE VAGUE :**
+   - Chaque ligne médicamenteuse DOIT comporter : [DCI] + [Nom commercial usuel] + [Forme galénique précise (cp, sachet, sirop)] + [Posologie journalière explicite en mg/g ou dose-poids] + [Fréquence de prise] + [Durée chiffrée en jours ou semaines]. Interdiction des mentions floues type "dose usuelle", "à adapter", "selon le cas".
+
+3. RÈGLES DE SÉCURITÉ CLINIQUE PAR TERRAIN (INVARIANTS TRANSVERSAUX) :
    - Pédiatrie : Posologies obligatoirement exprimées en dose-poids (mg/kg/j ou cuillère-mesure selon le poids). Rappel du seuil néonatal (< 2 mois = avis spécialisé/hospitalier).
    - Grossesse / Allaitement : Respect strict des données du CRAT. Mentionner les contre-indications absolues (ex: IEC/ARA2, AINS aux T2/T3).
    - Insuffisance Rénale / Gériatrie : Adapter les doses selon le DFG (Cockcroft) et éliminer les molécules néphrotoxiques.
-   - Psychiatrie & Psychologie (Santé Mentale) :
-     * Évaluer SYSTÉMATIQUEMENT le risque suicidaire selon la grille RUD (Risque / Urgence / Dangerosité) dans toute pathologie dépressive, anxieuse ou psychotique.
-     * Durée maximale des Benzodiazépines : 12 semaines MAX pour les anxiolytiques (calendrier de décroissance inclus), 4 semaines MAX pour les hypnotiques. Pas de prescription au long cours sans réévaluation.
-     * Antidépresseurs (ISRS) : Prévenir impérativement du délai d'action thérapeutique (2 à 4 semaines, dose max Sertraline 200 mg/j) et de la vigilance sur la levée d'inhibition suicidaire à l'initiation chez l'adolescent et le jeune adulte.
-     * Sédation de l'Agitation Aiguë : Monothérapie séquentielle en 1ère intention (Cyamémazine OU Loxapine en dose unique, réévaluation à 15-30 min). Ne JAMAIS combiner simultanément plusieurs sédatifs majeurs d'emblée. Éviter le Diazépam IM (absorption erratique) ; privilégier la voie orale ou Diazépam IV lent / Midazolam IM sous surveillance de la ventilation (SpO2/FR).
-     * Sujet âgé : Proscrire les BZD à demi-vie longue (Diazépam, Bromazépam ➔ chutes, confusion). Attention à l'Hydroxyzine chez le sujet âgé fragile (effet anticholinergique ➔ risque de rétention urinaire et confusion) ; privilégier l'Oxazépam (Séresta) à faible dose ou la psychothérapie.
-     * Volet Médico-Légal (Législation Sanitaire Algérienne) : Utiliser les termes légaux « Hospitalisation Libre » ou « Hospitalisation Sans Consentement / Soins Psychiatriques sous Contrainte (Placement d'Office) » avec certificat médical initial circonstancié.
-     * Pédopsychiatrie : Posologies strictes en mg/kg/j, formulations sirops/gouttes pédiatriques.
-     * Interactions critiques : Alerte formelle sur le syndrome sérotoninergique (ISRS + Tramadol/Triptans), l'intoxication au Lithium (Lithium + AINS), et l'allongement du QTc (Neuroleptiques + Macrolides/Quinolones).
    - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie ne la concerne pas.
 
-4. SOUS-PROFILS CLINIQUES ET SUB-CATS DÉDIÉS (Pour les pathologies complexes ou à sous-types critiques) :
-   - Si la pathologie présente des complications aiguës majeures ou des formes cliniques distinctes nécessitant une prise en charge/réanimation dédiée (ex: Diabète ➔ Acidocétose diabétique, Diabète gestationnel ; Diarrhée ➔ Forme glairo-sanglante, Nourrisson/SRO ; HTA ➔ Urgence hypertensive, HTA gravidique ; Asthme ➔ Asthme aigu grave) :
-   - Le tableau "sub_cats" du JSON contiendra UNIQUEMENT les sous-fiches pertinentes. En pratique, ne générer JAMAIS plus de 2 sous-fiches par CAT.
-   - Pour CHAQUE sous-fiche, le champ "summary" DOIT suivre ce format condensé en 4 étapes :
-
+4. SOUS-PROFILS CLINIQUES ET SUB-CATS DÉDIÉS :
+   - Pour CHAQUE sous-fiche ("sub_cats"), le champ "summary" DOIT suivre ce format condensé en 4 étapes :
      **0. Spécificités & Urgence du Profil :** (Mesures réflexes, détresse, seuils d'alerte vitale)
      **1. Diagnostic & Particularités Cliniques :** (Formes atypiques, examens spécifiques à ce profil)
      **2. Prise en Charge & Adaptation Thérapeutique :** (Molécules autorisées, posologies adaptées mg/kg/j ou DFG, exclusions)
      **3. Surveillance, Hospitalisation & Suivi :** (Critères d'admission, délai de contrôle)
-
-   - NE PAS générer de liens markdown type [🚨 Ouvrir la Sous-Fiche ...](subcat:1) dans le summary principal. L'application affiche automatiquement des onglets interactifs et des encarts cliquables.
-   - Si la pathologie est simple ou univoque (ex: Constipation banale, Furoncle simple), ne génère pas de sub_cats (tableau vide ou absent).
+   - Le champ "ordonnance" de chaque sous-fiche DOIT suivre la réplique en 4 sections (**TRAITEMENT NON MÉDICAMENTEUX & RHD**, **1ère INTENTION**, **ALTERNATIVES [OU]**, **TRAITEMENT SYMPTOMATIQUE / ADJUVANT**).
+   - INTERDICTION STRICTE DE LIENS MARKDOWN DANS LE SUMMARY : Ne génère JAMAIS de liens ou boutons markdown type [🚨 Ouvrir la Sous-Fiche ...](subcat:1) ou [👶 Sous-Fiche ...](subcat:2) dans le texte du summary principal. L'application affiche automatiquement des onglets interactifs.
 `;
+
+  if (Array.isArray(options.requestedSubCats) && options.requestedSubCats.length > 0) {
+    systemPrompt += `
+DEMANDE EXPLICITE DE SOUS-FICHES PAR LE MÉDECIN (GÉNÉRATION MULTI-PROFILS SUR-MESURE) :
+L'utilisateur médecin a expressément demandé d'inclure les sous-fiches suivantes dans le tableau "sub_cats" :
+${options.requestedSubCats.map((sub, i) => `${i + 1}. "${sub}"`).join('\n')}
+
+DIRECTIVES IMPÉRATIVES :
+- Génère EXACTEMENT ces ${options.requestedSubCats.length} sous-fiches dans le tableau JSON "sub_cats" en plus de la fiche principale.
+- Chaque sous-fiche dans "sub_cats" doit comporter : "label" (emoji + nom clair), "summary" (4 étapes), "red_flags", "ordonnance" (4 sections).
+- Non-contradiction et cohérence absolue entre la fiche principale (Master) et chaque sous-fiche.
+`;
+  } else if (options.standardSingleOnly) {
+    systemPrompt += `
+MODE 1-TAB STANDARD STRICT :
+Ne génère AUCUNE sous-fiche ("sub_cats": []). Concentre toute l'information essentielle dans la fiche principale en 1 onglet unique rapide et dense.
+`;
+  } else {
+    systemPrompt += `
+MODE STANDARD AUTOMATIQUE :
+Si la pathologie présente des complications aiguës majeures, des formes graves ou des profils cliniques distincts nécessitant une prise en charge dédiée (ex: Diabète ➔ Acidocétose, Diarrhée ➔ SRO Enfant / Forme fébrile glairo-sanglante, HTA ➔ Urgence hypertensive), génère 1 à 3 sous-fiches pertinentes dans "sub_cats" selon le besoin clinique réel. Si la pathologie est simple ou univoque, "sub_cats" sera vide [].
+`;
+  }
 
   if (isAdmin) {
     systemPrompt += `
@@ -643,7 +656,211 @@ ${librarySnippets || 'Aucun guide standard spécifique trouvé pour cette pathol
   throw new Error(failureReason);
 }
 
+/**
+ * Targeted Sub-CAT Generation Engine (Human-in-the-Loop Clinical Modifiers)
+ * Generates a laser-focused, 4-step specialized sub-profile without repeating generalities or contradicting the master CAT.
+ */
+async function generateSubCATWithLLM(parentCat, subProfileDescription, options = {}) {
+  if (!parentCat || !parentCat.title) {
+    throw new Error('Parent CAT object is required to generate a targeted sub-CAT.');
+  }
+  if (!subProfileDescription || typeof subProfileDescription !== 'string') {
+    throw new Error('Sub-profile description/type is required.');
+  }
+
+  const { extractSmartKeywords } = require('./web-fetcher');
+
+  const systemPrompt = `Tu es le moteur d'intelligence médicale de Dr. CAT (Doctor Clinical Action Protocol) alimenté par Gemini 3.6 Flash.
+Ta mission est de générer UNE SOUS-FICHE CLINIQUE CIBLÉE ET ADAPTÉE (Sub-CAT) pour une pathologie donnée et un terrain/profil clinique spécifique.
+
+RÈGLES D'OR DE RÉDACTION DE LA SOUS-FICHE :
+1. COMPLÉMENTARITÉ STRICTE & NON-RÉPÉTITION :
+   - Cette sous-fiche est un zoom chirurgical pour le médecin praticien.
+   - Ne JAMAIS répéter la physiopathologie générale, les définitions ou les généralités déjà présentes dans la fiche principale.
+   - Concentre-toi EXCLUSIVEMENT sur ce qui change pour ce profil : adaptations posologiques, molécules autorisées de choix, contre-indications formelles et pièges à éviter.
+
+2. NON-CONTRADICTION :
+   - Ne contredis jamais la ligne thérapeutique de la fiche principale, sauf pour substituer formellement une molécule contre-indiquée sur ce terrain (ex: remplacer un AINS ou un IEC contre-indiqué lors de la grossesse par une molécule autorisée au CRAT).
+
+3. RÈGLES DE SÉCURITÉ CLINIQUE PAR TERRAIN :
+   - Grossesse / Allaitement : Respect strict des données du CRAT (Centre de Référence sur les Agents Tératogènes). Mentionner clairement les molécules sûres et proscrire les tératogènes (ex: AINS aux T2/T3, IEC/ARA2).
+   - Sujet Âgé / Gériatrie : Adapter les posologies selon le DFG (Cockcroft), la fonction hépatique et la fragilité globale (règle « start low, go slow » avec posologies initiales prudentes). Proscrire les médicaments inappropriés chez le sujet âgé (BZD à demi-vie longue, molécules à fort effet anticholinergique comme l'Hydroxyzine ➔ risque majeur de chutes, rétention d'urine et confusion).
+   - Pédiatrie / Nourrisson : Posologies obligatoires en mg/kg/j ou cuillère-mesure selon le poids, formes adaptées (sirops/gouttes), critères stricts d'hospitalisation (< 2-3 mois).
+   - Insuffisance Rénale / Hépatique : Ajustement posologique précis selon la clairance et alternatives non-néphrotoxiques.
+   - Formes Aiguës / Urgences : Conduite de réanimation immédiate, posologies de charge, critères d'alerte et transfert SMUR/Hospitalisation.
+   - Volet Psychiatrique & Médico-Légal (Algérie) : Utiliser exclusivement « Hospitalisation Libre » ou « Hospitalisation Sans Consentement / Placement d'Office » (Loi sanitaire n° 18-11).
+
+4. FORMAT DU SUMMARY (STRICTEMENT 4 ÉTAPES NUMÉROTÉES EN MARKDOWN) :
+   **0. Spécificités & Urgence du Profil :** (Mesures réflexes, détresse, seuils d'alerte vitale sur ce terrain)
+   **1. Diagnostic & Particularités Cliniques :** (Formes atypiques, examens ou pièges spécifiques à ce profil)
+   **2. Prise en Charge & Adaptation Thérapeutique :** (Molécules de choix autorisées, posologies adaptées mg/kg/j ou DFG, exclusions)
+   **3. Surveillance, Hospitalisation & Suivi :** (Critères d'admission, délai de contrôle)
+
+5. FORMAT DE L'ORDONNANCE (RÉPLIQUE EXACTE EN 4 SECTIONS EN MARKDOWN) :
+   **TRAITEMENT NON MÉDICAMENTEUX & RHD :**
+   **1ère INTENTION (Traitement médicamenteux de choix) :**
+   **ALTERNATIVES [OU] :**
+   **TRAITEMENT SYMPTOMATIQUE / ADJUVANT :**
+
+   **RÈGLE UNIVERSELLE ZÉRO POSOLOGIE VAGUE :**
+   - Chaque ligne médicamenteuse de la sous-fiche DOIT comporter : [DCI] + [Nom commercial usuel] + [Forme galénique précise (cp, sachet, sirop)] + [Posologie journalière explicite en mg/g ou dose-poids] + [Fréquence de prise] + [Durée chiffrée en jours ou semaines]. Interdiction des mentions floues type "dose usuelle", "à adapter", "selon le cas".
+
+FORMAT DE RÉPONSE ATTENDU (EXCLUSIVEMENT DU JSON VALIDE) :
+{
+  "label": "Emoji + Titre clair du profil (ex: 🤰 Grossesse & Allaitement)",
+  "summary": "**0. Spécificités & Urgence du Profil :** ...\\n\\n**1. Diagnostic & Particularités Cliniques :** ...\\n\\n**2. Prise en Charge & Adaptation Thérapeutique :** ...\\n\\n**3. Surveillance, Hospitalisation & Suivi :** ...",
+  "red_flags": "Drapeaux rouges et signaux d'alerte spécifiques à ce terrain (liste à puces)...",
+  "ordonnance": "**TRAITEMENT NON MÉDICAMENTEUX & RHD :**\\n...\\n\\n**1ère INTENTION (Traitement médicamenteux de choix) :**\\n...\\n\\n**ALTERNATIVES [OU] :**\\n...\\n\\n**TRAITEMENT SYMPTOMATIQUE / ADJUVANT :**\\n..."
+}`;
+
+  // RAG: Query local PDFs and Clinical Library for this specific sub-profile
+  const searchQuery = `${parentCat.title} ${subProfileDescription}`;
+  const pdfMatches = await searchLocalPDFs(searchQuery, { maxMatchesPerFile: 2, category: parentCat.category });
+  const ragSnippets = pdfMatches.flatMap(p => p.matches.map(m => `[Core Reference: ${p.pdfFile}] ${m.snippet}`)).join('\n');
+
+  const { queryClinicalLibrary } = require('./knowledge-library');
+  const libraryMatches = queryClinicalLibrary(searchQuery);
+  const librarySnippets = libraryMatches.map(l => `[Standard Clinical Library: ${l.source} (${l.file})]\n${l.snippet}`).join('\n\n');
+
+  let sourcesContext = '';
+  if (ragSnippets) sourcesContext += `\n\n--- EXTRAITS PERTINENTS DU CORPUS MÉDICAL LOCAL (PDFs) ---\n${ragSnippets}`;
+  if (librarySnippets) sourcesContext += `\n\n--- RECOMMANDATIONS CLINIQUES SPÉCIALISÉES (SFMU, MSF, Antibioclic, CRAT) ---\n${librarySnippets}`;
+
+  const userPrompt = `GÉNÈRE UNE SOUS-FICHE CLINIQUE CIBLÉE POUR :
+PATHOLOGIE : "${parentCat.title}"
+CATÉGORIE : "${parentCat.category || 'Gastro-entérologie'}"
+PROFIL CLINIQUE REQUIS : "${subProfileDescription}"
+
+--- CONTEXTE DE LA FICHE PRINCIPALE DÉJÀ VALIDÉE ---
+[Summary Principal] :
+${parentCat.summary || 'Non spécifié'}
+
+[Ordonnance Principale] :
+${parentCat.ordonnance || 'Non spécifiée'}
+
+[Drapeaux Rouges Principaux] :
+${parentCat.red_flags || 'Non spécifié'}${sourcesContext}
+
+RAPPEL : Génère un objet JSON unique avec "label", "summary" (4 étapes), "red_flags", et "ordonnance" (4 sections).`;
+
+  debugEmitter.emitEvent('llm_prompt_built', {
+    title: `[Sub-CAT] ${parentCat.title} -> ${subProfileDescription}`,
+    category: parentCat.category || 'Gastro-entérologie',
+    systemPromptChars: systemPrompt.length,
+    userPromptChars: userPrompt.length,
+    estimatedTokens: Math.ceil((systemPrompt.length + userPrompt.length) / 4)
+  });
+
+  const { validateCAT } = require('./medical-validator');
+  let attempts = 0;
+  const maxAttempts = 3;
+  let previousValidationErrors = [];
+  let subResult = null;
+  let lastMetrics = null;
+
+  while (attempts < maxAttempts) {
+    attempts++;
+    console.log(`🤖 Sub-CAT Generation Attempt ${attempts}/${maxAttempts} for "${parentCat.title}" -> "${subProfileDescription}"...`);
+
+    let currentPrompt = userPrompt;
+    if (previousValidationErrors.length > 0) {
+      currentPrompt += `\n\n🚨 ATTENTION — TENTATIVE PRÉCÉDENTE REJETÉE PAR LE VALIDATEUR CLINIQUE :\n` +
+        previousValidationErrors.map(e => `- ${e}`).join('\n') +
+        `\n👉 INSTRUCTION DE CORRECTION : Corrige STRICTEMENT ces erreurs médicales/structurelles dans ta nouvelle réponse JSON !`;
+    }
+
+    const apiResult = await callLLMApi(systemPrompt, currentPrompt, options);
+    lastMetrics = apiResult.metrics;
+
+    try {
+      subResult = safeParseLLMJson(apiResult.text);
+
+      // Markdown Header Sanitizer
+      const sanitizeMarkdownText = (text) => {
+        if (!text || typeof text !== 'string') return text;
+        let clean = text;
+        clean = clean.replace(/(?:^|\n)\s*\*\*\s*(?:\n|$)/g, '\n');
+        clean = clean.replace(/\*\*\s*\*\*/g, '');
+        clean = clean.replace(/\*\*([^*\n]+):\*(?!\*)/g, '**$1:**');
+        clean = clean.replace(/:\*\*\s*:/g, ':**');
+        clean = clean.replace(/(?:^|\n)(?:\*\*|#{2,4}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*:?\s*(?:\n|$)/gi, (m, title) => {
+          return '\n\n**' + title.trim() + ' :**\n';
+        });
+        clean = clean.replace(/\n{3,}/g, '\n\n');
+        return clean.trim();
+      };
+
+      if (subResult.summary) subResult.summary = sanitizeMarkdownText(subResult.summary);
+      if (subResult.ordonnance) subResult.ordonnance = sanitizeMarkdownText(subResult.ordonnance);
+      if (subResult.red_flags) subResult.red_flags = sanitizeMarkdownText(subResult.red_flags);
+
+      // Verify 4-step summary presence
+      const subErrors = [];
+      if (!subResult.label || typeof subResult.label !== 'string') {
+        subErrors.push('Field "label" is missing or invalid.');
+      }
+      if (!subResult.summary || !subResult.summary.includes('Spécificités') || !subResult.summary.includes('Diagnostic')) {
+        subErrors.push('Sub-CAT summary must strictly contain the 4 steps (0. Spécificités & Urgence, 1. Diagnostic, 2. Prise en Charge, 3. Surveillance).');
+      }
+      if (!subResult.ordonnance || subResult.ordonnance.length < 20) {
+        subErrors.push('Sub-CAT ordonnance is required with 4 structured sections.');
+      }
+      if (!subResult.red_flags || subResult.red_flags.length < 10) {
+        subErrors.push('Sub-CAT red_flags field is required.');
+      }
+
+      // Run complete 8-layer Medical Validator on the parent CAT with this new sub-profile attached
+      const syntheticParent = {
+        ...parentCat,
+        id: parentCat.id || 999,
+        sub_cats: [subResult]
+      };
+      const validation = validateCAT(syntheticParent);
+
+      const allErrors = [...subErrors, ...(validation.valid ? [] : validation.errors)];
+
+      if (allErrors.length === 0) {
+        console.log(`✅ Sub-CAT Medical Checksum PASSED on Attempt ${attempts}!`);
+        
+        // Metadata tags
+        subResult._manually_requested = true;
+        subResult._profile_query = subProfileDescription;
+        subResult._generated_at = new Date().toISOString();
+        subResult._execution_metrics = apiResult.metrics;
+
+        debugEmitter.emitEvent('generation_done', {
+          title: `[Sub-CAT] ${parentCat.title} -> ${subResult.label || subProfileDescription}`,
+          status: 'success',
+          attempt: attempts,
+          latencyMs: apiResult.metrics ? apiResult.metrics.latencyMs : 0,
+          totalTokens: apiResult.metrics ? apiResult.metrics.totalTokens : 0,
+          model: apiResult.metrics ? apiResult.metrics.model : 'unknown'
+        });
+
+        return {
+          sub_cat: subResult,
+          validation: validation,
+          metrics: apiResult.metrics
+        };
+      } else {
+        console.warn(`❌ Sub-CAT Medical Validation Failed (Attempt ${attempts}):`, allErrors);
+        previousValidationErrors = allErrors;
+      }
+    } catch (parseErr) {
+      console.warn(`⚠️ Sub-CAT JSON parse error on attempt ${attempts}: ${parseErr.message}`);
+      previousValidationErrors = [`Erreur de formatage JSON : ${parseErr.message}`];
+    }
+  }
+
+  const failureReason = previousValidationErrors.length > 0
+    ? `Validation clinique de la sous-fiche non résolue après ${maxAttempts} tentatives :\n` + previousValidationErrors.map(e => `• ${e}`).join('\n')
+    : `Échec de l'appel LLM pour la sous-fiche après ${maxAttempts} tentatives.`;
+
+  throw new Error(failureReason);
+}
+
 module.exports = {
   callLLMApi,
-  generateCATWithLLM
+  generateCATWithLLM,
+  generateSubCATWithLLM
 };

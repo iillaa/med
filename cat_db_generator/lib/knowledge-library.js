@@ -23,12 +23,15 @@ const LIBRARY_SUBDIRS = [
   'medg_fiches_cat',
   'antibioclic_decision_trees',
   'sfmu_emergency_reflex',
+  'sfmu_emergency_protocols',
   'pediadol_pediatric_protocols',
   'msf_pocket_clinical_guides',
+  'msf_clinical_guidelines',
   'orphanet_urgences_reflex',
   'crat_pregnancy_lactation',
   'has_clinical_memos',
-  'algeria_msprh_nomenclature'
+  'algeria_msprh_nomenclature',
+  'colleges_consensus'
 ];
 
 function ensureLibraryDirectories() {
@@ -167,11 +170,14 @@ function queryClinicalLibrary(title, keywords = []) {
           .replace('MEDG FICHES CAT', 'MEDG.FR — CONDUITE À TENIR')
           .replace('ANTIBIOCLIC DECISION TREES', 'ANTIBIOCLIC / SPILF')
           .replace('SFMU EMERGENCY REFLEX', 'SFMU URGENCES')
+          .replace('SFMU EMERGENCY PROTOCOLS', 'SFMU URGENCES PROTOCOLES')
           .replace('PEDIADOL PEDIATRIC PROTOCOLS', 'PÉDIADOL PÉDIATRIE')
           .replace('MSF POCKET CLINICAL GUIDES', 'MSF GUIDE CLINIQUE DE POCHE')
+          .replace('MSF CLINICAL GUIDELINES', 'MSF GUIDES CLINIQUES')
           .replace('ORPHANET URGENCES REFLEX', 'ORPHANET URGENCES')
           .replace('CRAT PREGNANCY LACTATION', 'CRAT GROSSESSE & ALLAITEMENT')
-          .replace('HAS CLINICAL MEMOS', 'HAS FICHES MÉMO');
+          .replace('HAS CLINICAL MEMOS', 'HAS FICHES MÉMO')
+          .replace('COLLEGES CONSENSUS', 'COLLÈGES & SOCIÉTÉS SAVANTES');
 
         results.push({
           source: prettySource,
