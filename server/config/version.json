@@ -1,8 +1,8 @@
 {
   "minVersion": "1.9.0",
-  "latestVersion": "1.10.1",
+  "latestVersion": "1.10.2",
   "forceUpdateActive": false,
-  "updateMessage": "Une mise à jour de Dr.CAT v1.10.1 est disponible.",
+  "updateMessage": "Une mise à jour de Dr.CAT v1.10.2 est disponible.",
   "releaseNotes": [
     "🔬 PDF Lab 2.0 : Découpeur Visuel de PDF (Visual Slicer) avec recadrage par canvas et marges de sécurité (+15px)",
     "🧪 Espace de travail à deux niveaux : Sandbox de Staging & Ingestion multi-formats (.pdf, .md, .txt)",
@@ -15,5 +15,5 @@
     "telegramUrl": "https://t.me/DrCatOfficialApp",
     "directServerUrl": "https://apkpure.com/p/com.drcat.app"
   },
-  "lastUpdated": "2026-08-19T23:25:00.263Z"
+  "lastUpdated": "2026-08-21T15:36:22.515Z"
 }

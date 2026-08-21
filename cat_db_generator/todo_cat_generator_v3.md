@@ -1,208 +1,198 @@
-# 🩺 CAT Generator — True V3 Architectural Blueprint & Master Plan
-> **Date**: 2026-08-11 | **Branch**: `beta-test-pr` | **Author**: Dr. Kibeche Ali Dia Eddine
+# 🩺 Dr. CAT Generator — Master Architecture, Strategy & Unified V3.5 Roadmap
+> **Document Name**: `todo_cat_generator_v3.md`  
+> **Author & Lead Architect**: Dr. Kibeche Ali Dia Eddine  
+> **Current Version**: v1.10.1+ | **Branch**: `beta-test-pr`  
+> **Purpose**: Master registry of completed architectural milestones, live technical specifications, and prioritized remaining tasks.
 
 ---
 
-## 🎯 EXECUTIVE SUMMARY & V3 OBJECTIVES
+## 🎯 1. Architectural Philosophy & Core Paradigm
 
-The goal of **CAT Generator True V3** is to transition the generator from a system that relies primarily on Gemini's general pretrained knowledge into a **precision-engineered Doctor-Grade Clinical Engine** driven by:
-1. **Dynamic Cumulative Local Algerian PDF Data**: Combines dedicated short PDF guides AND multi-topic compilations (150 Ordonnances, specialty textbooks) simultaneously for *any* medical condition without artificial limits.
-2. **Real Online Medical Guideline Articles**: Fetches actual PubMed medical abstracts (`efetch`) and MSD clinical articles via direct URL rather than superficial search listing pages.
-3. **A Live Diagnostic Debug Panel (SSE)**: Enables the physician-admin to inspect every single token, retrieved PDF/Web snippet, parser tier, and LLM reasoning step in real time with 1-click JSON log export.
-
----
-
-## ✅ PART 1 — COMPLETED WORK RECAP
-
-### 1.1 LLM Engine (`cat_db_generator/lib/llm-engine.js`) — DONE ✅
-- **Dynamic Model Discovery**: Auto-queries `/v1beta/models`, filters `generateContent` models, sorts by version (`3.6` > `3.5` > `3.0` > `2.0` > `latest`). 1h TTL cache.
-- **4-Tier Robust JSON Parser**:
-  - *Tier 1*: Direct native JSON.parse
-  - *Tier 2*: Control characters strip + trailing comma removal
-  - *Tier 3*: String-literal newline/tab repair
-  - *Tier 4*: Deterministic key-boundary regex extraction
-- **Dynamic Thinking Budget**: 4,096 tokens for Pro models, 2,048 for Flash models. Lite variants excluded.
-- **Resilience & Timeouts**: 10s cooldown on HTTP 429 rate limits (up to 3 retries) + 60-second `AbortController` fetch timeout preventing stalled requests.
-- **Clinical Schema & Prompt**: 7-Step clinical logic (`0. ABCDE -> 1. Diagnostic -> 2. Drapeaux Rouges -> 3. Examens -> 3bis. Terrain -> 4. Prise en charge -> 5. Orientation/Médico-légal`).
-- **Anti-Polypharmacy 4-Section Ledger**: Enforces `1ère INTENTION`, `ALTERNATIVES [OU]`, `TRAITEMENT SYMPTOMATIQUE`, `TRAITEMENT NON MÉDICAMENTEUX`.
-- **Administrative vs Clinical Lock**: Auto-detects administrative documents (certificats, CBU, lettres) and switches to 3-step medico-legal schema.
-- **3-Attempt Validation Checksum Loop**: Auto-retries generation up to 3 times if schema/drug assertions fail.
-
-### 1.2 Medical Validator & Safety Engine — DONE ✅
-- **Dynamic Rules Engine (`drug-safety-rules.json`)**: Standalone JSON database covering **16 critical drugs**. Zero hardcoding.
-- **Active Safety Assertions**: Daily ceiling overdose, single-dose limits, pediatric weight-based dosing (`mg/kg/prise` and `mg/kg/j`), and specific contraindications (Pregnancy > 24SA for NSAIDs, Aspirin in pediatric viral illness for Reye's syndrome, Tramadol + SSRI serotonin syndrome, Metformin DFG < 30, etc.).
-- **Anti-Hallucination Forbidden Placeholders**: Rejects `lorem ipsum`, `à compléter`, `tbd`, etc.
-
----
-
-## 🔬 PART 2 — DYNAMIC CUMULATIVE PDF RAG ARCHITECTURE
-
-### 2.1 The Cumulative Multi-Source Strategy (No Artificial Limits)
-
-In clinical medicine, comprehensive knowledge is rarely found in a single document. For **any given pathology** (e.g. Asthme, Hémorragie digestive, Gale, Insuffisance cardiaque, Colique néphrétique):
-- A **Dedicated Single PDF** provides specific local diagnostic nuances and drug choices.
-- A **Specialty Chapter** (e.g. Urgences, Gastro, Pneumo, Infectio) provides acute stabilization, differential diagnosis, and hospital referral criteria.
-- A **Prescription Compilation** (e.g. *150 Ordonnances types*) provides exact hospital prescription formulas, posologies, and durations.
-
-**V3 Rule**: The engine **never restricts** itself to only one source. It queries **both dedicated files AND multi-topic compilations simultaneously**, merging all relevant findings into one rich RAG context.
+The **Dr. CAT Generator (v3.5)** is engineered as a **precision Doctor-Grade Clinical Engine** driven by a strict 4-pillar architectural foundation:
 
 ```
-                   ANY CAT TITLE (e.g. "Hémorragie digestive haute")
-                                          │
-                                          ▼
-                   1. DYNAMIC TOKEN & SYNONYM EXPANSION
-             ["hémorragie digestive", "méléna", "hématémèse", "fibroscopie", "IPP"]
-                                          │
-                                          ▼
-                   2. PARALLEL DUAL-TIER CUMULATIVE SEARCH
-         ┌────────────────────────────────┴────────────────────────────────┐
-         ▼                                                                 ▼
-   LAYER A: DEDICATED FILES                               LAYER B: MULTI-TOPIC COMPILATIONS
-   (Matches in data/pdf_cache/ filenames/P1)              (Searches all 77 PDFs with \b regex)
-   ─────────────────────────────────────────              ───────────────────────────────────
-   • Extracts focused single-topic guide                  • Searches Urgences, Gastro, ECN,
-   • Injects full protocol without chopping                 150 Ordonnances chapters
-                                                          • Scans for Section Anchors:
-                                                            "Traitement", "Posologie",
-                                                            "Signes de gravité"
-                                                          • Extracts 1,200–2,000 char blocks
-         │                                                                 │
-         └────────────────────────────────┬────────────────────────────────┘
-                                          ▼
-                   3. AGGREGATED UNIFIED LOCAL PDF PROMPT
-         [📚 Dedicated Local Guide: ...] + [📚 Hospital Compilation: ...]
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    DR. CAT V3.5 GENERATOR ARCHITECTURE                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. 🧠 AI Reasoning Engine (Gemini Flash Unthrottled) :                      │
+│    - Fast, unthrottled medical reasoning without cognitive clutter.         │
+│    - Dynamic model discovery (Gemini 3.7 / 3.6 Flash) + 4-tier JSON parser. │
+│                                                                             │
+│ 2. 📐 Lean Universal Master Prompt :                                        │
+│    - Universal 7-step clinical / 3-step administrative structure.           │
+│    - Anti-polypharmacy 4-section ordonnance ledger.                         │
+│    - Universal "Zéro Posologie Vague" rule.                                 │
+│    - Transversal terrain invariants (Pédiatrie, Grossesse CRAT, Gériatrie). │
+│                                                                             │
+│ 3. 📚 Concrete Ground Truth (Dual RAG) :                                    │
+│    - Tier 1: Local curated Algerian PDFs & Clinical Monographs.             │
+│    - Tier 2: Precision Clinical Decision Library (HAS, SFMU, CRAT, MedG).   │
+│    - Tier 3: Real Online Web Articles (PubMed efetch, MSD via Jina).        │
+│    - Tier 4: Active Doctor Learning Memory (human edits preserved).         │
+│                                                                             │
+│ 4. 🛡️ Deterministic Safety Firewall (8-Layer Medical Validator) :           │
+│    - Immutable drug ceilings, dangerous interactions, CRAT, typos (500g).   │
+│    - 3-attempt automated checksum and correction retry loop.                │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
-
-### 2.2 Strict French Word-Boundary Matching (`\b`)
-- **Problem**: Substring searching `.includes("gale")` matches `é-gale-ment`, `lé-gale-ment`, `dé-légat-ion`. Searching `.includes("cat")` matches `certifi-cat`.
-- **V3 Solution**: Strict regex matching with word boundaries:
-  ```javascript
-  const rx = new RegExp(`(?:^|[^a-z0-9à-ÿ])${escapedToken}(?:$|[^a-z0-9à-ÿ])`, 'i');
-  ```
-  Matches *"la gale"* or *"gale,"*, but **strictly ignores** *"également"* and *"légalement"*.
-
-### 2.3 Clinical Section-Anchor Extraction
-- **Problem**: Slicing 400 characters around the title keyword captures only the *Definition* at the top of the page, missing the *Treatment & Dosages* located 1,500 characters down.
-- **V3 Solution**: 
-  - Scans matched documents for clinical section headers: `Traitement`, `Thérapeutique`, `Prise en charge`, `Ordonnance`, `Posologie`, `Drapeaux rouges`.
-  - Extracts the **entire treatment section block** (1,200–2,000 chars) containing real molecules, dosages, and regimens.
-  - **Multi-Page Continuation**: Automatically extracts `page + 1` if a section continues across page boundaries.
-
-### 2.4 Dedicated `cat_pdf_index.json` Builder
-- `pdf_index.json` remains untouched for the general app's PDF Viewer and user search.
-- `cat_pdf_index.json` is generated by `scripts/build_cat_pdf_index.js` specifically for AI generation:
-  - Injects `{ pdf, quality, total_pages }` into every page object.
-  - Classifies documents into `dedicated_sheet` vs `multi_compilation`.
-  - Filters out non-clinical noise pages (covers, table of contents, bibliography).
 
 ---
 
-## 🌐 PART 3 — WEB RAG V3: REAL CLINICAL ARTICLE RETRIEVAL
+## ✅ 2. Completed Work Record (Done Milestones)
 
-### 3.1 The Current Limitation
-- Currently, PubMed queries return only article metadata (title, authors, pub date) via `esummary` with **zero clinical text**.
-- MSD and MedG queries return search result listing pages or RSS snippets rather than full clinical guides.
+### 2.1 LLM Engine & Reasoning Pipeline (`cat_db_generator/lib/llm-engine.js`) — DONE ✅
+- [x] **Dynamic Google AI Studio Model Discovery**: Queries `/v1beta/models`, sorts by capability (`3.7` > `3.6` > `3.5` > `3.0`), 1h TTL cache.
+- [x] **4-Tier Robust JSON Parser**:
+  - *Tier 1*: Direct native `JSON.parse`.
+  - *Tier 2*: Control characters strip + trailing comma cleanup.
+  - *Tier 3*: String-literal newline/tab repair.
+  - *Tier 4*: Deterministic key-boundary regex extraction.
+- [x] **Dynamic Thinking Budget**: 4,096 tokens for Pro models, 2,048 for Flash models.
+- [x] **Rate Limit & Timeout Resilience**: 10s cooldown on HTTP 429 errors (up to 3 retries) + 60s `AbortController` timeout.
+- [x] **Lean Universal Master Prompt**:
+  - Universal 7-step clinical logic (`0. ABCDE -> 1. Diagnostic -> 2. Drapeaux Rouges -> 3. Examens -> 3bis. Terrain -> 4. Prise en charge -> 5. Orientation & Suivi`).
+  - Automatic administrative switch for legal documents (certificats, CBU, lettres).
+  - Anti-polypharmacy 4-section ordonnance (`TRAITEMENT NON MÉDICAMENTEUX & RHD`, `1ère INTENTION`, `ALTERNATIVES [OU]`, `TRAITEMENT SYMPTOMATIQUE / ADJUVANT`).
+  - **Universal "Zéro Posologie Vague" Rule**: Imposes `[DCI] + [Nom commercial] + [Forme] + [Posologie journalière explicite mg/g ou dose-poids] + [Fréquence] + [Durée]`.
+  - **Clean Summary Rule**: Strict prohibition of markdown `[...](subcat:1)` links in the summary text.
+  - **Specialty Clutter Removal**: Removed bulky specialty blocks from the universal prompt, keeping Gemini un-throttled.
 
-### 3.2 V3 Upgrades
-1. **PubMed PMC `efetch` API**:
-   - Query `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=${pmcId}&rettype=abstract&retmode=text` to extract the **real medical abstract**.
-2. **MSD Direct Article URL Extraction**:
-   - From search results, parse the first clinical article link (`/fr/professional/.../article-title`), then fetch that specific article via Jina Reader.
-3. **Web Cache 30-Day Staleness Check**:
-   - `getCachedWebSources()` automatically ignores and re-fetches web caches older than 30 days.
-4. **Dead Code Cleanup**:
-   - Remove unused `fetchMSDManuals()` in `web-fetcher.js`.
+### 2.2 Targeted Sub-CATs Micro-Engine & Option C (v1.10.0) — DONE ✅
+- [x] **Option C Pre-Configuration Panel (`admin/cat_generator_lab.html`)**:
+  - Radio selector: Standard (1-Tab Rapide) vs Multi-Profils (Master + Sous-Fiches).
+  - 6 1-click clinical presets (*🤰 Grossesse CRAT, 👴 Gériatrie Start Low, 👶 Pédiatrie mg/kg/j, 🚨 Urgences, 🫘 Rénal DFG, 🧠 RUD*) + custom text input.
+- [x] **Targeted Sub-CAT Micro-Prompt Engine (`generateSubCATWithLLM`)**:
+  - Strict 4-step summary (`0. Spécificités & Urgence`, `1. Diagnostic`, `2. Prise en Charge`, `3. Surveillance`).
+  - Non-contradiction and zero-repetition rules relative to the parent Master CAT.
+  - 4-section prescription with "Zéro Posologie Vague" enforcement.
+- [x] **Interactive Workspace Pill Bar (`public/js/components/workspace.js`)**:
+  - Top segmented pill navigation bar dynamically switching summary, red flags, and ordonnance in real time.
+
+### 2.3 Deterministic 8-Layer Medical Safety Firewall (`cat_db_generator/lib/medical-validator.js`) — DONE ✅
+- [x] **Pharmacological Toxicity Ceilings (`clinical_drug_ceilings.json`)**:
+  - Daily adult maximum dose ceilings, pediatric weight-based ceilings, single-dose ceilings, and CRAT safety flags.
+- [x] **Dangerous Drug-Drug Interactions Matrix (`dangerous_drug_interactions.json`)**:
+  - 18 ANSM/Vidal contraindicated red pairs (QT prolongation, serotonin syndrome, Triple Whammy, Statin + Fusidic acid, etc.).
+- [x] **Dynamic Drug Safety Rules (`drug-safety-rules.json`)**:
+  - Standalone JSON safety assertions (Aspirin pediatric viral illness Reye's syndrome, NSAIDs > 24 SA pregnancy, Metformin DFG < 30).
+- [x] **Typo & Order-of-Magnitude Interceptor**:
+  - Intercepts dangerous unit errors (e.g. `500g` vs `500mg`, `1000g` vs `1000mg`).
+- [x] **Anti-Hallucination Placeholders Check**:
+  - Rejects `lorem ipsum`, `à compléter`, `tbd`, `dose usuelle`, `selon le cas`.
+- [x] **3-Attempt Automated Checksum & Correction Loop**:
+  - Feeds validator error diagnostics directly back into Gemini prompt on failure for self-correction.
+
+### 2.4 PDF Lab 2.0 & Ingestion Workbench (`admin/pdf_lab.html`) — DONE ✅
+- [x] **Visual Interactive PDF Slicer & Cropper**:
+  - Native canvas rendering via `PDF.js` with interactive draggable top/bottom crop lines.
+  - Automatic safety margin (+15px) preventing severed headers or posology subscripts.
+  - Dual-mode export: Vector slice (`pdf-lib`) in 15ms or Canvas High-Res image bundle.
+- [x] **Two-Tier Ingestion Sandbox (Staging vs Master Corpus)**:
+  - Staging Sandbox for testing, OCR cleanup, and metadata tagging.
+  - 1-click promotion button (`[💎 Promouvoir dans le Master Index]`) locking verified slices into `pdf_index.json`.
+- [x] **Live RAG Simulator & Section-Anchor Extraction**:
+  - Real-time token search with strict French word-boundary (`\b`) regex.
+  - Extracts full treatment blocks (`Traitement`, `Posologie`, `Signes de gravité`) over 1,200–2,000 characters.
+
+### 2.5 Web Fetcher V3 & Jina Reader (`cat_db_generator/lib/web-fetcher.js`) — DONE ✅
+- [x] **PubMed PMC `efetch` API**: Fetches authentic full medical abstracts instead of empty metadata listings.
+- [x] **MSD Manuals Professional via Jina Reader**: Extracts verified clinical chapters directly.
+- [x] **Custom Doctor URL Injector**: Input field in Admin Lab and Add CAT modal to paste official links (`sante.gov.dz`, `cnpm.org.dz`).
+- [x] **30-Day Cache Staleness TTL**: Automatically refreshes stale cached web results.
+- [x] **1-Click Offline / Online Toggle**: Instant 3-second offline generation with 1-click web opt-in.
+
+### 2.6 Real-Time Diagnostic Debug Panel (`cat_db_generator/lib/debug-emitter.js`) — DONE ✅
+- [x] **Server-Sent Events (SSE) Stream**: Live event bus streaming from `llm-engine`, `web-fetcher`, `pdf-extractor`.
+- [x] **Admin Lab Telemetry Drawer**: Live visual status of each RAG channel, exact character counts, parser tiers, and latency.
+- [x] **1-Click JSON Log Export**: Instant clipboard copy of the full raw telemetry payload for auditing.
+
+### 2.7 Tier 2 Clinical Decision Library (`cat_db_generator/clinical_library/`) — DONE ✅
+- [x] **Section-Aware Precision Chunking (`knowledge-library.js`)**: Dynamic token search across all specialized folders (HAS, SFMU, CRAT, MedG, MSF, Pediadol).
+- [x] **Psychiatry & Mental Health Reference Guide (`has_psychiatrie_sante_mentale_urgences.md`)**:
+  - Full clinical memo covering RUD suicide risk grid, BZD duration ceilings (12w/4w), SSRI delays + inhibition release, acute agitation monotherapy, and Algerian Health Law 18-11. Tested with 120-130 RAG scores.
+
+### 2.8 Server Stability, Security & Process Supervision — DONE ✅
+- [x] **PM2 Process Supervision (`ecosystem.config.js`)**: Auto-restart on crashes or memory spikes.
+- [x] **Log Rotation (`scripts/rotate-logs.js`)**: Rotates logs > 10 MB and prunes older than 7 days (`npm run log:rotate`).
+- [x] **Localhost Admin Auth Guard**: Restricts admin login strictly to local connections on Termux to prevent tunnel brute-forcing.
+- [x] **User Storage Protection Protocol**: Lock screen and kill switch preserve 100% of user data (`dr_cat_notes_*`, reading history, Leitner stats, streaks).
 
 ---
 
-## 🪟 PART 4 — DIAGNOSTIC & DEBUG PANEL (P1 PRIORITY)
+## ⏳ 3. Active Actionable Roadmap (Pending Tasks)
 
-### 4.1 Concept & Architecture
-A live-streaming telemetry window embedded in `admin/cat_generator_lab.html` connected via Server-Sent Events (SSE).
-
-```
-CAT Generation Triggered
-           │
-           ▼
-┌────────────────────────────────────────────────────────┐
-│               debug-emitter.js (Singleton)             │
-│   Listens to: llm-engine, web-fetcher, pdf-extractor   │
-└──────────────────────────┬─────────────────────────────┘
-                           │ SSE Stream
-                           ▼
-             GET /api/admin/cat-generator/debug-stream
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│            ADMIN LAB UI LIVE DEBUG PANEL               │
-│  • Visual status of each RAG channel                   │
-│  • Exact snippets & characters injected into prompt    │
-│  • Raw LLM response & parser tier used                 │
-│  • [📋 Copy Full JSON Logs] button for analysis        │
-└────────────────────────────────────────────────────────┘
-```
-
-### 4.2 Streamed Events Catalog
-
-| Event Name | Description |
-|---|---|
-| `web_fetch_start` | Keywords extracted and sources being queried |
-| `web_fetch_result` | Source name, URL, content length, preview snippet |
-| `pdf_dedicated_hit` | Dedicated short PDF matched (Full-doc injection triggered) |
-| `pdf_compilation_search` | Word-boundary tokens used, matching pages, section-anchor extracted |
-| `active_learning` | Status of doctor-edited memory in `cats_db_v3_generated.json` |
-| `llm_prompt_built` | Exact system & user prompt character count and estimated token load |
-| `llm_model_try` | Dynamic model selected, attempt number, thinking budget applied |
-| `llm_response_raw` | First 500 chars of raw LLM output text |
-| `llm_parse_tier` | Which parser tier succeeded (Tier 1 native, Tier 2 clean, Tier 3 repair, Tier 4 regex) |
-| `validation_result` | Medical validator outcome (valid/invalid, safety assertions triggered) |
-| `generation_done` | Total execution latency, tokens consumed, final status |
+### 🧱 Task 1: Architectural Decoupling & Codebase Modular Refactor (Idea 13)
+* **Priority**: 🟠 HIGH | **Complexity**: Medium | **Status**: ⏳ Queued for Next Pass
+* **Objective**: Decouple monolithic 1,000+ line files into cohesive, testable ES modules:
+  1. **`admin/cat_generator_lab.html` (1,890 lines)**:
+     - Extract client JS logic to `admin/js/cat_generator_lab.js`.
+     - Extract inline styles to `admin/css/cat_generator_lab.css`.
+  2. **`public/js/main.js` (1,219 lines)**:
+     - Extract keyboard navigation & hotkeys to `public/js/shortcuts.js`.
+     - Extract modal lifecycle & backdrop isolation to `public/js/modals.js`.
+  3. **`public/js/utils.js` (1,026 lines)**:
+     - Split into `public/js/utils/dom.js` (element builders, sanitizers) and `public/js/utils/formatters.js` (dates, text parsing, search tokenizers).
+  4. **`public/css/workspace.css` (1,645 lines)**:
+     - Partition into modular stylesheet imports (`workspace-reading.css`, `workspace-split.css`, `workspace-mobile.css`).
 
 ---
 
-## 📋 PART 5 — STEP-BY-STEP IMPLEMENTATION ROADMAP
-
-| Phase | Task | Impact |
-|---|---|---|
-| **Phase 1 (P1)** | **Real-Time Debug Panel & SSE Telemetry**<br>• Create `cat_db_generator/lib/debug-emitter.js`<br>• Instrument `llm-engine.js`, `web-fetcher.js`, `pdf-extractor.js`<br>• Add SSE endpoint in `server/routes/cat-generator.js`<br>• Add collapsible UI panel + Copy Logs button in `admin/cat_generator_lab.html` | 🔴 CRITICAL: Complete visibility into live operations |
-| **Phase 2 (P2)** | **Dynamic Cumulative PDF Engine & Word-Boundary Matching**<br>• Implement `matchExactWord()` with `\b` regex in `pdf-extractor.js`<br>• Add Dynamic Token/Synonym expansion<br>• Add Parallel Dedicated File Matcher + Multi-Topic Compilation Searcher<br>• Add Clinical Section-Anchor extraction (`Traitement:`, `Posologie:`)<br>• Create `scripts/build_cat_pdf_index.js` for dedicated `cat_pdf_index.json` | 🟠 HIGH: Eliminates PDF noise & extracts actual prescriptions across all sources |
-| **Phase 3 (P3)** | **Web RAG Full Article Content**<br>• Switch PubMed to `efetch` (abstract text)<br>• Add MSD direct article link extractor<br>• Add 30-day cache staleness TTL check<br>• Delete dead `fetchMSDManuals()` code | 🟡 HIGH: Feeds genuine clinical text instead of search listings |
-| **Phase 4 (P4)** | **RAG Faithfulness Test Suite & Verification**<br>• Benchmark test with injected controlled parameters<br>• Verify end-to-end V3 generation on sample CATs (#56 Gale, #57 Hémorragie digestive) | 🟢 VALIDATION: Guarantees True V3 quality standard |
-| **Phase 5 (P5)** | **Targeted Sub-CATs Micro-Engine & Option C (v1.10.0)**<br>• Implement `generateSubCATWithLLM` with laser-focused micro-prompt<br>• Add Option C Pre-Configuration panel in Creation Modal (Standard 1-Tab vs Multi-Profils)<br>• Add 6 1-click clinical presets (CRAT, Start Low Go Slow, mg/kg/j, Urgence, DFG, RUD)<br>• Integrate 8-layer medical validator with 3-attempt automated checksum loop<br>• Re-enable Segmented Pill Bar in Workspace view | 🟢 COMPLETED: Full human-in-the-loop clinical flexibility |
+### ☁️ Task 2: Dedicated Cloudflare Snapshot Rail (`cloudflare-deploy`) (Phase D)
+* **Priority**: 🟡 MEDIUM | **Complexity**: Low-Medium | **Status**: ⏳ Queued
+* **Objective**: Streamline public cloud deployment without git commit pollution on the main work branch (`beta-test-pr`):
+  1. Create a dedicated orphan/snapshot branch: `cloudflare-deploy`.
+  2. Create a flat deployment script: `scripts/cf_deploy.js` (`npm run cf-deploy`):
+     - Runs production build (`npm run build`).
+     - Checks out / stages compiled assets to `cloudflare-deploy`.
+     - Amends a single clean snapshot commit.
+     - Force-pushes to GitHub for automated Cloudflare Workers trigger.
+     - Automatically returns to the active working branch (`beta-test-pr`).
 
 ---
 
-## 🧩 PART 6 — TARGETED SUB-CATS & OPTION C SPECIFICATIONS (v1.10.0)
+### 🔬 Task 3: Multi-Stage "Distill ➔ Decide ➔ Prescribe" Chain (Idea 5)
+* **Priority**: 🔵 LOW / EXPLORATORY | **Complexity**: Medium | **Status**: ⏳ Pending Doctor Decision
+* **Objective**: Further separate clinical fact extraction from master formatting:
+  - *Pass 1 (Clinical Fact Distiller - 300ms Flash)*: Extracts raw validated molecules, dosages, and contraindications from RAG text into a 0-noise Fact Sheet.
+  - *Pass 2 (Master Synthesizer)*: Formats the final CAT, sub-profiles, and 4-section ordonnance from the Fact Sheet.
 
-### 6.1 Architectural Objective
-Eliminate both monolithic "800-page book" CAT bloat and information starvation by decoupling the lean Master Hub (80% standard consultations) from specialized, high-yield clinical sub-profiles (20% complex terrains) via a dual-path pipeline:
-1. **Creation Modal (Option C Pre-Configuration)**:
-   - *Mode 1 (Standard 1-Tab)*: Dense, rapid, single-tab CAT with `sub_cats: []`.
-   - *Mode 2 (Multi-Profils)*: Pre-select multiple clinical terrain presets (`🤰 Grossesse`, `👴 Gériatrie`, `👶 Pédiatrie`, `🚨 Urgence`, `🫘 Rénal`, `🧠 RUD`) + custom text. Synthesizes Master + Sub-CATs simultaneously in one cohesive pass.
-2. **Inspector Drawer (On-Demand Post-Creation)**:
-   - Expandable drawer in `admin/cat_generator_lab.html` calling `POST /api/admin/cat-generator/subcat` to synthesize a targeted child profile in 3s with zero pollution to the master text.
+---
 
-### 6.2 Sub-CAT Schema & Safety Contract
-```json
-{
-  "label": "🤰 Grossesse & Allaitement (CRAT, Tératogénicité)",
-  "summary": "**0. Spécificités & Urgence :** ...\n**1. Diagnostic :** ...\n**2. Prise en Charge :** ...\n**3. Surveillance :** ...",
-  "red_flags": "Specific acute warnings...",
-  "ordonnance": "**TRAITEMENT NON MÉDICAMENTEUX & RHD :** ...\n**1ère INTENTION :** ...\n**ALTERNATIVES [OU] :** ...\n**TRAITEMENT SYMPTOMATIQUE / ADJUVANT :** ...",
-  "_manually_requested": true,
-  "_profile_query": "Grossesse",
-  "_generated_at": "ISO_TIMESTAMP"
-}
-```
+### 🧪 Task 4: Batch Generation & Validation Audit of Core CAT Database
+* **Priority**: 🟡 MEDIUM | **Complexity**: Low | **Status**: ⏳ Queued
+* **Objective**: Run automated verification and batch generation across existing CATs to bring all database records to the 100% V3.5 standard.
 
-### 6.3 8-Layer Automated Medical Checksum
-Every generated Sub-CAT is synthetically tested via `validateCAT()` against:
-1. Exact 4-step summary markdown headers.
-2. Exact 4-section uppercase prescription headings.
-3. Daily toxic dosage ceilings (`clinical_drug_ceilings.json`).
-4. Dangerous drug-drug interaction matrix (`dangerous_drug_interactions.json`).
-5. Pediatric weight-based dosing assertions (`mg/kg/j`).
-6. CRAT teratogenicity rules.
-7. Anti-hallucination forbidden placeholder assertions.
-8. Anti-contradiction with parent Master CAT.
-*(Auto-retries up to 3 times feeding validator error diagnostics back into Gemini on failure).*
+---
+
+## 🚫 4. Archived & Resolved Ideas (Historical Reference)
+
+The following proposals from previous design sessions have been **fully resolved** by the introduction of the PDF Lab 2.0 Visual Curation Workbench:
+
+- **Idea 3: Contiguous PDF Context Stitching ($N \pm 1$)**: Resolved by PDF Lab's interactive canvas range slicer which preserves complete chapters.
+- **Idea 4: Action Block Extractor**: Resolved by visual chapter curation and automated section-anchor extraction.
+- **Idea 7: Strict PDF Ingestion Gate**: Resolved by the Two-Tier Sandbox (Staging vs Master Corpus).
+- **Idea 8: Smart Deduplicator**: Postponed/Resolved because PDF Lab slices are clean and atomic, eliminating publishing boilerplate.
+
+---
+
+## 📊 5. Master Roadmap Comparison Matrix
+
+| Component | Focus Area | Technical Deliverable | Complexity | Live Status |
+| :--- | :--- | :--- | :---: | :---: |
+| **Task 1 (Idea 13)** | Codebase Health | Modularize `cat_generator_lab.html`, `main.js`, `utils.js`, `workspace.css`. | Medium | ⏳ **Next Priority** |
+| **Task 2 (Phase D)** | DevOps & Deployment | Publish-only `cloudflare-deploy` branch + `npm run cf-deploy` script. | Low | ⏳ **Queued** |
+| **Task 4** | Database Quality | Batch audit & generation of 55+ production CATs in V3.5. | Low | ⏳ **Queued** |
+| **Task 3 (Idea 5)** | AI Generation Chain | 2-Pass Fact Distiller ➔ Master Synthesizer. | Medium | ⏳ *Pending Decision* |
+| **LLM Engine V3.5** | Core AI Logic | Universal Master Prompt, Zero Vague Posology, Sub-CAT Option C. | High | ✅ **Completed (v1.10.1)** |
+| **Medical Validator** | Drug Safety | 8-layer validator, clinical ceilings, dangerous interactions, CRAT. | High | ✅ **Completed** |
+| **PDF Lab 2.0** | RAG Grounding | Visual Slicer, +15px margins, Staging Sandbox, Section Anchors. | High | ✅ **Completed** |
+| **Web Fetcher V3** | Web RAG | PubMed `efetch`, MSD Jina, Custom Doctor URL, 30d TTL. | Medium | ✅ **Completed** |
+| **Debug Panel** | Telemetry & Observability | SSE live event stream, token tracking, 1-click JSON log export. | Medium | ✅ **Completed** |
+| **Server & Auth** | Reliability | PM2 auto-restart, log rotation, localhost admin security. | Medium | ✅ **Completed** |
+
+---
+
+## 📝 Document History & Attribution
+- **Consolidated**: 2026-08-20 (Merged `todo4catgenerator.md`, `todosuggestion.md`, and `todo_cat_generator_v3.md`).
+- **Author & Copyright**: Dr. Kibeche Ali Dia Eddine
+- **Active Master File**: `cat_db_generator/todo_cat_generator_v3.md`
