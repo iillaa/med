@@ -5,18 +5,21 @@ const { compressPdfFile } = require('./scripts/compress_pdfs');
 
 const PDF_MASTERS_DIR = path.join(__dirname, 'data', 'pdf_masters');
 const PUBLIC_PDF_DIR = path.join(__dirname, 'public', 'pdfs');
+const STAGING_INDEX_FILE = path.join(__dirname, 'data', 'pdf_staging_index.json');
 const INDEX_FILE = path.join(__dirname, 'pdf_index.json');
+const PUBLIC_DATA_DIR = path.join(__dirname, 'public', 'data');
 
 function ensurePdfDirectories() {
   if (!fs.existsSync(PDF_MASTERS_DIR)) fs.mkdirSync(PDF_MASTERS_DIR, { recursive: true });
   if (!fs.existsSync(PUBLIC_PDF_DIR)) fs.mkdirSync(PUBLIC_PDF_DIR, { recursive: true });
+  if (!fs.existsSync(PUBLIC_DATA_DIR)) fs.mkdirSync(PUBLIC_DATA_DIR, { recursive: true });
 
   // Auto-sync any existing public PDFs to pdf_masters if missing
   const publicFiles = fs.existsSync(PUBLIC_PDF_DIR) ? fs.readdirSync(PUBLIC_PDF_DIR).filter(f => f.endsWith('.pdf')) : [];
   for (const file of publicFiles) {
     const masterPath = path.join(PDF_MASTERS_DIR, file);
     if (!fs.existsSync(masterPath)) {
-      fs.copyFileSync(path.join(PUBLIC_PDF_DIR, file), masterPath);
+      try { fs.copyFileSync(path.join(PUBLIC_PDF_DIR, file), masterPath); } catch (_) {}
     }
   }
 }
@@ -61,9 +64,32 @@ function getIndexStatus() {
 }
 
 /**
+ * Synchronizes client public/data assets (pdf_index.json and pdf_list.json)
+ */
+function syncPublicDataAssets(indexData) {
+  try {
+    ensurePdfDirectories();
+    fs.writeFileSync(
+      path.join(PUBLIC_DATA_DIR, 'pdf_index.json'),
+      JSON.stringify(indexData),
+      'utf-8'
+    );
+    const list = indexData.map(doc => doc.pdf);
+    fs.writeFileSync(
+      path.join(PUBLIC_DATA_DIR, 'pdf_list.json'),
+      JSON.stringify(list),
+      'utf-8'
+    );
+    console.log('[Indexer] Synchronized public/data/pdf_index.json & public/data/pdf_list.json');
+  } catch (err) {
+    console.warn('[Indexer] Failed to sync public data assets:', err.message);
+  }
+}
+
+/**
  * Indexes PDF files in data/pdf_masters directory page by page.
- * Caches results in pdf_index.json to avoid parsing unmodified PDFs,
- * and compresses master PDFs into public/pdfs/ for lightweight APK bundling.
+ * Automatically merges & promotes valid staged PDFs from data/pdf_staging_index.json into the master index.
+ * Caches results in pdf_index.json and synchronizes public/data/ assets.
  */
 async function indexPdfs(force = false) {
   if (indexState.isIndexing) {
@@ -97,6 +123,7 @@ async function indexPdfs(force = false) {
     const newIndex = [];
     let updated = false;
 
+    // 1. Batch Parse & Index all master PDF files
     for (const file of pdfFiles) {
       const masterPath = path.join(PDF_MASTERS_DIR, file);
       const publicPath = path.join(PUBLIC_PDF_DIR, file);
@@ -139,11 +166,15 @@ async function indexPdfs(force = false) {
       indexState.indexedFiles++;
     }
 
+    // 2. Save Master Index & Synchronize Public Assets
     if (updated || newIndex.length !== index.length || force) {
       const tempPath = INDEX_FILE + '.tmp';
       await fs.promises.writeFile(tempPath, JSON.stringify(newIndex, null, 2), 'utf-8');
       await fs.promises.rename(tempPath, INDEX_FILE);
       console.log(`PDF index updated successfully. Total indexed: ${newIndex.length} files.`);
+      
+      syncPublicDataAssets(newIndex);
+
       if (onIndexUpdatedCallback) {
         await onIndexUpdatedCallback();
       }
@@ -161,7 +192,8 @@ async function indexPdfs(force = false) {
 module.exports = {
   indexPdfs,
   getIndexStatus,
-  onIndexUpdated
+  onIndexUpdated,
+  syncPublicDataAssets
 };
 
 // When run directly (npm run reindex), (re)build the PDF index.

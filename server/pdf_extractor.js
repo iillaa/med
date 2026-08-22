@@ -66,7 +66,7 @@ async function extractPdfData(filePath, force = false) {
 
   // 3. Extraction Strategy
   const llamaKey = process.env.LLAMAPARSE_API_KEY;
-  const googleKey = process.env.GOOGLE_API_KEY;
+  const googleKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   let result = null;
   
   if (llamaKey) {

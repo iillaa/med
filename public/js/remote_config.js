@@ -1,3 +1,3 @@
-export const REMOTE_SERVER_URL = "https://drcat.dr-cat.workers.dev";
-export const REMOTE_SERVER_URLS = ["https://drcat.dr-cat.workers.dev","https://rendition-duchess-dry.ngrok-free.dev"];
-export const REMOTE_SERVER_CONFIG = {"primaryProvider":"cloudflare","urls":["https://drcat.dr-cat.workers.dev","https://rendition-duchess-dry.ngrok-free.dev"]};
+export const REMOTE_SERVER_URL = "https://rendition-duchess-dry.ngrok-free.dev";
+export const REMOTE_SERVER_URLS = ["https://rendition-duchess-dry.ngrok-free.dev","https://supervision-reggae-announcements-homework.trycloudflare.com"];
+export const REMOTE_SERVER_CONFIG = {"primaryProvider":"ngrok","urls":["https://rendition-duchess-dry.ngrok-free.dev","https://supervision-reggae-announcements-homework.trycloudflare.com"]};

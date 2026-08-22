@@ -26,10 +26,11 @@ node setup/setup_new_device.js
 ### 🪄 Ce que fait le script automatiquement :
 1. ✅ Vérifie la version de Node.js (>= v18).
 2. ✅ Installe toutes les dépendances (`npm install`).
-3. ✅ Vous demande votre clé d'API Gemini et génère le fichier `.env`.
-4. ✅ Vous demande votre mot de passe Administrateur et le hache dans `admin_password.txt`.
-5. ✅ Compile et minifie les bundles de production (`npm run build`).
-6. ✅ Exécute la suite de tests médicaux pour valider que tout est 100% opérationnel.
+3. ✅ Configure les clés d'API et le mot de passe Administrateur.
+4. ✅ Compile et minifie les bundles de production (`npm run build`).
+5. ✅ Télécharge et configure les tunnels réseau (`cloudflared` & `ngrok`).
+6. ✅ Installe les raccourcis Termux:Widget et les commandes CLI globales (`med`).
+7. ✅ Exécute la suite de tests médicaux pour valider que tout est 100% opérationnel.
 
 ---
 
@@ -40,7 +41,7 @@ Si vous préférez exécuter les commandes une par une :
 ### Étape 1 : Prérequis selon votre système
 * **Sur Android (Termux)** :
   ```bash
-  pkg update && pkg install nodejs git -y
+  pkg update && pkg install nodejs git cloudflared -y
   ```
 * **Sur Linux (Ubuntu / Debian)** :
   ```bash
@@ -149,7 +150,12 @@ npx wrangler deploy
 | `npm run pm2:logs` | Affiche les logs en direct. |
 | `npm run pm2:stop` | Arrête le serveur PM2. |
 | `npm run build` | Recompile les bundles JS/CSS et synchronise les bases minifiées. |
-| `npm test` | Lance la suite de tests automatisés. |
+| `npm run setup:shortcuts` | Configure les raccourcis Termux:Widget et commandes CLI (`med`). |
+| `med start` | Démarre les tunnels (Ngrok + Cloudflare) + serveur + navigateur. |
+| `med local` | Démarre en local uniquement (mode éco-batterie). |
+| `med stop` | Arrête proprement le serveur Node.js et les tunnels. |
+| `med status` | Affiche l'état du serveur et des tunnels actifs. |
+| `med inspect` | Ouvre le tableau de bord d'inspection Ngrok. |
 | `npm run set:password` | Modifie le mot de passe d'accès Administrateur. |
 | `npm run set:provider` | Met à jour l'URL du tunnel Ngrok / Cloudflare. |
 | `npm run log:rotate` | Archive et nettoie les fichiers de logs volumineux. |

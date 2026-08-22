@@ -95,10 +95,10 @@ async function extractWithLlamaParse(filePath, apiKey) {
     const pageSplits = rawMarkdown.split(/\n---\n/g);
     
     pageSplits.forEach((chunk, index) => {
-       pages.push({
-         page: index + 1,
-         content: chunk.trim().substring(0, 1500) // Bound size for mobile memory
-       });
+      pages.push({
+        page: index + 1,
+        content: (chunk || '').trim()
+      });
     });
 
     return {

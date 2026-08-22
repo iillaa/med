@@ -1,3 +1,19 @@
+# Planning & Full-Auto Execution Protocol
+
+## 1. Plan-First Alignment Rule
+- **CRITICAL**: Before executing non-trivial architectural changes, refactors, feature implementations, or complex bug fixes, Gemini MUST FIRST present a structured, concise **Step-by-Step Plan** to the user.
+- **Content of the Plan**:
+  1. **Root Cause Analysis & Diagnosis**: Clearly explain what is happening and why.
+  2. **Proposed Solution & Exact Steps**: Detail the files to be touched and the exact changes to be made.
+  3. **Verification Strategy**: How the changes will be tested and proven.
+
+## 2. Full-Auto Mode Upon User Approval
+- **Rule**: Once the user agrees to the plan (e.g. responds with "ok", "go", "proceed", "agreed"), Gemini MUST enter **Full Autonomous Execution Mode**.
+- **No Unclear Micro-Permissions**:
+  - Do NOT interrupt the flow with piecemeal, cryptic, or low-level permission questions that confuse the user.
+  - Autonomously complete all code edits, run automated builds, execute test suites, and verify end-to-end.
+- **Reporting**: Report back to the user with a concise summary of results and test evidence once all steps are fully completed.
+
 # App Versioning & Mandatory Prompt Protocol
 
 ## Automatic Version Bump Proposal Requirement
@@ -40,4 +56,3 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
 ## Author Name Display Rule
 - **User-Facing UI Credit**: Display **`Dr. Kibeche Ali`** (in Dashboard footer, About modal, Legal/CGU disclaimer).
 - **Code & Legal Metadata**: Display **`Dr. Kibeche Ali Dia Eddine`** (in `package.json`, `LICENSE`, `server/index.js`, and `android/app/build.gradle`).
-

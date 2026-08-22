@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
 export PATH=/data/data/com.termux/files/usr/bin:$PATH
 
 echo "=================================================="
@@ -21,6 +21,12 @@ if pgrep -f "ngrok" &>/dev/null; then
   fi
 else
   echo "🔴 Tunnel Ngrok   : arrêté"
+fi
+
+if pgrep -f "cloudflared" &>/dev/null; then
+  echo "🟢 Tunnel Cloudflare : en cours d'exécution"
+else
+  echo "🔴 Tunnel Cloudflare : arrêté"
 fi
 
 echo ""

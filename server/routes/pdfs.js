@@ -1,20 +1,92 @@
 const fs = require('fs');
 const path = require('path');
 const { extractPdfData } = require('../pdf_extractor');
-const { indexPdfs } = require('../../index_pdfs');
+const { indexPdfs, syncPublicDataAssets } = require('../../index_pdfs');
 const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 
-const { compressPdfFile } = require('../../scripts/compress_pdfs');
+const { compressPdfFile, processAllPdfs } = require('../../scripts/compress_pdfs');
 
 const PDF_MASTERS_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_masters');
 const PUBLIC_PDF_DIR = path.join(__dirname, '..', '..', 'public', 'pdfs');
+const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
 
 function registerPdfRoutes(app, cache) {
   const express = require('express');
   // Local 50 MB body parser — only for the PDF upload route which receives base64 file data.
   // The global express.json limit is 1 MB; all other routes in this file use the global limit.
   const pdfUploadBodyParser = express.json({ limit: '50mb' });
+
+  // GET /api/admin/master-pdf
+  // Streams pristine uncompressed Master PDF (from data/pdf_masters/) directly for high-resolution visual slicing
+  app.get('/api/admin/master-pdf', (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    const filename = req.query.filename;
+    if (!filename) {
+      return res.status(400).json({ error: 'Paramètre "filename" requis.' });
+    }
+
+    const cleanFilename = path.basename(filename);
+    const masterPath = path.join(PDF_MASTERS_DIR, cleanFilename);
+    const publicPath = path.join(PUBLIC_PDF_DIR, cleanFilename);
+
+    let filePath = null;
+    if (fs.existsSync(masterPath)) {
+      filePath = masterPath;
+    } else if (fs.existsSync(publicPath)) {
+      filePath = publicPath;
+    }
+
+    if (!filePath) {
+      return res.status(404).json({ error: `Master PDF "${cleanFilename}" introuvable.` });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${cleanFilename}"`);
+    fs.createReadStream(filePath).pipe(res);
+  });
+
+  // POST /api/admin/compress-all-pdfs
+  // Manually runs full dual-pipeline compression on all master PDFs to optimize the public APK bundle
+  app.post('/api/admin/compress-all-pdfs', (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      processAllPdfs();
+      res.json({ success: true, message: 'Compression de tous les PDFs pour l\'APK terminée avec succès !' });
+    } catch (err) {
+      console.error('[Compress All Error]', err);
+      res.status(500).json({ error: err.message || 'Erreur lors de la compression des PDFs' });
+    }
+  });
+
+  // POST /api/admin/compress-pdf
+  // Manually compresses a single master PDF into public/pdfs/
+  app.post('/api/admin/compress-pdf', (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const filename = path.basename(req.body.filename || '');
+      if (!filename) return res.status(400).json({ error: 'Filename is required' });
+
+      const masterPath = path.join(PDF_MASTERS_DIR, filename);
+      const publicPath = path.join(PUBLIC_PDF_DIR, filename);
+
+      if (!fs.existsSync(masterPath)) {
+        return res.status(404).json({ error: `Fichier Master "${filename}" non trouvé.` });
+      }
+
+      const savedBytes = compressPdfFile(masterPath, publicPath);
+      res.json({ success: true, message: `PDF "${filename}" compressé pour l'APK.`, savedBytes });
+    } catch (err) {
+      console.error('[Compress PDF Error]', err);
+      res.status(500).json({ error: err.message || 'Erreur lors de la compression' });
+    }
+  });
 
   // POST /api/admin/upload-pdf
   app.post('/api/admin/upload-pdf', pdfUploadBodyParser, async (req, res) => {
@@ -202,8 +274,36 @@ function registerPdfRoutes(app, cache) {
       // Process it completely and await the result, forcing cache bypass
       const parseResult = await extractPdfData(targetPath, true);
       
-      // Rebuild the master index now that the local cache is updated
-      await indexPdfs(false);
+      // Update ONLY this single file in master index and memory cache without triggering a full batch reindex
+      if (!Array.isArray(cache.pdfIndex)) {
+        try {
+          cache.pdfIndex = fs.existsSync(INDEX_FILE) ? JSON.parse(fs.readFileSync(INDEX_FILE, 'utf-8')) : [];
+        } catch (_) {
+          cache.pdfIndex = [];
+        }
+      }
+
+      const existingIdx = cache.pdfIndex.findIndex(d => d.pdf === cleanFilename);
+      const indexRecord = {
+        pdf: cleanFilename,
+        specialty: parseResult.specialty || (existingIdx !== -1 ? cache.pdfIndex[existingIdx].specialty : 'Médecine Générale'),
+        quality: parseResult.quality || 'offline',
+        hash: parseResult.hash || `single_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        toc: parseResult.toc || (existingIdx !== -1 ? cache.pdfIndex[existingIdx].toc : []),
+        pages: parseResult.pages || []
+      };
+
+      if (existingIdx !== -1) {
+        cache.pdfIndex[existingIdx] = indexRecord;
+      } else {
+        cache.pdfIndex.push(indexRecord);
+      }
+
+      // Synchronize master index file and public client assets
+      await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf-8');
+      syncPublicDataAssets(cache.pdfIndex);
+      if (cache.searchCache) cache.searchCache.clear();
 
       res.json({ success: true, result: parseResult });
     } catch(err) {
@@ -398,7 +498,8 @@ function registerPdfRoutes(app, cache) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
-      const { id, pdf } = req.body;
+      const id = req.body.id || req.body.docId;
+      const pdf = req.body.pdf;
       const staging = loadStagingData();
       const doc = staging.find(d => d.id === id || d.pdf === pdf);
       if (!doc) return res.status(404).json({ error: 'Document introuvable dans le staging.' });
@@ -412,7 +513,7 @@ function registerPdfRoutes(app, cache) {
       });
 
       saveStagingData(staging);
-      res.json({ success: true, message: `Nettoyage OCR terminé (${cleanedCount} page(s) corrigée(s)).`, doc });
+      res.json({ success: true, message: `Nettoyage OCR terminé (${cleanedCount} page(s) corrigée(s)).`, doc, cleanedDoc: doc });
     } catch (err) {
       res.status(500).json({ error: err.message || 'Failed to clean OCR in staging' });
     }
@@ -424,10 +525,15 @@ function registerPdfRoutes(app, cache) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
-      const { id, pdf } = req.body;
+      const id = req.body.id || req.body.docId;
+      const pdf = req.body.pdf || req.body.filename;
       let staging = loadStagingData();
       const initialLen = staging.length;
-      staging = staging.filter(d => d.id !== id && d.pdf !== pdf);
+      staging = staging.filter(d => {
+        if (id && d.id === id) return false;
+        if (pdf && (d.pdf === pdf || d.filename === pdf)) return false;
+        return true;
+      });
 
       if (staging.length === initialLen) {
         return res.status(404).json({ error: 'Document non trouvé dans le staging.' });
@@ -447,7 +553,8 @@ function registerPdfRoutes(app, cache) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
-      const { id, pdf } = req.body;
+      const id = req.body.id || req.body.docId;
+      const pdf = req.body.pdf;
       const staging = loadStagingData();
       const doc = staging.find(d => d.id === id || d.pdf === pdf);
       if (!doc) return res.status(404).json({ error: 'Document introuvable dans le staging.' });
@@ -601,13 +708,25 @@ function registerPdfRoutes(app, cache) {
 
       // Build staging document record
       const staging = loadStagingData();
-      const stagingPages = [];
+      let stagingPages = [];
       if (extractedText && typeof extractedText === 'string' && extractedText.trim()) {
         const rawPages = extractedText.split(/(?:\n\s*---\s*\n|\n\s*##\s*Page\s*\d+)/i).filter(p => p.trim());
         rawPages.forEach((txt, idx) => {
           stagingPages.push({ page: idx + 1, content: txt.trim() });
         });
-      } else {
+      } else if (mode === 'page_range' && newPdfBuffer) {
+        try {
+          const { extractWithOffline } = require('../parsers/extractor_offline');
+          const extRes = await extractWithOffline(newMasterPath);
+          if (extRes && Array.isArray(extRes.pages) && extRes.pages.length > 0 && extRes.pages.some(p => (p.content || '').trim())) {
+            stagingPages = extRes.pages;
+          }
+        } catch (extErr) {
+          console.warn('[Slice PDF] Auto-extraction on sliced vector PDF:', extErr.message);
+        }
+      }
+
+      if (stagingPages.length === 0) {
         stagingPages.push({
           page: 1,
           content: `# ${title}\n\n**Spécialité :** ${specialty || 'Médecine Générale'}\n**Pathologie :** ${pathology || ''}\n\n[Extrait du document source ${sourceFilename || ''} (Pages ${startPage || 1} à ${endPage || 1})]`

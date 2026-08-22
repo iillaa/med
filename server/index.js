@@ -367,9 +367,8 @@ initializeData().then(() => {
     console.log(`Network Access: http://<your-device-ip>:${PORT}`);
     console.log(`=================================================`);
 
-    if (process.env.NODE_ENV !== 'test') {
-      indexPdfs().catch(err => console.error("Startup indexing error:", err));
-    }
+    // PDF Index is already loaded in memory by initializeData() from pdf_index.json.
+    // Parsing & indexing is 100% manual via the PDF Lab UI or /api/reindex to prevent burning API tokens on boot.
   });
 }).catch(err => {
   console.error("Critical: Failed to initialize application data caches:", err);

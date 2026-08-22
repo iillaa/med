@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
 set -e
 export PATH=/data/data/com.termux/files/usr/bin:$PATH
 cd /data/data/com.termux/files/home/med
@@ -28,76 +28,95 @@ if command -v cloudflared &>/dev/null; then
   HAS_CLOUDFLARED=true
 fi
 
-echo "Démarrage des tunnels de communication (Ngrok / Cloudflare)..."
+echo "=================================================="
+echo "      CLINICAL CAT APP - DÉMARRAGE DU SERVEUR     "
+echo "=================================================="
 
 # Ensure Termux DNS resolv.conf exists for Go binaries
 if [[ ! -f "/data/data/com.termux/files/usr/etc/resolv.conf" ]]; then
+  mkdir -p /data/data/com.termux/files/usr/etc
   echo "nameserver 8.8.8.8" > /data/data/com.termux/files/usr/etc/resolv.conf
   echo "nameserver 1.1.1.1" >> /data/data/com.termux/files/usr/etc/resolv.conf
 fi
 
+# Check ngrok authtoken
+HAS_NGROK_AUTH=false
 if [[ -n "$NGROK_CMD" ]]; then
-  if command -v termux-chroot &>/dev/null; then
-    nohup termux-chroot $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
-  else
-    nohup $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
-  fi
-  NGROK_PID=$!
-fi
-
-if [[ "$HAS_CLOUDFLARED" == "true" ]]; then
-  if [[ -f "$HOME/.cloudflared/config.yml" ]]; then
-    nohup cloudflared tunnel run > cloudflared.log 2>&1 &
-    CF_PID=$!
-    CF_NAMED_MODE=true
-  else
-    nohup cloudflared tunnel --url http://localhost:3000 > cloudflared.log 2>&1 &
-    CF_PID=$!
-    CF_NAMED_MODE=false
+  if $NGROK_CMD config check &>/dev/null; then
+    HAS_NGROK_AUTH=true
   fi
 fi
 
-echo "Attente de l'établissement des tunnels publics..."
-URL=""
-CF_URL=""
-for i in {1..15}; do
-  if [[ -z "$URL" && -n "$NGROK_CMD" ]]; then
-    URL=$(curl -s http://127.0.0.1:4040/api/tunnels 2>/dev/null | grep -o 'https://[^"]*ngrok-free.dev' | head -n 1 || true)
+ENABLE_NGROK=false
+if [[ "$1" == "--ngrok" || "$1" == "--all" || "$HAS_NGROK_AUTH" == "true" ]]; then
+  if [[ -n "$NGROK_CMD" ]]; then
+    ENABLE_NGROK=true
   fi
-  if [[ -z "$CF_URL" && "$HAS_CLOUDFLARED" == "true" ]]; then
-    if [[ "$CF_NAMED_MODE" == "true" ]]; then
-      # Named tunnel is active with drcat.is-a.dev / cfargotunnel.com
-      CF_URL="https://drcat.dr-cat.workers.dev"
+fi
+
+if [[ "$ENABLE_NGROK" == "true" || "$HAS_CLOUDFLARED" == "true" ]]; then
+  echo "Démarrage des tunnels de communication..."
+
+  if [[ "$ENABLE_NGROK" == "true" ]]; then
+    if [[ "$HAS_NGROK_AUTH" == "true" ]]; then
+      if command -v termux-chroot &>/dev/null; then
+        nohup termux-chroot $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
+      else
+        nohup $NGROK_CMD http 3000 --url=rendition-duchess-dry.ngrok-free.dev --log=stdout > ngrok.log 2>&1 &
+      fi
     else
-      CF_URL=$(grep -o 'https://[^"]*\.trycloudflare\.com' cloudflared.log 2>/dev/null | head -n 1 || true)
+      nohup $NGROK_CMD http 3000 --log=stdout > ngrok.log 2>&1 &
     fi
   fi
-  if [[ ( -n "$URL" || -z "$NGROK_CMD" ) && ( -n "$CF_URL" || "$HAS_CLOUDFLARED" == "false" ) ]]; then
-    break
+
+  if [[ "$HAS_CLOUDFLARED" == "true" ]]; then
+    if [[ -f "$HOME/.cloudflared/config.yml" ]]; then
+      nohup cloudflared tunnel run > cloudflared.log 2>&1 &
+      CF_NAMED_MODE=true
+    else
+      nohup cloudflared tunnel --url http://localhost:3000 > cloudflared.log 2>&1 &
+      CF_NAMED_MODE=false
+    fi
   fi
-  sleep 1
-done
+
+  echo "Attente de l'établissement des tunnels publics..."
+  URL=""
+  CF_URL=""
+  for i in {1..15}; do
+    if [[ -z "$URL" && "$ENABLE_NGROK" == "true" ]]; then
+      URL=$(curl -s http://127.0.0.1:4040/api/tunnels 2>/dev/null | grep -o 'https://[^"]*ngrok-free.dev' | head -n 1 || true)
+    fi
+    if [[ -z "$CF_URL" && "$HAS_CLOUDFLARED" == "true" ]]; then
+      if [[ "$CF_NAMED_MODE" == "true" ]]; then
+        CF_URL="https://drcat.dr-cat.workers.dev"
+      else
+        CF_URL=$(grep -o 'https://[a-zA-Z0-9-]*\.trycloudflare\.com' cloudflared.log 2>/dev/null | grep -v 'api\.trycloudflare\.com' | head -n 1 || true)
+      fi
+    fi
+    if [[ ( -n "$URL" || "$ENABLE_NGROK" == "false" ) && ( -n "$CF_URL" || "$HAS_CLOUDFLARED" == "false" ) ]]; then
+      break
+    fi
+    sleep 1
+  done
+fi
 
 ACTIVE_URLS=()
-if [[ -z "$URL" && -n "$NGROK_CMD" ]]; then
-  URL="https://rendition-duchess-dry.ngrok-free.dev"
-fi
 if [[ -n "$URL" ]]; then ACTIVE_URLS+=("$URL"); fi
 if [[ -n "$CF_URL" ]]; then ACTIVE_URLS+=("$CF_URL"); fi
 
 if [[ ${#ACTIVE_URLS[@]} -eq 0 ]]; then
-  echo "⚠️  Impossible de récupérer une URL publique après 15s."
-  echo "   Vérifiez 'ngrok.log' et 'cloudflared.log'."
-  exit 1
+  CF_URL="https://drcat.dr-cat.workers.dev"
+  ACTIVE_URLS+=("$CF_URL")
+  echo "ℹ️  Tunnels locaux non détectés — Rail Edge Cloudflare actif ($CF_URL)"
 fi
 
 URL_STRING=$(IFS=,; echo "${ACTIVE_URLS[*]}")
 echo "Mise à jour du registre des serveurs (remote_server_config.json)..."
-node set_server_provider.js --reset "$URL_STRING"
+node set_server_provider.js --reset "$URL_STRING" 2>/dev/null || true
 sleep 1
 
 echo "=================================================="
-echo "      CLINICAL CAT APP - DISTRIBUTEUR PUBLIC      "
+echo "      CLINICAL CAT APP - SERVEUR EN LIGNE         "
 echo "=================================================="
 echo ""
 echo " Accès Local          : http://localhost:3000"
@@ -116,7 +135,13 @@ echo "=================================================="
 echo ""
 
 # Ouvrir automatiquement l'application dans le navigateur
-termux-open http://localhost:3000
+if command -v termux-open &>/dev/null; then
+  termux-open http://localhost:3000 2>/dev/null || true
+elif command -v xdg-open &>/dev/null; then
+  xdg-open http://localhost:3000 2>/dev/null || true
+elif command -v open &>/dev/null; then
+  open http://localhost:3000 2>/dev/null || true
+fi
 
 # Run Node in the foreground so the terminal remains open and logs are visible
 node server.js

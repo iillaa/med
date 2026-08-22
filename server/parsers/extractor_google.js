@@ -20,8 +20,8 @@ async function extractWithGoogle(filePath, apiKey) {
     const fileData = await fs.promises.readFile(filePath);
     const base64Data = fileData.toString('base64');
     
-    // We use gemini-1.5-flash for fast, high-quality multimodal extraction
-    const model = 'gemini-1.5-flash';
+    // We use gemini-3.6-flash for fast, high-quality multimodal medical extraction
+    const model = 'gemini-3.6-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     
     const payload = {
@@ -83,10 +83,10 @@ async function extractWithGoogle(filePath, apiKey) {
       }
     } else {
       pageSplits.forEach((chunk, index) => {
-         pages.push({
-           page: index + 1,
-           content: chunk.trim().substring(0, 1500)
-         });
+        pages.push({
+          page: index + 1,
+          content: (chunk || '').trim()
+        });
       });
     }
 

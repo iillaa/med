@@ -1,11 +1,56 @@
 [
   {
+    "id": "staging_slice_1787360837047_rrhcb",
+    "pdf": "la gale.pdf",
+    "specialty": "Dermatologie",
+    "pathology": "gale",
+    "quality": "staging_sliced",
+    "timestamp": "2026-08-22T01:07:17.047Z",
+    "status": "promoted",
+    "pages": [
+      {
+        "page": 1,
+        "content": "# la gale.pdf\n\n**Spécialité :** Dermatologie\n**Pathologie :** gale\n\n[Extrait du document source CAT Dermatologie_(1).pdf (Pages 2 à 2)]"
+      }
+    ]
+  },
+  {
+    "id": "staging_slice_1787360250175_nbfzr",
+    "pdf": "panaris.pdf",
+    "specialty": "Dermatologie",
+    "quality": "staging_sliced",
+    "timestamp": "2026-08-22T00:57:30.175Z",
+    "status": "promoted",
+    "toc": [],
+    "pages": [
+      {
+        "page": 1,
+        "content": "# panaris.pdf\n\n**Spécialité :** Ophtalmologie\n**Pathologie :** Panaris\n\n[Extrait du document source CAT Dermatologie_(1).pdf (Pages 1 à 1)]"
+      }
+    ]
+  },
+  {
+    "id": "staging_slice_1787353024033_r65f5",
+    "pdf": "blepharite.pdf",
+    "specialty": "Infectiologie",
+    "pathology": "Blepharite",
+    "quality": "staging_sliced",
+    "timestamp": "2026-08-21T22:57:04.033Z",
+    "status": "promoted",
+    "pages": [
+      {
+        "page": 1,
+        "content": "# blepharite.pdf\n\n**Spécialité :** Infectiologie\n**Pathologie :** Blepharite\n\n[Extrait du document source Ophtalmologie_.pdf (Pages 3 à 4)]"
+      }
+    ]
+  },
+  {
     "id": "staging_sample_hta",
     "pdf": "Cardiologie_HTA_Fiche.pdf",
     "specialty": "Cardiologie",
     "quality": "staging",
     "timestamp": "2026-08-18T21:36:36.545Z",
-    "status": "draft",
+    "status": "promoted",
     "toc": [
       {
         "title": "HTA Essentielle",

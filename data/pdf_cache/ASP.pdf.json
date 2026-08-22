@@ -1,24 +1,24 @@
 {
   "pdf": "ASP.pdf",
-  "hash": "ffd2a8602f4ea9b1b6d42b0831db8af0cbc45e35306873b5f8cf9683c0dce696",
+  "hash": "360577cb1a8b122ac5d8649f386b1a64cd91f8760d16dca24b4fecd5ed7841f0",
   "quality": "online",
-  "timestamp": 1784765843763,
+  "timestamp": 1787409482794,
   "pages": [
     {
       "page": 1,
-      "content": "# ASP\n\n# Dr. KHERBA_N"
+      "content": "<font color=\"blue\">ASP</font>\n\n**Dr.KHERBA_N**"
     },
     {
       "page": 2,
-      "content": "# Femme de 29 ans\n\nDouleur épigastrique et au niveau de l'hypochondre gauche\n\nMétéorisme abdominal\n\nArrêt des matières et des gaz depuis ce matin\n\n⚠️ASP: Aérocolie\n\n✅️Traitement symptomatique"
+      "content": "X-ray image\n\n- Femme de 29ans\nDouleur épigastrique et au niveau de l'hypochondre gauche\nMétéorisme abdominal\nArrêt des matières et des gaz depuis ce matin\n\n⚠ ASP: <font color=red>**Aérocolie**</font>\n- [x] Traitement symptomatique"
     },
     {
       "page": 3,
-      "content": "# 2\n\n# A\n\nPatient 48 ans consulte pour arrêt des matières et des gaz depuis 2 jours\n\n⚠️ASP: Aspect en grains de café ☕️\n\n=> Occlusion intestinale (Volvulus de sigmoïde)\n\n➡️Évacuation: Chirurgie en Urgence"
+      "content": "X-ray image with yellow markings\n\n🔵 Patient 48ans consulte pour arrêt des matières et des gaz depuis 2 jours\n\n⚠️ ASP: <font color=red>**Aspect en grains de café** ☕</font>\n\n==> <font color=red>**Occlusion intestinale (Volvulus de sigmoïde)**</font>\n\n📌 Évacuation: Chirurgie en Urgence"
     },
     {
       "page": 4,
-      "content": "# Patient aux ATCD d’occlusion opéré en 2010\n\nconsulte pour une douleur abdominal intense avec vomissements\n\nabdomen légèrement distendu\n\narrêt des matières et des gaz depuis 2h du matin\n\n⚠️ASP: NHA plus large que haut et central\n\n=> Occlusion grélique\n\nTDM AP + Ionogramme en urgence"
+      "content": "X-ray image\n\n- Patient aux ATCD d'occlusion opéré en 2010\nconsulte pour une douleur abdominal intense\navec vomissements\nabdomen légèrement distendu\narrêt des matières et des gaz depuis 2h du matin\n\n⚠️ ASP: <font color=red>NHA plus large que haut et central</font>\n==> Occlusion grélique\nTDM AP + Ionogramme en urgence"
     },
     {
       "page": 5,

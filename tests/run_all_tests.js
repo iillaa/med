@@ -10,6 +10,8 @@ const testFiles = [
   { name: 'Reprendre la révision Test', file: 'tests/test_resume.mjs' },
   { name: 'Suggestion Lifecycle Test', file: 'tests/test_suggestions.js' },
   { name: 'Auth & Security Test', file: 'tests/test_auth.js' },
+  { name: 'Remote & Tunnel Security Isolation Test', file: 'tests/test_security_remote_access.js' },
+  { name: 'PDF Lab & Extraction Endpoints Test', file: 'tests/test_pdf_lab_endpoints.js' },
   { name: 'API & Server Smoke Test', file: 'tests/test_api.js' }
 ];
 

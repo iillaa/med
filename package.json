@@ -28,6 +28,8 @@
     "set:password": "node set_admin_password.js",
     "set:provider": "node set_server_provider.js",
     "setup:device": "node setup/setup_new_device.js",
+    "setup:shortcuts": "node scripts/setup_shortcuts.js",
+    "install:tunnels": "node scripts/install_tunnels.js",
     "bump": "node scripts/bump_version.js"
   },
   "keywords": [

@@ -41,6 +41,7 @@
     .badge-offline { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); }
     .badge-google { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
     .badge-llamaparse { background: rgba(14, 165, 233, 0.15); color: var(--primary); border: 1px solid var(--primary); }
+    .badge-curated { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; }
     .badge-grade-a { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
     .badge-grade-b { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
     .badge-grade-c { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
@@ -203,6 +204,7 @@
         <p style="color: var(--text-muted); margin: 5px 0 0 0;">Atelier de découpage visuel, standardisation et contrôle qualité pour un corpus médical 100% propre.</p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button onclick="triggerBatchReindex()" class="btn-success" title="Lancer une réindexation globale (Batch Parse) et synchroniser automatiquement tous les documents du Staging dans le Master">⚡ Réindexer Tout (Batch Parse)</button>
         <button onclick="copyStandardizationPrompt()" class="btn-outline" title="Copier le prompt IA de standardisation">📋 Copier Prompt Standardisation</button>
         <button onclick="openModal('guide-modal')" class="btn-outline" style="border-color: var(--success); color: var(--success);" title="Ouvrir le guide des règles d'or RAG">📖 Guide RAG</button>
         <button onclick="refreshAll()" class="btn-outline">🔄 Actualiser</button>
@@ -236,7 +238,14 @@
         <div class="grid-form">
           <div class="form-group">
             <label>Nom du Fichier / Titre du Document</label>
-            <input type="text" id="new-doc-title" placeholder="Ex: Cardiologie_HTA_Essentielle.pdf ou Brucellose_Cours.md" />
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="new-doc-title" placeholder="Ex: Cardiologie_HTA_Essentielle ou Brucellose_Cours" style="flex: 1;" />
+              <select id="new-doc-format" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; min-width: 105px;">
+                <option value=".md" selected>📝 .md</option>
+                <option value=".txt">📄 .txt</option>
+                <option value=".pdf">📑 .pdf</option>
+              </select>
+            </div>
           </div>
           <div class="form-group">
             <label>Spécialité Médicale</label>
@@ -284,7 +293,8 @@
     <div id="tab-content-slicer" style="display: none; flex-direction: column; gap: 20px;">
       <div class="panel">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="slicer-search-input" placeholder="🔍 Filtrer les PDFs..." oninput="filterSlicerSelect()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: 190px;" />
             <select id="slicer-file-select" onchange="loadSelectedPdfToSlicer()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; max-width: 280px;">
               <option value="">-- Choisir un PDF existant --</option>
             </select>
@@ -382,8 +392,10 @@
             <h3 style="margin: 0;">Base Médicale de Référence Validée</h3>
             <span style="font-size: 12px; color: var(--text-muted);">PDFs indexés et servis par le moteur RAG</span>
           </div>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <input type="text" id="master-filter-input" placeholder="🔍 Filtrer par nom ou spécialité..." oninput="filterMasterList()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; min-width: 240px;" />
+            <button onclick="triggerBatchReindex()" class="btn-success" title="Lancer une réindexation globale (Batch Parse) du Master Corpus">⚡ Réindexer Tout (Batch Parse)</button>
+            <button onclick="triggerCompressAllPdfs()" class="btn-outline" style="border-color: #38bdf8; color: #38bdf8;" title="Optimiser et compresser tous les PDFs pour alléger l'application APK">🗜️ Compresser pour l'APK</button>
             <button onclick="fetchMasterList()" class="btn-outline">🔄 Rafraîchir</button>
           </div>
         </div>
@@ -395,14 +407,13 @@
                 <th>Nom du Fichier</th>
                 <th>Moteur & Qualité</th>
                 <th>Pages & Mots</th>
-                <th>Économie APK</th>
                 <th>Statut RAG</th>
                 <th>Indexé le</th>
                 <th style="text-align: right; min-width: 260px;">Actions</th>
               </tr>
             </thead>
             <tbody id="master-table-body">
-              <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chargement des fichiers master...</td></tr>
+              <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Chargement des fichiers master...</td></tr>
             </tbody>
           </table>
         </div>
@@ -708,8 +719,17 @@
       if (!file) return;
 
       const titleInput = document.getElementById('new-doc-title');
+      const formatSelect = document.getElementById('new-doc-format');
       const contentInput = document.getElementById('new-doc-content');
-      titleInput.value = file.name;
+
+      const lowerName = file.name.toLowerCase();
+      let ext = '.md';
+      if (lowerName.endsWith('.pdf')) ext = '.pdf';
+      else if (lowerName.endsWith('.txt')) ext = '.txt';
+      else if (lowerName.endsWith('.md')) ext = '.md';
+
+      if (formatSelect) formatSelect.value = ext;
+      titleInput.value = file.name.replace(/\.(pdf|md|txt)$/i, '');
 
       if (file.name.endsWith('.pdf')) {
         const overlay = document.getElementById('overlay');
@@ -777,8 +797,16 @@
             ? `<span class="badge badge-grade-a">💎 Master Promu</span>`
             : `<span class="badge badge-offline">🟡 En Curation</span>`;
 
+          const filename = file.pdf || file.filename || file.title || 'Sans titre';
+          let formatBadge = `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; font-size: 10px; margin-left: 6px;">📝 MD</span>`;
+          if (filename.toLowerCase().endsWith('.txt')) {
+            formatBadge = `<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid #94a3b8; font-size: 10px; margin-left: 6px;">📄 TXT</span>`;
+          } else if (filename.toLowerCase().endsWith('.pdf')) {
+            formatBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; font-size: 10px; margin-left: 6px;">📑 PDF</span>`;
+          }
+
           tr.innerHTML = `
-            <td><strong>${escapeHtml(file.pdf)}</strong></td>
+            <td><strong>${escapeHtml(filename)}</strong> ${formatBadge}</td>
             <td><span class="badge badge-llamaparse">${escapeHtml(file.specialty || 'Non définie')}</span></td>
             <td>${(file.pages || []).length} page(s) (${((file.audit?.checks?.totalChars || 0) / 1000).toFixed(1)}k car.)</td>
             <td>${gradeBadge}</td>
@@ -806,12 +834,17 @@
     }
 
     async function createStagingDoc() {
-      const title = document.getElementById('new-doc-title').value.trim();
+      let title = document.getElementById('new-doc-title').value.trim();
+      const format = document.getElementById('new-doc-format') ? document.getElementById('new-doc-format').value : '.md';
       const specialty = getSelectedSpecialty('new-doc-specialty', 'new-doc-custom-specialty');
       const content = document.getElementById('new-doc-content').value.trim();
 
       if (!title) return alert('Veuillez spécifier un nom de fichier / titre.');
       if (!content) return alert('Veuillez coller le contenu extrait de la fiche.');
+
+      // Strip existing extension if user typed it, then append chosen format
+      title = title.replace(/\.(pdf|md|txt)$/i, '');
+      const finalFilename = `${title}${format}`;
 
       const rawPages = content.split(/(?:\n\s*---\s*\n|\n\s*##\s*Page\s*\d+)/i).filter(p => p.trim());
       const pages = rawPages.map((text, idx) => ({
@@ -824,7 +857,8 @@
           method: 'POST',
           headers: API_HEADERS,
           body: JSON.stringify({
-            pdf: title.endsWith('.pdf') ? title : `${title}.pdf`,
+            pdf: finalFilename,
+            format: format.replace('.', ''),
             specialty,
             pages
           })
@@ -832,7 +866,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        alert(`✅ Fiche "${title}" enregistrée dans le Staging !`);
+        alert(`✅ Fiche "${finalFilename}" enregistrée dans le Staging !`);
         document.getElementById('new-doc-title').value = '';
         document.getElementById('new-doc-content').value = '';
         document.getElementById('new-doc-custom-specialty').value = '';
@@ -895,15 +929,35 @@
     // ══════════════════════════════════════════════════════════════════════════
     // ✂️ VISUAL SLICER & PDF BUILDER
     // ══════════════════════════════════════════════════════════════════════════
-    function populateSlicerFileSelect() {
+    function filterSlicerSelect() {
+      const query = (document.getElementById('slicer-search-input')?.value || '').toLowerCase().trim();
       const select = document.getElementById('slicer-file-select');
+      const currentVal = select.value;
       select.innerHTML = '<option value="">-- Choisir un PDF existant --</option>';
-      masterFiles.forEach(f => {
+
+      const filtered = masterFiles.filter(f => 
+        !query || 
+        f.pdf.toLowerCase().includes(query) || 
+        (f.specialty && f.specialty.toLowerCase().includes(query))
+      );
+
+      filtered.forEach(f => {
         const opt = document.createElement('option');
         opt.value = f.pdf;
         opt.textContent = `${f.pdf} (${f.pagesCount} p.)`;
+        if (f.pdf === currentVal) opt.selected = true;
         select.appendChild(opt);
       });
+
+      if (query && filtered.length > 0) {
+        select.style.borderColor = '#38bdf8';
+      } else {
+        select.style.borderColor = 'var(--border)';
+      }
+    }
+
+    function populateSlicerFileSelect() {
+      filterSlicerSelect();
     }
 
     async function loadSelectedPdfToSlicer() {
@@ -911,7 +965,8 @@
       if (!filename) return;
       slicerSourceFilename = filename;
       document.getElementById('slice-title-input').value = filename.replace(/\.pdf$/i, '') + '_Slice.pdf';
-      await loadPdfIntoCanvas(`/pdfs/${encodeURIComponent(filename)}`);
+      // Load uncompressed pristine Master original directly from data/pdf_masters/
+      await loadPdfIntoCanvas(`/api/admin/master-pdf?filename=${encodeURIComponent(filename)}`);
     }
 
     function handleSlicerFileSelect(event) {
@@ -934,7 +989,10 @@
       const overlay = document.getElementById('overlay');
       overlay.style.display = 'flex';
       try {
-        const loadingTask = pdfjsLib.getDocument(url);
+        const loadingTask = pdfjsLib.getDocument({
+          url,
+          httpHeaders: API_HEADERS
+        });
         currentSlicerPdfDoc = await loadingTask.promise;
         currentSlicerPageNum = 1;
         document.getElementById('slice-end-page').max = currentSlicerPdfDoc.numPages;
@@ -1366,10 +1424,24 @@
       }
     }
 
+    function getQualityBadgeHtml(quality) {
+      const q = (quality || '').toLowerCase();
+      if (q === 'online' || q === 'llamaparse') {
+        return '<span class="badge badge-llamaparse">🦙 LlamaParse</span>';
+      }
+      if (q === 'online-google' || q === 'google') {
+        return '<span class="badge badge-google">✨ Gemini OCR</span>';
+      }
+      if (q === 'curated_master' || q === 'curated') {
+        return '<span class="badge badge-curated">💎 Curated Master</span>';
+      }
+      return '<span class="badge badge-offline">⚡ Offline</span>';
+    }
+
     function renderMasterTable(files) {
       const tbody = document.getElementById('master-table-body');
       if (files.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Aucun fichier trouvé.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Aucun fichier trouvé.</td></tr>';
         return;
       }
 
@@ -1377,17 +1449,12 @@
       files.forEach(file => {
         const tr = document.createElement('tr');
         const date = new Date(file.timestamp).toLocaleDateString();
-        const savingsHtml = file.savedPercent > 0
-          ? `<span class="compression-pill comp-high">💾 -${file.savedPercent}%</span>`
-          : `<span class="compression-pill comp-none">-</span>`;
 
         const tocPill = (file.tocCount || 0) > 0
           ? `<span class="badge badge-llamaparse" style="margin-left: 4px;">🎯 GPS (${file.tocCount})</span>`
           : '';
 
-        const qualityBadge = file.quality === 'llamaparse'
-          ? `<span class="badge badge-llamaparse">LlamaParse</span>`
-          : (file.quality === 'google' ? `<span class="badge badge-google">Google OCR</span>` : `<span class="badge badge-offline">Offline</span>`);
+        const qualityBadge = getQualityBadgeHtml(file.quality);
 
         tr.innerHTML = `
           <td>
@@ -1398,7 +1465,6 @@
           </td>
           <td>${qualityBadge}</td>
           <td>${file.pagesCount} p. (${((file.totalWords || 0) / 1000).toFixed(1)}k mots)</td>
-          <td>${savingsHtml}</td>
           <td><span class="badge badge-grade-a">💎 Master</span>${tocPill}</td>
           <td style="color: var(--text-muted); font-size: 12px;">${date}</td>
           <td style="text-align: right;">
@@ -1407,6 +1473,7 @@
               <button class="btn-outline master-inspect-btn" title="Inspection détaillée de la densité par page" style="padding: 4px 8px; font-size: 11px;">🔍 Inspecter</button>
               <button class="btn-outline master-json-btn" title="Ouvrir l'inspecteur JSON grand écran (90%)" style="color: #38bdf8; border-color: var(--primary); padding: 4px 8px; font-size: 11px;">📄 JSON</button>
               <button class="btn-outline master-reparse-btn" title="Forcer la ré-extraction en ligne (Re-Parse / Force Upgrade)" style="color: var(--warning); border-color: var(--warning); padding: 4px 8px; font-size: 11px;">⚡ Re-Parse</button>
+              <button class="btn-outline master-compress-btn" title="Compresser ce PDF avec Ghostscript pour l'APK" style="color: #38bdf8; border-color: #38bdf8; padding: 4px 7px; font-size: 11px;">🗜️</button>
               <button class="btn-outline master-toc-btn" title="Éditer le sommaire GPS" style="color: #38bdf8; padding: 4px 8px; font-size: 11px;">🎯 TOC</button>
               <button class="btn-outline master-delete-btn" title="Supprimer définitivement ce PDF" style="color: #ef4444; border-color: #ef4444; padding: 4px 7px; font-size: 11px;">🗑️</button>
             </div>
@@ -1417,6 +1484,7 @@
         tr.querySelector('.master-inspect-btn').addEventListener('click', () => inspectMasterPdf(file));
         tr.querySelector('.master-json-btn').addEventListener('click', () => openJsonModal(file.pdf));
         tr.querySelector('.master-reparse-btn').addEventListener('click', () => forceReextractPdf(file.pdf));
+        tr.querySelector('.master-compress-btn').addEventListener('click', () => compressSinglePdf(file.pdf));
         tr.querySelector('.master-toc-btn').addEventListener('click', () => openTocModal(file.pdf, file.toc || []));
         tr.querySelector('.master-delete-btn').addEventListener('click', () => deleteMasterPdf(file.pdf));
 
@@ -1492,9 +1560,7 @@
       document.getElementById('inspect-modal-title').textContent = `Inspection : ${file.pdf}`;
       document.getElementById('inspect-modal-hash').textContent = `Hash SHA-256: ${file.hash || 'N/A'}`;
       
-      document.getElementById('inspect-modal-engine').innerHTML = file.quality === 'llamaparse'
-        ? '<span class="badge badge-llamaparse">LlamaParse</span>'
-        : (file.quality === 'google' ? '<span class="badge badge-google">Google OCR</span>' : '<span class="badge badge-offline">Offline</span>');
+      document.getElementById('inspect-modal-engine').innerHTML = getQualityBadgeHtml(file.quality);
         
       document.getElementById('inspect-modal-words').textContent = `${(file.totalWords || 0).toLocaleString()} mots (${((file.totalChars || 0) / 1000).toFixed(1)}k car.)`;
       document.getElementById('inspect-modal-savings').textContent = file.savedPercent > 0 ? `-${file.savedPercent}% économisé` : '0%';
@@ -1575,6 +1641,78 @@
         fetchMasterList();
       } catch (err) {
         alert(`Erreur: ${err.message}`);
+      }
+    }
+
+    async function triggerBatchReindex() {
+      if (!confirm("⚡ Lancer une réindexation globale de tous les PDFs du Master Corpus (Batch Parse) ?\n\nLe moteur va réanalyser l'ensemble des fichiers originaux sans modifier vos brouillons en Staging.")) return;
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = "Réindexation globale du Master Corpus en cours (Batch Parse)...";
+
+      try {
+        const res = await fetch('/api/reindex', {
+          method: 'POST',
+          headers: API_HEADERS
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        alert("✅ Réindexation globale du Master Corpus lancée avec succès en arrière-plan !");
+        setTimeout(() => {
+          fetchMasterList();
+        }, 2000);
+      } catch (err) {
+        alert(`Erreur réindexation: ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    async function triggerCompressAllPdfs() {
+      if (!confirm("🗜️ Lancer la compression double pipeline Ghostscript sur tous les PDFs Master ?\n\nCela optimisera et réduira considérablement la taille de l'application APK.")) return;
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = "Compression et optimisation de tous les PDFs pour l'APK en cours...";
+
+      try {
+        const res = await fetch('/api/admin/compress-all-pdfs', {
+          method: 'POST',
+          headers: API_HEADERS
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        alert(`✅ ${data.message}`);
+        fetchMasterList();
+      } catch (err) {
+        alert(`Erreur de compression: ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    async function compressSinglePdf(filename) {
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `Compression de ${filename}...`;
+
+      try {
+        const res = await fetch('/api/admin/compress-pdf', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        alert(`✅ ${data.message}`);
+        fetchMasterList();
+      } catch (err) {
+        alert(`Erreur de compression: ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
       }
     }
 

@@ -117,8 +117,24 @@ async function main() {
   execSync('npm run build', { cwd: ROOT_DIR, stdio: 'inherit' });
   console.log('  ✅ Build terminé avec succès.');
 
-  // Step 6: Sanity Tests
-  logStep(6, 'Vérification de l\'Intégrité du Système (Tests Automatisés)');
+  // Step 6: Tunnel Tools Setup (Cloudflare / Ngrok)
+  logStep(6, 'Vérification et Installation des Outils de Tunnel (Cloudflare & Ngrok)');
+  try {
+    execSync('node scripts/install_tunnels.js', { cwd: ROOT_DIR, stdio: 'inherit' });
+  } catch (tErr) {
+    console.warn('  ⚠️ Installation automatique des tunnels ignorée :', tErr.message);
+  }
+
+  // Step 7: Shortcuts & CLI setup
+  logStep(7, 'Configuration des Raccourcis et Commandes CLI');
+  try {
+    execSync('node scripts/setup_shortcuts.js', { cwd: ROOT_DIR, stdio: 'inherit' });
+  } catch (scErr) {
+    console.warn('  ⚠️ Configuration raccourcis ignorée :', scErr.message);
+  }
+
+  // Step 8: Sanity Tests
+  logStep(8, 'Vérification de l\'Intégrité du Système (Tests Automatisés)');
   console.log('  🧪 Lancement de la suite de tests (Validation médicale, Auth, APIs)...');
   try {
     execSync('node tests/run_all_tests.js', { cwd: ROOT_DIR, stdio: 'inherit' });
@@ -131,8 +147,9 @@ async function main() {
   console.log(`\n\x1b[1;32m════════════════════════════════════════════════════════════════\x1b[0m`);
   console.log(`\x1b[1;32m   🎉 DR. CAT EST 100% PRÊT SUR CE NOUVEL APPAREIL !          \x1b[0m`);
   console.log(`\x1b[1;32m════════════════════════════════════════════════════════════════\x1b[0m\n`);
-  console.log(`  👉 Pour lancer l'application immédiatement :`);
-  console.log(`     \x1b[1;33mnpm start\x1b[0m (ou avec supervision PM2 : \x1b[1;33mnpm run pm2:start\x1b[0m)\n`);
+  console.log(`  👉 Pour lancer l'application avec les raccourcis :`);
+  console.log(`     \x1b[1;33mmed start\x1b[0m (Tunnels publics + Navigateur) ou \x1b[1;33mmed local\x1b[0m (Local)`);
+  console.log(`     \x1b[1;33mmed menu\x1b[0m  (Menu interactif Termux & Widget)\n`);
   console.log(`  👉 Pour accéder à l'application dans votre navigateur :`);
   console.log(`     \x1b[1;37mhttp://localhost:3000\x1b[0m (ou \x1b[1;37mhttp://localhost:8080\x1b[0m)\n`);
   console.log(`  👉 Pour configurer un tunnel Ngrok :`);

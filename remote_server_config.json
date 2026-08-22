@@ -1,14 +1,14 @@
 {
-  "primaryProvider": "cloudflare",
+  "primaryProvider": "ngrok",
   "servers": [
-    {
-      "url": "https://drcat.dr-cat.workers.dev",
-      "provider": "cloudflare",
-      "priority": 1
-    },
     {
       "url": "https://rendition-duchess-dry.ngrok-free.dev",
       "provider": "ngrok",
+      "priority": 1
+    },
+    {
+      "url": "https://supervision-reggae-announcements-homework.trycloudflare.com",
+      "provider": "cloudflare",
       "priority": 2
     }
   ]
