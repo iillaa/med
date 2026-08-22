@@ -2,6 +2,7 @@
 <html lang="fr" class="dark-theme">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Dr.CAT — PDF Ingestion & Visual Curation Lab</title>
   <style>
     :root {
@@ -9,10 +10,10 @@
       --primary: #0ea5e9; --primary-hover: #0284c7; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
       --border: #334155; --border-light: rgba(255,255,255,0.08);
     }
-    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; }
-    .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
-    .panel { background: var(--panel); padding: 20px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 15px; }
+    .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .panel { background: var(--panel); padding: 18px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
     h1, h2, h3, h4 { margin-top: 0; color: var(--primary); }
     button { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
     button:hover { background: var(--primary-hover); transform: translateY(-1px); }
@@ -21,22 +22,24 @@
     .btn-danger:hover { background: #dc2626; }
     .btn-success { background: var(--success); }
     .btn-success:hover { background: #059669; }
+    .btn-warning { background: var(--warning); color: #000; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: rgba(14,165,233,0.1); }
     
     /* Navigation Tabs */
     .nav-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; flex-wrap: wrap; }
-    .tab-btn { background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .tab-btn { background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 10px 16px; border-radius: 8px; font-size: 13.5px; font-weight: bold; cursor: pointer; }
     .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
     .tab-btn.active { color: var(--primary); background: rgba(14,165,233,0.15); border-color: var(--primary); }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; }
     th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
     tr:hover { background: rgba(255,255,255,0.02); }
     
     .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
     .badge-offline { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-google { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
     .badge-llamaparse { background: rgba(14, 165, 233, 0.15); color: var(--primary); border: 1px solid var(--primary); }
     .badge-grade-a { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
     .badge-grade-b { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
@@ -46,31 +49,51 @@
     .comp-high { background: rgba(16, 185, 129, 0.15); color: var(--success); }
     .comp-none { color: var(--text-muted); }
 
-    pre { background: #000; padding: 15px; border-radius: 6px; overflow: auto; color: #a5b4fc; max-height: 400px; font-size: 13px; margin: 0; font-family: monospace; }
+    /* Modals & Scroll Lock */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 15px; box-sizing: border-box; }
+    .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 22px; max-width: 900px; width: 100%; max-height: 88vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); }
+    .modal-box-large { max-width: 94vw; width: 94vw; max-height: 90vh; height: 90vh; }
     
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-    .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; max-width: 850px; width: 90%; max-height: 88vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); }
     .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 768px) { .grid-form { grid-template-columns: 1fr; } }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
     .form-group input, .form-group select, .form-group textarea {
-      background: #0f172a; border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 6px; font-size: 13px;
+      background: #0f172a; border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 6px; font-size: 13px;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
       outline: none; border-color: var(--primary);
     }
 
-    /* Visual Slicer Styles */
-    .slicer-workspace { display: grid; grid-template-columns: 1fr 400px; gap: 20px; align-items: start; }
-    .canvas-wrapper { position: relative; background: #070a10; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; display: flex; justify-content: center; min-height: 500px; user-select: none; }
-    #pdf-canvas { max-width: 100%; height: auto; display: block; }
-    .crop-handle { position: absolute; left: 0; right: 0; height: 6px; background: #0ea5e9; cursor: ns-resize; z-index: 10; display: flex; align-items: center; justify-content: center; }
-    .crop-handle::after { content: '↕'; color: #fff; font-size: 12px; background: #0ea5e9; padding: 0 8px; border-radius: 4px; }
-    .crop-mask { position: absolute; left: 0; right: 0; background: rgba(0,0,0,0.55); pointer-events: none; }
-    .crop-box-highlight { position: absolute; left: 0; right: 0; border: 2px dashed #0ea5e9; background: rgba(14, 165, 233, 0.08); pointer-events: none; }
+    /* Visual Slicer Styles & Touch Handles */
+    .slicer-workspace { display: grid; grid-template-columns: 1fr 380px; gap: 18px; align-items: start; }
+    @media (max-width: 992px) { .slicer-workspace { grid-template-columns: 1fr; } }
+    
+    .canvas-scroll-container {
+      position: relative; background: #070a10; border-radius: 8px; border: 1px solid var(--border);
+      overflow: auto; max-height: 75vh; min-height: 480px; display: flex; justify-content: center;
+      touch-action: pan-x pan-y; user-select: none; -webkit-user-select: none;
+    }
+    .canvas-wrapper { position: relative; display: inline-block; }
+    #pdf-canvas { display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    
+    .crop-handle {
+      position: absolute; left: 0; right: 0; height: 16px; margin-top: -8px; background: rgba(14, 165, 233, 0.9);
+      cursor: ns-resize; z-index: 20; display: flex; align-items: center; justify-content: center;
+      touch-action: none; border-top: 2px solid #38bdf8; border-bottom: 2px solid #0284c7;
+    }
+    .crop-handle::after {
+      content: '↕ GLISSER POUR RECADRER ↕'; color: #fff; font-size: 10px; font-weight: bold;
+      background: #0369a1; padding: 2px 10px; border-radius: 10px; letter-spacing: 0.5px;
+    }
+    .crop-mask { position: absolute; left: 0; right: 0; background: rgba(0,0,0,0.65); pointer-events: none; }
+    .crop-box-highlight {
+      position: absolute; left: 0; right: 0; border: 2px dashed #38bdf8;
+      background: rgba(14, 165, 233, 0.12); cursor: move; touch-action: none;
+    }
   </style>
 </head>
 <body>
@@ -83,6 +106,95 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 📄 DEDICATED 90% JSON INSPECTOR MODAL -->
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <div id="json-modal" class="modal-overlay" onclick="handleBackdropClick(event, 'json-modal')">
+    <div class="modal-box modal-box-large">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">📄</span>
+          <div>
+            <h3 id="json-modal-title" style="margin: 0; color: #38bdf8; font-size: 17px;">JSON Inspecteur</h3>
+            <span id="json-modal-subtitle" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">-</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button onclick="copyJsonModalContent()" class="btn-outline" style="color: #38bdf8; border-color: var(--primary);">📋 Copier JSON</button>
+          <button onclick="downloadJsonModalContent()" class="btn-outline" style="color: var(--success); border-color: var(--success);">⬇️ Télécharger</button>
+          <button onclick="closeModal('json-modal')" class="btn-outline" style="font-size: 16px; padding: 4px 10px;">✕</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="json-search-input" placeholder="🔍 Rechercher dans le texte JSON..." oninput="filterJsonModalContent()" style="flex: 1; background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 13px;" />
+        <span id="json-stats-badge" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">-</span>
+      </div>
+
+      <pre id="json-modal-pre" style="flex: 1; background: #070a10; padding: 15px; border-radius: 8px; border: 1px solid var(--border); overflow: auto; color: #a5b4fc; font-size: 12.5px; line-height: 1.5; margin: 0;"></pre>
+      
+      <div style="display: flex; justify-content: flex-end;">
+        <button onclick="closeModal('json-modal')" class="btn-outline">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 🔍 DETAILED PAGE-BY-PAGE INSPECTION MODAL -->
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <div id="inspect-modal" class="modal-overlay" onclick="handleBackdropClick(event, 'inspect-modal')">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div>
+          <h3 id="inspect-modal-title" style="margin: 0; font-size: 18px; color: var(--primary);">Inspection Détaillée du Document</h3>
+          <div id="inspect-modal-hash" style="font-size: 11px; font-family: monospace; color: var(--text-muted); margin-top: 4px;">Hash: -</div>
+        </div>
+        <button onclick="closeModal('inspect-modal')" class="btn-outline" style="font-size: 16px; padding: 4px 10px;">✕</button>
+      </div>
+
+      <!-- 3 Metrics Cards -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Moteur d'Extraction</div>
+          <div id="inspect-modal-engine" style="font-weight: bold; font-size: 14px; margin-top: 4px;">-</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Volume Total</div>
+          <div id="inspect-modal-words" style="font-weight: bold; font-size: 14px; margin-top: 4px; color: var(--primary);">-</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Économie APK</div>
+          <div id="inspect-modal-savings" style="font-weight: bold; font-size: 14px; margin-top: 4px; color: var(--success);">-</div>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="margin: 6px 0 8px 0; font-size: 13px; text-transform: uppercase; color: var(--text-muted);">Répartition de la Densité Page par Page</h4>
+        <div style="background: #070a10; border-radius: 6px; border: 1px solid var(--border); max-height: 280px; overflow-y: auto;">
+          <table style="margin: 0;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.04);">
+                <th style="padding: 8px 12px;">Page</th>
+                <th style="padding: 8px 12px;">Mots</th>
+                <th style="padding: 8px 12px;">Caractères</th>
+                <th style="padding: 8px 12px; width: 45%;">Densité Textuelle</th>
+              </tr>
+            </thead>
+            <tbody id="inspect-modal-page-rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px;">
+        <div style="display: flex; gap: 8px;">
+          <button id="inspect-open-pdf-btn" class="btn-outline" style="color: #38bdf8; border-color: var(--primary);">👁️ Ouvrir ce PDF</button>
+          <button id="inspect-view-json-btn" class="btn-outline">📄 Voir JSON</button>
+        </div>
+        <button onclick="closeModal('inspect-modal')" class="btn-outline">Fermer</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <!-- Header -->
     <div class="header">
@@ -92,7 +204,7 @@
       </div>
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <button onclick="copyStandardizationPrompt()" class="btn-outline" title="Copier le prompt IA de standardisation">📋 Copier Prompt Standardisation</button>
-        <button onclick="openGuideModal()" class="btn-outline" style="border-color: var(--success); color: var(--success);" title="Ouvrir le guide des règles d'or RAG">📖 Guide RAG</button>
+        <button onclick="openModal('guide-modal')" class="btn-outline" style="border-color: var(--success); color: var(--success);" title="Ouvrir le guide des règles d'or RAG">📖 Guide RAG</button>
         <button onclick="refreshAll()" class="btn-outline">🔄 Actualiser</button>
       </div>
     </div>
@@ -114,10 +226,12 @@
       <div class="panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
           <h3>➕ Importer une Fiche / Chapitre dans le Staging</h3>
-          <label class="btn-outline" style="cursor: pointer; padding: 6px 12px; font-size: 12px;">
-            📁 Charger Fichier (.pdf / .md / .txt)
-            <input type="file" id="file-uploader" accept=".pdf,.txt,.md" style="display: none;" onchange="handleFileUpload(event)" />
-          </label>
+          <div style="display: flex; gap: 8px;">
+            <label class="btn-outline" style="cursor: pointer; padding: 6px 12px; font-size: 12px;">
+              📁 Importer (.pdf / .md / .txt)
+              <input type="file" id="file-uploader" accept=".pdf,.txt,.md" style="display: none;" onchange="handleFileUpload(event)" />
+            </label>
+          </div>
         </div>
         <div class="grid-form">
           <div class="form-group">
@@ -126,24 +240,10 @@
           </div>
           <div class="form-group">
             <label>Spécialité Médicale</label>
-            <select id="new-doc-specialty">
-              <option value="">-- Choisir la Spécialité --</option>
-              <option value="Cardiologie">Cardiologie</option>
-              <option value="Urgences">Urgences & Réanimation</option>
-              <option value="Pédiatrie">Pédiatrie</option>
-              <option value="Gynécologie-Obstétrique">Gynécologie-Obstétrique</option>
-              <option value="Gastro-entérologie">Gastro-entérologie</option>
-              <option value="Dermatologie">Dermatologie</option>
-              <option value="Pneumologie">Pneumologie</option>
-              <option value="Infectiologie">Infectiologie</option>
-              <option value="Neurologie">Neurologie</option>
-              <option value="Psychiatrie">Psychiatrie</option>
-              <option value="Rhumatologie">Rhumatologie</option>
-              <option value="Urologie / Néphrologie">Urologie / Néphrologie</option>
-              <option value="Endocrinologie">Endocrinologie</option>
-              <option value="ORL / Ophtalmologie">ORL / Ophtalmologie</option>
-              <option value="Médecine Générale">Médecine Générale</option>
+            <select id="new-doc-specialty" onchange="handleSpecialtyChange('new-doc-specialty', 'new-doc-custom-specialty')">
+              <!-- Full 22 Specialties injected via JS -->
             </select>
+            <input type="text" id="new-doc-custom-specialty" placeholder="Précisez votre spécialité personnalisée..." style="display: none; margin-top: 6px;" />
           </div>
         </div>
         <div class="form-group" style="margin-top: 15px;">
@@ -158,21 +258,23 @@
       <!-- Staging Files List -->
       <div class="panel">
         <h3>Documents en cours de Curation & Staging</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Document</th>
-              <th>Spécialité</th>
-              <th>Pages & Volume</th>
-              <th>Audit Ingestion</th>
-              <th>Statut</th>
-              <th style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="staging-table-body">
-            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Chargement du staging...</td></tr>
-          </tbody>
-        </table>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Spécialité</th>
+                <th>Pages & Volume</th>
+                <th>Audit Ingestion</th>
+                <th>Statut</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staging-table-body">
+              <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Chargement du staging...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -183,46 +285,49 @@
       <div class="panel">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <select id="slicer-file-select" onchange="loadSelectedPdfToSlicer()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px;">
+            <select id="slicer-file-select" onchange="loadSelectedPdfToSlicer()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; max-width: 280px;">
               <option value="">-- Choisir un PDF existant --</option>
             </select>
             <label class="btn-outline" style="cursor: pointer; padding: 6px 12px; font-size: 12px;">
-              📁 Charger PDF depuis l'appareil
+              📁 Charger PDF local
               <input type="file" id="slicer-file-input" accept=".pdf" style="display: none;" onchange="handleSlicerFileSelect(event)" />
             </label>
           </div>
 
-          <!-- Page Nav & Zoom -->
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <button onclick="slicerPrevPage()" class="btn-outline" style="padding: 4px 8px;">◀</button>
-            <span id="slicer-page-indicator" style="font-size: 13px; font-weight: bold; min-width: 90px; text-align: center;">Page 0 / 0</span>
-            <button onclick="slicerNextPage()" class="btn-outline" style="padding: 4px 8px;">▶</button>
-            <button onclick="slicerZoom(-0.2)" class="btn-outline" style="padding: 4px 8px;">🔍 -</button>
-            <button onclick="slicerZoom(0.2)" class="btn-outline" style="padding: 4px 8px;">🔍 +</button>
+          <!-- Page Nav & Zoom Controls -->
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <button onclick="slicerPrevPage()" class="btn-outline" style="padding: 4px 10px;" title="Page précédente">◀</button>
+            <span id="slicer-page-indicator" style="font-size: 13px; font-weight: bold; min-width: 90px; text-align: center; font-family: monospace;">Page 0 / 0</span>
+            <button onclick="slicerNextPage()" class="btn-outline" style="padding: 4px 10px;" title="Page suivante">▶</button>
+            <button onclick="slicerZoom(-0.2)" class="btn-outline" style="padding: 4px 8px;" title="Zoom arrière">🔍 -</button>
+            <button onclick="slicerZoom(0.2)" class="btn-outline" style="padding: 4px 8px;" title="Zoom avant">🔍 +</button>
+            <button onclick="slicerResetZoom()" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">100%</button>
           </div>
         </div>
 
         <div class="slicer-workspace">
-          <!-- Left: Canvas with Drag Handles -->
-          <div class="canvas-wrapper" id="canvas-wrapper">
-            <canvas id="pdf-canvas"></canvas>
-            <!-- Visual Masks & Markers -->
-            <div id="crop-mask-top" class="crop-mask" style="top: 0; height: 50px;"></div>
-            <div id="crop-handle-top" class="crop-handle" style="top: 50px;" title="Glisser pour ajuster la limite haute"></div>
-            <div id="crop-box-highlight" class="crop-box-highlight" style="top: 56px; height: 200px;"></div>
-            <div id="crop-handle-bottom" class="crop-handle" style="top: 256px;" title="Glisser pour ajuster la limite basse"></div>
-            <div id="crop-mask-bottom" class="crop-mask" style="top: 262px; bottom: 0;"></div>
+          <!-- Left: Canvas with Touch-Friendly Drag Handles -->
+          <div class="canvas-scroll-container" id="canvas-scroll-container">
+            <div class="canvas-wrapper" id="canvas-wrapper">
+              <canvas id="pdf-canvas"></canvas>
+              <!-- Visual Crop Masks & Handles -->
+              <div id="crop-mask-top" class="crop-mask" style="top: 0; height: 50px;"></div>
+              <div id="crop-handle-top" class="crop-handle" style="top: 50px;" title="Glisser pour ajuster la limite haute"></div>
+              <div id="crop-box-highlight" class="crop-box-highlight" style="top: 50px; height: 200px;" title="Glisser pour déplacer toute la zone"></div>
+              <div id="crop-handle-bottom" class="crop-handle" style="top: 250px;" title="Glisser pour ajuster la limite basse"></div>
+              <div id="crop-mask-bottom" class="crop-mask" style="top: 250px; bottom: 0;"></div>
+            </div>
           </div>
 
           <!-- Right: Metadata & Slice Actions Panel -->
-          <div style="display: flex; flex-direction: column; gap: 15px; background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-            <h4 style="margin: 0; color: #38bdf8; font-size: 14px;">🏷️ Métadonnées de la Fiche Découpée</h4>
+          <div style="display: flex; flex-direction: column; gap: 14px; background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+            <h4 style="margin: 0; color: #38bdf8; font-size: 14px;">🏷️ Paramètres de Découpage</h4>
 
             <div class="form-group">
               <label>Mode de Découpage :</label>
               <select id="slicer-mode-select" onchange="toggleSlicerMode()" style="background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 6px; border-radius: 6px; font-size: 12px;">
-                <option value="image_crop">🖼️ Recadrage Visuel (Zone Image Canvas)</option>
-                <option value="page_range">📄 Plage de Pages Entières (PDF Natif)</option>
+                <option value="image_crop">🖼️ Recadrage Visuel (Zone Rectangulaire)</option>
+                <option value="page_range">📄 Plage de Pages Entières (PDF Vectoriel 15ms)</option>
               </select>
             </div>
 
@@ -233,18 +338,10 @@
 
             <div class="form-group">
               <label>Spécialité :</label>
-              <select id="slice-specialty-select">
-                <option value="Cardiologie">Cardiologie</option>
-                <option value="Urgences">Urgences</option>
-                <option value="Pédiatrie">Pédiatrie</option>
-                <option value="Gynécologie-Obstétrique">Gynécologie-Obstétrique</option>
-                <option value="Gastro-entérologie">Gastro-entérologie</option>
-                <option value="Dermatologie">Dermatologie</option>
-                <option value="Pneumologie">Pneumologie</option>
-                <option value="Infectiologie">Infectiologie</option>
-                <option value="Neurologie">Neurologie</option>
-                <option value="Médecine Générale">Médecine Générale</option>
+              <select id="slice-specialty-select" onchange="handleSpecialtyChange('slice-specialty-select', 'slice-custom-specialty')">
+                <!-- Full 22 Specialties injected via JS -->
               </select>
+              <input type="text" id="slice-custom-specialty" placeholder="Précisez votre spécialité personnalisée..." style="display: none; margin-top: 6px;" />
             </div>
 
             <div class="form-group">
@@ -263,8 +360,8 @@
               </div>
             </div>
 
-            <div style="background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 6px; border: 1px solid var(--primary); font-size: 11px; color: #bae6fd;">
-              🛡️ <strong>Marge de sécurité automatique :</strong> Une marge de <strong>+15px</strong> est ajoutée en haut et en bas pour protéger les titres et les posologies.
+            <div style="background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 6px; border: 1px solid var(--primary); font-size: 11.5px; color: #bae6fd; line-height: 1.4;">
+              🛡️ <strong>Marge de sécurité automatique :</strong> Une marge de <strong>+15px</strong> est ajoutée pour protéger les titres et les posologies.
             </div>
 
             <button onclick="executeSliceAction()" class="btn-success" style="padding: 12px; font-size: 14px; font-weight: bold; justify-content: center;">
@@ -280,26 +377,35 @@
     <!-- ═════════════════════════════════════════════════════════════════════════ -->
     <div id="tab-content-master" style="display: none; flex-direction: column; gap: 20px;">
       <div class="panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h3>Base Médicale de Référence Validée</h3>
-          <input type="text" id="master-filter-input" placeholder="Filtrer par nom ou spécialité..." oninput="filterMasterList()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px;" />
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="margin: 0;">Base Médicale de Référence Validée</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">PDFs indexés et servis par le moteur RAG</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="master-filter-input" placeholder="🔍 Filtrer par nom ou spécialité..." oninput="filterMasterList()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; min-width: 240px;" />
+            <button onclick="fetchMasterList()" class="btn-outline">🔄 Rafraîchir</button>
+          </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Nom du Fichier</th>
-              <th>Moteur & Qualité</th>
-              <th>Pages & Mots</th>
-              <th>Économie APK</th>
-              <th>RAG Fitness</th>
-              <th>Indexé le</th>
-              <th style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="master-table-body">
-            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chargement des fichiers master...</td></tr>
-          </tbody>
-        </table>
+        
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom du Fichier</th>
+                <th>Moteur & Qualité</th>
+                <th>Pages & Mots</th>
+                <th>Économie APK</th>
+                <th>Statut RAG</th>
+                <th>Indexé le</th>
+                <th style="text-align: right; min-width: 260px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="master-table-body">
+              <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chargement des fichiers master...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -311,8 +417,8 @@
         <h3>🔍 Testeur de Requêtes RAG en Direct</h3>
         <p style="color: var(--text-muted); font-size: 13px; margin: 5px 0 15px 0;">Simulez instantanément comment le moteur extrait les fragments de PDF pour une pathologie donnée.</p>
         
-        <div style="display: flex; gap: 10px;">
-          <input type="text" id="sim-query-input" placeholder="Ex: Hypertension artérielle, Brucellose, Gale..." style="flex: 1; background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 10px 14px; border-radius: 6px; font-size: 14px;" onkeydown="if(event.key==='Enter') runRagSimulation()" />
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input type="text" id="sim-query-input" placeholder="Ex: Hypertension artérielle, Brucellose, Gale..." style="flex: 1; min-width: 250px; background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 10px 14px; border-radius: 6px; font-size: 14px;" onkeydown="if(event.key==='Enter') runRagSimulation()" />
           <button onclick="runRagSimulation()" class="btn-success">🚀 Tester l'Extraction RAG</button>
         </div>
 
@@ -323,41 +429,25 @@
       </div>
     </div>
 
-    <!-- Console Output Box -->
-    <div class="panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h4 style="margin: 0; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Sortie Console & Diagnostics</h4>
-        <button id="copy-btn" class="btn-outline" style="font-size: 11px; padding: 2px 8px; display: none;">Copier JSON</button>
-      </div>
-      <pre id="json-output">Prêt. Sélectionnez un document ou une action ci-dessus...</pre>
-    </div>
-
   </div>
 
-  <!-- In-Browser Page Editor Modal -->
-  <div id="editor-modal" class="modal-overlay">
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <!-- ✏️ IN-BROWSER PAGE EDITOR MODAL -->
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <div id="editor-modal" class="modal-overlay" onclick="handleBackdropClick(event, 'editor-modal')">
     <div class="modal-box" style="max-width: 900px;">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
         <div>
           <h3 id="editor-title" style="margin: 0; color: var(--primary);">✏️ Éditeur de Pages & Épissure</h3>
           <span id="editor-subtitle" style="font-size: 12px; color: var(--text-muted);">Document : -</span>
         </div>
-        <button onclick="closeEditorModal()" class="btn-outline">✕</button>
+        <button onclick="closeModal('editor-modal')" class="btn-outline">✕</button>
       </div>
 
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <label style="font-size: 12px; font-weight: bold; color: var(--text-muted);">Spécialité :</label>
-        <select id="editor-specialty" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-          <option value="Cardiologie">Cardiologie</option>
-          <option value="Urgences">Urgences</option>
-          <option value="Pédiatrie">Pédiatrie</option>
-          <option value="Gynécologie-Obstétrique">Gynécologie-Obstétrique</option>
-          <option value="Gastro-entérologie">Gastro-entérologie</option>
-          <option value="Dermatologie">Dermatologie</option>
-          <option value="Pneumologie">Pneumologie</option>
-          <option value="Infectiologie">Infectiologie</option>
-          <option value="Neurologie">Neurologie</option>
-          <option value="Médecine Générale">Médecine Générale</option>
+        <select id="editor-specialty" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 12px;">
+          <!-- Injected via JS -->
         </select>
         <button onclick="cleanEditorOcr()" class="btn-outline" style="border-color: var(--warning); color: var(--warning);">🧹 Nettoyer Bruit OCR</button>
       </div>
@@ -367,22 +457,24 @@
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px;">
         <button onclick="addEditorPage()" class="btn-outline">➕ Ajouter une Page</button>
         <div style="display: flex; gap: 8px;">
-          <button onclick="closeEditorModal()" class="btn-outline">Annuler</button>
+          <button onclick="closeModal('editor-modal')" class="btn-outline">Annuler</button>
           <button onclick="saveEditorDoc()" class="btn-success">💾 Enregistrer les Modifications</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Human TOC GPS Indexer Modal -->
-  <div id="toc-modal" class="modal-overlay">
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 🎯 TOC GPS INDEXER MODAL -->
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <div id="toc-modal" class="modal-overlay" onclick="handleBackdropClick(event, 'toc-modal')">
     <div class="modal-box" style="max-width: 850px;">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
         <div>
           <h3 style="margin: 0; color: #38bdf8;">🎯 Indexeur de Sommaire GPS (Human TOC)</h3>
           <div id="toc-modal-filename" style="font-size: 12px; font-family: monospace; color: var(--text-muted); margin-top: 4px;">-</div>
         </div>
-        <button onclick="closeTocModal()" class="btn-outline">✕</button>
+        <button onclick="closeModal('toc-modal')" class="btn-outline">✕</button>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -390,14 +482,14 @@
           Collez le sommaire avec numéros de pages pour un ciblage à 100% de précision (+90 pts RAG).
         </p>
 
-        <textarea id="toc-input" rows="6" style="width: 100%; box-sizing: border-box; background: #000; color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: monospace; font-size: 12px; resize: vertical;" placeholder="Exemple :&#10;- Colique néphrétique ................. 48&#10;- Gastro-entérite aiguë ............... 71&#10;- Crise d'asthme ...................... 112&#10;- Gale humaine ........................ 145" oninput="previewTocParse()"></textarea>
+        <textarea id="toc-input" rows="6" style="width: 100%; box-sizing: border-box; background: #070a10; color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-family: monospace; font-size: 12px; resize: vertical;" placeholder="Exemple :&#10;- Colique néphrétique ................. 48&#10;- Gastro-entérite aiguë ............... 71&#10;- Crise d'asthme ...................... 112&#10;- Gale humaine ........................ 145" oninput="previewTocParse()"></textarea>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 12px; color: var(--text-muted);">Chapitres détectés : <strong id="toc-parsed-count" style="color: var(--success);">0</strong></span>
           <button onclick="clearTocInput()" class="btn-outline" style="padding: 2px 8px; font-size: 11px;">Effacer</button>
         </div>
 
-        <div style="background: #000; border-radius: 6px; border: 1px solid var(--border); max-height: 160px; overflow-y: auto;">
+        <div style="background: #070a10; border-radius: 6px; border: 1px solid var(--border); max-height: 160px; overflow-y: auto;">
           <table style="margin: 0;">
             <thead>
               <tr style="background: rgba(255,255,255,0.04);">
@@ -412,45 +504,21 @@
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px;">
-          <button onclick="closeTocModal()" class="btn-outline">Annuler</button>
+          <button onclick="closeModal('toc-modal')" class="btn-outline">Annuler</button>
           <button onclick="saveTocData()" class="btn-success">💾 Enregistrer le Sommaire GPS</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Detailed Page Breakdown Modal -->
-  <div id="inspect-modal" class="modal-overlay">
-    <div class="modal-box">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-        <h3 id="inspect-modal-title" style="margin: 0; color: var(--primary);">Inspection du Document</h3>
-        <button onclick="closeInspectModal()" class="btn-outline">✕</button>
-      </div>
-      <div style="background: #000; border-radius: 6px; border: 1px solid var(--border); max-height: 350px; overflow-y: auto;">
-        <table style="margin: 0;">
-          <thead>
-            <tr style="background: rgba(255,255,255,0.04);">
-              <th>Page</th>
-              <th>Mots</th>
-              <th>Caractères</th>
-              <th>Densité</th>
-            </tr>
-          </thead>
-          <tbody id="inspect-modal-page-rows"></tbody>
-        </table>
-      </div>
-      <div style="display: flex; justify-content: flex-end;">
-        <button onclick="closeInspectModal()" class="btn-outline">Fermer</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- RAG Standardization Guide Modal -->
-  <div id="guide-modal" class="modal-overlay">
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 📖 RAG STANDARDIZATION GUIDE MODAL -->
+  <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+  <div id="guide-modal" class="modal-overlay" onclick="handleBackdropClick(event, 'guide-modal')">
     <div class="modal-box" style="max-width: 800px;">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
         <h3 style="margin: 0; color: var(--success);">📖 Guide RAG & Ingestion PDF Lab 2.0</h3>
-        <button onclick="closeGuideModal()" class="btn-outline">✕</button>
+        <button onclick="closeModal('guide-modal')" class="btn-outline">✕</button>
       </div>
       <div style="font-size: 13px; line-height: 1.6; color: #cbd5e1; display: flex; flex-direction: column; gap: 12px;">
         <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px; border: 1px solid var(--success);">
@@ -470,7 +538,7 @@
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
           <button onclick="copyStandardizationPrompt()" class="btn-outline" style="background: rgba(14, 165, 233, 0.15); border-color: var(--primary); color: #38bdf8;">📋 Copier le Prompt IA de Standardisation</button>
-          <button onclick="closeGuideModal()" class="btn-outline">Fermer</button>
+          <button onclick="closeModal('guide-modal')" class="btn-outline">Fermer</button>
         </div>
       </div>
     </div>
@@ -487,23 +555,134 @@
       'x-admin-token': localStorage.getItem('dr_cat_admin_token') || ''
     };
 
+    // ── Complete Medical Specialties List (22 Specialties + Custom) ───────────
+    const ALL_SPECIALTIES = [
+      "Cardiologie",
+      "Urgences & Réanimation",
+      "Pédiatrie",
+      "Gynécologie-Obstétrique",
+      "Gastro-entérologie",
+      "Pneumologie",
+      "Infectiologie",
+      "Neurologie",
+      "Psychiatrie & Santé Mentale",
+      "Dermatologie",
+      "Endocrinologie-Diabétologie",
+      "Rhumatologie",
+      "Néphrologie",
+      "Urologie",
+      "Ophtalmologie",
+      "ORL & Stomatologie",
+      "Hématologie",
+      "Toxicologie",
+      "Médecine Interne",
+      "Médecine Générale",
+      "Médecine Légale",
+      "Chirurgie & Traumatologie",
+      "__custom__"
+    ];
+
+    function populateSpecialtySelects() {
+      const selects = [
+        document.getElementById('new-doc-specialty'),
+        document.getElementById('slice-specialty-select'),
+        document.getElementById('editor-specialty')
+      ];
+
+      selects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Choisir la Spécialité --</option>';
+        ALL_SPECIALTIES.forEach(sp => {
+          const opt = document.createElement('option');
+          if (sp === '__custom__') {
+            opt.value = '__custom__';
+            opt.textContent = '➕ Autre / Spécialité personnalisée...';
+            opt.style.color = '#38bdf8';
+            opt.style.fontWeight = 'bold';
+          } else {
+            opt.value = sp;
+            opt.textContent = sp;
+          }
+          sel.appendChild(opt);
+        });
+      });
+    }
+
+    function handleSpecialtyChange(selectId, customInputId) {
+      const select = document.getElementById(selectId);
+      const customInput = document.getElementById(customInputId);
+      if (!select || !customInput) return;
+
+      if (select.value === '__custom__') {
+        customInput.style.display = 'block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+        customInput.value = '';
+      }
+    }
+
+    function getSelectedSpecialty(selectId, customInputId) {
+      const select = document.getElementById(selectId);
+      const customInput = document.getElementById(customInputId);
+      if (!select) return 'Médecine Générale';
+      if (select.value === '__custom__') {
+        return (customInput && customInput.value.trim()) || 'Médecine Générale';
+      }
+      return select.value || 'Médecine Générale';
+    }
+
+    // ── Modal Lifecycle with Background Scroll Lock ───────────────────────────
+    function openModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) {
+        el.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) {
+        el.style.display = 'none';
+        // Only unlock body scroll if no other modals are active
+        const activeModals = document.querySelectorAll('.modal-overlay[style*="display: flex"]');
+        if (activeModals.length === 0) {
+          document.body.style.overflow = '';
+        }
+      }
+    }
+
+    function handleBackdropClick(event, modalId) {
+      if (event.target && event.target.id === modalId) {
+        closeModal(modalId);
+      }
+    }
+
+    // ── Application State ─────────────────────────────────────────────────────
     let activeTab = 'staging';
     let stagingFiles = [];
     let masterFiles = [];
     let currentEditingDoc = null;
     let currentTocFilename = '';
     let parsedTocItems = [];
+    let currentRawJsonData = null;
+    let currentRawJsonFilename = '';
 
     // Slicer Variables
     let currentSlicerPdfDoc = null;
     let currentSlicerPageNum = 1;
-    let currentSlicerScale = 1.4;
+    let currentSlicerScale = 1.3;
     let slicerSourceFilename = '';
     let slicerBase64 = '';
     let cropTopY = 50;
-    let cropBottomY = 300;
+    let cropBottomY = 280;
     let isDraggingCropTop = false;
     let isDraggingCropBottom = false;
+    let isDraggingCropBox = false;
+    let dragBoxStartY = 0;
+    let dragBoxStartTop = 0;
+    let dragBoxStartBottom = 0;
 
     function switchTab(tabId) {
       activeTab = tabId;
@@ -524,7 +703,6 @@
     // ══════════════════════════════════════════════════════════════════════════
     // 📁 FILE UPLOAD HANDLER (.pdf, .md, .txt)
     // ══════════════════════════════════════════════════════════════════════════
-
     async function handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -573,7 +751,6 @@
     // ══════════════════════════════════════════════════════════════════════════
     // 🧪 STAGING FUNCTIONS
     // ══════════════════════════════════════════════════════════════════════════
-
     async function fetchStagingList() {
       const tbody = document.getElementById('staging-table-body');
       try {
@@ -630,7 +807,7 @@
 
     async function createStagingDoc() {
       const title = document.getElementById('new-doc-title').value.trim();
-      const specialty = document.getElementById('new-doc-specialty').value;
+      const specialty = getSelectedSpecialty('new-doc-specialty', 'new-doc-custom-specialty');
       const content = document.getElementById('new-doc-content').value.trim();
 
       if (!title) return alert('Veuillez spécifier un nom de fichier / titre.');
@@ -658,6 +835,8 @@
         alert(`✅ Fiche "${title}" enregistrée dans le Staging !`);
         document.getElementById('new-doc-title').value = '';
         document.getElementById('new-doc-content').value = '';
+        document.getElementById('new-doc-custom-specialty').value = '';
+        document.getElementById('new-doc-custom-specialty').style.display = 'none';
         fetchStagingList();
       } catch (err) {
         alert(`Erreur: ${err.message}`);
@@ -716,7 +895,6 @@
     // ══════════════════════════════════════════════════════════════════════════
     // ✂️ VISUAL SLICER & PDF BUILDER
     // ══════════════════════════════════════════════════════════════════════════
-
     function populateSlicerFileSelect() {
       const select = document.getElementById('slicer-file-select');
       select.innerHTML = '<option value="">-- Choisir un PDF existant --</option>';
@@ -801,11 +979,10 @@
       await page.render(renderContext).promise;
 
       document.getElementById('slicer-page-indicator').textContent = `Page ${num} / ${currentSlicerPdfDoc.numPages}`;
-      document.getElementById('slice-start-page').value = num;
-
-      // Adjust crop handles to page height
-      cropTopY = Math.min(cropTopY, viewport.height - 100);
-      cropBottomY = Math.min(viewport.height - 30, Math.max(cropTopY + 120, cropBottomY));
+      
+      // Auto-bound crop coordinates to canvas height
+      cropTopY = Math.min(cropTopY, canvas.height - 80);
+      cropBottomY = Math.min(Math.max(cropBottomY, cropTopY + 100), canvas.height);
       updateCropOverlay();
     }
 
@@ -823,6 +1000,11 @@
 
     function slicerZoom(delta) {
       currentSlicerScale = Math.max(0.6, Math.min(3.0, currentSlicerScale + delta));
+      if (currentSlicerPdfDoc) renderSlicerPage(currentSlicerPageNum);
+    }
+
+    function slicerResetZoom() {
+      currentSlicerScale = 1.3;
       if (currentSlicerPdfDoc) renderSlicerPage(currentSlicerPageNum);
     }
 
@@ -846,45 +1028,91 @@
       }
     }
 
-    // Drag Crop Handles Logic
+    // ── Touch & Mouse Resizing / Dragging Implementation ──────────────────────
     const handleTop = document.getElementById('crop-handle-top');
     const handleBottom = document.getElementById('crop-handle-bottom');
-    const wrapper = document.getElementById('canvas-wrapper');
+    const cropHighlight = document.getElementById('crop-box-highlight');
+    const canvasWrapper = document.getElementById('canvas-wrapper');
 
-    handleTop.addEventListener('mousedown', () => isDraggingCropTop = true);
-    handleBottom.addEventListener('mousedown', () => isDraggingCropBottom = true);
+    function onPointerDown(type, e) {
+      e.stopPropagation();
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      if (type === 'top') isDraggingCropTop = true;
+      if (type === 'bottom') isDraggingCropBottom = true;
+      if (type === 'box') {
+        isDraggingCropBox = true;
+        dragBoxStartY = clientY;
+        dragBoxStartTop = cropTopY;
+        dragBoxStartBottom = cropBottomY;
+      }
+    }
 
-    window.addEventListener('mouseup', () => {
+    handleTop.addEventListener('mousedown', (e) => onPointerDown('top', e));
+    handleTop.addEventListener('touchstart', (e) => onPointerDown('top', e), { passive: false });
+
+    handleBottom.addEventListener('mousedown', (e) => onPointerDown('bottom', e));
+    handleBottom.addEventListener('touchstart', (e) => onPointerDown('bottom', e), { passive: false });
+
+    cropHighlight.addEventListener('mousedown', (e) => onPointerDown('box', e));
+    cropHighlight.addEventListener('touchstart', (e) => onPointerDown('box', e), { passive: false });
+
+    function onPointerUp() {
       isDraggingCropTop = false;
       isDraggingCropBottom = false;
-    });
+      isDraggingCropBox = false;
+    }
 
-    wrapper.addEventListener('mousemove', (e) => {
-      if (!isDraggingCropTop && !isDraggingCropBottom) return;
-      const rect = wrapper.getBoundingClientRect();
-      const y = e.clientY - rect.top;
+    window.addEventListener('mouseup', onPointerUp);
+    window.addEventListener('touchend', onPointerUp);
+
+    function onPointerMove(e) {
+      if (!isDraggingCropTop && !isDraggingCropBottom && !isDraggingCropBox) return;
+      if (e.cancelable) e.preventDefault(); // Prevent accidental page scrolling during handle drag
+
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const rect = canvasWrapper.getBoundingClientRect();
+      const y = clientY - rect.top;
+      const canvasHeight = document.getElementById('pdf-canvas').height || 800;
 
       if (isDraggingCropTop) {
         cropTopY = Math.max(0, Math.min(y, cropBottomY - 40));
       } else if (isDraggingCropBottom) {
-        cropBottomY = Math.max(cropTopY + 40, Math.min(y, wrapper.offsetHeight));
+        cropBottomY = Math.max(cropTopY + 40, Math.min(y, canvasHeight));
+      } else if (isDraggingCropBox) {
+        const delta = clientY - dragBoxStartY;
+        const boxHeight = dragBoxStartBottom - dragBoxStartTop;
+        let newTop = dragBoxStartTop + delta;
+        let newBottom = dragBoxStartBottom + delta;
+
+        if (newTop < 0) {
+          newTop = 0;
+          newBottom = boxHeight;
+        } else if (newBottom > canvasHeight) {
+          newBottom = canvasHeight;
+          newTop = canvasHeight - boxHeight;
+        }
+        cropTopY = newTop;
+        cropBottomY = newBottom;
       }
       updateCropOverlay();
-    });
+    }
+
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
 
     function updateCropOverlay() {
       document.getElementById('crop-mask-top').style.height = `${cropTopY}px`;
       document.getElementById('crop-handle-top').style.top = `${cropTopY}px`;
-      document.getElementById('crop-box-highlight').style.top = `${cropTopY + 6}px`;
-      document.getElementById('crop-box-highlight').style.height = `${cropBottomY - cropTopY - 6}px`;
+      document.getElementById('crop-box-highlight').style.top = `${cropTopY}px`;
+      document.getElementById('crop-box-highlight').style.height = `${cropBottomY - cropTopY}px`;
       document.getElementById('crop-handle-bottom').style.top = `${cropBottomY}px`;
-      document.getElementById('crop-mask-bottom').style.top = `${cropBottomY + 6}px`;
+      document.getElementById('crop-mask-bottom').style.top = `${cropBottomY}px`;
     }
 
     async function executeSliceAction() {
       const mode = document.getElementById('slicer-mode-select').value;
       const title = document.getElementById('slice-title-input').value.trim();
-      const specialty = document.getElementById('slice-specialty-select').value;
+      const specialty = getSelectedSpecialty('slice-specialty-select', 'slice-custom-specialty');
       const pathology = document.getElementById('slice-pathology-input').value.trim();
 
       if (!title) return alert('Veuillez entrer un titre pour la fiche.');
@@ -945,7 +1173,6 @@
     // ══════════════════════════════════════════════════════════════════════════
     // ✏️ IN-BROWSER PAGE EDITOR
     // ══════════════════════════════════════════════════════════════════════════
-
     function openEditorModal(docId) {
       currentEditingDoc = stagingFiles.find(d => d.id === docId);
       if (!currentEditingDoc) return;
@@ -955,12 +1182,7 @@
       document.getElementById('editor-specialty').value = currentEditingDoc.specialty || 'Médecine Générale';
 
       renderEditorPages();
-      document.getElementById('editor-modal').style.display = 'flex';
-    }
-
-    function closeEditorModal() {
-      document.getElementById('editor-modal').style.display = 'none';
-      currentEditingDoc = null;
+      openModal('editor-modal');
     }
 
     function renderEditorPages() {
@@ -976,7 +1198,7 @@
             <strong style="color: var(--primary); font-size: 13px;">Page ${p.page || idx + 1}</strong>
             <button onclick="removeEditorPage(${idx})" class="btn-outline" style="color: var(--danger); padding: 2px 6px; font-size: 11px;">Supprimer Page</button>
           </div>
-          <textarea class="editor-page-text" data-idx="${idx}" rows="5" style="width: 100%; box-sizing: border-box; background: #000; color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-family: monospace; font-size: 12px; resize: vertical;">${escapeHtml(p.content || '')}</textarea>
+          <textarea class="editor-page-text" data-idx="${idx}" rows="5" style="width: 100%; box-sizing: border-box; background: #070a10; color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-family: monospace; font-size: 12px; resize: vertical;">${escapeHtml(p.content || '')}</textarea>
         `;
         container.appendChild(pageBox);
       });
@@ -1034,7 +1256,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        closeEditorModal();
+        closeModal('editor-modal');
         fetchStagingList();
       } catch (err) {
         alert(`Erreur: ${err.message}`);
@@ -1044,7 +1266,6 @@
     // ══════════════════════════════════════════════════════════════════════════
     // 🎯 TOC GPS INDEXER MODAL
     // ══════════════════════════════════════════════════════════════════════════
-
     function openTocModal(filename, existingToc = []) {
       currentTocFilename = filename;
       document.getElementById('toc-modal-filename').textContent = `Fichier : ${filename}`;
@@ -1057,13 +1278,7 @@
       }
 
       previewTocParse();
-      document.getElementById('toc-modal').style.display = 'flex';
-    }
-
-    function closeTocModal() {
-      document.getElementById('toc-modal').style.display = 'none';
-      currentTocFilename = '';
-      parsedTocItems = [];
+      openModal('toc-modal');
     }
 
     function clearTocInput() {
@@ -1128,7 +1343,7 @@
         if (!res.ok) throw new Error(data.error);
 
         alert(`✅ Sommaire GPS enregistré avec ${parsedTocItems.length} chapitres !`);
-        closeTocModal();
+        closeModal('toc-modal');
         refreshAll();
       } catch (err) {
         alert(`Erreur: ${err.message}`);
@@ -1136,9 +1351,8 @@
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // 💎 MASTER CORPUS FUNCTIONS
+    // 💎 MASTER CORPUS FUNCTIONS & RESTORED V1 ACTIONS
     // ══════════════════════════════════════════════════════════════════════════
-
     async function fetchMasterList() {
       const tbody = document.getElementById('master-table-body');
       try {
@@ -1171,24 +1385,39 @@
           ? `<span class="badge badge-llamaparse" style="margin-left: 4px;">🎯 GPS (${file.tocCount})</span>`
           : '';
 
+        const qualityBadge = file.quality === 'llamaparse'
+          ? `<span class="badge badge-llamaparse">LlamaParse</span>`
+          : (file.quality === 'google' ? `<span class="badge badge-google">Google OCR</span>` : `<span class="badge badge-offline">Offline</span>`);
+
         tr.innerHTML = `
-          <td><strong>${escapeHtml(file.pdf)}</strong></td>
-          <td><span class="badge badge-llamaparse">${escapeHtml(file.quality || 'Master')}</span></td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <a href="/pdfs/${encodeURIComponent(file.pdf)}" target="_blank" title="Ouvrir le PDF" style="text-decoration: none; font-size: 15px;">👁️</a>
+              <strong>${escapeHtml(file.pdf)}</strong>
+            </div>
+          </td>
+          <td>${qualityBadge}</td>
           <td>${file.pagesCount} p. (${((file.totalWords || 0) / 1000).toFixed(1)}k mots)</td>
           <td>${savingsHtml}</td>
-          <td><span class="badge badge-grade-a">💎 Master Indexé</span>${tocPill}</td>
+          <td><span class="badge badge-grade-a">💎 Master</span>${tocPill}</td>
           <td style="color: var(--text-muted); font-size: 12px;">${date}</td>
-          <td style="text-align: right; display: flex; gap: 5px; justify-content: flex-end;">
-            <button class="btn-outline master-toc-btn" style="color: #38bdf8; padding: 4px 8px; font-size: 11px;">🎯 TOC GPS</button>
-            <button class="btn-outline master-inspect-btn" style="padding: 4px 8px; font-size: 11px;">🔍 Inspecter</button>
-            <button class="btn-outline master-json-btn" style="padding: 4px 8px; font-size: 11px;">JSON</button>
-            <button class="btn-outline master-delete-btn" style="color: #ef4444; border-color: #ef4444; padding: 4px 8px; font-size: 11px;">✕</button>
+          <td style="text-align: right;">
+            <div style="display: flex; gap: 5px; justify-content: flex-end; flex-wrap: wrap;">
+              <button class="btn-outline master-view-pdf-btn" title="Ouvrir et lire le PDF dans un nouvel onglet" style="padding: 4px 7px; font-size: 11px;">👁️</button>
+              <button class="btn-outline master-inspect-btn" title="Inspection détaillée de la densité par page" style="padding: 4px 8px; font-size: 11px;">🔍 Inspecter</button>
+              <button class="btn-outline master-json-btn" title="Ouvrir l'inspecteur JSON grand écran (90%)" style="color: #38bdf8; border-color: var(--primary); padding: 4px 8px; font-size: 11px;">📄 JSON</button>
+              <button class="btn-outline master-reparse-btn" title="Forcer la ré-extraction en ligne (Re-Parse / Force Upgrade)" style="color: var(--warning); border-color: var(--warning); padding: 4px 8px; font-size: 11px;">⚡ Re-Parse</button>
+              <button class="btn-outline master-toc-btn" title="Éditer le sommaire GPS" style="color: #38bdf8; padding: 4px 8px; font-size: 11px;">🎯 TOC</button>
+              <button class="btn-outline master-delete-btn" title="Supprimer définitivement ce PDF" style="color: #ef4444; border-color: #ef4444; padding: 4px 7px; font-size: 11px;">🗑️</button>
+            </div>
           </td>
         `;
 
-        tr.querySelector('.master-toc-btn').addEventListener('click', () => openTocModal(file.pdf, file.toc || []));
+        tr.querySelector('.master-view-pdf-btn').addEventListener('click', () => window.open(`/pdfs/${encodeURIComponent(file.pdf)}`, '_blank'));
         tr.querySelector('.master-inspect-btn').addEventListener('click', () => inspectMasterPdf(file));
-        tr.querySelector('.master-json-btn').addEventListener('click', () => viewJson(file.pdf));
+        tr.querySelector('.master-json-btn').addEventListener('click', () => openJsonModal(file.pdf));
+        tr.querySelector('.master-reparse-btn').addEventListener('click', () => forceReextractPdf(file.pdf));
+        tr.querySelector('.master-toc-btn').addEventListener('click', () => openTocModal(file.pdf, file.toc || []));
         tr.querySelector('.master-delete-btn').addEventListener('click', () => deleteMasterPdf(file.pdf));
 
         tbody.appendChild(tr);
@@ -1201,18 +1430,82 @@
       renderMasterTable(filtered);
     }
 
-    async function viewJson(pdfName) {
+    // ── 📄 Dedicated 90% Width JSON Inspector ─────────────────────────────────
+    async function openJsonModal(pdfName) {
+      currentRawJsonFilename = pdfName;
+      document.getElementById('json-modal-title').textContent = `JSON Inspecteur : ${pdfName}`;
+      document.getElementById('json-modal-subtitle').textContent = `Fichier : /data/pdf_cache/${pdfName}.json`;
+      document.getElementById('json-modal-pre').textContent = 'Chargement du contenu JSON...';
+      document.getElementById('json-search-input').value = '';
+      openModal('json-modal');
+
       try {
         const res = await fetch(`/api/admin/pdf-lab-json?filename=${encodeURIComponent(pdfName)}`, { headers: API_HEADERS });
         const data = await res.json();
-        document.getElementById('json-output').textContent = JSON.stringify(data.result, null, 2);
+        if (!res.ok) throw new Error(data.error);
+
+        currentRawJsonData = data.result;
+        const formatted = JSON.stringify(currentRawJsonData, null, 2);
+        document.getElementById('json-modal-pre').textContent = formatted;
+        document.getElementById('json-stats-badge').textContent = `${(formatted.length / 1024).toFixed(1)} KB | ${(currentRawJsonData.pages || []).length} page(s)`;
       } catch (err) {
-        document.getElementById('json-output').textContent = `Erreur: ${err.message}`;
+        document.getElementById('json-modal-pre').textContent = `Erreur de chargement: ${err.message}`;
       }
     }
 
+    function filterJsonModalContent() {
+      if (!currentRawJsonData) return;
+      const term = document.getElementById('json-search-input').value.trim().toLowerCase();
+      const fullText = JSON.stringify(currentRawJsonData, null, 2);
+
+      if (!term) {
+        document.getElementById('json-modal-pre').textContent = fullText;
+        return;
+      }
+
+      // Filter pages matching search query
+      const filteredDoc = { ...currentRawJsonData };
+      if (Array.isArray(filteredDoc.pages)) {
+        filteredDoc.pages = filteredDoc.pages.filter(p => (p.content || '').toLowerCase().includes(term));
+      }
+      document.getElementById('json-modal-pre').textContent = JSON.stringify(filteredDoc, null, 2);
+    }
+
+    function copyJsonModalContent() {
+      if (!currentRawJsonData) return;
+      navigator.clipboard.writeText(JSON.stringify(currentRawJsonData, null, 2)).then(() => {
+        alert('📋 JSON complet copié dans le presse-papier !');
+      });
+    }
+
+    function downloadJsonModalContent() {
+      if (!currentRawJsonData) return;
+      const blob = new Blob([JSON.stringify(currentRawJsonData, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${currentRawJsonFilename}.json`;
+      a.click();
+    }
+
+    // ── 🔍 Restored Detailed Page Breakdown Modal ─────────────────────────────
     function inspectMasterPdf(file) {
       document.getElementById('inspect-modal-title').textContent = `Inspection : ${file.pdf}`;
+      document.getElementById('inspect-modal-hash').textContent = `Hash SHA-256: ${file.hash || 'N/A'}`;
+      
+      document.getElementById('inspect-modal-engine').innerHTML = file.quality === 'llamaparse'
+        ? '<span class="badge badge-llamaparse">LlamaParse</span>'
+        : (file.quality === 'google' ? '<span class="badge badge-google">Google OCR</span>' : '<span class="badge badge-offline">Offline</span>');
+        
+      document.getElementById('inspect-modal-words').textContent = `${(file.totalWords || 0).toLocaleString()} mots (${((file.totalChars || 0) / 1000).toFixed(1)}k car.)`;
+      document.getElementById('inspect-modal-savings').textContent = file.savedPercent > 0 ? `-${file.savedPercent}% économisé` : '0%';
+
+      // Wire Action Buttons inside Modal
+      document.getElementById('inspect-open-pdf-btn').onclick = () => window.open(`/pdfs/${encodeURIComponent(file.pdf)}`, '_blank');
+      document.getElementById('inspect-view-json-btn').onclick = () => {
+        closeModal('inspect-modal');
+        openJsonModal(file.pdf);
+      };
+
       const tbody = document.getElementById('inspect-modal-page-rows');
       tbody.innerHTML = '';
 
@@ -1226,20 +1519,46 @@
           <td style="padding: 6px 12px; font-weight: bold; color: var(--primary);">p. ${p.page}</td>
           <td style="padding: 6px 12px;">${p.words.toLocaleString()}</td>
           <td style="padding: 6px 12px; color: var(--text-muted);">${p.chars.toLocaleString()}</td>
-          <td style="padding: 6px 12px; width: 40%;">
-            <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
-              <div style="background: var(--primary); width: ${percent}%; height: 100%;"></div>
+          <td style="padding: 6px 12px; width: 45%;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="background: rgba(255,255,255,0.08); flex: 1; height: 8px; border-radius: 4px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #0ea5e9, #10b981); width: ${percent}%; height: 100%;"></div>
+              </div>
+              <span style="font-size: 11px; color: var(--text-muted); font-family: monospace; min-width: 32px;">${percent}%</span>
             </div>
           </td>
         `;
         tbody.appendChild(tr);
       });
 
-      document.getElementById('inspect-modal').style.display = 'flex';
+      openModal('inspect-modal');
     }
 
-    function closeInspectModal() {
-      document.getElementById('inspect-modal').style.display = 'none';
+    // ── ⚡ Force Re-Extract (Re-Parse / Force Upgrade) ─────────────────────────
+    async function forceReextractPdf(filename) {
+      if (!confirm(`Forcer la ré-extraction complète de "${filename}" en ligne via LlamaParse / Google OCR ?\n\nLe cache actuel sera purgé.`)) return;
+
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `Ré-extraction forcée en cours pour : ${filename}...`;
+
+      try {
+        const res = await fetch('/api/admin/pdf-lab-force-extract', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        alert(`✅ Ré-extraction réussie pour "${filename}" !\nPages traitées : ${(data.result?.pages || []).length}`);
+        fetchMasterList();
+      } catch (err) {
+        alert(`Échec ré-extraction: ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
     }
 
     async function deleteMasterPdf(filename) {
@@ -1262,7 +1581,6 @@
     // ══════════════════════════════════════════════════════════════════════════
     // 🔍 RAG SIMULATOR FUNCTIONS
     // ══════════════════════════════════════════════════════════════════════════
-
     async function runRagSimulation() {
       const query = document.getElementById('sim-query-input').value.trim();
       if (!query) return alert('Veuillez entrer une requête médicale à tester.');
@@ -1330,10 +1648,6 @@
     // ══════════════════════════════════════════════════════════════════════════
     // UTILITIES
     // ══════════════════════════════════════════════════════════════════════════
-
-    function openGuideModal() { document.getElementById('guide-modal').style.display = 'flex'; }
-    function closeGuideModal() { document.getElementById('guide-modal').style.display = 'none'; }
-
     function copyStandardizationPrompt() {
       const prompt = `Tu es un médecin réviseur et expert en synthèse clinique pour le moteur RAG Dr.CAT.
 Ta mission est de transformer ce texte/cours médical brut en une ressource clinique parfaitement structurée au format Markdown (.md).
@@ -1371,6 +1685,7 @@ Génère UNIQUEMENT le texte Markdown propre sans bavardage.`;
 
     // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
+      populateSpecialtySelects();
       refreshAll();
     });
   </script>

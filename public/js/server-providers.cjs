@@ -38,12 +38,12 @@ const PROVIDERS = [
   {
     id: 'cloudflare',
     name: 'Cloudflare Tunnel',
-    urlPattern: /^(?:https?:\/\/)?(?:[^\/]+\.)?(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|is-an\.app|is-a\.dev)(?:[:\/]|$)/i,
+    urlPattern: /^(?:https?:\/\/)?(?:[^\/]+\.)?(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|workers\.dev|is-an\.app|is-a\.dev)(?:[:\/]|$)/i,
     extraHeaders: {},
     managementPort: null,
     managementPath: null,
-    isDevHostname: (h) => /(?:^|\.)(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|is-an\.app|is-a\.dev)$/i.test(h),
-    isTunnelOrigin: (o) => /(?:^|\.)(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|is-an\.app|is-a\.dev)(?::\d+)?$/i.test(o.replace(/^https?:\/\//, '')),
+    isDevHostname: (h) => /(?:^|\.)(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|workers\.dev|is-an\.app|is-a\.dev)$/i.test(h),
+    isTunnelOrigin: (o) => /(?:^|\.)(?:trycloudflare\.com|cfargotunnel\.com|pages\.dev|workers\.dev|is-an\.app|is-a\.dev)(?::\d+)?$/i.test(o.replace(/^https?:\/\//, '')),
     tunnelLabel: 'Cloudflare',
   },
   {
