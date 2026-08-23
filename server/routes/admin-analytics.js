@@ -1,12 +1,21 @@
+const crypto = require('crypto');
 const { getDeviceAnalytics, resetDeviceStore, toggleAdminDevice } = require('../services/active-devices');
 const { isAdminRequest } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 
+function isValidApiKey(provided) {
+  const expected = process.env.ADMIN_API_KEY;
+  if (!expected || typeof provided !== 'string' || provided.length !== expected.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
+  } catch (_) {
+    return false;
+  }
+}
+
 function registerAdminAnalyticsRoutes(app, cache) {
   app.get('/api/admin/active-devices', (req, res) => {
-    const apiKey = req.headers['x-api-key'];
-    const expectedApiKey = process.env.ADMIN_API_KEY || 'drcat_secret_api_key_2026';
-    const isApiKeyValid = apiKey && apiKey === expectedApiKey;
+    const isApiKeyValid = isValidApiKey(req.headers['x-api-key']);
     const isLocal = isLocalhostConnection(req);
     const isAdmin = cache ? isAdminRequest(req, cache.activeTokens || new Set()) : false;
 
@@ -27,9 +36,7 @@ function registerAdminAnalyticsRoutes(app, cache) {
   });
 
   app.post('/api/admin/active-devices/reset', (req, res) => {
-    const apiKey = req.headers['x-api-key'];
-    const expectedApiKey = process.env.ADMIN_API_KEY || 'drcat_secret_api_key_2026';
-    const isApiKeyValid = apiKey && apiKey === expectedApiKey;
+    const isApiKeyValid = isValidApiKey(req.headers['x-api-key']);
     const isLocal = isLocalhostConnection(req);
     const isAdmin = cache ? isAdminRequest(req, cache.activeTokens || new Set()) : false;
 
@@ -47,9 +54,7 @@ function registerAdminAnalyticsRoutes(app, cache) {
   });
 
   app.post('/api/admin/active-devices/toggle-admin', (req, res) => {
-    const apiKey = req.headers['x-api-key'];
-    const expectedApiKey = process.env.ADMIN_API_KEY || 'drcat_secret_api_key_2026';
-    const isApiKeyValid = apiKey && apiKey === expectedApiKey;
+    const isApiKeyValid = isValidApiKey(req.headers['x-api-key']);
     const isLocal = isLocalhostConnection(req);
     const isAdmin = cache ? isAdminRequest(req, cache.activeTokens || new Set()) : false;
 

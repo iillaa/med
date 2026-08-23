@@ -12,6 +12,7 @@ class DebugEmitter extends EventEmitter {
     this.eventBuffer = [];
     this.maxBufferSize = 300;
     this.sseClients = new Set();
+    this.maxSSEClients = 20;
   }
 
   /**
@@ -51,8 +52,12 @@ class DebugEmitter extends EventEmitter {
 
   /**
    * Registers a new Express response as an SSE client
+   * @returns {boolean} false when the concurrent client cap is reached (caller should reject)
    */
   addSSEClient(res) {
+    if (this.sseClients.size >= this.maxSSEClients) {
+      return false;
+    }
     this.sseClients.add(res);
 
     // Send initial handshake

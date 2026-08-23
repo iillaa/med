@@ -90,7 +90,12 @@ function registerCatGeneratorRoutes(app) {
 
   // GET /api/admin/cat-generator/debug-stream (SSE Real-Time Telemetry)
   app.get('/api/admin/cat-generator/debug-stream', (req, res) => {
-    // Note: SSE stream allows authenticated admin session or local loopback connection
+    // Strictly admin token OR local loopback connection
+    const isAdmin = checkIsAdmin(req, cache.activeTokens);
+    const isLocal = isLocalhostConnection(req);
+    if (!isAdmin && !isLocal) {
+      return res.status(403).json({ error: 'Accès interdit. Session administrateur ou connexion locale requise.' });
+    }
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
@@ -98,7 +103,11 @@ function registerCatGeneratorRoutes(app) {
       'X-Accel-Buffering': 'no'
     });
     if (res.flushHeaders) res.flushHeaders();
-    debugEmitter.addSSEClient(res);
+    if (!debugEmitter.addSSEClient(res)) {
+      res.write('data: {"type":"sse_rejected","payload":{"message":"Limite de clients SSE atteinte."}}\n\n');
+      res.end();
+      return;
+    }
   });
 
   // GET /api/admin/cat-generator/debug-logs (Recent JSON Buffer)
@@ -385,8 +394,8 @@ function registerCatGeneratorRoutes(app) {
       const validation = validateCAT(updatedCat);
 
       db[catIdx] = updatedCat;
-      // Async write — avoids blocking the event loop
-      await fs.promises.writeFile(V2_DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+      // Async write — avoids blocking the event loop; write to the SAME resolved path we read from
+      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
 
       res.json({
         success: true,
