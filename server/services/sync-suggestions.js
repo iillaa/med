@@ -7,17 +7,25 @@ const { safeWriteJsonAsync } = require('./data-store');
 const SUGGESTIONS_FILE = path.join(__dirname, '..', '..', 'suggestions.json');
 const CLOUDFLARE_URL = 'https://drcat.dr-cat.workers.dev/api/suggestions';
 
+// Shared secret for worker server-to-server routes (set in .env AND Cloudflare Worker vars)
+function syncHeaders(extra = {}) {
+  const headers = { 'User-Agent': 'Node-Termux-Sync', ...extra };
+  if (process.env.SYNC_SECRET) {
+    headers['x-sync-secret'] = process.env.SYNC_SECRET;
+  }
+  return headers;
+}
+
 async function ackCloudflareSuggestions(syncedIds) {
   if (!Array.isArray(syncedIds) || syncedIds.length === 0) return;
   return new Promise((resolve) => {
     const payload = JSON.stringify({ ids: syncedIds });
     const req = https.request(`${CLOUDFLARE_URL}/ack`, {
       method: 'POST',
-      headers: {
+      headers: syncHeaders({
         'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
-        'User-Agent': 'Node-Termux-Sync'
-      }
+        'Content-Length': Buffer.byteLength(payload)
+      })
     }, () => resolve());
     req.on('error', () => resolve());
     req.write(payload);
@@ -26,8 +34,11 @@ async function ackCloudflareSuggestions(syncedIds) {
 }
 
 async function syncCloudflareSuggestions() {
+  if (!process.env.SYNC_SECRET) {
+    console.warn('[CloudSync] SYNC_SECRET non défini — le worker refusera la synchronisation (503/403). Ajoutez-le dans .env et dans les variables du Worker.');
+  }
   return new Promise((resolve) => {
-    https.get(CLOUDFLARE_URL, { headers: { 'User-Agent': 'Node-Termux-Sync' } }, (res) => {
+    https.get(CLOUDFLARE_URL, { headers: syncHeaders() }, (res) => {
       let rawData = '';
       res.on('data', chunk => rawData += chunk);
       res.on('end', async () => {
@@ -71,7 +82,7 @@ async function purgeCloudflareSuggestion(id) {
   return new Promise((resolve) => {
     const req = https.request(`${CLOUDFLARE_URL}/${encodeURIComponent(id)}`, {
       method: 'DELETE',
-      headers: { 'User-Agent': 'Node-Termux-Sync' }
+      headers: syncHeaders()
     }, () => resolve());
     req.on('error', () => resolve());
     req.end();

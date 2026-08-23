@@ -8,13 +8,13 @@
     "androidScheme": "https",
     "cleartext": true,
     "allowNavigation": [
-      "*",
       "*.ngrok-free.dev",
       "*.ngrok-free.app",
       "*.ngrok.io",
       "*.trycloudflare.com",
       "*.cfargotunnel.com",
       "*.pages.dev",
+      "*.workers.dev",
       "*.is-an.app",
       "*.is-a.dev"
     ]

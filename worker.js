@@ -1,25 +1,41 @@
 // Native Cloudflare Worker entrypoint (worker.js)
 // Handles API routes natively on Cloudflare edge network and serves static assets
 
+const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
+
+async function isValidSyncSecret(provided, expected) {
+  if (!expected || typeof provided !== 'string' || provided.length === 0) return false;
+  const enc = new TextEncoder();
+  const a = await crypto.subtle.digest('SHA-256', enc.encode(provided));
+  const b = await crypto.subtle.digest('SHA-256', enc.encode(expected));
+  const av = new Uint8Array(a);
+  const bv = new Uint8Array(b);
+  let diff = 0;
+  for (let i = 0; i < av.length; i++) diff |= av[i] ^ bv[i];
+  return diff === 0;
+}
+
+// Gate for server-to-server routes (sync, ack, purge). Client POST stays open.
+function requireSyncSecret(request, env) {
+  const provided = request.headers.get('x-sync-secret');
+  return isValidSyncSecret(provided, env && env.SYNC_SECRET);
+}
+
+const syncDenied = () => new Response(JSON.stringify({
+  success: false,
+  error: 'Secret de synchronisation requis (en-tête x-sync-secret).'
+}), {
+  status: 403,
+  headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+});
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // 1. CORS Preflight
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS, PUT, PATCH",
-          "Access-Control-Allow-Headers": "*",
-          "Access-Control-Max-Age": "86400"
-        }
-      });
-    }
-
     // 2. ACK handler: POST /api/suggestions/ack — Termux acknowledges receipt of suggestions
     if (url.pathname === '/api/suggestions/ack' && request.method === 'POST') {
+      if (!(await requireSyncSecret(request, env))) return syncDenied();
       try {
         const { ids } = await request.json();
         if (Array.isArray(ids) && ids.length > 0 && env && env.SUGGESTIONS_KV) {
@@ -48,6 +64,7 @@ export default {
       const parts = url.pathname.split('/');
       const targetId = parts[3];
       if (targetId && (request.method === 'DELETE' || request.method === 'POST')) {
+        if (!(await requireSyncSecret(request, env))) return syncDenied();
         try {
           if (env && env.SUGGESTIONS_KV) {
             let list = [];
@@ -72,6 +89,13 @@ export default {
     // 4. /api/suggestions (Serverless Suggestion Store in Cloudflare KV)
     if (url.pathname === '/api/suggestions') {
       if (request.method === 'POST') {
+        // Client submissions: require the public app key (anti-spam parity with Node backend)
+        if (request.headers.get('x-app-key') !== APP_DATA_KEY) {
+          return new Response(JSON.stringify({ success: false, error: 'Accès interdit.' }), {
+            status: 403,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        }
         try {
           const body = await request.json();
           const suggestionId = `sug_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -112,6 +136,8 @@ export default {
       }
 
       // GET /api/suggestions — Fetch un-acknowledged suggestions from Cloudflare KV
+      // (server-to-server sync only — leaks user suggestion content, gated by SYNC_SECRET)
+      if (!(await requireSyncSecret(request, env))) return syncDenied();
       try {
         let list = [];
         if (env && env.SUGGESTIONS_KV) {
