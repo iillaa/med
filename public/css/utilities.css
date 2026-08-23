@@ -35,8 +35,6 @@ button i,
   justify-content: center;
   gap: var(--space-8, 32px);
   padding: var(--space-6, 24px);
-  padding-top: max(var(--space-6, 24px), env(safe-area-inset-top));
-  padding-bottom: max(var(--space-6, 24px), env(safe-area-inset-bottom));
   box-sizing: border-box;
   transition: opacity var(--motion-slower) ease, visibility var(--motion-slower) ease;
 }
@@ -423,7 +421,7 @@ button i,
 /* Offline indicator badge (Phase 6.3) — subtle, non-intrusive. */
 .offline-badge {
   position: fixed;
-  bottom: max(12px, env(safe-area-inset-bottom));
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%) translateY(12px);
   display: flex;
@@ -549,4 +547,17 @@ button i,
 .font-monospace {
   font-family: monospace;
   font-size: 12px;
+}
+
+/* Eruda DevTools & Floating Console Safe Area Protection */
+#eruda,
+.eruda-container,
+div[class*="eruda-"] {
+  box-sizing: border-box !important;
+}
+
+#eruda .eruda-nav-bar,
+#eruda .eruda-entry-btn {
+  bottom: 20px !important;
+  right: 20px !important;
 }

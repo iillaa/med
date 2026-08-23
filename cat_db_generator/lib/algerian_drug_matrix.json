@@ -1,0 +1,159 @@
+{
+  "_comment": "Dr.CAT Algerian Clinical Drug Matrix — DCI to local trade names and formulations",
+  "_version": "1.0.0",
+  "drugs": [
+    {
+      "dci": "Amoxicilline",
+      "trade_names": ["Clamoxyl", "Amoxil", "Ospamox", "Hiconcil", "Amoxicilline générique"],
+      "forms_adulte": ["Gélules 500 mg", "Comprimés dispersibles 1 g", "Comprimés 1 g"],
+      "forms_enfant": ["Suspension buvable 125 mg / 5 mL", "Suspension buvable 250 mg / 5 mL", "Suspension buvable 500 mg / 5 mL"],
+      "default_posology_adulte": "1 g toutes les 8h ou 1 g 2 fois/jour selon indication",
+      "default_posology_enfant": "50 à 80 mg/kg/jour répartis en 2 ou 3 prises",
+      "category": "Antibiotique — Pénicilline A"
+    },
+    {
+      "dci": "Amoxicilline + Acide Clavulanique",
+      "trade_names": ["Augmentin", "Clavulin", "Amoclan", "Curam", "Klavox", "Amoxi-Clav"],
+      "forms_adulte": ["Comprimés 1 g / 125 mg", "Sachets 1 g / 125 mg"],
+      "forms_enfant": ["Suspension buvable Nourrisson 100 mg/12.5 mg par mL (dose-poids)", "Suspension buvable Enfant 500 mg/62.5 mg par sachet ou dose-poids"],
+      "default_posology_adulte": "1 g/125 mg 2 à 3 fois par jour",
+      "default_posology_enfant": "80 mg/kg/j (exprimé en amoxicilline) en 3 prises",
+      "category": "Antibiotique — Bêta-lactamine + Inhibiteur"
+    },
+    {
+      "dci": "Céfixime",
+      "trade_names": ["Oroken", "Fixim", "Cefix", "Zifi", "Suprax"],
+      "forms_adulte": ["Comprimés 200 mg", "Comprimés 400 mg"],
+      "forms_enfant": ["Suspension buvable 100 mg / 5 mL (avec pipette doseuse)"],
+      "default_posology_adulte": "200 mg 2 fois par jour ou 400 mg en 1 prise",
+      "default_posology_enfant": "8 mg/kg/j en 2 prises",
+      "category": "Antibiotique — Céphalosporine de 3ème génération orale"
+    },
+    {
+      "dci": "Azithromycine",
+      "trade_names": ["Zithromax", "Azitro", "Macrozit", "Azyter (collyre)"],
+      "forms_adulte": ["Comprimés 250 mg", "Comprimés 500 mg"],
+      "forms_enfant": ["Suspension buvable 200 mg / 5 mL (40 mg/mL)"],
+      "default_posology_adulte": "500 mg le 1er jour puis 250 mg/j pdt 4 jours OU 500 mg/j pdt 3 jours",
+      "default_posology_enfant": "20 mg/kg/j en 1 prise quotidienne pendant 3 jours",
+      "category": "Antibiotique — Macrolide"
+    },
+    {
+      "dci": "Métronidazole",
+      "trade_names": ["Flagyl", "Metrolag", "Nidazol", "Générique Métronidazole"],
+      "forms_adulte": ["Comprimés 250 mg", "Comprimés 500 mg", "Ovules gynécologiques 500 mg"],
+      "forms_enfant": ["Suspension buvable 125 mg / 5 mL (benzoate de métronidazole)"],
+      "default_posology_adulte": "500 mg 2 à 3 fois par jour au cours des repas",
+      "default_posology_enfant": "30 à 40 mg/kg/j en 3 prises",
+      "category": "Antibactérien et Antiparasitaire — Nitro-imidazolé"
+    },
+    {
+      "dci": "Ciprofloxacine",
+      "trade_names": ["Ciflox", "Cipro", "Uniflox", "Ciprolon"],
+      "forms_adulte": ["Comprimés 250 mg", "Comprimés 500 mg", "Comprimés 750 mg"],
+      "forms_enfant": ["Réservé usage hospitalier / indications strictes"],
+      "default_posology_adulte": "500 mg 2 fois par jour",
+      "default_posology_enfant": "Contre-indiqué sauf cas exceptionnels (mucoviscidose)",
+      "category": "Antibiotique — Fluoroquinolone"
+    },
+    {
+      "dci": "Paracétamol",
+      "trade_names": ["Doliprane", "Efferalgan", "Perfalgan", "Panadol", "Paralyoc", "Algidol"],
+      "forms_adulte": ["Comprimés 500 mg", "Comprimés 1 g", "Comprimés effervescents 1 g", "Sachets 1 g"],
+      "forms_enfant": ["Sirop 2.4% (pipette graduée en kg)", "Suppositoires 100 mg, 150 mg, 300 mg", "Sachets 150 mg, 250 mg, 300 mg"],
+      "default_posology_adulte": "1 g par prise, à renouveler si besoin après 6h (max 4 g/j)",
+      "default_posology_enfant": "15 mg/kg/prise toutes les 6 heures (max 60 mg/kg/j)",
+      "category": "Antalgique / Antipyrétique — Palier 1"
+    },
+    {
+      "dci": "Ibuprofène",
+      "trade_names": ["Advil", "Nurofen", "Brufen", "Antadys", "Ibugesic", "Algoflex"],
+      "forms_adulte": ["Comprimés 200 mg", "Comprimés 400 mg"],
+      "forms_enfant": ["Suspension buvable pédiatrique (pipette graduée en kg)", "Sirop 100 mg / 5 mL"],
+      "default_posology_adulte": "400 mg 3 fois par jour au milieu des repas (max 1200 mg/j en automédication, 2400 mg/j sur ordonnance)",
+      "default_posology_enfant": "20 à 30 mg/kg/j répartis en 3 à 4 prises au cours des repas",
+      "category": "Anti-inflammatoire non stéroïdien (AINS)"
+    },
+    {
+      "dci": "Phloroglucinol",
+      "trade_names": ["Spasfon", "Spasmocalm", "Spasmo-DCI", "Phloroglucinol générique"],
+      "forms_adulte": ["Comprimés 80 mg", "Lyophilisats oraux (Spasfon Lyoc) 80 mg", "Ampoules injectables 40 mg"],
+      "forms_enfant": ["Spasfon Lyoc (à dissoudre dans un verre d'eau si > 2 ans)"],
+      "default_posology_adulte": "2 comprimés par prise, 3 fois par jour au moment des crises",
+      "default_posology_enfant": "1 lyophilisat oral dissous 2 fois par jour",
+      "category": "Antispasmodique musculotrope"
+    },
+    {
+      "dci": "Racécadotril",
+      "trade_names": ["Tiorfan", "Tiorfast", "Hydrasec", "Racécadotril générique"],
+      "forms_adulte": ["Gélules 100 mg"],
+      "forms_enfant": ["Sachets Nourrisson 10 mg", "Sachets Enfant 30 mg"],
+      "default_posology_adulte": "1 gélule d'emblée puis 1 gélule 3 fois par jour au début des repas",
+      "default_posology_enfant": "1.5 mg/kg/prise 3 fois par jour en complément de la réhydratation (SRO)",
+      "category": "Antidiarrhéique antisécrétoire intestinal"
+    },
+    {
+      "dci": "Diosmectite",
+      "trade_names": ["Smecta", "Smectalia", "Diosmectite générique"],
+      "forms_adulte": ["Sachets suspension buvable 3 g"],
+      "forms_enfant": ["Sachets suspension buvable 3 g (à distance des repas et autres médicaments)"],
+      "default_posology_adulte": "3 sachets par jour dissous dans un demi-verre d'eau",
+      "default_posology_enfant": "Nourrisson/Enfant : selon avis médical, à distance (> 2h) de tout autre médicament",
+      "category": "Protecteur gastro-intestinal / Adsorbant"
+    },
+    {
+      "dci": "Soluté de Réhydratation Orale (SRO)",
+      "trade_names": ["Adiaril", "Hydrasol", "SRO OMS"],
+      "forms_adulte": ["Sachets à diluer dans 200 mL d'eau ou 1 L d'eau"],
+      "forms_enfant": ["Sachets à diluer dans 200 mL d'eau peu minéralisée"],
+      "default_posology_adulte": "À volonté selon soif et pertes",
+      "default_posology_enfant": "À volonté, par petites gorgées fréquentes (5-10 mL toutes les 5 min)",
+      "category": "Réhydratation hydro-électrolytique"
+    },
+    {
+      "dci": "Benzoate de Benzyle",
+      "trade_names": ["Ascabiol", "Scabecid"],
+      "forms_adulte": ["Émulsion pour application cutanée 10% ou 25%"],
+      "forms_enfant": ["Émulsion pour application cutanée (dilution spécifique ou temps de pose réduit)"],
+      "default_posology_adulte": "Application sur tout le corps (sauf visage) pendant 24h, à renouveler à J8",
+      "default_posology_enfant": "Application selon protocole pédiatrique (temps de pose 6h à 12h), J1 et J8",
+      "category": "Antiparasitaire cutané — Antiscabieux"
+    },
+    {
+      "dci": "Salbutamol",
+      "trade_names": ["Ventoline", "Salbu", "Aerolin", "Ventolin"],
+      "forms_adulte": ["Aérosol-doseur 100 µg/bouffée", "Solution pour nébulisation 5 mg/mL"],
+      "forms_enfant": ["Aérosol-doseur 100 µg/bouffée avec chambre d'inhalation (Babyhaler/AeroChamber)"],
+      "default_posology_adulte": "1 à 2 bouffées à la demande lors des crises de dyspnée (max 8-10 bouffées/j sans avis)",
+      "default_posology_enfant": "2 bouffées via chambre d'inhalation avec masque, à renouveler si crise",
+      "category": "Bronchodilatateur — Bêta-2 mimétique d'action rapide"
+    },
+    {
+      "dci": "Prednisolone",
+      "trade_names": ["Solupred", "Prednisolone générique"],
+      "forms_adulte": ["Comprimés orodispersibles 20 mg", "Comprimés effervescents 20 mg"],
+      "forms_enfant": ["Comprimés orodispersibles 5 mg", "Solution buvable pédiatrique"],
+      "default_posology_adulte": "0.5 à 1 mg/kg/jour le matin au cours du petit-déjeuner pendant 3 à 5 jours",
+      "default_posology_enfant": "1 à 2 mg/kg/jour le matin pendant 3 à 5 jours",
+      "category": "Corticoïde par voie générale"
+    },
+    {
+      "dci": "Bétaméthasone",
+      "trade_names": ["Célestène", "Bétaméthasone générique"],
+      "forms_adulte": ["Comprimés 2 mg"],
+      "forms_enfant": ["Gouttes buvables 0.05% (1 goutte = 0.05 mg)"],
+      "default_posology_adulte": "2 à 4 mg/j le matin pendant 3 à 5 jours",
+      "default_posology_enfant": "10 à 20 gouttes/kg/j (laryngite aiguë : 0.15 mg/kg = 3 gouttes/kg en prise unique)",
+      "category": "Corticoïde par voie générale"
+    },
+    {
+      "dci": "Oméprazole",
+      "trade_names": ["Mopral", "Losec", "Gastrimat", "Omez", "Omecap", "Générique Oméprazole"],
+      "forms_adulte": ["Gélules gastro-résistantes 10 mg", "Gélules gastro-résistantes 20 mg"],
+      "forms_enfant": ["Usage réservé spécialisé pédiatrique"],
+      "default_posology_adulte": "20 mg une fois par jour le matin à jeun pendant 4 à 8 semaines",
+      "default_posology_enfant": "1 mg/kg/j (indication stricte RGO compliqué)",
+      "category": "Inhibiteur de la pompe à protons (IPP)"
+    }
+  ]
+}

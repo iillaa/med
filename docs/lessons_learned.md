@@ -56,13 +56,25 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 
 ### 9. Capturing-Phase Error Listeners Trapping Non-Fatal Asset 404s
 * **Problem**: Listening to `error` events in the capturing phase (`true`) to catch early startup module crashes also traps normal resource loading failures (like a `404 Not Found` for `capacitor.js` on localhost). If the error handler automatically locks the loading screen visible on any error, these harmless warnings will freeze the app.
-* **Solution**: Filter out element-level errors by checking `if (event.target && event.target !== window) return;` to only process real JavaScript runtime execution crashes.
+### 10. Express 5 & Capacitor Android CORS Preflight Handling
+* **Problem**: Native Android Capacitor WebViews send `Origin: http://localhost` or `Origin: capacitor://localhost` with custom headers (`X-App-Version`, `X-Install-ID`, `ngrok-skip-browser-warning`). Standard Express CORS configurations dropped these custom headers or failed OPTIONS preflights, causing WebViews to block requests.
+* **Solution**: Integrated explicit `cors` middleware with `app.options('{*path}', cors(corsOptions))` preflight handling and whitelisted all custom headers in both `server/index.js` and `server/middleware/cors.js`.
 
-### 10. Static Caching of App Modes
+### 11. Double-Slash URL Normalization (`//api/*`)
+* **Problem**: When a configured tunnel base URL has a trailing slash (`https://domain.dev/`), appending `/api/search-status` produces a double slash (`//api/search-status`). In Express 5 / `path-to-regexp` v8, `//api` is parsed as the hostname, causing routes to return `404 Not Found`.
+* **Solution**: Implemented top-level Express middleware (`req.url.replace(/^\/+/, '/')` and `delete req._parsedUrl`) to clean double slashes before routing, while sanitizing client-side base URLs in `api.js` and `main.js`.
+
+### 12. Android `build.gradle` & Capacitor `localhost` Versioning
+* **Problem**: Android OS Settings reads `versionName` directly from `android/app/build.gradle` (which was hardcoded to `"1.0"`). Furthermore, Capacitor WebViews run under `location.hostname === 'localhost'`, causing `isLocalhost` version checker guards to mistakenly bypass Kill Switch force updates.
+* **Solution**: Synchronized `android/app/build.gradle` (`versionCode 10110`, `versionName "1.1.10"`) with `package.json`, and updated `version-checker.js` so `isLocalhost` exemption only applies to desktop web browser developers (`!isNativeApk`).
+
+---
+
+### 13. Static Caching of App Modes
 * **Problem**: Caching the app mode statically at launch (e.g., locking the app mode to `ANDROID_OFFLINE` on standalone Capacitor boot) prevents background sync handlers from ever retrieving remote server updates, even if they detect the server is reachable. Calling `api.fetchCats()` continues to load local bundle copies.
 * **Solution**: Implement dynamic setter interfaces (`api.setAppMode()`) that dispatch custom DOM events (`drcat-app-mode-changed`) so that relevant UI elements automatically re-evaluate their state (e.g., toggling edit controls or refreshing data grids).
 
-### 11. Invoking Catch Handlers on Synchronous Methods
+### 14. Invoking Catch Handlers on Synchronous Methods
 * **Problem**: Attempting to attach `.catch()` directly to synchronous functions (like asset builders that return `undefined`) throws a `TypeError` which blocks thread execution and crashes the boot phase.
 * **Solution**: Standardize synchronous wrapper callbacks or wrap synchronous tasks inside a try/catch block inside a non-blocking `setImmediate()` or next-tick deferral.
 
@@ -160,3 +172,81 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Do NOT try**: `adjustMarginsForEdgeToEdge: "none"` (invalid), `windowSoftInputMode="adjustNothing"` (breaks top insets / pushes header down), or overriding `ViewCompat.setOnApplyWindowInsetsListener` on the WebView parent (doesn't help when Capacitor reverts at window level).
 
 ---
+
+### 31. Relative API URL Failures on Standalone Native Capacitor Android Builds
+* **Problem**: Calling relative API paths (e.g. `fetchWithTimeout('/api/server-providers')`) works cleanly on local web browsers (where the origin is `http://localhost:3000`), but fails completely on native standalone Android APKs. In Capacitor Android, the WebView origin is `https://localhost` (a local webview container). The browser engine attempts to fetch `https://localhost/api/server-providers` which returns 404 / Connection Refused because the local Android WebView has no backend server listening on `/api`.
+* **Solution**: Every client API call targeting `/api/*` MUST be wrapped with `getApiUrl('/api/...')` (defined in `public/js/api.js`). On native standalone Capacitor builds, `getApiUrl()` automatically prepends the configured remote server URL (e.g. `https://ngrok-tunnel-url/...`), routing network requests correctly to the backend server.
+
+### 32. Version Guard Route Exclusion Deadlocks (Admin Lockout)
+* **Problem**: When a server-controlled Kill Switch (`forceUpdateActive: true`) is enabled on the server, the version guard middleware intercepts incoming data endpoints and responds with `HTTP 426 Upgrade Required`. If administrative endpoints (such as `PUT /api/admin/version`) or server discovery routes (`GET /api/server-providers`) are not excluded from the version guard, administrative requests are blocked with HTTP 426, creating a deadlock where the admin can never log in or disable the Kill Switch.
+* **Solution**: Explicitly add administrative configuration routes (`/api/admin/version`), server discovery routes (`/api/server-providers`), static resources, and health endpoints to the route exclusion list in `server/middleware/version-guard.js` before evaluating version limits.
+
+### 33. Target-Specific Version Guarding (Android APK vs. Web/PWA)
+* **Problem**: Applying a strict hard Kill Switch lock to web browser visitors (`http://localhost` or web domains) blocks web users and developers unnecessarily. Web browsers receive live, updated code directly from the server on page load and do not run compiled device binaries.
+* **Solution**: Differentiate client environments. Native Android APKs send the `X-App-Version` header on every request; web browsers do not. In `version-guard.js`, if `X-App-Version` is missing, the request is allowed through as a web client. In `version-checker.js`, checking `if (!isNativeApk) return;` ensures web users experience zero lockouts or version checks, keeping hard Kill Switch enforcement strictly focused on compiled native mobile APKs.
+
+### 34. Preserving Anonymous Installation IDs Across Storage Purges
+* **Problem**: When a Kill Switch force update triggers a hard storage purge (`localStorage.clear()`), non-essential caches are wiped. If an anonymous client Installation ID (`dr_cat_install_id`) is stored in `localStorage` without protection, the storage clear erases the ID. When the user opens the updated app, a new UUID is generated, creating a false metric inflation (counting 1 user as multiple new users).
+* **Solution**: In `version-checker.js` (`wipeStorageOnLock()`), back up `dr_cat_install_id` before calling `localStorage.clear()` and immediately restore it back to `localStorage` after the wipe completes. This guarantees token persistence across app updates and purges.
+
+### 35. Deep Multi-Token CAT Content Search vs. Title-Only Filtering
+* **Problem**: Filtering CAT clinical items solely by `title` or `category` fails when doctors search for specific symptoms, prescriptions, posologies, or diagnostic criteria (e.g., searching for `"otomycose"`, which lives inside the `ordonnance` or `summary` of CAT #22 "Otite Externe").
+* **Solution**: Upgrade `filterCats()` in `public/js/components/sidebar.js` to construct a unified searchable text space (`title`, `summary`, `ordonnance`, `red_flags`, `category`, `pdf_keywords`, `notes`). Tokenize the search query by whitespace and assert that *every* query token appears somewhere within the unified text space. This enables instant deep content search across all clinical fiches.
+
+### 36. Omission of Utility Stylesheets in HTML String Manipulations
+* **Problem**: Editing `index.html` via string replacements can accidentally remove core CSS link tags (such as `css/utilities.css`). This causes subtle, hard-to-debug layout shifts across the dashboard, breaking flex button alignments and dark/light mode button positioning without throwing JavaScript exceptions.
+* **Solution**: Always audit stylesheet link tags in `index.html` after major HTML updates, and run UI layout verification checks to confirm component alignments remain pristine.
+
+### 37. Complete Prohibition of Destructive `localStorage.clear()` in Version Lock Gates
+* **Problem**: In early implementations of the Security Lock Gate (`version-checker.js`), triggering a Kill Switch or Force Update called `localStorage.clear()`. This permanently destroyed the doctor's personal clinical notes (`dr_cat_notes_*`), reading history (`dr_cat_user_progress`), Leitner spaced repetition stats (`dr_cat_leitner`), and study streaks (`dr_cat_streak`), even if the admin turned off the Kill Switch later.
+* **Solution**: Completely remove `localStorage.clear()`, `sessionStorage.clear()`, and `indexedDB.deleteDatabase()` from `version-checker.js`. Lock gates must strictly block UI interaction while leaving 100% of user data intact. Only temporary network HTTP cache keys (`dr_cat_synced_db`) should ever be cleared.
+
+### 38. Native AAPT Exclusions & Production Asset Hardening for Capacitor APKs
+* **Problem**: Standard `capacitor sync android` copies the entire `public/` web directory into `android/app/src/main/assets/public/`. This accidentally packages unbundled raw ES module source files (`public/js/components/`, `public/js/lib/`, `main.js`, `api.js`, `utils.js`) alongside the compiled bundle (`dist/app-*.js`). Decompiling tools (`apktool`, `jadx`) can extract these raw source files.
+* **Solution**: Implement a 2-stage hardening architecture: (1) Add `clean_android_assets.js` to `"cap:sync"` in `package.json`, and (2) Configure `aaptOptions.ignoreAssetsPattern` in `android/app/build.gradle` to permanently exclude raw JS source folders (`components`, `lib`, `workspace`, `dashboard`, `main.js`, `api.js`, `utils.js`, `state.js`). Any APK built by Android Studio or GitHub Actions will contain ONLY `dist/app-*.js` and zero readable source files.
+
+### 39. Dual-Tier Author Credit Attribution (UI vs. Metadata)
+* **Problem**: Inconsistent author credits across app interfaces, legal disclaimers, and metadata files creates confusion for copyright licensing, app store publishing, and legal liability.
+* **Solution**: Enforce a strict dual-tier attribution standard across the project: (1) **User-Facing UI Credit**: Display **`Dr. Kibeche Ali`** (in Dashboard footer, About modal, Legal/CGU disclaimer); (2) **Code & Legal Metadata**: Display **`Dr. Kibeche Ali Dia Eddine`** (in `package.json`, `LICENSE`, `server/index.js`, and `android/app/build.gradle`).
+
+### 40. JavaScript `ISO String` vs `Numeric Milliseconds` Type Coercion Bug in Data Sync Filtering
+* **Problem**: Newly promoted or updated CATs on the server were not being detected by client devices (Android APK or PWA) during background sync. The client received an empty update list `[]` and logged `[Background Sync] Remote database is in sync. No action needed.` despite active server database changes.
+* **Root Cause**: The client sends a numeric timestamp in milliseconds (`?since=1785700000000`). When CATs were saved or promoted in the database, `updatedAt` was formatted as an ISO Date String (`"2026-08-03T23:17:08.210Z"`). In JavaScript array filtering, comparing a string directly to a number (`"2026-08-03T23:17:08.210Z" > 1785700000000`) converts the string to `NaN`. Since `NaN > number` evaluates to `false`, the server silently filtered out all updated records.
+* **Fix (`server/routes/cats.js`)**: All timestamp filters in API routes MUST explicitly parse date fields using `typeof val === 'number' ? val : new Date(val).getTime()` to prevent silent type coercion failures between ISO strings and epoch numbers.
+
+### 41. Replacing Pseudo-Numeric Prompt Weighting Placebos with Strict Priority Directives
+* **Problem**: Early system prompts used pseudo-numeric percentage weights (e.g. `50% PDF Index`, `30% Web RAG`, `20% AI reasoning`). LLM Transformer models do not perform internal floating-point arithmetic on prompt text. Pseudo-numeric weights can distract attention heads by introducing artificial math tokens.
+* **Solution**: Replace pseudo-numeric percentages with an explicit, unambiguous **Strict Priority Order Directive** (`PRIORITÉ 1 (Baseline Locale)`, `PRIORITÉ 2 (Enrichissement Web)`, `PRIORITÉ 3 (Synthèse IA)`). This maintains 100% of the local Algerian drug priority (*Ascabiol*, *Spasfon*, *Smecta*) and doctor-grade Web RAG enrichment while delivering a clean, placebo-free prompt.
+
+### 42. Strict Avoidance of Short-Circuiting `&&` in Localhost Guard Middleware
+* **Problem**: Writing guard expressions with `&&` like `if (!isLocalhostConnection(req) && !checkIsAdmin(req, activeTokens))` evaluated `!isLocalhostConnection(req)` as `false` for any local loopback connection. This short-circuited the `&&` operator and accidentally bypassed admin password verification for unauthenticated local users.
+* **Solution**: Always enforce double-door boolean OR logic (`if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens))`). This asserts that a request MUST originate from localhost AND possess a valid authenticated admin session token. Remote requests are rejected immediately before password evaluation, and unauthenticated local requests are blocked with HTTP 403 Forbidden.
+
+### 43. Mandatory Production Database Backup & Auto-Restore Guard in Automated Test Suites
+* **Problem**: Running integration and suggestion lifecycle tests directly against `cats_db.json` created temporary test records (or approved test modifications). If a test suite exited unexpectedly or failed mid-flight, temporary records remained in the production database file, corrupting the production CAT count or creating duplicate entries.
+* **Solution**: Implemented an automated database backup and restore guard in all test scripts (`tests/test_suggestions.js`, `tests/test_auth.js`). Before any server process is spawned for testing, a snapshot copy (`cats_db.json.bak_*_test`) is created. In the test process `cleanup()` handler (which executes on test completion, `SIGINT`, or `exit`), `cats_db.json` is **AUTOMATICALLY RESTORED** from the backup snapshot and the temporary file is unlinked. This guarantees production database integrity regardless of test outcomes.
+
+### 44. Strict Primary Key (`id`) Database Integrity & Prohibition of Title String Matching
+* **Problem**: Relying on title text matching (or regex string stripping) to look up, update, or generate CAT records in `cats_db.json` was an anti-pattern. Titles can be customized freely by doctors (e.g. without `"CAT devant "`), causing title lookups to fail, generating timestamp IDs (`Date.now()`), and producing duplicate database rows.
+* **Solution**: Refactored all backend routes (`server/routes/cat-generator.js`), AI generation engines (`cat_db_generator/lib/llm-engine.js`), and frontend components (`admin/cat_generator_lab.html`) to operate EXCLUSIVELY by Primary Key (`id`). `Date.now()` primary keys are permanently banned; new records receive an integer sequence ID (`getNextIntegerId()`). Titles are preserved 100% verbatim as entered by the doctor without artificial mutation.
+
+### 45. Elimination of MutationObserver & CSS Opacity Animation Deadlocks (Android Lock Freezes)
+* **Problem**: When rendering a security lock screen overlay (`.update-lock-screen`), attaching a `MutationObserver` on `document.documentElement` combined with a CSS `@keyframes fadeInLock { from { opacity: 0; } }` animation created a catastrophic infinite recursion loop. The observer saw `opacity: 0` during the first animation frame, interpreted it as UI tampering, and called `renderLockScreen()` again. This ran 60 times/second, choked the JavaScript main thread at 100% CPU, completely froze the Android phone's touch events, and blocked all background network polling.
+* **Solution**: (1) Add an explicit singleton guard `if (document.getElementById('app-update-lock-overlay')) return;` at the top of `renderLockScreen()`. (2) Remove dangerous global `MutationObserver` opacity checks from production release builds. (3) Render lock screens with instant static visibility (`opacity: 1`) without zero-opacity entry keyframes.
+
+### 46. Touch Event Safety & Native Intent Handlers in Mobile WebViews
+* **Problem**: Intercepting `touchstart` globally with `e.preventDefault()` in the capture phase on Android WebViews completely cancels touch and click interactions across the entire screen, rendering action buttons dead. Additionally, standard `<a href="..." target="_blank">` tags can be silently ignored by WebViews.
+* **Solution**: (1) Never call `e.preventDefault()` on `touchstart` globally. (2) Bind explicit click event listeners to update action buttons that command native external browser opening via `window.Capacitor.Plugins.Browser.open({ url })` or `window.open(url, '_system')`.
+
+### 47. Dedicated Test Database Environment Variable (`CATS_DB_PATH`) vs. In-Place Rollbacks
+* **Problem**: Relying solely on asynchronous file copy rollbacks (`cats_db.json.bak`) during automated test suite execution left room for race conditions: when test child processes were terminated with asynchronous disk writes in flight, temporary test CATs could leak into the production database file.
+* **Solution**: Upgraded all database access layers (`server/index.js`, `server/routes/cats.js`, `server/routes/suggestions.js`, `server/routes/cat-generator.js`) to support `process.env.CATS_DB_PATH`. Test suites spawn child processes pointing strictly to temporary files (`cats_db_test_*.json`), guaranteeing that production `cats_db.json` is physically isolated and 100% immune from test modifications.
+
+### 48. Atomic Multi-Platform Version Bumper (`scripts/bump_version.js`)
+* **Problem**: Manually updating version numbers across multiple config files resulted in discrepancies (e.g., `package.json` at `1.7.9`, `build.gradle` at `1.7.8`, `version.json` at `1.7.8`).
+* **Solution**: Created `scripts/bump_version.js` (`npm run bump <version>`), which atomically updates `package.json`, `android/app/build.gradle` (`versionName` & `versionCode`), `server/config/version.json`, `public/index.html`, and `worker.js`, then stamps the production bundle with `npm run build` in one single command.
+
+
+
+
+

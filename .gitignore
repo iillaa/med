@@ -4,6 +4,10 @@ node_modules/
 
 # Temp files
 *.tmp
+apktool_output/
+apktool_output_new/
+audit_output/
+audit_output_new/
 
 # Local backups (tracked by Git history instead)
 *.bak
@@ -19,6 +23,8 @@ node_modules/
 
 # Uncompressed Master Original PDFs (Local server only, keep off GitHub to minimize repo/APK size)
 data/pdf_masters/
+data/pdf_sliced/
+data/pdf_done/
 
 # Local ngrok binary
 ngrok
@@ -26,12 +32,24 @@ ngrok
 # Runtime server-provider link (gitignored so the tunnel URL is never committed)
 remote_server_config.json
 
+# Environment & API keys
+.env
+*.env
+
+# Local web research cache
+cat_db_generator/web_cache/
+data/web_cache/
+scratch/
+data/*_bdpm.txt
+data/*.csv
+
 # Logs
 *.log
 nohup.out
 
 # Suggestions database
 suggestions.json*
+!remote_server_config.json
 
 # Admin Password
 admin_password.txt*
@@ -48,3 +66,6 @@ audit.log
 
 # Lighthouse CI local reports (also produced by CI artifact upload)
 .lighthouseci/
+
+# PM2 log files
+logs/

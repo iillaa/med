@@ -2,6 +2,7 @@ import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 import { renderAdminPdfTab } from './admin_pdf.js';
+import { renderAdminVersionTab } from './admin_version.js';
 
 let onSuggestionHandledCallback = null;
 
@@ -11,6 +12,11 @@ export function initAdminTabListeners(onSuggestionHandled) {
   const pdfPane = document.getElementById('admin-pane-pdfs');
   if (pdfPane) {
     renderAdminPdfTab(pdfPane);
+  }
+
+  const versionPane = document.getElementById('admin-pane-version');
+  if (versionPane) {
+    renderAdminVersionTab(versionPane);
   }
 
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
@@ -37,6 +43,9 @@ export function initAdminTabListeners(onSuggestionHandled) {
       const activePane = document.getElementById(targetId);
       if (activePane) {
         activePane.style.display = 'block';
+        if (targetId === 'admin-pane-version') {
+          renderAdminVersionTab(activePane);
+        }
       }
 
       window.dispatchEvent(new CustomEvent('drcat-admin-tab-changed', {
@@ -49,6 +58,80 @@ export function initAdminTabListeners(onSuggestionHandled) {
   if (activeTabBtn) {
     activeTabBtn.style.color = 'var(--color-primary)';
     activeTabBtn.style.backgroundColor = 'rgba(6, 182, 212, 0.1)';
+  }
+
+  // ⚡ 1-Tap AI Auto-Fill listener for Add CAT Modal (Admin Only)
+  const aiAutoFillBtn = document.getElementById('btn-ai-auto-fill');
+  if (aiAutoFillBtn) {
+    aiAutoFillBtn.style.display = state.isAdmin ? 'inline-flex' : 'none';
+    aiAutoFillBtn.addEventListener('click', async () => {
+      const titleInput = document.getElementById('new-cat-title');
+      const title = titleInput ? titleInput.value.trim() : '';
+
+      if (!title || title.length < 3) {
+        showToast("Veuillez saisir au moins un titre de CAT (ex: CAT devant colique néphrétique)", "fa-circle-exclamation", 4000);
+        if (titleInput) titleInput.focus();
+        return;
+      }
+
+      const originalHtml = aiAutoFillBtn.innerHTML;
+      aiAutoFillBtn.disabled = true;
+      aiAutoFillBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dual RAG...';
+
+      try {
+        showToast("Recherche Web RAG en cours...", "fa-globe", 3000);
+        await fetch(api.getApiUrl('/api/admin/cat-generator/fetch-web'), {
+          method: 'POST',
+          headers: api.getHeaders(),
+          body: JSON.stringify({ title, forceRefetch: false })
+        }).catch(() => {});
+
+        showToast("Synthèse IA Dual RAG en cours...", "fa-wand-magic-sparkles", 5000);
+        const res = await fetch(api.getApiUrl('/api/admin/cat-generator/single'), {
+          method: 'POST',
+          headers: api.getHeaders(),
+          body: JSON.stringify({ title })
+        });
+
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Erreur lors de la génération IA.');
+        }
+
+        const cat = data.cat;
+        if (cat) {
+          if (cat.category) {
+            const catInput = document.getElementById('new-cat-category');
+            if (catInput) catInput.value = cat.category;
+          }
+          if (cat.red_flags) {
+            const rfInput = document.getElementById('new-cat-red-flags');
+            if (rfInput) rfInput.value = cat.red_flags;
+          }
+          if (cat.summary) {
+            const sumInput = document.getElementById('new-cat-summary');
+            if (sumInput) sumInput.value = cat.summary;
+          }
+          if (cat.ordonnance) {
+            const ordInput = document.getElementById('new-cat-ordonnance');
+            if (ordInput) ordInput.value = cat.ordonnance;
+          }
+          if (cat.pdf_keywords && Array.isArray(cat.pdf_keywords)) {
+            const kwInput = document.getElementById('new-cat-pdf-keywords');
+            if (kwInput) kwInput.value = cat.pdf_keywords.join(', ');
+          }
+
+          showToast(`Fiche "${cat.title}" générée et pré-remplie !`, "fa-circle-check", 4000);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Erreur IA: " + err.message, "fa-triangle-exclamation", 5000);
+      } finally {
+        aiAutoFillBtn.disabled = false;
+        aiAutoFillBtn.innerHTML = originalHtml;
+      }
+    });
   }
 
   window.handleApproveSuggestion = async function(id) {
@@ -161,10 +244,10 @@ export function initAdminTabListeners(onSuggestionHandled) {
       document.body.appendChild(modal);
 
       const closeModal = () => closeModalAnimated(modal);
-      document.getElementById('review-modal-close').addEventListener('click', closeModal);
-      document.getElementById('review-btn-cancel').addEventListener('click', closeModal);
+      document.getElementById('review-modal-close')?.addEventListener('click', closeModal);
+      document.getElementById('review-btn-cancel')?.addEventListener('click', closeModal);
 
-      document.getElementById('review-btn-save').addEventListener('click', async () => {
+      document.getElementById('review-btn-save')?.addEventListener('click', async () => {
         try {
           const updatedData = {};
           if (sug.type === 'add') {

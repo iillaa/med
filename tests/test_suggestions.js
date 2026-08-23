@@ -4,7 +4,8 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const BASE = 'http://127.0.0.1:3000';
+const PORT = process.env.PORT || '3099';
+const BASE = `http://127.0.0.1:${PORT}`;
 const PASSWORD_FILE = path.join(ROOT, 'admin_password.txt');
 
 function req(method, reqPath, body, headers = {}) {
@@ -13,7 +14,7 @@ function req(method, reqPath, body, headers = {}) {
     const opts = {
       hostname: url.hostname, port: url.port,
       path: url.pathname + url.search, method,
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...headers }
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'x-app-key': 'drcat_pub_2f7a91c4e8', ...headers }
     };
     const r = http.request(opts, res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => {
@@ -37,14 +38,25 @@ async function runTests() {
   const tempPassword = 'test-sug-pass-123';
   fs.writeFileSync(PASSWORD_FILE, tempPassword, 'utf-8');
 
+  const CATS_DB_FILE = path.join(ROOT, 'cats_db.json');
+  const CATS_DB_TEST = path.join(ROOT, 'cats_db_test_suggestions.json');
+
+  // Create isolated dedicated test database from master template
+  fs.copyFileSync(CATS_DB_FILE, CATS_DB_TEST);
+
   function cleanup() {
     if (serverProcess) {
-      try { serverProcess.kill(); } catch (_) {}
+      try {
+        serverProcess.kill('SIGKILL');
+      } catch (_) {}
     }
     if (originalPassword) {
       fs.writeFileSync(PASSWORD_FILE, originalPassword, 'utf-8');
     } else {
       try { fs.unlinkSync(PASSWORD_FILE); } catch (_) {}
+    }
+    if (fs.existsSync(CATS_DB_TEST)) {
+      try { fs.unlinkSync(CATS_DB_TEST); } catch (_) {}
     }
   }
 
@@ -52,21 +64,25 @@ async function runTests() {
   process.on('SIGINT', () => { cleanup(); process.exit(1); });
   process.on('SIGTERM', () => { cleanup(); process.exit(1); });
 
-  console.log('Starting test server for Suggestion Lifecycle...');
+  console.log('Starting test server for Suggestion Lifecycle (Isolated DB)...');
   serverProcess = spawn('node', ['server.js'], {
     cwd: ROOT,
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, NODE_ENV: 'test' }
+    env: { ...process.env, NODE_ENV: 'test', PORT: PORT, CATS_DB_PATH: CATS_DB_TEST }
   });
 
   let serverReady = false;
-  serverProcess.stdout.on('data', (data) => {
-    if (data.toString().includes('Medical CAT Learning App is running')) {
+  const onData = (data) => {
+    const text = data.toString();
+    console.log('[TestServer Output]', text.trim());
+    if (text.includes('Medical CAT Learning App is running') || text.includes('App is running')) {
       serverReady = true;
     }
-  });
+  };
+  serverProcess.stdout.on('data', onData);
+  serverProcess.stderr.on('data', onData);
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 60; i++) {
     await new Promise(r => setTimeout(r, 500));
     if (serverReady) break;
   }
@@ -158,7 +174,8 @@ async function runTests() {
       check('POST /api/suggestions/:id/approve (add) → 200', approveAddRes.status === 200 && approveAddRes.body.success === true);
 
       const catsRes = await req('GET', '/api/cats');
-      createdCat = catsRes.body.find(c => c.title === newCatTitle || c.summary === 'Corrected summary after admin review');
+      const catsList = Array.isArray(catsRes.body) ? catsRes.body : (catsRes.body.cats || []);
+      createdCat = catsList.find(c => c.title === newCatTitle || c.summary === 'Corrected summary after admin review');
       check('New CAT created in cats_db.json', createdCat !== undefined && createdCat.category === 'Cardiologie');
 
       // 6. Admin approves 'edit' suggestion on temporary test CAT
@@ -167,7 +184,8 @@ async function runTests() {
       check('POST /api/suggestions/:id/approve (edit) → 200', approveEditRes.status === 200 && approveEditRes.body.success === true);
 
       const updatedCatsRes = await req('GET', '/api/cats');
-      const targetTempCat = updatedCatsRes.body.find(c => c.id === tempCatId);
+      const updatedCatsList = Array.isArray(updatedCatsRes.body) ? updatedCatsRes.body : (updatedCatsRes.body.cats || []);
+      const targetTempCat = updatedCatsList.find(c => c.id === tempCatId);
       check('Temp CAT updated in cats_db.json (Real CATs untouched)', targetTempCat && targetTempCat.summary === 'Proposed update for temp CAT summary');
 
       // 7. Admin rejects suggestion

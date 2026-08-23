@@ -17,7 +17,7 @@ async function extractWithOffline(filePath) {
     
     const pages = res.pages.map(p => ({
       page: p.num,
-      content: p.text.trim().substring(0, 1500)
+      content: (p.text || '').trim()
     }));
 
     await parser.destroy();

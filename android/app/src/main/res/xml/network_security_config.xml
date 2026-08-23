@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network Security Config — Dr. CAT v1.7.1
+  Explicitly trusts HTTPS tunnel domains used for online sync.
+  cleartext (HTTP) traffic is blocked by default; only HTTPS is allowed.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Explicitly trust all HTTPS tunnel providers used for online sync -->
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Reserved static ngrok domain -->
+        <domain includeSubdomains="true">ngrok-free.dev</domain>
+        <domain includeSubdomains="true">ngrok-free.app</domain>
+        <domain includeSubdomains="true">ngrok.io</domain>
+        <!-- Cloudflare Quick Tunnels and custom domains -->
+        <domain includeSubdomains="true">trycloudflare.com</domain>
+        <domain includeSubdomains="true">cfargotunnel.com</domain>
+        <domain includeSubdomains="true">pages.dev</domain>
+        <domain includeSubdomains="true">is-an.app</domain>
+        <domain includeSubdomains="true">is-a.dev</domain>
+        <domain includeSubdomains="true">eu.org</domain>
+        <!-- localtunnel fallback -->
+        <domain includeSubdomains="true">loca.lt</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Allow localhost cleartext for Capacitor WebView internal communication -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+    </domain-config>
+</network-security-config>

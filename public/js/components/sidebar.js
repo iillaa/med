@@ -1,5 +1,5 @@
 import { state } from '../state.js';
-import { setupSwipeGestures, debounce, prefersReducedMotion } from '../utils.js';
+import { setupSwipeGestures, debounce, prefersReducedMotion, escapeHTML } from '../utils.js';
 
 // DOM Elements
 let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
@@ -183,6 +183,17 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
     });
   }
 
+  // APK Download Button visibility: show ONLY when running as web_client/PWA, hide when inside Android APK container
+  const apkDownloadBtn = document.getElementById('apk-download-btn');
+  if (apkDownloadBtn) {
+    const isNativeApk = !!window.Capacitor || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || (navigator.userAgent && navigator.userAgent.toLowerCase().includes('capacitor'));
+    if (isNativeApk) {
+      apkDownloadBtn.style.display = 'none';
+    } else {
+      apkDownloadBtn.style.display = 'inline-flex';
+    }
+  }
+
   // Phase 3.6: Pull-to-refresh on the CAT list (native feel).
   if (catList && onRefresh) setupPullToRefresh(catList, onRefresh);
 }
@@ -209,14 +220,22 @@ const catItemNodes = new Map();
 
 function buildCatItem(cat) {
   const li = document.createElement('li');
-  li.className = 'cat-item';
+  const isChild = !!cat.parent_id;
+  li.className = `cat-item ${isChild ? 'cat-item-subcat' : ''}`;
   li.setAttribute('data-id', cat.id);
+
+  let branchBadge = '';
+  if (isChild) {
+    branchBadge = '<span class="badge" style="font-size:9.5px; padding:1px 5px; background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3);"><i class="fa-solid fa-code-branch"></i> Sous-fiche</span>';
+  }
+
   li.innerHTML = `
     <div class="cat-indicator ${cat.status}"></div>
     <div class="cat-item-content">
-      <span class="cat-item-title">${cat.id}. ${cat.title}</span>
+      <span class="cat-item-title">${cat.id}. ${escapeHTML(cat.title)}</span>
       <div class="cat-item-meta">
-        <span class="cat-item-cat">${cat.category}</span>
+        <span class="cat-item-cat">${escapeHTML(cat.category)}</span>
+        ${branchBadge}
         <span class="cat-item-status">${getStatusLabel(cat.status)}</span>
       </div>
     </div>
@@ -225,7 +244,8 @@ function buildCatItem(cat) {
 }
 
 function paintCatItem(li, cat) {
-  li.className = `cat-item ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;
+  const isChild = !!cat.parent_id;
+  li.className = `cat-item ${isChild ? 'cat-item-subcat' : ''} ${state.activeCat && state.activeCat.id === cat.id ? 'active' : ''}`;
   li.setAttribute('data-id', cat.id);
   const title = li.querySelector('.cat-item-title');
   if (title) title.textContent = `${cat.id}. ${cat.title}`;
@@ -349,24 +369,36 @@ export function updateSidebarItemUI(cat) {
 
 // Filter CAT list based on search, category, and quick status filter selections
 function filterCats(onFilterTriggered) {
-  const query = searchInput.value.toLowerCase().trim();
+  const rawQuery = searchInput.value.toLowerCase().trim();
   const selectedCat = categoryFilter.value;
+
+  // Split query into terms for multi-keyword search (e.g. "otomycose orl")
+  const queryTokens = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
 
   const filtered = state.allCats.filter(cat => {
     if (!cat) return false;
-    const titleStr = (cat.title || '').toLowerCase();
-    const summaryStr = (cat.summary || '').toLowerCase();
-    const redFlagsStr = (cat.red_flags || '').toLowerCase();
-    const categoryStr = (cat.category || '').toLowerCase();
-    const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
 
-    // 1. Search text match
-    const matchesQuery = !query || 
-                         titleStr.includes(query) || 
-                         summaryStr.includes(query) || 
-                         redFlagsStr.includes(query) ||
-                         categoryStr.includes(query) ||
-                         idStr === query;
+    // Use pre-cached searchable text index string to avoid string allocations during typing
+    if (!cat._searchTokenStr) {
+      const titleStr = (cat.title || '').toLowerCase();
+      const summaryStr = (cat.summary || cat.customSummary || '').toLowerCase();
+      const ordonnanceStr = (cat.ordonnance || cat.customOrdonnance || '').toLowerCase();
+      const redFlagsStr = (cat.red_flags || '').toLowerCase();
+      const categoryStr = (cat.category || '').toLowerCase();
+      const notesStr = (cat.notes || '').toLowerCase();
+      const keywordsStr = Array.isArray(cat.pdf_keywords)
+        ? cat.pdf_keywords.filter(k => k && typeof k === 'string').join(' ').toLowerCase()
+        : (cat.pdf_keywords || '').toLowerCase();
+      const subCatsStr = Array.isArray(cat.sub_cats)
+        ? cat.sub_cats.map(s => `${s.label || ''} ${s.summary || ''} ${s.ordonnance || ''}`).join(' ').toLowerCase()
+        : '';
+      const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
+
+      cat._searchTokenStr = `${idStr} ${titleStr} ${categoryStr} ${summaryStr} ${ordonnanceStr} ${redFlagsStr} ${keywordsStr} ${notesStr} ${subCatsStr}`;
+    }
+
+    // 1. Search text match (every search token must appear somewhere in the CAT content)
+    const matchesQuery = queryTokens.length === 0 || queryTokens.every(token => cat._searchTokenStr.includes(token));
 
     // 2. Category filter match
     const matchesCategory = selectedCat === 'all' || cat.category === selectedCat;
@@ -377,6 +409,7 @@ function filterCats(onFilterTriggered) {
     else if (state.activeStatusFilter === 'doing') matchesStatus = cat.status === 'doing';
     else if (state.activeStatusFilter === 'done') matchesStatus = cat.status === 'done';
     else if (state.activeStatusFilter === 'redflags') {
+      const redFlagsStr = (cat.red_flags || '').toLowerCase();
       matchesStatus = redFlagsStr.length > 0 && 
                       !redFlagsStr.includes("aucun signe de gravité") && 
                       !redFlagsStr.includes("aucun");
@@ -389,3 +422,4 @@ function filterCats(onFilterTriggered) {
     onFilterTriggered(filtered);
   }
 }
+

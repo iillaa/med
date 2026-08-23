@@ -12,7 +12,7 @@ try {
 // Phase 5.4: inline critical (above-the-fold) CSS into index.html.
 let inlineCriticalCss = () => {};
 try {
-  ({ inlineIntoIndex } = require('./build-inline-critical-css.js'));
+  const { inlineIntoIndex } = require('./build-inline-critical-css.js');
   inlineCriticalCss = inlineIntoIndex;
 } catch (_) {
   console.warn('[build] critical-css inliner not available; skipping.');
@@ -31,12 +31,26 @@ function rebuildClientAssets() {
     fs.mkdirSync(publicDataDir, { recursive: true });
   }
 
-  // Copy cats_db.json (stripping version history and minifying JSON to optimize PWA client asset size)
+  // Copy cats_db.json (stripping internal AI metrics, history, search queries, and minifying JSON to optimize PWA client asset size & protect IP)
   try {
     const rawDb = fs.readFileSync(path.join(__dirname, 'cats_db.json'), 'utf-8');
     const db = JSON.parse(rawDb);
     const cleanDb = db.map(c => {
-      const { history, ...rest } = c;
+      const {
+        history,
+        _execution_metrics,
+        online_verification_queries,
+        sources,
+        _audit_trail,
+        _raw_llm_response,
+        ...rest
+      } = c;
+      if (Array.isArray(rest.sub_cats)) {
+        rest.sub_cats = rest.sub_cats.map(sub => {
+          const { _execution_metrics, online_verification_queries, sources, ...cleanSub } = sub;
+          return cleanSub;
+        });
+      }
       return rest;
     });
     fs.writeFileSync(
@@ -44,7 +58,7 @@ function rebuildClientAssets() {
       JSON.stringify(cleanDb),
       'utf-8'
     );
-    console.log("Copied cats_db.json (minified with history stripped) to public/data/");
+    console.log("Copied cats_db.json (minified with internal AI metrics & history stripped) to public/data/");
   } catch (err) {
     console.error("Error packaging cats_db.json during build:", err);
     throw err;
@@ -141,20 +155,29 @@ function rebuildClientAssets() {
     const indexPath = path.join(__dirname, 'public', 'index.html');
     if (fs.existsSync(indexPath)) {
       let indexContent = fs.readFileSync(indexPath, 'utf-8');
+      const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf-8'));
+      const pkgVersion = pkg.version || '1.5.2';
 
-      let updatedIndexContent = indexContent.replace(
-        /<meta name="app-build-version" content="[^"]*">/,
-        `<meta name="app-build-version" content="${versionString}">`
-      );
+      let updatedIndexContent = indexContent
+        .replace(/<meta name="app-version" content="[^"]*">/, `<meta name="app-version" content="${pkgVersion}">`)
+        .replace(/<meta name="app-build-version" content="[^"]*">/, `<meta name="app-build-version" content="${versionString}">`);
+
+      if (!updatedIndexContent.includes('name="app-version"')) {
+        updatedIndexContent = updatedIndexContent.replace(
+          '<head>',
+          `<head>\n  <meta name="app-version" content="${pkgVersion}">`
+        );
+      }
+
       updatedIndexContent = stampAsset(updatedIndexContent);
 
       if (updatedIndexContent !== indexContent) {
         fs.writeFileSync(indexPath, updatedIndexContent, 'utf-8');
-        console.log(`Auto-bumped app-build-version to ${versionString} and stamped assets with ?v=${assetVersion}`);
+        console.log(`Auto-bumped app-version to v${pkgVersion}, app-build-version to ${versionString} and stamped assets with ?v=${assetVersion}`);
       }
     }
   } catch (err) {
-    console.error("Error auto-bumping app-build-version during build:", err);
+    console.error("Error auto-bumping app-version / app-build-version during build:", err);
   }
 
   // 1b. style.css: stamp the @import'd CSS files so they bust too.

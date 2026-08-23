@@ -1,27 +1,32 @@
 import { state } from '../../state.js';
 import { parsePrescriptionText } from '../../utils.js';
 
-export function renderPrescription(text) {
+export function renderPrescription(text, cat) {
   const wsPrescription = document.getElementById('workspace-prescription');
   const selector = document.getElementById('prescription-variants-selector');
   const stampCodeEl = document.getElementById('stamp-code');
 
+  const currentCat = cat || state.activeCat;
+
   if (stampCodeEl) {
-    const catId = state.activeCat && state.activeCat.id !== undefined ? String(state.activeCat.id).padStart(2, '0') : '01';
+    const catId = currentCat && currentCat.id !== undefined ? String(currentCat.id).padStart(2, '0') : '01';
     const year = new Date().getFullYear();
     stampCodeEl.textContent = `N° ${catId}/CAT-${year}`;
   }
 
   if (!wsPrescription) return;
 
-  if (!text) {
+  const rawText = text || currentCat?.ordonnance || currentCat?.prescription || '';
+
+  if (!rawText) {
     wsPrescription.innerHTML = 'Pas d\'ordonnance type rédigée.';
     if (selector) selector.style.display = 'none';
     state.prescriptionVariants = [];
     return;
   }
 
-  state.prescriptionVariants = parsePrescriptionText(text);
+  state.prescriptionVariants = parsePrescriptionText(rawText);
+
 
   if (state.prescriptionVariants.length <= 1) {
     if (selector) selector.style.display = 'none';

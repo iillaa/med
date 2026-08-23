@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "drcat",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-13",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "SUGGESTIONS_KV",
+      "id": "d569bf8299a545f182c9e6acedd4d6aa"
+    }
+  ]
+}

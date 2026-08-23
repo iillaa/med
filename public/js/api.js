@@ -5,7 +5,8 @@ import { REMOTE_SERVER_URL, REMOTE_SERVER_URLS } from './remote_config.js';
 import { getExtraHeaders } from './server-providers.js';
 import { isOfflineCat } from './lib/helpers.js';
 import { FETCH_TIMEOUT_MS, PING_TIMEOUT_MS, SYNC_MAX_RETRIES, SYNC_RETRY_DELAY_MS } from './config.js';
-export { REMOTE_SERVER_URL };
+import { getInstallId } from './install-id.js';
+export { REMOTE_SERVER_URL, getInstallId };
 
 
 // Transparent wrapper to log API latencies and dispatch debug events
@@ -58,7 +59,7 @@ export const isOfflineApp =
 
 console.log("[API] Offline Standalone Mode:", isOfflineApp);
 
-// ── Clean App Mode Detection ──────────────────────────────
+// ── Clean App Mode & Host Capability Detection ──────────────
 export const APP_MODES = {
   ADMIN_LOCAL: 'admin_local',
   WEB_CLIENT: 'web_client',
@@ -67,6 +68,14 @@ export const APP_MODES = {
 };
 
 let _cachedAppMode = null;
+
+export function isStaticCdnHost(hostname = window.location.hostname) {
+  if (isOfflineApp) return true; // Android APK assets
+  if (!hostname) return false;
+  return hostname.endsWith('.workers.dev') || 
+         hostname.endsWith('.pages.dev') || 
+         hostname.endsWith('.github.io');
+}
 
 export function getAppMode() {
   if (_cachedAppMode) return _cachedAppMode;
@@ -89,7 +98,7 @@ export function getAppMode() {
     _cachedAppMode = APP_MODES.WEB_CLIENT;
   }
 
-  console.log(`[App Mode] Detected: ${_cachedAppMode} (Host: ${hostname}).`);
+  console.log(`[App Mode] Detected: ${_cachedAppMode} (Host: ${hostname}, Static CDN: ${isStaticCdnHost(hostname)}).`);
   return _cachedAppMode;
 }
 
@@ -116,39 +125,69 @@ let offlinePdfIndexCache = null;
 // Seeded from the build-baked remote_config.js so the offline APK has a fallback
 // before it can reach any server. Never persisted to localStorage (single source of truth).
 let serverListCache = null;
-// url -> { ok, latencyMs, last }  (health, for failover + load-balancing)
-const serverHealth = new Map();
+// --- Simplified & Stable Primary-First Server Failover Protocol ---
+let activeProviderIndex = 0;
+let consecutiveFailures = 0;
+let lastFailureTimestamp = 0;
+const MAX_CONSECUTIVE_FAILURES = 3;
 
-function healthRank(url) {
-  const h = serverHealth.get(url);
-  if (!h) return 0; // unknown = neutral
-  return h.ok ? (1 - Math.min(h.latencyMs || 0, 5000) / 10000) : -1;
-}
-
-export function recordServerHealth(url, ok, latencyMs) {
+export function recordServerHealth(url, ok) {
   if (!url) return;
-  serverHealth.set(url, { ok, latencyMs: latencyMs || 0, last: Date.now() });
+  const urls = getConfiguredRemoteUrls();
+  if (!urls.length) return;
+  
+  const currentActiveUrl = urls[activeProviderIndex] || urls[0];
+
+  // Only track failures for the currently active server URL
+  if (url !== currentActiveUrl) return;
+
+  if (ok) {
+    // Success! Reset failure count and stay on active provider
+    consecutiveFailures = 0;
+  } else {
+    const now = Date.now();
+    // Debounce parallel request bursts occurring within the same 1000ms window
+    if (now - lastFailureTimestamp > 1000) {
+      consecutiveFailures++;
+      lastFailureTimestamp = now;
+      console.warn(`[ServerFailover] Provider "${url}" failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
+    }
+
+    if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+      consecutiveFailures = 0;
+      if (urls.length > 1) {
+        activeProviderIndex = (activeProviderIndex + 1) % urls.length;
+        console.warn(`[ServerFailover] 3 consecutive failures reached. Switched active provider to: ${urls[activeProviderIndex]}`);
+      } else {
+        activeProviderIndex = 0;
+        console.warn(`[ServerFailover] 3 consecutive failures reached. Reverting to Primary server: ${urls[0]}`);
+      }
+    }
+  }
 }
 
 export function getConfiguredRemoteUrls() {
   if (serverListCache && serverListCache.servers.length) {
-    // Priority first; among equal priority, healthy + low-latency servers win
-    // (this is what gives failover + cross-provider load-balancing).
+    // Preserve strict priority order without random latency flipping
     return serverListCache.servers
       .slice()
-      .sort((a, b) => (a.priority - b.priority) || (healthRank(b.url) - healthRank(a.url)))
+      .sort((a, b) => (a.priority - b.priority))
       .map(s => s.url);
   }
   if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS) && REMOTE_SERVER_URLS.length > 0) {
     return REMOTE_SERVER_URLS.slice();
   }
-  if (REMOTE_SERVER_URL) return [REMOTE_SERVER_URL];
+  if (typeof REMOTE_SERVER_URL !== 'undefined' && REMOTE_SERVER_URL) return [REMOTE_SERVER_URL];
   return [];
 }
 
 function getRemoteServerUrl() {
   const urls = getConfiguredRemoteUrls();
-  return urls.length ? urls[0] : null;
+  if (!urls.length) return null;
+  if (activeProviderIndex >= urls.length) {
+    activeProviderIndex = 0;
+  }
+  return urls[activeProviderIndex];
 }
 
 export function hasRemoteServer() {
@@ -157,7 +196,7 @@ export function hasRemoteServer() {
 
 export async function fetchServerList() {
   try {
-    const res = await fetchWithTimeout('/api/server-providers', { headers: getHeaders() });
+    const res = await fetchWithTimeout(getApiUrl('/api/server-providers'), { headers: getHeaders() });
     if (res.ok) {
       const data = await res.json();
       serverListCache = { servers: data.servers || [], primaryProvider: data.primaryProvider || null };
@@ -167,12 +206,26 @@ export async function fetchServerList() {
 }
 
 export function getApiUrl(endpoint, overrideUrl) {
-  const configuredUrl = overrideUrl || getRemoteServerUrl();
+  let configuredUrl = overrideUrl || getRemoteServerUrl();
   // On localhost web browser (not standalone Capacitor app), use relative paths to avoid cross-origin requests to the tunnel URL
   const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
   if (isLocalWebBrowser) return endpoint;
-  if (isOfflineApp && configuredUrl) {
-    return `${configuredUrl}${endpoint}`;
+  
+  // When hosted on a static CDN (workers.dev, pages.dev, is-a.dev) or in Capacitor app,
+  // route dynamic API requests (/api/suggestions, /api/login, etc.) to the configured backend server.
+  if (configuredUrl) {
+    try {
+      const targetUrlObj = new URL(configuredUrl);
+      if (isOfflineApp || location.origin !== targetUrlObj.origin) {
+        const cleanUrl = configuredUrl.replace(/\/+$/, '');
+        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        let fullUrl = `${cleanUrl}${cleanEndpoint}`;
+        if (fullUrl.includes('ngrok-free.dev') || fullUrl.includes('ngrok')) {
+          return fullUrl.includes('?') ? `${fullUrl}&ngrok-skip-browser-warning=true` : `${fullUrl}?ngrok-skip-browser-warning=true`;
+        }
+        return fullUrl;
+      }
+    } catch (_) { /* invalid URL fallback */ }
   }
   return endpoint;
 }
@@ -181,17 +234,26 @@ export function getApiUrl(endpoint, overrideUrl) {
 // read it), so it is NOT real access control — just friction against casual scraping.
 // Genuine protection would require a server-signed per-session token at login.
 export const APP_DATA_KEY = 'drcat_pub_2f7a91c4e8';
-const STATIC_DATA_HEADERS = { 'x-app-key': APP_DATA_KEY };
+const STATIC_DATA_HEADERS = { 
+  'x-app-key': APP_DATA_KEY,
+  'ngrok-skip-browser-warning': 'true'
+};
 
 export function getHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('dr_cat_admin_token');
+  const installId = getInstallId();
+  const metaVer = document.querySelector('meta[name="app-version"]')?.content || document.querySelector('meta[name="app-build-version"]')?.content || '1.5.2';
   const configuredUrl = getRemoteServerUrl() || REMOTE_SERVER_URL;
-  // Only add provider headers if we are not on localhost or if explicitly hitting a remote URL
   const isLocalWebBrowser = !isOfflineApp && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
   const providerExtraHeaders = isLocalWebBrowser ? {} : getExtraHeaders(configuredUrl);
   return {
     'Content-Type': 'application/json',
     'x-app-key': APP_DATA_KEY,
+    'x-install-id': installId,
+    'x-app-version': metaVer,
+    'x-device-platform': isOfflineApp ? 'android_apk' : 'web_pwa',
+    'ngrok-skip-browser-warning': 'true',
+    ...(isOfflineApp ? { 'x-capacitor-platform': 'android' } : {}),
     ...(token ? { 'x-admin-token': token } : {}),
     ...providerExtraHeaders,
     ...extraHeaders
@@ -203,7 +265,7 @@ export async function loginAdmin(password) {
     return { success: false, error: 'Connexion administrateur impossible en mode hors-ligne.' };
   }
  
-  const res = await fetchWithTimeout('/api/login', {
+  const res = await fetchWithTimeout(getApiUrl('/api/login'), {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({ password })
@@ -222,7 +284,7 @@ export async function logoutAdmin() {
   }
  
   try {
-    await fetchWithTimeout('/api/logout', {
+    await fetchWithTimeout(getApiUrl('/api/logout'), {
       method: 'POST',
       headers: getHeaders()
     });
@@ -273,7 +335,7 @@ export async function fetchCats(since) {
 
   // 1. ADMIN_LOCAL: Fast local server load
   if (mode === APP_MODES.ADMIN_LOCAL) {
-    const res = await fetchWithTimeout(`/api/cats${queryParam}`, { headers: getHeaders() });
+    const res = await fetchWithTimeout(getApiUrl(`/api/cats${queryParam}`), { headers: getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch CATs from local server');
     const data = await res.json();
     const activeIds = res.headers.get('X-Active-Cat-IDs');
@@ -281,14 +343,14 @@ export async function fetchCats(since) {
     return data;
   }
 
-  // 2. ANDROID_OFFLINE: Load cached synced database or static fallback instantly
-  if (mode === APP_MODES.ANDROID_OFFLINE) {
+  // 2. STATIC CDN (Cloudflare/Pages) or ANDROID_OFFLINE: Load cached synced database or static fallback instantly (unless ANDROID_ONLINE mode is active)
+  if (mode === APP_MODES.ANDROID_OFFLINE || (mode !== APP_MODES.ANDROID_ONLINE && isStaticCdnHost())) {
     const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
       try {
         const parsed = JSON.parse(cachedDb);
         if (Array.isArray(parsed) && parsed.length >= 40) {
-          console.log('[fetchCats] Offline mode — loading cached synced database.');
+          console.log('[fetchCats] Loading cached synced database.');
           return parsed;
         }
         console.warn('[fetchCats] Cached database looks corrupted or incomplete (length < 40). Falling back to static bundle.');
@@ -296,13 +358,13 @@ export async function fetchCats(since) {
         // no-op: JSON.parse failure on cached DB falls through to static bundle
       }
     }
-    console.log('[fetchCats] Offline mode — loading bundled data instantly.');
+    console.log('[fetchCats] Loading static bundled data.');
     const res = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
     if (!res.ok) throw new Error('Failed to fetch CATs statically');
     return res.json();
   }
 
-  // 3. ANDROID_ONLINE or WEB_CLIENT: remote try, but bounded tightly to avoid logo freeze
+  // 3. DYNAMIC REMOTE (Ngrok, Localtunnel, Direct IP): Full Dynamic REST API with bounded fallback
   const remoteUrls = getConfiguredRemoteUrls();
 
   // Quick ping test (HEAD) with short timeout (PING_TIMEOUT_MS from config).
@@ -313,10 +375,11 @@ export async function fetchCats(since) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), PING_TIMEOUT_MS);
       // For fast check we only care about whether the network path accepts the request.
-      await fetch(`${url}/api/search-status`, {
-        method: 'HEAD',
+      const pingUrl = getApiUrl('/api/search-status', url);
+      await fetch(pingUrl, {
+        method: 'GET',
         signal: controller.signal,
-        mode: 'no-cors'
+        headers: getHeaders()
       });
       clearTimeout(timeoutId);
       recordServerHealth(url, true, PING_TIMEOUT_MS);
@@ -371,7 +434,11 @@ export async function fetchCats(since) {
             let currentCached = [];
             const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
             if (cachedDb) {
-              currentCached = JSON.parse(cachedDb);
+              try {
+                currentCached = JSON.parse(cachedDb);
+              } catch (_) {
+                currentCached = [];
+              }
             } else {
               // Load static bundled data as baseline if cache is empty
               const fallbackRes = await fetchWithTimeout('data/cats_db.json', { headers: STATIC_DATA_HEADERS });
@@ -391,7 +458,12 @@ export async function fetchCats(since) {
             // Prune deleted items from the local cache
             if (activeIds) {
               const activeSet = new Set(activeIds.split(',').map(id => parseInt(id)));
-              const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+              let customCats = [];
+              try {
+                customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+              } catch (_) {
+                customCats = [];
+              }
               const customCatIds = new Set(customCats.map(cc => cc.id));
               currentCached = currentCached.filter(c => {
                 // Keep custom offline created cats
@@ -435,22 +507,40 @@ export async function fetchCats(since) {
 
 
 export async function fetchPdfs() {
-  if (isOfflineApp) {
-    // Load only the list of filenames instead of the heavy index structure containing all parsed texts
-    const res = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
-    if (!res.ok) throw new Error("Failed to fetch PDFs list statically");
-    return res.json();
+  const mode = getAppMode();
+  if (isOfflineApp || mode === APP_MODES.ANDROID_OFFLINE || isStaticCdnHost()) {
+    try {
+      const res = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) return data;
+      }
+    } catch (_) { /* no-op */ }
+    return [];
   }
 
-  const res = await fetchWithTimeout('/api/pdfs', { headers: getHeaders() });
-  if (!res.ok) throw new Error("Failed to fetch PDFs");
-  return res.json();
+  try {
+    const res = await fetchWithTimeout(getApiUrl('/api/pdfs'), { headers: getHeaders() });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) return data;
+    }
+  } catch (_) { /* fallback to static list */ }
+
+  try {
+    const fallbackRes = await fetchWithTimeout('data/pdf_list.json', { headers: STATIC_DATA_HEADERS });
+    if (fallbackRes.ok) {
+      const data = await fallbackRes.json();
+      if (Array.isArray(data)) return data;
+    }
+  } catch (_) { /* no-op */ }
+  return [];
 }
 
 export async function saveCatDataToServer(id, data) {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
   try {
-    const res = await fetchWithTimeout(`/api/cats/${id}`, {
+    const res = await fetchWithTimeout(getApiUrl(`/api/cats/${id}`), {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data)
@@ -485,7 +575,7 @@ export async function saveCatDataToServer(id, data) {
 export async function deleteCatFromServer(id) {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
   try {
-    const res = await fetchWithTimeout(`/api/cats/${id}`, {
+    const res = await fetchWithTimeout(getApiUrl(`/api/cats/${id}`), {
       method: 'DELETE',
       headers: getHeaders()
     });
@@ -505,7 +595,7 @@ export async function deleteCatFromServer(id) {
 export async function createCatOnServer(catData) {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
   try {
-    const res = await fetchWithTimeout('/api/cats', {
+    const res = await fetchWithTimeout(getApiUrl('/api/cats'), {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(catData)
@@ -519,7 +609,7 @@ export async function createCatOnServer(catData) {
 
 export async function bulkImportCats(importList) {
   try {
-    const res = await fetchWithTimeout('/api/cats/bulk-import', {
+    const res = await fetchWithTimeout(getApiUrl('/api/cats/bulk-import'), {
       method: 'POST',
       headers: getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(importList)
@@ -555,25 +645,38 @@ export async function submitSuggestion(suggestionData, onAttempt) {
     };
   }
 
-  // WEB_CLIENT or ANDROID_ONLINE: Try to send to remote server with retries
+  // WEB_CLIENT or ANDROID_ONLINE: Try to send to remote server with retries across available backend URLs
+  const remoteUrls = getConfiguredRemoteUrls();
   let attempts = 0;
+  
   while (attempts < SYNC_MAX_RETRIES) {
     attempts++;
     if (onAttempt) onAttempt(attempts);
 
-    try {
-      const res = await fetchWithTimeout(getApiUrl('/api/suggestions'), {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(suggestionData)
-      });
-      if (res.ok) return await res.json();
-      const errorData = await res.json().catch(() => ({}));
-      if (res.status >= 400 && res.status < 500) {
-        return { success: false, error: errorData.error || "Erreur client." };
+    for (const serverUrl of (remoteUrls.length ? remoteUrls : [null])) {
+      try {
+        const apiUrl = getApiUrl('/api/suggestions', serverUrl);
+        const res = await fetchWithTimeout(apiUrl, {
+          method: 'POST',
+          headers: getHeaders(serverUrl ? getExtraHeaders(serverUrl) : {}),
+          body: JSON.stringify(suggestionData)
+        });
+
+        if (res.ok) return await res.json();
+
+        // If static CDN host returned 404 for API route, continue loop to try backend server URL
+        if (res.status === 404 && remoteUrls.length > 1) {
+          console.warn(`[API] submitSuggestion: static endpoint ${apiUrl} returned 404, trying next provider.`);
+          continue;
+        }
+
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status >= 400 && res.status < 500) {
+          return { success: false, error: errorData.error || "Erreur client." };
+        }
+      } catch (err) {
+        console.warn(`[API] submitSuggestion: attempt ${attempts} on ${serverUrl || 'default'} failed.`, err.message);
       }
-    } catch (err) {
-      console.warn(`[API] submitSuggestion: attempt ${attempts} failed.`, err.message);
     }
 
     if (attempts < SYNC_MAX_RETRIES) {
@@ -590,7 +693,7 @@ export async function submitSuggestion(suggestionData, onAttempt) {
 
 export async function fetchSuggestions() {
   // Admin action: always use local server. Admin is localhost-only, never tunnel.
-  const res = await fetchWithTimeout('/api/suggestions', { headers: getHeaders() });
+  const res = await fetchWithTimeout(getApiUrl('/api/suggestions'), { headers: getHeaders() });
   if (res.status === 403) throw new Error('403 Forbidden');
   if (!res.ok) throw new Error('Failed to fetch suggestions');
   return res.json();
@@ -640,22 +743,14 @@ export async function updateSuggestionOnServer(id, updatedData) {
 }
 
 export async function fetchSearchStatus() {
-  if (hasRemoteServer()) {
-    try {
-      const res = await fetchWithTimeout(getApiUrl('/api/search-status'), { headers: getHeaders() });
-      if (res.ok) return res.json();
-    } catch (_) {
-      // no-op: search-status fetch failure falls through to offline default
-    }
+  try {
+    const res = await fetchWithTimeout(getApiUrl('/api/search-status'), { headers: getHeaders() });
+    if (res.ok) return await res.json();
+  } catch (_) {
+    // no-op: server search-status fetch failure falls through to static default
   }
 
-  if (isOfflineApp) {
-    return { isIndexing: false, totalFiles: 76, indexedFiles: 76, currentFile: '' };
-  }
-
-  const res = await fetchWithTimeout('/api/search-status', { headers: getHeaders() });
-  if (!res.ok) throw new Error('Failed to fetch search status');
-  return res.json();
+  return { isIndexing: false, totalFiles: 76, indexedFiles: 76, currentFile: '' };
 }
 
 export async function searchPdfsContent(query) {
@@ -663,7 +758,7 @@ export async function searchPdfsContent(query) {
 
   if (!isOfflineApp) {
     try {
-      const res = await fetchWithTimeout(`/api/search-pdfs?q=${encodeURIComponent(query)}`, {
+      const res = await fetchWithTimeout(getApiUrl(`/api/search-pdfs?q=${encodeURIComponent(query)}`), {
         headers: getHeaders()
       });
       if (res.ok) return res;
@@ -684,7 +779,7 @@ export async function searchPdfsContent(query) {
 
     // 1. Filename matches first (High Relevance)
     for (const doc of offlinePdfIndexCache) {
-      if (doc.pdf.toLowerCase().includes(cleanQuery)) {
+      if (doc.pdf && typeof doc.pdf === 'string' && doc.pdf.toLowerCase().includes(cleanQuery)) {
         results.push({
           pdf: doc.pdf,
           page: 1,
@@ -744,7 +839,7 @@ export async function triggerReindexing() {
     return { success: true, message: "La ré-indexation n'est pas prise en charge hors-ligne." };
   }
 
-  const res = await fetchWithTimeout('/api/reindex', { 
+  const res = await fetchWithTimeout(getApiUrl('/api/reindex'), { 
     method: 'POST',
     headers: getHeaders()
   });
@@ -754,49 +849,73 @@ export async function triggerReindexing() {
 }
 
 export async function fetchPdfIndexStatus() {
-  if (isOfflineApp) {
+  const mode = getAppMode();
+  if (isOfflineApp || mode === APP_MODES.ANDROID_OFFLINE || isStaticCdnHost()) {
     try {
-      const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
-      if (!indexRes.ok) throw new Error("Failed to load PDF index for status calculation");
-      const index = await indexRes.json();
-      
-      const statusMap = {};
-      for (const doc of index) {
-        const totalPages = doc.pages ? doc.pages.length : 0;
-        const pagesWithText = doc.pages ? doc.pages.filter(p => {
-          const txt = (p.content || p.text || '').trim();
-          return txt.length > 15 && txt !== 'NO_CONTENT_HERE';
-        }).length : 0;
-        
-        let status = 'red';
-        if (totalPages > 0) {
-          const ratio = pagesWithText / totalPages;
-          if (ratio >= 0.90) {
-            status = 'green';
-          } else if (ratio >= 0.05) {
-            status = 'orange';
+      const indexRes = await fetchWithTimeout('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
+      if (indexRes.ok) {
+        const index = await indexRes.json();
+        const statusMap = {};
+        for (const doc of index) {
+          const totalPages = doc.pages ? doc.pages.length : 0;
+          const pagesWithText = doc.pages ? doc.pages.filter(p => {
+            const txt = (p.content || p.text || '').trim();
+            return txt.length > 15 && txt !== 'NO_CONTENT_HERE';
+          }).length : 0;
+          
+          let status = 'red';
+          if (totalPages > 0) {
+            const ratio = pagesWithText / totalPages;
+            if (ratio >= 0.90) {
+              status = 'green';
+            } else if (ratio >= 0.05) {
+              status = 'orange';
+            }
           }
+          statusMap[doc.pdf] = { status, totalPages, pagesWithText };
         }
-        statusMap[doc.pdf] = {
-          status,
-          pagesWithText,
-          totalPages
-        };
+        return statusMap;
       }
-      return statusMap;
-    } catch (err) {
-      console.error("Failed to calculate offline PDF status map:", err);
-      return {};
-    }
+    } catch (_) {}
   }
 
-  // Server mode: fetch pre-calculated status from API
   try {
-    const res = await fetchWithTimeout('/api/pdf-index-status', { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch PDF index status from server");
-    return res.json();
+    const res = await fetchWithTimeout(getApiUrl('/api/pdf-index-status'), { headers: getHeaders() });
+    if (res.ok) return await res.json();
+  } catch (_) {
+    // no-op: server status fetch failure falls through to static index calculation
+  }
+
+  try {
+    const indexRes = await fetch('data/pdf_index.json', { headers: STATIC_DATA_HEADERS });
+    if (!indexRes.ok) throw new Error("Failed to load PDF index for status calculation");
+    const index = await indexRes.json();
+    
+    const statusMap = {};
+    for (const doc of index) {
+      const totalPages = doc.pages ? doc.pages.length : 0;
+      const pagesWithText = doc.pages ? doc.pages.filter(p => {
+        const txt = (p.content || p.text || '').trim();
+        return txt.length > 15 && txt !== 'NO_CONTENT_HERE';
+      }).length : 0;
+      
+      let status = 'red';
+      if (totalPages > 0) {
+        const ratio = pagesWithText / totalPages;
+        if (ratio >= 0.90) {
+          status = 'green';
+        } else if (ratio >= 0.05) {
+          status = 'orange';
+        }
+      }
+      statusMap[doc.pdf] = {
+        status,
+        pagesWithText,
+        totalPages
+      };
+    }
+    return statusMap;
   } catch (err) {
-    console.error("Error fetching PDF status map from server:", err);
     return {};
   }
 }
@@ -865,6 +984,30 @@ export async function updateServerProviders(payload) {
   return res.json();
 }
 
+export async function fetchVersionConfigOnServer() {
+  const res = await fetchWithTimeout(getApiUrl('/api/version'), {
+    method: 'GET',
+    headers: getHeaders()
+  });
+  if (!res.ok) {
+    throw new Error("Impossible de récupérer la configuration de version.");
+  }
+  return res.json();
+}
+
+export async function updateVersionConfigOnServer(payload) {
+  const res = await fetchWithTimeout(getApiUrl('/api/admin/version'), {
+    method: 'PUT',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Échec de la mise à jour de la version.");
+  }
+  return res.json();
+}
+
 // Learn the authoritative server list from the backend. Safe to call anywhere:
 // on localhost it returns the same-origin list; on the offline APK it fails
 // silently and the build-baked seed remains in use.
@@ -889,12 +1032,21 @@ async function api_pingHealth(url) {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 4000);
     const start = performance.now();
-    await fetch(`${url}/api/search-status`, { method: 'HEAD', signal: controller.signal, mode: 'no-cors' });
+    const pingUrl = getApiUrl('/api/search-status', url);
+    await fetch(pingUrl, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: getHeaders()
+    });
     clearTimeout(t);
     recordServerHealth(url, true, performance.now() - start);
   } catch (_) {
     recordServerHealth(url, false);
   }
+}
+
+export function getAdminToken() {
+  return localStorage.getItem('dr_cat_admin_token') || '';
 }
 
 

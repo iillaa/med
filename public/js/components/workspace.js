@@ -5,7 +5,7 @@ import { buildPrintableText } from './workspace/state.js';
 import { renderSummary } from './workspace/summary.js';
 import { renderPrescription } from './workspace/prescription.js';
 import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList } from './workspace/pdfs.js';
-import { saveAppStateBeforeNavigation, restoreAppState } from './workspace/print.js';
+import { saveAppStateBeforeNavigation, restoreAppState, printCatDocument } from './workspace/print.js';
 
 let workspace, welcomeScreen;
 let wsCategory, wsTitle, wsRedFlags, wsPrescription, notesInput;
@@ -172,58 +172,16 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   const printCatBtn = document.getElementById('print-cat-btn');
   if (printCatBtn) {
     printCatBtn.addEventListener('click', async () => {
-      if (!state.activeCat) return;
+      const cat = state.activeCat;
+      if (!cat) return;
 
-      const dateEl = document.getElementById('print-date-stamp');
-      if (dateEl) {
-        dateEl.textContent = 'Le : ' + new Date().toLocaleDateString('fr-FR');
-      }
-
-      const catVal = document.getElementById('print-val-category');
-      const titleVal = document.getElementById('print-val-title');
-      const redFlagsVal = document.getElementById('print-val-redflags');
-      const summaryVal = document.getElementById('print-val-summary');
-      const prescriptionVal = document.getElementById('print-val-prescription');
-      const notesVal = document.getElementById('print-val-notes');
-
-      if (catVal) catVal.textContent = state.activeCat.category;
-      if (titleVal) titleVal.textContent = `${state.activeCat.id}. ${state.activeCat.title}`;
-
-      const rfSec = document.getElementById('print-section-redflags');
-      if (state.activeCat.red_flags && state.activeCat.red_flags.trim().length > 0) {
-        if (redFlagsVal) redFlagsVal.textContent = state.activeCat.red_flags;
-        if (rfSec) rfSec.style.display = 'block';
-      } else {
-        if (rfSec) rfSec.style.display = 'none';
-      }
-
-      if (summaryVal) {
-        const rawText = state.activeCat.summary;
-        summaryVal.innerHTML = parseSummaryMarkdown(rawText);
-      }
-
-      const presSec = document.getElementById('print-section-prescription');
-      if (state.activeCat.ordonnance && state.activeCat.ordonnance.trim().length > 0) {
-        if (prescriptionVal) prescriptionVal.textContent = state.activeCat.ordonnance;
-        if (presSec) presSec.style.display = 'block';
-      } else {
-        if (presSec) presSec.style.display = 'none';
-      }
-
-      const notesSec = document.getElementById('print-section-notes');
-      if (state.activeCat.notes && state.activeCat.notes.trim().length > 0) {
-        if (notesVal) notesVal.textContent = state.activeCat.notes;
-        if (notesSec) notesSec.style.display = 'block';
-      } else {
-        if (notesSec) notesSec.style.display = 'none';
-      }
-
+      // Android Native App / Capacitor Clipboard Copier
       if (typeof window.Capacitor !== 'undefined' || api.isOfflineApp) {
-        const text = buildPrintableText(state.activeCat);
+        const text = buildPrintableText(cat);
         if (navigator.clipboard && navigator.clipboard.writeText) {
           try {
             await navigator.clipboard.writeText(text);
-            showToast("Texte copié dans le presse-papier. Vous pouvez le coller ailleurs.", "fa-clipboard-check", 4000);
+            showToast("Fiche complète (avec sous-fiches) copiée dans le presse-papier !", "fa-clipboard-check", 4000);
           } catch (_) {
             showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
           }
@@ -231,7 +189,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           showToast("L'impression native n'est pas disponible. Utilisez la version web.", "fa-circle-info", 5000);
         }
       } else {
-        window.print();
+        // Desktop Web / Browser: Render 100% standalone Doctor-Grade Multi-Page PDF Document
+        printCatDocument(cat);
       }
     });
   }
@@ -240,7 +199,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     editSummaryBtn.addEventListener('click', () => {
       summaryView.style.display = 'none';
       summaryEditorWrapper.style.display = 'flex';
-      summaryEditor.value = state.activeCat.summary;
+      const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat?.sub_cats);
+      summaryEditor.value = isSub
+        ? (state.activeCat.sub_cats[state.activeSubCatIndex - 1].summary || '')
+        : (state.activeCat?.summary || '');
     });
   }
 
@@ -264,16 +226,26 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const restore = setButtonLoading(saveSummaryBtn);
 
       try {
+        const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat.sub_cats);
         if (state.isAdmin) {
-          const result = await api.saveCatDataToServer(state.activeCat.id, { summary: newSummary });
+          let result;
+          if (isSub) {
+            state.activeCat.sub_cats[state.activeSubCatIndex - 1].summary = newSummary;
+            result = await api.saveCatDataToServer(state.activeCat.id, { sub_cats: state.activeCat.sub_cats });
+          } else {
+            result = await api.saveCatDataToServer(state.activeCat.id, { summary: newSummary });
+          }
+
           if (result.success) {
-            state.activeCat.summary = newSummary;
+            if (!isSub) state.activeCat.summary = newSummary;
             const itemInAll = (state.allCats || []).find(c => c.id === state.activeCat.id);
             if (itemInAll) {
-              itemInAll.summary = newSummary;
+              if (isSub) itemInAll.sub_cats = state.activeCat.sub_cats;
+              else itemInAll.summary = newSummary;
             }
-            renderSummary(newSummary, state.activeCat);
-            showToast("Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
+            const subLabel = isSub ? state.activeCat.sub_cats[state.activeSubCatIndex - 1].label : null;
+            renderSummary(newSummary, state.activeCat, subLabel);
+            showToast(isSub ? "Sous-fiche mise à jour avec succès !" : "Synthèse mise à jour avec succès !", "fa-circle-check", 2500);
             triggerHaptic(true);
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
@@ -288,12 +260,17 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             return;
           }
 
+          const clonedSubCats = isSub ? JSON.parse(JSON.stringify(state.activeCat.sub_cats)) : null;
+          if (clonedSubCats) {
+            clonedSubCats[state.activeSubCatIndex - 1].summary = newSummary;
+          }
+
           await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'edit',
               catId: state.activeCat.id,
-              data: { summary: newSummary }
+              data: isSub ? { sub_cats: clonedSubCats } : { summary: newSummary }
             },
             "Votre proposition de modification a été envoyée à l'administrateur pour validation."
           );
@@ -344,7 +321,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       wsPrescription.style.display = 'none';
       prescriptionEditor.style.display = 'block';
       prescriptionEditorActions.style.display = 'flex';
-      prescriptionEditor.value = state.activeCat.ordonnance;
+      const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat?.sub_cats);
+      prescriptionEditor.value = isSub
+        ? (state.activeCat.sub_cats[state.activeSubCatIndex - 1].ordonnance || '')
+        : (state.activeCat?.ordonnance || '');
     });
   }
 
@@ -369,16 +349,25 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const restore = setButtonLoading(savePrescriptionBtn);
 
       try {
+        const isSub = state.activeSubCatIndex > 0 && Array.isArray(state.activeCat.sub_cats);
         if (state.isAdmin) {
-          const result = await api.saveCatDataToServer(state.activeCat.id, { ordonnance: newOrdonnance });
+          let result;
+          if (isSub) {
+            state.activeCat.sub_cats[state.activeSubCatIndex - 1].ordonnance = newOrdonnance;
+            result = await api.saveCatDataToServer(state.activeCat.id, { sub_cats: state.activeCat.sub_cats });
+          } else {
+            result = await api.saveCatDataToServer(state.activeCat.id, { ordonnance: newOrdonnance });
+          }
+
           if (result.success) {
-            state.activeCat.ordonnance = newOrdonnance;
+            if (!isSub) state.activeCat.ordonnance = newOrdonnance;
             const itemInAll = (state.allCats || []).find(c => c.id === state.activeCat.id);
             if (itemInAll) {
-              itemInAll.ordonnance = newOrdonnance;
+              if (isSub) itemInAll.sub_cats = state.activeCat.sub_cats;
+              else itemInAll.ordonnance = newOrdonnance;
             }
             renderPrescription(newOrdonnance);
-            showToast("Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
+            showToast(isSub ? "Ordonnance de la sous-fiche mise à jour !" : "Ordonnance type mise à jour avec succès !", "fa-circle-check", 2500);
             triggerHaptic(true);
           } else {
             showToast("Erreur: " + result.error, "fa-circle-exclamation", 4000);
@@ -393,12 +382,17 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
             return;
           }
 
+          const clonedSubCats = isSub ? JSON.parse(JSON.stringify(state.activeCat.sub_cats)) : null;
+          if (clonedSubCats) {
+            clonedSubCats[state.activeSubCatIndex - 1].ordonnance = newOrdonnance;
+          }
+
           await runSuggestionWithUI(
             api.submitSuggestion,
             {
               type: 'edit',
               catId: state.activeCat.id,
-              data: { ordonnance: newOrdonnance }
+              data: isSub ? { sub_cats: clonedSubCats } : { ordonnance: newOrdonnance }
             },
             "Votre proposition de modification de l'ordonnance a été envoyée à l'administrateur pour validation."
           );
@@ -586,6 +580,9 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       const isTopPanel = e.target.closest('.workspace-header') || e.target.closest('#red-flags-banner');
       if (!isTopPanel) return;
 
+      // Prevent conflict when tapping sub-profile pills
+      if (e.target.closest('#subcat-selector-bar') || e.target.closest('.subcat-pill')) return;
+
       const tagName = e.target.tagName.toLowerCase();
       const insideEditor = e.target.closest('#summary-editor') || e.target.closest('#notes-input');
       if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
@@ -641,6 +638,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
 export function selectCat(cat, preserveTab = false) {
   if (window.perf) window.perf.startMeasure('workspace.selectCat');
   state.activeCat = cat;
+  state.activeSubCatIndex = 0;
   state.activePrescriptionVariantIndex = 0;
 
   if (!cat) {
@@ -720,6 +718,8 @@ export function selectCat(cat, preserveTab = false) {
       btn.classList.add('active');
     }
   });
+
+  renderSubCatBar(cat);
 
   renderSummary(cat.customSummary || cat.summary, cat);
 
@@ -886,7 +886,7 @@ export function loadRelatedPdfs(cat) {
 
   const keywords = Array.isArray(cat?.pdf_keywords) ? cat.pdf_keywords : [];
   const categoryName = cat?.category ? cat.category.toLowerCase() : '';
-  const tags = Array.isArray(cat?.tags) ? cat.tags.map(t => t.toLowerCase()) : [];
+  const tags = Array.isArray(cat?.tags) ? cat.tags.filter(t => t && typeof t === 'string').map(t => t.toLowerCase()) : [];
   
   // Broad clinical terms that define a "General Guide" (Urgencies, Therapeutics, Prescriptions, etc.)
   const clinicalGenerals = ['urgence', 'urgences', 'traitement', 'thérapeutique', 'ordonnance', 'ordonnances', 'manuel', 'guide'];
@@ -896,7 +896,7 @@ export function loadRelatedPdfs(cat) {
   const matchedFiles = state.allPdfs.filter(filename => {
     if (!filename) return false;
     const lowerName = filename.toLowerCase();
-    return keywords.some(kw => kw && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
+    return keywords.some(kw => kw != null && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
   });
 
   // Global PDFs matching category or tags (but not already caught by specific keywords)
@@ -905,7 +905,7 @@ export function loadRelatedPdfs(cat) {
     const lowerName = filename.toLowerCase();
     
     // Skip if it's already in the specific matched files
-    const isSpecific = keywords.some(kw => kw && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
+    const isSpecific = keywords.some(kw => kw != null && typeof kw === 'string' && lowerName.includes(kw.toLowerCase()));
     if (isSpecific) return false;
 
     // Must match the category or tags
@@ -951,6 +951,112 @@ export function loadRelatedPdfs(cat) {
       pdfListContainer.appendChild(createPdfCardElement(file, true));
     });
   }
+}
+
+/**
+ * Render fluid Sub-CAT / Clinical Profile Segmented Bar
+ */
+function renderSubCatBar(cat) {
+  const subCatBar = document.getElementById('subcat-selector-bar');
+  if (!subCatBar) return;
+
+  const subCats = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? cat.sub_cats : [];
+  if (subCats.length === 0) {
+    subCatBar.style.display = 'none';
+    subCatBar.innerHTML = '';
+    return;
+  }
+
+  subCatBar.style.display = 'flex';
+  subCatBar.innerHTML = '';
+
+  const profiles = [
+    {
+      label: '⭐ Fiche Principale',
+      summary: cat.summary,
+      red_flags: cat.red_flags,
+      ordonnance: cat.ordonnance
+    },
+    ...subCats
+  ];
+
+  profiles.forEach((prof, idx) => {
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = `subcat-pill ${state.activeSubCatIndex === idx ? 'active' : ''}`;
+    pill.setAttribute('role', 'tab');
+    pill.setAttribute('aria-selected', state.activeSubCatIndex === idx ? 'true' : 'false');
+    
+    const iconClass = getSubCatIcon(prof.label);
+    pill.innerHTML = `<i class="fa-solid ${iconClass} subcat-pill-icon"></i> <span>${escapeHTML(prof.label || `Profil ${idx}`)}</span>`;
+    
+    pill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.switchToSubProfile(idx);
+    });
+
+    subCatBar.appendChild(pill);
+  });
+}
+
+/**
+ * Global In-Place Sub-Profile Switcher
+ * Callable directly by contextual in-text badges or top segmented bar!
+ */
+window.switchToSubProfile = function(idx) {
+  if (!state.activeCat) return;
+  const subCats = Array.isArray(state.activeCat.sub_cats) && state.activeCat.sub_cats.length > 0 ? state.activeCat.sub_cats : [];
+  const profiles = [
+    {
+      label: '⭐ Fiche Principale',
+      summary: state.activeCat.summary,
+      red_flags: state.activeCat.red_flags,
+      ordonnance: state.activeCat.ordonnance
+    },
+    ...subCats
+  ];
+
+  const targetIdx = Number(idx);
+  if (targetIdx < 0 || targetIdx >= profiles.length) return;
+  state.activeSubCatIndex = targetIdx;
+
+  const prof = profiles[targetIdx];
+  const wsRedFlags = document.getElementById('workspace-red-flags');
+  if (wsRedFlags) wsRedFlags.textContent = prof.red_flags || state.activeCat.red_flags;
+
+  renderSummary(prof.summary || state.activeCat.summary, state.activeCat, targetIdx > 0 ? prof.label : null);
+  renderPrescription(prof.ordonnance || state.activeCat.ordonnance);
+  triggerHaptic(true);
+
+  // Update active pill styling
+  const subCatBar = document.getElementById('subcat-selector-bar');
+  if (subCatBar) {
+    subCatBar.querySelectorAll('.subcat-pill').forEach((p, pIdx) => {
+      if (pIdx === targetIdx) {
+        p.classList.add('active');
+        p.setAttribute('aria-selected', 'true');
+      } else {
+        p.classList.remove('active');
+        p.setAttribute('aria-selected', 'false');
+      }
+    });
+  }
+
+  // Smooth scroll back to top of summary view
+  const summaryView = document.getElementById('summary-view');
+  if (summaryView) summaryView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+function getSubCatIcon(textOrType) {
+  const t = (textOrType || '').toLowerCase();
+  if (t.includes('urgence') || t.includes('grave') || t.includes('aigu') || t.includes('glairo') || t.includes('sanglant')) return 'fa-truck-medical';
+  if (t.includes('enceinte') || t.includes('grossesse')) return 'fa-person-pregnant';
+  if (t.includes('enfant') || t.includes('pédiatr') || t.includes('nourrisson') || t.includes('sro')) return 'fa-child';
+  if (t.includes('âgé') || t.includes('gériatr') || t.includes('senior')) return 'fa-person-cane';
+  if (t.includes('diabét') || t.includes('diabete')) return 'fa-droplet';
+  if (t.includes('rénal') || t.includes('renal')) return 'fa-kidneys';
+  if (t.includes('psych') || t.includes('neuro')) return 'fa-brain';
+  return 'fa-stethoscope';
 }
 
 export { restoreAppState };

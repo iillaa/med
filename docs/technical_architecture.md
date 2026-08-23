@@ -6,22 +6,22 @@ This document provides a deep dive into the architectural design, security mecha
 
 ## 🏗️ System Architecture Overview
 
-Dr. CAT operates in a **Dual-Mode Hybrid Architecture** across two runtime environments:
+Dr. CAT operates in a **Dual-Rail Hybrid Network Architecture** across edge CDN and local Node.js environments:
 
 ```text
-1. Node.js/Termux Server Web App (Online mode)
-   [Mobile Browser / APK WebView] <--- HTTP / REST ---> [Express.js Backend (server.js)]
-                                                               |
-                                                     [Local JSON Databases]
-                                                     [PDF index.json]
-                                                     [AsyncLock write queue]
+1. ⚡ 90% Mass Content Sync Rail (Cloudflare Worker Edge)
+   [Android APK / PWA Client] <--- HTTPS / Edge REST ---> [Cloudflare Worker (drcat.dr-cat.workers.dev)]
+                                                                |
+                                                      [Mature GitHub Production Database]
+                                                      [Static CDN Assets & PDF Lists]
 
-2. Standalone Capacitor Android Wrapper (Offline mode)
-   [Android WebView (Capacitor)] <---> [API Router (api.js)]
-                                              |
-                                    [localStorage overrides]
-                                    [Bundled data/ JSONs]
-                                    [server-providers.js sync]
+2. 🔒 10% Admin Control Rail (Termux Node.js Ngrok Server)
+   [Android APK / Admin Lab] <--- HTTPS Tunnel ---> [Termux Express Backend (server.js)]
+                                                            |
+                                                  [Security Lock Gate & Kill Switch]
+                                                  [Version Checker /api/version]
+                                                  [Suggestion Moderation & Active Learning]
+                                                  [V3 CAT Generator Engine]
 ```
 
 ### App Mode Detection
@@ -37,6 +37,75 @@ At startup, `main.js` evaluates the runtime context via `api.getAppMode()` and a
 The mode can switch dynamically at runtime via `api.setAppMode()`, which dispatches a `drcat-app-mode-changed` DOM event so all components can react without a page reload.
 
 ---
+
+## 🧠 5-Stream Knowledge & Self-Correcting Medical Engine (v1.8.9)
+
+Dr. CAT's V3.5 Dual RAG generation engine synthesizes medical protocols using 5 prioritized knowledge streams:
+
+| Stream | Source | Role & Priority |
+|---|---|---|
+| **Stream 1: Tier 1 Core Corpus** | **PDF Index & Staging Slices (`pdf_index.json` & `pdf_staging_index.json`)** | **Priority 1 (Pure Signal Slices)**: Dedicated 1–3 page clinical slices created in PDF Lab 2.0, university manuals, and local textbooks. When a dedicated slice is matched, general 500-page textbooks are muted. |
+| **Stream 2: Tier 2 Clinical Library** | **Standard Clinical Decision Library (`clinical_library/`)** | **Priority 2 (Action Protocols)**: Concise CAT decision trees from MedG.fr, Antibioclic/SPILF, SFMU Urgences, Pédiadol, MSF Guides, Orphanet Urgences, and CRAT. |
+| **Stream 3: Doctor Custom Links** | **Jina Reader Link Injector (`data/web_cache/`)** | **Priority 3 (Specialized Links)**: Custom URLs pasted by doctors (`sante.gov.dz`, `cnpm.org.dz`, specific guidelines) converted to clean markdown via Jina Reader. |
+| **Stream 4: Online Web Research** | **Web RAG Live Cache (`web_cache/`)** | **Priority 4 (Enrichment)**: Full-phrase search on PubMed, MSD Manuals, and Vidal (with automatic SERP shell rejection). |
+| **Stream 5: Active Learning** | **Human Active Learning Memory** | **Absolute Priority Override**: Retains manual doctor edits (`✏️ Éditer` in Generator Lab UI). Stamps `_human_edited: true` and injects exact doctor preferences into future AI prompts. |
+
+```text
+  [1. Tier 1 Core Slices]   [2. Tier 2 Guidelines]   [3. Doctor Links]   [4. Web RAG]   [5. Active Learning]
+            \                       \                     |                    /                 /
+             \                       \                    |                   /                 /
+              ▼                       ▼                   ▼                  ▼                 ▼
+          ┌────────────────────────────────────────────────────────────────────────────────────────┐
+          │                  DUAL RAG V3.5 SYNTHESIS ENGINE (GEMINI FLASH)                         │
+          │                  - 5-Field Metadata Precision Scoring (Title, Specialty, Keywords, TOC)│
+          │                  - Pure Signal Isolation (Mutes multi-chapter textbooks on slice hit)  │
+          │                  - 5-Step Invariant Clinical Structure with Conditional ABCDE & Terrain│
+          │                  - Academic DCI Target Ranges in Summary vs Real-Life 4-Part Ordonnance│
+          └───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                                      │
+                                                      ▼
+          ┌────────────────────────────────────────────────────────────────────────────────────────┐
+          │             DETERMINISTIC 8-LAYER MEDICAL VALIDATOR & PHARMACOPEIA FIREWALL            │
+          │             - French BDPM Pharmacopeia (15,857 authorized drugs & 4,474 DCIs)          │
+          │             - Algerian Drug Nomenclature (4,627 commercial brands & Chifa status)      │
+          │             - GPIP / Antibioclic Pediatric Weight Ceilings (mg/kg/j) & Age Bounds      │
+          │             - CRAT Absolute Teratogenic Block (Valproate, MTX, Isotretinoin, NSAIDs)   │
+          │             - Lethal Unit Typo Interceptor (500g vs 500mg)                             │
+          │             - Anti-Hallucination Token Firewall & Automated 3-Attempt Retry Feedback   │
+          └────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 🛡️ Pharmacological Toxic Ceilings & Big Data Safety Shield (`lib/clinical_drug_ceilings.json`)
+The validation engine enforces deterministic dosage bounds and contraindication checks compiled from authoritative clinical databases:
+* **`BDPM France` (Base de Données Publique des Médicaments)**: Ingested 15,857 authorized pharmaceutical products, 4,474 DCIs, and 8,206 generic associations (`data/bdpm_pharmacology.json`).
+* **`MSPRH / Chifa Algérie` (Nomenclature Nationale)**: Ingested 4,627 registered commercial brand names, dosages, and galenic forms (`data/algerian_nomenclature.json`).
+* **`CRAT` (Centre de Référence sur les Agents Tératogènes)**: Systematic blocking of teratogenic/fœtotoxic molecules (Valproate, Methotrexate, Isotretinoin, NSAIDs after 24 SA, ACE inhibitors, ARBs) in pregnancy contexts.
+* **`GPIP` / `Antibioclic` / `Pédiadol`**: Strict weight-based pediatric bounds (`mg/kg/jour` and single-dose limits).
+
+---
+
+## 🧩 Targeted Sub-CATs & Option C Architecture (v1.10.0)
+
+Dr. CAT v1.10.0 decouples the high-density Master Hub (for 80% of routine outpatient consultations) from specialized, high-yield clinical sub-profiles (for 20% complex terrains) via a dual-path pipeline:
+
+### 1. Creation Modal Pre-Configuration (Option C)
+During CAT creation or full re-synthesis in `admin/cat_generator_lab.html`:
+* **Mode ⚡ Standard (1-Tab Rapide)**: Generates a lean, dense Master Hub with `sub_cats: []`.
+* **Mode 🧩 Multi-Profils & Sous-Fiches**: Pre-selects multiple clinical presets (`🤰 Grossesse & Allaitement`, `👴 Sujet Âgé`, `👶 Pédiatrie`, `🚨 Forme Aiguë`, `🫘 Insuffisance Rénale`, `🧠 Psychiatrie / RUD`) plus custom profiles (e.g. *Salmonella*, *Dépression résistante*).
+* **Unified Single-Pass Synthesis**: The backend passes `requestedSubCats` into `generateCATWithLLM`, synthesizing the Master Hub and all child sub-CATs simultaneously with full internal consistency.
+
+### 2. Inspector Drawer (On-Demand Post-Creation)
+Doctors can generate targeted sub-profiles anytime from the Inspector Modal via `generateSubCATWithLLM(parentCat, subProfileDescription)` without modifying or bloating the parent summary text.
+
+### 3. Segmented Pill Navigation Bar
+In the Workspace view (`public/js/components/workspace.js`), the top `#subcat-selector-bar` dynamically renders interactive pills:
+* `⭐ Fiche Principale`
+* `🤰 Grossesse & Allaitement`
+* `👴 Sujet Âgé`
+Clicking any pill triggers `window.switchToSubProfile(idx)`, instantly re-rendering the summary, red flags, and dedicated prescription without full page reloads.
+
+### 4. 8-Layer Automated Checksum Loop
+Sub-CATs pass through the complete medical validation pipeline (`validateCAT`), enforcing daily drug ceilings, dangerous interactions, CRAT rules, and pediatric dosing with an automated 3-attempt retry loop on validation failure.
 
 ## 💾 Data Management & Integrity
 
@@ -65,6 +134,17 @@ To keep track of modifications without overloading client devices:
 * **Change Log Archiving**: Whenever an admin directly edits a CAT or approves an edit suggestion, the server records the change type, timestamp, and a copy of the previous text values (`previousState`) inside a `history` array in `cats_db.json`.
 * **Non-Admin API Stripping**: To protect bandwidth during synchronization, the GET `/api/cats` API endpoint strips the `history` fields from responses unless the request is authenticated with an admin token.
 * **Offline Client Build Pruning**: During compilation (`npm run build` / `node build.js`), the build script parses the database and deletes the `history` property from all items before writing them to the web assets folder. This guarantees that the offline standalone APK package remains extremely lightweight.
+
+### 5. SafeStorage & Protected Key Policy Subsystem (`safeStorage.js` v1.8.1)
+Browser `localStorage` is restricted to ~5 MB per origin. When storage pressure occurs:
+* **Regex Protection Engine**: Keys matching `PROTECTED_KEY_PATTERNS` (`/^dr_cat_notes_/`, `/^dr_cat_user_progress$/`, `/^dr_cat_leitner$/`, `/^dr_cat_streak$/`, `/^dr_cat_custom_/`) are strictly safeguarded and **never deleted**.
+* **Intelligent LRU Pruning**: On `QuotaExceededError` (code 22), the engine sorts evictable keys by priority (transient network sync caches `dr_cat_synced_database*` purged first, then temporary search caches) to free space immediately without touching doctor study data.
+* **Safe JSON Parsing**: `safeParseJSON` handles malformed or truncated inputs gracefully with fallback defaults.
+
+### 6. Pre-Cached Zero-Allocation Search Indexing (`sidebar.js` v1.8.1)
+Traditional search filtering creates string lowercase copies and concatenations on every keystroke:
+* **One-Pass Token Cache**: Each CAT lazily compiles a normalized composite string `cat._searchTokenStr` (combining ID, title, category, summary, red flags, and sub-category titles).
+* **Zero GC Pressure at 60 FPS**: Subsequent multi-keyword queries execute simple array `.every(token => cat._searchTokenStr.includes(token))` checks directly in RAM with zero string object allocations during rapid typing.
 
 ---
 
@@ -197,6 +277,88 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 
 ---
 
+## 🩺 Doctor-Grade Prescription & Local-First Weighting Engine (v1.5.2)
+
+Le moteur de génération et d'édition d'ordonnances intègre une logique décisionnelle clinique de niveau médical (Doctor-Grade) associée à une matrice de pondération contextuelle locale à 3 niveaux (3-Tier Source Weighting Matrix).
+
+### 1. Hiérarchie Stricte des Sources de Connaissances (Strict Priority Order Directive)
+
+| Niveau (Tier) | Source de Connaissances | Rôle & Priorité Clinique |
+|---|---|---|
+| **Priorité 1 (Baseline)** | **Offline PDF Index** (Originaux Locaux Algérie/Maghreb) | **Priorité Absolue** : Détermine les molécules médicamenteuses, les posologies locales et les habitudes de prescription (ex: Ascabiol/Benzoate de benzyle, Spasfon, Tiorfan, Smecta). |
+| **Priorité 2 (Supplement)** | **Web RAG** (StatPearls NCBI, MSD Manuals Pro, MedG) | **Consolidation & Sécurité** : Détermine la structuration rigoureuse en 5 étapes cliniques, le bilan paraclinique et l'exhaustivité des Drapeaux Rouges (*Red Flags*). |
+| **Priorité 3 (Synthesis)** | **Moteur de Raisonnement Gemini** | **Formatage & Syntaxe** : Assure la rigueur de rédaction médicale française, l'absence de répétitions et le respect du schéma JSON. |
+
+### 2. Structure de Prescription à 3 Niveaux (3 Tiers)
+Les ordonnances générées et affichées dans les fiches CAT suivent une hiérarchisation clinique stricte :
+- **1ère Intention (First-Line)** : Traitement étiologique de référence pour le tableau clinique donné (posologie exacte, durée et modalité d'administration).
+- **Alternatives Thérapeutiques (`[OU]`)** : Options de remplacement explicites en cas de contre-indication, d'intolérance, d'allergie ou de rupture de stock (ex: `[OU] Alternative 1 (Si contre-indication au traitement topique) : Ivermectine orale...`).
+- **Traitements Symptomatiques Adjuvants** : Prescriptions d'appoint ciblant uniquement les symptômes associés (douleur, fièvre, spasmes, diarrhée, prurit).
+
+### 3. Algorithme de Pondération Locale (Local-First Drug Weighting)
+Pour s'adapter à la réalité du terrain et de la pharmacopée locale, le moteur accorde une priorité algorithmique supérieure aux molécules de référence couramment prescrites et disponibles :
+- **Gastro-entérologie / Antispasmodiques** : Priorisation de *Spasfon* (Phloroglucinol), *Tiorfan* (Racecadotril), *Smecta* (Diosmectite).
+- **Dermatologie / Parasitologie** : Priorisation d'*Ascabiol* (Benzoate de benzyle) pour les gales et parasitoses cutanées.
+- **Règles d'Équivalence** : Substitution automatique ou suggestion préférentielle des spécialités disponibles localement par rapport aux dénominations internationales rares.
+
+### 4. Garde-Fous Anti-Polypharmacie & Sécurité Patient
+- **Interdiction de la Liste Plate** : Élimination des numérotations plates (1, 2, 3, 4) pouvant faire croire à une coprescription simultanée.
+- **Balises d'Alerte d'Exclusion** : Insertion automatique d'avertissements explicites `⚠️ ALTERNATIVE : Ne pas associer le traitement topique et oral en première intention sauf forme grave/croûteuse`.
+- **Vérification de Redondance** : Détection des doublons de classe thérapeutique (ex. coprescription de deux AINS ou deux antispasmodiques).
+- **Avertissements de Posologie** : Signalement visuel sur les durées de traitement prolongées et ajustements pédiatriques/gériatriques.
+
+---
+
+## 🤖 Moteur Dual RAG V2, Découverte Dynamique & Pipeline 1-Tap (v1.6.0 – v1.7.0)
+
+Dr. CAT intègre une architecture **Dual RAG (Retrieval-Augmented Generation)** couplée à un moteur de découverte dynamique de modèles IA et de contrôle de sécurité clinique algorithmique.
+
+### 1. Qu'est-ce que le RAG & le Dual RAG ?
+- **RAG (Génération Amplifiée par Récupération)** : Au lieu de compter uniquement sur la mémoire pré-entraînée de l'IA (qui peut être obsolète ou halluciner), le système extrait d'abord des documents médicaux réels et les transmet à l'IA avant la rédaction.
+- **Dual RAG** : Interroge simultanément **DEUX canaux de connaissances externes distincts** :
+  1. **Canal 1 — Offline RAG (PDF Index Local)** : Interroge `cat_db_generator/pdf_index.json` (77 ouvrages et consensus médicaux algériens/maghrébins) pour garantir la disponibilité des spécialités locales (*Ascabiol*, *Spasfon*, *Smecta*, *Tiorfan*) et les habitudes de prescription régionales.
+  2. **Canal 2 — Online RAG (Doctor Web)** : Interroge en direct des bases médicales professionnelles (StatPearls NCBI open REST API, Manuel MSD Professionnel via Jina MD Reader, MedG) pour intégrer les dernières recommandations internationales 2026.
+
+### 2. Moteur de Découverte Dynamique de Modèles & Extended Thinking (`llm-engine.js`)
+- **Découverte Dynamique (`discoverDynamicModels`)** : Interroge l'API Google AI Studio (`GET /v1beta/models`) au démarrage pour lister les modèles actifs et les classer par version sémantique (`3.6` > `3.5` > `3.1` > `2.5`). Adopte automatiquement les futurs modèles (`gemini-3.7`, `gemini-4.0`) dès leur sortie sans modification de code.
+- **Budget de Raisonnement Étendu (`thinkingConfig`)** : Injecte un budget de 2048 tokens de réflexion clinique approfondie pour valider les diagnostics différentiels et les calculs de posologie pédiatrique.
+- **Gestion des Limites de Débit HTTP 429** : Pause automatiquement 4 secondes et réessaie le modèle principal lors des générations par lots.
+
+### 3. Assertions Algorithmiques de Sécurité Thérapeutique (`medical-validator.js`)
+Garde-fous programmatiques qui vérifient et rejettent les posologies dangereuses avant l'écriture sur disque :
+- **Plafond Quotidien Paracétamol Adulte** : Rejet automatique des prescriptions dépassant `4g/jour` (ex: 2g 4x/j = 8g/j).
+- **Plafond Posologique Pédiatrique** : Rejet des doses uniques pédiatriques dépassant `15 mg/kg`.
+- **Alerte Syndrome de Reye** : Contre-indication stricte de l'Aspirine dans les infections virales pédiatriques (grippe, varicelle).
+
+### 4. Pipeline Centralisé 1-Tap (`POST /api/admin/cat-generator/pipeline-full`)
+Exécute la chaîne complète **Recherche Web Step 1 ➔ Synthèse IA Dual RAG Step 2 ➔ Approbation Auto Step 3** en un seul appel API.
+- Accessible via le bouton **`⚡ IA Auto`** dans le modal d'ajout de CAT (`index.html`) et les boutons **`⚡ 1-Tap Auto`** dans le Generator Lab UI (`admin/cat_generator_lab.html`).
+
+---
+
+## 🔒 Architecture de Sécurité à Double Porte (Double-Door Security v1.7.0)
+
+Les outils d'administration, le Generator Lab V2 et les endpoints d'importation/génération sont protégés par un protocole de sécurité à double verrouillage strict :
+
+### 1. Les Deux Portes de Protection
+$$\text{Accès Autorisé} = \text{Connexion Localhost (Porte 1)} \quad \mathbf{ET} \quad \text{Jeton Admin Valide (Porte 2)}$$
+
+| Type de Requête | Porte 1 (Localhost) | Porte 2 (Mot de passe Admin) | Résultat Serveur |
+|---|---|---|---|
+| **Attaque Distante (Ngrok/Tunnel/Wi-Fi)** | ❌ Non | ❌ Non | 🛑 **REJETÉ (HTTP 403)** |
+| **Attaque Distante (Ngrok/Tunnel/Wi-Fi)** | ❌ Non | 🔑 Présent | 🛑 **REJETÉ (HTTP 403)** |
+| **Utilisateur Local Non Authentifié** | ✅ Oui | ❌ Non | 🛑 **REJETÉ (HTTP 403)** |
+| **Administrateur Local Authentifié** | ✅ Oui | 🔑 Présent | ✅ **AUTORISÉ** |
+
+- **Porte 1 (Périmètre Réseau)** : Les requêtes distantes (via tunnel public, Ngrok ou IP distante) sont rejetées immédiatement avec un code `HTTP 403` **avant même l'évaluation du mot de passe**. Les attaquants distants ne disposent d'aucune surface d'attaque ni d'opportunité de brute-force.
+- **Porte 2 (Authentification Fortifiée)** : La vérification du jeton de session administrateur (`checkIsAdmin`) est obligatoire sur 100% des endpoints sensibles (`/api/admin/cat-generator/*`, `/api/cats/bulk-import`, `/api/pdfs/reindex`).
+
+### 2. Sécurisation de l'Interface Utilisateur (UI Hardening)
+- **Bouton `⚡ IA Auto`** : Masqué par défaut (`display: none`) dans l'HTML brut de `index.html`. Injecté dynamiquement uniquement si `state.isAdmin === true`.
+- **Verrouillage du Generator Lab (`cat_generator_lab.html`)** : Transmission systématique du header `x-admin-token`. Affichage automatique d'un écran de verrouillage 🔐 **Connexion Admin Requise** avec formulaire d'authentification en cas d'accès non autorisé.
+
+---
+
 ## 📶 Offline-First Capabilities & PWA
 
 * **App Mode at Startup**: `main.js` calls `api.getAppMode()` which checks host, protocol, and Capacitor UA to assign the correct data routing strategy before any network call is made.
@@ -205,26 +367,48 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 
 ---
 
+## 🔐 Security Hardening (v1.5.0)
+
+The following critical security patches were applied in v1.5.0:
+
+| Fix | File | Detail |
+|---|---|---|
+| Hardcoded API key removed | `server/routes/version.js` | `ADMIN_API_KEY` now loaded from `.env` only |
+| dotenv loading | `server/index.js` | Secrets loaded at boot from `.env` |
+| X-Forwarded-For spoofing blocked | `server/middleware/rate-limit.js` | XFF only trusted from local socket IPs |
+| Suggestions endpoint auth | `server/routes/suggestions.js` | Requires valid `x-app-key` header + 5KB payload cap |
+| Toast XSS eliminated | `public/js/utils.js` | `textContent` used instead of `innerHTML` |
+| Body size limit | `server/index.js` + `server/routes/pdfs.js` | Global 1MB limit, PDF upload gets local 50MB |
+
+---
+
 ## 🔒 Security & Admin Hardening
 
-### 1. Localhost-Only Authentication
+### 1. Production APK Asset Hardening & Anti-Decompilation
+* **Automated Asset Stripping**: `"cap:sync"` script in `package.json` executes `node scripts/clean_android_assets.js` after `cap sync` to remove unbundled development JS source files (`components/`, `lib/`, `workspace/`, `dashboard/`, `main.js`, `api.js`, `utils.js`, `state.js`).
+* **Native AAPT Exclusion**: `android/app/build.gradle` enforces `aaptOptions.ignoreAssetsPattern` (`components:lib:workspace:dashboard:main.js:...`) to filter out development source files at the Gradle compiler level.
+* **Bytecode Obfuscation**: Android R8/ProGuard obfuscation enabled (`minifyEnabled true`, `shrinkResources true`).
+* **Reverse Engineering Protection**: Decompilation tools (`apktool`, `jadx`, `unzip`) find **ONLY** `public/dist/app-*.js` (minified production bundle) and runtime engine files (`pdf.min.js`, `version-checker.js`).
+
+### 2. User Data Storage Protection & Non-Destructive Lock Gate
+* **Kill Switch / Force Update Protection**: `public/js/version-checker.js` is strictly prohibited from calling `localStorage.clear()` or `indexedDB.deleteDatabase()`.
+* **Data Preservation**: User clinical notes (`dr_cat_notes_*`), reading history (`dr_cat_user_progress`), Leitner spaced repetition stats (`dr_cat_leitner`), and streaks (`dr_cat_streak`) remain 100% preserved during version locks.
+* **Network Cache Purging**: Locks clear ONLY temporary network API caches (`dr_cat_synced_db`). When the lock is deactivated or the APK is updated, `window.location.reload()` restores active UI with 100% of user data intact.
+
+### 3. Localhost-Only Authentication
 * `/api/login` is locked to loopback IP addresses (`127.0.0.1`, `::1`).
 * Handles proxy layers (Ngrok/Cloudflare tunnels) by inspecting `X-Forwarded-For` header.
 * Remote users only see the app in read-only/suggestion mode.
 
-### 2. PBKDF2 Password Hashing
+### 4. PBKDF2 Password Hashing
 * Admin passwords are never stored in plain text.
 * `set_admin_password.js` hashes passwords using PBKDF2 with a random 16-byte salt and 100,000 iterations, identical to the server's verification logic.
 * The resulting `salt:hash` pair is stored in `admin_password.txt` (Git-ignored).
-* On first run, if no password file exists, `server.js` auto-generates a long random password and writes the hashed credentials.
 
-### 3. Dynamic Token Generation
+### 5. Dynamic Token Generation & HTML Sanitization
 * Logins yield a 32-character hex token from `crypto.randomBytes(16).toString('hex')`.
 * Stored in a server-side memory `Set`, verified on every administrative API call.
-* Cleared on logout or server restart.
-
-### 3. HTML Sanitization (XSS Prevention)
-* User-submitted suggestions are escaped at rendering time via `escapeHTML()` before being injected into the DOM.
+* User-submitted suggestions are escaped at rendering time via `escapeHTML()` (XSS Prevention).
 
 ### 4. Admin UI Gating
 * The **Admin** button is hidden by default for all remote users.
@@ -249,3 +433,72 @@ To guarantee a fluid, 60FPS native application feel inside the Capacitor Android
 * Pings core API endpoints and displays latency in real time.
 * Shows last sync timestamp, active provider URL, and PDF index coverage.
 * Allows exporting the full diagnostics snapshot as a JSON file.
+
+---
+
+## 🚨 Server-Controlled Force Update, Kill Switch & Anonymous Telemetry
+
+### 1. Multi-Source Mandatory Force Update System (`v1.1.6`)
+* **Server Version Config Store (`server/config/version.json`)**: Persists `minVersion`, `latestVersion`, `forceUpdateActive`, `updateMessage`, `releaseNotes`, and multi-source `downloadLinks`.
+* **Numeric Version Guard Middleware (`server/middleware/version-guard.js`)**: Inspects `X-App-Version` headers on incoming API calls. Compares semantic version numbers numerically (`compareVersions`). Responds with `HTTP 426 Upgrade Required` when `forceUpdateActive: true` and client version `< minVersion`.
+* **Target-Specific Lockout**: Native Android APKs send `X-App-Version` and are strictly locked out when outdated. Web browser clients (without `X-App-Version`) pass through cleanly to receive live server assets.
+* **Route Exclusion Guarantee**: Excludes `/api/version`, `/api/admin/version`, `/api/server-providers`, and static assets from version checks to prevent administrative deadlocks.
+* **Client Lock Gate & Offline Resilience (`public/js/version-checker.js`)**: Encapsulates lock state inside an IIFE closure. Purges non-essential browser caches (`wipeStorageOnLock()`) while explicitly preserving `dr_cat_install_id`. Attaches a DOM `MutationObserver` to prevent DevTools element deletion tampering.
+
+### 2. Anonymous Installation ID & Device Telemetry Engine
+* **Persistent Device Token (`public/js/install-id.js`)**: Generates a persistent UUID (`drcat-inst-${crypto.randomUUID()}`) saved in `localStorage`. Automatically attached to all outgoing API calls via `X-Install-ID` header.
+* **Server Active Device Tracker (`server/services/active-devices.js`)**: Records unique installation tokens, app versions, platform types (`android_apk` vs `web_pwa`), and request frequencies.
+* **Debounced Persistence (`server/data/active_devices.json`)**: Writes updated device data asynchronously using a 10-second debounce timer to eliminate disk I/O thrashing.
+* **Protected Admin Analytics Endpoint (`GET /api/admin/active-devices`)**: Protected by `x-api-key`. Computes Total Devices, Daily Active Users (DAU - 24h), Monthly Active Users (MAU - 30d), and Version Distribution ratios.
+
+### 3. Standalone Analytics Lab UI (`analytics_lab.html` v1.5.3)
+* **Protected Localhost Interface**: HTML route protected in `server/index.js` via `isLocalhostConnection(req)` (identical security tier to `pdf_lab.html`).
+* **Rich Telemetry Suite (v1.5.3)**:
+  - **Real-Time Live Users Card (`🟢 En Ligne < 5 min`)**: Instantaneous visibility into active beta testers currently connected (5-minute sliding window).
+  - **Dev/Admin IP Auto-Whitelisting & Classification**: Requests from localhost, admin session tokens, or known admin IPs are automatically tagged as `isAdminDevice: true`, completely isolating developer self-testing from external beta metrics without compromising route security.
+  - **Manual Dev/External Toggle Button**: 1-click `[ -> Dev ]` / `[ -> Externe ]` button in the UI table to override classification for any device (`POST /api/admin/active-devices/toggle-admin`).
+  - **Universal Client Headers**: `public/js/api.js` transmits explicit `x-device-platform` (`android_apk` vs `web_pwa`) and dynamic package version (`x-app-version: 1.5.3`).
+  - **Telemetry Reset with Safety Modal**: Protected endpoint `POST /api/admin/active-devices/reset` guarded by an in-app confirmation modal dialog.
+  - **Multi-Window Metrics**: Displays 🟢 Live (<5 min), ⚡ Recent (<1h), 📅 DAU (24h), and 📆 MAU (30d) counters with external vs dev user breakdown.
+  - **1-Click CSV Spreadsheet Exporter**: Exports detailed device telemetry (`drcat_active_devices_YYYY-MM-DD.csv`).
+  - **Auto-Refresh Toggle**: 10-second live polling loop.
+
+---
+
+## 🌐 Web RAG Pipeline & Generator Lab Architecture (v1.5.4 & v1.5.5)
+
+### 1. Incremental Web RAG Top-Up & Cache Management (v1.5.4)
+* **Incremental Top-Up Mode (`fetchAndCacheWebSources`)**:
+  - When re-running Web Fetch on any CAT, the fetcher inspects existing disk cache files in `cat_db_generator/web_cache/<folder>/`.
+  - If cached files are present but fewer than `maxSources: 6`, it preserves all existing cache files and queries online only for missing guidelines from Wikipedia Medical FR, MedG Consensus, and MSD Manuals.
+* **1-Click Cache Purge & Force Online Refetch**:
+  - **Single & Global Purge Endpoints (`POST /api/admin/cat-generator/clear-web-cache`)**: Supports deleting cache files for a single CAT title or purging the entire `web_cache/` directory cleanly.
+  - **Master Batch Controls**: Added global header buttons (`Recharger Web Global` and `Vider Tout Cache Web`) in `admin/cat_generator_lab.html` alongside per-CAT table actions.
+
+### 2. Client-Server Background Sync Timestamp Type Normalization (v1.5.5)
+* **Problem**: Clients issue delta sync queries sending epoch milliseconds (`GET /api/cats?since=1785700000000`). Database records promoted from the Generator Lab formatted `updatedAt` as ISO strings (`"2026-08-03T23:17:08.210Z"`). In JavaScript array filtering, comparing a string directly with a number (`isoString > numericMs`) evaluates to `NaN > number` (`false`), causing silent exclusion of modified records.
+* **Resolution (`server/routes/cats.js`)**: The API endpoint normalizes all `updatedAt` values at runtime:
+  ```javascript
+  const catTime = typeof c.updatedAt === 'number' ? c.updatedAt : new Date(c.updatedAt).getTime();
+  return !isNaN(catTime) && catTime > since;
+  ```
+  Guarantees 100% reliable delta sync detection across all Android APK versions and PWAs.
+
+---
+
+## ⚡ Serverless Cloudflare Edge API & Protocole ACK (v1.7.9)
+
+### 1. Engine Edge Serverless (`worker.js` & `wrangler.jsonc`)
+* **Execution Native Edge (24/7)** : `drcat.dr-cat.workers.dev` exécute nativement les endpoints de l'application (`POST /api/suggestions`, `GET /api/server-providers`, `GET /api/search-status`, `GET /api/version`) directement sur les serveurs Edge de Cloudflare (~90ms).
+* **Persistance Cloudflare KV (`SUGGESTIONS_KV`)** : Les propositions soumises par les utilisateurs web du monde entier sont enregistrées 24/7 dans la base clé-valeur Cloudflare (`d569bf8299a545f182c9e6acedd4d6aa`).
+* **Multi-Provider Failover Registry** :
+  - **Primary (Priority 1)** : `https://drcat.dr-cat.workers.dev` (Cloudflare Worker Edge)
+  - **Secondary (Priority 2)** : `https://rendition-duchess-dry.ngrok-free.dev` (Termux Backend Tunnel)
+
+### 2. Handshake ACK & Purge 2-Voies (`server/services/sync-suggestions.js`)
+* **Accusé de Réception (`POST /api/suggestions/ack`)** : Lors du démarrage de Termux ou de l'ouverture du Panneau d'Administration, le serveur local interroge Cloudflare KV, stocke les propositions dans `suggestions.json`, et envoie immédiatement un signal ACK (`{ ids: [...] }`) à Cloudflare pour purger les éléments reçus de la file d'attente du cloud.
+* **Purge lors de la Décision (`DELETE /api/suggestions/:id`)** : Lorsque l'administrateur valide ou rejette une proposition dans Termux, un appel DELETE purge définitivement la fiche de la base Cloudflare KV pour éviter toute réapparition en boucle.
+* **Smart Upsert Engine (`server/routes/suggestions.js`)** : Lors de l'approbation d'une proposition, le serveur vérifie la présence d'une CAT existante par ID ou titre identique. Si la carte existe, elle est mise à jour in-place (`"offline"` ➔ `"offlineh"`) sans générer de doublons orphelins dans la base de données.
+
+
+

@@ -1,0 +1,2 @@
+# Prevent Wrangler from uploading worker script as a public asset
+_worker.js

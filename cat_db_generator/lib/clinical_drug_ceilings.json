@@ -1,0 +1,1282 @@
+{
+  "paracetamol": {
+    "dci": "Paracétamol",
+    "classe": "Antalgique / Antipyrétique (Palier 1)",
+    "algerian_brands": ["Doliprane", "Efferalgan", "Perfalgan", "Panadol", "Paralyoc", "Algidol", "Paracetamol"],
+    "adult_min_daily_dose_mg": 1500,
+    "adult_usual_dose_mg": 3000,
+    "adult_max_daily_ceiling_mg": 4000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": {
+      "min": 40,
+      "usual": 60,
+      "max_mg_kg": 60,
+      "single_dose_mg_kg": 15,
+      "absolute_max_mg": 3000,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Insuffisance hépatocellulaire sévère", "Allergie au paracétamol"],
+    "renal_adjustment": "DFG < 10 ml/min : espacer les prises de 8 heures (max 3g/j)"
+  },
+  "ibuprofene": {
+    "dci": "Ibuprofène",
+    "classe": "Anti-inflammatoire non stéroïdien (AINS)",
+    "algerian_brands": ["Advil", "Nurofen", "Antadys", "Brufen", "Ibuprène", "Algofène", "Ibuprofene"],
+    "adult_min_daily_dose_mg": 600,
+    "adult_usual_dose_mg": 1200,
+    "adult_max_daily_ceiling_mg": 2400,
+    "adult_max_single_dose_mg": 400,
+    "pediatric_mg_per_kg_day": {
+      "min": 20,
+      "usual": 30,
+      "max_mg_kg": 30,
+      "single_dose_mg_kg": 10,
+      "absolute_max_mg": 1200,
+      "age_min_months": 3
+    },
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Grossesse dès 24 SA (5e mois révolu - fermeture prématurée canal artériel)",
+      "Ulcère gastroduodénal évolutif",
+      "Insuffisance rénale sévère",
+      "Insuffisance cardiaque sévère",
+      "Varicelle (risque de fasciite nécrosante)",
+      "Infection bactérienne active non contrôlée"
+    ],
+    "renal_adjustment": "Contre-indiqué si DFG < 30 ml/min"
+  },
+  "ketoprofene": {
+    "dci": "Kétoprofène",
+    "classe": "Anti-inflammatoire non stéroïdien (AINS)",
+    "algerian_brands": ["Profénid", "Bi-Profénid", "Toprec", "Ketofan", "Ketoprofene"],
+    "adult_min_daily_dose_mg": 100,
+    "adult_usual_dose_mg": 200,
+    "adult_max_daily_ceiling_mg": 300,
+    "adult_max_single_dose_mg": 150,
+    "pediatric_mg_per_kg_day": {
+      "min": 2,
+      "usual": 2,
+      "max_mg_kg": 2,
+      "single_dose_mg_kg": 0.5,
+      "absolute_max_mg": 100,
+      "age_min_months": 6
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse dès 24 SA", "Ulcère gastroduodénal", "Insuffisance rénale sévère"],
+    "renal_adjustment": "Contre-indiqué si DFG < 30 ml/min"
+  },
+  "diclofenac": {
+    "dci": "Diclofénac",
+    "classe": "Anti-inflammatoire non stéroïdien (AINS)",
+    "algerian_brands": ["Voltarène", "Clofen", "Diclogesic", "Voltass", "Diclofenac"],
+    "adult_min_daily_dose_mg": 75,
+    "adult_usual_dose_mg": 100,
+    "adult_max_daily_ceiling_mg": 150,
+    "adult_max_single_dose_mg": 75,
+    "pediatric_mg_per_kg_day": {
+      "min": 2,
+      "usual": 2.5,
+      "max_mg_kg": 3,
+      "single_dose_mg_kg": 1,
+      "absolute_max_mg": 150,
+      "age_min_months": 12
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse dès 24 SA", "Ulcère gastroduodénal", "Insuffisance cardiaque avérée"]
+  },
+  "acide_mefenamique": {
+    "dci": "Acide méfénamique",
+    "classe": "Anti-inflammatoire non stéroïdien (AINS)",
+    "algerian_brands": ["Ponstyl", "Mefen", "Fenamate"],
+    "adult_min_daily_dose_mg": 750,
+    "adult_usual_dose_mg": 1500,
+    "adult_max_daily_ceiling_mg": 1500,
+    "adult_max_single_dose_mg": 500,
+    "pediatric_mg_per_kg_day": {
+      "min": 20,
+      "usual": 25,
+      "max_mg_kg": 25,
+      "single_dose_mg_kg": 6.5,
+      "absolute_max_mg": 750,
+      "age_min_months": 24
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse dès 24 SA", "Ulcère gastroduodénal actif", "Enfant < 2 ans"]
+  },
+  "aspirine": {
+    "dci": "Acide acétylsalicylique",
+    "classe": "Antalgique / AINS / Antiagrégant",
+    "algerian_brands": ["Aspégic", "Kardégic", "Aspirine UPSA", "Catalgine", "Aspirine"],
+    "adult_min_daily_dose_mg": 1000,
+    "adult_usual_dose_mg": 3000,
+    "adult_max_daily_ceiling_mg": 4000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Syndrome de Reye chez l'enfant et l'adolescent en contexte viral (varicelle, grippe)",
+      "Ulcère gastroduodénal actif",
+      "Grossesse à dose anti-inflammatoire dès 24 SA"
+    ]
+  },
+  "tramadol": {
+    "dci": "Tramadol",
+    "classe": "Antalgique opioïde faible (Palier 2)",
+    "algerian_brands": ["Contramal", "Topalgic", "Ixprim", "Zaldiar", "Tramal", "Tramadol"],
+    "adult_min_daily_dose_mg": 100,
+    "adult_usual_dose_mg": 200,
+    "adult_max_daily_ceiling_mg": 400,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Enfant de moins de 12 ans (risque dépression respiratoire métaboliseurs ultra-rapides)",
+      "Insuffisance respiratoire sévère",
+      "Épilepsie non contrôlée",
+      "Allaitement",
+      "Association aux IMAO ou ISRS (syndrome sérotoninergique)"
+    ]
+  },
+  "codeine": {
+    "dci": "Codéine",
+    "classe": "Antalgique opioïde faible (Palier 2)",
+    "algerian_brands": ["Codoliprane", "Efferalgan Codéine", "Prontalgine", "Lindilane", "Klipal"],
+    "adult_min_daily_dose_mg": 60,
+    "adult_usual_dose_mg": 120,
+    "adult_max_daily_ceiling_mg": 240,
+    "adult_max_single_dose_mg": 60,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Enfant de moins de 12 ans", "Insuffisance respiratoire", "Allaitement"]
+  },
+  "morphine": {
+    "dci": "Morphine",
+    "classe": "Antalgique opioïde fort (Palier 3)",
+    "algerian_brands": ["Skenan", "Sevredol", "Actiskenan", "Morphine"],
+    "adult_min_daily_dose_mg": 30,
+    "adult_usual_dose_mg": 60,
+    "adult_max_daily_ceiling_mg": 360,
+    "adult_max_single_dose_mg": 30,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.5,
+      "usual": 1.0,
+      "max_mg_kg": 2.0,
+      "single_dose_mg_kg": 0.2,
+      "absolute_max_mg": 60,
+      "age_min_months": 6
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Insuffisance respiratoire décompensée", "Traumatisme crânien non surveillé"]
+  },
+  "nefopam": {
+    "dci": "Néfopam",
+    "classe": "Antalgique central non opioïde",
+    "algerian_brands": ["Acupan", "Nefopam"],
+    "adult_min_daily_dose_mg": 60,
+    "adult_usual_dose_mg": 120,
+    "adult_max_daily_ceiling_mg": 120,
+    "adult_max_single_dose_mg": 20,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Enfant de moins de 15 ans", "Convulsions", "Risque de glaucome par fermeture de l'angle", "Adénome prostatique"]
+  },
+  "amoxicilline": {
+    "dci": "Amoxicilline",
+    "classe": "Antibiotique - Pénicilline A (Bêta-lactamine)",
+    "algerian_brands": ["Clamoxyl", "Amoxil", "Amopen", "Hiconcil", "Augmentin", "Clavulin", "Amoxicilline"],
+    "adult_min_daily_dose_mg": 1500,
+    "adult_usual_dose_mg": 2000,
+    "adult_max_daily_ceiling_mg": 3000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": {
+      "min": 50,
+      "usual": 80,
+      "max_mg_kg": 100,
+      "single_dose_mg_kg": 33,
+      "absolute_max_mg": 3000,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie prouvée aux pénicillines et bêta-lactamines", "Mononucléose infectieuse (rash)"],
+    "renal_adjustment": "DFG 10-30 ml/min : max 1000 mg x 2/j ; DFG < 10 ml/min : max 500 mg x 2/j"
+  },
+  "amoxicilline_acide_clavulanique": {
+    "dci": "Amoxicilline + Acide clavulanique",
+    "classe": "Antibiotique - Aminopénicilline + Inhibiteur de bêta-lactamases",
+    "algerian_brands": ["Augmentin", "Clavulin", "Curam", "Amoclan", "Klavox", "Amoxi-Clav"],
+    "adult_min_daily_dose_mg": 1500,
+    "adult_usual_dose_mg": 2000,
+    "adult_max_daily_ceiling_mg": 3000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": {
+      "min": 80,
+      "usual": 80,
+      "max_mg_kg": 100,
+      "single_dose_mg_kg": 30,
+      "absolute_max_mg": 3000,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux pénicillines", "Antécédent d'ictère ou d'hépatite cholestatique sous Augmentin"]
+  },
+  "cefalexine": {
+    "dci": "Céfalexine",
+    "classe": "Antibiotique - Céphalosporine de 1ère génération (C1G)",
+    "algerian_brands": ["Keforal", "Cefalex", "Keflex"],
+    "adult_min_daily_dose_mg": 1500,
+    "adult_usual_dose_mg": 2000,
+    "adult_max_daily_ceiling_mg": 4000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": {
+      "min": 25,
+      "usual": 50,
+      "max_mg_kg": 100,
+      "single_dose_mg_kg": 25,
+      "absolute_max_mg": 3000,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux céphalosporines"]
+  },
+  "cefpodoxime": {
+    "dci": "Cefpodoxime proxétil",
+    "classe": "Antibiotique - Céphalosporine de 3ème génération orale (C3G)",
+    "algerian_brands": ["Orelox", "Podomex", "Cefodox"],
+    "adult_min_daily_dose_mg": 200,
+    "adult_usual_dose_mg": 200,
+    "adult_max_daily_ceiling_mg": 400,
+    "adult_max_single_dose_mg": 200,
+    "pediatric_mg_per_kg_day": {
+      "min": 8,
+      "usual": 8,
+      "max_mg_kg": 8,
+      "single_dose_mg_kg": 4,
+      "absolute_max_mg": 400,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux céphalosporines"]
+  },
+  "cefixime": {
+    "dci": "Céfixime",
+    "classe": "Antibiotique - Céphalosporine de 3ème génération orale (C3G)",
+    "algerian_brands": ["Oroken", "Fixim", "Cefix"],
+    "adult_min_daily_dose_mg": 400,
+    "adult_usual_dose_mg": 400,
+    "adult_max_daily_ceiling_mg": 400,
+    "adult_max_single_dose_mg": 200,
+    "pediatric_mg_per_kg_day": {
+      "min": 8,
+      "usual": 8,
+      "max_mg_kg": 8,
+      "single_dose_mg_kg": 4,
+      "absolute_max_mg": 400,
+      "age_min_months": 6
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux céphalosporines", "Enfant de moins de 6 mois"]
+  },
+  "ceftriaxone": {
+    "dci": "Ceftriaxone",
+    "classe": "Antibiotique - Céphalosporine de 3ème génération injectable (C3G)",
+    "algerian_brands": ["Rocéphine", "Ceftriax", "Triaxone"],
+    "adult_min_daily_dose_mg": 1000,
+    "adult_usual_dose_mg": 1000,
+    "adult_max_daily_ceiling_mg": 4000,
+    "adult_max_single_dose_mg": 2000,
+    "pediatric_mg_per_kg_day": {
+      "min": 50,
+      "usual": 50,
+      "max_mg_kg": 100,
+      "single_dose_mg_kg": 50,
+      "absolute_max_mg": 4000,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux céphalosporines", "Nouveau-né ictérique ou prématuré (ictère nucléaire)"]
+  },
+  "ciprofloxacine": {
+    "dci": "Ciprofloxacine",
+    "classe": "Antibiotique - Fluoroquinolone",
+    "algerian_brands": ["Ciflox", "Ciprox", "Ciprolon", "Baflox", "Ciprofloxacine"],
+    "adult_min_daily_dose_mg": 500,
+    "adult_usual_dose_mg": 1000,
+    "adult_max_daily_ceiling_mg": 1500,
+    "adult_max_single_dose_mg": 750,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Grossesse (tous trimestres)",
+      "Allaitement",
+      "Enfant et adolescent de moins de 18 ans (arthropathies chez le sujet en croissance)",
+      "Antécédent de tendinopathie sous fluoroquinolones"
+    ]
+  },
+  "levofloxacine": {
+    "dci": "Lévofloxacine",
+    "classe": "Antibiotique - Fluoroquinolone respiratoire",
+    "algerian_brands": ["Tavanic", "Levox", "Floxilev"],
+    "adult_min_daily_dose_mg": 500,
+    "adult_usual_dose_mg": 500,
+    "adult_max_daily_ceiling_mg": 1000,
+    "adult_max_single_dose_mg": 500,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse", "Enfant < 18 ans", "Tendinopathie sous quinolones"]
+  },
+  "ofloxacine": {
+    "dci": "Ofloxacine",
+    "classe": "Antibiotique - Fluoroquinolone",
+    "algerian_brands": ["Oflocet", "Oflox"],
+    "adult_min_daily_dose_mg": 400,
+    "adult_usual_dose_mg": 400,
+    "adult_max_daily_ceiling_mg": 800,
+    "adult_max_single_dose_mg": 400,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse", "Enfant < 18 ans", "Tendinopathie"]
+  },
+  "azithromycine": {
+    "dci": "Azithromycine",
+    "classe": "Antibiotique - Macrolide (Azalide)",
+    "algerian_brands": ["Zithromax", "Azix", "Azitro", "Zitrex", "Azithromycine"],
+    "adult_min_daily_dose_mg": 500,
+    "adult_usual_dose_mg": 500,
+    "adult_max_daily_ceiling_mg": 1000,
+    "adult_max_single_dose_mg": 500,
+    "pediatric_mg_per_kg_day": {
+      "min": 10,
+      "usual": 20,
+      "max_mg_kg": 20,
+      "single_dose_mg_kg": 20,
+      "absolute_max_mg": 500,
+      "age_min_months": 6
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux macrolides", "Association aux dérivés de l'ergot de seigle"]
+  },
+  "clarithromycine": {
+    "dci": "Clarithromycine",
+    "classe": "Antibiotique - Macrolide",
+    "algerian_brands": ["Zeclar", "Naxy", "Biclar", "Clarithro"],
+    "adult_min_daily_dose_mg": 500,
+    "adult_usual_dose_mg": 1000,
+    "adult_max_daily_ceiling_mg": 1000,
+    "adult_max_single_dose_mg": 500,
+    "pediatric_mg_per_kg_day": {
+      "min": 15,
+      "usual": 15,
+      "max_mg_kg": 15,
+      "single_dose_mg_kg": 7.5,
+      "absolute_max_mg": 1000,
+      "age_min_months": 6
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Allergie aux macrolides", "Allongement de l'intervalle QT"]
+  },
+  "spiramycine": {
+    "dci": "Spiramycine",
+    "classe": "Antibiotique - Macrolide (Toxoplasmose / Odontologie)",
+    "algerian_brands": ["Rovamycine", "Bi-Rodogyl", "Rodogyl"],
+    "adult_min_daily_dose_mg": 6000000,
+    "adult_usual_dose_mg": 9000000,
+    "adult_max_daily_ceiling_mg": 9000000,
+    "adult_max_single_dose_mg": 3000000,
+    "pediatric_mg_per_kg_day": {
+      "min": 150000,
+      "usual": 150000,
+      "max_mg_kg": 300000,
+      "single_dose_mg_kg": 75000,
+      "absolute_max_mg": 9000000,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à la spiramycine"]
+  },
+  "doxycycline": {
+    "dci": "Doxycycline",
+    "classe": "Antibiotique - Tétracycline (Cycline)",
+    "algerian_brands": ["Doxypalu", "Tolexine", "Vibramycine", "Doxycin"],
+    "adult_min_daily_dose_mg": 100,
+    "adult_usual_dose_mg": 200,
+    "adult_max_daily_ceiling_mg": 200,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Enfant de moins de 8 ans (dyschromie dentaire définitive et hypoplasie de l'émail)",
+      "Grossesse aux 2ème et 3ème trimestres",
+      "Allaitement"
+    ]
+  },
+  "metronidazole": {
+    "dci": "Métronidazole",
+    "classe": "Antibactérien / Antiparasitaire (Nitro-imidazolé)",
+    "algerian_brands": ["Flagyl", "Nidazol", "Metrolag", "Métronidazole"],
+    "adult_min_daily_dose_mg": 1000,
+    "adult_usual_dose_mg": 1500,
+    "adult_max_daily_ceiling_mg": 2000,
+    "adult_max_single_dose_mg": 500,
+    "pediatric_mg_per_kg_day": {
+      "min": 30,
+      "usual": 35,
+      "max_mg_kg": 40,
+      "single_dose_mg_kg": 15,
+      "absolute_max_mg": 1500,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux imidazolés", "Consommation d'alcool (effet antabuse sévère)"]
+  },
+  "cotrimoxazole": {
+    "dci": "Sulfaméthoxazole + Triméthoprime",
+    "classe": "Antibiotique - Sulfamide antibactérien",
+    "algerian_brands": ["Bactrim", "Bactrimel", "Cotrimoxazole"],
+    "adult_min_daily_dose_mg": 800,
+    "adult_usual_dose_mg": 1600,
+    "adult_max_daily_ceiling_mg": 3200,
+    "adult_max_single_dose_mg": 800,
+    "pediatric_mg_per_kg_day": {
+      "min": 30,
+      "usual": 30,
+      "max_mg_kg": 40,
+      "single_dose_mg_kg": 15,
+      "absolute_max_mg": 1600,
+      "age_min_months": 1
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Allergie aux sulfamides", "Déficit en G6PD", "Nourrisson < 1 mois"]
+  },
+  "fosfomycine": {
+    "dci": "Fosfomycine-trométamol",
+    "classe": "Antibiotique urinaire monodose",
+    "algerian_brands": ["Monuril", "Uridoz", "Fosfocine"],
+    "adult_min_daily_dose_mg": 3000,
+    "adult_usual_dose_mg": 3000,
+    "adult_max_daily_ceiling_mg": 3000,
+    "adult_max_single_dose_mg": 3000,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Insuffisance rénale sévère", "Pyélonéphrite aiguë (inefficace)"]
+  },
+  "nitrofurantoine": {
+    "dci": "Nitrofurantoïne",
+    "classe": "Antiseptique urinaire",
+    "algerian_brands": ["Furadantine", "Furadoine"],
+    "adult_min_daily_dose_mg": 150,
+    "adult_usual_dose_mg": 300,
+    "adult_max_daily_ceiling_mg": 300,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": {
+      "min": 5,
+      "usual": 5,
+      "max_mg_kg": 7,
+      "single_dose_mg_kg": 2.5,
+      "absolute_max_mg": 300,
+      "age_min_months": 3
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Insuffisance rénale (DFG < 45 ml/min)", "Déficit en G6PD", "Dernier mois de grossesse"]
+  },
+  "pristinamycine": {
+    "dci": "Pristinamycine",
+    "classe": "Antibiotique - Synergistine",
+    "algerian_brands": ["Pyostacine", "Pristinamycine"],
+    "adult_min_daily_dose_mg": 2000,
+    "adult_usual_dose_mg": 2000,
+    "adult_max_daily_ceiling_mg": 3000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": {
+      "min": 50,
+      "usual": 50,
+      "max_mg_kg": 100,
+      "single_dose_mg_kg": 25,
+      "absolute_max_mg": 2000,
+      "age_min_months": 72
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux synergistines", "Enfant < 6 ans (forme comprimé)"]
+  },
+  "acide_fusidique": {
+    "dci": "Acide fusidique",
+    "classe": "Antibiotique antistaphylococcique",
+    "algerian_brands": ["Fucidine", "Fucithalmic"],
+    "adult_min_daily_dose_mg": 1000,
+    "adult_usual_dose_mg": 1500,
+    "adult_max_daily_ceiling_mg": 1500,
+    "adult_max_single_dose_mg": 500,
+    "pediatric_mg_per_kg_day": {
+      "min": 30,
+      "usual": 40,
+      "max_mg_kg": 50,
+      "single_dose_mg_kg": 15,
+      "absolute_max_mg": 1500,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à l'acide fusidique", "Association aux statines (risque rhabdomyolyse sévère)"]
+  },
+  "prednisone": {
+    "dci": "Prednisone",
+    "classe": "Corticoïde par voie générale",
+    "algerian_brands": ["Cortancyl", "Prednisone"],
+    "adult_min_daily_dose_mg": 20,
+    "adult_usual_dose_mg": 40,
+    "adult_max_daily_ceiling_mg": 80,
+    "adult_max_single_dose_mg": 60,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.5,
+      "usual": 1.0,
+      "max_mg_kg": 2.0,
+      "single_dose_mg_kg": 1.0,
+      "absolute_max_mg": 60,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["État infectieux non contrôlé", "Virose évolutive (hépatite, herpès, varicelle)"]
+  },
+  "prednisolone": {
+    "dci": "Prednisolone",
+    "classe": "Corticoïde par voie générale",
+    "algerian_brands": ["Solupred", "Prednisolone"],
+    "adult_min_daily_dose_mg": 20,
+    "adult_usual_dose_mg": 40,
+    "adult_max_daily_ceiling_mg": 80,
+    "adult_max_single_dose_mg": 60,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.5,
+      "usual": 1.0,
+      "max_mg_kg": 2.0,
+      "single_dose_mg_kg": 1.0,
+      "absolute_max_mg": 60,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["État infectieux non contrôlé", "Virose évolutive"]
+  },
+  "methylprednisolone": {
+    "dci": "Méthylprednisolone",
+    "classe": "Corticoïde par voie générale",
+    "algerian_brands": ["Médrol", "Solu-Médrol"],
+    "adult_min_daily_dose_mg": 16,
+    "adult_usual_dose_mg": 32,
+    "adult_max_daily_ceiling_mg": 80,
+    "adult_max_single_dose_mg": 60,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.8,
+      "usual": 1.0,
+      "max_mg_kg": 2.0,
+      "single_dose_mg_kg": 1.0,
+      "absolute_max_mg": 60,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["État infectieux non contrôlé"]
+  },
+  "betamethasone": {
+    "dci": "Bétaméthasone",
+    "classe": "Corticoïde - Laryngite aiguë / Urgences",
+    "algerian_brands": ["Célestène", "Bétaspan", "Bétasone"],
+    "adult_min_daily_dose_mg": 2,
+    "adult_usual_dose_mg": 4,
+    "adult_max_daily_ceiling_mg": 6,
+    "adult_max_single_dose_mg": 4,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.15,
+      "usual": 0.2,
+      "max_mg_kg": 0.3,
+      "single_dose_mg_kg": 0.2,
+      "absolute_max_mg": 4,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Infection non contrôlée"]
+  },
+  "dexamethasone": {
+    "dci": "Dexaméthasone",
+    "classe": "Corticoïde puissant",
+    "algerian_brands": ["Dectancyl", "Dexazone", "Dexaméthasone"],
+    "adult_min_daily_dose_mg": 4,
+    "adult_usual_dose_mg": 8,
+    "adult_max_daily_ceiling_mg": 16,
+    "adult_max_single_dose_mg": 8,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.15,
+      "usual": 0.3,
+      "max_mg_kg": 0.6,
+      "single_dose_mg_kg": 0.3,
+      "absolute_max_mg": 10,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Infection fongique ou virale systémique"]
+  },
+  "ramipril": {
+    "dci": "Ramipril",
+    "classe": "Antihypertenseur - Inhibiteur de l'Enzyme de Conversion (IEC)",
+    "algerian_brands": ["Triatec", "Ramitec", "Cotriatec", "Ramipril"],
+    "adult_min_daily_dose_mg": 2.5,
+    "adult_usual_dose_mg": 5,
+    "adult_max_daily_ceiling_mg": 10,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Grossesse (tous trimestres - formellement contre-indiqué)",
+      "Allaitement",
+      "Sténose bilatérale des artères rénales",
+      "Hyperkaliémie (> 5.5 mmol/L)",
+      "Antécédent d'angio-œdème sous IEC"
+    ],
+    "renal_adjustment": "DFG < 30 ml/min : débuter à 1.25 mg/j (max 5 mg/j)"
+  },
+  "perindopril": {
+    "dci": "Périndopril",
+    "classe": "Antihypertenseur - Inhibiteur de l'Enzyme de Conversion (IEC)",
+    "algerian_brands": ["Coversyl", "Bipreterax", "Coveram", "Triplixam", "Périndopril"],
+    "adult_min_daily_dose_mg": 2.5,
+    "adult_usual_dose_mg": 5,
+    "adult_max_daily_ceiling_mg": 10,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse (tous trimestres)", "Sténose bilatérale artères rénales", "Hyperkaliémie"]
+  },
+  "enalapril": {
+    "dci": "Énalapril",
+    "classe": "Antihypertenseur - Inhibiteur de l'Enzyme de Conversion (IEC)",
+    "algerian_brands": ["Renitec", "Énalapril", "Co-Renitec"],
+    "adult_min_daily_dose_mg": 5,
+    "adult_usual_dose_mg": 20,
+    "adult_max_daily_ceiling_mg": 40,
+    "adult_max_single_dose_mg": 20,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse", "Sténose bilatérale artères rénales", "Angio-œdème"]
+  },
+  "losartan": {
+    "dci": "Losartan",
+    "classe": "Antihypertenseur - Antagoniste des Récepteurs de l'Angiotensine II (ARA2)",
+    "algerian_brands": ["Cozaar", "Fortzaar", "Hyzaar", "Losar", "Losartan"],
+    "adult_min_daily_dose_mg": 50,
+    "adult_usual_dose_mg": 50,
+    "adult_max_daily_ceiling_mg": 100,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse (tous trimestres - fœtotoxicité rénale majeure)", "Sténose bilatérale artères rénales"]
+  },
+  "valsartan": {
+    "dci": "Valsartan",
+    "classe": "Antihypertenseur - Antagoniste des Récepteurs de l'Angiotensine II (ARA2)",
+    "algerian_brands": ["Tareg", "Cotareg", "Exforge", "Valsartan"],
+    "adult_min_daily_dose_mg": 80,
+    "adult_usual_dose_mg": 160,
+    "adult_max_daily_ceiling_mg": 320,
+    "adult_max_single_dose_mg": 160,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse (tous trimestres)", "Insuffisance hépatique sévère"]
+  },
+  "candesartan": {
+    "dci": "Candésartan",
+    "classe": "Antihypertenseur - Antagoniste des Récepteurs de l'Angiotensine II (ARA2)",
+    "algerian_brands": ["Atacand", "Kenzen", "Canderan", "Candésartan"],
+    "adult_min_daily_dose_mg": 8,
+    "adult_usual_dose_mg": 16,
+    "adult_max_daily_ceiling_mg": 32,
+    "adult_max_single_dose_mg": 32,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse (tous trimestres)", "Cholestase hépatique"]
+  },
+  "amlodipine": {
+    "dci": "Amlodipine",
+    "classe": "Antihypertenseur - Inhibiteur calcique dihydropyridine",
+    "algerian_brands": ["Amlor", "Amlopin", "Coveram", "Exforge", "Amlodipine"],
+    "adult_min_daily_dose_mg": 5,
+    "adult_usual_dose_mg": 5,
+    "adult_max_daily_ceiling_mg": 10,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Hypotension sévère", "Choc cardiogénique", "Sténose aortique serrée"]
+  },
+  "nicardipine": {
+    "dci": "Nicardipine",
+    "classe": "Antihypertenseur / Urgences - Inhibiteur calcique",
+    "algerian_brands": ["Loxen", "Loxen LP", "Nicardipine"],
+    "adult_min_daily_dose_mg": 40,
+    "adult_usual_dose_mg": 40,
+    "adult_max_daily_ceiling_mg": 60,
+    "adult_max_single_dose_mg": 20,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Sténose aortique serrée", "Infarctus du myocarde en phase aiguë"]
+  },
+  "lercanidipine": {
+    "dci": "Lercanidipine",
+    "classe": "Antihypertenseur - Inhibiteur calcique dihydropyridine",
+    "algerian_brands": ["Zanidip", "Lercan", "Lercadip"],
+    "adult_min_daily_dose_mg": 10,
+    "adult_usual_dose_mg": 10,
+    "adult_max_daily_ceiling_mg": 20,
+    "adult_max_single_dose_mg": 20,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse et allaitement", "Insuffisance hépatique ou rénale sévère"]
+  },
+  "furosemide": {
+    "dci": "Furosémide",
+    "classe": "Diurétique de l'anse",
+    "algerian_brands": ["Lasilix", "Furoz", "Lasilix Spécial", "Furosémide"],
+    "adult_min_daily_dose_mg": 20,
+    "adult_usual_dose_mg": 40,
+    "adult_max_daily_ceiling_mg": 250,
+    "adult_max_single_dose_mg": 80,
+    "pediatric_mg_per_kg_day": {
+      "min": 1,
+      "usual": 1.5,
+      "max_mg_kg": 2,
+      "single_dose_mg_kg": 1,
+      "absolute_max_mg": 40,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Hypovolémie ou déshydratation", "Hypokaliémie sévère", "Obstacle sur les voies urinaires"]
+  },
+  "hydrochlorothiazide": {
+    "dci": "Hydrochlorothiazide",
+    "classe": "Diurétique thiazidique",
+    "algerian_brands": ["Esidrex", "Co-Renitec", "Cotriatec", "Hyzaar", "Hydrochlorothiazide"],
+    "adult_min_daily_dose_mg": 12.5,
+    "adult_usual_dose_mg": 25,
+    "adult_max_daily_ceiling_mg": 50,
+    "adult_max_single_dose_mg": 25,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Insuffisance rénale sévère (DFG < 30 ml/min)", "Hypokaliémie réfractaire", "Goutte aiguë"]
+  },
+  "spironolactone": {
+    "dci": "Spironolactone",
+    "classe": "Diurétique épargneur de potassium - Antagoniste de l'aldostérone",
+    "algerian_brands": ["Aldactone", "Spiroctan", "Aldactazine", "Spironolactone"],
+    "adult_min_daily_dose_mg": 25,
+    "adult_usual_dose_mg": 50,
+    "adult_max_daily_ceiling_mg": 100,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Hyperkaliémie > 5.0 mmol/L", "Insuffisance rénale sévère (DFG < 30 ml/min)", "Maladie d'Addison"]
+  },
+  "bisoprolol": {
+    "dci": "Bisoprolol",
+    "classe": "Bêta-bloquant cardio-sélectif",
+    "algerian_brands": ["Cardensiel", "Detensiel", "Lodoz", "Biso", "Bisoprolol"],
+    "adult_min_daily_dose_mg": 2.5,
+    "adult_usual_dose_mg": 5,
+    "adult_max_daily_ceiling_mg": 10,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Asthme sévère / BPCO décompensée", "BAV de 2e ou 3e degré", "Bradycardie < 50 bpm", "Choc cardiogénique"]
+  },
+  "atenolol": {
+    "dci": "Aténolol",
+    "classe": "Bêta-bloquant",
+    "algerian_brands": ["Ténormine", "Ténoretic", "Aténolol"],
+    "adult_min_daily_dose_mg": 50,
+    "adult_usual_dose_mg": 50,
+    "adult_max_daily_ceiling_mg": 100,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Asthme sévère", "BAV de haut degré", "Bradycardie sévère"]
+  },
+  "metoprolol": {
+    "dci": "Métoprolol",
+    "classe": "Bêta-bloquant cardio-sélectif",
+    "algerian_brands": ["Séloken", "Lopressor", "Métoprolol"],
+    "adult_min_daily_dose_mg": 50,
+    "adult_usual_dose_mg": 100,
+    "adult_max_daily_ceiling_mg": 200,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Asthme", "BAV", "Bradycardie"]
+  },
+  "methyldopa": {
+    "dci": "Méthyldopa",
+    "classe": "Antihypertenseur central - Référence Grossesse",
+    "algerian_brands": ["Aldomet", "Dopegyt", "Méthyldopa"],
+    "adult_min_daily_dose_mg": 500,
+    "adult_usual_dose_mg": 750,
+    "adult_max_daily_ceiling_mg": 3000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Hépatopathie active", "Dépression sévère"]
+  },
+  "metformine": {
+    "dci": "Metformine",
+    "classe": "Antidiabétique oral - Biguanide",
+    "algerian_brands": ["Glucophage", "Stagid", "Metfor", "Diaformin", "Metformine"],
+    "adult_min_daily_dose_mg": 1000,
+    "adult_usual_dose_mg": 2000,
+    "adult_max_daily_ceiling_mg": 3000,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": [
+      "Insuffisance rénale sévère (DFG < 30 ml/min - risque d'acidose lactique)",
+      "Insuffisance hépatique",
+      "Injection de produit de contraste iodé (suspendre 48h)",
+      "Décompensation acidocétosique"
+    ]
+  },
+  "gliclazide": {
+    "dci": "Gliclazide",
+    "classe": "Antidiabétique oral - Sulfamide hypoglycémiant",
+    "algerian_brands": ["Diamicron", "Diaprel", "Glicla", "Gliclazide"],
+    "adult_min_daily_dose_mg": 30,
+    "adult_usual_dose_mg": 60,
+    "adult_max_daily_ceiling_mg": 120,
+    "adult_max_single_dose_mg": 120,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse et allaitement", "Diabète de type 1", "Insuffisance rénale ou hépatique sévère"]
+  },
+  "salbutamol": {
+    "dci": "Salbutamol",
+    "classe": "Bronchodilatateur - Bêta-2 mimétique d'action rapide",
+    "algerian_brands": ["Ventoline", "Salbu", "Ventodisk", "Asmasal", "Salbutamol"],
+    "adult_min_daily_dose_mg": 0.4,
+    "adult_usual_dose_mg": 1.6,
+    "adult_max_daily_ceiling_mg": 4.0,
+    "adult_max_single_dose_mg": 0.4,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Intolérance connue au salbutamol"]
+  },
+  "terbutaline": {
+    "dci": "Terbutaline",
+    "classe": "Bronchodilatateur - Bêta-2 mimétique",
+    "algerian_brands": ["Bricanyl", "Terbutaline"],
+    "adult_min_daily_dose_mg": 1.0,
+    "adult_usual_dose_mg": 2.0,
+    "adult_max_daily_ceiling_mg": 4.0,
+    "adult_max_single_dose_mg": 0.5,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à la terbutaline"]
+  },
+  "ipratropium": {
+    "dci": "Bromure d'ipratropium",
+    "classe": "Bronchodilatateur - Anticholinergique",
+    "algerian_brands": ["Atrovent", "Combivent", "Ipratropium"],
+    "adult_min_daily_dose_mg": 0.08,
+    "adult_usual_dose_mg": 0.16,
+    "adult_max_daily_ceiling_mg": 0.32,
+    "adult_max_single_dose_mg": 0.04,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Glaucome à angle fermé", "Allergie à l'atropine"]
+  },
+  "budesonide": {
+    "dci": "Budésonide",
+    "classe": "Corticoïde inhalé - Asthme / BPCO",
+    "algerian_brands": ["Pulmicort", "Miflasone", "Symbicort", "Budésonide"],
+    "adult_min_daily_dose_mg": 0.4,
+    "adult_usual_dose_mg": 0.8,
+    "adult_max_daily_ceiling_mg": 1.6,
+    "adult_max_single_dose_mg": 0.8,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Tuberculose pulmonaire évolutive non traitée"]
+  },
+  "phloroglucinol": {
+    "dci": "Phloroglucinol",
+    "classe": "Antispasmodique musculotrope",
+    "algerian_brands": ["Spasfon", "Spasmocalm", "Météospasmyl", "Phloroglucinol"],
+    "adult_min_daily_dose_mg": 160,
+    "adult_usual_dose_mg": 320,
+    "adult_max_daily_ceiling_mg": 480,
+    "adult_max_single_dose_mg": 160,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie au phloroglucinol"]
+  },
+  "trimebutine": {
+    "dci": "Trimébutine",
+    "classe": "Régulateur de la motricité digestive / Antispasmodique",
+    "algerian_brands": ["Débridat", "Proctolog", "Trimébutine"],
+    "adult_min_daily_dose_mg": 300,
+    "adult_usual_dose_mg": 300,
+    "adult_max_daily_ceiling_mg": 600,
+    "adult_max_single_dose_mg": 200,
+    "pediatric_mg_per_kg_day": {
+      "min": 4.8,
+      "usual": 4.8,
+      "max_mg_kg": 4.8,
+      "single_dose_mg_kg": 1.6,
+      "absolute_max_mg": 300,
+      "age_min_months": 24
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à la trimébutine"]
+  },
+  "mebeverine": {
+    "dci": "Mébévérine",
+    "classe": "Antispasmodique musculotrope colique",
+    "algerian_brands": ["Duspatalin", "Spascol", "Mébévérine"],
+    "adult_min_daily_dose_mg": 200,
+    "adult_usual_dose_mg": 400,
+    "adult_max_daily_ceiling_mg": 400,
+    "adult_max_single_dose_mg": 200,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à la mébévérine"]
+  },
+  "domperidone": {
+    "dci": "Dompéridone",
+    "classe": "Antiémétique / Modificateur de la vidange gastrique",
+    "algerian_brands": ["Motilium", "Motilyo", "Péridys", "Dompéridone"],
+    "adult_min_daily_dose_mg": 30,
+    "adult_usual_dose_mg": 30,
+    "adult_max_daily_ceiling_mg": 30,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Allongement de l'intervalle QT", "Insuffisance hépatique modérée à sévère", "Enfant pesant moins de 35 kg"]
+  },
+  "metoclopramide": {
+    "dci": "Métoclopramide",
+    "classe": "Antiémétique - Neuroleptique antagoniste dopaminergique",
+    "algerian_brands": ["Primpéran", "Clopram", "Métoclopramide"],
+    "adult_min_daily_dose_mg": 15,
+    "adult_usual_dose_mg": 30,
+    "adult_max_daily_ceiling_mg": 30,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Enfant de moins de 18 ans (risque de syndrome extrapyramidal)", "Hémorragie gastro-intestinale", "Phéochromocytome"]
+  },
+  "ondansetron": {
+    "dci": "Ondansétron",
+    "classe": "Antiémétique - Antagoniste 5-HT3 (Sétrons)",
+    "algerian_brands": ["Zophren", "Ondan", "Ondansétron"],
+    "adult_min_daily_dose_mg": 8,
+    "adult_usual_dose_mg": 16,
+    "adult_max_daily_ceiling_mg": 32,
+    "adult_max_single_dose_mg": 8,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.15,
+      "usual": 0.15,
+      "max_mg_kg": 0.4,
+      "single_dose_mg_kg": 0.15,
+      "absolute_max_mg": 8,
+      "age_min_months": 6
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Grossesse au 1er trimestre (risque de fente labio-palatine)", "Allongement congénital du QT"]
+  },
+  "racecadotril": {
+    "dci": "Racécadotril",
+    "classe": "Antidiarrhéique antisécrétoire pur",
+    "algerian_brands": ["Tiorfan", "Tiorfast", "Hidrasec", "Racécadotril"],
+    "adult_min_daily_dose_mg": 300,
+    "adult_usual_dose_mg": 300,
+    "adult_max_daily_ceiling_mg": 300,
+    "adult_max_single_dose_mg": 100,
+    "pediatric_mg_per_kg_day": {
+      "min": 4.5,
+      "usual": 4.5,
+      "max_mg_kg": 4.5,
+      "single_dose_mg_kg": 1.5,
+      "absolute_max_mg": 90,
+      "age_min_months": 3
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Diarrhée glairo-sanglante fébrile (dysenterie)", "Grossesse"]
+  },
+  "diosmectite": {
+    "dci": "Diosmectite",
+    "classe": "Adsorbant intestinal / Protecteur muqueux",
+    "algerian_brands": ["Smecta", "Nédiosmectite", "Bedelix", "Diosmectite"],
+    "adult_min_daily_dose_mg": 9000,
+    "adult_usual_dose_mg": 9000,
+    "adult_max_daily_ceiling_mg": 18000,
+    "adult_max_single_dose_mg": 3000,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à la diosmectite"]
+  },
+  "lactulose": {
+    "dci": "Lactulose",
+    "classe": "Laxatif osmotique",
+    "algerian_brands": ["Duphalac", "Gatinar", "Lactulose"],
+    "adult_min_daily_dose_mg": 10000,
+    "adult_usual_dose_mg": 20000,
+    "adult_max_daily_ceiling_mg": 30000,
+    "adult_max_single_dose_mg": 15000,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Galactosémie", "Occlusion intestinale"]
+  },
+  "macrogol": {
+    "dci": "Macrogol 4000",
+    "classe": "Laxatif osmotique",
+    "algerian_brands": ["Forlax", "Transipeg", "Movicol", "Macrogol"],
+    "adult_min_daily_dose_mg": 10000,
+    "adult_usual_dose_mg": 20000,
+    "adult_max_daily_ceiling_mg": 40000,
+    "adult_max_single_dose_mg": 20000,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Maladies inflammatoires sévères de l'intestin (Crohn, RCH)", "Perforation digestive"]
+  },
+  "omeprazole": {
+    "dci": "Oméprazole",
+    "classe": "Inhibiteur de la Pompe à Protons (IPP)",
+    "algerian_brands": ["Mopral", "Zoltum", "Gastrimol", "Losec", "Oméprazole"],
+    "adult_min_daily_dose_mg": 20,
+    "adult_usual_dose_mg": 20,
+    "adult_max_daily_ceiling_mg": 40,
+    "adult_max_single_dose_mg": 40,
+    "pediatric_mg_per_kg_day": {
+      "min": 1,
+      "usual": 1,
+      "max_mg_kg": 2,
+      "single_dose_mg_kg": 1,
+      "absolute_max_mg": 40,
+      "age_min_months": 12
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux IPP"]
+  },
+  "esomeprazole": {
+    "dci": "Ésoméprazole",
+    "classe": "Inhibiteur de la Pompe à Protons (IPP)",
+    "algerian_brands": ["Inexium", "Nexium", "Esom", "Ésoméprazole"],
+    "adult_min_daily_dose_mg": 20,
+    "adult_usual_dose_mg": 40,
+    "adult_max_daily_ceiling_mg": 40,
+    "adult_max_single_dose_mg": 40,
+    "pediatric_mg_per_kg_day": {
+      "min": 1,
+      "usual": 1,
+      "max_mg_kg": 1,
+      "single_dose_mg_kg": 1,
+      "absolute_max_mg": 40,
+      "age_min_months": 12
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux IPP"]
+  },
+  "pantoprazole": {
+    "dci": "Pantoprazole",
+    "classe": "Inhibiteur de la Pompe à Protons (IPP)",
+    "algerian_brands": ["Inipomp", "Eupantol", "Pantozol", "Pantoprazole"],
+    "adult_min_daily_dose_mg": 20,
+    "adult_usual_dose_mg": 40,
+    "adult_max_daily_ceiling_mg": 80,
+    "adult_max_single_dose_mg": 40,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie aux IPP"]
+  },
+  "cetirizine": {
+    "dci": "Cétirizine",
+    "classe": "Antihistaminique H1 de 2ème génération",
+    "algerian_brands": ["Zyrtec", "Virlix", "Cetir", "Cétirizine"],
+    "adult_min_daily_dose_mg": 10,
+    "adult_usual_dose_mg": 10,
+    "adult_max_daily_ceiling_mg": 10,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.25,
+      "usual": 0.25,
+      "max_mg_kg": 0.25,
+      "single_dose_mg_kg": 0.125,
+      "absolute_max_mg": 10,
+      "age_min_months": 24
+    },
+    "pregnancy_safe": true,
+    "contraindications": ["Insuffisance rénale terminale (DFG < 15 ml/min)"]
+  },
+  "desloratadine": {
+    "dci": "Desloratadine",
+    "classe": "Antihistaminique H1 de 2ème génération non sédatif",
+    "algerian_brands": ["Aerius", "Deslor", "Lordestin", "Desloratadine"],
+    "adult_min_daily_dose_mg": 5,
+    "adult_usual_dose_mg": 5,
+    "adult_max_daily_ceiling_mg": 5,
+    "adult_max_single_dose_mg": 5,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à la desloratadine"]
+  },
+  "levocetirizine": {
+    "dci": "Lévocétirizine",
+    "classe": "Antihistaminique H1 de 2ème génération",
+    "algerian_brands": ["Xyzall", "Levocet", "Lévocétirizine"],
+    "adult_min_daily_dose_mg": 5,
+    "adult_usual_dose_mg": 5,
+    "adult_max_daily_ceiling_mg": 5,
+    "adult_max_single_dose_mg": 5,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Insuffisance rénale sévère"]
+  },
+  "fexofenadine": {
+    "dci": "Fexofénadine",
+    "classe": "Antihistaminique H1",
+    "algerian_brands": ["Telfast", "Fexofenadine"],
+    "adult_min_daily_dose_mg": 120,
+    "adult_usual_dose_mg": 180,
+    "adult_max_daily_ceiling_mg": 180,
+    "adult_max_single_dose_mg": 180,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Allergie à la fexofénadine"]
+  },
+  "diazepam": {
+    "dci": "Diazépam",
+    "classe": "Benzodiazépine - Anxiolytique / Anticonvulsivant",
+    "algerian_brands": ["Valium", "Diazépam"],
+    "adult_min_daily_dose_mg": 5,
+    "adult_usual_dose_mg": 10,
+    "adult_max_daily_ceiling_mg": 20,
+    "adult_max_single_dose_mg": 10,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.3,
+      "usual": 0.5,
+      "max_mg_kg": 0.5,
+      "single_dose_mg_kg": 0.5,
+      "absolute_max_mg": 10,
+      "age_min_months": 6
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Myasthénie", "Insuffisance respiratoire sévère", "Syndrome d'apnée du sommeil"]
+  },
+  "lorazepam": {
+    "dci": "Lorazépam",
+    "classe": "Benzodiazépine - Anxiolytique",
+    "algerian_brands": ["Témesta", "Lorazépam"],
+    "adult_min_daily_dose_mg": 1,
+    "adult_usual_dose_mg": 2.5,
+    "adult_max_daily_ceiling_mg": 5,
+    "adult_max_single_dose_mg": 2.5,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": ["Myasthénie", "Insuffisance respiratoire"]
+  },
+  "hydroxyzine": {
+    "dci": "Hydroxyzine",
+    "classe": "Antihistaminique H1 sédatif / Anxiolytique",
+    "algerian_brands": ["Atarax", "Hydroxyzine"],
+    "adult_min_daily_dose_mg": 25,
+    "adult_usual_dose_mg": 50,
+    "adult_max_daily_ceiling_mg": 100,
+    "adult_max_single_dose_mg": 50,
+    "pediatric_mg_per_kg_day": {
+      "min": 1,
+      "usual": 1,
+      "max_mg_kg": 2,
+      "single_dose_mg_kg": 1,
+      "absolute_max_mg": 50,
+      "age_min_months": 36
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Allongement de l'intervalle QT", "Glaucome à angle fermé", "Rétention urinaire"]
+  },
+  "ivermectine": {
+    "dci": "Ivermectine",
+    "classe": "Antiparasitaire oral - Traitement Gale humaine",
+    "algerian_brands": ["Stromectol", "Mectizan", "Ivermectine"],
+    "adult_min_daily_dose_mg": 12,
+    "adult_usual_dose_mg": 12,
+    "adult_max_daily_ceiling_mg": 18,
+    "adult_max_single_dose_mg": 18,
+    "pediatric_mg_per_kg_day": {
+      "min": 0.2,
+      "usual": 0.2,
+      "max_mg_kg": 0.2,
+      "single_dose_mg_kg": 0.2,
+      "absolute_max_mg": 18,
+      "age_min_months": 24
+    },
+    "pregnancy_safe": false,
+    "contraindications": ["Enfant pesant moins de 15 kg", "Grossesse au 1er trimestre"]
+  },
+  "benzoate_de_benzyle": {
+    "dci": "Benzoate de benzyle",
+    "classe": "Antiparasitaire topique - Traitement Gale",
+    "algerian_brands": ["Ascabiol", "Scabecid"],
+    "adult_min_daily_dose_mg": 0,
+    "adult_usual_dose_mg": 0,
+    "adult_max_daily_ceiling_mg": 0,
+    "adult_max_single_dose_mg": 0,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": true,
+    "contraindications": ["Application sur peau lésée ou surinfectée", "Nourrisson < 1 mois"]
+  },
+  "valproate": {
+    "dci": "Acide valproïque / Valproate de sodium",
+    "classe": "Antiépileptique / Régulateur de l'humeur",
+    "algerian_brands": ["Dépakine", "Micropakine", "Valpro"],
+    "adult_min_daily_dose_mg": 1000,
+    "adult_usual_dose_mg": 1500,
+    "adult_max_daily_ceiling_mg": 2500,
+    "adult_max_single_dose_mg": 1000,
+    "pediatric_mg_per_kg_day": {
+      "min": 20,
+      "usual": 25,
+      "max_mg_kg": 30,
+      "single_dose_mg_kg": 15,
+      "absolute_max_mg": 2000,
+      "age_min_months": 0
+    },
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Grossesse (CONTRE-INDICATION ABSOLUE - risque tératogène majeur > 10% et troubles neuro-développementaux 40%)",
+      "Femme en âge de procréer sans programme de prévention de grossesse",
+      "Hépatite aiguë ou chronique"
+    ]
+  },
+  "methotrexate": {
+    "dci": "Méthotrexate",
+    "classe": "Immunosuppresseur / Antinéoplasique",
+    "algerian_brands": ["Novatrex", "Imeth", "Metoject", "Méthotrexate"],
+    "adult_min_daily_dose_mg": 7.5,
+    "adult_usual_dose_mg": 15,
+    "adult_max_daily_ceiling_mg": 25,
+    "adult_max_single_dose_mg": 25,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Grossesse (CONTRE-INDICATION ABSOLUE - embryotoxique et tératogène majeur)",
+      "Allaitement",
+      "Insuffisance rénale sévère",
+      "Insuffisance hépatique sévère"
+    ]
+  },
+  "isotretinoine": {
+    "dci": "Isotrétinoïne",
+    "classe": "Rétinoïde oral - Traitement Acné sévère",
+    "algerian_brands": ["Curacné", "Procuta", "Roaccutane", "Acnetrait", "Isotrétinoïne"],
+    "adult_min_daily_dose_mg": 20,
+    "adult_usual_dose_mg": 40,
+    "adult_max_daily_ceiling_mg": 80,
+    "adult_max_single_dose_mg": 40,
+    "pediatric_mg_per_kg_day": null,
+    "pregnancy_safe": false,
+    "contraindications": [
+      "Grossesse (CONTRE-INDICATION ABSOLUE - tératogène fœtal majeur)",
+      "Femme en âge de procréer sans contraception double et carnet de suivi",
+      "Insuffisance hépatique",
+      "Association aux tétracyclines (risque d'hypertension intracrânienne)"
+    ]
+  }
+}

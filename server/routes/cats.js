@@ -3,10 +3,42 @@ const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
 
-const DB_FILE = require('path').join(__dirname, '..', '..', 'cats_db.json');
+const DB_FILE = process.env.CATS_DB_PATH || require('path').join(__dirname, '..', '..', 'cats_db.json');
+
+const { APP_DATA_KEY } = require('../config/constants');
+
+let lastDbMtimeMs = 0;
+
+function syncCatsCacheWithDisk() {
+  try {
+    const fs = require('fs');
+    if (fs.existsSync(DB_FILE)) {
+      const stats = fs.statSync(DB_FILE);
+      if (stats.mtimeMs > lastDbMtimeMs || cache.catsCache.length === 0) {
+        const raw = fs.readFileSync(DB_FILE, 'utf8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          cache.catsCache = parsed;
+          lastDbMtimeMs = stats.mtimeMs;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[cats.js] Cache sync error:', err.message);
+  }
+}
 
 function registerCatRoutes(app) {
   app.get('/api/cats', (req, res) => {
+    // Ensure in-memory cache matches disk if cats_db.json was updated
+    syncCatsCacheWithDisk();
+
+    // Simple x-app-key check to stop casual data grabs (the client always sends this)
+    const requestKey = req.headers['x-app-key'];
+    if (!requestKey || requestKey !== APP_DATA_KEY) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+
     const isAdmin = checkIsAdmin(req, cache.activeTokens);
     const since = parseInt(req.query.since);
 
@@ -15,13 +47,30 @@ function registerCatRoutes(app) {
 
     let result = cache.catsCache;
     if (!isNaN(since)) {
-      result = cache.catsCache.filter(c => (c.updatedAt || 0) > since);
+      result = cache.catsCache.filter(c => {
+        if (!c.updatedAt) return false;
+        const catTime = typeof c.updatedAt === 'number' ? c.updatedAt : new Date(c.updatedAt).getTime();
+        return !isNaN(catTime) && catTime > since;
+      });
     }
 
     if (!isAdmin) {
       result = result.map(c => {
-        const rest = { ...c };
-        delete rest.history;
+        const {
+          history,
+          _execution_metrics,
+          online_verification_queries,
+          sources,
+          _audit_trail,
+          _raw_llm_response,
+          ...rest
+        } = c;
+        if (Array.isArray(rest.sub_cats)) {
+          rest.sub_cats = rest.sub_cats.map(sub => {
+            const { _execution_metrics, online_verification_queries, sources, ...cleanSub } = sub;
+            return cleanSub;
+          });
+        }
         return rest;
       });
     }
@@ -69,6 +118,7 @@ function registerCatRoutes(app) {
             summary: item.summary || '',
             red_flags: item.red_flags || '',
             ordonnance: item.ordonnance || '',
+            sub_cats: Array.isArray(item.sub_cats) ? item.sub_cats : undefined,
             pdf_keywords: item.pdf_keywords || [],
             updatedAt: Date.now(),
             history: [{
@@ -103,7 +153,7 @@ function registerCatRoutes(app) {
       if (isNaN(catId)) {
         return res.status(400).json({ error: 'Invalid CAT ID' });
       }
-      const { summary, ordonnance, category, title, red_flags } = req.body;
+      const { summary, ordonnance, category, title, red_flags, sub_cats, pdf_keywords } = req.body;
 
       const result = await dbLock.acquire(async () => {
         const cat = cache.catsCache.find(c => c.id === catId);
@@ -117,12 +167,15 @@ function registerCatRoutes(app) {
         if (category !== undefined && cat.category !== category) previousState.category = cat.category;
         if (title !== undefined && cat.title !== title) previousState.title = cat.title;
         if (red_flags !== undefined && cat.red_flags !== red_flags) previousState.red_flags = red_flags;
+        if (sub_cats !== undefined && JSON.stringify(cat.sub_cats) !== JSON.stringify(sub_cats)) previousState.sub_cats = cat.sub_cats;
 
         if (summary !== undefined) cat.summary = summary;
         if (ordonnance !== undefined) cat.ordonnance = ordonnance;
         if (category !== undefined) cat.category = category;
         if (title !== undefined) cat.title = title;
         if (red_flags !== undefined) cat.red_flags = red_flags;
+        if (sub_cats !== undefined) cat.sub_cats = Array.isArray(sub_cats) ? sub_cats : undefined;
+        if (pdf_keywords !== undefined) cat.pdf_keywords = pdf_keywords;
 
         cat.updatedAt = Date.now();
         if (!cat.history) cat.history = [];
@@ -132,6 +185,8 @@ function registerCatRoutes(app) {
           detail: 'Modifié directement par l\'administrateur',
           previousState: Object.keys(previousState).length > 0 ? previousState : undefined
         });
+        // Cap history at 50 entries to prevent unbounded JSON growth
+        if (cat.history.length > 50) cat.history = cat.history.slice(-50);
 
         await safeWriteJsonAsync(DB_FILE, cache.catsCache);
         return { success: true, message: `CAT ${catId} mise à jour directement.` };
@@ -153,7 +208,7 @@ function registerCatRoutes(app) {
       return res.status(403).json({ error: 'Accès interdit. Seul l\'administrateur peut modifier directement la base de données.' });
     }
     try {
-      const { title, category, summary, red_flags, ordonnance, pdf_keywords } = req.body;
+      const { title, category, summary, red_flags, ordonnance, pdf_keywords, sub_cats } = req.body;
       if (!title || !category) {
         return res.status(400).json({ error: 'Title and Category are required' });
       }
@@ -167,6 +222,7 @@ function registerCatRoutes(app) {
           summary: summary || '',
           red_flags: red_flags || '',
           ordonnance: ordonnance || '',
+          sub_cats: Array.isArray(sub_cats) ? sub_cats : undefined,
           pdf_keywords: pdf_keywords || [],
           updatedAt: Date.now(),
           history: [{

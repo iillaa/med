@@ -28,6 +28,25 @@ To configure the workspace on a Termux instance or standard Linux terminal:
     echo 'export ADMIN_PASSWORD=admin123' >> ~/.bashrc
     source ~/.bashrc
     npm start
+    ```
+
+---
+
+## 🚀 Version 1.2.0 Architecture & Modulization Overhaul
+
+Dr. CAT v1.2.0 replaces legacy custom middleware and boilerplate with industry-standard open-source modules and native Web APIs:
+
+1. **Backend Server Security & Performance**:
+   - **`cors`**: RFC-compliant cross-origin resource sharing and preflight `OPTIONS` handling.
+   - **`compression`**: Automatic Gzip & Brotli response compression engine.
+   - **`express-rate-limit`**: Production-grade sliding-window rate limiting (120 req/min).
+   - **`helmet`**: Enterprise HTTP security header engine.
+
+2. **Frontend Security & UI Engines**:
+   - **`DOMPurify`**: HTML sanitization across clinical markdown summaries and search previews.
+   - **`crypto.randomUUID()`**: Zero-bundle-size native cryptographic device UUID generation (`drcat-inst-${crypto.randomUUID()}`).
+   - **`Intl.DateTimeFormat` / `Intl.RelativeTimeFormat`**: Native French date and relative time formatting.
+   - **HTML5 `<dialog>`**: Native browser modal dialogs with landscape safe-area inset protection.
     
     # Option B: Use the interactive password setter script
     node set_admin_password.js mypassword
@@ -128,6 +147,44 @@ npm run cap:sync        # Sync Capacitor assets
 
 ---
 
+## 🔄 Running with PM2 (Recommended for Production)
+
+PM2 supervises the server and auto-restarts it on crash.
+
+```bash
+# Start server under PM2
+npm run pm2:start
+
+# Check status
+npm run pm2:status
+
+# View live logs
+npm run pm2:logs
+
+# Stop server
+npm run pm2:stop
+```
+
+### Changing PM2 Settings
+All parameters are in [`ecosystem.config.js`](../ecosystem.config.js). Edit the file then run `npm run pm2:restart`.
+
+| Parameter | Default | What it controls |
+|---|---|---|
+| `restart_delay` | `3000` | Milliseconds to wait before restarting after a crash |
+| `max_restarts` | `10` | Max crashes before PM2 gives up restarting |
+| `min_uptime` | `'5s'` | App must stay alive this long to count as a clean start |
+| `max_memory_restart` | `'200M'` | Auto-restart if RAM usage exceeds this |
+| `out_file` | `logs/server-out.log` | Standard output log path |
+| `error_file` | `logs/server-err.log` | Error/crash log path |
+
+### Log Rotation
+```bash
+npm run log:rotate   # Rotate logs >10MB, prune archives >7 days
+```
+Settings are in `scripts/rotate-logs.js` (`MAX_SIZE_MB`, `KEEP_DAYS`).
+
+---
+
 ## ⚙️ Configuring Server URLs & Syncing
 
 Dr. CAT lets standalone offline APK builds talk to a central server (tunnel or custom domain) to fetch updates and send suggestions.
@@ -224,3 +281,68 @@ Direct database writing and suggestion moderation are unavailable on standalone 
 2. **Unlock Diagnostics Panel**: Click or tap the **🐛 button 3 times** consecutively. This triggers a toast notification confirming activation, automatically closes the log viewer overlay, and reveals the **Admin Control Center** (Diagnostics/Performance tabs) at the bottom of the main dashboard.
 3. **Persistence**: The developer mode state is saved to local storage and persists across application restarts.
 
+---
+
+## 🧪 Testing & Verification Suite
+
+The repository includes standalone node testing scripts to verify system integrity before releases:
+
+```bash
+# 1. Test version comparison and version guard middleware exclusions
+node tests/test_version.js
+
+# 2. Test active device telemetry & DAU/MAU analytics calculation
+node tests/test_analytics.js
+
+# 3. Test deep multi-token CAT content search matching
+node tests/test_cat_search.js
+```
+
+---
+
+## 🔬 Admin Labs & Diagnostic Tools
+
+- **PDF Lab**: `http://localhost:3000/pdf_lab.html` (Protected localhost PDF inspection & extraction lab)
+- **Analytics Lab**: `http://localhost:3000/analytics_lab.html` (Protected localhost active device telemetry: real-time 🟢 Live (<5 min) user tracking, IP auto-whitelisting, manual Dev/External toggle, reset confirmation modal, and CSV exporter)
+
+---
+
+## ⚡ Cloudflare Workers & KV Configuration (v1.7.9)
+
+### 1. Structure du projet Edge (`worker.js` & `wrangler.jsonc`)
+* **Entrypoint Serverless** : `worker.js` (à la racine) intercepte les routes API `/api/suggestions`, `/api/server-providers`, `/api/search-status`, `/api/version` et sert les fichiers statiques via `env.ASSETS`.
+* **Fichier de Configuration (`wrangler.jsonc`)** :
+  ```json
+  {
+    "name": "drcat",
+    "main": "worker.js",
+    "compatibility_date": "2026-08-13",
+    "assets": { "directory": "./public" },
+    "kv_namespaces": [{ "binding": "SUGGESTIONS_KV", "id": "d569bf8299a545f182c9e6acedd4d6aa" }]
+  }
+  ```
+* **Exclusion d'Assets (`public/.assetsignore`)** : Contient `_worker.js` pour empêcher Wrangler de traiter les scripts du serveur comme des ressources téléchargeables publiques.
+
+### 3. Synchronisation Atomique de Version (`scripts/bump_version.js`)
+* **Commande Universelle** : `node scripts/bump_version.js <version>` (ex: `node scripts/bump_version.js 1.8.1`).
+* **Fichiers synchronisés en une seule étape** :
+  1. `package.json` (`version`)
+  2. `android/app/build.gradle` (`versionName` et `versionCode`)
+  3. `server/config/version.json` (`latestVersion` et `updateMessage`)
+  4. `public/index.html` (`meta[name="app-version"]`)
+  5. `worker.js` (`version`)
+  6. Exécute `npm run build` pour re-stamper le bundle et les hashs d'assets.
+
+### 4. Isolation Complète de la Base de Données de Test (`CATS_DB_PATH`)
+* **Principe** : Les suites de tests automatiques (`test_suggestions.js`, `test_auth.js`) s'exécutent sur une base temporaire isolée (`cats_db_test_*.json`) via la variable d'environnement `CATS_DB_PATH`.
+* **Garantie** : La base de production réelle `cats_db.json` ne subit aucune écriture ni pollution lors des tests.
+
+### 5. Gestion de la Bibliothèque Clinique Tier 2 (`cat_db_generator/clinical_library/`)
+Pour ajouter de nouveaux guides d'aide à la décision sans toucher au code :
+* Déposez simplement un fichier `.md` ou `.json` dans l'un des sous-dossiers dédiés :
+  - `medg_fiches_cat/` : Arbres diagnostiques et CAT complètes.
+  - `antibioclic_decision_trees/` : Schémas d'antibiothérapie raisonnée.
+  - `sfmu_emergency_reflex/` : Fiches d'urgences vitales et gestes de réanimation.
+  - `pediadol_pediatric_protocols/` : Protocoles pédiatriques au poids.
+  - `crat_pregnancy_lactation/` : Fiches pharmacologiques grossesse & allaitement.
+* Le moteur `knowledge-library.js` détecte et indexe automatiquement le nouveau contenu à la volée.

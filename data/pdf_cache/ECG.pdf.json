@@ -1,544 +1,540 @@
 {
   "pdf": "ECG.pdf",
-  "hash": "039790acc6a879a3be13efdf49b198e1645177a2d04d54550c4bf6b82d84f3f5",
-  "quality": "online",
-  "timestamp": 1784766902459,
+  "hash": "1cc2c4e56b357d7cf3d127d106e9324f719445b13f0f5380aa3bf70f3c2a3534",
+  "quality": "online-google",
+  "timestamp": 1787410229484,
   "pages": [
     {
       "page": 1,
-      "content": "# ECG\n\n# Dr. KHERBA_N"
+      "content": "ECG\nDr.KHERBA_N"
     },
     {
       "page": 2,
-      "content": "# ECG\n\n✅️Vailde: 1mm = 0.04s / 1mm = 0.1mv\n\n▪️Vitesse: 25mm/s Voltage: 10mm/mv\n\n▪️Pas d'inversion : P(+) en D1 / P(-) en avR\n\n▪️QRS (V1....V6) => un seul sommet\n\n▪️La ligne de base: isoélectrique (pas de tribulations = parasitage)\n\n# Interprétation générale:\n\n▪️Rythme: Régulier => RR constant\n\n▪️Sinusal: P(+) en DI et DII\n\n▪️Chaque P doit être suivie par un QRS et chaque QRS doit être précédé par P\n\n▪️Fréquence: 300 / nb des grands carreaux RR\n\nSi rythme irrégulier: calculer la moyenne de 3RR"
+      "content": "ECG\n✅️Vailde:1mm=0.04s/1mm=0.1mv\n▪️Vitesse: 25mm/s Voltage: 10mm/mv\n▪️Pas d'inversion : P(+) en D1/P(-) en avR\n▪️QRS (V1....V6)=> un seul sommet \n▪️La ligne de base: isoélectrique (pas de tribulations =parasitage)\n✅️Interprétation générale:\n▪️Rythme: Régulier=> RR constant \n▪️Sinusal: P(+) en DI et DII\n▪️Chaque P doit être suivie par un QRS et chaque QRS doit Précédé par P\n▪️Fréquence: 300/ nb des grands carreaux RR\nSi rhytme irrégulier: calculer la moyenne de 3RR"
     },
     {
       "page": 3,
-      "content": "# Interprétation spécifique:\n\n- Onde P: présente/positive/petite(2.5mm)\n- Si: Absente:\n1. Remplacée: Flutter A ou Fibrillation A\n- Flutter Atrial: Rythme régulier\n- Fibrillation Atriale: Rythme irrégulier\n2. Non Remplacée: T jonctionnelle (QRS fin &#x3C;3mm) ou Troubles de rythme ventriculaire TDR (QRS large = ou >3mm)\n- ESV: QRS prématuré\n- Maligne: Polymorphe/regroupé/à la 2ème partie de T.\n- TV: amplitude constant et durée constante\n- TP: amplitude varié et durée constante\n- FV: amplitude varié et durée variée\n- P ample=> HAD\n- P bifide=> HAG"
+      "content": "✅️Interprétation spécifique:\n◾️Onde P: présente/positive/petite(2.5mm)\nSi: Absente:\n1/Remplacée: Flutter A ou Fibrillation A\n▪️Flutter Atrial: Rythme régulier \n▪️Fibrillation Atriale: Rythme irrégulier \n2/Non Remplacée: T jonctionnelle \n(QRS fin <3mm)\nou Troubles de rythme ventriculaire TDR\n(QRS large = ou >3mm)\n▪️ESV: QRS prématuré\nMaligne: Polymorphe/regroupé/à la 2ème partie de T.\n▪️TV: amplitude constant et durée constante\n▪️TP: amplitude varié et durée constante\n▪️FV: amplitude varié et durée variée\n▪️P ample=> HAD\n▪️P bifide=> HAG"
     },
     {
       "page": 4,
-      "content": "# Bloc de conduction\n\n- PR: 3mm &#x3C;...&#x3C; 5mm\n- &#x3C;3mm => WFW (Triangle ou angle Delta)\n- >5mm => BAV 1er D\n- BAV 2ème D: blocage de P (pas suivie de QRS)\n- 1. 1/Mobitz 1: allongement de PR + blocage\n2. 2/Mobitz 2: blocage seul\n\nBAV 3ème D: tous les P sont bloquées\n\nRythme Atrial et ventriculaire réguliers mais pas le rythme Atrial qui est responsable de ventriculaire.\n\n- QRS: 3mm\n- = ou > 3mm avec un aspect en M (pas W) : Bloc de branche BB"
+      "content": "◾️PR: 3mm<...<5mm\n▪️<3mm=> WFW (Triangle ou angle Delta)\n▪️>5mm=> BAV 1er D\n▪️BAV 2ème D: blocage de P ( pas suivie de QRS )\n1/Mobitz 1: allongement de PR + blocage \n2/Mobitz 2: blocage seul\n▪️BAV 3ème D: tt les P sont bloquées\nRythme Atrial et ventriculaire réguliers mais pas le rythme Atrial qui est responsable de ventriculaire. \n◾️QRS: 3mm\n=ou> 3mm avec un aspect en M (pas W) : Bloc de branche BB\n▪️Si (V1V2): BBD\n▪️Si (V5V6): BBG\nOu BBD=> M(V1) /W(V6)\nBBG=> W(V1)/M(V6)"
     },
     {
       "page": 5,
-      "content": "# Onde Q: pathologique:\n\n- Ample => >1/4R\n- Large => = ou >1mm\n- Absence de R => QS\n\n# q r st T: pathologique dans au moins 2 D\n\n- DII_DIII_avF: inférieur\n- V5_V6_DI_avL: latéral\n- V1_V2_V3_V4: antérieur\n\n# Ischémie :\n\n- T ample ou (-)\n- ST sus ou sous décalage\n\n# Puis nécrose :\n\n- Q Ample/large/seul\n- Rabotage de R (↘️amplitude en V1V2V3V4)"
+      "content": "◾️Onde Q: pathologique:\n▪️Ample=> >1/4R\n▪️Large=> = ou >1mm\n▪️Absence de R => QS\n⛔️q r st T: pathologique dans au moins 2 D\n▪️DII_DIII_avF: inférieur \n▪️V5_V6_DI_avL: latéral\n▪️V1_V2_V3_V4: antérieur\n◾️Ischémie : \n▪️T ample ou (-)\n▪️ST sus ou sous décalage \n◾️Puis nécrose :\n▪️Q Ample/large/seul \n▪️Rabotage de R(↘️amplitude en V1V2V3V4)"
     },
     {
       "page": 6,
-      "content": "# ST: >2mm/2D/2ECG\n\n- Image en miroir :\n- ST(+) pas forcément a une image en miroir mais ST(-) => image en miroir\n- infer(DII DIII avF) # latéral haut(DI avL)\n- infer # antérieur(V1V2V3V4)\n- antérieur # poster (V7V8V9)\n- latéral bas(V5V6) # droit (V1 av3R av4R)\n\n# Onde T (-) en avR\n\n- Elle peut être (-) en V1V2D3 à condition que QRS aussi si non pathologique\n- T ample>2/3 ou plat &#x3C;1/10 => pathologique\n- Péricardite\n- Ischémie\n- Dyskalémie (ample:↗️K / plat ou (-): ↘️K)\n\nD'après Dr.Astuce..."
+      "content": "◾️ST: >2mm/2D/2ECG\n▪️Image en miroir :\nST(+) pas forcément a une image en miroir \nmais ST(-) => image en miroir \n▪️infer(DII DIII avF) # latéral haut(DI avL)\n▪️infer # antérieur(V1V2V3V4)\n▪️antérieur # poster (V7V8V9)\n▪️latéral bas(V5V6) # droit (V1 av3R av4R)\n◾️Onde T (-) en avR\n▪️Elle peut être (-) en V1V2D3 à condition que QRS aussi si non pathologique \n◾️T ample>2/3 ou plat <1/10 => pathologique \n▪️Péricardite \n▪️Ischémie \n▪️Dyskalémie (ample:↗️K / plat ou (-): ↘️K)\nD'après Dr.Astuce..."
     },
     {
       "page": 7,
-      "content": "NO_CONTENT_HERE"
+      "content": ""
     },
     {
       "page": 8,
-      "content": "ACFA\n  wwtt\n  WLLLLLLLLLLL\n\nL"
+      "content": ""
     },
     {
       "page": 9,
-      "content": "# Motif : Palpitations\n\nFemme de 52 ans sans ATCD\n\n# ⚠️Interprétation : ACFA\n\n=> Rythme irrégulier + Absence d’onde P (Remplacée par des trémulations)\n\n▪️ Tachycardie > 100 btt/min\n\n# ◾️ Causes :\n\n- Valvulopathies\n- Complications thrombœmboliques\n- Traitement par les bétabloquants ou Amiodarone en IV\n- Anticoagulants\n- Anémie\n- Hyperthyroïdie\n\n# ▪️ Inhibiteur calcique bradycardisant en sublingual :\n\ncomme Diltiazem\n\n# ▪️ Si bien toléré :\n\ncliniquement bien stable pas d’hypotension"
+      "content": "🔴Motif : Palpitations \nFemme de 52ans sans ATCD\n⚠️Interprétation : ACFA\n=>Rythme irrégulier + Absence d’onde P \n(Remplacée par des trémulations)\n▪️Tachycardie >100btt/min\n◾️Causes : Valvulopathies, complications thrombœmboliques, Traitement par les bétabloquants ou Amiodarone en IV, Anticoagulants, anémie, Hyperthyroïdie\n▪️Inhibiteur calcique bradycardisant en subligual comme Diltiazem \n▪️Si bien toléré : cliniquement bien stable pas d’hypotension"
     },
     {
       "page": 10,
-      "content": "# Orientation cardiologie pour instaurer un traitement anticoagulant le plus tôt possible\n\n(consultation cette semaine)\n\n- Si mal toléré : choc, OAP ..\n- Avis cardiologie en urgence pour une cardioversion en urgence"
+      "content": "➡️Orientation cardiologie pour instaurer un traitement anticoagulant le plus tôt possible (consultation cette semaine)\n▪️Si mal toléré : choc, OAP .. \n➡️Avis cardiologie en urgence pour une cardioversion en urgence"
     },
     {
       "page": 11,
-      "content": "# TACHYCARDIE SINUSALE"
+      "content": ""
     },
     {
       "page": 12,
-      "content": "# Motif: Palpitations\n\nPatiente 37ans\n\nSans ATCD\n\nTa: 110/70\n\nDextro: correct\n\n⚠️Interprétation: Tachycardie_Sinusale\n\n# Clinique:\n\nBénigne FC=100/min\n\nEffort, stress, consommation de tabac, café,\n\nFièvre, anémie, déshydratation, crise de\n\npanique, Hyperthyroïdie.."
+      "content": "🔴Motif: Palpitations \nPatiente 37ans\nSans ATCD \nTa: 110/70 \nDextro: correct \n⚠️Interprétation: Tachycardie_Sinusale\n🔴Clinique:\nBénigne FC=100/min\nEffort, stress, consommation de tabac, café, Fièvre, anémie, déshydratation, crise de panique, Hyperthyroïdie.."
     },
     {
       "page": 13,
-      "content": "O2 thérapie\n# 1/2amp Mg diluée dans 250 SG5%\n\n# Bilan :\n\n- FNS\n- TSH\n- DDIMÈRES\n- Ionogramme\n\n# Orientation Cardiologie"
+      "content": "✅️O2 thérapie \n1/2amp Mg diluée dans 250 SG5%\n◾️Bilan :🩸\n▪️FNS\n▪️TSH\n▪️DDIMÈRES \n▪️Ionogramme \n➡️Orientation Cardiologie"
     },
     {
       "page": 14,
-      "content": "# Motif : Palpitations\n\nSujet jeune sans ATCD\n\nDextro : normal\n\n⚠️Interprétation : TSV\n\n- Tachycardie supraventriculaire\n- TA+++\n- +/_ Massage carotidien\n- Manœuvre de Valsalva (vagale)"
+      "content": "🔴Motif : Palpitations \nSujet jeune sans ATCD\nDextro : normal \n⚠️Interprétation : TSV\n▪️Tachycardie supraventriculaire \n▪️TA+++\n▪️+/_ Massage carotidien \n▪️Manœuvre de Valsalva (vagale)"
     },
     {
       "page": 15,
-      "content": "Si non réponse et TA correcte (stable) :\n\n- 1cp de bétabloquant ou 2amp de Cordaron en perfusion de SG 5%\n\nSi le malade est en état de choc (instable) :\n\n- ➡️cardioversion en urgence\n\n⛔️Attention : n’introduit jamais la Digoxine dans ce cas ( WPW )\n\nAprès réduction => ECG ( à rechercher un raccourcissement de l’espace PR)"
+      "content": "▪️Si non réponse et TA correcte (stable) :\n1cp de bétabloquant ou 2amp de Cordaron en perfusion de SG 5%\n🚨Si le malade est en état de choc (instable) : \n➡️cardioversion en urgence\n⛔️Attention : n’introduit jamais la Digoxine dans ce cas ( WPW ) \n▪️Après réduction=> ECG ( à rechercher un raccourcissement de l’espace PR)"
     },
     {
       "page": 16,
-      "content": "# Motif : Douleur épigastrique\n\nPatient 84 ans, hypertendu\n\nTa correcte\n\n⚠️Interprétation : SCA sans sus décalage de ST en V4V5V6\n\n- Ondes T amples => Hyperkalémie\n- Faire un ECG de 17D => ça peut être une image en miroir d’un SCA (+)\n\n# Demander :\n\n- Troponines\n- Ionogramme"
+      "content": "🔴Motif : Douleur épigastrique \nPatient 84ans, hypertendu\nTa correcte\n⚠️Interprétation : SCA sans sus décalage de ST en V4V5V6\n▪️Ondes T amples=> Hyperkalémie \n▪️ Faire un ECG de 17D=> ça peut être une image en miroir d’un SCA(+)\n◾️Demander :\n▪️Troponines \n▪️Ionogramme"
     },
     {
       "page": 17,
-      "content": "# BBD\n\n# 1\n\nif\n\nM\n\n\\q$\n\nBBD\n\n=>Aspect en M en V1V2"
+      "content": "BBD\n=>Aspect en M en V1V2"
     },
     {
       "page": 18,
-      "content": "BBG\n\n# 1 N\n\n# Motif : Douleur thoracique\n\nPatiente de 60 ans\n\n⚠️Interprétation : BBG\n\n⇨ Aspect en M en V5V6\n\n- BBG complet qui peut cacher un syndrome coronarien.\n- Scope\n- Surveillance électrique\n- ECG avec D2 long\n- Dosage des troponines en urgence"
+      "content": "🔴Motif : Douleur thoracique \nPatiente de 60ans\n⚠️Interprétation : BBG\n Aspect en M en V5V6\n◾️ BBG complet qui peut caché un syndrome coronarien.\n▪️Scope\n▪️Surveillance électrique\n▪️ECG avec D2 long\n▪️Dosage des troponines en urgence"
     },
     {
       "page": 19,
-      "content": "# ESV\n\n# Motif : Toux\n\nUn patient de 73 ans hypertendu\n\nTa 16/09\n\n⚠️Interprétation : ESV\n\n- ▪️QRS prématuré"
+      "content": "🔴Motif : Toux\nUn patient de 73ans hypertendu\nTa 16/09\n⚠️Interprétation : ESV\n▪️QRS prématuré"
     },
     {
       "page": 20,
-      "content": "BBG+TV HANNNA\n# Motif : Dyspnée\n\nPatient sans ATCD\n\nSaO2 : normal\n\nTa : 22/14, FC : 116\n\n⚠️Interprétation : BBG + TV\n\n- BBG (Aspect en M en V5V6)\n- TV (QRS avec amplitude constant et durée constante)\n\n⇨ OAP sur SCA st(+)"
+      "content": "🔴Motif : Dyspnée \nPatient sans ATCD \nSaO2 : normal \nTa : 22/14, FC : 116\n⚠️Interprétation : BBG + TV\n▪️BBG (Aspect en M en V5V6)\n▪️TV (QRS avec amplitude constant et durée constante)\n OAP sur SCA st(+)"
     },
     {
       "page": 21,
-      "content": "# V1\n\n# avL. V2\n\n# aVF\n\n# DFT-25H2 AC-5812 Auto3x4\n\n# aVR\n\n# mvⅡ av\n\n# 111 aVF\n\n# 25mm/s 18mm/mv DFT-25HZ AC-58H2 Auto3x"
+      "content": ""
     },
     {
       "page": 22,
-      "content": "# Interprétation : BAV + BBD\n\n- PR allongé mais constant : BAV 1er degré\n- QRS en V1 aspect en M : BBD incomplet"
+      "content": "⚠️Interprétation : BAV + BBD\n▪️PR allongé mais constant : BAV 1er degré \n▪️QRS en V1 aspect en M : BBD incomplet"
     },
     {
       "page": 23,
-      "content": "# Sus décalage de ST\n\n# en V2 V2\n\n# V6\n\n# TDR\n\n# aVR\n\n# aVL\n\n# aVF"
+      "content": ""
     },
     {
       "page": 24,
-      "content": "# Motif : Épigastralgies\n\nHomme 61 ans, Diabétique\n\nTa : 15/10\n\n⚠️Interprétation : Sus décalage de ST en V2V3\n\n- Troubles de repolarisation en territoire inférieur, AVR, V1\n- ⇨ Dosage des troponines\n- Refaire l’ECG après 10-20 min"
+      "content": "🔴Motif : Épigastralgies \nHomme 61ans, Diabétique\nTa : 15/10 \n⚠️Interprétation : Sus décalage de ST en V2V3\n▪️Troubles de repolarisation en territoire inférieur, AVR, V1\n Dosage des troponines \n▪️Refaire l’ECG après 10_20min"
     },
     {
       "page": 25,
-      "content": "10mm/04\n\n7 1\n\nST(-) wl\n\nx\n\n1Cmm/mV\n\n/\n\nyy/alm\n\nw"
+      "content": ""
     },
     {
       "page": 26,
-      "content": "# Patiente âgé de 65ans hypertendu, mal suivi pour son traitement d'HTA\n\n⚠️Interprétation: Sous décalage de ST en V4V5V6\n\n- Dosage des troponines\n- Refaire l'ECG\n- Faut faire les dérivations postérieurs et droites, V7V8V9V1 V3R V4R\n- Le sous décalage en V5V6 peut être la miroir d'un sus décalage V1 V3R V4R, ischémie de la face latérale droite"
+      "content": "🔴Patiente âgé de 65ans hypertendu, mal suivi pour son traitement d'HTA\n⚠️Interprétation: Sous décalage de ST en V4V5V6 \n=> Dosage des troponines \n▪️Refaire l'ECG\n▪️Faut faire les dérivations postérieurs et droites, V7V8V9V1 V3R V4R \n▪️Le sous décalage en V5V6 peut être la miroir d'un sus décalage V1 V3R V4R, ischémie de la face latérale droite"
     },
     {
       "page": 27,
-      "content": "# V2\n\n# V3\n\n| ST(-) | av     | V2      |                    |\n| ----- | ------ | ------- | ------------------ |\n| 1mV   | III    | aVF     | V3                 |\n| III   | 25mm/s | 10mm/mV | DFT-25 Hz AC-58 HZ |\n\nMotif : Épigastralgies\n\nPatient de 40ans, hypertendu, diabétique\n\n⚠️Interprétation : Sous décalage de ST en V1V2V3"
+      "content": "🔴Motif : Épigastralgies \nPatient de 40ans, hypertendu, diabétique\n⚠️Interprétation : Sous décalage de ST en V1V2V3"
     },
     {
       "page": 28,
-      "content": "# SUS DECALAGE EN AVR\n\n+/-V1\n\n| Al10:10m/my | 1O0mm/ml | 1/nV |   |\n| ----------- | -------- | ---- | - |\n| 2           |          |      |   |\n\n# Motif:\n\nÉpigastralgies + Douleur thoracique irradie vers l'épaule gauche jusqu'au poignet et le cou\n\n# ⚠️Interprétation:\n\nSus décalage en AVR +/_ V1 + un sous décalage diffus aux autres dérivations\n\n▪️Aspect électrique d’une lésion tritronculaire (équivalent d'un syndrome coronarien à haut risque)"
+      "content": "🔴Motif: Épigastralgies + Douleur thoracique irradie vers l'épaule gauche jusqu'au poignet et le cou\n⚠️Interprétation: Sus décalage en AVR +/_ V1\n+ un sous décalage diffus aux autres dérivations \n▪️Aspect électrique d’une lésion tritronculaire ( équivalent d'un syndrome coronarien à haut risque )"
     },
     {
       "page": 29,
-      "content": "# CAT :\n\n- 2 AVS / Scope\n- Dosage des troponines\n- Dose de charge : Plavix (selon l'âge), Aspegic 250mg, Lovenox (selon le poids)\n- Faxez à un centre spécialisé pour la réalisation d'une coronarographie dans les plus brefs délais.\n- Hospitalisation du patient au service de cardiologie"
+      "content": "✅️CAT : \n▪️2 AVS / Scope \n▪️Dosage des troponines \n◾️Dose de charge : Plavix (selon l'âge), Aspegic 250mg, Lovenox (selon le poids) \n▪️Faxez à un centre spécialisé pour la réalisation d'une coronarographie dans les plus brefs délais.\n🚨Hospitalisation du patient au service de cardiologie"
     },
     {
       "page": 30,
-      "content": "1D:58703\n        VI    BBD\n\n    V2\n\n V3\n\n11 15:28\n II!\n\n bVF\n\n II1\n\n1avh\n\nIA\n\n2YR\n\n  V4\n v\\s\n\nval"
+      "content": ""
     },
     {
       "page": 31,
-      "content": "# Motif : Épigastralgies\n\nPatient âgé de 70 ans, hypertendu\n\n⚠️Interprétation : BBD"
+      "content": "🔴Motif : Épigastralgies \nPatient âgé de 70ans, hypertendu\n⚠️Interprétation : BBD"
     },
     {
       "page": 32,
-      "content": "# Sous décalage de ST\n\nw/s DITO -\n\nPatiente de 63 ans, sans ATCD\n\nTa : 18/08\n\nT° : 18.6\n\n⚠️Interprétation: Sous décalage de ST en V4V5V6\n\n⇨ Dosage des troponines en urgence"
+      "content": "🔴Patiente de 63ans, sans ATCD \nTa : 18/08 \nT° : 18.6\n⚠️Interprétation: Sous décalage de ST en V4V5V6\n Dosage des troponines en urgence"
     },
     {
       "page": 33,
-      "content": "# BBD EN VIV2\n\nUn sujet jeune 25 ans, sans ATCD présente une douleur thoracique précordiale sans irradiations ni d’autres signes associés sauf notion d’asthénie depuis une semaine.\n\nA l’examen clinique patient conscient coopérant en EG moyen SGW 15/15.\n\nTA : 150/90\n\nFC : 84 FR : 24 SaO2 : 97%\n\nL’auscultation : propre\n\nTLT est normal\n\n⚠️Interprétation : BBD en V1V2\n\n⇨ Aspect en M"
+      "content": "🔴Un sujet jeune 25ans, sans ATCD \nPrésente une douleur thoracique précordiale sans irradiations ni d’autres signes associés sauf notion d’asthénie depuis une semaine\nA l’examen clinique patient conscient coopérant en EG moyen SGW 15/15 \nTA : 150/90 \nFC : 84 FR : 24 SaO2 : 97% \nL’auscultation : propre\nTLT est normal\n⚠️Interprétation : BBD en V1V2\n Aspect en M"
     },
     {
       "page": 34,
-      "content": "# SOUS DECALAGE DE ST\n\nm ADeeoav\n\nm\n\n45 Sod/a\n\n/ ACS0e ICST\n\nw\n\n10mm/vv\n\nw\n\n25mm/s AC501iz EMC35HZ DPT\n\n10mm/mV 1Cmm/mV"
+      "content": ""
     },
     {
       "page": 35,
-      "content": "# Motif : Douleur thoracique\n\nTa normal\n\nExamen normal\n\n⚠️Interprétation : Sous décalage de ST en antérieur et inférieur\n\n- Faites les dérivations postérieurs (image en miroir)\n- Dosage des troponines\n- Refaire l’ECG après 10-20min"
+      "content": "🔴Motif : Douleur thoracique \nTa normal \nExamen normal \n⚠️Interprétation : Sous décalage de ST en antérieur et inférieur \n▪️Faites les dérivations postérieurs (image en miroir)\n▪️Dosage des troponines \n▪️Refaire l’ECG après 10_20min"
     },
     {
       "page": 36,
-      "content": "m\n\n# h ESV\n\ne\n\n+ rohh\n\nN\n\nV2\n\nOmm/mV 1Omm/mV\n\nLwnA\n\n10mm/mV"
+      "content": ""
     },
     {
       "page": 37,
-      "content": "# Interprétation : ESV\n\n# QRS prématuré\n\n# CAT :\n\n- Si c’est symptomatique :"
+      "content": "⚠️Interprétation : ESV\n▪️QRS prématuré \n✅️CAT :\n▪️Si c’est symptomatique :\n➡️Orientation Cardiologie en urgence"
     },
     {
       "page": 38,
-      "content": "# uwuluuTjonctionnette\n\nwNN eNNN\n\n4 p\n\n5mm/s AC5Ol+EMC351+DETO 5Hz+PI7511z\n\n# Motif : Un pic d’HTA + Palpitations\n\nPatiente 66ans, d’ATCD d’insuffisance rénale chronique, HTA sous traitement\n\nTa : 190/70 mmhg\n\nFc : 140/min\n\n⚠️Interprétation : Tachycardie_jonctionnelle\n\n⇨ Absence des ondes P + QRS fins"
+      "content": "🔴Motif : Un pic d’HTA + Palpitations \nPatiente 66ans, d’ATCD d’insuffisance rénale chronique, HTA sous traitement \nTa : 190/70 mmhg \nFc : 140/min\n⚠️Interprétation : Tachycardie_jonctionnelle \n Absence des ondes P + QRS fins"
     },
     {
       "page": 39,
-      "content": "# CAT :\n\n- 1amp de Mg dans 250cc de SG5 % ou SSI\n- Bisoprolol 5mg\n- Manœuvre de Valsalva\n\n# Bilan\n\n- FNS\n- Rénal\n- Ionogramme"
+      "content": "✅️CAT :\n▪️1amp de Mg dans 250cc de SG5 % ou SSI\nBisoprolol 5mg\n▪️Manœuvre de Valsalva\n◾️Bilan 🩸\n▪️FNS\n▪️Rénal \n▪️Ionogramme"
     },
     {
       "page": 40,
-      "content": "0119015730                                   020250\nWPW  V2                                 VS    20125-91\nV3                                 V5\n\n# 10 mm m  50 Hr  908 35 H    02.1000 28.4\n\nPatient de 55 ans, ancien tabagique\n\n⚠️Interprétation : Wolf Parkinson White WPW\n\n➡️Orientation Cardiologie en urgence\n\n⛔️ Risque de FA puis FV et mort subite\n\n▪️Toute activité sportive est contre-indiquée"
+      "content": "🔴Patient de 55ans, ancien tabagique \n⚠️Interprétation : Wolf Parkinson White WPW\n➡️Orientation Cardiologie en urgence \n⛔️Risque de FA puis FV et mort subite\n▪️Toute activité sportive est contre indiquée"
     },
     {
       "page": 41,
-      "content": "# Doi Ishok  4\n\n# Motif : Douleur thoracique\n\nPatient 70ans, sans ATCD\n\n⚠️Interprétation : BBD + Sous décalage de ST en V1V2\n\n▪️Dosage des troponines"
+      "content": "🔴Motif : Douleur thoracique \nPatient 70ans, sans ATCD \n⚠️Interprétation : BBD + Sous décalage de ST en V1V2 \n▪️Dosage des troponines"
     },
     {
       "page": 42,
-      "content": "# 1\n\n25 ms 10.0 mev  ST(+) en inférieur\n\nHomme de 67 ans, diabétique et hypertendu qui se plaint de douleurs abdominales et de nausées depuis 24h\n\n⚠️Interprétation : STEMI ST(+) en inférieur DII DIII AVF\n\n- Avec image en miroir en latéral haut DI AVL\n- Mais, on note également un sous-décalage en antérieur V1V2V3 ce qui est à coup sûr l’image en miroir du territoire postérieur.\n- Donc c’est un STEMI postérieur Vrai\n- Compléter les dérivations droites et postérieures +++"
+      "content": "🔴Homme de 67ans, diabétique et hypertendu qui se plainte de douleurs abdominales et de nausées depuis 24h\n⚠️Interprétation : STEMI ST(+) en inférieur DII DIII AVF\n▪️ Avec image en miroir en latéral haut DI AVL \nMais, on note également un sous-décalage en antérieur V1V2V3 ce qui est à coup sûr l’image en miroir du territoire postérieur..\n▪️Donc c’est un STEMI postérieur Vrai\n▪️Compléter les dérivations droites et postérieures +++"
     },
     {
       "page": 43,
-      "content": "# AUTO 10mm/mV\n\n# ST(+) en inferiew\n\n# aVR\n\n# 10mm/mV\n\n# BBD\n\n# 10mm/mV\n\n# V3\n\n# V5"
+      "content": ""
     },
     {
       "page": 44,
-      "content": "# Patiente de 66ans, diabétique\n\nElle consulte pour des vomissements et toux\n\n- Gly : 4\n- Ph (bandelette) : 5\n- CU : cc+++\n\n⚠️Interprétation : Sus décalage en inférieur D2D3 AVF avec des images en mémoire V5 AVL + BBD aspect en M en V1V2\n\n- Compléter par les dérivations droite et postérieure\n- Donner les doses de charge Aspegic et Plavix\n- évacuer rapidement le malade"
+      "content": "🔴Patiente de 66ans, diabétique \nElle consulte pour des vomissements et toux \nGly : 4\nPh (bandelette) : 5\nCU : cc+++\n⚠️Interprétation : Sus décalage en inférieur D2D3 AVF avec des images en mémoire V5 AVL\n+ BBD aspect en M en V1V2 \n▪️Compléter par les dérivations droite et postérieure\n▪️Donner les doses de charge Aspegic et Plavix évacuer rapidement le malade"
     },
     {
       "page": 45,
-      "content": "Mm-v2    TSV\n   a\n\nmh1\n   BBD\nrr\nr\nmnfoaa\n\nababbba\n\nho\n ST(-EN ANTERIEUR"
+      "content": ""
     },
     {
       "page": 46,
-      "content": "# Patiente de 62 ans, d’ATCD de syndrome du côlon irritable\n\nConsulte pour tachycardie Fc : 174\n\nTa : 11/07\n\n⚠️Interprétation : TSV + BBD (Aspect en M en V1V2) + ST(-) en antérieur\n\n- Nb : On ne peut pas interpréter un sous ou sus décalage en Tachycardie\n- Faut d’abord ↘️ la Fc\n- Mg 1 amp en IVL si non Bétabloquant ou Cordarone, puis refaire l’ECG"
+      "content": "🔴Patiente de 62ans, d’ATCD de syndrome du côlon irritable \nConsulte pour tachycardie Fc :174\nTa : 11/07 \n⚠️Interprétation : TSV + BBD (Aspect en M en V1V2) + ST(-) en antérieur \n▪️Nb : On ne peut pas interpréter un sous ou sus décalage en Tachycardie \n▪️Faut d’abord ↘️ la Fc \n▪️Mg 1amp en IVL si non Bétabloquant ou Cordarone, puis refaire l’ECG"
     },
     {
       "page": 47,
-      "content": "# mm/mV  5 mm/mV TachyFA\n\nm/mV\n\nmhn\n\n4620 01 05 o1 02 01\n\n25 mm/s Filter 100 Hz H 50) d 10 mm/mV    5 mm/mV\n\naVL                                       V2\n\naVF\n\nPatient de 84 ans, sans ATCD\n\nDouleur thoracique intense non soulager par Perfalgan\n\nTa 120/70, Fc : 75, SaO2 : 99\n\n⚠️Interprétation : TachyFA + BBG"
+      "content": "🔴Patient de 84 ans, sans ATCD \nDouleur thoracique intense non soulager par Perfalgan\nTa 120/70, Fc : 75, SaO2 : 99\n⚠️Interprétation : TachyFA + BBG"
     },
     {
       "page": 48,
-      "content": "# BAV 3 complet\n\n| T0mm/69 | 10mn/av | 10m/m |\n| ------- | ------- | ----- |\n\nh m\n\n# Epigastralgies\n\nTa normal\n\nPacemaker\n\n⚠️Interprétation : BAV 3 complet (toutes Les ondes P sont bloquées)\n\n➡️Avis cardiologie en urgence"
+      "content": "🔴Epigastralgies\nTa normal\nPacemaker \n⚠️Interprétation : BAV 3 complet (toutes Les ondes P sont bloquées)\n➡️Avis cardiologie en urgence"
     },
     {
       "page": 49,
-      "content": "# U4\n\n# BBD\n\n# U6\n\nFC: 58/81 achee 18 mm/m\n\nDans le cadre du travail d’un sujet de 35 ans\n\n⚠️ Interprétation : BBD"
+      "content": "🔴Dans le cadre du travail d’un sujet de 35ans \n⚠️Interprétation : BBD"
     },
     {
       "page": 50,
-      "content": "# Patient de 61ans aux ATCD de diabète et HTA\n\nIl consulte pour une dyspnée et sueurs\n\nTa: 12/8, Dextro: pas de bandelette\n\nAuscultation libre\n\n⚠️Interprétation: Aspect S1Q3=> Embolie pulmonaire\n\n- Dosage: Troponines/DDIMÈRES"
+      "content": "🔴Patient de 61ans aux ATCD de diabète et HTA \nIl consulte pour une dyspnée et sueurs \nTa: 12/8, Dextro: pas de bandelette \nAuscultation libre \n⚠️Interprétation: Aspect S1Q3=> Embolie pulmonaire\n▪️Dosage: Troponines/DDIMÈRES"
     },
     {
       "page": 51,
-      "content": "# Q DE NÉCROSE V1V2\n\nPatiente de 76 ans, ATCD : DID\n\nCardiopathe avec IDM en 2023\n\nConsulte pour douleur thoracique irradiant aux épaules, Toux grasse, TLT fait objectivant un sd interstitiel sous traitement antibiotique\n\n⚠️Interprétation: Q de nécrose en V1V2\n\n- Séquelles de l'IDM"
+      "content": "🔴Patiente de 76ans, ATCD : DID\nCardiopathe avec IDM en 2023 \nConsulte pour douleur thoracique irradiant aux épaules, Toux grasse , TLT fait objectivant un sd interstitiel sous traitement antibiotique \n⚠️Interprétation: Q de nécrose en V1V2\n▪️Séquelles de l'IDM"
     },
     {
       "page": 52,
-      "content": "# Q nécrose DIl DI/I\n\nSujet âgé hypertendu, il a fait une chute de sa propre hauteur avec plaie du scalp\n\nTa: 10/6\n\nGly: 1.4 g/dl\n\n⚠️Interprétation : Q de nécrose en DII DIII (Séquences d'IDM) + T ample (Troubles de repolarisation) => Ionogramme"
+      "content": "🔴Sujet âgé hypertendu, il a fait une chute de sa propre hauteur avec plaie du scalp\nTa: 10/6\nGly: 1.4 g/dl\n⚠️Interprétation : Q de nécrose en DII DIII\n(Séquelles d'IDM)\n+ T ample (Troubles de repolarisation)\n=> Ionogramme"
     },
     {
       "page": 53,
-      "content": "# TRP\n\nPatient de 27 ans, sans ATCD\n\nIl consulte pour douleur cardiaque avec fourmillements de main gauche\n\n⚠️Interprétation : Trouble de repolarisation précoce (Bénin)\n\n- Pour TRP : Généralement un sujet jeune, sans FDR :"
+      "content": "🔴Patient de 27ans, sans ATCD \nIl consulte pour douleur cardiaque avec fourmillements de main gauche \n⚠️Interprétation : Trouble de repolarisation précoce (Bénin)\n◾️Pour TRP : Généralement un sujet jeune, sans FDR :\n▪️Sus décalage concave vers le haut, absence d’images en miroir\n▪️Présence de point « J »\n▪️QRS amples…"
     },
     {
       "page": 54,
-      "content": "Mais, ça n’élimine pas un sus décalage, plus la clinique ça reste inquiétante..\n\n- Demande un dosage des troponines pour confirmer et refaire l’ECG"
+      "content": "◾️Mais, ça n’élimine pas un sus décalage, plus la clinique ça reste inquiétante..\n▪️Demande un dosage des troponines pour confirmer et refaire l’ECG"
     },
     {
       "page": 55,
-      "content": "# BAV 1er D\n\n# Rap\n\n# Sujet jeune\n\nDiarrhée depuis 1 semaine\n\nPrésente une lipothymie avec Ta : 09/07\n\n⚠️Interprétation : BAV 1ᵉʳ degré\n\n⇨ Allongement de l’espace PR"
+      "content": "🔴Sujet jeune \nDiarrhée depuis 1 semaine \nPrésente une lipothymie avec Ta : 09/07 \n⚠️Interprétation : BAV 1er degré\n Allongement de l’espace PR"
     },
     {
       "page": 56,
-      "content": "# TACHYCARDIE SINUSALE\n\nSujet jeune\n\nTa : 14/08\n\nIl bois 4 ou 5 bouteilles d’un boisson énergétique\n\nPalpitation : Fc : 134\n\n⚠️Interprétation : Tachycardie sinusale"
+      "content": "🔴Sujet jeune\nTa : 14/ 08 \nIl bois 4 ou 5 bouteilles d’un boisson énergétique\nPalpitation : Fc : 134 \n⚠️Interprétation : Tachycardie sinusale"
     },
     {
       "page": 57,
-      "content": "# Interprétation : Tachycardie Supraventriculaire TSV\n\n⇨ Ondes P non visibles\n\n- Manœuvre vagale\n- Traitement Bétabloquant"
+      "content": "⚠️Interprétation : Tachycardie Supraventriculaire TSV\n Ondes P non visibles\n▪️Manœuvre vagale \n▪️Traitement Bétabloquant"
     },
     {
       "page": 58,
-      "content": "# V6\n\n# LaK\n\n# aVR\n\n# AVL\n\nPatiente de 58 ans\n\nATCD : cardiopathie non suivie et non documentée, présente des précordialgies\n\nSaO2: 72, Ta: 120/80, Gly: 3g\n\n⚠️ Interprétation: Sous décalage de ST en antérieur\n\n=> Faire les dérivations postérieurs V7 V8 V9\n\n▪️ Dosage des troponines"
+      "content": "🔴Patiente de 58ans \nATCD :cardiopathie non suivie et non documentée, présente des précordialgies\nSaO2:72, Ta: 120/80, Gly: 3g\n⚠️Interprétation: Sous décalage de ST en antérieur \n=> Faire les dérivations postérieurs V7V8V9 \n▪️Dosage des troponines"
     },
     {
       "page": 59,
-      "content": "BBGC\n\nPatient âgé hypertendu\n\nDouleur thoracique\n\n⚠️Interprétation: BBG complet\n\nFaut le comparer avec un ECG ancien\n\n⛔️Si non toute BBG de novo = IDM jusqu'au preuve du contraire\n\n- Les blocs de branches soit droite ou gauche généralement cachent les IDM, donc dosage des troponines et une comparaison avec des résultats anciennes s'il existent + Ionogramme (sus décalage, hyperkaliémie: onde T ample)"
+      "content": "🔴Patient âgé hypertendu \nDouleur thoracique \n⚠️Interprétation: BBG complet\nFaut le comparer avec un ECG ancien \n⛔️Si non toute BBG de novo = IDM jusqu'au preuve du contraire\n◾️Les blocs de branches soit droite ou gauche généralement cachent les IDM, donc dosage des troponines et une comparaison avec des résultats anciennes s'il existent + Ionogramme (sus décalage, hyperkaliémie: onde T ample)"
     },
     {
       "page": 60,
-      "content": "# Les critères de Sgarbossa\n\nAbsence dans le cas en cas de suspicion d'IDM sur BBG, dans un contexte de douleur thoracique avec un tel terrain, un dosage des troponines est primordial.\n\n# Criteres de Sgarbossa\n\n| Infarctus                                                                                 | BBG      | avec BBG     |\n| ----------------------------------------------------------------------------------------- | -------- | ------------ |\n| Sus-décalage de ST ≥ 1 mm lorsque les QRS sont positifs (< concordance )                  | 5 points | V4-V6-DI-aVL |\n| Sous-décalage de ST ≥ 1 mm en V1, V2 ou V3 (< concordance >)                              | 3 points | V1-V3        |\n| Sus-décalage de ST ≥ 5 mm lorsque les QRS sont négatifs (< majoration de la discordance ) | 2 points | V1-V3        |"
+      "content": "▪️Les critères de Sgarbossa (absence dans ve cas) en cas de suspicion d'IDM sur BBG, dans un contexte de douleur thoracique avec un tel terrain, un dosage des troponines est primordial"
     },
     {
       "page": 61,
-      "content": "ACFA\n\n p\nf\nIpapppap\nAth\nWLLLLLLLLLLL"
+      "content": ""
     },
     {
       "page": 62,
-      "content": "# Femme de 52 ans, sans ATCD\n\nPrésente des palpitations\n\n⚠️Interprétation: ACFA\n\n=> Ondes P Remplacée par des trémulations + rhytme irrégulier\n\n✅️CAT: Inhibiteur calcique bradycardisant en sublingual comme Diltiazem, car il est en tachycardie\n\n- Si: Stabilisation, pas d'hypotension (bien toléré..)\n- ➡️ Orientation Cardiologie: pour instaurer un traitement anticoagulant le plus tôt possible (consultation cette semaine)\n- Si mal toléré : choc, OAP ..\n- ➡️Avis cardiologie en urgence pour une Cardioversion en urgence"
+      "content": "🔴Femme de 52ans, sans ATCD\nPrésente des palpitations\n⚠️Interprétation: ACFA\n=> Ondes P Remplacée par des trémulations + rhytme irrégulier \n✅️CAT: Inhibiteur calcique bradycardisant en subligual comme Diltiazem, car il est en tachycardie \n▪️Si: Stabilisation, pas d'hypotension (bien toléré..)\n➡️Orientation Cardiologie: pour instaurer un traitement anticoagulant le plus tôt possible (consultation cette semaine)\n🚨Si mal toléré : choc, OAP ..\n➡️Avis cardiologie en urgence pour une Cardioversion en urgence"
     },
     {
       "page": 63,
-      "content": "# 1S\n\nPatient de 66 ans, sans ATCD pathologiques consulte pour douleur thoracique\n\n⚠️Interprétation : Sus décalage de ST (+) en Septoapical + parasitage\n\n▪️A refaire l’ECG"
+      "content": "🔴Patient de 66ans, sans ATCD pathologiques consulte pour douleur thoracique \n⚠️Interprétation : Sus décalage de ST (+) en Septoapical \n+ parasitage \n▪️A refaire l’ECG"
     },
     {
       "page": 64,
-      "content": "# Interprétation ECG\n\nPatiente 73 ans, hypertendue, sous Sintrom\n\nPrésente pour précordialgies type brûlure\n\nTa: 13.07\n\n⚠️Interprétation: Fibrillation auriculaire FA\n\n+ Sous décalage de ST (-) en latéral bas V4 V5 V6\n\n- Refaire l'ECG\n- Dosage des troponines et DDIMÈRES"
+      "content": "🔴Patiente 73ans, hypertendue, sous Sintrom \nPrésente pour précordialgies type brûlure \nTa: 13.07\n⚠️Interprétation: Fibrillation auriculaire FA\n+ Sous décalage de ST (-) en latéral bas V4V5V6 \n▪️Refaire l'ECG + Dosage des troponines et DDIMÈRES"
     },
     {
       "page": 65,
-      "content": "# BAV1\n\n# HA\n\n# m1\n\n# TAm\n\n# 8A\n\nPatiente de 53 ans, aux ATCD HTA, Cardiopathie sous Sintrom Consulte pour des Vertiges suite à une chute sur le sol, douleur thoracique\n\nSaO2: 99%, Fc: 75\n\n⚠️Interprétation: BAV 1er degré, PR>5mm\n\n◾️Bilan: TP/INR"
+      "content": "🔴Patiente de 53ans, aux ATCD HTA, Cardiopathie sous Sintrom\nConsulte pour des Vertiges suite à une chute sur le sol, douleur thoracique \nSaO2: 99%, Fc: 75\n⚠️Interprétation: BAV 1er degré, PR>5mm\n◾️Bilan: 🩸 TP/INR"
     },
     {
       "page": 66,
-      "content": "# Interprétation\n\nFemme de 40 ans, sans ATCD\n\nDouleur thoracique irradiant vers le bras gauche\n\n⚠️ Interprétation: Onde T positive en V1V2 et négative dans les autres dérivations précordiales, compléter par un dosages des troponines + Ionogramme"
+      "content": "🔴Femme de 40ans, sans ATCD \nDouleur thoracique irradiant vers le bras gauche\n⚠️Interprétation: Onde T positive en V1V2 et négative dans les autres dérivations précordiales, compléter par un dosages des troponines + Ionogramme"
     },
     {
       "page": 67,
-      "content": "# ACFA + BBD\n\nPatiente de 52 ans, sans ATCD particuliers\n\n⚠️Interprétation: ACFA + BBD"
+      "content": "🔴Patiente de 52ans, sans ATCD particuliers\n⚠️Interprétation: ACFA + BBD"
     },
     {
       "page": 68,
-      "content": "# MAC0 1.82\n\n# VI\n\nPatient de 87 ans, ATCD de goitre sous Levothyrox, hypertrophie de la prostate, cardiaque, il présente une dyspnée nocturne avec toux occasionnel, à l'auscultation souffle au foyer pulmonaire.\n\nTa: 12/6, SaO2: 97%, Gly: 1g\n\n⚠️Interprétation : BBG\n\n- S'il est récent peut cacher un IDM faut le comparer avec un ECG ancien"
+      "content": "🔴Patient de 87ans, ATCD de goitre sous Levothyrox, hypertrophie de la prostate, cardiaque, il présente une dyspnée nocturne avec toux occasionnel, à l'auscultation souffle au foyer pulmonaire \nTa: 12/6, SaO2: 97%, Gly: 1g\n⚠️Interprétation : BBG\n▪️S'il est récent peut cacher un IDM\nfaut le comparer avec un ECG ancien"
     },
     {
       "page": 69,
-      "content": "# Flutter A x1mv\n\nganisation: Docteur"
+      "content": ""
     },
     {
       "page": 70,
-      "content": "Patient de 78 ans qui consulte pour faiblesse depuis 48h +/- douleur thoracique et lombaire\n\nTa: 13/08 pour les 02 membres\n\nDextro : 1.45 g/dl\n\nFc: 80 bpm\n\nSaO2: 94 %\n\nATCD : HTA/Diabète/IDM : stenté en 2013/2015\n\n# ⚠️ Interprétation: Flutter Atrial\n\n- Ondes P Remplacées par des trémulations\n- Rythme régulier\n- Comparer avec un ECG ancien\n- Dosage des troponines pour éliminer un NSTEMI\n- Ionogramme\n- Bilan complet"
+      "content": "🔴Patient de 78ans qui consulte pour faiblesse depuis 48h +/- douleur thoracique et lombaire\nTa: 13/08 pour les 02 membres \nDextro : 1.45 g/dl\nFc: 80bpm\nSaO2: 94 %\nATCD : HTA/Diabète/IDM : stenté en 2013/ 2015\n⚠️Interprétation: Flutter Atrial \n◾️Ondes P Remplacées par des trémulations \nRythme régulier \n▪️Comparer avec un ECG ancien \n▪️Dosage des troponines pour éliminer un NSTEMI \n▪️Ionogramme \n▪️Bilan complet"
     },
     {
       "page": 71,
-      "content": "# Examen\n\nPatient consulte pour une asthénie et des épigastralgie minime, d'ATCD d'HTA\n\nTa: normal.\n\n⚠️Interprétation: Sous décalage de ST en V1V2V3V4\n\n- Faire les dérivations postérieurs à la recherche d'un STEMI\n- Troponines pour éliminer un NSTEMI"
+      "content": "🔴Patient consulte pour une asthénie et des épigastralgie minime, d'ATCD d'HTA\nTa: normal.\n⚠️Interprétation: Sous décalage de ST en V1V2V3V4\n▪️Faire les dérivations postérieurs à la recherche d'un STEMI \n▪️Troponines pour éliminer un NSTEMI"
     },
     {
       "page": 72,
-      "content": "# Tachycardie\n\nsirusale fuaf\n\nyousy\n\nav/\n\nn\n\nBBD\n\nv5"
+      "content": ""
     },
     {
       "page": 73,
-      "content": "# Enfant de 11 ans, d'ATCD d’épilepsie\n\nFc: 140\n\nMotif: palpitation et asthénie\n\n⚠️Interprétation: Tachycardie sinusale\n\n- BBD physiologique\n\n▪️Faut ↘️ la Fc puis refaire l'ECG: O2 + Mg\n\nFNS"
+      "content": "🔴Enfant de 11ans, d'ATCD d’épilepsie \nFc: 140 \nMotif: palpitation et asthénie\n⚠️Interprétation: Tachycardie sinusale \n+ BBD physiologique \n▪️Faut ↘️la Fc puis refaire l'ECG: O2 + Mg\nFNS"
     },
     {
       "page": 74,
-      "content": "# ESV 15A V6A\n\nFemme 68 ans, Hypertendue\n\n⚠️Interprétation : ESV\n\n▪️Faire un DII long"
+      "content": "🔴Femme 68ans, Hypertendue\n⚠️Interprétation : ESV\n▪️Faire un DII long"
     },
     {
       "page": 75,
-      "content": "nLs\n\n 7    I\n n"
+      "content": ""
     },
     {
       "page": 76,
-      "content": "# Syndrome de Wellens\n\n# (&#x3C; syndrome de I'IVA >)\n\nInversion terminale de T en V2-V3(V4) = ischémie sous-épicardique (type 1) évoluant vers une inversion profonde des ondes T (type 2) en dehors d'un épisode douloureux, sans anomalie des QRS (forme typique)\n\n| Type 1 | Type 2 |\n| ------ | ------ |\n| V1     | √      |\n| V2     | T Trv  |\n| V3     |        |\n\nP. Taboulet &#x3C; L'ECG de A a Z >\n\nPatient de 70 ans, sans ATCD Consulte pour des épigastralgies aigues Ta : 160/80\n\n⚠️Interprétation : STEMI en antéro-septal V1V2V3\n\n▪️Faire les dérivations postérieures V7V8V9"
+      "content": "🔴Patient de 70ans, sans ATCD\nConsulte pour des épigastralgies aigues \nTa : 160/80 \n⚠️Interprétation : STEMI en antéro-septal V1V2V3\n▪️Faire les dérivations postérieures V7V8V9"
     },
     {
       "page": 77,
-      "content": "# Syndrome de Wellens :\n\nC’est l’équivalent d’un syndrome coronarien (manifestation de la sténose de l’IVA).\n\n# Électriquement y a 2 manifestations :\n\n- Type 1 : ondes T biphasiques en V1V2V3\n- Type 2 : ondes T négatives (les mêmes dérivations sus_citées)\n\n# CAT :\n\n- On le traite comme un NSTEMI avec une coronarographie dans les plus brefs délais"
+      "content": "Ou\nSyndrome de Wellens :\n◾️C’est l’équivalent d’un syndrome coronarien (manifestation de la sténose de l’IVA) .\nÉlectriquement y a 2 manifestations : \n▪️Type 1 : ondes T biphasiques en V1V2V3\n▪️Type 2 : ondes T négatives (les mêmes dérivations sus_citées)\n✅️CAT : \n▪️On le traite comme un NSTEMI avec une coronarographie dans les plus brefs délais"
     },
     {
       "page": 78,
-      "content": "# 5 mn\n\nPatient âgé de 46 ans, consulte pour palpitations, grand fumeur\n\n# ⚠️Interprétation:\n\nTachycardie Supraventriculaire TSV\n\n- Tachycardie + absence d'onde P + rythme régulier"
+      "content": "🔴Patient âgé de 46ans, consulte pour palpitations, grand fumeur\n⚠️Interprétation: Tachycardie Supraventriculaire TSV\n▪️Tachycardie + absence d'onde P + rythme régulier"
     },
     {
       "page": 79,
-      "content": "NrN\nJhalaa                 IWWW\nACFA MNNW\n\n# 25 mm/5    0.25-35M2550              AT-1 C:2.85\n\nPatient sous Flecaine depuis 2ans\n\nConsulte pour malaise et palpitations\n\n# ⚠️Interprétation : ACFA"
+      "content": "🔴Patient sous Flecaine depuis 2ans \nConsulte pour malaise et palpitations\n⚠️Interprétation : ACFA"
     },
     {
       "page": 80,
-      "content": "# Épigastralgies\n\nTa : 16/8\n\n⚠️Interprétation: Extrasystoles ESV"
+      "content": "🔴Épigastralgies \nTa : 16/8\n⚠️Interprétation: Extrasystoles ESV"
     },
     {
       "page": 81,
-      "content": "# Current Page\n\n| 1Omm/mV                | avR     |\n| ---------------------- | ------- |\n| + a                    | ESA     |\n| vsfomm/mv              | L       |\n| ACSOUEMC35HZ+DETO.OSHZ | aVR     |\n| V1                     | V4      |\n| V2                     | V5      |\n| V6                     |         |\n| 1Omm/mV                | 10mm/mV |\n| V4                     |         |\n| V5                     | LUL     |\n| V6                     | aVR     |\n| 25mm/s                 |         |"
+      "content": ""
     },
     {
       "page": 82,
-      "content": "# Femme 54 ans\n\nConsulte pour fièvre à 39.1 et douleur abdominale.\n\n# Examen clinique\n\n- Gorge : angine\n- Auscultation : normal\n- TA : 150/90\n\n# Interprétation\n\nESA"
+      "content": "🔴Femme 54ans , consulte pour fièvre à 39.1 et douleur abdominale \ngorge : angine \nauscultation: normal \nTA: 150/90 \n⚠️Interprétation: ESA"
     },
     {
       "page": 83,
-      "content": "# V2\n\n10 mm/it 5 mm/mV\n\nv3 ACFA\n\n10 mm/mV 25 mm/S F11ter 100 Hz H 50 d 10 mm/mV\n\naVR\n\nII aVL\n\nNN\n\naVF 713\n\nWNNN\n\nPatient de 52ans sous Sintrom\n\nIl se présente pour des palpitations et douleurs thoraciques\n\nTa: 16/11\n\n⚠️Interprétation: ACFA"
+      "content": "🔴Patient de 52ans sous Sintrom\nIl se présente pour des palpitations et douleurs thoraciques \nTa: 16/11\n⚠️Interprétation: ACFA"
     },
     {
       "page": 84,
-      "content": "- Palpitations sont à cause de l'ACFA et la Tachycardie\n- Eliminer une ACFA mal tolérée (choc, OAP, AEG..)\n- Orientation vers son cardiologue pour ajustement de traitement (si les palpitations sont très gênantes => Diltiazem en sub lingual sur place)\n- Troponine pour éliminer une NSTEMI (douleur thoracique)\n- O2 thérapie + 1/2 amp Mg diluée dans 200cc SG5% puis refaire ECG"
+      "content": "▪️Palpitations sont à cause de l'ACFA et la Tachycardie \n▪️Eliminer une ACFA mal tolérée (choc, OAP, AEG..) \n▪️Orientation vers son cardiologue pour ajustement de traitement (si les palpitations sont très gênantes => Diltiazem en sub lingual sur place)\n▪️Troponine pour éliminer une NSTEMI (douleur thoracique)\n▪️O2 thérapie + 1/2 amp Mg diluée dans 200cc SG5% puis refaire ECG"
     },
     {
       "page": 85,
-      "content": "# Interprétation ECG\n\n| AUTO 10mm/mV | J0mm/aV |\n| ------------ | ------- |\n| St+          | LII     |\n| aVR          | 25m     |\n| =V1          | 2       |\n| V5           | aBR     |\n| 16           |         |\n\nPatient sans ATCD consulte pour des précordialgies\n\n⚠️Interprétation: STEMI jusqu'à preuve de contraire\n\n- Sus décalage en V1V2V3 (mais pas significatif en V2V3 1mm)\n- Image en miroir en inférieur\n- Onde Q de nécrose V1V2V3"
+      "content": "🔴Patient sans ATCD consulte pour des précordialgies\n⚠️Interprétation: STEMI jusqu'à preuve de contraire\n▪️Sus décalage en V1V2V3 (mais pas significatif en V2V3 1mm)\n▪️Image en miroir en inférieur\n▪️Onde Q de nécrose V1V2V3"
     },
     {
       "page": 86,
-      "content": "Acfa 44\n\n# TR VUZ POLYCL INIQUE SOUIDANIA\n\n# ⚠️Interprétation : ACFA\n\n- Absence d'onde P\n- Trémulations de ligne de base\n- Rythme cardiaque irrégulier"
+      "content": "⚠️Interprétation : ACFA\n▪️Absence d'onde P \n▪️Trémulations de ligne de base \n▪️Rythme cardiaque irrégulier"
     },
     {
       "page": 87,
-      "content": "ACFA\n\n# Exam:\n\n| V4       | V5  | V2   | V6 |\n| -------- | --- | ---- | -- |\n| t0 mm/mV |     |      |    |\n| aVF      | GVF | 1150 |    |\n\nPatiente âgée de 43ans, sans ATCD Consulte pour une asthénie avec une senstation de bouffée de chaleur\n\n⚠️Interprétation : ACFA"
+      "content": "🔴Patiente âgée de 43ans, sans ATCD\nConsulte pour une asthénie avec une senstation de bouffée de chaleur \n⚠️Interprétation : ACFA"
     },
     {
       "page": 88,
-      "content": "# W I\n\nPatient âgé de 69 ans, HTA connue\n\nTa: 17/10\n\nIl consulte pour des précordialgies\n\n⚠️Interprétation: Troubles de repolarisation\n\nT(-)\n\n- ST(-) diffus (peut-être NSTEMI comme peut-être une hypokaliémie) avec des T(-) très profondes en antérieur [Wellens syndrome]"
+      "content": "🔴Patient âgé de 69ans, HTA connue \nTa: 17/10\nIl consulte pour des précordialgies\n⚠️Interprétation: Troubles de repolarisation T(-)\n▪️ST(-) diffus (peut-être NSTEMI comme peut-être une hypokaliémie) avec des T(-) très profondes en antérieur [Wellens syndrome] et"
     },
     {
       "page": 89,
-      "content": "# ondes Q de nécrose en V1V2V3 (STEMI hors délai)\n\n▪️Diagnostic probable: un syndrome de Wellens avec une Hypokaliémie\n\nSTEMI en antérieur hors délai\n\n# ✅️CAT :\n\n- Mise en condition / Scope\n- Ionogramme\n- Bilan rénal\n- Dosage des troponines\n\n# ◾️Dose de charge :\n\n4cp Plavix, 3cp Aspegic et Lovenox en Sc selon le poids\n\n# ⛔️On ne thrombolyse pas le NSTEMI\n\n➡️Coronarographie"
+      "content": "ondes Q de nécrose en V1V2V3 (STEMI hors délai)\n▪️Diagnostic probable: un syndrome de Wellens avec une Hypokaliémie\nSTEMI en antérieur hors délai\n✅️CAT : \n▪️Mise en condition / Scope \n▪️Ionogramme\n▪️Bilan rénal\n▪️Dosage des troponines\n◾️Dose de charge : 4cp Plavix, 3cp Aspegic et Lovenox en Sc selon le poids\n⛔️On ne thrombolyse pas le NSTEMI \n➡️Coronarographie"
     },
     {
       "page": 90,
-      "content": "# Syndrome de Wellens\n\n# (&#x3C; syndrome de I'lVA >)\n\nInversion terminale de T en V2-V3(V4) = ischémie sous-épicardique (type 1) évoluant vers une inversion profonde des ondes T (type 2) en dehors d'un épisode douloureux, sans anomalie des QRS (forme typique)\n\n| Type 1 | Type 2 |\n| ------ | ------ |\n| V1     | F √    |\n| V2     | pv     |\n| V3     | 4 hv   |\n\nP. Taboulet. - L'ECG de A a Z=\n\n# Syndrome de Wellens\n\n# (&#x3C; syndrome de I'IVA >)\n\nFluctuation de I'onde T en V2-V4 en rapport avec une IVA occluse\n\n|     | U1  | II |\n| --- | --- | -- |\n| I1I | U3  | 53 |\n| AUR | U4  |    |\n| AUL | AUF | U6 |\n|     |     | U6 |"
+      "content": ""
     },
     {
       "page": 91,
-      "content": "# Patient d'ATCD d'HTA et cardiopathie\n\nVenu en dyspnée SaO2 89%\n\nTa: 7/5\n\nTLT : OAP\n\n⚠️Interprétation: BBG + ACFA\n\n- SCA ST+ (masqué par un BBG), compliqué d'un OAP cardiogenique\n- Cardiopathie décompensée"
+      "content": "🔴Patient d'ATCD d'HTA et cardiopathie, venu en dyspnée SaO2 89% \nTa: 7/5 \nTLT : OAP\n⚠️Interprétation: BBG + ACFA \n▪️SCA ST+ (masqué par un BBG), compliqué d'un OAP cardiogenique\n▪️Cardiopathie décompensée"
     },
     {
       "page": 92,
-      "content": "# ✅️CAT:\n\n- Position demi assise/2VVP/O2/Scope\n- Sonde urinaire\n- Perfalgan en IVL\n- Dosage des Troponines\n\n# Bilan:\n\n- FNS / Gly\n- CRP\n\n➡️Évacuation en urgence"
+      "content": "✅️CAT:\n▪️Position demi assise/2VVP/O2/Scope\n▪️Sonde urinaire \n▪️Perfalgan en IVL\n◾️Dosage des Troponines \n◾️Bilan:🩸\n▪️FNS / Gly\n▪️CRP\n➡️Évacuation en urgence"
     },
     {
       "page": 93,
-      "content": "# III\n\naVF V6\n\n25mum's 10mmnV 40H: 9.09 12SL 231 CID:10 EID 21 EDT: 16:03 11-FEB-2008 ORDER\n\n⚠️Interprétation: Sus décalage en antéro sptale et latéral\n\n▪️Image en miroir en V1"
+      "content": "⚠️Interprétation: Sus décalage en antéro sptale et latéral \n▪️Image en miroir en V1"
     },
     {
       "page": 94,
-      "content": "# Patient 79ans, ATCD d'HTA, diabète et cardiopathie\n\nConsulte pour une douleur thoracique\n\n- ⚠️Interprétation : ST(+) antéro septo apical\n- Image en miroir en latéral haut\n- Onde Q de nécrose en inférieur"
+      "content": "🔴Patient 79ans, ATCD d'HTA, diabète et cardiopathie\nConsulte pour une douleur thoracique\n⚠️Interprétation : ST(+) antéro septo apical \n▪️Image en miroir en latéral haut\n▪️Onde Q de nécrose en inférieur"
     },
     {
       "page": 95,
-      "content": "# Dose de charge Plavix Aspegic et Lovenox\n\n# Antalgique\n\n- Monitoring\n- Bilan d'urgence\n- ➡️Avis cardiologie"
+      "content": "◾️Dose de charge Plavix Aspegic et Lovenox \nAntalgique \n▪️Monitoring \n▪️Bilan d'urgence \n➡️Avis cardiologie"
     },
     {
       "page": 96,
-      "content": "# Patient âgé de 67 ans aux ATCD d’HTA et cardiopathie non documentée\n\nConsulte pour une dyspnée et toux sèche\n\n- Ta : 18/11\n- SaO2 : 95\n- Fc : 99\n\n# ⚠️Interprétation:\n\n- BBG + ACFA\n- Rythme irrégulier sans ondes P avec des QRS larges de retard gauche"
+      "content": "🔴Patient âgé de 67ans aux ATCD d’HTA et cardiopathie non documentée \nConsulte pour une dyspnée et toux sèche \nTa : 18/11 \nSaO2 : 95 \nFc : 99\n⚠️Interprétation: BBG + ACFA\n◾️Rythme irrégulier sans ondes P avec des QRS larges de retard gauche"
     },
     {
       "page": 97,
-      "content": "# CAT\n\n- Surveillance de Ta/SaO2/AVS/O2\n- Dosage des Troponines\n- Bilan :\n- FNS/Gly\n- Urée/Créat\n\n➡️Evacuation"
+      "content": "✅️CAT :\n◾️Surveillance de Ta/SaO2/AVS/O2\n◾️Dosage des Troponines \n◾️Bilan :🩸\n▪️FNS/Gly\n▪️Urée/Créat \n➡️Evacuation"
     },
     {
       "page": 98,
-      "content": "# CLITTUOOUN\n\n# HAW EAAA bA UM\n\n# 1\n\n12 TAe\n\n# 1\n\n1 11 UT\n\n# 121 aAt EA 94\n\n\" Lh\n\n1\n\nUn sujet âgé qui consulte pour des vertiges\n\n# ⚠️Interprétation: BAV 3eme degré\n\n- P dissocié du QRS\n- PP intervalle régulier\n- RR intervalle régulier"
+      "content": "🔴Un sujet âgé qui consulte pour des vertiges \n⚠️Interprétation: BAV 3eme degré \n◾️P dissocié du QRS \n◾️PP intervalle régulier \n◾️RR intervalle régulier"
     },
     {
       "page": 99,
-      "content": "BBD\nPatiente présente épigastralgies\n\nCardiopathie non suivie\n\n⚠️Interprétation: BBD complet\n\n- QRS large, aspect RR' en V1 V2, et onde S trainante en V5V6 et D2 AVL\n- Bilan complet\n- Troponines\n- DDIMÈRES\n\n◾️Si RAS cela veut dire que c'est un trouble conductif lié à sa cardiopathie"
+      "content": "🔴Patiente présente épigastralgies \nCardiopathie non suivie\n⚠️Interprétation: BBD complet \n◾️QRS large, aspect RR' en V1 V2, et onde S trainante en V5V6 et D2 AVL \n▪️Bilan complet \n▪️Troponines \n▪️DDIMÈRES \n◾️Si RAS cela veut dire que c'est un trouble conductif lié à sa cardiopathie"
     },
     {
       "page": 100,
-      "content": "# V2\n\n# aVF  BBG\n\nPatient 60ans ATCD d'IDM ça fait 3ans\n\nConsulte pour une Toux productive, sueurs, asthénie depuis hier soir, Pas douleur thoracique\n\n⚠️Interprétation: BBG + HVG\n\n- Bilan\n- Ionogramme"
+      "content": "🔴Patient 60ans ATCD d'IDM ça fait 3ans \nConsulte pour une Toux productive, sueurs, asthénie depuis hier soir, Pas douleur thoracique\n⚠️Interprétation: BBG + HVG\n▪️Bilan \n▪️Ionogramme"
     },
     {
       "page": 101,
-      "content": "# Analyse ECG\n\nIl y a une discordance donc on cherche un Sus décalage de plus de 5mm en V1V2V3 pour dire qu'il y a des signes de Sgarbossa positifs et que notre BBG cache un SCA.\n\nComparaison avec un ECG antérieur, si c'est la même image (BBG ancien) ➡️ Abstention.\n\nS'il y a une modification ➡️ Troponines."
+      "content": "◾️Il y a une discordance donc on cherche un Sus décalage de plus de 5mm en V1V2V3 pour dire qu'il y a des signes de Sgarbossa positifs et que notre BBG cache un SCA \n◾️Comparaison avec un ECG antérieur, si c'est la même image (BBG ancien)➡️Abstention \n◾️S'il y a une modification➡️Troponines"
     },
     {
       "page": 102,
-      "content": "# STEMI\n\nMalade âgé de 67 ans diabétique sous ADO, mal équilibré\n\nLe diagnostic de PFLA était posé\n\nLe jour de contrôle patient stable avec une bonne amélioration clinique.\n\nPas d'autres symptômes ni signes cliniques alarmants.\n\nDextro: 2.7 il ne prend pas son traitement\n\nCDU: absence des CC\n\nTA : 11/7\n\n⚠️Interprétation: STEM"
+      "content": "🔴Malade âgé de 67ans diabétique sous ADO, mal équilibré\nLe diagnostic de PFLA était posé\nLe jour de contrôle patient stable avec une bonne amélioration clinique .. \nPas d'autres symptômes ni signes cliniques alarmantes..\nDextro: 2.7 il ne prend pas son traitement \nCDU: absence des CC\nTA : 11/7 \n⚠️Interprétation: STEM"
     },
     {
       "page": 103,
-      "content": "# Évaluation Clinique\n\n- Qui a passé inaperçu, y a déjà l'aspect QS (le malade à fait une nécrose)\n- Dosage des troponines\n- Dose de charge (Plavix + Aspegic + Lovenox)\n- Hospitalisation dans un service de cardiologie\n- Thrombolyse n'est pas indiquée\n\n# Considérations Spéciales\n\nChez les diabétiques ➡️ toujours demander un ECG devant une cétose ou un déséquilibre glycémique"
+      "content": "◾️Qui a passé inaperçu, y a déjà l'aspect QS (le malade à fait une nécrose) \n▪️Dosage des troponines \n▪️Dose de charge (Plavix + Aspegic + Lovenox) \n▪️Hospitalisation dans un service de cardiologie \n▪️Thrombolyse n'est pas indiquée\n⛔️Chez les diabétiques➡️toujours demander un ECG devant une cétose ou un déséquilibre glycémique"
     },
     {
       "page": 104,
-      "content": "# STEMI\n\n# Patient sans ATCD\n\nConsulte pour une douleur thoracique irradiante vers le bras gauche depuis 11h du matin jusqu'à l'arrivée à 4:30h\n\nTA: 10/06\n\nFc: 63btms/min Spo2: 97%\n\n⚠️Interprétation: STEMI inf D2D3 AVF\n\nImage en miroir en AVL"
+      "content": "🔴Patient sans ATCD, consulte pour une douleur thoracique irradiante vers le bras gauche depuis 11h du matin jusqu'à l'arrivée à 4:30h\nTA: 10/06 \nFc: 63btms/min Spo2: 97% \n⚠️Interprétation: STEMI inf D2D3 AVF \nImage en miroir en AVL"
     },
     {
       "page": 105,
-      "content": "# Dose de charge\n\n# Délai dépassé pour la thrombolyse(>12h)\n\n➡️Evacuation vers service cardiologie pour une angioplastie"
+      "content": "▪️Dose de charge\n▪️Délai dépassé pour la thrombolyse(>12h)\n➡️Evacuation vers service cardiologie pour une angioplastie"
     },
     {
       "page": 106,
-      "content": "ST(-)⁰⁵⁴⁷⁵⁷\n\ng\n\n1 NN\nK"
+      "content": ""
     },
     {
       "page": 107,
-      "content": "# Consultation Médicale\n\nPatiente âgée de 40 ans, Hypertendu sous traitement, qui consulte pour une douleur rétrosternale intense localisée sans irradiation, non calmée par les antalgiques.\n\nTA: 140/90 mmHg FC: 88 bpm SaO2: 98%\n\nAuscultation cardiopulmonaire : RAS\n\n⚠️ Interprétation: ST (-) (sous décalage en antérieur étendu + inférieur)\n\n- Faites un ECG complet (dérivations postérieurs) à la recherche d'un sus décalage postérieur\n- Dosage des Troponines\n- Dose de charge (300 mg de Aspegic + 4 cp Plavix de 75 mg) + injection Lovenox 100 ui/kg ou 1 mg/kg 2/j\n\n➡️ Orientation cardiologie"
+      "content": "🔴Patiente âgée de 40ans, Hypertendu sous traitement, qui consulte pour une douleur rétrosternale intense localisée sans irradiation, non calmée par les antalgiques\nTA:140/90mmhg FC: 88bpm SaO2: 98%\nAuscultation cardiopulmonaire : RAS\n⚠️Interprétation: ST (-) (sous décalage en antérieur étendu + inferieur)\n▪️Faites un ECG complet (dérivations postérieurs) à la recherche d'un sus décalage posterieur\n▪️Dosage des Troponines \n▪️Dose de charge (300mg de Aspegic + 4cp Plavix de 75mg ) + injection Lovenox 100ui/kg ou 1mg/kg 2/j\n➡️Orientation cardiologie"
     },
     {
       "page": 108,
-      "content": "BBG\n\n# 1Omm/mV\n\nMotif: Patiente âgé de 80ans, sans ATCD\n\nElle se présente pour des douleurs thoraciques et épigastriques\n\nTa: 18/09 SaO2: correcte\n\nAuscultation: Normal\n\n# ⚠️Interprétation: BBG\n\n- TDR secondaires au BBG\n- Comparer avec un ECG ancien (Sgarbossa)"
+      "content": "🔴Motif: Patiente âgé de 80ans , sans ATCD \nElle se présente pour des douleurs thoraciques et épigastriques\nTa: 18/09 SaO2: correcte \nAuscultation: Normal \n⚠️Interprétation: BBG\n▪️TDR secondaires au BBG\n▪️Comparer avec un ECG ancien (Sgarbossa)"
     },
     {
       "page": 109,
-      "content": "# Troponines si douleur typique\n\n# Traiter le pic HTA\n\n# Bilan\n\n- FNS\n- Urée/Créat\n- Ionogramme\n\n# Orientation cardiologie"
+      "content": "▪️Troponines si douleur typique \n▪️Traiter le pic HTA\n◾️Bilan 🩸\n▪️FNS\n▪️Urée/Créat \n▪️Ionogramme \n➡️Orientation cardiologie"
     },
     {
       "page": 110,
-      "content": "# Motif: Patiente âgée 49ans\n\nATCD: remplacement de la valve mitrale, sous sintrom\n\nPrésente pour palpitations et douleur légère thoracique\n\n⚠️Interprétation: BAV III\n\n- Soulager la douleur: Perfalgan\n- Mg 1amp diluée dans 250cc SG5"
+      "content": "🔴Motif: Patiente âgée 49ans \nATCD: remplacement de la valve mitrale, sous sintrom \nPrésente pour palpitations et douleur légère thoracique \n⚠️Interprétation: BAV III\n▪️Soulager la douleur: Perfalgan \n▪️Mg 1amp diluée dans 250cc SG5"
     },
     {
       "page": 111,
-      "content": "# Bilan\n\n- FNS\n- TSH\n- TP/INR\n- Ionogramme\n- Troponines\n\n# Avis cardiologie en urgence"
+      "content": "◾️Bilan 🩸\n▪️FNS\n▪️TSH\n▪️TP/INR\n▪️Ionogramme \n▪️Troponines \n➡️Avis cardiologie en urgence"
     },
     {
       "page": 112,
-      "content": "# 10mm/mv\n\n# Patient Details\n\nPatiente 29ans aux ATCD de CMH non obstructive sous Neocardil 40mg (1/2cp) avec grossesse actuelle évolutive de 20SA, qui se présente pour une douleur thoracique type d'oppression irradiante vers la mâchoire et le bras gauche.\n\nTa: 08/06, FC: 180bpm\n\n# Interprétation\n\n- BBG + ACFA\n- Rhytme irrégulier\n- Aspect rS en V1 et RSR' en V6: BBG"
+      "content": "🔴Patiente 29ans aux ATCD de CMH non obstructive sous Neocardil 40mg (1/2cp) avec grossesse actuelle évolutive de 20SA, qui se présente pour une douleur thoracique type d'oppression irradiante vers la mâchoire et le bras gauche\nTa: 08/06, FC: 180bpm\n⚠️Interprétation: BBG + ACFA\n◾️Rhytme irrégulier \n◾️Aspect rS en V1 et RSR' en V6: BBG"
     },
     {
       "page": 113,
-      "content": "# 1. Sous décalage de ST en V1\n\n- Comparer avec un ECG ancien\n- Selon la clinique Ta: 8/6 => ACFA mal tolérée\n\n# ➡️ Avis cardiologie en urgence après stabilisation de la patiente :\n\n- Manœuvre modifiée de Valsalva\n- Massage carotidien"
+      "content": "◾️Sous décalage de ST en V1\n▪️Comparer avec un ECG ancien \n▪️Selon la clinique Ta: 8/6=> ACFA mal tolérée \n➡️Avis cardiologie en urgence après stabilisation de la patiente : \n▪️Manœuvre modifiée de Valsalva\n▪️Massage carotidien"
     },
     {
       "page": 114,
-      "content": "# Fi H50 3\n\n10 m / Fier: 50 4 5\n\nwwomnmmnmmn\n\n+1 NLY\n\nayF\n\n10 465 0203\n\n1150 01 05 03-03\n\nam me Fiter 10 m 5\n\nWWWWw\n\nName: 41\n\nA Mwwtwwn\n\nwwwwwww\n\nVS\n\ntwww NG\n\nWwww\n\n# Patient\n\nPatient de 90ans, Sans ATCD particuliers, qui se présente pour fatigue, sensation de nausées avec 1 épisode de vomissement + épigastralgies.\n\nTa : 12/06, Dextro : 1,3g/l\n\nAuscultation propre, Abdomen souple\n\n⚠️Interprétation : BBG\n\n- Sus décalage de ST en V1V2 AVR\n- Image en miroir en DI DII"
+      "content": "🔴Patiente de 90ans, Sans ATCD particuliers, qui se présente pour fatigue, sensation de nausées avec 1 épisode de vomissement + épigastralgies..\nTa : 12/06, Dextro : 1,3g/l\nAuscultation propre, Abdomen souple \n⚠️Interprétation : BBG\n◾️Sus décalage de ST en V1V2 AVR\n▪️Image en miroir en DI DII"
     },
     {
       "page": 115,
-      "content": "# Bilan\n\n- TP/TCK\n- Ionogramme\n- Troponines\n\n1. Aspegic 300mg en IVD\n2. Plavix 1cp 75mg en per Os\n3. Lovenox 0.4Ui en Sc\n\n➡️ Evacuation cardiologie"
+      "content": "◾️Bilan🩸\n▪️TP/TCK\n▪️Ionogramme\n▪️Troponines \n1 Aspegic 300mg en IVD\n2 Plavix 1cp 75mg en per Os \n3 Lovenox 0.4Ui en Sc\n➡️Evacuation cardiologie"
     },
     {
       "page": 116,
-      "content": "n\n\naa\n\na\n\ni\n\nnn\n\nCtattn\n\nECG pepppprpriredn"
+      "content": ""
     },
     {
       "page": 117,
-      "content": "# Patient de 84 ans\n\nATCD de HTA, rétrécissement aortique, BPCO, IR (clairance à 30), Insuffisance surrénalienne\n\n# Motif\n\nPerte de connaissance (légère), nausée, apyrétique\n\nTa: 130/80 mmhg, Dextro 1.25g/l\n\n⚠️Interprétation: ACFA"
+      "content": "🔴Patient de 84ans au ATCD de HTA, rétrécissement aortique, BPCO, IR (clairance à 30), Insuffisance surrénalienne \nMotif: Perte de connaissance (légère), nausée, apyrétique \nTa: 130/80 mmgh, Dextro 1.25g/l \n⚠️Interprétation: ACFA"
     },
     {
       "page": 118,
-      "content": "# 13OUACHA\n\nIm aVR 25m/s Smm/ml DFT-45 H2 AC-58 H ad3\n\nHomme de 70 ans, hypertendu, diabètique, néphropathe au stade d’hémodialyse, cardiopathe, qui présente des douleurs thoraciques.\n\n⚠️Interprétation : BBG complet Onde P présente, QRS large à cause du BBG + Rabotage de l’onde R : soit une séquelle d’une STEMI antérieur car il est cardiopathe, soit une STEMI courante Tachycardie 150/min"
+      "content": "🔴Homme de 70ans, hypertendu, diabètique, néphropathe au stade d’hémodialyse, cardiopathe, qui présente des douleurs thoraciques.\n⚠️Interprétation : BBG complet \nOnde P présente, QRS large à cause du BBG \n+ Rabotage de l’onde R : soit une séquelle d’une STEMI antérieur car il est cardiopathe, soit une STEMI courante \nTachycardie 150/min"
     },
     {
       "page": 119,
-      "content": "# Troponines\n\n# Ionogramme"
+      "content": "◾️Troponines \n◾️Ionogramme"
     },
     {
       "page": 120,
-      "content": "# Interprétation ECG\n\nPatient de 86 ans, hypertendu consulte pour une douleur thoracique\n\n⚠️Interprétation: STEMI [IDM] antérieur en V1V2V3\n\nBBG complet (IDM jusqu'à preuve du contraire)\n\nAspect en M en latéral gauche V5V6\n\n- Si BBG récent = STEMI\n- Si BBG ancien => On utilise les critères SGARBOSSA\n- si (+) => (majoration de la discordance) = STEMI\n\n✅️CAT: Hospitalisation"
+      "content": "🔴Patient de 86ans, hypertendu \nconsulte pour une douleur thoracique \n⚠️Interprétation: STEMI [IDM] antérieur en V1V2V3 \nBBG complet (IDM jusqu'à preuve du contraire)\nAspect en M en latéral gauche V5V6\n◾️Si BBG récent= STEMI\n◾️Si BBG ancien=> On utilise les critères SGARBOSSA\n▪️si (+)=> (majoration de la discordance)=STEMI\n✅️CAT: Hospitalisation"
     },
     {
       "page": 121,
-      "content": "# Monitoring / O2 thérapie\n\n# Perfalgan en perfusion\n\n# Bilan complet:\n\n- FNS/Gly\n- TP/TCK\n- INR\n- Rénal\n- Ionogramme\n- Troponines\n\n# Dose de charge:\n\n- Plavix + Aspegic + Lovenox\n\n# Evacuation cardiologie"
+      "content": "◾️Monitoring / O2 thérapie \n▪️Perfalgan en perfusion \n◾️Bilan complet:\n▪️FNS/Gly\n▪️TP/TCK\n▪️INR\n▪️Rénal\n▪️Ionogramme \n▪️Troponines \n◾️Dose de charge:\n▪️Plavix + Aspegic + Lovenox \n➡️Evacuation cardiologie"
     },
     {
       "page": 122,
-      "content": "# Patiente de 50ans hypertendue diabétique\n\nConsulte pour une douleur épigastrique + vomissements\n\n⚠️Interprétation : Sus décalage en latéral\n\nImage en miroir en inférieur"
+      "content": "🔴Patiente de 50ans hypertendue diabétique \nConsulte pour une douleur épigastrique + vomissements \n⚠️Interprétation : Sus décalage en latéral \nImage en miroir en inférieur"
     },
     {
       "page": 123,
-      "content": "ESU\n\n# Un homme âgé de 40ans, diabétique, qui se présente pour des épigastralgies depuis hier\n\n# ⚠️Interprétation: ESV\n\n- Extrasystoles ventriculaire: dans ce contexte considérer un SCA à présentation atypique jsq'à preuve du contraire\n- Refaire ECG après 20min\n- Bilan d'urgence\n- Troponines\n- Ionogramme: Hypokalémie"
+      "content": "🔴Un homme âgé de 40ans, diabétique, qui se présente pour des épigastralgies depuis hier\n⚠️Interprétation: ESV\n◾️Extrasystoles ventriculaire: dans ce contexte considérer un SCA à présentation atypique jsq'à preuve du contraire\n▪️Refaire ECG après 20min\n▪️Bilan d'urgence \n▪️Troponines \n▪️Ionogramme: Hypokalémie"
     },
     {
       "page": 124,
-      "content": "# ECG Report\n\n# Patient Information\n\nPatient de 70 ans, aux ATCD de trouble de rythme (non documenté), consulte pour des précordialgies\n\nTa : 14/09  Dextro : 1.51\n\n# Interprétation\n\n⚠️ ESV\n\n# Recommendations\n\n- Refaire ECG\n- Antalgique\n- Ionogramme + Calcémie"
+      "content": "🔴Patient de 70ans, aux ATCD de trouble de rythme (non documenté), consulte pour des précordialgies \nTa : 14/09 Dextro : 1.51 \n⚠️Interprétation : ESV\n▪️Refaire ECG\n▪️Antalgique \n▪️Ionogramme + Calcémie"
     },
     {
       "page": 125,
-      "content": "ID:3202 2925-q8-19 21,17:31\n\nPatient aux ATCD d'Hyperthyroïdie sous traitement, consulte pour des palpitations\n\n# Interprétation: TSV\n\n- Manœuvres vagales\n- Mg 1amp dans 250cc de SSI"
+      "content": "🔴Patient aux ATCD d'Hyperthyroïdie sous traitement, consulte pour des palpitations \n⚠️Interprétation: TSV\n▪️Manœuvres vagales\n▪️Mg 1amp dans 250cc de SSI"
     },
     {
       "page": 126,
-      "content": "s\n\n2\n\n2nn"
+      "content": ""
     },
     {
       "page": 127,
-      "content": "# Patiente de 73ans, d'ATCD d'HTA sous traitement\n\nIl se présente pour des douleurs au niveau du bras droit depuis une semaine.\n\n# ⚠️Interprétation: BBG\n\n- Comparer avec un ECG ancien\n- Si nouveau aspect ou douleur typique\n- Dosage des troponines\n\n➡️ Evacuation"
+      "content": "🔴Patiente de 73ans, d'ATCD d'HTA sous traitement \nIl se présente pour des douleurs au niveau du bras droit depuis une semaine.\n⚠️Interprétation: BBG\n◾️Comparer avec un ECG ancien \n◾️Si nouveau aspect ou douleur typique\n▪️Dosage des troponines \n➡️Evacuation"
     },
     {
       "page": 128,
-      "content": "I\n\nn\n\n11\n\n\"nn\n\n111\n\nV2\n\nV3\n\n2UR V1\n\n3M\n\n$VF A\n\nV4\n\nVS\n\nV6"
+      "content": ""
     },
     {
       "page": 129,
-      "content": "# Patient de 89ans, sous Sintrom\n\nConsulte pour dyspnée de repos\n\nFc : 80 Ta : 150/90\n\n# ⚠️Interprétation : Fibrillation Atriale FA\n\n- Un rythme irrégulier et très ralenti\n- Absence de l’onde P"
+      "content": "🔴Patient de 89ans, sous Sintrom \nConsulte pour dyspnée de repos \nFc : 80 Ta : 150/90 \n⚠️Interprétation : Fibrillation Atriale FA\n▪️Un rythme irrégulier et très ralenti\n▪️Absence de l’onde P"
     },
     {
       "page": 130,
-      "content": "# V1.0.0.9(20230504)\n\n25mm/s AC 50Hz 05-25H2\n\n# Femme 55ans sans ATCD\n\nPrécordialgies depuis 4h à l'arrivée\n\nTa: 8/5 Dextro: 1.55\n\nTroponine négative\n\n⚠️Interprétation: TSV mal tolérée\n\n- Digoxine 1/2amp à 2 reprises\n- Cordarone 2cp 200mg\n- Mg 1amp dans 250 SSI9"
+      "content": "🔴Femme 55ans sans ATCD \nPrécordialgies depuis 4h à l'arrivée\nTa: 8/5 Dextro: 1.55\nTroponine négative \n⚠️Interprétation: TSV mal tolérée \n▪️Digoxine 1/2amp à 2 reprises\n▪️Cordarone 2cp 200mg\n▪️Mg 1amp dans 250 SSI9"
     },
     {
       "page": 131,
-      "content": "# État clinique\n\n- Bon état clinique\n- Disparition de la douleur, respiration calme\n- Lourdeur de membre supérieur droit mais sans paralysie ni autres signes d'AVC\n\n# ECG\n\n- ESV\n- Fc: 88/99"
+      "content": "▪️Bon état clinique \n▪️Disparition de la douleur, respiration calme\n▪️Lourdeur de membre supérieur droit mais sans paralysie ni autres signes d'AVC\n◾️ECG: ESV\nFc: 88/99"
     },
     {
       "page": 132,
-      "content": "# Conelaatiome\n\n# Taebycat. Simusale\n\n| Nom           | l                     | hu         | 34      | Sese        | Age           | 2 | car a |\n| ------------- | --------------------- | ---------- | ------- | ----------- | ------------- | - | ----- |\n| Poida:        | kx Decalinge S. 1nch. |            |         |             |               |   |       |\n| SYS           | DIA                   | bpm1141    | T       |             |               |   |       |\n| Intervalle PX | as ⁷⁻¹⁵⁶              | Duree P    | 1120    | Duree QRS   | 01247         |   |       |\n| Diree         | ON 388/594            | qT/uTe     | as      | Axe P/QRS/T | 8.3/57.9/32.5 |   |       |\n| R(VS)/S(V1)   | BV 1.5/1.61           | R(VS)-8(V) | V :3.13 | Wedecin     |               |   |       |\n\nPatiente de 30ans, consulte pour des douleurs rétrosternales avec irradiation vers le membre supérieur gauche et des fourmillements de mâchoire\n\nTa: 16/10\n\nInterprétation: Aspect S1Q3 + Tachycardie sinusale 150btt"
+      "content": "🔴Patiente de 30ans, consulte pour des douleurs rétrosternales avec irradiation vers le membre supérieur gauche et des fourmillements de mâchoire\nTa: 16/10\n⚠️Interprétation: Aspect S1Q3 + Tachycardie sinusale 150btt"
     },
     {
       "page": 133,
-      "content": "# Dosage DDIMÈRES\n\n# Angioscanner"
-    },
-    {
-      "page": 134,
-      "content": "NO_CONTENT_HERE"
+      "content": "▪️Dosage DDIMÈRES \n▪️Angioscanner\n\n---"
     }
   ]
 }

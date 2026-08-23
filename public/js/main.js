@@ -101,15 +101,16 @@ async function bootstrapApp() {
     showToast("Erreur réseau ou réponse de base de données non reconnue.", "fa-circle-exclamation", 5000);
   });
 
-  // PWA Service Worker — disable in standalone Capacitor offline app to prevent logo freezes
+  // PWA Service Worker — disable in standalone Capacitor offline app & remote tunnel domains (ngrok) to prevent stale cache deadlocks & white pages
   if ('serviceWorker' in navigator) {
-    if (api.isOfflineApp) {
-      // Always unregister to avoid stale caches/clients.claim deadlocks in Capacitor standalone app
+    const isTunnelHost = location.hostname.includes('ngrok') || location.hostname.includes('loca.lt') || location.hostname.includes('trycloudflare.com') || location.hostname.includes('cfargotunnel.com');
+    if (api.isOfflineApp || isTunnelHost) {
+      // Always unregister to avoid stale caches/ngrok warning page deadlocks
       navigator.serviceWorker.getRegistrations().then(regs => {
         regs.forEach(reg => reg.unregister());
       });
       caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-      console.log('[Startup] Service worker disabled in Standalone Offline App to prevent freezes.');
+      console.log('[Startup] Service worker disabled on standalone app / remote tunnel host to prevent cache deadlocks.');
     } else {
       const isDev = location.hostname === 'localhost' ||
                     location.hostname === '127.0.0.1' ||
@@ -230,7 +231,18 @@ async function bootstrapApp() {
           }
         `;
         document.head.appendChild(style);
-        vt.call(document, swap);
+        const transition = vt.call(document, swap);
+        if (transition) {
+          if (transition.finished && typeof transition.finished.catch === 'function') {
+            transition.finished.catch(() => {});
+          }
+          if (transition.ready && typeof transition.ready.catch === 'function') {
+            transition.ready.catch(() => {});
+          }
+          if (transition.updateCallbackDone && typeof transition.updateCallbackDone.catch === 'function') {
+            transition.updateCallbackDone.catch(() => {});
+          }
+        }
         setTimeout(() => style.remove(), 400);
       } else {
         swap();
@@ -285,8 +297,7 @@ async function bootstrapApp() {
         };
       }
       if (addCatModal) {
-        if (window.innerWidth <= 600) addCatModal.classList.add('modal-overlay--sheet');
-        else addCatModal.classList.remove('modal-overlay--sheet');
+        addCatModal.classList.remove('modal-overlay--sheet');
         addCatModal.style.display = 'flex';
       }
     });
@@ -793,13 +804,14 @@ export async function runBackgroundSync() {
     for (const url of remoteUrls) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         // Merge base headers + provider-specific bypass headers (e.g. ngrok-skip-browser-warning)
         const headers = {
           ...api.getHeaders(),
           ...getExtraHeaders(url)
         };
-        const res = await fetch(`${url}/api/search-status`, {
+        const pingUrl = api.getApiUrl('/api/search-status', url);
+        const res = await fetch(pingUrl, {
           signal: controller.signal,
           headers
         });
@@ -828,7 +840,12 @@ export async function runBackgroundSync() {
       // Check if any CATs were deleted on the server
       let hasDeletions = false;
       let activeIdsSet = null;
-      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      let customCats = [];
+      try {
+        customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      } catch (_) {
+        customCats = [];
+      }
       const customCatIds = new Set(customCats.map(c => c.id));
 
       if (freshCats.activeIds) {
@@ -883,27 +900,26 @@ export async function runBackgroundSync() {
 
       if (isUpdated) {
         console.log('[Background Sync] Server changes detected! Offering update...');
-        showToast(
-          'Nouvelles fiches ou modifications disponibles — <span id="update-app-toast-btn" style="color:#06b6d4; font-weight:700; text-decoration:underline; cursor:pointer;">Actualiser ?</span>',
-          'fa-arrows-rotate',
-          15000
-        );
 
-        // Attach action listener to the toast link
-        setTimeout(() => {
-          const updateBtn = document.getElementById('update-app-toast-btn');
-          if (updateBtn) {
-            updateBtn.addEventListener('click', (event) => {
-              event.preventDefault();
-              applySyncUpdates(freshCats, isIncremental, activeIdsSet);
-              
-              const toast = document.getElementById('drcat-toast');
-              if (toast) toast.remove();
-              
-              showToast('Mise à jour appliquée avec succès !', 'fa-circle-check', 3000);
-            });
-          }
-        }, 150);
+        // Build the action button via DOM methods (safe — no innerHTML with user data)
+        const updateBtn = document.createElement('span');
+        updateBtn.id = 'update-app-toast-btn';
+        updateBtn.style.cssText = 'color:#06b6d4;font-weight:700;text-decoration:underline;cursor:pointer;';
+        updateBtn.textContent = 'Actualiser ?';
+        updateBtn.addEventListener('click', (event) => {
+          event.preventDefault();
+          applySyncUpdates(freshCats, isIncremental, activeIdsSet);
+          const toast = document.getElementById('drcat-toast');
+          if (toast) toast.remove();
+          showToast('Mise \u00e0 jour appliqu\u00e9e avec succ\u00e8s !', 'fa-circle-check', 3000);
+        });
+
+        showToast(
+          'Nouvelles fiches ou modifications disponibles \u2014',
+          'fa-arrows-rotate',
+          15000,
+          updateBtn
+        );
       } else {
         console.log('[Background Sync] Remote database is in sync. No action needed.');
         localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
@@ -951,7 +967,12 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
 
     // Handle deletions if we have the list of active IDs from the server
     if (activeIdsSet) {
-      const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      let customCats = [];
+      try {
+        customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      } catch (_) {
+        customCats = [];
+      }
       const customCatIds = new Set(customCats.map(c => c.id));
       state.allCats = state.allCats.filter(c => {
         // Keep custom offline created cats
@@ -963,7 +984,13 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
   } else {
     // Full replacement merge
     const existingIds = new Set(freshCats.map(c => c.id));
-    const customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]')
+    let rawCustom = [];
+    try {
+      rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    } catch (_) {
+      rawCustom = [];
+    }
+    const customCats = rawCustom
       .filter(c => !existingIds.has(c.id))
       .map(c => ({ ...c, isOffline: true }));
 

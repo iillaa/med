@@ -1,0 +1,15 @@
+{
+  "primaryProvider": "ngrok",
+  "servers": [
+    {
+      "url": "https://rendition-duchess-dry.ngrok-free.dev",
+      "provider": "ngrok",
+      "priority": 1
+    },
+    {
+      "url": "https://sticks-promoted-garden-earlier.trycloudflare.com",
+      "provider": "cloudflare",
+      "priority": 2
+    }
+  ]
+}

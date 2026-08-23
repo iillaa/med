@@ -1,3 +1,15 @@
+/**
+ * Dr.CAT — Clinical Review App
+ * Authored, Architected & Developed by Dr. Kibeche Ali Dia Eddine
+ * Copyright (c) 2026 Dr. Kibeche Ali Dia Eddine. All rights reserved.
+ */
+
+// Load environment variables from .env FIRST — before any other require()
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
+const { initActivityLogger } = require('./services/activity_logger');
+initActivityLogger();
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -6,6 +18,10 @@ const { serverProviders } = require('./config/providers');
 const { state: cache } = require('./services/cache');
 const { initAdminPassword } = require('./services/auth-service');
 const { safeWriteJsonAsync, runDatabaseBackup, dbLock } = require('./services/data-store');
+const cors = require('cors');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const { corsMiddleware } = require('./middleware/cors');
 const { rateLimitMiddleware } = require('./middleware/rate-limit');
 const { registerAuthRoutes } = require('./routes/auth');
@@ -14,17 +30,31 @@ const { registerSuggestionRoutes } = require('./routes/suggestions');
 const { registerSearchRoutes } = require('./routes/search');
 const { registerServerProviderRoutes } = require('./routes/server-providers');
 const { registerPdfRoutes } = require('./routes/pdfs');
+const { registerVersionRoutes } = require('./routes/version');
+const { registerAdminAnalyticsRoutes } = require('./routes/admin-analytics');
+const { registerCatGeneratorRoutes } = require('./routes/cat-generator');
+const { versionGuardMiddleware } = require('./middleware/version-guard');
+const { recordDeviceActivity } = require('./services/active-devices');
 const allowedOriginsSvc = require('./services/allowed-origins');
 const spc = require('./services/server-providers-config');
 
 const INDEX_FILE = path.join(__dirname, '..', 'pdf_index.json');
 const SUGGESTIONS_FILE = path.join(__dirname, '..', 'suggestions.json');
-const DB_FILE = path.join(__dirname, '..', 'cats_db.json');
+const DB_FILE = process.env.CATS_DB_PATH || path.join(__dirname, '..', 'cats_db.json');
 // APP_DATA_KEY is public (shipped in the client bundle) — server-side
 // validation has been removed. The key remains in the client for legacy
 // compatibility with Capacitor's static data fetch.
 
 const app = express();
+
+// Clean double-slash request URLs (e.g. //api/search-status -> /api/search-status) sent by legacy APK clients
+app.use((req, res, next) => {
+  if (req.url && req.url.startsWith('//')) {
+    req.url = req.url.replace(/^\/+/, '/');
+    delete req._parsedUrl;
+  }
+  next();
+});
 const PORT = process.env.PORT || 3000;
 const configuredRemoteUrls = [];
 
@@ -152,8 +182,62 @@ onIndexUpdated(async () => {
   }
 });
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const isAllowed =
+      origin === 'http://localhost' ||
+      origin === 'https://localhost' ||
+      origin === 'http://localhost:3000' ||
+      origin === 'capacitor://localhost' ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.ngrok-free\.dev$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.ngrok-free\.app$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.ngrok\.io$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.trycloudflare\.com$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.cfargotunnel\.com$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.pages\.dev$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9.-]+\.workers\.dev$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.is-an\.app$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9-]+\.is-a\.dev$/i.test(origin) ||
+      /^https?:\/\/[a-zA-Z0-9.-]+\.eu\.org$/i.test(origin) ||
+      (allowedOriginsSvc && allowedOriginsSvc.allowedOrigins && allowedOriginsSvc.allowedOrigins.includes(origin));
+
+    return callback(null, isAllowed ? true : false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-App-Version',
+    'x-app-version',
+    'X-Install-ID',
+    'x-install-id',
+    'x-device-platform',
+    'x-api-key',
+    'x-app-key',
+    'x-admin-token',
+    'x-capacitor-platform',
+    'ngrok-skip-browser-warning'
+  ],
+  exposedHeaders: ['Content-Length', 'X-App-Version'],
+  credentials: true,
+  maxAge: 86400,
+  optionsSuccessStatus: 204
+};
+
+// 1. CORS MUST come BEFORE Rate Limiting so error responses (HTTP 429) contain CORS headers
+app.use(cors(corsOptions));
+app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
+
+app.use(compression());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Global body limit is 1 MB — the PDF upload route applies its own 50 MB limit locally.
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -163,20 +247,22 @@ app.use((err, req, res, next) => {
 });
 
 app.use(rateLimitMiddleware);
-app.use(corsMiddleware(allowedOriginsSvc.allowedOrigins, serverProviders));
 
 // Content Security Policy — mitigates XSS and data injection risks.
-// This is a restrictive baseline; adjust as needed for specific endpoints.
 app.use((req, res, next) => {
   res.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  // unsafe-inline needed for inline scripts; unsafe-eval for esbuild
+      // NOTE: 'unsafe-inline' is required by the current HTML structure (inline handlers,
+      // critical CSS). While present, it already allows XSS script injection — so keeping
+      // 'unsafe-eval' costs nothing security-wise and is required by PDF.js PostScript
+      // rendering. The real fix is a nonce-based CSP (future work, tracked in TODO).
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.trycloudflare.com wss:",
+      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.ngrok-free.dev https://*.trycloudflare.com https://*.cfargotunnel.com https://*.pages.dev https://*.is-an.app https://*.is-a.dev wss:",
       "frame-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",
@@ -188,8 +274,11 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   const start = Date.now();
+  try {
+    recordDeviceActivity(req);
+  } catch (_) { /* ignore device tracking errors */ }
   res.on('finish', () => {
-    if (req.path.startsWith('/api')) {
+    if (req.path.startsWith('/api') && global.perfServer) {
       const duration = Date.now() - start;
       global.perfServer.recordRequest(req.path, req.method, duration, res.statusCode);
     }
@@ -202,23 +291,62 @@ app.get('/capacitor.js', (req, res) => {
   res.send('// Capacitor bridge mock for web browser\n');
 });
 
-// Data file access is guarded by the CORS middleware and admin auth.
-// The x-app-key header is a public client token (visible in the bundle)
-// and provides no real security — it's been removed to avoid a false
-// sense of protection. Real access control is handled by admin tokens.
-
 app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'drcat_logo.png'));
 });
 
-// Block public access to the admin PDF Lab UI
-app.get('/pdf_lab.html', (req, res, next) => {
+// Simple x-app-key guard for static data files (cats_db.json, pdf_index.json, etc.)
+const { APP_DATA_KEY } = require('./config/constants');
+app.use('/data', (req, res, next) => {
+  const requestKey = req.headers['x-app-key'];
+  if (!requestKey || requestKey !== APP_DATA_KEY) {
+    return res.status(403).json({ error: 'Accès interdit. Données non disponibles.' });
+  }
+  next();
+});
+
+// Guard and serve /admin tools (cat_generator_lab.html, pdf_lab.html, analytics_lab.html)
+app.use('/admin', (req, res, next) => {
   const { isLocalhostConnection } = require('./utils/request');
   if (!isLocalhostConnection(req)) {
     return res.status(403).send('Accès interdit. This is an admin tool.');
   }
   next();
+}, express.static(path.join(__dirname, '..', 'admin')));
+
+// Redirect legacy lab URLs to /admin/
+app.get(['/pdf_lab.html', '/analytics_lab.html', '/cat_lab.html', '/cat_generator_lab.html'], (req, res) => {
+  const fileBasename = req.path.substring(1);
+  res.redirect(301, `/admin/${fileBasename}`);
 });
+
+app.get('/health', (req, res) => {
+  const memory = process.memoryUsage();
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: `${Math.round(process.uptime())}s`,
+    performance: {
+      memory: {
+        rss: `${Math.round(memory.rss / 1024 / 1024)} MB`,
+        heapUsed: `${Math.round(memory.heapUsed / 1024 / 1024)} MB`
+      }
+    }
+  });
+});
+
+app.use(versionGuardMiddleware);
+
+// API Route Registration (must take priority before express.static catch-all)
+registerAuthRoutes(app);
+registerVersionRoutes(app, cache);
+registerAdminAnalyticsRoutes(app, cache);
+registerCatGeneratorRoutes(app);
+registerCatRoutes(app);
+registerSuggestionRoutes(app, cache);
+registerSearchRoutes(app, cache);
+registerServerProviderRoutes(app, cache);
+registerPdfRoutes(app, cache);
 
 app.use(express.static(path.join(__dirname, '..', 'public'), {
   etag: false,
@@ -232,43 +360,18 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
   }
 }));
 
-app.get('/health', (req, res) => {
-  const memory = process.memoryUsage();
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: Math.floor(process.uptime()),
-    database: {
-      loaded: cache.catsCache.length > 0,
-      records: cache.catsCache.length,
-    },
-    system: {
-      memoryUsage: {
-        rss: `${Math.round(memory.rss / 1024 / 1024)} MB`,
-        heapUsed: `${Math.round(memory.heapUsed / 1024 / 1024)} MB`
-      }
-    }
-  });
-});
-
-registerAuthRoutes(app);
-registerCatRoutes(app);
-registerSuggestionRoutes(app, cache);
-registerSearchRoutes(app, cache);
-registerServerProviderRoutes(app, cache);
-registerPdfRoutes(app, cache);
-
 let serverInstance = null;
 
 initializeData().then(() => {
-  serverInstance = app.listen(PORT,  () => {
-    console.log(`=================================================`);
-    console.log(`Medical CAT Learning App is running!`);
-    console.log(`Local Access: http://localhost:${PORT}`);
-    console.log(`Network Access: http://<your-device-ip>:${PORT}`);
-    console.log(`=================================================`);
-
-    indexPdfs().catch(err => console.error("Startup indexing error:", err));
+  serverInstance = app.listen(PORT, () => {
+    console.log(`\n═════════════════════════════════════════════════════════════════`);
+    console.log(`🩺 Dr. CAT — Clinical Assistant & Learning Server v1.11.0`);
+    console.log(`🌐 Local Access:   http://localhost:${PORT}`);
+    console.log(`📂 Medical Corpus: ${cache.pdfIndex ? cache.pdfIndex.length : 0} Master PDFs & ${cache.catsCache ? cache.catsCache.length : 0} CATs loaded into memory`);
+    console.log(`⚡ Startup Mode:   Cold Boot Active (0 tokens burned at startup)`);
+    console.log(`🔬 PDF Lab Studio: http://localhost:${PORT}/admin/pdf_lab.html`);
+    console.log(`🤖 AI Slicer & CAT: Ready for manual on-demand execution`);
+    console.log(`═════════════════════════════════════════════════════════════════\n`);
   });
 }).catch(err => {
   console.error("Critical: Failed to initialize application data caches:", err);

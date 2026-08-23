@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dr.CAT — Analytics & Telemetry Lab</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0f172a; --panel: #1e293b; --text: #f8fafc; --text-muted: #94a3b8;
+      --primary: #06b6d4; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --indigo: #6366f1; --purple: #a855f7; --border: #334155; --bg-input: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 16px; min-height: 100vh; }
+    
+    .container { max-width: 1350px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    
+    /* Header Responsive Layout */
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .header-brand { display: flex; flex-direction: column; gap: 4px; }
+    .header-title { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; margin: 0; }
+    .header-subtitle { font-size: 12px; color: var(--text-muted); }
+    
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; width: auto; }
+    
+    /* Responsive Buttons */
+    .btn { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; text-decoration: none; min-height: 38px; }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-outline:hover { color: var(--text); border-color: var(--primary); }
+    .btn-success { background: var(--success); }
+    .btn-danger { background: var(--danger); }
+
+    /* Key Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .stat-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .stat-val { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1; }
+    .stat-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
+
+    /* Panels */
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .panel-title { font-size: 15px; font-weight: 700; margin: 0; color: var(--text); display: flex; align-items: center; gap: 8px; }
+
+    /* Filter Bar Responsive */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; background: rgba(15,23,42,0.6); padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+    .filter-input { background: var(--bg-input); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 12px; outline: none; flex: 1; min-width: 140px; }
+    .filter-input:focus { border-color: var(--primary); }
+
+    /* Mobile Table Scroll Container */
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; min-width: 750px; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 12px; white-space: nowrap; }
+    th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; background: rgba(15,23,42,0.6); }
+    tr:hover { background: rgba(255,255,255,0.02); }
+
+    .badge { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-apk { background: rgba(61, 220, 132, 0.15); color: #3ddc84; border: 1px solid rgba(61, 220, 132, 0.3); }
+    .badge-pwa { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    
+    .install-id-code { font-family: monospace; font-size: 11px; color: var(--primary); background: rgba(6,182,212,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(6,182,212,0.2); max-width: 220px; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
+
+    .progress-bar-container { background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 6px; width: 100%; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--indigo)); border-radius: 3px; transition: width 0.4s ease; }
+    
+    /* Modal Inspection Dialog */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 16px; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; max-width: 500px; width: 100%; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
+
+    /* Media Queries for Mobile Screens (< 600px) */
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .header-title { font-size: 18px; }
+      .header-actions { width: 100%; justify-content: space-between; }
+      .btn { flex: 1; font-size: 11px; padding: 8px 10px; }
+      .filter-input { flex: 1 1 100%; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-brand">
+      <h1 class="header-title">
+        <i class="fa-solid fa-chart-line"></i> Dr.CAT — Analytics Lab
+      </h1>
+      <div class="header-subtitle">
+        Télémétrie en temps réel des appareils installés (APK & PWA).
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <label style="font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;">
+        <input type="checkbox" id="auto-refresh-check" onchange="toggleAutoRefresh(this.checked)"> Auto (10s)
+      </label>
+      
+      <button class="btn btn-outline" onclick="loadAnalytics()">
+        <i class="fa-solid fa-rotate"></i> Actualiser
+      </button>
+
+      <button class="btn btn-danger" onclick="openResetModal()">
+        <i class="fa-solid fa-trash-can"></i> Réinitialiser
+      </button>
+
+      <button class="btn btn-success" onclick="exportDataCSV()">
+        <i class="fa-solid fa-file-csv"></i> CSV
+      </button>
+
+      <a href="/" class="btn btn-outline">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </a>
+    </div>
+  </div>
+
+  <!-- Key Performance Metrics Grid -->
+  <div class="stats-grid">
+    <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.4);">
+      <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
+        <i class="fa-solid fa-signal"></i>
+      </div>
+      <div>
+        <div class="stat-label" style="color: #10b981;">🟢 En Ligne (< 5 min)</div>
+        <div class="stat-val" id="stat-live" style="color: #10b981;">0</div>
+        <div style="font-size: 10px; color: var(--text-muted);" id="stat-live-sub">0 dev / 0 total</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">
+        <i class="fa-solid fa-mobile-screen"></i>
+      </div>
+      <div>
+        <div class="stat-label">Utilisateurs Externe</div>
+        <div class="stat-val" id="stat-total">0</div>
+        <div style="font-size: 10px; color: var(--text-muted);" id="stat-total-sub">0 dev / 0 total</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+      <div>
+        <div class="stat-label">Actifs 24h (DAU)</div>
+        <div class="stat-val" id="stat-dau">0</div>
+        <div style="font-size: 10px; color: var(--text-muted);" id="stat-dau-sub">0 externes</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <div>
+        <div class="stat-label">Actifs 30j (MAU)</div>
+        <div class="stat-val" id="stat-mau">0</div>
+        <div style="font-size: 10px; color: var(--text-muted);" id="stat-mau-sub">0 externes</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+        <i class="fa-solid fa-android"></i>
+      </div>
+      <div>
+        <div class="stat-label">APK Android</div>
+        <div class="stat-val" id="stat-apk">0</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">
+        <i class="fa-solid fa-globe"></i>
+      </div>
+      <div>
+        <div class="stat-label">Web PWA</div>
+        <div class="stat-val" id="stat-pwa">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version Distribution Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <h3 class="panel-title"><i class="fa-solid fa-code-branch"></i> Répartition des Versions</h3>
+      <span style="font-size: 11px; color: var(--text-muted);" id="version-dist-summary">--</span>
+    </div>
+    <div id="version-dist-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+      <span style="color: var(--text-muted); font-size: 12px;">Chargement...</span>
+    </div>
+  </div>
+
+  <!-- Device Table & Search Filter Tools -->
+  <div class="panel">
+    <div class="panel-header">
+      <h3 class="panel-title"><i class="fa-solid fa-list-check"></i> Registre des Appareils</h3>
+      <div style="font-size: 11px; color: var(--text-muted);" id="filtered-count">Appareils: 0</div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filter-bar">
+      <input type="text" id="search-input" class="filter-input" placeholder="🔍 Rechercher UUID, Version..." oninput="applyFilters()">
+      
+      <select id="platform-filter" class="filter-input" onchange="applyFilters()">
+        <option value="all">Toutes Plateformes</option>
+        <option value="android_apk">Android APK 📱</option>
+        <option value="web_pwa">Web PWA 🌐</option>
+      </select>
+
+      <select id="activity-filter" class="filter-input" onchange="applyFilters()">
+        <option value="all">Toutes Activités</option>
+        <option value="dau">Actifs 24h (DAU)</option>
+        <option value="mau">Actifs 30j (MAU)</option>
+      </select>
+    </div>
+
+    <!-- Responsive Scrollable Data Table -->
+    <div class="table-responsive">
+      <table id="device-table">
+        <thead>
+          <tr>
+            <th>ID d'Installation (UUID)</th>
+            <th>Plateforme</th>
+            <th>Version App</th>
+            <th>Premier Accès</th>
+            <th>Dernière Activité</th>
+            <th>Requêtes</th>
+            <th>Inspecter</th>
+          </tr>
+        </thead>
+        <tbody id="device-table-body">
+          <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chargement du registre...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Inspection Dialog -->
+<div class="modal-overlay" id="inspect-modal">
+  <div class="modal-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <h3 style="margin: 0; color: var(--primary); font-size: 15px;"><i class="fa-solid fa-circle-info"></i> Détails de l'Appareil</h3>
+      <button class="btn btn-outline" style="padding: 4px 8px; min-height: auto;" onclick="closeModal()">✕</button>
+    </div>
+
+    <div id="modal-content" style="display: flex; flex-direction: column; gap: 10px; font-size: 12px; word-break: break-all;">
+      <!-- Filled dynamically -->
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+      <button class="btn btn-outline" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reset Confirmation Dialog -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal-card" style="max-width: 440px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <h3 style="margin: 0; color: var(--danger); font-size: 15px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> Réinitialiser la Télémétrie ?
+      </h3>
+      <button class="btn btn-outline" style="padding: 4px 8px; min-height: auto;" onclick="closeResetModal()">✕</button>
+    </div>
+
+    <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px;">
+      Voulez-vous vraiment réinitialiser toutes les données d'appareils enregistrés et remettre les compteurs à zéro ?<br><br>
+      <strong style="color: var(--danger);">⚠️ Tous les enregistrements d'installations, DAU/MAU et compteurs de requêtes seront définitivement effacés.</strong>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button class="btn btn-outline" onclick="closeResetModal()">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmResetTelemetry()">
+        <i class="fa-solid fa-trash-can"></i> Oui, Réinitialiser Tout
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let rawDeviceList = [];
+  let autoRefreshTimer = null;
+
+  async function loadAnalytics() {
+    try {
+      const token = localStorage.getItem('dr_cat_admin_token') || localStorage.getItem('admin_token') || '';
+      const apiKey = localStorage.getItem('dr_cat_admin_key') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (apiKey) headers['x-api-key'] = apiKey;
+
+      const res = await fetch('/api/admin/active-devices', {
+        credentials: 'same-origin',
+        headers
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      const data = json.analytics || {};
+
+      document.getElementById('stat-live').textContent = data.externalLiveNow || 0;
+      const devLive = (data.liveNow || 0) - (data.externalLiveNow || 0);
+      document.getElementById('stat-live-sub').textContent = `${devLive} dev / ${data.liveNow || 0} total`;
+
+      document.getElementById('stat-total').textContent = data.externalDevices || 0;
+      document.getElementById('stat-total-sub').textContent = `${data.adminDevices || 0} dev / ${data.totalDevices || 0} total`;
+      
+      document.getElementById('stat-dau').textContent = data.externalDau || 0;
+      document.getElementById('stat-dau-sub').textContent = `${data.dau || 0} total en 24h`;
+      
+      document.getElementById('stat-mau').textContent = data.externalMau || 0;
+      document.getElementById('stat-mau-sub').textContent = `${data.mau || 0} total en 30j`;
+      
+      document.getElementById('stat-apk').textContent = data.platformDistribution?.android_apk || 0;
+      document.getElementById('stat-pwa').textContent = data.platformDistribution?.web_pwa || 0;
+
+      rawDeviceList = data.recentDevices || [];
+
+      renderVersionDistribution(data.versionDistribution || {}, data.totalDevices || 1);
+      applyFilters();
+
+    } catch (err) {
+      console.error('Error loading analytics:', err);
+    }
+  }
+
+  function renderVersionDistribution(versionMap, totalCount) {
+    const container = document.getElementById('version-dist-container');
+    const summary = document.getElementById('version-dist-summary');
+    const entries = Object.entries(versionMap);
+
+    if (entries.length === 0) {
+      container.innerHTML = '<span style="color: var(--text-muted); font-size: 12px;">Aucun appareil enregistré.</span>';
+      summary.textContent = '';
+      return;
+    }
+
+    summary.textContent = `${entries.length} version(s) active(s)`;
+
+    container.innerHTML = entries.map(([ver, count]) => {
+      const pct = Math.round((count / totalCount) * 100);
+      return `
+        <div style="background: rgba(15,23,42,0.6); border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
+            <span><i class="fa-solid fa-tag" style="color: var(--primary);"></i> v${ver}</span>
+            <span>${count} (${pct}%)</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function applyFilters() {
+    const searchVal = (document.getElementById('search-input').value || '').toLowerCase();
+    const platFilter = document.getElementById('platform-filter').value;
+    const actFilter = document.getElementById('activity-filter').value;
+
+    const now = Date.now();
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const THIRTY_DAYS = 30 * ONE_DAY;
+
+    const filtered = rawDeviceList.filter(d => {
+      const matchesSearch = !searchVal || 
+        d.installId.toLowerCase().includes(searchVal) || 
+        (d.appVersion || '').toLowerCase().includes(searchVal) ||
+        (d.platform || '').toLowerCase().includes(searchVal);
+
+      const matchesPlat = platFilter === 'all' || d.platform === platFilter;
+
+      const diffMs = now - (new Date(d.lastSeen).getTime() || 0);
+      let matchesAct = true;
+      if (actFilter === 'dau') matchesAct = diffMs <= ONE_DAY;
+      if (actFilter === 'mau') matchesAct = diffMs <= THIRTY_DAYS;
+
+      return matchesSearch && matchesPlat && matchesAct;
+    });
+
+    document.getElementById('filtered-count').textContent = `Appareils: ${filtered.length} / ${rawDeviceList.length}`;
+
+    const tbody = document.getElementById('device-table-body');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">Aucun appareil ne correspond aux filtres.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(d => {
+      const isLive = d.isLiveNow;
+      const isRecent = d.isRecent1h;
+      let statusBadge = '<span class="badge" style="background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3);"><i class="fa-solid fa-moon"></i> Inactif</span>';
+      if (isLive) {
+        statusBadge = '<span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4);"><i class="fa-solid fa-circle" style="font-size:7px;"></i> 🟢 En Ligne (< 5m)</span>';
+      } else if (isRecent) {
+        statusBadge = '<span class="badge" style="background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);"><i class="fa-solid fa-bolt"></i> Récent (< 1h)</span>';
+      }
+
+      return `
+        <tr>
+          <td><span class="install-id-code" title="${d.installId}">${d.installId}</span></td>
+          <td>
+            ${d.isAdminDevice ? 
+              '<span class="badge" style="background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3);"><i class="fa-solid fa-crown"></i> Dev / Admin</span>' : 
+              '<span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);"><i class="fa-solid fa-user"></i> Externe</span>'}
+          </td>
+          <td>${statusBadge}</td>
+          <td>
+            ${d.platform === 'android_apk' ? 
+              '<span class="badge badge-apk"><i class="fa-solid fa-android"></i> Android APK</span>' : 
+              '<span class="badge badge-pwa"><i class="fa-solid fa-globe"></i> Web PWA</span>'}
+          </td>
+          <td><strong>v${d.appVersion || '1.5.2'}</strong></td>
+          <td>${d.firstSeen ? new Date(d.firstSeen).toLocaleDateString('fr-FR') : '--'}</td>
+          <td>${new Date(d.lastSeen).toLocaleString('fr-FR')}</td>
+          <td><strong>${d.requestCount || 1}</strong></td>
+          <td>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-outline" style="padding: 3px 8px; font-size: 10px; min-height: auto;" onclick="inspectDevice('${d.installId}')">
+                <i class="fa-solid fa-eye"></i> Voir
+              </button>
+              <button class="btn btn-outline" style="padding: 3px 8px; font-size: 10px; min-height: auto; ${d.isAdminDevice ? 'border-color: rgba(16,185,129,0.4); color: #10b981;' : 'border-color: rgba(168,85,247,0.4); color: #a855f7;'}" onclick="toggleAdminStatus('${d.installId}', ${!!d.isAdminDevice})" title="${d.isAdminDevice ? 'Basculer en Utilisateur Externe' : 'Basculer en Appareil Développeur/Admin'}">
+                ${d.isAdminDevice ? '<i class="fa-solid fa-user"></i> -> Externe' : '<i class="fa-solid fa-crown"></i> -> Dev'}
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function inspectDevice(id) {
+    const dev = rawDeviceList.find(d => d.installId === id);
+    if (!dev) return;
+
+    const modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = `
+      <div><strong>Installation ID:</strong> <div class="install-id-code" style="max-width:100%; margin-top:4px; white-space:normal;">${dev.installId}</div></div>
+      <div><strong>Type Appareil:</strong> ${dev.isAdminDevice ? '👑 Appareil Développeur / Admin' : '👤 Utilisateur Externe'}</div>
+      <div><strong>Plateforme:</strong> ${dev.platform === 'android_apk' ? 'Android APK (Native App)' : 'Web PWA (Browser Client)'}</div>
+      <div><strong>Version Installée:</strong> v${dev.appVersion || '1.5.2'}</div>
+      <div><strong>Dernière IP:</strong> ${dev.lastIp || 'N/A'}</div>
+      <div><strong>Premier Accès:</strong> ${dev.firstSeen ? new Date(dev.firstSeen).toLocaleString('fr-FR') : 'N/A'}</div>
+      <div><strong>Dernière Activité:</strong> ${new Date(dev.lastSeen).toLocaleString('fr-FR')}</div>
+      <div><strong>Total Requêtes:</strong> ${dev.requestCount || 1}</div>
+    `;
+
+    document.getElementById('inspect-modal').classList.add('active');
+  }
+
+  async function toggleAdminStatus(id, currentStatus) {
+    const newStatus = !currentStatus;
+    try {
+      const token = localStorage.getItem('dr_cat_admin_token') || localStorage.getItem('admin_token') || '';
+      const apiKey = localStorage.getItem('dr_cat_admin_key') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (apiKey) headers['x-api-key'] = apiKey;
+
+      const res = await fetch('/api/admin/active-devices/toggle-admin', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers,
+        body: JSON.stringify({ installId: id, isAdmin: newStatus })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      await loadAnalytics();
+    } catch (err) {
+      alert('❌ Erreur lors du changement de statut: ' + err.message);
+    }
+  }
+
+  function openResetModal() {
+    document.getElementById('reset-modal').classList.add('active');
+  }
+
+  function closeResetModal() {
+    document.getElementById('reset-modal').classList.remove('active');
+  }
+
+  async function confirmResetTelemetry() {
+    closeResetModal();
+    try {
+      const token = localStorage.getItem('dr_cat_admin_token') || localStorage.getItem('admin_token') || '';
+      const apiKey = localStorage.getItem('dr_cat_admin_key') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (apiKey) headers['x-api-key'] = apiKey;
+
+      const res = await fetch('/api/admin/active-devices/reset', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      alert('✅ ' + (json.message || 'Télémétrie réinitialisée.'));
+      await loadAnalytics();
+    } catch (err) {
+      alert('❌ Erreur lors de la réinitialisation: ' + err.message);
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('inspect-modal').classList.remove('active');
+  }
+
+  function toggleAutoRefresh(enabled) {
+    if (enabled) {
+      autoRefreshTimer = setInterval(loadAnalytics, 10000);
+    } else if (autoRefreshTimer) {
+      clearInterval(autoRefreshTimer);
+      autoRefreshTimer = null;
+    }
+  }
+
+  function exportDataCSV() {
+    if (!rawDeviceList || rawDeviceList.length === 0) {
+      alert('Aucune donnée à exporter.');
+      return;
+    }
+
+    const headers = ['InstallID', 'Platform', 'AppVersion', 'FirstSeen', 'LastSeen', 'RequestCount'];
+    const rows = rawDeviceList.map(d => [
+      d.installId,
+      d.platform,
+      d.appVersion || '1.1.9',
+      d.firstSeen || '',
+      d.lastSeen || '',
+      d.requestCount || 1
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + 
+      [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `drcat_active_devices_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+
+</body>
+</html>

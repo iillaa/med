@@ -4,7 +4,8 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const BASE = 'http://127.0.0.1:3000';
+const PORT = process.env.PORT || '3099';
+const BASE = `http://127.0.0.1:${PORT}`;
 
 function req(method, reqPath, body, headers = {}) {
   return new Promise((resolve, reject) => {
@@ -26,7 +27,7 @@ function req(method, reqPath, body, headers = {}) {
   });
 }
 
-(async () => {
+async function runTests() {
   let serverProcess = null;
   const PASSWORD_FILE = path.join(ROOT, 'admin_password.txt');
   let originalPasswordContent = '';
@@ -38,14 +39,25 @@ function req(method, reqPath, body, headers = {}) {
   const tempPassword = 'test-temp-password-999';
   fs.writeFileSync(PASSWORD_FILE, tempPassword, 'utf-8');
   
+  const CATS_DB_FILE = path.join(ROOT, 'cats_db.json');
+  const CATS_DB_TEST = path.join(ROOT, 'cats_db_test_auth.json');
+
+  // Create isolated dedicated test database from master template
+  fs.copyFileSync(CATS_DB_FILE, CATS_DB_TEST);
+
   function cleanup() {
     if (serverProcess) {
-      try { serverProcess.kill(); } catch (_) {}
+      try {
+        serverProcess.kill('SIGKILL');
+      } catch (_) {}
     }
     if (originalPasswordContent) {
       fs.writeFileSync(PASSWORD_FILE, originalPasswordContent, 'utf-8');
     } else {
       try { fs.unlinkSync(PASSWORD_FILE); } catch (_) {}
+    }
+    if (fs.existsSync(CATS_DB_TEST)) {
+      try { fs.unlinkSync(CATS_DB_TEST); } catch (_) {}
     }
   }
 
@@ -53,22 +65,24 @@ function req(method, reqPath, body, headers = {}) {
   process.on('SIGINT', () => { cleanup(); process.exit(1); });
   process.on('SIGTERM', () => { cleanup(); process.exit(1); });
 
-  console.log('Starting test server...');
+  console.log('Starting test server (Isolated DB)...');
   serverProcess = spawn('node', ['server.js'], {
     cwd: ROOT,
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, NODE_ENV: 'test' }
+    env: { ...process.env, NODE_ENV: 'test', PORT: PORT, CATS_DB_PATH: CATS_DB_TEST }
   });
 
   let serverReady = false;
-  serverProcess.stdout.on('data', (data) => {
-    const msg = data.toString();
-    if (msg.includes('Medical CAT Learning App is running')) {
+  const onData = (data) => {
+    const text = data.toString();
+    if (text.includes('Medical CAT Learning App is running') || text.includes('App is running')) {
       serverReady = true;
     }
-  });
+  };
+  serverProcess.stdout.on('data', onData);
+  serverProcess.stderr.on('data', onData);
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 60; i++) {
     await new Promise(r => setTimeout(r, 500));
     if (serverReady) break;
   }
@@ -112,7 +126,7 @@ function req(method, reqPath, body, headers = {}) {
     check('GET  /api/suggestions → 200', (await req('GET', '/api/suggestions', null, { 'x-admin-token': token })).status === 200);
 
     console.log('\n4. Suggestion lifecycle:');
-    const sug = await req('POST', '/api/suggestions', { type: 'edit', catId: testCatId, data: { summary: 'sug ' + Date.now() } });
+    const sug = await req('POST', '/api/suggestions', { type: 'edit', catId: testCatId, data: { summary: 'sug ' + Date.now() } }, { 'x-app-key': 'drcat_pub_2f7a91c4e8' });
     check('POST /api/suggestions → created', sug.status === 200 && sug.body.success === true);
     const sugId = sug.body.suggestion.id;
 
@@ -145,4 +159,6 @@ function req(method, reqPath, body, headers = {}) {
 
   cleanup();
   process.exit(failed > 0 ? 1 : 0);
-})();
+}
+
+runTests();

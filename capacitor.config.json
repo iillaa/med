@@ -8,14 +8,22 @@
     "androidScheme": "https",
     "cleartext": true,
     "allowNavigation": [
-      "*"
+      "*",
+      "*.ngrok-free.dev",
+      "*.ngrok-free.app",
+      "*.ngrok.io",
+      "*.trycloudflare.com",
+      "*.cfargotunnel.com",
+      "*.pages.dev",
+      "*.is-an.app",
+      "*.is-a.dev"
     ]
   },
   "android": {
     "backgroundColor": "#090d16",
     "allowMixedContent": true,
     "captureInput": true,
-    "adjustMarginsForEdgeToEdge": "disable"
+    "webContentsDebuggingEnabled": false
   },
   "plugins": {
     "SplashScreen": {

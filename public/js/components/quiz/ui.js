@@ -4,7 +4,7 @@ import { shuffleArray, updateLeitnerStats, updateQuizStreak, requestWakeLock, re
 import {
   getOrientationText, cleanTextOfClues, cleanOrientationOfClues,
   generateClinicalVignette, getKeywordHints
-} from './generator.js';
+} from './quiz_generator.js';
 import { submitWriteInAnswer, saveWriteInGrade } from './scoring.js';
 
 let quizScreen, welcomeScreen, workspaceView;
@@ -31,6 +31,17 @@ let questionMaxPoints = 1.0;
 let wakeLock = null;
 
 let globalOnOpenCatCard = null;
+
+export function cleanupQuizTimers() {
+  if (timerIntervalId) {
+    clearInterval(timerIntervalId);
+    timerIntervalId = null;
+  }
+  if (wakeLock) {
+    releaseWakeLock(wakeLock);
+    wakeLock = null;
+  }
+}
 
 export function initQuiz(onOpenCatCard) {
   globalOnOpenCatCard = onOpenCatCard;

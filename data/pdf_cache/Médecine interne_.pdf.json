@@ -1,80 +1,80 @@
 {
   "pdf": "Médecine interne_.pdf",
-  "hash": "c11180dbfdf254c4adc76353132fda82e9a3aed0989137a6c0f35c23044456c6",
+  "hash": "f75338a5bb53567d97666a69515065d18861f4b4ff829417a2a3945c07267191",
   "quality": "online",
-  "timestamp": 1784767128459,
+  "timestamp": 1787410257128,
   "pages": [
     {
       "page": 1,
-      "content": "# MÉDECINE INTERNE\n\nDr. KHERBA_N"
+      "content": "<font color=red>MÉDECINE INTERNE</font>\n\n**Dr.KHERBA_N**"
     },
     {
       "page": 2,
-      "content": "# MÉDECINE INTERNE\n\n- Behçet\n- Cellulite\n- Engelures\n- Érysipèle\n- Pied diabétique\n- Purpura rhumatoïde\n- Sécheresse buccale"
+      "content": "<font color=red># MÉDECINE INTERNE</font>\n\nBehçet\nCellulite\nEngelures\nÉrysipèle\nPied diabétique\nPurpura rhumatoïde\nSécheresse buccale"
     },
     {
       "page": 3,
-      "content": "# Maladie de Behçet\n\n# Clinique\n\nAphtose récidivante bipolaire buccale, génitale, articulaire, cutanée (Folliculite, érythème noueux).\n\n# Forme bénigne :\n\nAphtes buccales +/_ génitales douloureux mais sans atteinte systémique (oculaire, neurologique, vasculaire..), absence des signes infectieux ni AEG.\n\n⇨ Pas besoin d’hospitalisation\n\n# Forme modérée à sévère :\n\nAphtes très nombreux, fièvre, AEG, arthrite, signes neurologiques, digestifs, vasculaire..\n\n⇨ Hospitalisation (médecine interne)"
+      "content": "# <font color=red>Maladie de Behçet</font>\n\n## Clinique\n\nAphtose récidivante bipolaire buccale, génitale, articulaire, cutanée ( Folliculite, érythème nouveaux )...\n\n- **Forme bénigne :**\nAphtes buccales +/- génitales douloureux mais sans atteinte systémique (oculaire, neurologique, vasculaire..), absence des signes infectieux ni AEG\n\n  ⇒ Pas besoin d'hospitalisation\n\n- **Forme modérée à sévère :**\nAphtes très nombreux, fièvre, AEG, arthrite, singes neurologiques, digestifs, vasculaire..\n\n  ⇒ Hospitalisation (médecine interne)"
     },
     {
       "page": 4,
-      "content": "# Maladie de Behçet\n\n⚠️ 3 épisodes aphtosiques pendant une année fait suspecter la maladie de Behçet\n\n▪️ Pour l’enfant cette maladie est rare, le diagnostic après l’âge de 15 ans.\n\n# Bilan :\n\n- ▪️ FNS : Hyperleucocytose à PNN\n- ▪️ CRP/VS : syndrome inflammatoire\n\n# ✅️ Traitement :\n\n- ▪️ Poussée => Colchicine 1-2 mg/j\n- ▪️ Fond => CTC oral Prednisone 0.5 mg/kg/j pendant 7-10 j avec décroissance rapide\n- ▪️ Traitement local des aphtes : bain de bouche, anesthésie locaux « Xylocaïn »\n- ▪️ Crème corticoïde pour les aphtes génitales\n- ▪️ Supplémentation vitaminique en B9 B12\n- ▪️ Si échec => immunodépresseurs"
+      "content": "⚠️ 3 épisodes aphtosiques pendant une année fait suspecter la maladie de Behçet\n\n- Pour l'enfant cette maladie est rare, le diagnostic après l'âge de 15ans..\n\n- Bilan : 💧\n- FNS : Hyperleucocytose à PNN\n- CRP/VS : syndrome inflammatoire\n\n☑️ Traitement :\n- Poussée => Colchicine 1_2mg/j\n- Fond => CTC oral Prednisone 0.5mg/kg/j pdt 7_10j avec décroissance rapide\n- Traitement local des aphtes : bain de bouche, anesthésie locaux « Xylocain »\n- Crème corticoïde pour les aphtes génitales\n- Supplémentation vitaminique en B9 B12\n- Si échec => immunodépresseurs"
     },
     {
       "page": 5,
-      "content": "# Diagnostic Positif :\n\nLe diagnostic de la maladie de Behçet se fait de nos jours par la nouvelle classification (critères internationaux 2013). Le diagnostic est retenu si le score est égal ou supérieur à 4:\n\n| Atteinte ophtalmologique:     | (2 points); |\n| ----------------------------- | ----------- |\n| Aphtose génitale:             | (2 points); |\n| Aphtose buccale:              | (2 points); |\n| Manifestations cutanées:      | (1 point);  |\n| Manifestations neurologiques: | (1 point);  |\n| Manifestations vasculaires:   | (1 point);  |\n| Test de pathergie:            | (1 point).  |\n\n# Maladie de Behcet\n\n# Maladie de Behcet"
+      "content": "🌸 Diagnostic Positif :\nLe diagnostic de la maladie de Behçet se fait de nos jours par la nouvelle classification (critères internationaux 2013). Le diagnostic est retenu si le score est égal ou supérieur à 4:\n\n- [x] Atteinte ophtalmologique:(2 points);\n- [x] Aphtose génitale:(2 points);\n- [x] Aphtose buccale:(2 points);\n- [x] Manifestations cutanées:(1 point);\n- [x] Manifestations neurologiques:(1 point);\n- [x] Manifestations vasculaires:(1 point);\n- [x] Test de pathergie:(1 point).\n\nMaladie de Behçet\nMaladie de Behçet"
     },
     {
       "page": 6,
-      "content": "# Cellulite\n\n# Clinique :\n\nInfection du tissu adipeux sous cutané,\n\nStrepto++\n\nDouleur + chaleur + œdème + érythème.\n\n➡️ Echographie des parties molles pour éliminer une collection abcédée\n\n# Bilan infectieux :\n\n- FNS\n- CRP\n\nContrôle CRP/48h\n\n# ⛔️Les AINS sont CI"
+      "content": "# <font color=red>Cellulite</font>\n\n- **Clinique :**\n  Infection du tissu adipeux sous cutané,\n  Strepto++\n  Douleur + chaleur + œdème + érythème.\n\n- ➡️ Echographie des parties molles pour éliminer une collection abcédée\n\n- ■ Bilan infectieux : 💧\n- ■ FNS\n- ■ CRP\n  Contrôle CRP/48h\n\n- (−) Les AINS sont CI"
     },
     {
       "page": 7,
-      "content": "# Traitement\n\nHospitalisation\n\nImmobilisation si cellulite de membre super ou infer.\n\n1. Cefazoline 1g 3/j pdt 10j\n2. Ou Augmentin cp ou st 1g 3/j pdt 7-10j\n3. Flagyl 500mg 3/j en perf\n4. Lovenox 0.4Ui\n\n# Au niveau de visage :\n\n1. Amoxicilline 50mg/kg/j\n2. Flagyl 30mg/kg/j\n3. Paracétamol\n4. Bain de bouche\n\nSi aggravation des signes après 48h : ATB en IV\n\nAvis ORL\n\nSi terrain :"
+      "content": "- [x] Traitement :Hospitalisation\n\nImmobilisation si cellulite de membre super ou infer.\n\n- [1] Cefazoline 1g 3/j pdt 10j\nOu Augmentin cp ou st 1g 3/j pdt 7_10j\n- [2] Flagyl 500mg 3/j en perf\n- [3] Lovenox 0.4Ui\n\n- ■ Au niveau de visage :\n- [1] Amoxicilline 50mg/kg/j\n- [2] Flagyl 30mg/kg/j\n- [3] Paracétamol\n- [4] Bain de bouche\n\n- ■ Si aggravation des signes après 48h : ATB en IV\n**Avis ORL**\n\n- ■ Si terrain :"
     },
     {
       "page": 8,
-      "content": "# Cellulite\n\n| Pyostacine  | cp 500mg | 2cp | 2/j |\n| ----------- | -------- | --- | --- |\n| Ou Fucidine | cp 250mg | 2cp | 3/j |"
+      "content": "Pyostacine cp 500mg 2cp 2/j\nOu Fucidine cp 250mg 2cp 3/j\n\nCellulite"
     },
     {
       "page": 9,
-      "content": "Engelures\n\n# Clinique :\n\nBlessure par le froid qui se traduit par des zones cutanées rouges, démangeaisons et tendres.\n\n# ✅️Traitement :\n\n- Massage par les huiles essentielles\n- Bain à l’eau tiède 15-30 min\n\n1. Akilenjure crème 1 app 4/j\n2. Ou Dexeryl pmd 1 app 2/j\n3. Ou Vaseline 1 app 2-3/j\n\nAllertine ou Loratidine cp 10 mg 1 cp/j le soir\n\nEngelures"
+      "content": "# <font color=red>Engelures</font>\n\n**Clinique :**\nBlessure par le froid qui se traduit par des zones cutanées rouges, démangeaisons et tendres..\n\n☑ **Traitement :**\n- Massage par les huiles essentielles\n- Bain à l'eau tiède 15_30min\n\n☑1 Akilenjure crème 1 app 4/j\nOu Dexeryl pmd 1 app 2/j\nOu Vaseline 1 app 2_3/j\n\n☑2 Allertine ou Loratidine cp 10mg 1 cp/j le soir\n\nEngelures"
     },
     {
       "page": 10,
-      "content": "# Érysipèle\n\n# Clinique :\n\n- Dermohypodermite bactérienne aigue non nécrosante\n- Zone inflammatoire rouge douloureuse unilatérale de la peau surtout le membre inférieur +++ d'origine strepto+++\n- Plaque érythémateuse à bordure nets, chaud, fièvre, frissons.\n- Penser toujours à une TVP => signes de Homonas/palper mollet.\n- Rechercher la porte d'entrée : Intertrigo\n\n# Critères d'hospitalisation :\n\n- Évolution défavorable après 72h\n- Signes généraux importants\n- Fébrile ou présence des signes de nécrose"
+      "content": "# <font color=red>**Érysipèle**</font>\n\n## 🟡 Clinique :\n\n- Dermohypodermite bactérienne aigue non nécrosante\n- Zone inflammatoire rouge douloureuse unilatérale de la peau surtout le membre inférieur +++ d'origine strepto+++\n- Plaque érythémateuse à bordure nets, chaud, fièvre, frissons.\n- Penser toujours à une TVP=> signes de Homonas/palper mollet.\n- Rechercher la porte d'entrée : Intertrigo\n\n## 🚨 Critères d'hospitalisation :\n\n- Évolution défavorable après 72h\n- Signes généraux importants\n- Fébrile ou présence des signes de nécrose"
     },
     {
       "page": 11,
-      "content": "# Terrain\n\nID, diabétique.\n\nSi non traitement Ambulatoire\n\n# Traitement :\n\n- Repos avec surélévation du membre\n- Augmentin 1g 3/j pdt 15j\n- Doliprane cp 1g 1cp 3/j\n\n# Traitement de la porte d'entrée souvent :\n\n- Intertrigo\n- Mycoster crème 1app 2/j pdt 21j\n- Ou Pevaryl spray 1app 2/j\n\n# Si allergie :\n\n- aux Pénicillines\n- Pyostacine cp 500mg 2cp 3/j pdt 15j\n- Si pas disponible => Rovamycine\n\n⛔️Les AINS sont CI"
+      "content": "- Terrain : ID, diabétique..\n- Si non traitement Ambulatoire\n\n☑ Traitement :\n- Repos avec surélévation du membre\n- Augmentin 1g 3/j pdt 15j\n- Doliprane cp 1g 1cp 3/j\n\n- Traitement de la porte d'entrée souvent : Intertrigo\nMycoster crème 1app 2/j pdt 21j\nOu Pevaryl spray 1app 2/j\n\n- Si allergie : aux Pénicillines\nPyostacine cp 500mg 2cp 3/j pdt 15j\nSi pas disponible => Rovamycine\n\n⊖ Les AINS sont CI"
     },
     {
       "page": 12,
-      "content": "# Hospitalisation\n\n- Peni G 5Mui (3_6Mui) dans 250cc de SG5% en IVL 1/j pdt 2j\n- Puis relais par Traitement de sortie :\n- - Orapen 1Mui 1cp 2/j pdt 10j\n- Ou Cefacet 1g inj IVD + Flagyl 500mg inj IVL\n- Ou Cefacet 1g inj IVD + Genta 80mg inj IVL\n\nLovenox à dose préventive 0.4/24h\n- Ou Traitement de sortie : pdt 10j"
+      "content": "- **Si: Hospitalisation**\n\n- Peni G 5Mui (3_6Mui) dans 250cc de SG5% en IVL 1/j pdt 2j\n\n- Puis relais par Traitement de sortie :\n  - Orapen 1Mui 1cp 2/j pdt 10j\n  - Ou Cefacet 1g inj IVD + Flagyl 500mg inj IVL\n  - Ou Cefacet 1g inj IVD + Genta 80mg inj IVL\n\n  + Lovenox à dose préventive 0.4/24h\n\n- Ou Traitement de sortie : pdt 10j\n  - Augmentin St 1g 3/j\n  - Flagyl 500mg 2/j\n  - Ou Pyostacine 1g 2/j\n  - Flagyl 500mg 2/j\n  - Ou Lexinal cp 1g 1cp 2/j pdt 10 à 12j\n  - Pyostacine cp 500mg 1cp 2/j pdt 10j\n  - Doliprane"
     },
     {
       "page": 13,
-      "content": "# Bilan\n\n# Glycémie\n\n# Echodoppler\n\n# Erysipele"
+      "content": "- Bilan💧\n- Glycémie\n- Echodoppler\n\nÉrysipèle"
     },
     {
       "page": 14,
-      "content": "# Pied diabétique\n\n# ✅️Traitement :\n\n- Sabot pour les pied diabétique\n- S’éloigner de toute source de l’eau\n\n# 1️⃣\n\nPyostacine cp 500mg 2cp 2_3/j si atteinte osseuse\n\nOu Lexin cp 1g 1cp 3/j pdt 7j\n\nOu Cefacet 1g 2/j si présence du pus\n\nOu Augmentin 3g/j\n\nOu Claforan 1g 4/j\n\nOu Ciprolon 400mg 2/j\n\n# 2️⃣\n\nFlagyl cp 500mg 1cp 3/j\n\nOu Fucidine pmd 1app 3/j\n\nAprès lavage au SSI\n\n+/_ Lovenox 0.4"
+      "content": "# <font color=red>Pied diabétique</font>\n\n- [x] Traitement :\n  - Sabot pour les pied diabétique\n  - S'éloigner de toute source de l'eau\n\n**1** Pyostacine cp 500mg 2cp 2_3/j si atteinte osseuse\nOu Lexin cp 1g 1cp 3/j pdt 7j\nOu Cefacet 1g 2/j si présence du pus\nOu Augmentin 3g/j\nOu Claforan 1g 4/j\nOu Ciprolon 400mg 2/j\n\n**2** Flagyl cp 500mg 1cp 3/j\nOu Fucidine pmd 1app 3/j\nAprès lavage au SSI\n+/_ Lovenox 0.4"
     },
     {
       "page": 15,
-      "content": "# Bilan complet\n\n- FNS\n- CRP/VS\n- Urée/Créat\n- Hémostase : TP/TCK/INR\n- Ionogramme/Ca\n- Gly à jeûne / HbA1C / CU\n\n# Rx de pied\n\nOstéite\n\n# Examens complémentaires\n\n- Echodoppler des MI bilatérale\n- Échographie des parties molles\n\n# Soins\n\n- Soins locaux/j SSI Flammazine + Tulle gras\n- Proscrire le Dakin et Betadine\n- Contrôle en 48-72h\n\n# Avis\n\nChirurgie"
+      "content": "- Bilan complet 💧 :\n- FNS\n- CRP/VS\n- Urée/Créat\n- Hémostase : TP/TCK/INR\n- Ionogramme/Ca\n- Gly à jeûne / HbA1C / CU\n\n- Rx de pied=> Ostéite\n- Echodoppler des MI bilatérale\n- Échographie des parties molles\n- Soins locaux/j SSI Flammazine + Tulle gras\n- Proscrire le Dakin et Betadine\n- Contrôle en 48_72h\n- [→] Avis Chirurgie"
     },
     {
       "page": 16,
-      "content": "# Purpura rhumatoïde\n\n- Vascularite à IgA, Enfant +++\n- Atteinte des capillaires sanguins en fait une maladie systémique entraînant des anomalies de la peau, des reins, des articulations et du système digestif.\n- Rechercher des complications rénales et digestives\n- Examen ORL\n\n# Prise de TA\n\n# Bilan standard :\n\n- FNS (taux de paquettes normal)\n- Urée/Créat\n- CRP/VS\n- Bilan d’hémostase : TP/TCA (normal)\n- CU : atteinte rénale"
+      "content": "# <font color=red>**Purpura rhumatoïde**</font>\n\n- Vascularite à IgA, Enfant +++\n- Atteinte des capillaires sanguins en fait une maladie systémique entraînant des anomalies de la peau, des reins, des articulations et du système digestif.\n- Rechercher des complications rénales et digestives\n- Examen ORL\n\n- Prise de TA\n- Bilan standard : 🟤\n- FNS (taux de paquettes normal)\n- Urée/Créat\n- CRP/VS\n- Bilan d'hémostase : TP/TCA (normal)\n- CU : atteinte rénale"
     },
     {
       "page": 17,
-      "content": "# Protéinurie des 24h\n\n# Ionogramme sanguin\n\n# Éléctrophorèse des protéines\n\n# Complément c3\n\n# CAT :\n\n- Repos\n- Alimentation liquide ou semi liquide\n- Si douleur abdominale => Antispasmodique\n- CTC : Solumedrol\n\n# Purpura\n\n# rhumatoïde\n\n# O"
+      "content": "- Protéinurie des 24h\n- Ionogramme sanguin\n- Électrophorèse des protéines\n- Complément c3\n\n[x] CAT :\n- Repos\n- Alimentation liquide ou semi liquide\n- Si douleur abdominale=> Antispasmodique\n- CTC : Solumedrol\n\nPurpura rhumatoïde"
     },
     {
       "page": 18,
-      "content": "# Sécheresse buccale Xérostomie\n\n# Causes :\n\n- Maladie de système\n- Syndrome sec Gougerot Sjögren secondaire au Polyarthrite rhumatoïde ou LES\n- Médicaments : Atropine, Antidépresseurs, Radiothérapie\n\n# Bilan :\n\nimmunologique\n\n# Traitement :\n\nSulfarem 25mg"
+      "content": "# <font color=red>** Sécheresse buccale Xérostomie**</font>\n\n- Causes :\n- Maladie de système\n- Syndrome sec Gougerot Sjögren secondaire au Polyarthrite rhumatoïde ou LES\n- Médicaments : Atropine, Antidépresseurs, Radiothérapie\n- Bilan : immunologique\n\n[x] Traitement :\nSulfarem 25mg"
     }
   ]
 }

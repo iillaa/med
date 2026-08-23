@@ -69,7 +69,7 @@
   --icon-lg: 18px;
   --icon-xl: 22px;
 
-  /* ── Z-index scale — single source so overlays never fight ── */
+/* ── Z-index scale — single source so overlays never fight ── */
   --z-sidebar: 100;
   --z-sticky: 500;
   --z-overlay: 1000;
@@ -312,8 +312,6 @@ body {
   justify-content: center;
   gap: var(--space-8, 32px);
   padding: var(--space-6, 24px);
-  padding-top: max(var(--space-6, 24px), env(safe-area-inset-top));
-  padding-bottom: max(var(--space-6, 24px), env(safe-area-inset-bottom));
   box-sizing: border-box;
   transition: opacity var(--motion-slower) ease, visibility var(--motion-slower) ease;
 }
@@ -357,10 +355,51 @@ body {
   50% { transform: scale(1.04); box-shadow: 0 0 24px 4px rgba(6,182,212,0.15); }
 }
 </style>
-  <meta name="app-build-version" content="2026.07.26.13.27">
-  <title>Dr.CAT — Rappel Clinique</title>
+  <meta name="app-version" content="1.12.0">
+  <meta name="app-build-version" content="2026.08.23.22.27">
+  <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="description" content="Dr.CAT — Application de Conduites à Tenir (CAT) médicales et outils de révision clinique pour médecins généralistes.">
+  <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
+  <link rel="canonical" href="https://drcat.dr-cat.workers.dev/">
+  
+  <!-- Open Graph / Facebook / WhatsApp / Telegram -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://drcat.dr-cat.workers.dev/">
+  <meta property="og:site_name" content="Dr.CAT">
+  <meta property="og:title" content="Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales">
+  <meta property="og:description" content="Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique et calculateurs pour médecins.">
+  <meta property="og:image" content="https://drcat.dr-cat.workers.dev/icon-512.png">
+  <meta property="og:locale" content="fr_FR">
+
+  <!-- Twitter / X Cards -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="https://drcat.dr-cat.workers.dev/">
+  <meta name="twitter:title" content="Dr.CAT — Rappel Clinique">
+  <meta name="twitter:description" content="Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique et révision pour médecins.">
+  <meta name="twitter:image" content="https://drcat.dr-cat.workers.dev/icon-192.png">
+
+  <!-- Schema.org JSON-LD Structured Data Entity -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Dr.CAT",
+    "url": "https://drcat.dr-cat.workers.dev/",
+    "applicationCategory": "MedicalApplication",
+    "operatingSystem": "Web, Android",
+    "description": "Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.",
+    "author": {
+      "@type": "Person",
+      "name": "Dr. Kibeche Ali Dia Eddine"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
   <link rel="manifest" href="manifest.json">
   <!-- iOS PWA support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -391,37 +430,38 @@ body {
       } catch (e) { /* localStorage unavailable — fall back to default dark */ }
     })();
   </script>
-  <!-- Preload critical assets -->
+  <!-- Preload critical assets & database for instant LCP render -->
   <link rel="preload" href="drcat_logo.webp" as="image" type="image/webp">
+  <link rel="preload" href="data/cats_db.json" as="fetch" crossorigin>
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2607261327" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2607261327"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608232227" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608232227"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2607261327" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2607261327"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608232227" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608232227"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2607261327" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2607261327" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="style.css?v=2608232227" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608232227" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608232227">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2607261327">
-    <link rel="stylesheet" href="css/utilities.css?v=2607261327">
+    <link rel="stylesheet" href="style.css?v=2608232227">
+    <link rel="stylesheet" href="css/utilities.css?v=2608232227">
   </noscript>
-  <!-- Capacitor native bridge script -->
-  <script src="capacitor.js"></script>
+  <script type="module" src="js/version-checker.js?v=2608232227"></script>
 </head>
 <body>
+  <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
+  <div id="security-root"></div>
+
   <!-- APP LOADING OVERLAY - full-screen boot splash, hidden when ready -->
   <div id="app-loading-overlay" class="loading-overlay">
     <div class="loading-overlay-brand">
-      <picture>
-        <source srcset="drcat_logo.webp" type="image/webp">
-        <img src="drcat_logo.png" alt="Dr.CAT"
-             style="width: 88px; height: 88px; border-radius: 20px; object-fit: cover; box-shadow: var(--shadow-lg); animation: pulse-glow 2s ease-in-out infinite;">
-      </picture>
+      <img src="drcat_logo.webp" alt="Dr.CAT" width="88" height="88"
+           style="width: 88px; height: 88px; border-radius: 20px; object-fit: cover; box-shadow: var(--shadow-lg); animation: pulse-glow 2s ease-in-out infinite;">
       <div>
         <h1 style="font-size: var(--text-2xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin: 0; letter-spacing: -0.02em;">Dr.CAT</h1>
         <p style="font-size: var(--text-sm); color: var(--text-secondary); margin: var(--space-1) 0 0;">Rappel Clinique</p>
@@ -461,10 +501,13 @@ body {
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button id="theme-toggle-btn" class="theme-toggle-btn" title="Changer le thème">
+          <a id="apk-download-btn" href="https://apkpure.com/p/com.drcat.app" target="_blank" rel="noopener noreferrer" class="theme-toggle-btn" title="Télécharger l'application Android sur APKPure" aria-label="Télécharger l'APK Android sur APKPure" style="display: inline-flex; align-items: center; justify-content: center; color: #10b981; text-decoration: none;">
+            <i class="fa-brands fa-android" style="font-size: 15px;"></i>
+          </a>
+          <button id="theme-toggle-btn" class="theme-toggle-btn" title="Changer le thème" aria-label="Changer le thème">
             <i class="fa-solid fa-moon" id="theme-toggle-icon"></i>
           </button>
-          <button class="toggle-sidebar-btn" id="close-sidebar-btn">
+          <button class="toggle-sidebar-btn" id="close-sidebar-btn" aria-label="Fermer le menu de navigation">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -487,7 +530,7 @@ body {
         <!-- Collapsible inner panel -->
         <div class="controls-panel" id="controls-panel">
           <!-- Category filter -->
-          <select id="category-filter" class="category-select">
+          <select id="category-filter" class="category-select" aria-label="Filtrer par spécialité">
             <option value="all">Toutes les spécialités</option>
           </select>
 
@@ -575,7 +618,7 @@ body {
     <main class="main-content">
       <!-- Mobile header -->
       <header class="mobile-header">
-        <button class="menu-btn" id="open-sidebar-btn">
+        <button class="menu-btn" id="open-sidebar-btn" aria-label="Ouvrir le menu de navigation">
           <i class="fa-solid fa-bars"></i>
         </button>
           <div class="mobile-brand" id="mobile-brand-logo">
@@ -601,7 +644,7 @@ body {
             </div>
              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
               <div class="specialty-export-container" style="display: none; align-items: center; gap: 6px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: var(--radius-md);">
-                <select id="export-specialty-select" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
+                <select id="export-specialty-select" aria-label="Sélectionner une spécialité à exporter" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
                   <option value="">Sélectionner spécialité...</option>
                 </select>
                 <button class="action-btn" id="export-specialty-btn" style="font-size: 11px; padding: 4px 8px; border: none; background: rgba(6,182,212,0.1); color: var(--color-primary); cursor: pointer; display: flex; align-items: center; gap: 4px; border-radius: 4px; font-weight: 600;">
@@ -689,6 +732,9 @@ body {
               <button class="admin-tab-btn" data-target="admin-pane-pdfs" role="tab" aria-selected="false" aria-controls="admin-pane-pdfs" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
                 <i class="fa-solid fa-file-pdf"></i> Fichiers PDF
               </button>
+              <button class="admin-tab-btn" data-target="admin-pane-version" role="tab" aria-selected="false" aria-controls="admin-pane-version" style="flex: 1; padding: 12px 8px; background: none; border: none; color: var(--text-secondary); cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Kill Switch & Version
+              </button>
             </div>
 
             <!-- Admin Tab Panes -->
@@ -727,6 +773,11 @@ body {
               <div class="admin-pane-content" id="admin-pane-pdfs" role="tabpanel" style="display: none;">
                 <!-- Dynamically rendered by admin_pdf.js -->
               </div>
+
+              <!-- PANE 3: Kill Switch & Version Control -->
+              <div class="admin-pane-content" id="admin-pane-version" role="tabpanel" style="display: none;">
+                <!-- Dynamically rendered by admin_version.js -->
+              </div>
             </div>
           </div>
 
@@ -751,7 +802,7 @@ body {
 
           <!-- Legal & Compliance Button -->
           <div class="dashboard-block" style="margin-top: 20px; border-color: rgba(6, 182, 212, 0.15); background: rgba(30, 41, 59, 0.25); padding: 16px; text-align: center; border-radius: var(--radius-md);">
-            <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 12px 0;">Application éducative en version BETA conçue par Dr. K-Ali.</p>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 12px 0;">Application éducative en version BETA conçue par Dr. Kibeche Ali.</p>
             <button id="open-legal-modal-btn" class="action-btn" style="background: rgba(6, 182, 212, 0.1); color: var(--color-primary); border: 1px solid rgba(6, 182, 212, 0.3); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">
               <i class="fa-solid fa-scale-balanced"></i> Consulter les Mentions Légales & CGU
             </button>
@@ -772,15 +823,16 @@ body {
                 </button>
               </div>
               <div class="workspace-header-actions">
-                <button id="print-cat-btn" class="action-btn print-compact-btn" title="Imprimer la fiche">
+                <button id="print-cat-btn" class="action-btn print-compact-btn" title="Imprimer la fiche" aria-label="Imprimer la fiche">
                   <i class="fa-solid fa-print"></i>
                 </button>
-                <button id="delete-cat-btn" class="btn-delete-ghost">
+                <button id="delete-cat-btn" class="btn-delete-ghost" title="Supprimer la fiche" aria-label="Supprimer la fiche">
                   <i class="fa-solid fa-trash-can"></i> Supprimer la fiche
                 </button>
               </div>
             </div>
             <h2 id="workspace-cat-title">CAT devant intoxication alimentaire</h2>
+            <div id="subcat-selector-bar" class="subcat-selector-bar" style="display:none;" role="tablist" aria-label="Variantes et profils cliniques"></div>
           </div>
           
           <div class="status-selector-area">
@@ -877,10 +929,10 @@ body {
             <div class="pane-header" style="margin-bottom: 12px;">
               <h3><i class="fa-solid fa-file-prescription"></i> <span class="desktop-only-inline">Exemple d'</span>Ordonnance Type</h3>
               <div style="display: flex; gap: 8px;">
-                <button class="action-btn" id="edit-prescription-btn">
+                <button class="action-btn" id="edit-prescription-btn" aria-label="Modifier l'ordonnance type">
                   <i class="fa-solid fa-pen"></i> Modifier<span class="desktop-only-inline"> l'ordonnance</span>
                 </button>
-                <button class="action-btn copy-prescription-btn" id="copy-prescription-btn" title="Copier dans le presse-papier">
+                <button class="action-btn copy-prescription-btn" id="copy-prescription-btn" title="Copier dans le presse-papier" aria-label="Copier l'ordonnance dans le presse-papier">
                   <i class="fa-regular fa-copy"></i> Copier
                 </button>
               </div>
@@ -1011,14 +1063,14 @@ body {
           <div class="dashboard-block" style="gap: 16px;">
             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
               <label for="quiz-category" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-filter"></i> Sélectionner une Spécialité :</label>
-              <select id="quiz-category" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+              <select id="quiz-category" aria-label="Sélectionner une spécialité pour le quiz" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
                 <option value="all">Toutes les spécialités</option>
               </select>
             </div>
 
             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
               <label for="quiz-count" style="font-weight: 600; color: var(--text-secondary);"><i class="fa-solid fa-list-ol"></i> Nombre de Questions :</label>
-              <select id="quiz-count" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
+              <select id="quiz-count" aria-label="Sélectionner le nombre de questions" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary);">
                 <option value="5">5 questions</option>
                 <option value="10" selected>10 questions</option>
                 <option value="15">15 questions</option>
@@ -1064,7 +1116,7 @@ body {
                 <input type="checkbox" id="quiz-timed-mode" style="width: 18px; height: 18px; accent-color: var(--color-primary);">
                 <span>Activer le chronomètre par question</span>
               </label>
-              <select id="quiz-timer-seconds" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); margin-top: 4px; display: none;">
+              <select id="quiz-timer-seconds" aria-label="Temps par question" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; color: var(--text-primary); margin-top: 4px; display: none;">
                 <option value="15">15 secondes</option>
                 <option value="30" selected>30 secondes</option>
                 <option value="60">60 secondes</option>
@@ -1232,7 +1284,7 @@ body {
   </div>
 
   <!-- Add CAT Modal -->
-  <div class="modal-overlay" id="add-cat-modal" role="dialog" aria-modal="true" aria-labelledby="add-cat-modal-title" style="display: none;">
+  <dialog class="modal-overlay" id="add-cat-modal" aria-labelledby="add-cat-modal-title" style="display: none;">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="add-cat-modal-title"><i class="fa-solid fa-plus-circle"></i> Ajouter une nouvelle CAT</h3>
@@ -1242,12 +1294,17 @@ body {
         <form id="add-cat-form" onsubmit="return false;">
           <div class="form-group">
             <label for="new-cat-title">Titre de la CAT *</label>
-            <input type="text" id="new-cat-title" required placeholder="Ex: CAT devant colique néphrétique...">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="new-cat-title" required placeholder="Ex: CAT devant colique néphrétique..." style="flex: 1;">
+              <button type="button" id="btn-ai-auto-fill" class="action-btn" title="Générer automatiquement avec l'IA Dual RAG" style="display: none; background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; border: none; padding: 10px 16px; border-radius: var(--radius-sm, 6px); font-size: 13px; font-weight: 600; cursor: pointer; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 2px 8px rgba(6,182,212,0.3); transition: all 0.2s ease;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> ⚡ IA Auto
+              </button>
+            </div>
           </div>
           <div class="form-group">
             <label for="new-cat-category">Spécialité / Catégorie *</label>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-              <select id="new-cat-category-select">
+              <select id="new-cat-category-select" aria-label="Spécialité de la nouvelle fiche">
                 <!-- Populated dynamically -->
               </select>
               <input type="text" id="new-cat-category" required placeholder="Ou saisissez une nouvelle spécialité...">
@@ -1276,7 +1333,7 @@ body {
         </form>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- Beautiful Printed PDF Template Block (Only visible when printing) -->
   <div id="print-template-container">
@@ -1321,6 +1378,12 @@ body {
         </div>
       </div>
     </div>
+
+    <!-- Sub-CATs Multi-Profile Section -->
+    <div class="print-section print-subcats-section" id="print-section-subcats" style="display: none;">
+      <h3><i class="fa-solid fa-code-branch"></i> Profils Spécifiques & Sous-Fiches Cliniques</h3>
+      <div id="print-val-subcats"></div>
+    </div>
     
     <div class="print-section" id="print-section-notes">
       <h3><i class="fa-solid fa-notes-medical"></i> Mes Observations & Protocoles Locaux</h3>
@@ -1329,7 +1392,7 @@ body {
     
     <div class="print-footer">
       <div class="print-quote">"Primum non nocere. L'art de la médecine consiste à divertir le patient pendant que la nature guérit la maladie."</div>
-      <div class="print-page-info">Généré via Dr.CAT Rappel Clinique</div>
+      <div class="print-page-info">Dr. Kibeche Ali — Dr.CAT Rappel Clinique</div>
     </div>
   </div>
 
@@ -1351,7 +1414,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-QORQD7WA.js"></script>
+  <script type="module" src="dist/app-IWDIEZVA.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
@@ -1452,7 +1515,7 @@ body {
   </script>
 
   <!-- Legal Modal -->
-  <div class="modal-overlay" id="legal-modal" style="display: none;">
+  <dialog class="modal-overlay" id="legal-modal" style="display: none;">
     <div class="modal-card modal-card-lg" style="padding: 24px; border-top: 4px solid var(--color-primary);">
       <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
         <h2 style="font-size: 18px; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text-primary);"><i class="fa-solid fa-scale-balanced" style="color: var(--color-primary);"></i> Mentions Légales & CGU</h2>
@@ -1463,7 +1526,7 @@ body {
         <div style="margin-bottom: 25px;">
           <h3 style="color: var(--color-danger, #ef4444); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> 1. Avertissement Médical (Important)</h3>
           <p style="margin-bottom: 8px;"><strong>Dr. CAT est un outil strictement éducatif.</strong> L'application ne fournit aucun avis médical officiel. Les informations cliniques, algorithmes et protocoles thérapeutiques présentés sont fournis à titre de révision et d'aide-mémoire pour les professionnels de la santé ou les étudiants en médecine.</p>
-          <p style="margin-bottom: 0;"><strong>En aucun cas</strong> l'utilisation de cette application ne saurait se substituer au jugement clinique du médecin. L'auteur (Dr. K-Ali) décline toute responsabilité quant aux conséquences directes ou indirectes pouvant résulter de l'utilisation des informations contenues dans cette application dans la pratique médicale réelle.</p>
+          <p style="margin-bottom: 0;"><strong>En aucun cas</strong> l'utilisation de cette application ne saurait se substituer au jugement clinique du médecin. L'auteur (Dr. Kibeche Ali) décline toute responsabilité quant aux conséquences directes ou indirectes pouvant résulter de l'utilisation des informations contenues dans cette application dans la pratique médicale réelle.</p>
         </div>
 
         <div style="margin-bottom: 25px;">
@@ -1483,14 +1546,14 @@ body {
 
         <div>
           <h3 style="color: var(--text-primary); font-size: 14px; margin-bottom: 8px;">4. Propriété Intellectuelle & Droits Réservés</h3>
-          <p style="margin-bottom: 8px;">Conception médicale, algorithmes et développement exclusif par <strong>Dr. K-Ali</strong>. Tous droits réservés.</p>
+          <p style="margin-bottom: 8px;">Conception médicale, algorithmes et développement exclusif par <strong>Dr. Kibeche Ali</strong>. Tous droits réservés.</p>
           <p style="margin-bottom: 12px;">L'ensemble des contenus, structures de données, moteurs de recherche internes et interfaces graphiques sont la propriété exclusive de l'auteur et protégés par le droit d'auteur.</p>
           <p style="margin-bottom: 0; padding: 12px; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md);">Pour tout signalement ou suggestion : <a href="mailto:airdrop257@gmail.com" style="color: var(--color-primary); text-decoration: underline;">airdrop257@gmail.com</a></p>
         </div>
 
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- Cookie Consent Banner -->
   <div id="legal-consent-banner" class="legal-consent-banner hidden" style="display: none;">
@@ -1503,7 +1566,7 @@ body {
     </div>
     <div class="consent-actions">
       <button id="accept-legal-btn" class="save-btn" style="padding: 6px 14px; font-size: 12px;"><i class="fa-solid fa-check"></i> J'accepte</button>
-      <button id="dismiss-legal-btn" class="dismiss-banner-btn" title="Fermer"><i class="fa-solid fa-xmark"></i></button>
+      <button id="dismiss-legal-btn" class="dismiss-banner-btn" title="Fermer" aria-label="Fermer le bandeau légal"><i class="fa-solid fa-xmark"></i></button>
     </div>
   </div>
 

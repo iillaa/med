@@ -63,7 +63,7 @@
   --icon-lg: 18px;
   --icon-xl: 22px;
 
-  /* ── Z-index scale — single source so overlays never fight ── */
+/* ── Z-index scale — single source so overlays never fight ── */
   --z-sidebar: 100;
   --z-sticky: 500;
   --z-overlay: 1000;
@@ -231,9 +231,6 @@ body {
   position: fixed;
   top: 20px;
   right: 20px;
-  /* Keep clear of the status bar / notch on mobile. */
-  top: max(20px, env(safe-area-inset-top));
-  right: max(20px, env(safe-area-inset-right));
   z-index: 9999;
   display: flex;
   align-items: flex-start;

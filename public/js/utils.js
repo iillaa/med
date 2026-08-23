@@ -5,8 +5,9 @@
  * @param {string} message - The text to display.
  * @param {string} [icon='fa-circle-info'] - FontAwesome icon class (without fa-solid prefix).
  * @param {number} [duration=5000] - Auto-dismiss delay in ms.
+ * @param {HTMLElement|null} [actionEl=null] - Optional DOM element appended safely after the message (e.g. a button).
  */
-export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
+export function showToast(message, icon = 'fa-circle-info', duration = 5000, actionEl = null) {
 
   // Remove any existing toast
   const existing = document.getElementById('drcat-toast');
@@ -16,11 +17,30 @@ export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
   toast.id = 'drcat-toast';
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
-  toast.innerHTML = `
-    <i class="fa-solid ${icon} t-icon"></i>
-    <span class="t-msg">${message}</span>
-    <button class="t-close" aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
-  `;
+
+  // Build the toast structure with DOM methods — the message is set via textContent
+  // to prevent XSS from server error messages or any user-controlled string.
+  const iconEl = document.createElement('i');
+  iconEl.className = `fa-solid ${icon} t-icon`;
+
+  const msgEl = document.createElement('span');
+  msgEl.className = 't-msg';
+  msgEl.textContent = message; // Safe: never interprets HTML
+
+  // Optional safe action element (e.g. a styled link/button built with DOM methods)
+  if (actionEl instanceof HTMLElement) {
+    msgEl.appendChild(document.createTextNode(' '));
+    msgEl.appendChild(actionEl);
+  }
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 't-close';
+  closeBtn.setAttribute('aria-label', 'Fermer');
+  closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>'; // Static markup only, no user data
+
+  toast.appendChild(iconEl);
+  toast.appendChild(msgEl);
+  toast.appendChild(closeBtn);
 
   document.body.appendChild(toast);
 
@@ -32,7 +52,7 @@ export function showToast(message, icon = 'fa-circle-info', duration = 5000) {
     setTimeout(() => toast.remove(), 350);
   };
 
-  toast.querySelector('.t-close').addEventListener('click', dismiss);
+  closeBtn.addEventListener('click', dismiss);
 
   let timer = setTimeout(dismiss, duration);
   toast.addEventListener('mouseenter', () => clearTimeout(timer));
@@ -98,11 +118,46 @@ export function parsePrescriptionText(text) {
 }
 
 /**
+ * Format timestamp using native Intl.DateTimeFormat (fr-FR)
+ */
+export function formatDateFR(dateOrTimestamp, options = {}) {
+  if (!dateOrTimestamp) return '';
+  const date = new Date(dateOrTimestamp);
+  if (isNaN(date.getTime())) return '';
+  const defaultOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return new Intl.DateTimeFormat('fr-FR', { ...defaultOptions, ...options }).format(date);
+}
+
+/**
+ * Format relative time using native Intl.RelativeTimeFormat (fr)
+ */
+export function formatRelativeTimeFR(dateOrTimestamp) {
+  if (!dateOrTimestamp) return '';
+  const date = new Date(dateOrTimestamp);
+  if (isNaN(date.getTime())) return '';
+  const now = new Date();
+  const diffSeconds = Math.round((date.getTime() - now.getTime()) / 1000);
+  const rtf = new Intl.RelativeTimeFormat('fr', { numeric: 'auto' });
+
+  if (Math.abs(diffSeconds) < 60) return rtf.format(diffSeconds, 'second');
+  const diffMinutes = Math.round(diffSeconds / 60);
+  if (Math.abs(diffMinutes) < 60) return rtf.format(diffMinutes, 'minute');
+  const diffHours = Math.round(diffMinutes / 60);
+  if (Math.abs(diffHours) < 24) return rtf.format(diffHours, 'hour');
+  const diffDays = Math.round(diffHours / 24);
+  if (Math.abs(diffDays) < 30) return rtf.format(diffDays, 'day');
+  const diffMonths = Math.round(diffDays / 30);
+  if (Math.abs(diffMonths) < 12) return rtf.format(diffMonths, 'month');
+  const diffYears = Math.round(diffDays / 365);
+  return rtf.format(diffYears, 'year');
+}
+
+/**
  * Escape HTML characters to prevent XSS injection
  */
 export function escapeHTML(str) {
-  if (!str) return '';
-  return str
+  if (str === null || str === undefined) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -113,17 +168,24 @@ export function escapeHTML(str) {
 /**
  * Convert line breaks and tables in markdown summaries to HTML elements
  */
-export function parseSummaryMarkdown(text) {
-  if (!text) {
-    return '<p class="text-muted">Aucune synthèse disponible.</p>';
-  }
+/**
+ * Formats a block of markdown text into clean HTML (tables, lists, bold, linebreaks)
+ */
+/**
+ * Formats a block of markdown text into clean HTML (tables, lists, bold, linebreaks)
+ */
+export function parseMarkdownBlock(text) {
+  if (!text) return '';
 
-  let html = escapeHTML(text);
+  // 1. Sanitize dangling asterisks, empty bold tags, and excessive blank lines
+  let clean = text.trim()
+    .replace(/(?:^|\n)\s*\*\*\s*(?:\n|$)/g, '\n')
+    .replace(/\*\*\s*\*\*/g, '')
+    .replace(/\n{3,}/g, '\n\n');
 
-  // Bold markdown
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  let html = escapeHTML(clean);
 
-  // Parse markdown tables if any
+  // 2. Parse markdown tables if any
   if (html.includes('|')) {
     const lines = html.split('\n');
     let inTable = false;
@@ -164,32 +226,170 @@ export function parseSummaryMarkdown(text) {
     html = lines.join('\n');
   }
 
-  // Remove raw table lines that were already parsed (to prevent double rendering)
+  // Remove raw table lines that were already parsed
   html = html.split('\n').filter(line => {
     const trimmed = line.trim();
     return !(trimmed.startsWith('|') && trimmed.endsWith('|'));
   }).join('\n');
 
-  // Bullet points
-  html = html.split('\n').map(line => {
-    const trimmed = line.trim();
-    if (trimmed.startsWith('- ')) {
-      return `<li>${trimmed.substring(2)}</li>`;
+  // 3. Strict single-line bold formatting
+  html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+
+  // 4. Sub-CAT In-Text Badges: [Titre de la sous-fiche](subcat:1) or [[subcat:1:Titre]]
+  html = html.replace(/\[(.*?)\]\(subcat:([0-9]+)\)/g, '<button type="button" class="subcat-inline-badge" onclick="window.switchToSubProfile && window.switchToSubProfile($2)" title="Consulter la sous-fiche spécialisée"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span>$1</span></button>');
+  html = html.replace(/\[\[subcat:([0-9]+):(.*?)]]/g, '<button type="button" class="subcat-inline-badge" onclick="window.switchToSubProfile && window.switchToSubProfile($1)" title="Consulter la sous-fiche spécialisée"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span>$2</span></button>');
+
+  // 5. Line-by-line list and paragraph processor (Clean layout without rogue <br>)
+  const lines = html.split('\n');
+  let inList = false;
+  const out = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trim();
+    if (!l) {
+      if (inList) {
+        inList = false;
+        out.push('</ul>');
+      }
+      continue;
     }
-    return line;
-  }).join('\n');
+    if (l.startsWith('<table') || l.startsWith('</table') || l.startsWith('<tr>')) {
+      if (inList) {
+        inList = false;
+        out.push('</ul>');
+      }
+      out.push(l);
+      continue;
+    }
+    if (l.startsWith('- ') || l.startsWith('• ') || l.startsWith('* ')) {
+      if (!inList) {
+        inList = true;
+        out.push('<ul>');
+      }
+      out.push(`<li>${l.replace(/^[-•*]\s*/, '')}</li>`);
+    } else {
+      if (inList) {
+        inList = false;
+        out.push('</ul>');
+      }
+      out.push(`<p>${l}</p>`);
+    }
+  }
+  if (inList) out.push('</ul>');
 
-  // Wrap continuous <li> groups in <ul>
-  html = html.replace(/(<li>.*?<\/li>\s*)+/gs, (match) => `<ul>${match}</ul>`);
+  return out.join('');
+}
 
-  // Paragraph line breaks
-  html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-  html = `<p>${html}</p>`;
-  
-  // Clean empty tags
-  html = html.replace(/<p>\s*<\/p>/g, '').replace(/<p>\s*<ul>/g, '<ul>').replace(/<\/ul>\s*<\/p>/g, '</ul>');
+/**
+ * Returns dynamic theme accent and icon for clinical step headers
+ */
+function getStepTheme(headerText) {
+  const h = (headerText || '').toLowerCase();
 
-  return html;
+  // 0. Stabilisation / ABCDE / Urgence
+  if (/^0\./.test(h) || h.includes('stabilisation') || h.includes('abcde') || h.includes('urgence')) {
+    return { themeClass: 'step-theme-emergency', icon: 'fa-truck-medical' };
+  }
+
+  // 1. Diagnostic / Triage / Bilan / Cadre Légal
+  if (/^1\./.test(h) || h.includes('diagnostic') || h.includes('triage') || h.includes('bilan') || h.includes('cadre')) {
+    return { themeClass: 'step-theme-diagnostic', icon: 'fa-stethoscope' };
+  }
+
+  // 2. Traitement / Posologie / Conduite / Structure
+  if (/^2\./.test(h) || h.includes('traitement') || h.includes('posologie') || h.includes('conduite') || h.includes('structure')) {
+    return { themeClass: 'step-theme-treatment', icon: 'fa-pills' };
+  }
+
+  // 3. / 3bis. Terrain Particulier / Grossesse / Comorbidités / Formules
+  if (/^3/.test(h) || h.includes('terrain') || h.includes('grossesse') || h.includes('comorbidit') || h.includes('formule')) {
+    return { themeClass: 'step-theme-terrain', icon: 'fa-person-pregnant' };
+  }
+
+  // 4. / 5. Critères d'Hospitalisation / Transfert / MDO
+  if (/^[456]\./.test(h) || h.includes('crit') || h.includes('hospitalis') || h.includes('transfert') || h.includes('mdo')) {
+    return { themeClass: 'step-theme-hospital', icon: 'fa-hospital-user' };
+  }
+
+  return { themeClass: 'step-theme-default', icon: 'fa-circle-info' };
+}
+
+/**
+ * Parses markdown into clean, seamless clinical text with colored clickable retractable step titles.
+ * All sections are FULL TEXT (open) by default; clicking any title retracts/collapses its text underneath.
+ */
+export function parseSummaryMarkdown(text) {
+  if (!text) {
+    return '<p class="text-muted">Aucune synthèse disponible.</p>';
+  }
+
+  const raw = text.trim();
+
+  // Pattern matching: **0. Step Name :** or ### 0. Step Name or 0. Step Name :
+  // Matches full header line up to newline without leaving stray ** or colons in content
+  const stepRegex = /(?:^|\n)(?:\*\*|#{2,4}\s*)?([0-9]+(?:bis|ter)?\.\s*[^\n]+?)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*(?:\n|$)/gi;
+  const matches = [...raw.matchAll(stepRegex)];
+
+  // If 2 or more clinical steps are found, render clean retractable title sections
+  if (matches.length >= 2) {
+    const sections = [];
+    let lastIndex = 0;
+
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      const headerTitle = match[1].trim()
+        .replace(/^(\*\*|#{2,4}\s*)/, '')
+        .replace(/(\*\*|:|\s)+$/, '')
+        .trim();
+      const matchStart = match.index;
+
+      if (i === 0 && matchStart > 0) {
+        const intro = raw.substring(0, matchStart).trim();
+        if (intro) sections.push({ header: null, content: intro });
+      }
+
+      if (i > 0) {
+        sections[sections.length - 1].content = raw.substring(lastIndex, matchStart).trim();
+      }
+
+      sections.push({ header: headerTitle, content: '' });
+      lastIndex = matchStart + match[0].length;
+    }
+
+    if (sections.length > 0) {
+      sections[sections.length - 1].content = raw.substring(lastIndex).trim();
+    }
+
+    let html = '<div class="cat-steps-flow">';
+    sections.forEach(sec => {
+      if (!sec.header) {
+        html += `<div class="cat-step-intro">${parseMarkdownBlock(sec.content)}</div>`;
+        return;
+      }
+
+      const { themeClass, icon } = getStepTheme(sec.header);
+      const parsedBody = parseMarkdownBlock(sec.content);
+
+      html += `
+        <details class="cat-step-section ${themeClass}" open>
+          <summary class="cat-step-title-toggle" title="Cliquer pour masquer / afficher cette section">
+            <span class="cat-step-icon"><i class="fa-solid ${icon}"></i></span>
+            <span class="cat-step-heading">${escapeHTML(sec.header)}</span>
+            <span class="cat-step-toggle-caret"><i class="fa-solid fa-chevron-down"></i></span>
+          </summary>
+          <div class="cat-step-body">
+            ${parsedBody}
+          </div>
+        </details>
+      `;
+    });
+    html += '</div>';
+
+    return html;
+  }
+
+  // Fallback for non-step fiches
+  return parseMarkdownBlock(raw);
 }
 
 /**
@@ -536,7 +736,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
   }
 
   // Download action (native documents or browser link)
-  document.getElementById('univ-btn-download').addEventListener('click', async () => {
+  document.getElementById('univ-btn-download')?.addEventListener('click', async () => {
     try {
       if (window.Capacitor && window.Capacitor.isNativePlatform()) {
         const Plugins = window.Capacitor.Plugins;
@@ -584,7 +784,7 @@ export function exportDataFile(fileName, dataTitle, payload) {
   });
 
   // Copy to clipboard action
-  document.getElementById('univ-btn-copy').addEventListener('click', async () => {
+  document.getElementById('univ-btn-copy')?.addEventListener('click', async () => {
     const success = await copyToClipboard(jsonStr);
     if (success) {
       showToast("Copié dans le presse-papiers !", "fa-copy", 4000);

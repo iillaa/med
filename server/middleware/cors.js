@@ -29,15 +29,24 @@ function corsMiddleware(allowedOrigins, serverProviders) {
     }
 
     if (allowAll) {
+      const requestedHeaders = req.headers['access-control-request-headers'];
       const providerHeaders = serverProviders.flatMap(p => Object.keys(p.extraHeaders || {}));
-      const uniqueHeaders = new Set([
+      const defaultHeaders = [
         'Content-Type',
         'Authorization',
+        'X-App-Version',
+        'x-app-version',
+        'X-Install-ID',
+        'x-install-id',
+        'x-device-platform',
+        'x-api-key',
         'x-admin-token',
         'x-app-key',
+        'x-capacitor-platform',
         'ngrok-skip-browser-warning',
         ...providerHeaders
-      ]);
+      ];
+      const allowHeadersString = requestedHeaders || defaultHeaders.join(', ');
 
       if (origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
@@ -46,7 +55,7 @@ function corsMiddleware(allowedOrigins, serverProviders) {
         res.setHeader('Access-Control-Allow-Origin', '*');
       }
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', Array.from(uniqueHeaders).join(', '));
+      res.setHeader('Access-Control-Allow-Headers', allowHeadersString);
     }
 
     if (req.method === 'OPTIONS') {

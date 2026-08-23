@@ -351,12 +351,12 @@ function createUI() {
     document.body.appendChild(panel);
     panel.style.display = 'none';
 
-    document.getElementById('debug-close-btn').addEventListener('click', toggleViewer);
-    document.getElementById('debug-clear-btn').addEventListener('click', () => {
+    document.getElementById('debug-close-btn')?.addEventListener('click', toggleViewer);
+    document.getElementById('debug-clear-btn')?.addEventListener('click', () => {
       logBuffer = [];
       renderLogs();
     });
-    document.getElementById('debug-copy-btn').addEventListener('click', () => {
+    document.getElementById('debug-copy-btn')?.addEventListener('click', () => {
       const text = logBuffer.map(l => `[${l.timestamp}] [${l.level}] ${l.message}`).join('\n');
       navigator.clipboard?.writeText(text).then(() => {
         alert('Logs copiés dans le presse-papier !');

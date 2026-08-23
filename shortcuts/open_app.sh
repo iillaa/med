@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
 set -e
 export PATH=/data/data/com.termux/files/usr/bin:$PATH
 cd /data/data/com.termux/files/home/med
@@ -21,7 +21,13 @@ echo "=================================================="
 echo ""
 
 # Ouvrir automatiquement l'application dans le navigateur
-termux-open http://localhost:3000
+if command -v termux-open &>/dev/null; then
+  termux-open http://localhost:3000 2>/dev/null || true
+elif command -v xdg-open &>/dev/null; then
+  xdg-open http://localhost:3000 2>/dev/null || true
+elif command -v open &>/dev/null; then
+  open http://localhost:3000 2>/dev/null || true
+fi
 
 # Run Node in the foreground so the terminal remains open and logs are visible
 node server.js

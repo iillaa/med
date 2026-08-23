@@ -30,6 +30,11 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - Support des **variantes** via séparateurs `--- Nom de la Variante ---` (ex: `--- Adulte ---` / `--- Enfant ---`). Les boutons de navigation sont générés automatiquement.
 - Bouton de **copie en 1 clic** de la variante active dans le presse-papier.
 
+### 🩺 Prescriptions de Grade Médical & Moteur Local-First (v1.5.2)
+- **Hiérarchisation à 3 Niveaux** : Distinction stricte entre traitement de 1ère intention, alternatives thérapeutiques (`[OU]`), et traitements symptomatiques adjuvants.
+- **Pondération Thérapeutique Locale** : Priorisation des molécules disponibles et courantes en pratique locale (ex: Ascabiol, Spasfon, Tiorfan, Smecta).
+- **Sécurité Anti-Polypharmacie** : Alertes et garde-fous intégrés pour éviter les sur-prescriptions et interactions médicamenteuses.
+
 ### 📝 Notes Personnelles & Observations
 - Zone de prise de notes persistantes, sauvegardées localement dans `localStorage`.
 - Idéal pour documenter vos protocoles locaux ou adaptations spécifiques.
@@ -48,18 +53,73 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - Neutralisation des délais tactiles (300ms) via CSS touch rules & `requestAnimationFrame` gesture throttling.
 - Event Delegation sur la liste des fiches (`#cat-list`) pour minimiser la consommation RAM/CPU.
 
-### 👤 Système Collaboratif & Lab Admin
+### 🧩 Générateur de Sous-Fiches Ciblées & Architecture Option C (v1.10.0)
+- **Pré-Sélection Multi-Profils (Option C)** : Choix dès la fenêtre de création entre le **Mode ⚡ Standard (1-Tab Rapide)** et le **Mode 🧩 Multi-Profils & Sous-Fiches**.
+- **6 Presets Cliniques Recommandés en 1-Clic** :
+  - `🤰 Grossesse & Allaitement` : Pharmacologie CRAT exclusive, alternatives sécures (Sertraline, Paracétamol), élimination formelle des AINS et IEC/ARA2.
+  - `👴 Sujet Âgé / Gériatrie` : Règle *"Start low, go slow"*, adaptation au DFG Cockcroft, proscription des anticholinergiques (Hydroxyzine) et BZD sédatives à demi-vie longue.
+  - `👶 Pédiatrie & Nourrisson` : Posologies impératives en dose-poids (`mg/kg/j`) et formes galéniques sirops/gouttes.
+  - `🚨 Forme Aiguë & Complication Urgente` : Détresse vitale, réanimation immédiate et seuils d'orientation SMUR.
+  - `🫘 Insuffisance Rénale & Hépatique` : Ajustement posologique selon les paliers de clairance et toxicité d'élimination.
+  - `🧠 Psychiatrie & Santé Mentale` : Grille RUD (Risque/Urgence/Dangerosité), plafonds de prescription des BZD (12 sem / 4 sem), et terminologie de la Loi sanitaire algérienne n° 18-11 (*Hospitalisation Libre* vs *Soins sans consentement*).
+- **Profils Personnalisés Sur-Mesure** : Saisie libre d'un terrain spécifique (ex: *Salmonella, Dépression résistante, Patient sous AVK*).
+- **Génération Ciblée à la Demande (Tiroir Inspecteur)** : Bouton `➕ Générer Sous-Fiche IA` directement dans la fenêtre d'inspection pour enrichir n'importe quelle fiche existante sans toucher au Master Hub.
+- **Barre de Navigation Segmentée (Segmented Pills)** : Pilules interactives en haut de chaque fiche (`⭐ Fiche Principale`, `🤰 Grossesse`, etc.) permettant une bascule instantanée du *Summary*, des *Drapeaux Rouges* et de l'ordonnance dédiée.
+- **Boucle de Validation Médicale Automatisée** : Checksum 8 couches avec boucle de rétro-action et 3 tentatives de correction en cas d'anomalie posologique.
+
+### 🔬 PDF Lab 2.0 — Visual Ingestion & Curation Workbench (v1.10.0)
+- **✂️ Découpage Visuel Interactif (Visual Slicer)** : Découpe de chapitres médicaux en fiches dédiées de 1 à 3 pages avec ajustement des curseurs haut/bas (+15px de marge de sécurité visuelle).
+- **🎯 Sommaire GPS & Pointeur de Page (+90 pts)** : Algorithme de navigation directe reliant les pointillés du sommaire (`..... p.48`) aux pages exactes du chapitre.
+- **📄 Ingestion Directe Markdown & Texte** : Import direct de cours et fiches de synthèse `.md` ou `.txt` créées avec le prompt de standardisation IA.
+- **🧪 Espace Staging & Brouillons (`pdf_staging_index.json`)** : Sandbox sécurisée permettant d'éditer, auditer et tester les documents découpés avant leur promotion en production.
+
+### 🏛️ Architecture RAG & Moteur de Synthèse V3.5 (v1.10.0)
+- **🎯 Isolation "Pure Signal"** : Priorité absolue aux fiches dédiées et découpées. Lorsqu'un extrait précis existe, le moteur met en sourdine les gros manuels généralistes de 500 pages pour éliminer le bruit.
+- **🧬 Précision RAG à 5 Champs Métadonnées** : Évaluation conjointe du *Titre*, de la *Spécialité*, des *Mots-clés médicaux*, des *Pointeurs Sommaire GPS*, et du *Contenu textuel*.
+- **🌐 Recherche Web RAG & Mémorisation Persistante** : Mode Dual RAG activé par défaut avec mémorisation locale (`localStorage`), lien personnalisé praticien, et bascule fluide vers le mode 100% hors-ligne (3s).
+- **🧠 Mémoire Active Learning** : Réinjection systématique des corrections et formulations manuelles du médecin dans le prompt Gemini lors des régénérations.
+
+### 🛡️ Moteur de Validation Médicale & Big Data Pharmacopées (v1.10.0)
+- **🇫🇷 Base de Données Publique des Médicaments (BDPM)** : Indexation de **15 857 spécialités pharmaceutiques autorisées** et **4 474 DCI** officielles.
+- **🇩🇿 Nomenclature Algérienne des Médicaments (MSPRH / Chifa)** : Indexation de **4 627 médicaments commercialisés** (*Saidal, El Kendi, Biogalenic...*) avec formes galéniques et statut de remboursement.
+- **👶 Plafonds Posologiques Pédiatriques (GPIP / HAS / Antibioclic)** : Contrôle strict des posologies au poids (`mg/kg/j`) et des limites d'âge (*Cyclines < 8 ans, Céfixime < 6 mois*).
+- **🤰 Pare-feu Tératogène CRAT** : Blocage immédiat des prescriptions à risque majeur (*Valproate, Méthotrexate, Isotrétinoïne, AINS dès 24 SA, IEC/ARA2*).
+- **⚠️ Intercepteur de Coquilles Létales** : Détection des erreurs de frappe mortelles (ex: *"500g"* au lieu de *"500mg"*).
+- **🔒 Assainissement des Données de Production** : Filtrage strict de la télémétrie IA et de l'historique dans `cats_db.json` client pour protéger la propriété intellectuelle.
+
+### 💾 SafeStorage & Protection des Données Utilisateur (v1.10.0)
+- **Protection Anti-Suppression** : Les notes personnelles (`dr_cat_notes_*`), la progression d'apprentissage (`dr_cat_user_progress`), les révisions espacées Leitner (`dr_cat_leitner`) et les streaks de révision (`dr_cat_streak`) sont protégées par regex et **ne sont jamais effacées**.
+- **Éviction LRU Automatique** : En cas de saturation du quota `localStorage` (5 MB), le système purge silencieusement les caches réseau transitoires (`dr_cat_synced_database*`) sans affecter les données cliniques du médecin.
+
+### ⚡ Recherche Instantanée Pré-Indexée (v1.10.0)
+- **Zéro Allocation Mémoire** : Pré-calcul de `cat._searchTokenStr` sur l'ensemble des 55+ fiches et sous-profils.
+- **Recherche Multi-Mots Fluide à 60 FPS** : Filtrage sans saccades ni saccades tactiles lors de la frappe de requêtes composées (ex: *"colique spasfon"*, *"otite orl"*).
+
+### 👤 Système Collaboratif & Lab Admin V3.5
 - Les **utilisateurs non-admin** peuvent proposer des modifications ou ajouts de fiches (via un système de suggestions).
 - L'**administrateur** valide ou rejette les suggestions depuis le panneau de modération sur le tableau de bord.
+- **Dr. CAT Generator Lab V3.5 (`admin/cat_generator_lab.html`)** : Télémétrie SSE temps réel, éditeur Markdown interactif, sélecteur de sous-fiches Option C, et promotion 1-clic vers la production.
+- **1-Tap Prompt Copy** : Boutons intégrés pour copier instantanément le Prompt Maître ou le Prompt de Standardisation dans le presse-papier.
 - **Dr. CAT PDF Inspector** : Un laboratoire admin pour inspecter l'index PDF, voir et télécharger les structures JSON extraites, et forcer une ré-extraction AI ciblée.
 - Mode admin activé par un token de session sécurisé, jamais stocké en clair côté serveur.
 
 ---
 
-## 🔐 Sécurité
+### ⚙️ Process Management & Reliability (v1.5.1)
+- **PM2 Process Supervisor**: Server runs under PM2 for automatic crash recovery (restarts in 3 sec). See `ecosystem.config.js` for all tunable parameters.
+- **Log Rotation** (`npm run log:rotate`): Auto-rotates server logs when they exceed 10 MB. Archives pruned after 7 days.
+- **Key PM2 Commands**: `npm run pm2:start` / `pm2:stop` / `pm2:restart` / `pm2:status` / `pm2:logs`.
+
+### 🔒 Sécurité & Hardening APK Production (Anti-Décompilation)
+- **Hardening Assets APK (`npm run cap:sync`)** : Filtrage automatique des fichiers sources de développement non-minifiés (`components/`, `lib/`, `workspace/`, `dashboard/`, `main.js`, `api.js`, `utils.js`). Les outils de rétro-ingénierie (`apktool`, `jadx`, `unzip`) ne trouvent **que** le bundle de production minifié `dist/app-*.js`.
+- **Exclusion AAPT Native (`build.gradle`)** : Règle `ignoreAssetsPattern` au niveau du compilateur Android empêchant tout empaquetage de code source brut dans le fichier `.apk`.
+- **Obfuscation Bytecode Android R8** : `minifyEnabled true` et `shrinkResources true` activés pour obscurcir le code Java native.
+- **Protection des Données Utilisateur (`version-checker.js`)** : Le système de Kill Switch / Lock Screen bloque strictement l'interface lors des mises à jour obligatoires **sans jamais effacer le `localStorage`** (les notes personnelles `dr_cat_notes_*`, la progression `dr_cat_user_progress`, et les statistiques Leitner restent 100% conservées).
+- **Hachage Mot de Passe PBKDF2** : Stockage du mot de passe admin avec hachage salé PBKDF2 (100 000 itérations).
+- **Auteur & Droits d'Auteur** : Conçu et développé par **Dr. Kibeche Ali** (Affichage UI) / **Dr. Kibeche Ali Dia Eddine** (Métadonnées & Mentions Légales).
 
 ### Authentification Admin
-- **Mot de passe sécurisé** stocké dans `admin_password.txt` (exclu du git via `.gitignore`).
+- **Mot de passe sécurisé** salé et haché via PBKDF2.
 - **Token de session aléatoire** (32 caractères hex) généré à chaque connexion. Stocké côté serveur en mémoire (`Set`), envoyé par header `x-admin-token`.
 - **Toutes les routes d'administration** (modification/suppression de fiches, approbation de suggestions, ré-indexation PDF) vérifient ce token.
 - La route `/api/login` est **restreinte à localhost uniquement** via vérification de l'adresse IP du socket TCP — impossible à usurper via le header `Host`.
@@ -212,6 +272,23 @@ shortcuts/stop_med.sh     # Clean shutdown
 ```
 
 > The `start_med.sh` script automatically updates `remote_server_config.json` with the ngrok-assigned URL each time it runs. No manual config editing needed.
+
+---
+
+## ⚡ Architecture Serverless Cloudflare Edge & Protocole ACK (v1.7.9)
+
+### ☁️ Moteur Edge Cloudflare Workers (`worker.js` & `wrangler.jsonc`)
+- **Execution 24/7 sur Edge Cloudflare** : `https://drcat.dr-cat.workers.dev` exécute nativement les endpoints `/api/suggestions`, `/api/server-providers`, `/api/search-status`, et `/api/version` en ~90ms (**HTTP 200 OK**) sans nécessiter que le serveur Termux soit en ligne.
+- **Stockage Cloudflare KV (`SUGGESTIONS_KV`)** : Les suggestions soumises par les utilisateurs du monde entier sont enregistrées 24h/24 dans la base clé-valeur Cloudflare (`d569bf8299a545f182c9e6acedd4d6aa`).
+- **Serveurs Multi-Fournisseurs avec Basculement** :
+  - **Priorité 1 (Primaire)** : `https://drcat.dr-cat.workers.dev` (Cloudflare CDN Edge)
+  - **Priorité 2 (Secondaire)** : `https://rendition-duchess-dry.ngrok-free.dev` (Tunnel Ngrok Termux)
+
+### 🔄 Protocole de Synchronisation 2-Voies & Handshake ACK
+1. **Sync Automatique au Démarrage** : Dès le lancement de `shortcuts/start_med.sh` (ou à l'ouverture du Panneau Admin), Termux interroge `GET /api/suggestions` sur Cloudflare KV et fusionne automatiquement les nouvelles propositions dans `suggestions.json`.
+2. **Accusé de Réception ACK (`POST /api/suggestions/ack`)** : Immédiatement après la mise en cache locale, Termux envoie la liste des identifiants reçus (`{ ids: [...] }`) à Cloudflare. Le Worker nettoie la file cloud pour garantir qu'aucune proposition n'est envoyée en double.
+3. **Purge Cloud lors de l'Approbation/Rejet (`DELETE /api/suggestions/:id`)** : Lorsque l'administrateur valide ou rejette une proposition dans Termux, le serveur envoie un signal DELETE à Cloudflare KV pour purger définitivement la fiche du cloud.
+4. **Approbation Intelligente Anti-Doublons (Upsert)** : Lors de l'approbation d'une fiche, le serveur vérifie la présence d'une CAT existante par ID ou titre identique et met à jour la fiche existante in-place au lieu de créer une carte orpheline en double.
 
 ---
 
