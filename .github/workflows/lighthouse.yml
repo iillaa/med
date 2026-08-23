@@ -41,10 +41,11 @@ jobs:
 
       # lighthouserc.js holds the mobile profile + score assertions
       # (perf >= 0.85, a11y >= 0.85, best-practices >= 0.90).
+      # No `|| true` — a failing score must fail the workflow (that's the point of the gate).
       - name: Run Lighthouse CI
         env:
           LHCI_URL: ${{ github.event.inputs.url }}
-        run: npx --yes @lhci/cli@0.13 autorun --collect.url="$LHCI_URL" || true
+        run: npx --yes @lhci/cli@0.13 autorun --collect.url="$LHCI_URL"
 
       - name: Upload Lighthouse Report
         if: always()
