@@ -65,11 +65,13 @@ try {
     { name: 'DrCAT_Start.sh', source: 'start_med.sh' },
     { name: 'DrCAT_Local.sh', source: 'open_app.sh' },
     { name: 'DrCAT_Status.sh', source: 'status_med.sh' },
+    { name: 'DrCAT_Logs.sh', source: 'logs_med.sh' },
     { name: 'DrCAT_Stop.sh', source: 'stop_med.sh' },
     { name: 'DrCAT_Inspect.sh', source: 'inspect_med.sh' },
     { name: 'start_med.sh', source: 'start_med.sh' },
     { name: 'stop_med.sh', source: 'stop_med.sh' },
     { name: 'status_med.sh', source: 'status_med.sh' },
+    { name: 'logs_med.sh', source: 'logs_med.sh' },
     { name: 'open_app.sh', source: 'open_app.sh' },
     { name: 'inspect_med.sh', source: 'inspect_med.sh' }
   ];
@@ -123,12 +125,14 @@ if (fs.existsSync(PREFIX_BIN)) {
     { cmd: 'med-start', target: 'start_med.sh' },
     { cmd: 'med-stop', target: 'stop_med.sh' },
     { cmd: 'med-status', target: 'status_med.sh' },
+    { cmd: 'med-logs', target: 'logs_med.sh' },
     { cmd: 'med-local', target: 'open_app.sh' },
     { cmd: 'med-inspect', target: 'inspect_med.sh' },
     { cmd: 'med-menu', target: 'menu_med.sh' },
     { cmd: 'start_med', target: 'start_med.sh' },
     { cmd: 'stop_med', target: 'stop_med.sh' },
     { cmd: 'status_med', target: 'status_med.sh' },
+    { cmd: 'logs_med', target: 'logs_med.sh' },
     { cmd: 'open_app', target: 'open_app.sh' },
     { cmd: 'inspect_med', target: 'inspect_med.sh' }
   ];
@@ -167,6 +171,7 @@ alias med='${path.join(SHORTCUTS_DIR, 'med.sh')}'
 alias med-start='${path.join(SHORTCUTS_DIR, 'start_med.sh')}'
 alias med-stop='${path.join(SHORTCUTS_DIR, 'stop_med.sh')}'
 alias med-status='${path.join(SHORTCUTS_DIR, 'status_med.sh')}'
+alias med-logs='${path.join(SHORTCUTS_DIR, 'logs_med.sh')}'
 alias med-local='${path.join(SHORTCUTS_DIR, 'open_app.sh')}'
 alias med-inspect='${path.join(SHORTCUTS_DIR, 'inspect_med.sh')}'
 alias med-menu='${path.join(SHORTCUTS_DIR, 'menu_med.sh')}'

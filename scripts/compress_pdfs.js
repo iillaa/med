@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+const { PDFDocument } = require('pdf-lib');
+
 const MASTERS_DIR = path.join(__dirname, '..', 'data', 'pdf_masters');
 const PUBLIC_DIR = path.join(__dirname, '..', 'public', 'pdfs');
 
@@ -14,7 +16,7 @@ function checkGhostscript() {
   }
 }
 
-function compressPdfFile(inputPath, outputPath) {
+async function compressPdfFile(inputPath, outputPath) {
   const fileName = path.basename(inputPath);
   const tempPath = outputPath + '.tmp';
 
@@ -25,38 +27,55 @@ function compressPdfFile(inputPath, outputPath) {
       fs.mkdirSync(targetDir, { recursive: true });
     }
 
+    // 1. Tier 1: Try Ghostscript if available
     if (checkGhostscript()) {
-      // Ghostscript command for ultra mobile PDF compression (96 DPI + JPEGQ 60)
       const cmd = `gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dColorImageResolution=96 -dGrayImageResolution=96 -dMonoImageResolution=96 -dColorImageDownsampleType=/Bicubic -dGrayImageDownsampleType=/Bicubic -dAutoFilterColorImages=false -dColorImageFilter=/DCTEncode -dJPEGQ=60 -dSubsetFonts=true -dCompressFonts=true -dDetectDuplicateImages=true -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${tempPath}" "${inputPath}"`;
-      execSync(cmd);
-
-      if (fs.existsSync(tempPath)) {
-        const newSize = fs.statSync(tempPath).size;
-        if (newSize < originalSize) {
-          const savedPercent = (((originalSize - newSize) / originalSize) * 100).toFixed(1);
-          const formatMb = (bytes) => (bytes / (1024 * 1024)).toFixed(2) + 'MB';
-          fs.renameSync(tempPath, outputPath);
-          console.log(` ✅ Compressed "${fileName}": ${formatMb(originalSize)} → ${formatMb(newSize)} (-${savedPercent}%)`);
-          return originalSize - newSize;
-        } else {
-          if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+      try {
+        execSync(cmd);
+        if (fs.existsSync(tempPath)) {
+          const newSize = fs.statSync(tempPath).size;
+          if (newSize < originalSize) {
+            const savedPercent = (((originalSize - newSize) / originalSize) * 100).toFixed(1);
+            const formatMb = (bytes) => (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            fs.renameSync(tempPath, outputPath);
+            console.log(` ✅ Ghostscript Compressed "${fileName}": ${formatMb(originalSize)} → ${formatMb(newSize)} (-${savedPercent}%)`);
+            return originalSize - newSize;
+          } else {
+            if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+          }
         }
-      }
+      } catch (_) {}
     }
-    
-    // Fallback: Copy original if Ghostscript unavailable or compression offered no size gain
+
+    // 2. Tier 2: Pure Node.js PDF-Lib Object Streams Optimizer (Runs anywhere, 0 native dependencies)
+    try {
+      const origBuffer = await fs.promises.readFile(inputPath);
+      const doc = await PDFDocument.load(origBuffer, { ignoreEncryption: true });
+      const optBytes = await doc.save({ useObjectStreams: true, addDefaultPage: false });
+      const newSize = optBytes.length;
+
+      if (newSize < originalSize && (originalSize - newSize) > 512) {
+        const savedPercent = (((originalSize - newSize) / originalSize) * 100).toFixed(1);
+        const formatMb = (bytes) => (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        await fs.promises.writeFile(outputPath, Buffer.from(optBytes));
+        console.log(` ✅ PDF-Lib Compressed "${fileName}": ${formatMb(originalSize)} → ${formatMb(newSize)} (-${savedPercent}%)`);
+        return originalSize - newSize;
+      }
+    } catch (_) {}
+
+    // Fallback: Copy original if already optimal
     fs.copyFileSync(inputPath, outputPath);
-    console.log(` ℹ️ Copied "${fileName}" to public/pdfs/ (uncompressed).`);
+    console.log(` ✨ Synced "${fileName}" to public/pdfs/ (already optimal).`);
     return 0;
   } catch (err) {
     if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-    console.error(` ❌ Failed to compress "${fileName}":`, err.message);
+    console.error(` ❌ Failed to process "${fileName}":`, err.message);
     try { fs.copyFileSync(inputPath, outputPath); } catch (_) {}
     return 0;
   }
 }
 
-function processAllPdfs() {
+async function processAllPdfs() {
   console.log("⚡ Dr. CAT — Automated Dual Pipeline PDF Compressor\n");
 
   if (!fs.existsSync(MASTERS_DIR)) {
@@ -66,7 +85,7 @@ function processAllPdfs() {
     fs.mkdirSync(PUBLIC_DIR, { recursive: true });
   }
 
-  // Auto-sync existing public PDFs into data/pdf_masters if MASTERS_DIR is empty
+  // Auto-sync existing public PDFs into data/pdf_masters if missing
   const publicFiles = fs.readdirSync(PUBLIC_DIR).filter(f => f.endsWith('.pdf'));
   for (const file of publicFiles) {
     const masterPath = path.join(MASTERS_DIR, file);
@@ -88,7 +107,7 @@ function processAllPdfs() {
   for (const file of masterFiles) {
     const inputPath = path.join(MASTERS_DIR, file);
     const outputPath = path.join(PUBLIC_DIR, file);
-    totalSaved += compressPdfFile(inputPath, outputPath);
+    totalSaved += await compressPdfFile(inputPath, outputPath);
   }
 
   const savedMb = (totalSaved / (1024 * 1024)).toFixed(2);

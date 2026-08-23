@@ -13,13 +13,14 @@ echo "  2) 🌐 Démarrer avec Ngrok + Cloudflare"
 echo "  3) 🏠 Démarrer en Local uniquement (Éco-batterie)"
 echo "  4) 🛑 Arrêter le Serveur et les Tunnels"
 echo "  5) 📊 Vérifier l'État du Serveur"
-echo "  6) 🔍 Ouvrir l'Inspecteur Ngrok"
-echo "  7) ⚙️  Recompiler les Bundles (Build)"
-echo "  8) 🧪 Lancer la Suite de Tests"
-echo "  9) 🚪 Quitter"
+echo "  6) 📜 Voir les Logs & Activité IA en Direct"
+echo "  7) 🔍 Ouvrir l'Inspecteur Ngrok"
+echo "  8) ⚙️  Recompiler les Bundles (Build)"
+echo "  9) 🧪 Lancer la Suite de Tests"
+echo "  0) 🚪 Quitter"
 echo ""
 echo "=================================================="
-read -p "Votre choix [1-9] : " choice
+read -p "Votre choix [0-9] : " choice
 
 case "$choice" in
   1)
@@ -40,17 +41,20 @@ case "$choice" in
     read -p "Appuyez sur Entrée pour fermer..."
     ;;
   6)
-    "$MED_DIR/shortcuts/inspect_med.sh"
+    "$MED_DIR/shortcuts/logs_med.sh"
     ;;
   7)
+    "$MED_DIR/shortcuts/inspect_med.sh"
+    ;;
+  8)
     npm run build
     read -p "Appuyez sur Entrée pour fermer..."
     ;;
-  8)
+  9)
     npm test
     read -p "Appuyez sur Entrée pour fermer..."
     ;;
-  9)
+  0)
     exit 0
     ;;
   *)

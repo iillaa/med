@@ -23,6 +23,8 @@ audit_output_new/
 
 # Uncompressed Master Original PDFs (Local server only, keep off GitHub to minimize repo/APK size)
 data/pdf_masters/
+data/pdf_sliced/
+data/pdf_done/
 
 # Local ngrok binary
 ngrok

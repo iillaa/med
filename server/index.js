@@ -7,6 +7,9 @@
 // Load environment variables from .env FIRST — before any other require()
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 
+const { initActivityLogger } = require('./services/activity_logger');
+initActivityLogger();
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -360,15 +363,15 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
 let serverInstance = null;
 
 initializeData().then(() => {
-  serverInstance = app.listen(PORT,  () => {
-    console.log(`=================================================`);
-    console.log(`Medical CAT Learning App is running!`);
-    console.log(`Local Access: http://localhost:${PORT}`);
-    console.log(`Network Access: http://<your-device-ip>:${PORT}`);
-    console.log(`=================================================`);
-
-    // PDF Index is already loaded in memory by initializeData() from pdf_index.json.
-    // Parsing & indexing is 100% manual via the PDF Lab UI or /api/reindex to prevent burning API tokens on boot.
+  serverInstance = app.listen(PORT, () => {
+    console.log(`\n═════════════════════════════════════════════════════════════════`);
+    console.log(`🩺 Dr. CAT — Clinical Assistant & Learning Server v1.11.0`);
+    console.log(`🌐 Local Access:   http://localhost:${PORT}`);
+    console.log(`📂 Medical Corpus: ${cache.pdfIndex ? cache.pdfIndex.length : 0} Master PDFs & ${cache.catsCache ? cache.catsCache.length : 0} CATs loaded into memory`);
+    console.log(`⚡ Startup Mode:   Cold Boot Active (0 tokens burned at startup)`);
+    console.log(`🔬 PDF Lab Studio: http://localhost:${PORT}/admin/pdf_lab.html`);
+    console.log(`🤖 AI Slicer & CAT: Ready for manual on-demand execution`);
+    console.log(`═════════════════════════════════════════════════════════════════\n`);
   });
 }).catch(err => {
   console.error("Critical: Failed to initialize application data caches:", err);

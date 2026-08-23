@@ -759,6 +759,504 @@ function registerPdfRoutes(app, cache) {
     }
   });
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // 🤖 AI-ASSISTED SMART SLICER & PATHOLOGY CATALOGER
+  // ══════════════════════════════════════════════════════════════════════════
+  const SLICED_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_sliced');
+  const DONE_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_done');
+  const { detectPathologySegments, sanitizeSliceFilename } = require('../parsers/segmenter_ai');
+
+  function ensureCatalogDirs() {
+    if (!fs.existsSync(SLICED_DIR)) fs.mkdirSync(SLICED_DIR, { recursive: true });
+    if (!fs.existsSync(DONE_DIR)) fs.mkdirSync(DONE_DIR, { recursive: true });
+  }
+
+  // POST /api/admin/auto-segment-pdf
+  // Uses Gemini 3.6 Flash on pre-extracted cached text to propose smart pathology slices with confidence & coverage
+  app.post('/api/admin/auto-segment-pdf', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const filename = path.basename(req.body.filename || '');
+      if (!filename) return res.status(400).json({ error: 'Le nom du fichier est obligatoire.' });
+
+      const result = await detectPathologySegments(filename);
+      res.json({
+        success: true,
+        filename: result.filename,
+        totalPages: result.totalPages,
+        segments: result.segments,
+        coverage: result.coverage
+      });
+    } catch (err) {
+      console.error('[Auto Segment Error]', err);
+      res.status(500).json({ error: err.message || 'Échec de la détection IA des pathologies.' });
+    }
+  });
+
+  // POST /api/admin/auto-slice-execute
+  // Executes batch/single vector slicing for approved segments and organizes into data/pdf_sliced/<specialty>/<pathology>/
+  app.post('/api/admin/auto-slice-execute', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      ensureCatalogDirs();
+      const { sourceFilename, segments, markDone } = req.body;
+      if (!sourceFilename || !Array.isArray(segments) || segments.length === 0) {
+        return res.status(400).json({ error: 'sourceFilename et un tableau de segments sont obligatoires.' });
+      }
+
+      const srcClean = path.basename(sourceFilename);
+      const srcPath = path.join(PDF_MASTERS_DIR, srcClean);
+      if (!fs.existsSync(srcPath)) {
+        return res.status(404).json({ error: `Fichier source "${srcClean}" introuvable dans data/pdf_masters.` });
+      }
+
+      const srcBuffer = await fs.promises.readFile(srcPath);
+      const srcDoc = await PDFDocument.load(srcBuffer);
+      const totalPages = srcDoc.getPageCount();
+
+      // Retrieve cached pages text if available for rich staging metadata
+      let cachedPages = [];
+      const cacheFile = path.join(__dirname, '..', '..', 'data', 'pdf_cache', `${srcClean}.json`);
+      if (fs.existsSync(cacheFile)) {
+        try {
+          const cached = JSON.parse(await fs.promises.readFile(cacheFile, 'utf8'));
+          cachedPages = cached.pages || [];
+        } catch (_) {}
+      }
+
+      const createdSlices = [];
+      const staging = loadStagingData();
+
+      for (const seg of segments) {
+        const sPage = Math.max(1, Math.min(parseInt(seg.startPage, 10) || 1, totalPages));
+        const ePage = Math.max(sPage, Math.min(parseInt(seg.endPage, 10) || sPage, totalPages));
+        const cleanTitle = sanitizeSliceFilename(seg.title || seg.pathology || 'Extrait');
+        const specialty = (seg.specialty || 'Médecine Générale').trim();
+        const pathology = (seg.pathology || 'Pathologie_Divers').trim();
+
+        // 1. Create Sub-PDF
+        const newDoc = await PDFDocument.create();
+        const pageIndices = [];
+        for (let p = sPage - 1; p <= ePage - 1; p++) pageIndices.push(p);
+
+        const copiedPages = await newDoc.copyPages(srcDoc, pageIndices);
+        copiedPages.forEach(p => newDoc.addPage(p));
+        const newPdfBuffer = Buffer.from(await newDoc.save());
+
+        // 2. Save in data/pdf_sliced/<specialty>/<pathology>/
+        const cleanSpecialtyFolder = (specialty.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9_-]/g, '_').trim() || 'Medecine_Generale');
+        const cleanPathologyFolder = (pathology.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9_-]/g, '_').trim() || 'Divers');
+        const targetDir = path.join(SLICED_DIR, cleanSpecialtyFolder, cleanPathologyFolder);
+        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+
+        const targetPdfPath = path.join(targetDir, cleanTitle);
+        const targetMetaPath = path.join(targetDir, cleanTitle.replace(/\.pdf$/i, '.json'));
+        await fs.promises.writeFile(targetPdfPath, newPdfBuffer);
+
+        // Also place in public/pdfs and master originals for immediate view & search
+        const publicPath = path.join(PUBLIC_PDF_DIR, cleanTitle);
+        const masterPath = path.join(PDF_MASTERS_DIR, cleanTitle);
+        await fs.promises.writeFile(masterPath, newPdfBuffer);
+        compressPdfFile(masterPath, publicPath);
+
+        // 3. Collect slice text pages from source cache
+        const slicePages = [];
+        for (let p = sPage; p <= ePage; p++) {
+          const match = cachedPages.find(cp => (cp.pageNum || cp.page) === p);
+          if (match && (match.text || match.content)) {
+            slicePages.push({
+              page: (p - sPage) + 1,
+              content: match.text || match.content
+            });
+          }
+        }
+
+        if (slicePages.length === 0) {
+          slicePages.push({
+            page: 1,
+            content: `# ${pathology}\n\n**Spécialité :** ${specialty}\n**Source :** ${srcClean} (Pages ${sPage} à ${ePage})\n\n${seg.summary || ''}`
+          });
+        }
+
+        const metaRecord = {
+          title: cleanTitle,
+          pathology,
+          specialty,
+          source: srcClean,
+          startPage: sPage,
+          endPage: ePage,
+          pageCount: (ePage - sPage) + 1,
+          keyTopics: seg.keyTopics || ['Clinique', 'Traitement'],
+          summary: seg.summary || '',
+          timestamp: new Date().toISOString(),
+          pages: slicePages
+        };
+        await fs.promises.writeFile(targetMetaPath, JSON.stringify(metaRecord, null, 2), 'utf8');
+
+        // 4. Save into Staging for direct 1-click CAT promotion/generation
+        const stagingDoc = {
+          id: `staging_slice_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          pdf: cleanTitle,
+          specialty,
+          pathology,
+          quality: 'ai_smart_sliced',
+          timestamp: new Date().toISOString(),
+          status: 'draft',
+          pages: slicePages
+        };
+        staging.unshift(stagingDoc);
+
+        createdSlices.push({
+          title: cleanTitle,
+          pathology,
+          specialty,
+          startPage: sPage,
+          endPage: ePage,
+          path: targetPdfPath
+        });
+      }
+
+      saveStagingData(staging);
+
+      // 5. Handle markDone / moving source to data/pdf_done/
+      if (markDone) {
+        const donePath = path.join(DONE_DIR, srcClean);
+        if (fs.existsSync(donePath)) await fs.promises.unlink(donePath);
+        await fs.promises.rename(srcPath, donePath);
+
+        // Remove from master active index and update files
+        cache.pdfIndex = (cache.pdfIndex || []).filter(d => d.pdf !== srcClean);
+        const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
+        await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+        syncPublicDataAssets(cache.pdfIndex);
+        if (cache.searchCache) cache.searchCache.clear();
+
+        console.log(`[Smart Slicer] Moved processed master "${srcClean}" to data/pdf_done/ and updated index.`);
+      }
+
+      res.json({
+        success: true,
+        message: `${createdSlices.length} segment(s) découpé(s) et classé(s) avec succès !`,
+        slices: createdSlices,
+        isDone: Boolean(markDone)
+      });
+    } catch (err) {
+      console.error('[Auto Slice Execute Error]', err);
+      res.status(500).json({ error: err.message || 'Erreur lors du découpage automatique.' });
+    }
+  });
+
+  // GET /api/admin/sliced-tree
+  // Returns hierarchical tree of organized slices in data/pdf_sliced/
+  app.get('/api/admin/sliced-tree', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      ensureCatalogDirs();
+      const tree = {};
+      let totalSlices = 0;
+
+      if (fs.existsSync(SLICED_DIR)) {
+        const specialties = await fs.promises.readdir(SLICED_DIR);
+        for (const spec of specialties) {
+          const specPath = path.join(SLICED_DIR, spec);
+          const specStat = await fs.promises.stat(specPath);
+          if (!specStat.isDirectory()) continue;
+
+          tree[spec] = {};
+          const pathologies = await fs.promises.readdir(specPath);
+          for (const pathol of pathologies) {
+            const patholPath = path.join(specPath, pathol);
+            const patholStat = await fs.promises.stat(patholPath);
+            if (!patholStat.isDirectory()) continue;
+
+            const files = await fs.promises.readdir(patholPath);
+            const pdfFiles = files.filter(f => f.toLowerCase().endsWith('.pdf'));
+            totalSlices += pdfFiles.length;
+            
+            tree[spec][pathol] = pdfFiles.map(file => {
+              const filePath = path.join(patholPath, file);
+              const metaPath = path.join(patholPath, file.replace(/\.pdf$/i, '.json'));
+              let meta = null;
+              try {
+                if (fs.existsSync(metaPath)) meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+              } catch (_) {}
+
+              return {
+                filename: file,
+                size: fs.existsSync(filePath) ? fs.statSync(filePath).size : 0,
+                meta
+              };
+            });
+          }
+        }
+      }
+
+      // Count done files
+      let doneCount = 0;
+      if (fs.existsSync(DONE_DIR)) {
+        const doneFiles = await fs.promises.readdir(DONE_DIR);
+        doneCount = doneFiles.filter(f => f.toLowerCase().endsWith('.pdf')).length;
+      }
+
+      res.json({ success: true, totalSlices, doneCount, tree });
+    } catch (err) {
+      console.error('[Sliced Tree Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to read sliced catalog tree.' });
+    }
+  });
+
+  // POST /api/admin/mark-pdf-done
+  // Manually moves a processed master PDF into data/pdf_done/
+  app.post('/api/admin/mark-pdf-done', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      ensureCatalogDirs();
+      const filename = path.basename(req.body.filename || '');
+      if (!filename) return res.status(400).json({ error: 'Filename is required' });
+
+      const srcPath = path.join(PDF_MASTERS_DIR, filename);
+      const destPath = path.join(DONE_DIR, filename);
+
+      if (!fs.existsSync(srcPath)) {
+        return res.status(404).json({ error: `Fichier "${filename}" introuvable dans data/pdf_masters.` });
+      }
+
+      if (fs.existsSync(destPath)) await fs.promises.unlink(destPath);
+      await fs.promises.rename(srcPath, destPath);
+
+      // Remove from master active index and update files
+      const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
+      let baseIndex = (Array.isArray(cache.pdfIndex) && cache.pdfIndex.length > 0) ? cache.pdfIndex : [];
+      if (baseIndex.length === 0 && fs.existsSync(INDEX_FILE)) {
+        try { baseIndex = JSON.parse(await fs.promises.readFile(INDEX_FILE, 'utf8')); } catch (_) {}
+      }
+      cache.pdfIndex = baseIndex.filter(d => d.pdf !== filename);
+      await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+      syncPublicDataAssets(cache.pdfIndex);
+      if (cache.searchCache) cache.searchCache.clear();
+
+      res.json({ success: true, message: `PDF "${filename}" déplacé vers data/pdf_done/.` });
+    } catch (err) {
+      console.error('[Mark PDF Done Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to mark PDF as done.' });
+    }
+  });
+
+  // GET /api/admin/done-pdfs-list
+  // Lists all archived master PDFs in data/pdf_done/
+  app.get('/api/admin/done-pdfs-list', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      ensureCatalogDirs();
+      const files = fs.existsSync(DONE_DIR) ? await fs.promises.readdir(DONE_DIR) : [];
+      const pdfFiles = files.filter(f => f.toLowerCase().endsWith('.pdf'));
+
+      const fileList = pdfFiles.map(file => {
+        const fullPath = path.join(DONE_DIR, file);
+        let size = 0;
+        let mtime = new Date();
+        try {
+          const stat = fs.statSync(fullPath);
+          size = stat.size;
+          mtime = stat.mtime;
+        } catch (_) {}
+        return {
+          pdf: file,
+          size,
+          timestamp: mtime.toISOString()
+        };
+      });
+
+      res.json({ success: true, count: fileList.length, files: fileList });
+    } catch (err) {
+      console.error('[Done PDFs Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to list done PDFs.' });
+    }
+  });
+
+  // POST /api/admin/restore-pdf-master
+  // Moves an archived PDF from data/pdf_done/ back to data/pdf_masters/ and restores its master record
+  app.post('/api/admin/restore-pdf-master', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      ensureCatalogDirs();
+      const filename = path.basename(req.body.filename || '');
+      if (!filename) return res.status(400).json({ error: 'Filename is required' });
+
+      const donePath = path.join(DONE_DIR, filename);
+      const masterPath = path.join(PDF_MASTERS_DIR, filename);
+
+      if (!fs.existsSync(donePath)) {
+        return res.status(404).json({ error: `Fichier "${filename}" introuvable dans data/pdf_done.` });
+      }
+
+      if (fs.existsSync(masterPath)) await fs.promises.unlink(masterPath);
+      await fs.promises.rename(donePath, masterPath);
+
+      // Re-index / restore in memory and on disk
+      let restoredRecord = null;
+      const cacheFile = path.join(__dirname, '..', '..', 'data', 'pdf_cache', `${filename}.json`);
+      if (fs.existsSync(cacheFile)) {
+        try {
+          const cached = JSON.parse(await fs.promises.readFile(cacheFile, 'utf8'));
+          restoredRecord = {
+            pdf: filename,
+            specialty: cached.specialty || 'Médecine Générale',
+            quality: cached.quality || 'offline',
+            hash: cached.hash || `single_${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            toc: cached.toc || [],
+            pages: cached.pages || []
+          };
+        } catch (_) {}
+      }
+
+      if (!restoredRecord) {
+        restoredRecord = {
+          pdf: filename,
+          specialty: 'Médecine Générale',
+          quality: 'offline',
+          hash: `restored_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          toc: [],
+          pages: []
+        };
+      }
+
+      const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
+      let baseIndex = (Array.isArray(cache.pdfIndex) && cache.pdfIndex.length > 0) ? cache.pdfIndex : [];
+      if (baseIndex.length === 0 && fs.existsSync(INDEX_FILE)) {
+        try { baseIndex = JSON.parse(await fs.promises.readFile(INDEX_FILE, 'utf8')); } catch (_) {}
+      }
+
+      cache.pdfIndex = baseIndex.filter(d => d.pdf !== filename);
+      cache.pdfIndex.push(restoredRecord);
+
+      await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+      syncPublicDataAssets(cache.pdfIndex);
+      if (cache.searchCache) cache.searchCache.clear();
+
+      console.log(`[Smart Slicer] ↩️ Restored "${filename}" to data/pdf_masters/ and active index.`);
+      res.json({ success: true, message: `Fichier "${filename}" restauré avec succès dans le Master Corpus !` });
+    } catch (err) {
+      console.error('[Restore PDF Master Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to restore PDF to master corpus.' });
+    }
+  });
+
+  // POST /api/admin/create-residual-slice
+  // Bundles unassigned gap pages into a single reviewable sub-document
+  app.post('/api/admin/create-residual-slice', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { sourceFilename, uncoveredPages } = req.body;
+      if (!sourceFilename || !Array.isArray(uncoveredPages) || uncoveredPages.length === 0) {
+        return res.status(400).json({ error: 'sourceFilename et uncoveredPages sont requis.' });
+      }
+
+      const srcClean = path.basename(sourceFilename);
+      let srcPath = path.join(PDF_MASTERS_DIR, srcClean);
+      if (!fs.existsSync(srcPath)) {
+        srcPath = path.join(DONE_DIR, srcClean);
+      }
+      if (!fs.existsSync(srcPath)) {
+        return res.status(404).json({ error: `Fichier source "${srcClean}" introuvable.` });
+      }
+
+      const srcBuffer = await fs.promises.readFile(srcPath);
+      const srcDoc = await PDFDocument.load(srcBuffer);
+      const totalPages = srcDoc.getPageCount();
+
+      const validPages = uncoveredPages
+        .map(p => parseInt(p, 10))
+        .filter(p => p >= 1 && p <= totalPages)
+        .sort((a, b) => a - b);
+
+      if (validPages.length === 0) {
+        return res.status(400).json({ error: 'Aucune page résiduelle valide.' });
+      }
+
+      const newDoc = await PDFDocument.create();
+      const pageIndices = validPages.map(p => p - 1);
+      const copiedPages = await newDoc.copyPages(srcDoc, pageIndices);
+      copiedPages.forEach(p => newDoc.addPage(p));
+      const newPdfBuffer = Buffer.from(await newDoc.save());
+
+      const cleanTitle = `${srcClean.replace(/\.pdf$/i, '')}_Pages_Restantes_A_Examiner.pdf`;
+      const targetDir = path.join(SLICED_DIR, 'A_Examiner', srcClean.replace(/\.pdf$/i, ''));
+      if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+
+      const targetPdfPath = path.join(targetDir, cleanTitle);
+      await fs.promises.writeFile(targetPdfPath, newPdfBuffer);
+
+      // Also place in public/pdfs and master originals for immediate view & search
+      const publicPath = path.join(PUBLIC_PDF_DIR, cleanTitle);
+      const masterPath = path.join(PDF_MASTERS_DIR, cleanTitle);
+      await fs.promises.writeFile(masterPath, newPdfBuffer);
+      compressPdfFile(masterPath, publicPath);
+
+      // Collect slice text pages from source cache
+      let cachedPages = [];
+      const cacheFile = path.join(__dirname, '..', '..', 'data', 'pdf_cache', `${srcClean}.json`);
+      if (fs.existsSync(cacheFile)) {
+        try {
+          const cached = JSON.parse(await fs.promises.readFile(cacheFile, 'utf8'));
+          cachedPages = cached.pages || [];
+        } catch (_) {}
+      }
+
+      const slicePages = validPages.map((origP, idx) => {
+        const match = cachedPages.find(cp => (cp.pageNum || cp.page) === origP);
+        return {
+          page: idx + 1,
+          content: match ? (match.text || match.content) : `[Page originale ${origP} de ${srcClean}]`
+        };
+      });
+
+      // Save into Staging for direct 2nd-pass human/AI review
+      const staging = loadStagingData();
+      const stagingDoc = {
+        id: `staging_residual_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        pdf: cleanTitle,
+        specialty: 'A Examiner',
+        pathology: `Pages Restantes (${validPages.join(', ')})`,
+        quality: 'residual_pages',
+        timestamp: new Date().toISOString(),
+        status: 'draft',
+        pages: slicePages
+      };
+      staging.unshift(stagingDoc);
+      saveStagingData(staging);
+
+      console.log(`[Smart Slicer] 📦 Created residual review document "${cleanTitle}" with ${validPages.length} pages.`);
+
+      res.json({
+        success: true,
+        message: `Document résiduel "${cleanTitle}" créé avec ${validPages.length} page(s) et disponible dans le Staging !`,
+        filename: cleanTitle,
+        pagesCount: validPages.length,
+        pages: validPages
+      });
+    } catch (err) {
+      console.error('[Create Residual Slice Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to create residual slice.' });
+    }
+  });
+
 }
 
 module.exports = { registerPdfRoutes };

@@ -18,6 +18,9 @@ case "$CMD" in
   status)
     exec "$MED_DIR/shortcuts/status_med.sh" "$@"
     ;;
+  logs|log)
+    exec "$MED_DIR/shortcuts/logs_med.sh" "$@"
+    ;;
   inspect)
     exec "$MED_DIR/shortcuts/inspect_med.sh" "$@"
     ;;
@@ -63,6 +66,7 @@ case "$CMD" in
     echo "  med local     : Démarre en local uniquement (éco-batterie)"
     echo "  med stop      : Arrête le serveur et tous les tunnels"
     echo "  med status    : Affiche l'état d'exécution et les URLs actives"
+    echo "  med logs      : Affiche le journal et l'activité IA en direct (ou --ai, --err)"
     echo "  med restart   : Redémarre complètement le serveur et les tunnels"
     echo "  med inspect   : Ouvre l'interface de diagnostic Ngrok (http://localhost:4040)"
     echo "  med pm2       : Gère l'exécution en arrière-plan via PM2 (start, stop, logs, status)"

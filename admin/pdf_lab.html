@@ -95,6 +95,38 @@
       position: absolute; left: 0; right: 0; border: 2px dashed #38bdf8;
       background: rgba(14, 165, 233, 0.12); cursor: move; touch-action: none;
     }
+
+    .ai-segment-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .ai-segment-card:hover {
+      border-color: #38bdf8;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.18);
+    }
+    .ai-segment-card.sliced-done {
+      opacity: 0.65;
+      border-color: #059669;
+      background: #064e3b15;
+    }
+    .conf-high { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); font-size: 10px; font-weight: bold; border-radius: 4px; padding: 2px 6px; }
+    .conf-medium { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); font-size: 10px; font-weight: bold; border-radius: 4px; padding: 2px 6px; }
+    .conf-uncertain { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); font-size: 10px; font-weight: bold; border-radius: 4px; padding: 2px 6px; }
+    .ai-segment-topic-pill {
+      font-size: 10.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -302,6 +334,13 @@
               📁 Charger PDF local
               <input type="file" id="slicer-file-input" accept=".pdf" style="display: none;" onchange="handleSlicerFileSelect(event)" />
             </label>
+            <button onclick="triggerAutoSegmentCurrentPdf()" class="btn-success" id="slicer-ai-segment-btn" title="Lancer l'analyse intelligente et la proposition de découpage automatique par pathologie" style="background: linear-gradient(135deg, #0284c7, #0d9488); border: none; font-weight: bold; padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+              <span>✨</span>
+              <span>Découpage IA</span>
+            </button>
+            <button onclick="openSlicedLibraryModal()" class="btn-outline" title="Explorer la bibliothèque des extraits classés par spécialité et pathologie" style="border-color: #a855f7; color: #c084fc; padding: 6px 12px; font-size: 12px;">
+              📂 Extraits Classés
+            </button>
           </div>
 
           <!-- Page Nav & Zoom Controls -->
@@ -312,6 +351,57 @@
             <button onclick="slicerZoom(-0.2)" class="btn-outline" style="padding: 4px 8px;" title="Zoom arrière">🔍 -</button>
             <button onclick="slicerZoom(0.2)" class="btn-outline" style="padding: 4px 8px;" title="Zoom avant">🔍 +</button>
             <button onclick="slicerResetZoom()" class="btn-outline" style="padding: 4px 8px; font-size: 11px;">100%</button>
+          </div>
+        </div>
+
+        <!-- AI Segments Smart Assistant Panel -->
+        <div id="ai-segments-container" style="display: none; background: #0b1329; border: 1px solid #0284c7; border-radius: 8px; padding: 14px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">🤖</span>
+              <div>
+                <strong style="color: #38bdf8; font-size: 14px;">Pathologies & Fiches Détectées par l'IA</strong>
+                <span id="ai-segments-meta" style="font-size: 12px; color: var(--text-muted); margin-left: 8px;"></span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer;" title="Si coché, le PDF source sera déplacé dans data/pdf_done/ une fois découpé">
+                <input type="checkbox" id="ai-mark-done-checkbox" />
+                <span>Archiver dans <code>pdf_done/</code></span>
+              </label>
+              <button onclick="executeBatchSliceAllApproved()" class="btn-success" id="ai-slice-all-btn" style="font-size: 12px; padding: 6px 14px; font-weight: bold;">
+                ⚡ Tout Découper & Classer (<span id="ai-slice-approved-count">0</span>)
+              </button>
+              <button onclick="closeAiSegmentsPanel()" class="btn-outline" style="font-size: 12px; padding: 6px 10px;" title="Fermer ce panneau">✖️</button>
+            </div>
+          </div>
+
+          <!-- Visual Coverage Map & Residual Button -->
+          <div id="ai-coverage-container" style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <span id="ai-coverage-badge" style="font-weight: bold; color: #34d399;">📊 Couverture : 100%</span>
+              <span id="ai-coverage-detail" style="color: var(--text-muted); font-size: 11px;"></span>
+            </div>
+            <div id="ai-residual-action-box" style="display: none;">
+              <button onclick="createResidualReviewDocument()" class="btn-outline" style="border-color: #f59e0b; color: #fbbf24; padding: 4px 10px; font-size: 11px; font-weight: bold;" title="Rassembler toutes les pages orphelines dans un sous-PDF pour ré-analyse">
+                📦 Extraire le Résidu (<span id="ai-residual-pages-count">0</span> pages à examiner)
+              </button>
+            </div>
+          </div>
+
+          <div id="ai-segments-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; max-height: 320px; overflow-y: auto; padding-right: 4px;">
+            <!-- Segment cards injected via JS -->
+          </div>
+
+          <!-- Ignored / Skipped Segments Drawer -->
+          <div id="ai-ignored-container" style="display: none; background: rgba(239, 68, 68, 0.06); border: 1px dashed rgba(239, 68, 68, 0.35); border-radius: 6px; padding: 8px 12px; margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleIgnoredDrawer()">
+              <span style="font-size: 12px; color: #f87171; font-weight: bold;">⏭️ Segments Mis de Côté / Ignorés (<span id="ai-ignored-count">0</span>)</span>
+              <span id="ai-ignored-toggle-arrow" style="color: #f87171; font-size: 11px;">▼ Afficher</span>
+            </div>
+            <div id="ai-ignored-list" style="display: none; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; margin-top: 8px;">
+              <!-- Ignored cards injected via JS with ↩️ Restaurer button -->
+            </div>
           </div>
         </div>
 
@@ -394,6 +484,7 @@
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <input type="text" id="master-filter-input" placeholder="🔍 Filtrer par nom ou spécialité..." oninput="filterMasterList()" style="background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; min-width: 240px;" />
+            <button onclick="openDonePdfsModal()" class="btn-outline" style="border-color: #c084fc; color: #c084fc;" title="Voir les masters traités et archivés avec option de restauration">📦 Masters Archivés (<span id="done-masters-count">0</span>)</button>
             <button onclick="triggerBatchReindex()" class="btn-success" title="Lancer une réindexation globale (Batch Parse) du Master Corpus">⚡ Réindexer Tout (Batch Parse)</button>
             <button onclick="triggerCompressAllPdfs()" class="btn-outline" style="border-color: #38bdf8; color: #38bdf8;" title="Optimiser et compresser tous les PDFs pour alléger l'application APK">🗜️ Compresser pour l'APK</button>
             <button onclick="fetchMasterList()" class="btn-outline">🔄 Rafraîchir</button>
@@ -551,6 +642,78 @@
           <button onclick="copyStandardizationPrompt()" class="btn-outline" style="background: rgba(14, 165, 233, 0.15); border-color: var(--primary); color: #38bdf8;">📋 Copier le Prompt IA de Standardisation</button>
           <button onclick="closeModal('guide-modal')" class="btn-outline">Fermer</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════════════ -->
+  <!-- 📂 MODAL: SLICED PATHOLOGY CATALOG EXPLORER (Spécialités / Pathologies) -->
+  <!-- ═════════════════════════════════════════════════════════════════════════ -->
+  <div id="sliced-library-modal" class="modal-overlay" onclick="handleBackdropClick(event, 'sliced-library-modal')">
+    <div class="modal-box modal-box-large">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">📂</span>
+          <div>
+            <h3 style="margin: 0; color: #c084fc;">Bibliothèque des Extraits Classés</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">Structure organisée dans <code>data/pdf_sliced/&lt;Spécialité&gt;/&lt;Pathologie&gt;/</code></span>
+          </div>
+        </div>
+        <button onclick="closeModal('sliced-library-modal')" class="btn-outline">✕</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #0f172a; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);">
+        <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); align-items: center;">
+          <span>Total Extraits : <strong id="sliced-tree-total-count" style="color: #38bdf8;">0</strong></span>
+          <span>•</span>
+          <span>Masters Archivés : <strong id="sliced-tree-done-count" style="color: #34d399;">0</strong></span>
+        </div>
+        <input type="text" id="sliced-tree-filter" placeholder="🔍 Filtrer par pathologie ou spécialité..." oninput="filterSlicedTree()" style="background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; min-width: 250px;" />
+      </div>
+
+      <div id="sliced-tree-content" style="overflow-y: auto; max-height: 60vh; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
+        <div style="text-align: center; color: var(--text-muted); padding: 30px;">Chargement de l'arborescence...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════════════ -->
+  <!-- 📦 MODAL: DONE ARCHIVED MASTERS (data/pdf_done/) -->
+  <!-- ═════════════════════════════════════════════════════════════════════════ -->
+  <div id="done-masters-modal" class="modal-overlay" onclick="handleBackdropClick(event, 'done-masters-modal')">
+    <div class="modal-box modal-box-large">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">📦</span>
+          <div>
+            <h3 style="margin: 0; color: #c084fc;">Masters Traités & Archivés</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">Fichiers déplacés dans <code>data/pdf_done/</code> après découpage</span>
+          </div>
+        </div>
+        <button onclick="closeModal('done-masters-modal')" class="btn-outline">✕</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: #0f172a; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);">
+        <span style="font-size: 13px; color: var(--text-muted);">
+          Total Archivés : <strong id="done-modal-total-count" style="color: #c084fc;">0</strong> fichier(s)
+        </span>
+        <input type="text" id="done-modal-filter" placeholder="🔍 Rechercher dans les fichiers archivés..." oninput="filterDoneMastersList()" style="background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; min-width: 260px;" />
+      </div>
+
+      <div style="overflow-x: auto; max-height: 58vh;">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom du Fichier Master</th>
+              <th>Taille</th>
+              <th>Date d'Archivage</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="done-masters-table-body">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chargement...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -811,7 +974,8 @@
             <td>${(file.pages || []).length} page(s) (${((file.audit?.checks?.totalChars || 0) / 1000).toFixed(1)}k car.)</td>
             <td>${gradeBadge}</td>
             <td>${statusBadge}</td>
-            <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end;">
+            <td style="text-align: right; display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+              <button class="btn-outline staging-view-btn" title="Voir / Lire le document (Ouvrir le PDF ou l'éditeur)" style="padding: 4px 8px; font-size: 11px; color: #38bdf8; border-color: #0284c7;">👁️</button>
               <button class="btn-outline staging-edit-btn" style="padding: 4px 8px; font-size: 11px;">✏️ Éditer</button>
               <button class="btn-outline staging-toc-btn" style="color: #38bdf8; padding: 4px 8px; font-size: 11px;">🎯 TOC GPS</button>
               <button class="btn-outline staging-clean-btn" style="border-color: var(--warning); color: var(--warning); padding: 4px 8px; font-size: 11px;">🧹 Nettoyer</button>
@@ -820,6 +984,13 @@
             </td>
           `;
 
+          tr.querySelector('.staging-view-btn').addEventListener('click', () => {
+            if (filename.toLowerCase().endsWith('.pdf')) {
+              window.open(`/pdfs/${encodeURIComponent(filename)}`, '_blank');
+            } else {
+              openEditorModal(file.id);
+            }
+          });
           tr.querySelector('.staging-edit-btn').addEventListener('click', () => openEditorModal(file.id));
           tr.querySelector('.staging-toc-btn').addEventListener('click', () => openTocModal(file.pdf, file.toc || []));
           tr.querySelector('.staging-clean-btn').addEventListener('click', () => cleanStagingOcr(file.id));
@@ -1229,6 +1400,586 @@
     }
 
     // ══════════════════════════════════════════════════════════════════════════
+    // 🤖 AI SMART SLICER, COVERAGE & PATHOLOGY CATALOGER
+    // ══════════════════════════════════════════════════════════════════════════
+    let currentAiSegments = [];
+    let currentAiIgnoredSegments = [];
+    let currentCoverageData = null;
+    let rawSlicedTreeData = null;
+    let doneMastersList = [];
+
+    async function triggerAutoSegmentCurrentPdf() {
+      const filename = slicerSourceFilename || document.getElementById('slicer-file-select').value;
+      if (!filename) {
+        return alert("Veuillez sélectionner ou charger un PDF dans le Découpeur avant de lancer la détection IA.");
+      }
+
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `🤖 Analyse IA des chapitres et pathologies pour "${filename}"...`;
+
+      try {
+        const res = await fetch('/api/admin/auto-segment-pdf', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Échec de l'analyse IA");
+
+        currentAiSegments = data.segments || [];
+        currentAiIgnoredSegments = [];
+        currentCoverageData = data.coverage || null;
+
+        if (currentAiSegments.length === 0) {
+          alert(`Aucun segment clinique distinct n'a été détecté pour ${filename}.`);
+          return;
+        }
+
+        renderCoverageBar(currentCoverageData);
+        renderAiSegmentCards(currentAiSegments);
+        renderIgnoredSegmentsCards(currentAiIgnoredSegments);
+
+        document.getElementById('ai-segments-container').style.display = 'block';
+        document.getElementById('ai-segments-meta').textContent = `${currentAiSegments.length} fiche(s) suggérée(s) pour "${filename}"`;
+        document.getElementById('ai-slice-approved-count').textContent = currentAiSegments.filter(s => !s.sliced).length;
+      } catch (err) {
+        alert(`Erreur Détection IA : ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function renderCoverageBar(cov) {
+      const badge = document.getElementById('ai-coverage-badge');
+      const detail = document.getElementById('ai-coverage-detail');
+      const residualBox = document.getElementById('ai-residual-action-box');
+      const residualCount = document.getElementById('ai-residual-pages-count');
+
+      if (!cov) {
+        badge.textContent = `📊 Analyse de couverture prête`;
+        detail.textContent = ``;
+        residualBox.style.display = 'none';
+        return;
+      }
+
+      const unassigned = (cov.uncoveredPages || []).length;
+      if (cov.coveragePercent >= 95 || unassigned === 0) {
+        badge.style.color = '#34d399';
+        badge.textContent = `📊 Couverture Complète : ${cov.coveragePercent}% (${cov.coveredCount}/${cov.totalPages} pages traitées)`;
+        detail.textContent = `100% de la matière médicale couverte.`;
+        residualBox.style.display = 'none';
+      } else {
+        badge.style.color = '#fbbf24';
+        badge.textContent = `📊 Couverture : ${cov.coveragePercent}% (${cov.coveredCount}/${cov.totalPages} pages traitées)`;
+        detail.textContent = `${unassigned} page(s) orpheline(s) non incluses dans les fiches principales.`;
+        residualBox.style.display = 'block';
+        residualCount.textContent = unassigned;
+      }
+    }
+
+    async function createResidualReviewDocument() {
+      if (!currentCoverageData || !currentCoverageData.uncoveredPages || currentCoverageData.uncoveredPages.length === 0) {
+        return alert("Aucune page résiduelle à extraire.");
+      }
+
+      const filename = slicerSourceFilename || document.getElementById('slicer-file-select').value;
+      const unassigned = currentCoverageData.uncoveredPages;
+
+      if (!confirm(`Extraire ces ${unassigned.length} pages orphelines (${unassigned.join(', ')}) dans un sous-document résiduel pour examen ?`)) return;
+
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `📦 Création du PDF résiduel (${unassigned.length} pages)...`;
+
+      try {
+        const res = await fetch('/api/admin/create-residual-slice', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            sourceFilename: filename,
+            uncoveredPages: unassigned
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur lors de l'extraction du résidu");
+
+        alert(`🎉 ${data.message}`);
+        fetchStagingList();
+        switchTab('staging');
+      } catch (err) {
+        alert(`Échec : ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function closeAiSegmentsPanel() {
+      document.getElementById('ai-segments-container').style.display = 'none';
+    }
+
+    function renderAiSegmentCards(segments) {
+      const list = document.getElementById('ai-segments-list');
+      list.innerHTML = '';
+
+      if (!segments || segments.length === 0) {
+        list.innerHTML = '<div style="color: var(--text-muted); padding: 15px; grid-column: 1 / -1; text-align: center;">Aucun segment actif dans la file.</div>';
+        return;
+      }
+
+      segments.forEach(seg => {
+        const card = document.createElement('div');
+        card.className = `ai-segment-card ${seg.sliced ? 'sliced-done' : ''}`;
+        card.id = `card-${seg.id}`;
+
+        const topicBadges = (seg.keyTopics || []).map(t => `<span class="ai-segment-topic-pill">${escapeHtml(t)}</span>`).join(' ');
+
+        let confBadge = `<span class="conf-high">🟢 Haute</span>`;
+        if (seg.confidence === 'medium') {
+          confBadge = `<span class="conf-medium">🟡 Moyenne</span>`;
+        } else if (seg.confidence === 'uncertain') {
+          confBadge = `<span class="conf-uncertain">⚪ À Vérifier</span>`;
+        }
+
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div>
+              <strong style="color: #38bdf8; font-size: 13.5px; display: block;">🩺 ${escapeHtml(seg.pathology)}</strong>
+              <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">📄 ${escapeHtml(seg.title)}</span>
+            </div>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              ${confBadge}
+              <span class="badge badge-llamaparse" style="font-size: 10px; white-space: nowrap;">${escapeHtml(seg.specialty)}</span>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1;">
+            <span style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-family: monospace;">
+              Pages ${seg.startPage} → ${seg.endPage} (${seg.pageCount} p.)
+            </span>
+          </div>
+
+          ${seg.summary ? `<p style="font-size: 11.5px; color: #94a3b8; margin: 0; line-height: 1.35;">${escapeHtml(seg.summary)}</p>` : ''}
+          
+          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+            ${topicBadges}
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; gap: 6px;">
+              <button onclick="jumpToSegmentById('${seg.id}')" class="btn-outline" style="padding: 3px 8px; font-size: 11px;" title="Prévisualiser sur le Canvas et charger les paramètres">👁️ Charger</button>
+              <button onclick="ignoreSegment('${seg.id}')" class="btn-outline" style="padding: 3px 6px; font-size: 11px; color: #f87171; border-color: rgba(239,68,68,0.4);" title="Mettre de côté ce segment">⏭️ Mettre de côté</button>
+            </div>
+            ${seg.sliced 
+              ? '<span style="color: #34d399; font-size: 11px; font-weight: bold;">✅ Découpé & Classé</span>'
+              : `<button onclick="sliceSingleAiSegment('${seg.id}')" class="btn-success" style="padding: 4px 10px; font-size: 11px; font-weight: bold;">✂️ Découper</button>`
+            }
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function renderIgnoredSegmentsCards(ignored) {
+      const container = document.getElementById('ai-ignored-container');
+      const list = document.getElementById('ai-ignored-list');
+      const countEl = document.getElementById('ai-ignored-count');
+
+      countEl.textContent = ignored.length;
+      if (ignored.length === 0) {
+        container.style.display = 'none';
+        list.innerHTML = '';
+        return;
+      }
+
+      container.style.display = 'block';
+      list.innerHTML = '';
+
+      ignored.forEach(seg => {
+        const item = document.createElement('div');
+        item.style.cssText = "background: #0f172a; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px;";
+        item.innerHTML = `
+          <div>
+            <strong style="font-size: 12px; color: #fca5a5;">${escapeHtml(seg.pathology)}</strong>
+            <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">p. ${seg.startPage} → ${seg.endPage}</div>
+          </div>
+          <button onclick="restoreIgnoredSegment('${seg.id}')" class="btn-outline" style="border-color: #34d399; color: #34d399; padding: 2px 8px; font-size: 11px; font-weight: bold;">
+            ↩️ Restaurer
+          </button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function toggleIgnoredDrawer() {
+      const list = document.getElementById('ai-ignored-list');
+      const arrow = document.getElementById('ai-ignored-toggle-arrow');
+      if (list.style.display === 'none' || list.style.display === '') {
+        list.style.display = 'grid';
+        arrow.textContent = '▲ Masquer';
+      } else {
+        list.style.display = 'none';
+        arrow.textContent = '▼ Afficher';
+      }
+    }
+
+    function jumpToSegmentById(segId) {
+      const seg = currentAiSegments.find(s => s.id === segId) || currentAiIgnoredSegments.find(s => s.id === segId);
+      if (!seg) return;
+      jumpToSegmentPages(seg.startPage, seg.endPage, seg.title, seg.specialty, seg.pathology);
+    }
+
+    function jumpToSegmentPages(startPage, endPage, title, specialty, pathology) {
+      document.getElementById('slicer-mode-select').value = 'page_range';
+      toggleSlicerMode();
+      document.getElementById('slice-start-page').value = startPage;
+      document.getElementById('slice-end-page').value = endPage;
+      document.getElementById('slice-title-input').value = title || '';
+      document.getElementById('slice-pathology-input').value = pathology || '';
+
+      const specSelect = document.getElementById('slice-specialty-select');
+      const customSpecInput = document.getElementById('slice-custom-specialty');
+      if (Array.from(specSelect.options).some(o => o.value === specialty)) {
+        specSelect.value = specialty;
+        if (customSpecInput) {
+          customSpecInput.value = '';
+          customSpecInput.style.display = 'none';
+        }
+      } else {
+        specSelect.value = 'Autre';
+        if (customSpecInput) {
+          customSpecInput.value = specialty || '';
+          customSpecInput.style.display = 'block';
+        }
+      }
+
+      currentSlicerPageNum = startPage;
+      renderSlicerPage(currentSlicerPageNum);
+    }
+
+    function ignoreSegment(segId) {
+      const seg = currentAiSegments.find(s => s.id === segId);
+      if (!seg) return;
+
+      currentAiSegments = currentAiSegments.filter(s => s.id !== segId);
+      currentAiIgnoredSegments.push(seg);
+
+      renderAiSegmentCards(currentAiSegments);
+      renderIgnoredSegmentsCards(currentAiIgnoredSegments);
+      document.getElementById('ai-slice-approved-count').textContent = currentAiSegments.filter(s => !s.sliced).length;
+    }
+
+    function restoreIgnoredSegment(segId) {
+      const seg = currentAiIgnoredSegments.find(s => s.id === segId);
+      if (!seg) return;
+
+      currentAiIgnoredSegments = currentAiIgnoredSegments.filter(s => s.id !== segId);
+      currentAiSegments.push(seg);
+      currentAiSegments.sort((a, b) => a.startPage - b.startPage);
+
+      renderAiSegmentCards(currentAiSegments);
+      renderIgnoredSegmentsCards(currentAiIgnoredSegments);
+      document.getElementById('ai-slice-approved-count').textContent = currentAiSegments.filter(s => !s.sliced).length;
+    }
+
+    async function sliceSingleAiSegment(segId) {
+      const seg = currentAiSegments.find(s => s.id === segId) || currentAiIgnoredSegments.find(s => s.id === segId);
+      if (!seg) return;
+
+      const filename = slicerSourceFilename || document.getElementById('slicer-file-select').value;
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `✂️ Découpage de "${seg.title}"...`;
+
+      try {
+        const res = await fetch('/api/admin/auto-slice-execute', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            sourceFilename: filename,
+            segments: [seg],
+            markDone: false
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur de découpage");
+
+        seg.sliced = true;
+        renderAiSegmentCards(currentAiSegments);
+        document.getElementById('ai-slice-approved-count').textContent = currentAiSegments.filter(s => !s.sliced).length;
+        fetchStagingList();
+      } catch (err) {
+        alert(`Échec : ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    async function executeBatchSliceAllApproved() {
+      const pendingSegments = currentAiSegments.filter(s => !s.sliced);
+      if (pendingSegments.length === 0) {
+        return alert("Tous les segments proposés ont déjà été découpés !");
+      }
+
+      const filename = slicerSourceFilename || document.getElementById('slicer-file-select').value;
+      const markDone = document.getElementById('ai-mark-done-checkbox').checked;
+
+      if (!confirm(`Découper et classer automatiquement ces ${pendingSegments.length} segments dans data/pdf_sliced/ ?${markDone ? '\n\nLe fichier source sera ensuite archivé dans data/pdf_done/.' : ''}`)) return;
+
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `✂️ Découpage par lot de ${pendingSegments.length} fiche(s)...`;
+
+      try {
+        const res = await fetch('/api/admin/auto-slice-execute', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            sourceFilename: filename,
+            segments: pendingSegments,
+            markDone
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur de découpage par lot");
+
+        currentAiSegments.forEach(s => s.sliced = true);
+        renderAiSegmentCards(currentAiSegments);
+        document.getElementById('ai-slice-approved-count').textContent = '0';
+
+        alert(`🎉 ${data.message}`);
+        fetchStagingList();
+        if (markDone) {
+          refreshAll();
+          closeAiSegmentsPanel();
+        }
+      } catch (err) {
+        alert(`Échec du découpage par lot : ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    async function openSlicerWithAutoSegment(filename) {
+      switchTab('slicer');
+      const searchInput = document.getElementById('slicer-search-input');
+      if (searchInput) searchInput.value = '';
+      populateSlicerFileSelect();
+      document.getElementById('slicer-file-select').value = filename;
+      await loadSelectedPdfToSlicer();
+      await triggerAutoSegmentCurrentPdf();
+    }
+
+    async function openSlicedLibraryModal() {
+      openModal('sliced-library-modal');
+      const container = document.getElementById('sliced-tree-content');
+      container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 30px;">Chargement de l\'arborescence...</div>';
+
+      try {
+        const res = await fetch('/api/admin/sliced-tree', {
+          headers: API_HEADERS
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur chargement arborescence");
+
+        rawSlicedTreeData = data;
+        document.getElementById('sliced-tree-total-count').textContent = data.totalSlices || 0;
+        document.getElementById('sliced-tree-done-count').textContent = data.doneCount || 0;
+        renderSlicedTree(data.tree || {});
+      } catch (err) {
+        container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center;">Erreur : ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📦 DONE ARCHIVED MASTERS MODAL & RESTORATION
+    // ══════════════════════════════════════════════════════════════════════════
+    async function openDonePdfsModal() {
+      openModal('done-masters-modal');
+      const tbody = document.getElementById('done-masters-table-body');
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Chargement des masters archivés...</td></tr>';
+
+      try {
+        const res = await fetch('/api/admin/done-pdfs-list', { headers: API_HEADERS });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur chargement masters archivés");
+
+        doneMastersList = data.files || [];
+        document.getElementById('done-modal-total-count').textContent = doneMastersList.length;
+        const doneHeaderCount = document.getElementById('done-masters-count');
+        if (doneHeaderCount) doneHeaderCount.textContent = doneMastersList.length;
+
+        renderDoneMastersTable(doneMastersList);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" style="color: #ef4444; text-align: center;">Erreur : ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    function renderDoneMastersTable(files) {
+      const tbody = document.getElementById('done-masters-table-body');
+      tbody.innerHTML = '';
+
+      if (!files || files.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 25px;">Aucun fichier master archivé pour le moment dans <code>data/pdf_done/</code>.</td></tr>';
+        return;
+      }
+
+      files.forEach(f => {
+        const tr = document.createElement('tr');
+        const sizeMb = (f.size / (1024 * 1024)).toFixed(2);
+        const dateStr = f.timestamp ? new Date(f.timestamp).toLocaleString('fr-FR') : '-';
+
+        tr.innerHTML = `
+          <td><strong style="color: #c084fc;">📄 ${escapeHtml(f.pdf)}</strong></td>
+          <td><span style="font-family: monospace; color: var(--text-muted);">${sizeMb} Mo</span></td>
+          <td><span style="font-size: 12px; color: var(--text-muted);">${dateStr}</span></td>
+          <td style="text-align: right;">
+            <button onclick="restoreMasterPdf('${escapeHtml(f.pdf).replace(/'/g, "\\'")}')" class="btn-outline" style="border-color: #34d399; color: #34d399; padding: 4px 10px; font-size: 11.5px; font-weight: bold;">
+              ↩️ Restaurer dans Master Corpus
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterDoneMastersList() {
+      const q = (document.getElementById('done-modal-filter').value || '').toLowerCase().trim();
+      const filtered = doneMastersList.filter(f => f.pdf.toLowerCase().includes(q));
+      renderDoneMastersTable(filtered);
+    }
+
+    async function restoreMasterPdf(filename) {
+      if (!confirm(`Voulez-vous restaurer "${filename}" dans le Master Production Corpus ?\n\nLe document réapparaîtra immédiatement dans la file de travail et dans la recherche.`)) return;
+
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `↩️ Restauration de "${filename}"...`;
+
+      try {
+        const res = await fetch('/api/admin/restore-pdf-master', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur de restauration");
+
+        alert(`🎉 ${data.message}`);
+        openDonePdfsModal();
+        fetchMasterList();
+        populateSlicerFileSelect();
+      } catch (err) {
+        alert(`Échec : ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    function renderSlicedTree(tree) {
+      const container = document.getElementById('sliced-tree-content');
+      container.innerHTML = '';
+
+      const specialties = Object.keys(tree).sort();
+      if (specialties.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); padding: 30px; text-align: center;">Aucun extrait classé pour le moment dans <code>data/pdf_sliced/</code>. Découpez des fiches avec le Slicer IA pour les voir apparaître ici !</div>';
+        return;
+      }
+
+      specialties.forEach(spec => {
+        const pathologiesObj = tree[spec] || {};
+        const patholKeys = Object.keys(pathologiesObj).sort();
+        let specTotalFiles = 0;
+        patholKeys.forEach(pk => specTotalFiles += (pathologiesObj[pk] || []).length);
+
+        const specBox = document.createElement('details');
+        specBox.open = true;
+        specBox.style.cssText = 'background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px;';
+
+        let patholHtml = '';
+        patholKeys.forEach(pk => {
+          const files = pathologiesObj[pk] || [];
+          const filesListHtml = files.map(f => {
+            const kbSize = (f.size / 1024).toFixed(1);
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-top: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span>📄</span>
+                  <a href="/pdfs/${encodeURIComponent(f.filename)}" target="_blank" style="color: #38bdf8; text-decoration: none; font-weight: 500;">${escapeHtml(f.filename)}</a>
+                  <span style="color: var(--text-muted); font-size: 11px;">(${kbSize} KB)</span>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button onclick="window.open('/pdfs/${encodeURIComponent(f.filename)}', '_blank')" class="btn-outline" style="padding: 2px 7px; font-size: 11px;">👁️ Ouvrir</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          patholHtml += `
+            <div style="margin-top: 8px; border-left: 2px solid #0284c7; padding-left: 10px;">
+              <div style="font-weight: bold; color: #e2e8f0; font-size: 12.5px; display: flex; align-items: center; gap: 6px;">
+                <span>🩺</span>
+                <span>${escapeHtml(pk)}</span>
+                <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(${files.length} fichier(s))</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                ${filesListHtml}
+              </div>
+            </div>
+          `;
+        });
+
+        specBox.innerHTML = `
+          <summary style="font-weight: bold; font-size: 14px; color: #38bdf8; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <span>📂 ${escapeHtml(spec)}</span>
+            <span class="badge badge-llamaparse">${specTotalFiles} extrait(s)</span>
+          </summary>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+            ${patholHtml}
+          </div>
+        `;
+        container.appendChild(specBox);
+      });
+    }
+
+    function filterSlicedTree() {
+      if (!rawSlicedTreeData || !rawSlicedTreeData.tree) return;
+      const query = (document.getElementById('sliced-tree-filter')?.value || '').toLowerCase().trim();
+      if (!query) {
+        renderSlicedTree(rawSlicedTreeData.tree);
+        return;
+      }
+
+      const filteredTree = {};
+      const orig = rawSlicedTreeData.tree;
+
+      Object.keys(orig).forEach(spec => {
+        const specMatches = spec.toLowerCase().includes(query);
+        const filteredPathols = {};
+
+        Object.keys(orig[spec] || {}).forEach(pathol => {
+          const patholMatches = pathol.toLowerCase().includes(query);
+          const matchingFiles = (orig[spec][pathol] || []).filter(f => f.filename.toLowerCase().includes(query));
+
+          if (specMatches || patholMatches || matchingFiles.length > 0) {
+            filteredPathols[pathol] = orig[spec][pathol];
+          }
+        });
+
+        if (Object.keys(filteredPathols).length > 0) {
+          filteredTree[spec] = filteredPathols;
+        }
+      });
+
+      renderSlicedTree(filteredTree);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
     // ✏️ IN-BROWSER PAGE EDITOR
     // ══════════════════════════════════════════════════════════════════════════
     function openEditorModal(docId) {
@@ -1419,6 +2170,14 @@
         masterFiles = data.files || [];
         document.getElementById('master-count').textContent = masterFiles.length;
         renderMasterTable(masterFiles);
+
+        // Also update done masters count
+        fetch('/api/admin/done-pdfs-list', { headers: API_HEADERS })
+          .then(r => r.json())
+          .then(d => {
+            const countEl = document.getElementById('done-masters-count');
+            if (countEl && d.success) countEl.textContent = d.count || 0;
+          }).catch(() => {});
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="7" style="color: var(--danger); text-align: center;">Erreur: ${err.message}</td></tr>`;
       }
@@ -1470,6 +2229,7 @@
           <td style="text-align: right;">
             <div style="display: flex; gap: 5px; justify-content: flex-end; flex-wrap: wrap;">
               <button class="btn-outline master-view-pdf-btn" title="Ouvrir et lire le PDF dans un nouvel onglet" style="padding: 4px 7px; font-size: 11px;">👁️</button>
+              <button class="btn-outline master-autoslice-btn" title="Lancer l'assistant IA de découpage par pathologie" style="color: #34d399; border-color: #059669; padding: 4px 8px; font-size: 11px; font-weight: bold;">🤖 Auto-Slice</button>
               <button class="btn-outline master-inspect-btn" title="Inspection détaillée de la densité par page" style="padding: 4px 8px; font-size: 11px;">🔍 Inspecter</button>
               <button class="btn-outline master-json-btn" title="Ouvrir l'inspecteur JSON grand écran (90%)" style="color: #38bdf8; border-color: var(--primary); padding: 4px 8px; font-size: 11px;">📄 JSON</button>
               <button class="btn-outline master-reparse-btn" title="Forcer la ré-extraction en ligne (Re-Parse / Force Upgrade)" style="color: var(--warning); border-color: var(--warning); padding: 4px 8px; font-size: 11px;">⚡ Re-Parse</button>
@@ -1481,6 +2241,7 @@
         `;
 
         tr.querySelector('.master-view-pdf-btn').addEventListener('click', () => window.open(`/pdfs/${encodeURIComponent(file.pdf)}`, '_blank'));
+        tr.querySelector('.master-autoslice-btn').addEventListener('click', () => openSlicerWithAutoSegment(file.pdf));
         tr.querySelector('.master-inspect-btn').addEventListener('click', () => inspectMasterPdf(file));
         tr.querySelector('.master-json-btn').addEventListener('click', () => openJsonModal(file.pdf));
         tr.querySelector('.master-reparse-btn').addEventListener('click', () => forceReextractPdf(file.pdf));
