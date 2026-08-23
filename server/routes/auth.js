@@ -2,6 +2,11 @@ const { state: cache } = require('../services/cache');
 const { isAdminRequest: checkIsAdmin, hashPassword, createToken, loginAttempts, MAX_LOGIN_ATTEMPTS, LOGIN_RATE_LIMIT_MS, ADMIN_TOKEN_TTL } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { logAuditEvent } = require('../services/data-store');
+const { z } = require('zod');
+
+const loginSchema = z.object({
+  password: z.string().min(1).max(200)
+});
 
 function registerAuthRoutes(app) {
   app.get('/api/is-admin', (req, res) => {
@@ -26,7 +31,11 @@ function registerAuthRoutes(app) {
       return res.status(429).json({ error: `Trop de tentatives. Réessayez dans ${retryMinutes} minutes.` });
     }
 
-    const { password } = req.body;
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Mot de passe requis.' });
+    }
+    const { password } = parsed.data;
 
     let isPasswordCorrect = false;
     if (password && cache.adminPasswordHash && cache.adminPasswordSalt) {

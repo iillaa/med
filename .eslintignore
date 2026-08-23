@@ -2,5 +2,7 @@ node_modules/
 public/js/pdf.min.js
 public/js/pdf.worker.min.js
 backups/
+android/
+public/dist/
 *.log
 .cat-med/

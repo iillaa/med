@@ -2,6 +2,23 @@ const { state: cache } = require('../services/cache');
 const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
 const { isLocalhostConnection } = require('../utils/request');
 const { safeWriteJsonAsync, logAuditEvent, dbLock } = require('../services/data-store');
+const { z } = require('zod');
+
+const suggestionSchema = z.object({
+  type: z.enum(['add', 'edit']),
+  catId: z.preprocess(
+    v => (v === null || v === '' || v === undefined ? undefined : v),
+    z.coerce.number().int().positive().optional()
+  ),
+  data: z.object({
+    title: z.string().max(300).optional(),
+    summary: z.string().max(20000).optional(),
+    red_flags: z.string().max(5000).optional(),
+    ordonnance: z.string().max(20000).optional(),
+    category: z.string().max(120).optional(),
+    originalTitle: z.string().max(300).optional()
+  }).passthrough()
+});
 
 const SUGGESTIONS_FILE = require('path').join(__dirname, '..', '..', 'suggestions.json');
 const DB_FILE = process.env.CATS_DB_PATH || require('path').join(__dirname, '..', '..', 'cats_db.json');
@@ -14,7 +31,7 @@ function registerSuggestionRoutes(app) {
     try {
       const { syncCloudflareSuggestions } = require('../services/sync-suggestions');
       await syncCloudflareSuggestions();
-    } catch (_) {}
+    } catch (_) { /* sync is best-effort */ }
     res.json(cache.suggestionsCache);
   });
 
@@ -27,10 +44,14 @@ function registerSuggestionRoutes(app) {
     }
 
     try {
-      const { type, catId, data } = req.body;
-      if (!type || !data) {
-        return res.status(400).json({ error: 'Type (add/edit) et Data sont requis.' });
+      const parsed = suggestionSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          error: 'Proposition invalide.',
+          details: parsed.error.issues.map(i => `${i.path.join('.') || 'body'}: ${i.message}`)
+        });
       }
+      const { type, catId, data } = parsed.data;
 
       // Guard against oversized payloads that could bloat the suggestions file.
       const dataSize = Buffer.byteLength(JSON.stringify(data), 'utf8');
@@ -38,16 +59,7 @@ function registerSuggestionRoutes(app) {
         return res.status(413).json({ error: 'Données trop volumineuses (max 20 Ko).' });
       }
 
-      // Strict integer validation — parseInt('abc') = NaN, parseInt('1e5') = 1 (wrong).
-      // Number() catches both cases: Number('abc')=NaN, Number('1e5')=100000 but non-integer.
-      let targetCatId = null;
-      if (catId !== undefined && catId !== null && catId !== '') {
-        const parsed = Number(catId);
-        if (!Number.isInteger(parsed) || parsed <= 0) {
-          return res.status(400).json({ error: 'catId doit être un entier positif valide.' });
-        }
-        targetCatId = parsed;
-      }
+      const targetCatId = catId ?? null;
       
       const duplicate = cache.suggestionsCache.find(s => 
         s.type === type && 
@@ -175,7 +187,7 @@ function registerSuggestionRoutes(app) {
       try {
         const { purgeCloudflareSuggestion } = require('../services/sync-suggestions');
         purgeCloudflareSuggestion(sugId).catch(() => {});
-      } catch (_) {}
+      } catch (_) { /* purge is best-effort */ }
       logAuditEvent('suggestion_approve', { id: sugId }, req);
       res.json(result);
     } catch (err) {
@@ -208,7 +220,7 @@ function registerSuggestionRoutes(app) {
       try {
         const { purgeCloudflareSuggestion } = require('../services/sync-suggestions');
         purgeCloudflareSuggestion(sugId).catch(() => {});
-      } catch (_) {}
+      } catch (_) { /* purge is best-effort */ }
       logAuditEvent('suggestion_reject', { id: sugId }, req);
       res.json(result);
     } catch (err) {

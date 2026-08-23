@@ -548,6 +548,12 @@
   .toggle-sidebar-btn {
     display: block;
   }
+
+  .status-pill {
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
 }
 
 /* Shimmer Skeleton Loader */
