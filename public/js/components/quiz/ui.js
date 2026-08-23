@@ -1,5 +1,5 @@
 import { state } from '../../state.js';
-import { showToast, triggerHaptic, countUp } from '../../utils.js';
+import { showToast, triggerHaptic, countUp, escapeHTML } from '../../utils.js';
 import { shuffleArray, updateLeitnerStats, updateQuizStreak, requestWakeLock, releaseWakeLock } from './state.js';
 import {
   getOrientationText, cleanTextOfClues, cleanOrientationOfClues,
@@ -277,7 +277,7 @@ function startQuizSession() {
           generatedQuestions.push({
             type: 'clinical',
             cat: cat,
-            questionText: `<strong>Simulation de Cas Clinique :</strong><br><br>${vignette}<br><br>En tant que clinicien, quelle est votre <strong>conduite à tenir ou orientation thérapeutique</strong> prioritaire à ce stade ?`,
+            questionText: `<strong>Simulation de Cas Clinique :</strong><br><br>${escapeHTML(vignette)}<br><br>En tant que clinicien, quelle est votre <strong>conduite à tenir ou orientation thérapeutique</strong> prioritaire à ce stade ?`,
             correctAnswer: correctAnswer,
             options: options,
             points: 1.0
@@ -309,7 +309,7 @@ function startQuizSession() {
           generatedQuestions.push({
             type: 'posology',
             cat: cat,
-            questionText: `<strong>Prescription Médicale :</strong><br><br>${vignette}<br><br>Quelle est l'<strong>ordonnance type recommandée</strong> (molécules, posologies et durées de traitement) pour ce patient ?`,
+            questionText: `<strong>Prescription Médicale :</strong><br><br>${escapeHTML(vignette)}<br><br>Quelle est l'<strong>ordonnance type recommandée</strong> (molécules, posologies et durées de traitement) pour ce patient ?`,
             correctAnswer: correctAnswer,
             options: options,
             points: 1.0
@@ -322,7 +322,7 @@ function startQuizSession() {
       generatedQuestions.push({
         type: 'redflags',
         cat: cat,
-        questionText: `<strong>Signes de Gravité (Red Flags) :</strong><br><br>${vignette}<br><br>Quels sont les <strong>Red Flags / Signes de Gravité</strong> cliniques prioritaires à rechercher ou éliminer pour ce patient ?`,
+        questionText: `<strong>Signes de Gravité (Red Flags) :</strong><br><br>${escapeHTML(vignette)}<br><br>Quels sont les <strong>Red Flags / Signes de Gravité</strong> cliniques prioritaires à rechercher ou éliminer pour ce patient ?`,
         correctAnswer: cat.red_flags,
         points: 1.0
       });
@@ -332,7 +332,7 @@ function startQuizSession() {
       generatedQuestions.push({
         type: 'prescription',
         cat: cat,
-        questionText: `<strong>Rédaction d'Ordonnance :</strong><br><br>${vignette}<br><br>Rédigez l'<strong>Ordonnance Type</strong> complète (traitements, posologies, et durées conseillées) pour ce patient.`,
+        questionText: `<strong>Rédaction d'Ordonnance :</strong><br><br>${escapeHTML(vignette)}<br><br>Rédigez l'<strong>Ordonnance Type</strong> complète (traitements, posologies, et durées conseillées) pour ce patient.`,
         correctAnswer: cat.ordonnance,
         points: 1.0
       });
@@ -707,7 +707,7 @@ function showHint() {
 
   const hints = getKeywordHints(q.correctAnswer);
   if (hintBox) {
-    hintBox.innerHTML = `<i class="fa-regular fa-lightbulb"></i> <strong>Indices clés :</strong> ${hints}`;
+    hintBox.innerHTML = `<i class="fa-regular fa-lightbulb"></i> <strong>Indices clés :</strong> ${escapeHTML(hints)}`;
     hintBox.style.display = 'block';
   }
   if (hintBtn) {
@@ -786,7 +786,7 @@ function showResults() {
       div.style.width = '100%';
       div.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-          <span style="font-weight: 600; color: var(--text-primary);">${category}${warningIcon}</span>
+          <span style="font-weight: 600; color: var(--text-primary);">${escapeHTML(category)}${warningIcon}</span>
           <span style="font-weight: 700; color: ${isWeak ? 'var(--color-danger)' : 'var(--color-success)'};">${catPercent}% (${stats.totalPoints.toFixed(1)}/${stats.maxPoints})</span>
         </div>
         <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; width: 100%;">
@@ -832,11 +832,11 @@ function showResults() {
       else typeLabel = 'Ordonnance Écrite';
 
       tr.innerHTML = `
-        <td style="padding: 10px; font-weight: 500; color: #fff;">${idx + 1}. ${ans.catTitle}</td>
+        <td style="padding: 10px; font-weight: 500; color: var(--text-primary);">${idx + 1}. ${escapeHTML(ans.catTitle || 'Fiche inconnue')}</td>
         <td style="padding: 10px; color: var(--text-secondary);">${typeLabel}</td>
         <td style="padding: 10px; text-align: center; font-weight: 700; color: ${ans.score === 1.0 ? 'var(--color-success)' : (ans.score === 0.5 ? 'var(--color-warning)' : 'var(--color-danger)')};">${ans.score.toFixed(1)}</td>
         <td style="padding: 10px; text-align: right;">
-          <button class="cancel-btn" style="font-size: 11.5px; padding: 4px 8px; border-radius: 4px;" data-cat-id="${ans.catId}">
+          <button class="cancel-btn" style="font-size: 11.5px; padding: 4px 8px; border-radius: 4px;" data-cat-id="${escapeHTML(String(ans.catId ?? ''))}">
             <i class="fa-solid fa-eye"></i> Voir
           </button>
         </td>

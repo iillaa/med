@@ -15,6 +15,23 @@ let saveNotesBtn, saveIndicator, copyPrescriptionBtn;
 let currentDateSpan, pdfListContainer;
 let allPdfsHeader, allPdfsContent, allPdfsAccordion, pdfSearch;
 let pdfContentSearchInput, pdfContentSearchBtn, pdfIndexStatus, pdfReindexBtn;
+let notesDebounceTimer = null;
+
+function persistNotesToActiveCat() {
+  if (!state.activeCat || !notesInput) return false;
+  const current = notesInput.value;
+  if (current === (state.activeCat.notes || '')) return false;
+  const cat = state.activeCat;
+  cat.notes = current;
+  cat.lastRead = Date.now();
+  const progress = getLocalProgress();
+  if (!progress[cat.id]) progress[cat.id] = {};
+  progress[cat.id].status = cat.status || 'todo';
+  progress[cat.id].notes = current;
+  progress[cat.id].lastRead = Date.now();
+  saveLocalProgress(progress);
+  return true;
+}
 
 export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   workspace = document.getElementById('workspace');
@@ -155,6 +172,28 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
           6000
         );
       }, 400);
+    });
+  }
+
+  if (notesInput) {
+    notesInput.addEventListener('input', () => {
+      clearTimeout(notesDebounceTimer);
+      notesDebounceTimer = setTimeout(() => {
+        if (persistNotesToActiveCat() && saveIndicator) {
+          saveIndicator.classList.add('show');
+          setTimeout(() => saveIndicator.classList.remove('show'), 1500);
+        }
+      }, 900);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        clearTimeout(notesDebounceTimer);
+        persistNotesToActiveCat();
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      clearTimeout(notesDebounceTimer);
+      persistNotesToActiveCat();
     });
   }
 
@@ -637,6 +676,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
 
 export function selectCat(cat, preserveTab = false) {
   if (window.perf) window.perf.startMeasure('workspace.selectCat');
+  clearTimeout(notesDebounceTimer);
+  persistNotesToActiveCat();
   state.activeCat = cat;
   state.activeSubCatIndex = 0;
   state.activePrescriptionVariantIndex = 0;

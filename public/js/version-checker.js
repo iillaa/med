@@ -20,6 +20,15 @@
   let isLocked = false;
   let currentVersionConfig = null;
 
+  function escapeHTML(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // Retrieve client app version from meta or default 1.0.0
   const CLIENT_VERSION = (function () {
     const metaVer = document.querySelector('meta[name="app-version"]')?.content;
@@ -77,7 +86,7 @@
       document.body.prepend(banner);
     }
     banner.innerHTML = `
-      <span>🔔 Une nouvelle version de Dr.CAT (${config.latestVersion || 'v1.1.0'}) est disponible.</span>
+      <span>🔔 Une nouvelle version de Dr.CAT (${escapeHTML(config.latestVersion || 'v1.1.0')}) est disponible.</span>
       <button id="pwa-soft-banner-refresh-btn" style="background: #fff; color: #0284c7; border: none; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer;">
         🔄 Rafraîchir le site
       </button>
@@ -124,11 +133,17 @@
 
     const isOffline = !!options.offlineMode;
 
-    const notesHtml = notes.map(n => `<li>${n}</li>`).join('');
+    // Only allow http(s) URLs from the version config into href attributes
+    function safeUrl(url, fallback) {
+      const value = typeof url === 'string' ? url.trim() : '';
+      return /^https?:\/\//i.test(value) ? escapeHTML(value) : fallback;
+    }
 
-    const storeUrl = links.storeUrl || links.apkpureUrl || links.uptodownUrl || 'https://apkpure.com/p/com.drcat.app';
-    const telegramUrl = links.telegramUrl || 'https://t.me/DrCatOfficialApp';
-    const directUrl = links.directServerUrl || 'https://apkpure.com/p/com.drcat.app';
+    const notesHtml = (Array.isArray(notes) ? notes : []).map(n => `<li>${escapeHTML(n)}</li>`).join('');
+
+    const storeUrl = safeUrl(links.storeUrl || links.apkpureUrl || links.uptodownUrl, 'https://apkpure.com/p/com.drcat.app');
+    const telegramUrl = safeUrl(links.telegramUrl, 'https://t.me/DrCatOfficialApp');
+    const directUrl = safeUrl(links.directServerUrl, 'https://apkpure.com/p/com.drcat.app');
 
     const buttonsHtml = `
       <a href="${storeUrl}" target="_blank" rel="noopener" class="btn-update store" data-update-link="store" id="lock-btn-store">
@@ -149,19 +164,19 @@
           <h2 class="update-lock-title">Dr.CAT — Mise à jour requise</h2>
 
           <div class="update-badge-container">
-            <span class="update-badge-old">Installé: v${CLIENT_VERSION}</span>
+            <span class="update-badge-old">Installé: v${escapeHTML(CLIENT_VERSION)}</span>
             <span class="update-badge-arrow">➔</span>
-            <span class="update-badge-new">Requis: v${config.minVersion || '1.1.0'}</span>
+            <span class="update-badge-new">Requis: v${escapeHTML(config.minVersion || '1.1.0')}</span>
           </div>
 
           ${isOffline ? `
             <div class="update-offline-notice">
               <i class="fa-solid fa-triangle-exclamation"></i>
-              ${options.message || 'Mode hors-ligne : Une mise à jour obligatoire a été détectée. Veuillez vous connecter à Internet pour mettre à jour l\'application.'}
+              ${options.message ? escapeHTML(options.message) : 'Mode hors-ligne : Une mise à jour obligatoire a été détectée. Veuillez vous connecter à Internet pour mettre à jour l\'application.'}
             </div>
           ` : `
             <p class="update-message-box">
-              ${config.updateMessage || 'Une mise à jour importante est requise pour continuer à utiliser Dr.CAT.'}
+              ${config.updateMessage ? escapeHTML(config.updateMessage) : 'Une mise à jour importante est requise pour continuer à utiliser Dr.CAT.'}
             </p>
           `}
 
