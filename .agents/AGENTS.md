@@ -93,3 +93,18 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
 - `medical-validator.js` section 7f cross-checks every token written next to a dosage against BDPM + Algerian nomenclature + local safety rules + clinical ceilings.
 - Unknown molecules produce a `[DCI Non Référencée]` WARNING (never an error — doctor decides in Generator Lab). Administrative CATs exempt; sub-cat ordonnances scanned.
 - When adding new reference datasets later, extend `getKnownDrugTokens()` so the cross-check stays current.
+
+# Staging DB Naming & Versioning Rule (v1.12.0+)
+
+## Fixed Names Forever — Version Lives in Data + UI
+- **CRITICAL**: NEVER version database FILENAMES. Filename-versioning (cats_db_v2 → v3) caused the original dead-path write bug.
+- Canonical names:
+  - Production: `cats_db.json` (stripped copy auto-generated to `public/data/` for APK/web)
+  - Staging: `cat_db_generator/cats_db_staged.json` — MUST remain a pure JSON **array** (all consumers parse it as an array)
+  - Version sidecar: `cat_db_generator/cats_db_staged.meta.json` (`schema_version`, `stagedAt`, `migratedFrom`)
+- Schema version is reported to the admin UI via `/api/admin/cat-generator/data` → `schema_version` field. Current: 3.5.
+- Safe migration/re-stamp tool: `node scripts/upgrade_db_schema.js [--clean] [--version X.Y]` (backs up to `backups/`, validates all entries, never blocks on legacy warnings).
+- Main CLI is now `cat_db_generator/generate_cat_db.js` (old `_v2` name retired). npm shortcut: `npm run generate`.
+- New quality tools:
+  - `npm run generate -- --canary` — dosage-parser self-test, runs automatically at the start of every `--rebuild-all`. If canaries fail, prompt-format ↔ validator parsing is broken.
+  - `npm run generate -- --golden [--limit N]` — re-generates 5 fixed clinical cases from `cat_db_generator/golden_set.json` and scores clinical expectations (catches silent QUALITY drift that schema validation cannot see).

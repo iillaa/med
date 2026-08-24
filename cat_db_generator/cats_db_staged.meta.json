@@ -1,0 +1,7 @@
+{
+  "schema_version": "3.5",
+  "stagedAt": "2026-08-24T02:29:47.792Z",
+  "migratedFrom": "cats_db_v3_generated.json",
+  "totalEntries": 63,
+  "note": "Version lives here and in the admin UI — never in filenames."
+}

@@ -70,16 +70,16 @@ Run commands from the project root directory:
 
 ```bash
 # 1. Generate or update a single CAT
-node cat_db_generator/generate_cat_db_v2.js --title "CAT devant insolation" --category "Urgences"
+node cat_db_generator/generate_cat_db.js --title "CAT devant insolation" --category "Urgences"
 
 # 2. Force re-fetch Step 1 Web Data before AI synthesis
-node cat_db_generator/generate_cat_db_v2.js --title "CAT devant insolation" --fetch-web
+node cat_db_generator/generate_cat_db.js --title "CAT devant insolation" --fetch-web
 
 # 3. Batch generate all CATs
-node cat_db_generator/generate_cat_db_v2.js --batch
+node cat_db_generator/generate_cat_db.js --batch
 
 # 4. Discover unindexed PDF topics and propose new CAT candidates
-node cat_db_generator/generate_cat_db_v2.js --discover
+node cat_db_generator/generate_cat_db.js --discover
 ```
 
 ---
@@ -107,7 +107,7 @@ cat_db_generator/
 │   └── medical-sources.js     # Target medical domains & online query builders
 ├── web_cache/                 # Local disk cache for scraped web guidelines
 ├── cats_db_v3_generated.json  # Complete V3 database output
-├── generate_cat_db_v2.js      # Main CLI tool
+├── generate_cat_db.js      # Main CLI tool
 └── generate_all_55_v2.js      # Real batch wrapper
 ```
 

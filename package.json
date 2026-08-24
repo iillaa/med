@@ -22,6 +22,7 @@
     "test:theme": "node tests/headless/harness.mjs themeReveal",
     "build": "node build.js",
     "build:bundle": "node build-bundle.js",
+    "generate": "node cat_db_generator/generate_cat_db.js",
     "compress:pdfs": "node scripts/compress_pdfs.js",
     "reindex": "node index_pdfs.js",
     "cap:sync": "node node_modules/@capacitor/cli/bin/capacitor sync android && node scripts/clean_android_assets.js",

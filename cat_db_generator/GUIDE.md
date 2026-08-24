@@ -10,7 +10,7 @@ The v3.5 generator combines **5-field metadata precision RAG** (PDF Index, dedic
 
 ```
 cat_db_generator/
-├── generate_cat_db_v2.js       # Main CLI & Generator Executable Engine
+├── generate_cat_db.js       # Main CLI & Generator Executable Engine
 ├── GUIDE.md                    # Detailed User & Developer Guide
 ├── clinical_library/           # Tier 2 Action-Oriented Decision Libraries (HAS, SFMU, Pédiadol, MedG)
 └── lib/
@@ -87,21 +87,21 @@ Generator v2 references and scores sources across 3 geographic tiers:
 ### 1. Single CAT Generation / Prompting
 Generate or update a specific CAT topic:
 ```bash
-node cat_db_generator/generate_cat_db_v2.js --title "CAT devant insolation" --category "Urgences"
+node cat_db_generator/generate_cat_db.js --title "CAT devant insolation" --category "Urgences"
 ```
 Or run in **Dry Run mode**:
 ```bash
-node cat_db_generator/generate_cat_db_v2.js --title "CAT devant crise d'angoisse" --category "Neurologie / Psychiatrie" --dry-run
+node cat_db_generator/generate_cat_db.js --title "CAT devant crise d'angoisse" --category "Neurologie / Psychiatrie" --dry-run
 ```
 
 ### 2. Topic Discovery Mode
 Scan your local PDF textbook collection (`.cat-med/reference-pdfs/` and `public/pdfs/`) to discover unmapped clinical topics:
 ```bash
-node cat_db_generator/generate_cat_db_v2.js --discover
+node cat_db_generator/generate_cat_db.js --discover
 ```
 
 ### 3. Full Database Validation & Rebuild
 Validate all 55 CATs in your active `cats_db.json` database against the strict medical schema:
 ```bash
-node cat_db_generator/generate_cat_db_v2.js --rebuild-all
+node cat_db_generator/generate_cat_db.js --rebuild-all
 ```

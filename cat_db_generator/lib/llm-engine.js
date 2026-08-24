@@ -71,14 +71,10 @@ async function discoverDynamicModels(apiKey) {
   return applyModelBlocklist(FALLBACK_GEMINI_MODELS);
 }
 
-const V3_DB_PATH = path.join(__dirname, '..', 'cats_db_v3_generated.json');
-const V2_DB_PATH_FALLBACK = path.join(__dirname, '..', 'cats_db_v2_generated.json');
+const { getStagingDbPath } = require('./db-paths');
 
 function getV3DbPath() {
-  if (!fs.existsSync(V3_DB_PATH) && fs.existsSync(V2_DB_PATH_FALLBACK)) {
-    try { fs.renameSync(V2_DB_PATH_FALLBACK, V3_DB_PATH); } catch (_) {}
-  }
-  return fs.existsSync(V3_DB_PATH) ? V3_DB_PATH : V2_DB_PATH_FALLBACK;
+  return getStagingDbPath();
 }
 
 function getHumanEditMemory(title) {

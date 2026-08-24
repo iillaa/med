@@ -163,7 +163,7 @@ This blueprint outlines the execution steps for introducing nested sub-categorie
   - **Web RAG Relevance Filtering**: Strict accent normalization, test-query rejection, and multi-keyword source gathering across Wikipedia FR, MedG, and MSD Manuals.
   - **Lab UI Target Display**: Dynamically lists ungenerated production CATs as targets without polluting database files.
 
-- [x] **2-Step Live Web Research RAG & Human Active Learning Engine (`generate_cat_db_v2.js`)** — Built 2-step clinical protocol synthesis engine featuring:
+- [x] **2-Step Live Web Research RAG & Human Active Learning Engine (`generate_cat_db.js`)** — Built 2-step clinical protocol synthesis engine featuring:
   - **Step 1 Live Web Fetcher (`lib/web-fetcher.js`)**: Scrapes target medical guidelines (`sante.gov.dz`, `cnpm.org.dz`, `samidz.com`, `vidal.fr`, `has-sante.fr`, `sfmu.org`, `who.int`, `msdmanuals.com`) into structured local disk cache (`cat_db_generator/web_cache/`).
   - **Step 2 Dual RAG AI Engine (`lib/llm-engine.js`)**: Assembles 3 knowledge channels (Offline PDF RAG + Online Web RAG + Human Edit Memory) into Gemini 3.6 Flash synthesis prompts.
   - **Human Active Learning Loop**: Learns from manual user edits in the Lab UI (`cat_generator_lab.html`) and feeds human corrections into future AI synthesis prompts.

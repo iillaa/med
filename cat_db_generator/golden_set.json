@@ -1,0 +1,51 @@
+{
+  "_comment": "Golden set — fixed clinical cases re-generated on demand (--golden) to detect QUALITY drift after prompt changes. Schema validation (--rebuild-all) catches structure breakage; this catches silent clinical quality regressions. Each expectation is a regex checked against summary + red_flags + ordonnance (+ sub_cats).",
+  "cases": [
+    {
+      "title": "CAT devant crise d'asthme chez l'enfant",
+      "category": "Pédiatrie",
+      "expect": [
+        { "rx": "mg\\s*/\\s*kg", "why": "posologie poids-dépendante obligatoire en pédiatrie" },
+        { "rx": "salbutamol|ventoline", "why": "bronchodilatateur de 1ère intention" }
+      ],
+      "forbid": [
+        { "rx": "aspirine", "why": "syndrome de Reye — jamais d'aspirine chez l'enfant" }
+      ]
+    },
+    {
+      "title": "CAT devant pyélonéphrite gravidique",
+      "category": "Gynécologie-Obstétrique",
+      "expect": [
+        { "rx": "ceftriaxone|céfoxitine|cefotaxime", "why": "ATB compatible grossesse en 1ère intention" },
+        { "rx": "grossesse|crat|gravide|enceinte", "why": "contexte obstétrical explicite" }
+      ],
+      "forbid": [
+        { "rx": "ciprofloxacine|norfloxacine|ofloxacine", "why": "fluoroquinolones contre-indiquées chez la gravide" }
+      ]
+    },
+    {
+      "title": "CAT devant douleur thoracique",
+      "category": "Cardiologie",
+      "expect": [
+        { "rx": "ECG|électrocardiogramme", "why": "ECG immédiat = socle diagnostique" },
+        { "rx": "troponine", "why": "marqueur de nécrose myocardique" }
+      ]
+    },
+    {
+      "title": "Certificat médical d'arrêt de travail : règles et modèle de rédaction",
+      "category": "Administratif",
+      "expect": [
+        { "rx": "main propre", "why": "formule réglementaire de remise" },
+        { "rx": "ITT|incapacité", "why": "évaluation de l'incapacité de travail" }
+      ]
+    },
+    {
+      "title": "CAT devant acidocétose diabétique",
+      "category": "Endocrinologie",
+      "expect": [
+        { "rx": "insulin", "why": "insulinothérapie = traitement pivot de l'ACD" },
+        { "rx": "réanimation|hydratation|sérum physiologique|NaCl", "why": "restauration volémique prioritaire" }
+      ]
+    }
+  ]
+}

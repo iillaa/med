@@ -26,7 +26,7 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── README.md                    # Project landing, features, security and performance overview
 │
 ├── cat_db_generator/            # Database V3.5 Generator Engine & Clinical Labs
-│   ├── generate_cat_db_v2.js   # CLI generator engine
+│   ├── generate_cat_db.js   # CLI generator engine
 │   ├── GUIDE.md                # V3.5 Generator & Validator documentation
 │   ├── GUIDE_PDF_RAG_STANDARDIZATION.md # Medical lesson formatting guide
 │   ├── clinical_library/       # Tier 2 Action Decision Trees (MedG, Antibioclic, SFMU, Pédiadol, MSF, CRAT)

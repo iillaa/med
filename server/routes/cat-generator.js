@@ -11,14 +11,13 @@ const { listAvailablePDFs } = require('../../cat_db_generator/lib/pdf-extractor'
 const debugEmitter = require('../../cat_db_generator/lib/debug-emitter');
 
 const PROD_DB_PATH = process.env.CATS_DB_PATH || path.join(__dirname, '..', '..', 'cats_db.json');
-const V3_DB_PATH = path.join(__dirname, '..', '..', 'cat_db_generator', 'cats_db_v3_generated.json');
-const V2_DB_PATH_FALLBACK = path.join(__dirname, '..', '..', 'cat_db_generator', 'cats_db_v2_generated.json');
+const { getStagingDbPath, readStagingMeta } = require('../../cat_db_generator/lib/db-paths');
 
+const STAGING_DB_LABEL = 'cat_db_generator/cats_db_staged.json';
+
+// Canonical staging DB resolution (legacy v2/v3 filenames migrate transparently).
 function getV3DbPath() {
-  if (!fs.existsSync(V3_DB_PATH) && fs.existsSync(V2_DB_PATH_FALLBACK)) {
-    try { fs.renameSync(V2_DB_PATH_FALLBACK, V3_DB_PATH); } catch (_) {}
-  }
-  return fs.existsSync(V3_DB_PATH) ? V3_DB_PATH : V2_DB_PATH_FALLBACK;
+  return getStagingDbPath();
 }
 
 function getNextIntegerId(dbArray) {
@@ -61,6 +60,9 @@ function registerCatGeneratorRoutes(app) {
       try { v2Cats = JSON.parse(fs.readFileSync(targetDbPath, 'utf8')); } catch (e) {}
     }
 
+    // Schema version lives INSIDE the data (_meta) — never in filenames.
+    const stagingMeta = readStagingMeta(targetDbPath);
+
     const v2Validations = v2Cats.map(cat => ({
       id: cat.id,
       title: cat.title,
@@ -73,6 +75,8 @@ function registerCatGeneratorRoutes(app) {
 
     res.json({
       success: true,
+      schema_version: stagingMeta ? stagingMeta.schema_version : null,
+      staged_file: STAGING_DB_LABEL,
       summary: {
         v1Total: v1Cats.length,
         v2Total: v2Cats.length,
@@ -213,7 +217,7 @@ function registerCatGeneratorRoutes(app) {
 
     const dbPath = getV3DbPath();
     if (!fs.existsSync(dbPath)) {
-      return res.status(404).json({ error: 'Fichier cats_db_v3_generated.json introuvable.' });
+      return res.status(404).json({ error: `Base de staging (${STAGING_DB_LABEL}) introuvable.` });
     }
 
     try {
