@@ -52,6 +52,7 @@ Deployed & live on `https://drcat.dr-cat.workers.dev` (Worker Version ID `4ea206
 
 > These are environment facts that MUST survive across sessions. Also mirrored in `.agents/AGENTS.md`.
 
+- [x] **ADMIN_API_KEY generated** — was missing from `.env`, which disabled key-based access to `/api/admin/active-devices*` routes entirely (localhost/admin-token paths unaffected). Now set: remote telemetry scripts can send `x-api-key: <ADMIN_API_KEY from .env>`. Activates on next server boot (dotenv loads at startup).
 - [ ] **SYNC_SECRET parity rule** — `SYNC_SECRET` exists in two places and MUST stay identical:
   1. Local Termux: `.env` → `SYNC_SECRET=<hex>` (read by `server/services/sync-suggestions.js`)
   2. Cloudflare: Worker secret on `drcat` (`wrangler secret put SYNC_SECRET --name drcat`)
