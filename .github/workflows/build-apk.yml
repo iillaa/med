@@ -114,13 +114,14 @@ jobs:
         if: steps.build_config.outputs.build_type == 'release' && steps.signing_check.outputs.has_signing_key == 'true'
         uses: r0adkll/sign-android-release@v1
         id: sign_app
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
         with:
           releaseDirectory: android/app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: "34.0.0"
 
       - name: Determine Artifact Path & Prepare Renamed APK
         id: artifact_path
