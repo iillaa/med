@@ -119,14 +119,15 @@ echo "=================================================="
 echo "      CLINICAL CAT APP - SERVEUR EN LIGNE         "
 echo "=================================================="
 echo ""
-echo " Accès Local          : http://localhost:3000"
-if [[ -n "$CF_URL" ]]; then
-echo " Accès Cloudflare     : $CF_URL"
-fi
+echo " 🏠 Accès Local (Termux)     : http://localhost:3000"
+echo " 🌐 Rail 1 (Cloudflare Edge) : https://drcat.dr-cat.workers.dev"
 if [[ -n "$URL" ]]; then
-echo " Accès Ngrok          : $URL"
+echo " 🔒 Rail 2 (Tunnel Ngrok)    : $URL"
 fi
-echo " Interface Inspecteur : http://localhost:4040"
+if [[ -n "$CF_URL" && "$CF_URL" != "https://drcat.dr-cat.workers.dev" ]]; then
+echo " ⚡ Rail 3 (Tunnel CF Termux): $CF_URL"
+fi
+echo " 🛠️  Inspecteur Ngrok         : http://localhost:4040"
 echo ""
 echo "=================================================="
 echo "Démarrage du serveur Node.js..."
