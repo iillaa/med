@@ -75,6 +75,10 @@ function registerVersionRoutes(app, cache) {
       };
 
       await safeWriteJsonAsync(VERSION_FILE, newConfig);
+      try {
+        const { invalidateVersionConfigCache } = require('../middleware/version-guard');
+        invalidateVersionConfigCache();
+      } catch (_) {}
       console.log(`[VersionRoute] Updated version config: minVersion=${newConfig.minVersion}, forceUpdateActive=${newConfig.forceUpdateActive}`);
       res.json({ success: true, versionConfig: newConfig });
     } catch (err) {

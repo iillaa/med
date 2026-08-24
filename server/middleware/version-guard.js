@@ -24,16 +24,30 @@ function compareVersions(v1, v2) {
   return 0;
 }
 
+let cachedConfig = null;
+let cachedMtime = 0;
+
+function invalidateVersionConfigCache() {
+  cachedConfig = null;
+  cachedMtime = 0;
+}
+
 function getVersionConfig() {
   try {
     if (fs.existsSync(VERSION_FILE)) {
+      const stats = fs.statSync(VERSION_FILE);
+      if (cachedConfig && stats.mtimeMs === cachedMtime) {
+        return cachedConfig;
+      }
       const data = fs.readFileSync(VERSION_FILE, 'utf-8');
-      return JSON.parse(data);
+      cachedConfig = JSON.parse(data);
+      cachedMtime = stats.mtimeMs;
+      return cachedConfig;
     }
   } catch (err) {
     console.error('[VersionGuard] Error reading version.json:', err.message);
   }
-  return {
+  return cachedConfig || {
     minVersion: '1.0.0',
     latestVersion: '1.0.0',
     forceUpdateActive: false
@@ -97,5 +111,6 @@ function versionGuardMiddleware(req, res, next) {
 module.exports = {
   versionGuardMiddleware,
   compareVersions,
-  getVersionConfig
+  getVersionConfig,
+  invalidateVersionConfigCache
 };
