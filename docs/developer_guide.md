@@ -138,12 +138,31 @@ npm run cap:sync
 npm start               # Start server (random password if none set)
 npm run start:admin     # Start server with ADMIN_PASSWORD=admin123
 npm run set:password    # Interactive password setter
-npm run build           # Compile static assets & minify JSON DBs
+npm run build           # Compile static assets & minify JSON DBs (auto-stamps worker /api/version)
 npm run reindex         # Re-index master PDFs (from data/pdf_masters/)
 npm run compress:pdfs   # Compress PDFs using Ghostscript ultra engine
 npm run test:suite      # Run master automated test suite
 npm run cap:sync        # Sync Capacitor assets
+npm run generate        # CAT generator CLI (see Generator section below)
 ```
+
+---
+
+## 🧪 CAT Generator Quality Workflow
+
+The AI generation pipeline (`cat_db_generator/`) has three safety layers — run them in this order after ANY prompt change:
+
+```bash
+npm run generate -- --rebuild-all   # 1. Canaries auto-run first, then full schema validation
+npm run generate -- --golden        # 2. Clinical quality regression on 5 fixed cases (LLM cost)
+node scripts/upgrade_db_schema.js   # 3. Migrate/re-stamp staging DB version (backed up, non-destructive)
+```
+
+- **Canaries** (`--canary`): feed known trap prescriptions through the validator; if the dosage-parsing regexes stop matching due to prompt-format drift, rebuild aborts loudly instead of validating blind.
+- **Golden set** (`--golden`): regenerates 5 fixed clinical cases from `golden_set.json` and scores must-contain / must-not-appear expectations. Exit code non-zero on regression.
+- **Staging DB**: fixed name `cat_db_generator/cats_db_staged.json` (pure JSON array) + `cats_db_staged.meta.json` sidecar (`schema_version`, shown in Generator Lab via `/api/admin/cat-generator/data`). Never put versions in filenames.
+- **Unknown-molecule gate**: any drug token next to a dosage is cross-checked against BDPM + Algerian nomenclature + local rules; unknown molecules surface as `[DCI Non Référencée]` warnings for manual review before promotion.
+- **Model filter**: set `GEMINI_BLOCKLIST=model-substring, other` in `.env` to exclude bad/experimental Gemini models from auto-selection.
 
 ---
 

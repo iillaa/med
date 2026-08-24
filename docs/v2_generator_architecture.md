@@ -69,7 +69,7 @@ The system combines:
    - Combines Web Cache + Local Slices + Clinical Library + Active Learning Memory into Master System Prompt.
    - Calls Gemini with dynamic model discovery and response MIME type JSON.
    - Enforces 8-layer validation checks: if failed, feeds exact error into prompt for auto-correction (up to 3 attempts).
-   - Persistence: Writes output to `cat_db_generator/cats_db_v3_generated.json`.
+   - Persistence: Writes output to `cat_db_generator/cats_db_staged.json` (fixed canonical name — schema version lives in the sidecar `cats_db_staged.meta.json` and is reported in the Generator Lab UI, never in filenames).
 
 4. **Human Active Learning Loop**:
    - User opens Lab UI -> Clicks `[ ✏️ Éditer ]` on a CAT row -> Modifies clinical text -> Clicks `[ 💾 Enregistrer ]`.

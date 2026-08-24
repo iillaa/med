@@ -80,6 +80,16 @@ node cat_db_generator/generate_cat_db.js --batch
 
 # 4. Discover unindexed PDF topics and propose new CAT candidates
 node cat_db_generator/generate_cat_db.js --discover
+
+# 5. Validate full staging DB schema — parser canaries run first automatically
+node cat_db_generator/generate_cat_db.js --rebuild-all
+
+# 6. Dosage-parser self-test only (no LLM call, no cost) — run after ANY prompt edit
+node cat_db_generator/generate_cat_db.js --canary
+
+# 7. Quality-drift regression: re-generate the 5 golden clinical cases and score expectations
+node cat_db_generator/generate_cat_db.js --golden            # all 5 (~5 flash-tier calls)
+node cat_db_generator/generate_cat_db.js --golden --limit 1  # smoke one case
 ```
 
 ---
@@ -106,7 +116,9 @@ cat_db_generator/
 │   ├── pdf-extractor.js       # Fast in-memory pdf_index.json RAG search
 │   └── medical-sources.js     # Target medical domains & online query builders
 ├── web_cache/                 # Local disk cache for scraped web guidelines
-├── cats_db_v3_generated.json  # Complete V3 database output
+├── cats_db_staged.json        # Staging database output (pure JSON array — fixed name forever)
+├── cats_db_staged.meta.json   # Schema version sidecar (reported in Generator Lab UI)
+├── golden_set.json            # 5 fixed clinical cases for quality-drift regression scoring
 ├── generate_cat_db.js      # Main CLI tool
 └── generate_all_55_v2.js      # Real batch wrapper
 ```

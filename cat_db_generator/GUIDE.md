@@ -105,3 +105,22 @@ Validate all 55 CATs in your active `cats_db.json` database against the strict m
 ```bash
 node cat_db_generator/generate_cat_db.js --rebuild-all
 ```
+
+> **Parser canaries run automatically first.** Four trap prescriptions (ceiling overload, pediatric mg/kg excess, mg/g unit typo, unknown molecule) are pushed through the validator — if the prompt-format ↔ dosage-regex couple ever breaks, rebuild aborts LOUDLY instead of validating blind. Run them standalone (no LLM cost): `node cat_db_generator/generate_cat_db.js --canary`
+
+### 4. Golden Set — Quality Regression Scoring
+Schema validation catches structure breakage; the golden set catches silent **clinical quality** drift after prompt changes. Five fixed representative cases (pédiatrie/asthme, pyélonéphrite gravidique, douleur thoracique, certificat ITT, acidocétose) are regenerated and scored against must-contain / must-not-appear expectations from `golden_set.json`:
+```bash
+node cat_db_generator/generate_cat_db.js --golden            # all 5 cases (~5 flash-tier calls)
+node cat_db_generator/generate_cat_db.js --golden --limit 1  # single-case smoke test
+```
+Exit code is non-zero if any case regresses. Forbid rules are context-aware: a forbidden drug mentioned inside a warning clause ("éviter l'aspirine…") is correct teaching, not a violation.
+
+### 5. Safe Staging DB Upgrade / Version Stamp
+```bash
+node scripts/upgrade_db_schema.js                # migrate legacy names + backup + validate + stamp
+node scripts/upgrade_db_schema.js --clean        # purge legacy files after verifying the app
+node scripts/upgrade_db_schema.js --version 3.6  # future re-stamp in one command
+```
+Staging stays at the fixed name `cat_db_generator/cats_db_staged.json` (pure JSON array). Schema version lives in `cats_db_staged.meta.json` and is surfaced by `/api/admin/cat-generator/data` (`schema_version` field) — never in filenames.
+

@@ -26,15 +26,18 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── README.md                    # Project landing, features, security and performance overview
 │
 ├── cat_db_generator/            # Database V3.5 Generator Engine & Clinical Labs
-│   ├── generate_cat_db.js   # CLI generator engine
+│   ├── generate_cat_db.js   # CLI generator engine (canary self-tests + golden-set regression mode)
+│   ├── golden_set.json         # 5 fixed clinical cases scored after prompt changes (--golden)
+│   ├── cats_db_staged.json     # Staging DB (pure array, fixed name — version in sidecar meta)
 │   ├── GUIDE.md                # V3.5 Generator & Validator documentation
 │   ├── GUIDE_PDF_RAG_STANDARDIZATION.md # Medical lesson formatting guide
 │   ├── clinical_library/       # Tier 2 Action Decision Trees (MedG, Antibioclic, SFMU, Pédiadol, MSF, CRAT)
 │   └── lib/
 │       ├── llm-engine.js       # Gemini Flash Dual RAG & Active Learning engine
+│       ├── db-paths.js         # Canonical staging path resolver + schema-version sidecar reader
 │       ├── pdf-extractor.js    # 5-field metadata precision RAG scanner with Pure Signal isolation
 │       ├── web-fetcher.js      # Web RAG scraper with Doctor Custom URL injector
-│       ├── medical-validator.js# Deterministic 8-layer medical & dosage ceiling validator
+│       ├── medical-validator.js# Deterministic 8-layer medical & dosage ceiling validator (+ unknown-DCI gate)
 │       ├── debug-emitter.js    # Real-time SSE telemetry logger
 │       └── knowledge-library.js# Sub-millisecond clinical library reader
 │
@@ -63,7 +66,8 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── scripts/                     # Utility & Optimization Scripts
 │   ├── clean_android_assets.js  # Android asset stripper (anti-decompilation protection)
 │   ├── compress_pdfs.js         # Ghostscript ultra-compressor
-│   └── termux-wrangler-fix.sh   # Patches workerd for Termux/ARM after npm install (wrangler CLI fix)
+│   ├── termux-wrangler-fix.sh   # Patches workerd for Termux/ARM after npm install (wrangler CLI fix)
+│   └── upgrade_db_schema.js     # Safe staging-DB migration + schema_version stamping (backups included)
 │
 ├── docs/security-hardening-v1.12.0.md  # 0x-alpha audit technical write-up
 │
