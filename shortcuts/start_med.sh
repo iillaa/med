@@ -101,14 +101,14 @@ if [[ "$ENABLE_NGROK" == "true" || "$HAS_CLOUDFLARED" == "true" ]]; then
 fi
 
 ACTIVE_URLS=()
-if [[ -n "$URL" ]]; then ACTIVE_URLS+=("$URL"); fi
-if [[ -n "$CF_URL" ]]; then ACTIVE_URLS+=("$CF_URL"); fi
+# Rail 1 (Priorité 1) : Cloudflare Worker permanent (Edge 24/7)
+ACTIVE_URLS+=("https://drcat.dr-cat.workers.dev")
 
-if [[ ${#ACTIVE_URLS[@]} -eq 0 ]]; then
-  CF_URL="https://drcat.dr-cat.workers.dev"
-  ACTIVE_URLS+=("$CF_URL")
-  echo "ℹ️  Tunnels locaux non détectés — Rail Edge Cloudflare actif ($CF_URL)"
-fi
+# Rail 2 (Priorité 2) : Ngrok Termux (Admin / Serveur direct)
+if [[ -n "$URL" ]]; then ACTIVE_URLS+=("$URL"); fi
+
+# Rail 3 (Priorité 3) : Cloudflare tunnel temporaire (Backup Termux)
+if [[ -n "$CF_URL" && "$CF_URL" != "https://drcat.dr-cat.workers.dev" ]]; then ACTIVE_URLS+=("$CF_URL"); fi
 
 URL_STRING=$(IFS=,; echo "${ACTIVE_URLS[*]}")
 echo "Mise à jour du registre des serveurs (remote_server_config.json)..."
