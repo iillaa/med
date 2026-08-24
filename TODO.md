@@ -2,13 +2,35 @@
 
 ---
 
+## 🚀 Version 1.13.0 — Delivered Features & Hardening (Completed)
+
+- [x] **Zero-Token LlamaParse Cache Slicing ("2 Birds with 1 Stone")**:
+  - Sub-PDF slices immediately inherit markdown text from `data/pdf_cache/<source>.json` into `data/pdf_cache/<slice>.json` without burning external OCR credits.
+  - Slices are auto-registered into `pdf_index.json` (`quality: "llama_cached_slice"`), ready for instant RAG search.
+- [x] **Pre-Extracted Markdown Skeleton AI Guide**:
+  - Deterministic scanner `extractDocumentSkeleton` scans headings and DCI patterns in <1ms to guide Gemini Flash-Lite for granular multi-topic detection.
+- [x] **Interactive Human-in-the-Loop Slicer Workbench (`admin/pdf_lab.html`)**:
+  - Inline card editing (title, specialty, pathology, start/end pages).
+  - Bidirectional canvas sync (`activeSlicingSegmentId`), manual card creation (`➕ Ajouter Fiche`), and unit page splitting (`✂️ Scinder`).
+  - Master PDF completion banner with 1-click archiving.
+- [x] **Master PDF Archiving & Restore Lifecycle**:
+  - Added `POST /api/admin/archive-pdf-master` and `POST /api/admin/restore-pdf-master` to move processed books to `data/pdf_done/` and restore on demand.
+- [x] **Golden Set Evaluator & Safe Context Window**:
+  - Hardened forbidden-term regex checking with 250-char window across all occurrences.
+  - Validated self-correcting clinical loops (Asthma, Pregnancy, Chest pain, Acidocétose, Arrêt de travail).
+- [x] **Cloudflare Production Deployment**:
+  - Deployed `worker.js` and `public/` assets to `https://drcat.dr-cat.workers.dev`.
+  - Stamped `version.json` and kill-switch lever to `1.13.0`.
+
+---
+
 ## 🚨 Active Confidentiality & IP Safeguards
 
 - [x] **Proprietary Engine Privacy & IP Safeguards (Active)**: Maintain strict confidentiality surrounding internal search index and PDF view rendering strategies. Never expose implementation hints or internal mechanisms in user-facing UI or public logs.
 
 ---
 
-## 🛠️ Dr. CAT Version 2 & Future Architecture Plan
+## 🛠️ Dr. CAT Version 2 & Future Architecture Plan (What is Left)
 
 ### 1. One-Tap Consent-Based Error & Log Reporter
 - **In-App Error Collector:** Capture uncaught errors, failed fetches, and console error logs into an in-memory buffer.

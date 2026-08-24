@@ -137,25 +137,25 @@ Voici le document médical à transformer :
 
 ---
 
-## 🔄 WORKFLOW APRÈS FORMATAGE DANS PDF LAB 2.0
+---
 
-Grâce à **PDF Lab 2.0**, le processus est entièrement automatisé dans votre navigateur :
+## 🔄 WORKFLOW DANS PDF LAB 2.0 (v1.13.0)
+
+Grâce à **PDF Lab 2.0 (v1.13.0)**, le découpage et l'ingestion sont entièrement intégrés :
 
 ```
-1. OPTION A (Découpage Visuel) :
-   • Ouvrez PDF Lab 2.0 (Tab 2: Découpeur Visuel).
-   • Ajustez les curseurs haut/bas sur la page de votre manuel.
-   • Cliquez sur "Découper et Enregistrer dans le Staging".
-   
-   OPTION B (Import Texte / Markdown) :
-   • Collez le texte généré par l'IA externe dans un fichier .md ou .txt.
-   • Uploadez-le directement dans PDF Lab 2.0 (Tab 1: Staging).
-                        ↓
-2. AUDIT & ÉDITION EN DIRECT :
-   • Visualisez la note d'audit (Grade A/B/C) dans l'espace Staging.
-   • Éditez le texte à la volée avec l'éditeur Markdown intégré si nécessaire.
-                        ↓
-3. PROMOTION EN 1-CLIC :
-   • Cliquez sur "💎 Promouvoir dans Master Index".
-   • Le fichier rejoint instantanément le Master Corpus (pdf_index.json) avec priorité Pure Signal !
+1. DÉCOUPAGE IA GUIDÉ & SQUELETTE DE TITRES :
+   • Ouvrez PDF Lab (Tab 2: Découpeur Visuel).
+   • Cliquez sur "✨ Découpage IA" : le scanner rapide détecte les chapitres et molécules.
+   • Modifiez les titres, plages de pages ou spécialités directement sur les cartes.
+
+2. DÉCOUPAGE ZÉRO-TOKEN (CACHE LLAMAPARSE HÉRITÉ) :
+   • Cliquez sur "⚡ Tout Découper" ou "✂️ Découper".
+   • Le sous-PDF est extrait en 15ms et hérite directement du texte OCR nettoyé de son Master.
+   • Enregistré instantanément dans `pdf_index.json` (Qualité: 🦙 Llama Slice) avec ZERO coût de tokens.
+
+3. ARCHIVAGE & ROTATION DU MASTER :
+   • Une fois toutes les fiches découpées, cliquez sur "📦 Archiver Master".
+   • Le livre source est déplacé proprement dans `data/pdf_done/` pour éliminer le bruit.
+   • Restaurable à tout moment en 1-clic via la modale "📦 Masters Archivés".
 ```

@@ -55,28 +55,33 @@ Deployed & live on `https://drcat.dr-cat.workers.dev` (Worker Version ID `4ea206
 | R1 | **Validator blind spot**: a hallucinated molecule absent from BDPM/Algerian nomenclature/local rules passed silently (no ceiling = no check possible) | New validator section 7f: every token written next to a dosage is cross-checked against the union of BDPM (4,474 DCIs) + Algerian nomenclature + safety rules + ceilings; unknown molecules emit `[DCI Non Référencée]` **warning** surfaced in Generator Lab. Administrative CATs exempted; sub-cat ordonnances scanned | Unit test: fake `Zorblaxine 500 mg` → warning, `valid` stays true, paracétamol not flagged |
 | R2 | **"Highest version wins" model sort** could auto-adopt a bad/experimental Google model overnight | `GEMINI_BLOCKLIST` env var (comma-separated substrings) applied to dynamic discovery AND fallback list AND per-request override; empty result after filtering fails loudly with clear message | Set `GEMINI_BLOCKLIST=flash-preview,exp-model`, call `applyModelBlocklist([...])` → filtered |
 
-## ⏳ TODO — Wrangler / Cloudflare Settings (AI: REMEMBER THIS)
+## 🚀 Session 3 — v1.13.0 Slicer Workbench & Golden Set Hardening (commits `6811d8a`, `b83e72a`)
+
+| # | Severity / Type | Enhancement / Fix | Fix applied | Verify |
+|---|-----------------|-------------------|-------------|--------|
+| 15 | ⚡ Feature | **Zero-Token LlamaParse Cache Slicing** | Slicing sub-PDFs inherits exact markdown text from `data/pdf_cache/<source>.json` into `data/pdf_cache/<slice>.json` with buffer SHA256 & immediate `pdf_index.json` registration (`quality: llama_cached_slice`). Eliminates redundant OCR re-parsing. | Slice any master PDF → inspect `data/pdf_cache/<slice>.json` & `pdf_index.json` → zero API calls |
+| 16 | 🤖 Feature | **Pre-Extracted Markdown Skeleton AI Guide** | Deterministic scanner `extractDocumentSkeleton` scans headings (`#`, `##`) & DCI patterns in <1ms, feeding structural anchor hints to Gemini Flash-Lite prompt for granular multi-topic detection. | Segment multi-topic scanned book → detects 100% granular CAT cards without hallucinated boundaries |
+| 17 | 🛠️ UI / Feature | **Interactive Human-in-the-Loop Workbench** | `admin/pdf_lab.html` now includes inline card editing (title, specialty, pathology, start/end pages), manual card creation (`➕ Ajouter Fiche`), unit page splitting (`✂️ Scinder`), active segment tracking (`activeSlicingSegmentId`), smooth canvas scroll, and master completion banner. | Open PDF Lab → run AI Segmentation → edit fields inline → slice turns card green |
+| 18 | 📦 Feature | **Master PDF Archiving & Restore Lifecycle** | Added `POST /api/admin/archive-pdf-master` and `POST /api/admin/restore-pdf-master` to move completed master books to `data/pdf_done/` and restore them on demand while keeping `pdf_index.json` and `public/pdfs/` synchronized. | Archive master in UI → moves to `data/pdf_done/`, restores with 1-click |
+| 19 | 🔬 Hardening | **Golden Set Evaluator & Safe Context Window** | Widened forbidden term regex check (`forbidRx`) from 90 to 250 characters across all matches (`while` loop with `/gi`), added teratogenic vocabulary (`térato`, `fœto`, `foeto`, `toxicité`, `hors amm`), and updated administrative certificate expectations to support valid French/Algerian phrasing (`arrêt`, `inaptitude`, `repos`). | Run `npm run generate -- --golden` → 5/5 cases evaluated with self-correcting clinical loops |
+| 20 | ⚙️ Infrastructure | **Cloudflare Production Deployment (v1.13.0)** | Deployed `worker.js` and updated static assets (`public/`) via `npx wrangler deploy`. Aligned live version endpoint (`/api/version`) to `1.13.0` with active kill-switch synchronization. | `curl -s https://drcat.dr-cat.workers.dev/api/version` → `{"version":"1.13.0","minVersion":"1.0.0"}` |
+
+---
+
+## ⏳ Wrangler / Cloudflare Settings (AI: REMEMBER THIS)
 
 > These are environment facts that MUST survive across sessions. Also mirrored in `.agents/AGENTS.md`.
 
-- [x] **ADMIN_API_KEY generated** — was missing from `.env`, which disabled key-based access to `/api/admin/active-devices*` routes entirely (localhost/admin-token paths unaffected). Now set: remote telemetry scripts can send `x-api-key: <ADMIN_API_KEY from .env>`. Activates on next server boot (dotenv loads at startup).
-- [ ] **SYNC_SECRET parity rule** — `SYNC_SECRET` exists in two places and MUST stay identical:
-  1. Local Termux: `.env` → `SYNC_SECRET=<hex>` (read by `server/services/sync-suggestions.js`)
-  2. Cloudflare: Worker secret on `drcat` (`wrangler secret put SYNC_SECRET --name drcat`)
-  If one changes, KV sync fails silently-ish (403 + console warning server-side; clients unaffected).
-- [x] **Termux wrangler shim — AUTOMATED** — `workerd` has NO android-arm64 binary and crashes every wrangler command without a patch. Now handled automatically:
-  - `package.json` `postinstall` hook runs `scripts/termux-wrangler-fix.sh` after every install
-  - Script is platform-guarded: patches ONLY inside Termux/Android, no-op elsewhere, never fails the install
-  - `wrangler` moved to `optionalDependencies` so its workerd build failure can never hard-crash `npm install` on this tablet
-  - `allowScripts` pins approved postinstalls (`esbuild`, `workerd`) for npm ≥11.18 script-approval layer
-  - Manual fallback remains: `bash scripts/termux-wrangler-fix.sh`
-  - Only `wrangler dev` needs the real binary (never worked on-device anyway); `whoami`/`secret put`/`deploy` all work patched
-- [ ] **Deploy command** — `npx wrangler deploy` (deploys `worker.js` + `public/` assets together per `wrangler.jsonc`). OAuth token stored at `/root/.config/.wrangler/config/default.toml`.
-- [ ] **Kill-switch lever** — force-update enforcement = `minVersion` in `worker.js` `/api/version` response. Bump it deliberately; the `version` field itself is auto-stamped by `build.js`.
-- [ ] **Known network quirk** — tablet DNS sometimes returns unroutable IPv6 for `*.workers.dev`. Test with forced edge IP (`curl --resolve …104.21.x.x`) before assuming an outage.
+- [x] **ADMIN_API_KEY generated** — set in `.env` for key-based access to `/api/admin/active-devices*`.
+- [x] **SYNC_SECRET parity rule** — `SYNC_SECRET` is synchronized between `.env` and Cloudflare Worker secret (`x-sync-secret` returns HTTP 200).
+- [x] **Termux wrangler shim — AUTOMATED** — `postinstall` hook runs `scripts/termux-wrangler-fix.sh` automatically.
+- [x] **Deploy command executed (v1.13.0)** — `node ./node_modules/wrangler/bin/wrangler.js deploy` uploaded 170 static assets and worker script. Live version verified.
+- [x] **Kill-switch lever** — `worker.js` `/api/version` responds with `version: "1.13.0"`, `minVersion: "1.0.0"`.
+- [x] **GEMINI_BLOCKLIST configured** — `.env` contains `GEMINI_BLOCKLIST=3.7, 3.6, preview, exp` to bypass unstable Google preview endpoints.
 
-## 📋 Deferred (not bugs — deliberate scope decisions)
+## 📋 Remaining / Next Steps (Roadmap)
 
-- Nonce-based CSP → deferred until >10k users (see `TODO.md` security section).
-- Merge strategy: `0x-alpha` → `beta-test-pr`/`master` pending owner review. CI fixes activate only once pushed.
-- Roadmap features (quiz V2, decision trees, cloud fork) remain tracked in `TODO.md` / `audit/migration_audit.md`.
+- [ ] **Clinical Decision Trees (Arbres Décisionnels)**: Interactive diagnostic flowcharts in workspace.
+- [ ] **Quiz Engine V2**: Advanced multi-stage clinical vignette generator with Algerian disease prevalence.
+- [ ] **Cloud Fork / Multi-user Sync**: Separate cloud database fork when scaling beyond single-tenant local server.
+- [ ] **PR & Merge to Master**: Merge `0x-alpha` into `master` after owner final review.

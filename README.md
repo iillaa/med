@@ -67,11 +67,16 @@ Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Co
 - **Barre de Navigation Segmentée (Segmented Pills)** : Pilules interactives en haut de chaque fiche (`⭐ Fiche Principale`, `🤰 Grossesse`, etc.) permettant une bascule instantanée du *Summary*, des *Drapeaux Rouges* et de l'ordonnance dédiée.
 - **Boucle de Validation Médicale Automatisée** : Checksum 8 couches avec boucle de rétro-action et 3 tentatives de correction en cas d'anomalie posologique.
 
-### 🔬 PDF Lab 2.0 — Visual Ingestion & Curation Workbench (v1.10.0)
+### 🔬 PDF Lab 2.0 — Visual Ingestion & Curation Workbench (v1.13.0)
 - **✂️ Découpage Visuel Interactif (Visual Slicer)** : Découpe de chapitres médicaux en fiches dédiées de 1 à 3 pages avec ajustement des curseurs haut/bas (+15px de marge de sécurité visuelle).
+- **⚡ Découpage Zéro-Token (Héritage Direct Cache LlamaParse)** : Les sous-PDFs découpés héritent immédiatement du texte markdown de leur Master (`data/pdf_cache/`) et s'enregistrent dans `pdf_index.json` (`quality: llama_cached_slice`) sans consommer de tokens d'API.
+- **🤖 Assistant IA Guidé par Squelette Déterministe** : Détection des chapitres et molécules par scanner d'en-têtes et DCI pour une segmentation chirurgicale sans hallucinations de limites.
+- **🛠️ Workbench Human-in-the-Loop** : Cartes IA éditables en ligne (titre, spécialité, pathologie, pages), ajout manuel (`➕ Ajouter Fiche`), division de segments (`✂️ Scinder`), et navigation synchronisée vers le Canvas.
+- **📦 Cycle de Vie & Archivage des Masters** : Archivage propre des livres sources traités vers `data/pdf_done/` pour éliminer le bruit du corpus, avec restauration en 1-clic à tout moment.
 - **🎯 Sommaire GPS & Pointeur de Page (+90 pts)** : Algorithme de navigation directe reliant les pointillés du sommaire (`..... p.48`) aux pages exactes du chapitre.
 - **📄 Ingestion Directe Markdown & Texte** : Import direct de cours et fiches de synthèse `.md` ou `.txt` créées avec le prompt de standardisation IA.
 - **🧪 Espace Staging & Brouillons (`pdf_staging_index.json`)** : Sandbox sécurisée permettant d'éditer, auditer et tester les documents découpés avant leur promotion en production.
+- **🏆 Évaluation Clinique par Golden Set** : Suite de 5 cas cliniques de référence pour détecter les dérives de qualité médicale avec boucle de correction automatique.
 
 ### 🏛️ Architecture RAG & Moteur de Synthèse V3.5 (v1.10.0)
 - **🎯 Isolation "Pure Signal"** : Priorité absolue aux fiches dédiées et découpées. Lorsqu'un extrait précis existe, le moteur met en sourdine les gros manuels généralistes de 500 pages pour éliminer le bruit.
