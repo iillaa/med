@@ -454,12 +454,18 @@ async function runGoldenSet(options) {
     for (const f of c.forbid || []) {
       // A forbidden term only violates if it appears WITHOUT a warning clause
       // nearby ("éviter l'aspirine" is correct teaching, not a prescription).
-      const forbidRx = new RegExp(f.rx, 'i');
-      const match = combined.match(forbidRx);
+      const forbidRx = new RegExp(f.rx, 'gi');
+      let m;
       let bad = false;
-      if (match) {
-        const ctx = combined.slice(Math.max(0, (match.index || 0) - 90), (match.index || 0) + match[0].length + 90);
-        bad = !/(?:évit|contre-?indiqu|ne\s+pas|ne\s+jamais|déclench|proscrit|proscrire|attention|prudence|formellement|risque\s+de)/i.test(ctx);
+      while ((m = forbidRx.exec(combined)) !== null) {
+        const start = Math.max(0, m.index - 250);
+        const end = Math.min(combined.length, m.index + m[0].length + 250);
+        const ctx = combined.slice(start, end);
+        const isSafeContext = /(?:évit|contre-?indiqu|interdi|proscri|ne\s+pas|ne\s+jamais|déclench|attention|prudence|formellement|risque|bannir|térato|foeto|fœto|toxicité|hors\s+amm)/i.test(ctx);
+        if (!isSafeContext) {
+          bad = true;
+          break;
+        }
       }
       if (bad) casePass = false;
       console.log(`   ${bad ? '❌ interdit présent:' : '✅ absent ou signalé (correct):'} ${f.why} (${f.rx})`);

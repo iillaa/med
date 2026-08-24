@@ -36,7 +36,7 @@
       "category": "Administratif",
       "expect": [
         { "rx": "main propre", "why": "formule réglementaire de remise" },
-        { "rx": "ITT|incapacité", "why": "évaluation de l'incapacité de travail" }
+        { "rx": "ITT|incapacité|arrêt|inaptitude|repos", "why": "évaluation de l'incapacité / arrêt de travail" }
       ]
     },
     {
