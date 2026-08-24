@@ -67,8 +67,10 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
 - Verification: `curl -s -o /dev/null -w "%{http_code}" https://drcat.dr-cat.workers.dev/api/suggestions` → must be 403; with `-H "x-sync-secret: $(grep '^SYNC_SECRET=' .env | cut -d= -f2)"` → must be 200.
 
 ## Termux workerd Shim Rule
-- **CRITICAL**: The `workerd` package has NO android-arm64 binary. After ANY `npm install`/`npm ci` that reinstalls workerd, EVERY wrangler command crashes (`Unsupported platform: android arm64 LE`) — even `wrangler --version`.
-- Fix: run `bash scripts/termux-wrangler-fix.sh`. It patches `node_modules/workerd/lib/main.js` to skip native binary resolution.
+- **CRITICAL**: The `workerd` package has NO android-arm64 binary. Without a patch, EVERY wrangler command crashes (`Unsupported platform: android arm64 LE`) — even `wrangler --version`.
+- **AUTOMATIC SINCE v1.12.0**: `package.json` runs `"postinstall": "bash scripts/termux-wrangler-fix.sh"` after every install. The script is platform-guarded (only patches inside Termux/Android; CI/machines untouched) and never fails the install.
+- `wrangler` lives in `optionalDependencies` (NOT devDependencies) so its workerd build failure can never hard-crash `npm install` on this tablet.
+- Manual fallback if ever needed: `bash scripts/termux-wrangler-fix.sh`.
 - Only `wrangler dev` needs the real binary — it never worked on-device and is not required for `whoami`, `secret put`, or `deploy`.
 
 ## Wrangler Deploy & Version Rules

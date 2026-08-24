@@ -56,11 +56,13 @@ Deployed & live on `https://drcat.dr-cat.workers.dev` (Worker Version ID `4ea206
   1. Local Termux: `.env` → `SYNC_SECRET=<hex>` (read by `server/services/sync-suggestions.js`)
   2. Cloudflare: Worker secret on `drcat` (`wrangler secret put SYNC_SECRET --name drcat`)
   If one changes, KV sync fails silently-ish (403 + console warning server-side; clients unaffected).
-- [ ] **Termux wrangler shim** — `workerd` has NO android-arm64 binary; after ANY `npm install`/`npm ci` that reinstalls workerd, re-run:
-  ```bash
-  bash scripts/termux-wrangler-fix.sh
-  ```
-  Without it, every wrangler command (even `--version`) crashes. The shim only breaks `wrangler dev` (which never worked on-device anyway).
+- [x] **Termux wrangler shim — AUTOMATED** — `workerd` has NO android-arm64 binary and crashes every wrangler command without a patch. Now handled automatically:
+  - `package.json` `postinstall` hook runs `scripts/termux-wrangler-fix.sh` after every install
+  - Script is platform-guarded: patches ONLY inside Termux/Android, no-op elsewhere, never fails the install
+  - `wrangler` moved to `optionalDependencies` so its workerd build failure can never hard-crash `npm install` on this tablet
+  - `allowScripts` pins approved postinstalls (`esbuild`, `workerd`) for npm ≥11.18 script-approval layer
+  - Manual fallback remains: `bash scripts/termux-wrangler-fix.sh`
+  - Only `wrangler dev` needs the real binary (never worked on-device anyway); `whoami`/`secret put`/`deploy` all work patched
 - [ ] **Deploy command** — `npx wrangler deploy` (deploys `worker.js` + `public/` assets together per `wrangler.jsonc`). OAuth token stored at `/root/.config/.wrangler/config/default.toml`.
 - [ ] **Kill-switch lever** — force-update enforcement = `minVersion` in `worker.js` `/api/version` response. Bump it deliberately; the `version` field itself is auto-stamped by `build.js`.
 - [ ] **Known network quirk** — tablet DNS sometimes returns unroutable IPv6 for `*.workers.dev`. Test with forced edge IP (`curl --resolve …104.21.x.x`) before assuming an outage.

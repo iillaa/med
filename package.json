@@ -30,7 +30,8 @@
     "setup:device": "node setup/setup_new_device.js",
     "setup:shortcuts": "node scripts/setup_shortcuts.js",
     "install:tunnels": "node scripts/install_tunnels.js",
-    "bump": "node scripts/bump_version.js"
+    "bump": "node scripts/bump_version.js",
+    "postinstall": "bash scripts/termux-wrangler-fix.sh"
   },
   "keywords": [
     "medical",
@@ -64,7 +65,13 @@
     "eslint": "^8.57.1",
     "jscpd": "^5.0.12",
     "knip": "^6.27.0",
-    "puppeteer-core": "^23.0.0",
+    "puppeteer-core": "^23.0.0"
+  },
+  "optionalDependencies": {
     "wrangler": "^4.125.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260820.1": true
   }
 }
