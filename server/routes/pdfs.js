@@ -7,8 +7,10 @@ const { isLocalhostConnection } = require('../utils/request');
 
 const { compressPdfFile, processAllPdfs } = require('../../scripts/compress_pdfs');
 
+const crypto = require('crypto');
 const PDF_MASTERS_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_masters');
 const PUBLIC_PDF_DIR = path.join(__dirname, '..', '..', 'public', 'pdfs');
+const PDF_CACHE_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_cache');
 const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
 
 function registerPdfRoutes(app, cache) {
@@ -863,16 +865,20 @@ function registerPdfRoutes(app, cache) {
         await fs.promises.writeFile(masterPath, newPdfBuffer);
         compressPdfFile(masterPath, publicPath);
 
-        // 3. Collect slice text pages from source cache
+        // 3. Collect slice text pages from source cache (Pristine LlamaParse extraction)
         const slicePages = [];
+        let totalWords = 0;
+        let totalChars = 0;
         for (let p = sPage; p <= ePage; p++) {
           const match = cachedPages.find(cp => (cp.pageNum || cp.page) === p);
-          if (match && (match.text || match.content)) {
-            slicePages.push({
-              page: (p - sPage) + 1,
-              content: match.text || match.content
-            });
-          }
+          const pageContent = match ? (match.text || match.content || '') : '';
+          const words = pageContent ? pageContent.trim().split(/\s+/).length : 0;
+          totalWords += words;
+          totalChars += pageContent.length;
+          slicePages.push({
+            page: (p - sPage) + 1,
+            content: pageContent || `[Page ${p} de ${srcClean}]`
+          });
         }
 
         if (slicePages.length === 0) {
@@ -880,6 +886,40 @@ function registerPdfRoutes(app, cache) {
             page: 1,
             content: `# ${pathology}\n\n**Spécialité :** ${specialty}\n**Source :** ${srcClean} (Pages ${sPage} à ${ePage})\n\n${seg.summary || ''}`
           });
+        }
+
+        // 3b. TWO BIRDS WITH ONE STONE: Save pristine sliced cache to data/pdf_cache/<cleanTitle>.json (0 Tokens burned!)
+        const sliceCachePath = path.join(PDF_CACHE_DIR, `${cleanTitle}.json`);
+        const sliceHash = crypto.createHash('sha256').update(newPdfBuffer).digest('hex');
+        const sliceCacheRecord = {
+          pdf: cleanTitle,
+          hash: sliceHash,
+          quality: 'llama_cached_slice',
+          source: srcClean,
+          sourceRange: [sPage, ePage],
+          timestamp: Date.now(),
+          pages: slicePages
+        };
+        await fs.promises.writeFile(sliceCachePath, JSON.stringify(sliceCacheRecord, null, 2), 'utf8');
+
+        // 3c. Sync sliced document into master index cache immediately
+        if (!Array.isArray(cache.pdfIndex)) cache.pdfIndex = [];
+        const existingIdx = cache.pdfIndex.findIndex(d => d.pdf === cleanTitle);
+        const indexItem = {
+          pdf: cleanTitle,
+          quality: 'llama_cached_slice',
+          engine: 'llamaparse',
+          pagesCount: slicePages.length,
+          wordsCount: totalWords,
+          charsCount: totalChars,
+          specialty,
+          pathology,
+          timestamp: new Date().toISOString()
+        };
+        if (existingIdx >= 0) {
+          cache.pdfIndex[existingIdx] = indexItem;
+        } else {
+          cache.pdfIndex.unshift(indexItem);
         }
 
         const metaRecord = {
@@ -903,7 +943,7 @@ function registerPdfRoutes(app, cache) {
           pdf: cleanTitle,
           specialty,
           pathology,
-          quality: 'ai_smart_sliced',
+          quality: 'llama_cached_slice',
           timestamp: new Date().toISOString(),
           status: 'draft',
           pages: slicePages
@@ -922,6 +962,12 @@ function registerPdfRoutes(app, cache) {
 
       saveStagingData(staging);
 
+      // Persist updated pdf_index.json with the new pre-indexed slices
+      const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
+      await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+      syncPublicDataAssets(cache.pdfIndex);
+      if (cache.searchCache) cache.searchCache.clear();
+
       // 5. Handle markDone / moving source to data/pdf_done/
       if (markDone) {
         const donePath = path.join(DONE_DIR, srcClean);
@@ -930,7 +976,6 @@ function registerPdfRoutes(app, cache) {
 
         // Remove from master active index and update files
         cache.pdfIndex = (cache.pdfIndex || []).filter(d => d.pdf !== srcClean);
-        const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
         await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
         syncPublicDataAssets(cache.pdfIndex);
         if (cache.searchCache) cache.searchCache.clear();
@@ -940,13 +985,58 @@ function registerPdfRoutes(app, cache) {
 
       res.json({
         success: true,
-        message: `${createdSlices.length} segment(s) découpé(s) et classé(s) avec succès !`,
+        message: `${createdSlices.length} segment(s) découpé(s), indexé(s) (LlamaParse Cache direct) et classé(s) avec succès !`,
         slices: createdSlices,
         isDone: Boolean(markDone)
       });
     } catch (err) {
       console.error('[Auto Slice Execute Error]', err);
       res.status(500).json({ error: err.message || 'Erreur lors du découpage automatique.' });
+    }
+  });
+
+  // POST /api/admin/archive-pdf-master
+  // Moves a master PDF to data/pdf_done/ and unindexes it from active master list
+  app.post('/api/admin/archive-pdf-master', async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      ensureCatalogDirs();
+      const filename = path.basename(req.body.filename || '');
+      if (!filename) return res.status(400).json({ error: 'Le nom du fichier est obligatoire.' });
+
+      const srcPath = path.join(PDF_MASTERS_DIR, filename);
+      if (!fs.existsSync(srcPath)) {
+        return res.status(404).json({ error: `Fichier "${filename}" introuvable dans data/pdf_masters.` });
+      }
+
+      const donePath = path.join(DONE_DIR, filename);
+      if (fs.existsSync(donePath)) await fs.promises.unlink(donePath);
+      await fs.promises.rename(srcPath, donePath);
+
+      // Clean up from public/pdfs
+      const publicPath = path.join(PUBLIC_PDF_DIR, filename);
+      if (fs.existsSync(publicPath)) {
+        try { await fs.promises.unlink(publicPath); } catch (_) {}
+      }
+
+      // Remove from active master index
+      cache.pdfIndex = (cache.pdfIndex || []).filter(d => d.pdf !== filename);
+      const INDEX_FILE = path.join(__dirname, '..', '..', 'pdf_index.json');
+      await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+      syncPublicDataAssets(cache.pdfIndex);
+      if (cache.searchCache) cache.searchCache.clear();
+
+      console.log(`[Smart Slicer] 📦 Manually archived "${filename}" to data/pdf_done/ and updated active index.`);
+      res.json({
+        success: true,
+        message: `Fichier Master "${filename}" archivé avec succès dans data/pdf_done/ !`,
+        filename
+      });
+    } catch (err) {
+      console.error('[Archive Master Error]', err);
+      res.status(500).json({ error: err.message || 'Erreur lors de l\'archivage du fichier.' });
     }
   });
 
@@ -1145,6 +1235,7 @@ function registerPdfRoutes(app, cache) {
       cache.pdfIndex.push(restoredRecord);
 
       await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf8');
+      compressPdfFile(masterPath, path.join(PUBLIC_PDF_DIR, filename));
       syncPublicDataAssets(cache.pdfIndex);
       if (cache.searchCache) cache.searchCache.clear();
 

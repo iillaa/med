@@ -361,11 +361,14 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
 }));
 
 let serverInstance = null;
+const APP_VERSION = (() => {
+  try { return require('../package.json').version || '1.12.0'; } catch (_) { return '1.12.0'; }
+})();
 
 initializeData().then(() => {
   serverInstance = app.listen(PORT, () => {
     console.log(`\n═════════════════════════════════════════════════════════════════`);
-    console.log(`🩺 Dr. CAT — Clinical Assistant & Learning Server v1.11.0`);
+    console.log(`🩺 Dr. CAT — Clinical Assistant & Learning Server v${APP_VERSION}`);
     console.log(`🌐 Local Access:   http://localhost:${PORT}`);
     console.log(`📂 Medical Corpus: ${cache.pdfIndex ? cache.pdfIndex.length : 0} Master PDFs & ${cache.catsCache ? cache.catsCache.length : 0} CATs loaded into memory`);
     console.log(`⚡ Startup Mode:   Cold Boot Active (0 tokens burned at startup)`);

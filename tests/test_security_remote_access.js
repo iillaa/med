@@ -77,7 +77,8 @@ async function runSecurityAudit() {
 
   let serverReady = false;
   serverProcess.stdout.on('data', (d) => {
-    if (d.toString().includes('Medical CAT Learning App is running')) serverReady = true;
+    const text = d.toString();
+    if (text.includes('Local Access:') || text.includes('Clinical Assistant') || text.includes('Dr. CAT') || text.includes('App is running')) serverReady = true;
   });
   serverProcess.stderr.on('data', () => {});
 

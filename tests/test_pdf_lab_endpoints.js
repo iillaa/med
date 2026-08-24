@@ -67,7 +67,8 @@ async function runPdfLabAudit() {
 
   let serverReady = false;
   serverProcess.stdout.on('data', (d) => {
-    if (d.toString().includes('Medical CAT Learning App is running')) serverReady = true;
+    const text = d.toString();
+    if (text.includes('Local Access:') || text.includes('Clinical Assistant') || text.includes('Dr. CAT') || text.includes('App is running')) serverReady = true;
   });
   serverProcess.stderr.on('data', (d) => console.error('[Server ERR]', d.toString()));
 
@@ -249,6 +250,19 @@ async function runPdfLabAudit() {
   assert(
     'POST /api/admin/compress-pdf -> 200 OK (Optimisation unitaire pour APK)',
     compressSingle.status === 200 && compressSingle.body?.success === true
+  );
+
+  console.log('\n📦 10. TEST D\'ARCHIVAGE ET RESTAURATION DU MASTER PDF :');
+  const archiveRes = await req('POST', '/api/admin/archive-pdf-master', { filename: 'blepharite.pdf' }, AUTH_HEADERS);
+  assert(
+    'POST /api/admin/archive-pdf-master -> 200 OK (Déplacement dans pdf_done/)',
+    archiveRes.status === 200 && archiveRes.body?.success === true
+  );
+
+  const restoreRes = await req('POST', '/api/admin/restore-pdf-master', { filename: 'blepharite.pdf' }, AUTH_HEADERS);
+  assert(
+    'POST /api/admin/restore-pdf-master -> 200 OK (Restauration dans master index)',
+    restoreRes.status === 200 && restoreRes.body?.success === true
   );
 
   console.log(`\n════════════════════════════════════════════════════════════════`);

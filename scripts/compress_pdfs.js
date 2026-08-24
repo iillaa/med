@@ -17,8 +17,11 @@ function checkGhostscript() {
 }
 
 async function compressPdfFile(inputPath, outputPath) {
+  if (!fs.existsSync(inputPath)) {
+    return 0;
+  }
   const fileName = path.basename(inputPath);
-  const tempPath = outputPath + '.tmp';
+  const tempPath = path.join(path.dirname(outputPath), `temp_${Date.now()}_${fileName}`);
 
   try {
     const originalSize = fs.statSync(inputPath).size;

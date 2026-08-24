@@ -75,7 +75,7 @@ async function runTests() {
   let serverReady = false;
   const onData = (data) => {
     const text = data.toString();
-    if (text.includes('Medical CAT Learning App is running') || text.includes('App is running')) {
+    if (text.includes('Local Access:') || text.includes('Clinical Assistant') || text.includes('Dr. CAT') || text.includes('App is running')) {
       serverReady = true;
     }
   };

@@ -75,7 +75,7 @@ async function runTests() {
   const onData = (data) => {
     const text = data.toString();
     console.log('[TestServer Output]', text.trim());
-    if (text.includes('Medical CAT Learning App is running') || text.includes('App is running')) {
+    if (text.includes('Local Access:') || text.includes('Clinical Assistant') || text.includes('Dr. CAT') || text.includes('App is running')) {
       serverReady = true;
     }
   };

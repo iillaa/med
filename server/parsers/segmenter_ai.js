@@ -3,7 +3,70 @@ const fs = require('fs');
 
 require('dotenv').config();
 
+const { applyModelBlocklist } = require('../../cat_db_generator/lib/llm-engine');
+const debugEmitter = require('../../cat_db_generator/lib/debug-emitter');
+
 const CACHE_DIR = path.join(__dirname, '..', '..', 'data', 'pdf_cache');
+
+const LITE_MODEL_CANDIDATES = [
+  'gemini-flash-lite-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash-lite',
+  'gemini-2.0-flash',
+  'gemini-flash-latest'
+];
+
+/**
+ * Deterministically scans LlamaParse / cached pages to extract pre-existing Markdown headings,
+ * DCI drug mentions, numbered protocols, and section breaks (0 API token cost).
+ */
+function extractDocumentSkeleton(pages) {
+  if (!Array.isArray(pages)) return '';
+  const skeletonLines = [];
+
+  pages.forEach((p, idx) => {
+    const pageNum = p.pageNum || p.page || (idx + 1);
+    const content = p.text || p.content || '';
+    const headings = [];
+
+    const lines = content.split('\n');
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) continue;
+
+      // Match markdown headers #, ##, ###
+      if (/^#{1,4}\s+/i.test(line)) {
+        const hText = line.replace(/^#{1,4}\s+/, '').replace(/[*_`]/g, '').replace(/<[^>]+>/g, '').trim();
+        if (hText.length > 2 && !headings.includes(hText)) headings.push(`[Titre] ${hText}`);
+      }
+      // Match DCI mentions (e.g. "Amoxicilline(DCI)", "DCI : Paracétamol")
+      else if (/\b(DCI)\b/i.test(line) || /\b(DCI\s*:)/i.test(line)) {
+        const dciClean = line.replace(/[*_`]/g, '').replace(/<[^>]+>/g, '').trim();
+        if (dciClean.length > 3 && dciClean.length < 80 && !headings.includes(dciClean)) {
+          headings.push(`[DCI] ${dciClean}`);
+        }
+      }
+      // Match numbered sections with bold titles (e.g. "**1) Amoxicilline**", "A) Beta lactamines")
+      else if (/^(?:[A-Z]\)|\d+\))\s*(?:\*\*)?[A-Za-zÀ-ÿ]/i.test(line)) {
+        const secClean = line.replace(/[*_`]/g, '').replace(/<[^>]+>/g, '').trim();
+        if (secClean.length > 3 && secClean.length < 80 && !headings.includes(secClean)) {
+          headings.push(`[Section] ${secClean}`);
+        }
+      }
+      // Match uppercase/bold standalone lines
+      else if (/^\*\*[A-Za-zÀ-ÿ0-9\s-]{4,50}\*\*$/i.test(line)) {
+        const bClean = line.replace(/[*_`]/g, '').trim();
+        if (!headings.includes(bClean)) headings.push(`[Pathologie] ${bClean}`);
+      }
+    }
+
+    if (headings.length > 0) {
+      skeletonLines.push(`• Page ${pageNum}: ${headings.slice(0, 8).join(' | ')}`);
+    }
+  });
+
+  return skeletonLines.join('\n');
+}
 
 /**
  * Normalizes title to clean filename format mentioning only the pathology
@@ -65,35 +128,46 @@ async function detectPathologySegments(filename, pages = null) {
     throw new Error(`Aucun texte indexé disponible pour "${filename}". Veuillez d'abord parser ce PDF.`);
   }
 
-  // 2. Prepare lightweight text summary per page (first 450 chars of each page to keep tokens minimal)
+  // 2. Extract Document Skeleton from LlamaParse Cache (0 Tokens)
+  const docSkeleton = extractDocumentSkeleton(pages);
+
+  // 3. Prepare FULL un-truncated page text with clean whitespace normalization
   const pageBriefs = pages.map((p, idx) => {
     const pageNum = p.pageNum || p.page || (idx + 1);
-    const snippet = (p.text || p.content || '').replace(/\s+/g, ' ').trim().slice(0, 450);
-    return `[PAGE ${pageNum}]: ${snippet}`;
-  }).join('\n\n');
+    const cleanText = (p.text || p.content || '')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    return `[PAGE ${pageNum}]:\n${cleanText || '(Page sans texte brut / Schéma ou Image)'}`;
+  }).join('\n\n---\n\n');
 
   const totalPages = pages.length;
 
   const prompt = `Tu es un médecin chef et expert en indexation médicale pour l'application Dr. CAT.
-Voici les extraits de texte page par page d'un document médical de ${totalPages} pages intitulé "${filename}":
+Voici les informations d'un document médical de ${totalPages} pages intitulé "${filename}":
 
+${docSkeleton ? `--- GUIDE STRUCTUREL PRÉ-EXTRAIT DU PARSER (LLAMAPARSE OCR SKELETON) ---
+${docSkeleton}
+------------------------------------------------------------------------\n` : ''}
+--- CONTENU COMPLET PAGE PAR PAGE ---
 ${pageBriefs}
 
 TÂCHE :
-Analyse le document et découpe-le en segments de PATHOLOGIES MÉDICALES DISTINCTES ou fiches de conduite à tenir (CAT).
-Regroupe les pages consécutives qui traitent du même sujet clinique/thérapeutique.
+Analyse le document médical et découpe-le en fiches granulaires et distinctes de PATHOLOGIES, MOLÉCULES THÉRAPEUTIQUES ou CONDUITES À TENIR (CAT).
+Utilise le GUIDE STRUCTUREL pour identifier avec précision le début et la fin de chaque fiche.
 
 RÈGLES IMPORTANTES :
 1. Ignore les pages d'introduction, préfaces, tables des matières ou pages de garde non cliniques.
-2. Pour chaque pathologie identifiée :
-   - "pathology" : Nom médical clair et précis (ex: "Hypertension Artérielle Essentielle", "Asthme Aigu Grave", "Pneumopathie Franche Lobaire Aiguë", "Colique Néphrétique").
-   - "title" : Nom de fichier court et canonique sans accents ni espaces (ex: "HTA_Essentielle.pdf", "Asthme_Aigu_Grave.pdf", "Colique_Nephretique.pdf").
+2. Si le document contient plusieurs molécules ou plusieurs pathologies distinctes (ex: Amoxicilline, Augmentin, Oxacilline, Céfazoline, Céfixime, Azithromycine, Ciprofloxacine, etc.), GÉNÈRE UNE FICHE GRANULAIRE DISTINCTE pour chaque molécule/pathologie avec ses pages exactes (ex: startPage: 1, endPage: 2).
+3. Pour chaque fiche identifiée :
+   - "pathology" : Nom médical clair et précis (ex: "Amoxicilline", "Amoxicilline + Acide Clavulanique", "Asthme Aigu Grave", "Colique Néphrétique").
+   - "title" : Nom de fichier court et canonique sans accents ni espaces (ex: "Amoxicilline.pdf", "Augmentin_Amox_Clav.pdf", "Colique_Nephretique.pdf").
    - "specialty" : Une spécialité médicale parmi : Cardiologie, Pneumologie, Gastro-entérologie, Neurologie, Dermatologie, Pédiatrie, Gynécologie-Obstétrique, Urgences & Réanimation, Infectiologie, Endocrinologie, Rhumatologie, ORL, Ophtalmologie, Néphrologie & Urologie, Hématologie, Psychiatrie, Médecine Interne, Thérapeutique Générale.
    - "startPage" : Numéro de page de début (1-indexé, entre 1 et ${totalPages}).
    - "endPage" : Numéro de page de fin (1-indexé, entre 1 et ${totalPages}, >= startPage).
-    - "keyTopics" : Tableau des sections clés (ex: ["Clinique", "Traitement", "Posologies", "Critères d'hospitalisation"]).
-    - "summary" : Résumé clinique en 1 phrase concise.
-    - "confidence" : "high" (si fiche CAT complète et évidente), "medium" (si vignette clinique partielle), ou "uncertain" (si extrait court ou douteux).
+   - "keyTopics" : Tableau des sections clés (ex: ["Posologies", "Indications", "Formes galéniques", "Contre-indications"]).
+   - "summary" : Résumé clinique en 1 phrase concise.
+   - "confidence" : "high" (si fiche évidente), "medium" (si vignette partielle), ou "uncertain" (si extrait court).
 
 Réponds STRICTEMENT sous la forme d'un tableau JSON d'objets :
 [
@@ -102,50 +176,93 @@ Réponds STRICTEMENT sous la forme d'un tableau JSON d'objets :
     "title": "...",
     "specialty": "...",
     "startPage": 1,
-    "endPage": 3,
+    "endPage": 2,
     "keyTopics": ["..."],
     "summary": "...",
     "confidence": "high"
   }
 ]`;
 
-  const model = 'gemini-3.6-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${googleKey}`;
-
-  console.log(`[AI Smart Slicer] 🤖 Analyzing "${filename}" (${totalPages} pages) with Gemini 3.6 Flash...`);
-
-  const payload = {
-    contents: [
-      {
-        parts: [
-          { text: prompt }
-        ]
-      }
-    ],
-    generationConfig: {
-      temperature: 0.1,
-      responseMimeType: "application/json"
-    }
-  };
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`[AI Smart Slicer] ❌ Gemini API error (${response.status}):`, errorText);
-    throw new Error(`Google API returned ${response.status}: ${errorText}`);
+  const availableModels = applyModelBlocklist(LITE_MODEL_CANDIDATES);
+  if (availableModels.length === 0) {
+    throw new Error('GEMINI_BLOCKLIST a filtré tous les modèles Lite disponibles. Vérifier .env.');
   }
 
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '[]';
+  let rawText = null;
+  let usedModel = null;
+  let lastError = null;
+
+  for (const model of availableModels) {
+    let attempts = 0;
+    while (attempts < 2) {
+      attempts++;
+      try {
+        console.log(`[AI Smart Slicer] 🤖 Analyzing "${filename}" (${totalPages} full pages) with ${model} (attempt ${attempts})...`);
+        debugEmitter.emitEvent('llm_model_attempt', {
+          model,
+          task: 'auto_slice',
+          filename,
+          totalPages
+        });
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${googleKey}`;
+        const payload = {
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.1,
+            responseMimeType: "application/json"
+          }
+        };
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        let response = null;
+        try {
+          response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        if (response.status === 429) {
+          console.warn(`⚠️ [AI Smart Slicer] HTTP 429 rate limit on ${model}. Pausing 8s...`);
+          await new Promise(r => setTimeout(r, 8000));
+          continue;
+        }
+
+        if (!response.ok) {
+          const errBody = await response.text();
+          throw new Error(`Google API returned ${response.status}: ${errBody}`);
+        }
+
+        const data = await response.json();
+        rawText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '[]';
+        usedModel = model;
+        break;
+      } catch (err) {
+        lastError = err;
+        console.warn(`⚠️ [AI Smart Slicer] Model ${model} attempt ${attempts} failed: ${err.message}`);
+      }
+    }
+    if (rawText) break;
+  }
+
+  if (!rawText) {
+    throw new Error(`Échec de l'analyse IA de segmentation : ${lastError ? lastError.message : 'Aucune réponse du LLM'}`);
+  }
 
   let segments = [];
   try {
-    segments = JSON.parse(rawText);
+    let cleanJson = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    segments = JSON.parse(cleanJson);
   } catch (parseErr) {
     console.error("[AI Smart Slicer] ❌ JSON parse failed, raw output was:", rawText);
     throw new Error("L'IA n'a pas renvoyé un format JSON valide.");
@@ -191,20 +308,21 @@ Réponds STRICTEMENT sous la forme d'un tableau JSON d'objets :
 
   const coveragePercent = totalPages > 0 ? Math.round((coveredPages.size / totalPages) * 100) : 0;
 
-  console.log(`[AI Smart Slicer] ✨ Identified ${validSegments.length} segments (${coveragePercent}% coverage, ${uncoveredPages.length} residual pages unassigned).`);
+  console.log(`[AI Smart Slicer] ✨ [${usedModel}] Identified ${validSegments.length} segments (${coveragePercent}% coverage, ${uncoveredPages.length} residual pages unassigned).`);
 
-  return {
-    filename,
-    totalPages,
-    segments: validSegments,
-    coverage: {
+    return {
+      filename,
       totalPages,
-      coveredCount: coveredPages.size,
-      coveragePercent,
-      uncoveredPages
-    }
-  };
-}
+      usedModel,
+      segments: validSegments,
+      coverage: {
+        totalPages,
+        coveredCount: coveredPages.size,
+        coveragePercent,
+        uncoveredPages
+      }
+    };
+  }
 
 module.exports = {
   detectPathologySegments,

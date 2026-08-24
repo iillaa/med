@@ -364,15 +364,33 @@
                 <span id="ai-segments-meta" style="font-size: 12px; color: var(--text-muted); margin-left: 8px;"></span>
               </div>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); cursor: pointer;" title="Si coché, le PDF source sera déplacé dans data/pdf_done/ une fois découpé">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button onclick="addNewManualSegment()" class="btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 11.5px; padding: 5px 10px;" title="Ajouter une fiche personnalisée manuellement">
+                ➕ Ajouter Fiche
+              </button>
+              <button onclick="archiveCurrentMasterPdf()" class="btn-outline" style="border-color: #c084fc; color: #c084fc; font-size: 11.5px; padding: 5px 10px;" title="Déplacer immédiatement ce master dans data/pdf_done/">
+                📦 Archiver Master
+              </button>
+              <label style="display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-muted); cursor: pointer;" title="Si coché, le PDF source sera déplacé dans data/pdf_done/ après le découpage par lot">
                 <input type="checkbox" id="ai-mark-done-checkbox" />
-                <span>Archiver dans <code>pdf_done/</code></span>
+                <span>Auto-archive</span>
               </label>
               <button onclick="executeBatchSliceAllApproved()" class="btn-success" id="ai-slice-all-btn" style="font-size: 12px; padding: 6px 14px; font-weight: bold;">
-                ⚡ Tout Découper & Classer (<span id="ai-slice-approved-count">0</span>)
+                ⚡ Tout Découper (<span id="ai-slice-approved-count">0</span>)
               </button>
               <button onclick="closeAiSegmentsPanel()" class="btn-outline" style="font-size: 12px; padding: 6px 10px;" title="Fermer ce panneau">✖️</button>
+            </div>
+          </div>
+
+          <!-- Post-Slice Completion / Success Banner -->
+          <div id="ai-completion-banner" style="display: none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">🎉</span>
+              <span style="font-size: 12.5px; color: #6ee7b7; font-weight: bold;">Toutes les fiches de ce document ont été découpées et indexées (LlamaParse Cache direct) !</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="archiveCurrentMasterPdf()" class="btn-success" style="font-size: 11.5px; padding: 4px 10px;">📦 Archiver ce Master dans pdf_done/</button>
+              <button onclick="switchTab('staging'); fetchStagingList();" class="btn-outline" style="font-size: 11.5px; padding: 4px 10px; border-color: #38bdf8; color: #38bdf8;">🧪 Voir le Staging</button>
             </div>
           </div>
 
@@ -389,7 +407,7 @@
             </div>
           </div>
 
-          <div id="ai-segments-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; max-height: 320px; overflow-y: auto; padding-right: 4px;">
+          <div id="ai-segments-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; max-height: 340px; overflow-y: auto; padding-right: 4px;">
             <!-- Segment cards injected via JS -->
           </div>
 
@@ -1136,6 +1154,26 @@
       if (!filename) return;
       slicerSourceFilename = filename;
       document.getElementById('slice-title-input').value = filename.replace(/\.pdf$/i, '') + '_Slice.pdf';
+
+      // Auto-prefill specialty if present in master index
+      const matched = masterFiles.find(f => f.pdf === filename);
+      if (matched && matched.specialty) {
+        const specSelect = document.getElementById('slice-specialty-select');
+        const customInput = document.getElementById('slice-custom-specialty');
+        if (specSelect) {
+          if (Array.from(specSelect.options).some(o => o.value === matched.specialty)) {
+            specSelect.value = matched.specialty;
+            if (customInput) customInput.style.display = 'none';
+          } else {
+            specSelect.value = '__custom__';
+            if (customInput) {
+              customInput.value = matched.specialty;
+              customInput.style.display = 'block';
+            }
+          }
+        }
+      }
+
       // Load uncompressed pristine Master original directly from data/pdf_masters/
       await loadPdfIntoCanvas(`/api/admin/master-pdf?filename=${encodeURIComponent(filename)}`);
     }
@@ -1389,6 +1427,15 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
+        if (activeSlicingSegmentId) {
+          const seg = currentAiSegments.find(s => s.id === activeSlicingSegmentId);
+          if (seg) {
+            seg.sliced = true;
+            renderAiSegmentCards(currentAiSegments);
+            document.getElementById('ai-slice-approved-count').textContent = currentAiSegments.filter(s => !s.sliced).length;
+          }
+        }
+
         alert(`✅ Fiche "${title}" découpée avec succès et créée dans le Staging !`);
         switchTab('staging');
         fetchStagingList();
@@ -1520,14 +1567,110 @@
       document.getElementById('ai-segments-container').style.display = 'none';
     }
 
+    function updateSegmentField(segId, field, val) {
+      const seg = currentAiSegments.find(s => s.id === segId) || currentAiIgnoredSegments.find(s => s.id === segId);
+      if (!seg) return;
+      if (field === 'startPage' || field === 'endPage') {
+        const num = parseInt(val, 10);
+        if (!isNaN(num) && num >= 1) {
+          seg[field] = num;
+          if (seg.startPage > seg.endPage) seg.endPage = seg.startPage;
+          seg.pageCount = (seg.endPage - seg.startPage) + 1;
+        }
+      } else {
+        seg[field] = val;
+      }
+    }
+
+    function addNewManualSegment() {
+      const curPage = currentSlicerPageNum || 1;
+      const newSeg = {
+        id: `seg_${Date.now()}_custom`,
+        pathology: 'Nouvelle Pathologie / Molécule',
+        title: `Extrait_Page_${curPage}.pdf`,
+        specialty: 'Médecine Générale',
+        startPage: curPage,
+        endPage: curPage,
+        pageCount: 1,
+        keyTopics: ['Clinique', 'Traitement'],
+        summary: '',
+        confidence: 'high',
+        sliced: false
+      };
+      currentAiSegments.unshift(newSeg);
+      renderAiSegmentCards(currentAiSegments);
+      document.getElementById('ai-slice-approved-count').textContent = currentAiSegments.filter(s => !s.sliced).length;
+    }
+
+    function splitSegmentToPages(segId) {
+      const seg = currentAiSegments.find(s => s.id === segId);
+      if (!seg || seg.startPage >= seg.endPage) return;
+
+      const idx = currentAiSegments.indexOf(seg);
+      const newSlices = [];
+      for (let p = seg.startPage; p <= seg.endPage; p++) {
+        newSlices.push({
+          id: `seg_${Date.now()}_p${p}`,
+          pathology: `${seg.pathology} (P.${p})`,
+          title: `${seg.title.replace(/\.pdf$/i, '')}_P${p}.pdf`,
+          specialty: seg.specialty,
+          startPage: p,
+          endPage: p,
+          pageCount: 1,
+          keyTopics: seg.keyTopics,
+          summary: seg.summary,
+          confidence: seg.confidence,
+          sliced: false
+        });
+      }
+      currentAiSegments.splice(idx, 1, ...newSlices);
+      renderAiSegmentCards(currentAiSegments);
+      document.getElementById('ai-slice-approved-count').textContent = currentAiSegments.filter(s => !s.sliced).length;
+    }
+
+    async function archiveCurrentMasterPdf() {
+      const filename = slicerSourceFilename || document.getElementById('slicer-file-select').value;
+      if (!filename) return alert("Veuillez d'abord sélectionner un PDF.");
+
+      if (!confirm(`Archiver le Master "${filename}" dans data/pdf_done/ ?\n\nIl sera retiré de l'index actif mais conservé en archive pour consultation.`)) return;
+
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `📦 Archivage du Master "${filename}"...`;
+
+      try {
+        const res = await fetch('/api/admin/archive-pdf-master', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Erreur lors de l'archivage.");
+
+        alert(`✅ ${data.message}`);
+        refreshAll();
+        closeAiSegmentsPanel();
+      } catch (err) {
+        alert(`Échec : ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
     function renderAiSegmentCards(segments) {
       const list = document.getElementById('ai-segments-list');
+      const banner = document.getElementById('ai-completion-banner');
       list.innerHTML = '';
 
       if (!segments || segments.length === 0) {
         list.innerHTML = '<div style="color: var(--text-muted); padding: 15px; grid-column: 1 / -1; text-align: center;">Aucun segment actif dans la file.</div>';
+        if (banner) banner.style.display = 'none';
         return;
       }
+
+      const allSliced = segments.length > 0 && segments.every(s => s.sliced);
+      if (banner) banner.style.display = allSliced ? 'flex' : 'none';
 
       segments.forEach(seg => {
         const card = document.createElement('div');
@@ -1543,34 +1686,53 @@
           confBadge = `<span class="conf-uncertain">⚪ À Vérifier</span>`;
         }
 
+        const specialtyOptions = ALL_SPECIALTIES.map(sp => `<option value="${escapeHtml(sp)}" ${sp === seg.specialty ? 'selected' : ''}>${escapeHtml(sp)}</option>`).join('');
+
         card.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-            <div>
-              <strong style="color: #38bdf8; font-size: 13.5px; display: block;">🩺 ${escapeHtml(seg.pathology)}</strong>
-              <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">📄 ${escapeHtml(seg.title)}</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <div style="display: flex; gap: 6px; align-items: center; flex: 1;">
+              <span style="color: #38bdf8; font-size: 13px;">🩺</span>
+              <input type="text" value="${escapeHtml(seg.pathology)}" onchange="updateSegmentField('${seg.id}', 'pathology', this.value)" style="flex: 1; background: #070a10; border: 1px solid var(--border); color: #38bdf8; font-weight: bold; font-size: 13px; padding: 4px 8px; border-radius: 4px;" title="Cliquer pour modifier la pathologie" />
             </div>
             <div style="display: flex; gap: 4px; align-items: center;">
               ${confBadge}
-              <span class="badge badge-llamaparse" style="font-size: 10px; white-space: nowrap;">${escapeHtml(seg.specialty)}</span>
             </div>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1;">
-            <span style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-family: monospace;">
-              Pages ${seg.startPage} → ${seg.endPage} (${seg.pageCount} p.)
-            </span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 2px;">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 11px; color: var(--text-muted);">📄 Fichier:</span>
+              <input type="text" value="${escapeHtml(seg.title)}" onchange="updateSegmentField('${seg.id}', 'title', this.value)" style="flex: 1; background: #070a10; border: 1px solid var(--border); color: #f8fafc; font-size: 11px; font-family: monospace; padding: 3px 6px; border-radius: 4px;" title="Nom du PDF découpé" />
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 11px; color: var(--text-muted);">🏷️ Spéc:</span>
+              <select onchange="updateSegmentField('${seg.id}', 'specialty', this.value)" style="flex: 1; background: #070a10; border: 1px solid var(--border); color: #cbd5e1; font-size: 11px; padding: 3px 4px; border-radius: 4px;">
+                ${specialtyOptions}
+              </select>
+            </div>
           </div>
 
-          ${seg.summary ? `<p style="font-size: 11.5px; color: #94a3b8; margin: 0; line-height: 1.35;">${escapeHtml(seg.summary)}</p>` : ''}
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; background: rgba(0,0,0,0.25); padding: 4px 8px; border-radius: 4px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 11px; color: var(--text-muted);">Pages:</span>
+              <input type="number" min="1" value="${seg.startPage}" onchange="updateSegmentField('${seg.id}', 'startPage', this.value); renderAiSegmentCards(currentAiSegments);" style="width: 45px; background: #070a10; border: 1px solid var(--border); color: #38bdf8; font-weight: bold; text-align: center; padding: 2px 4px; border-radius: 4px; font-size: 11.5px;" />
+              <span style="color: var(--text-muted);">➔</span>
+              <input type="number" min="1" value="${seg.endPage}" onchange="updateSegmentField('${seg.id}', 'endPage', this.value); renderAiSegmentCards(currentAiSegments);" style="width: 45px; background: #070a10; border: 1px solid var(--border); color: #38bdf8; font-weight: bold; text-align: center; padding: 2px 4px; border-radius: 4px; font-size: 11.5px;" />
+              <span style="color: var(--text-muted); font-size: 10.5px;">(${seg.pageCount} p.)</span>
+            </div>
+            ${seg.pageCount > 1 ? `<button onclick="splitSegmentToPages('${seg.id}')" class="btn-outline" style="padding: 2px 6px; font-size: 10px; color: #fbbf24; border-color: rgba(251,191,36,0.4);" title="Découper ce segment multi-pages en 1 fiche par page">✂️ Scinder</button>` : ''}
+          </div>
+
+          ${seg.summary ? `<p style="font-size: 11px; color: #94a3b8; margin: 0; line-height: 1.3;">${escapeHtml(seg.summary)}</p>` : ''}
           
           <div style="display: flex; gap: 4px; flex-wrap: wrap;">
             ${topicBadges}
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 6px;">
             <div style="display: flex; gap: 6px;">
-              <button onclick="jumpToSegmentById('${seg.id}')" class="btn-outline" style="padding: 3px 8px; font-size: 11px;" title="Prévisualiser sur le Canvas et charger les paramètres">👁️ Charger</button>
-              <button onclick="ignoreSegment('${seg.id}')" class="btn-outline" style="padding: 3px 6px; font-size: 11px; color: #f87171; border-color: rgba(239,68,68,0.4);" title="Mettre de côté ce segment">⏭️ Mettre de côté</button>
+              <button onclick="jumpToSegmentById('${seg.id}')" class="btn-outline" style="padding: 3px 8px; font-size: 11px; color: #38bdf8; border-color: rgba(56,189,248,0.4);" title="Prévisualiser sur le Canvas et charger les paramètres">👁️ Charger & Recadrer</button>
+              <button onclick="ignoreSegment('${seg.id}')" class="btn-outline" style="padding: 3px 6px; font-size: 11px; color: #f87171; border-color: rgba(239,68,68,0.4);" title="Mettre de côté ce segment">✕ Ignorer</button>
             </div>
             ${seg.sliced 
               ? '<span style="color: #34d399; font-size: 11px; font-weight: bold;">✅ Découpé & Classé</span>'
@@ -1625,13 +1787,17 @@
       }
     }
 
+    let activeSlicingSegmentId = null;
+
     function jumpToSegmentById(segId) {
       const seg = currentAiSegments.find(s => s.id === segId) || currentAiIgnoredSegments.find(s => s.id === segId);
       if (!seg) return;
-      jumpToSegmentPages(seg.startPage, seg.endPage, seg.title, seg.specialty, seg.pathology);
+      activeSlicingSegmentId = segId;
+      jumpToSegmentPages(seg.startPage, seg.endPage, seg.title, seg.specialty, seg.pathology, segId);
     }
 
-    function jumpToSegmentPages(startPage, endPage, title, specialty, pathology) {
+    function jumpToSegmentPages(startPage, endPage, title, specialty, pathology, segId = null) {
+      if (segId) activeSlicingSegmentId = segId;
       document.getElementById('slicer-mode-select').value = 'page_range';
       toggleSlicerMode();
       document.getElementById('slice-start-page').value = startPage;
@@ -1657,6 +1823,12 @@
 
       currentSlicerPageNum = startPage;
       renderSlicerPage(currentSlicerPageNum);
+
+      // Smooth scroll directly to the canvas & customizer workspace
+      const workspace = document.querySelector('.slicer-workspace');
+      if (workspace) {
+        workspace.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     }
 
     function ignoreSegment(segId) {
@@ -1692,7 +1864,7 @@
       const overlay = document.getElementById('overlay');
       const overlayText = document.getElementById('overlay-text');
       overlay.style.display = 'flex';
-      overlayText.textContent = `✂️ Découpage de "${seg.title}"...`;
+      overlayText.textContent = `✂️ Découpage et indexation cache de "${seg.title}"...`;
 
       try {
         const res = await fetch('/api/admin/auto-slice-execute', {
@@ -1727,7 +1899,7 @@
       const filename = slicerSourceFilename || document.getElementById('slicer-file-select').value;
       const markDone = document.getElementById('ai-mark-done-checkbox').checked;
 
-      if (!confirm(`Découper et classer automatiquement ces ${pendingSegments.length} segments dans data/pdf_sliced/ ?${markDone ? '\n\nLe fichier source sera ensuite archivé dans data/pdf_done/.' : ''}`)) return;
+      if (!confirm(`Découper, indexer (LlamaParse direct) et classer automatiquement ces ${pendingSegments.length} segments dans data/pdf_sliced/ ?${markDone ? '\n\nLe fichier source sera ensuite archivé dans data/pdf_done/.' : ''}`)) return;
 
       const overlay = document.getElementById('overlay');
       const overlayText = document.getElementById('overlay-text');
@@ -2179,16 +2351,19 @@
             if (countEl && d.success) countEl.textContent = d.count || 0;
           }).catch(() => {});
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" style="color: var(--danger); text-align: center;">Erreur: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="color: var(--danger); text-align: center;">Erreur: ${err.message}</td></tr>`;
       }
     }
 
     function getQualityBadgeHtml(quality) {
       const q = (quality || '').toLowerCase();
-      if (q === 'online' || q === 'llamaparse') {
+      if (q.includes('llama_cached_slice') || q.includes('ai_smart_sliced') || q.includes('sliced')) {
+        return '<span class="badge badge-llamaparse" style="background: rgba(14, 165, 233, 0.25); border-color: #38bdf8;">🦙 Llama Slice</span>';
+      }
+      if (q === 'online' || q === 'llamaparse' || q.includes('llama')) {
         return '<span class="badge badge-llamaparse">🦙 LlamaParse</span>';
       }
-      if (q === 'online-google' || q === 'google') {
+      if (q === 'online-google' || q === 'google' || q.includes('gemini')) {
         return '<span class="badge badge-google">✨ Gemini OCR</span>';
       }
       if (q === 'curated_master' || q === 'curated') {

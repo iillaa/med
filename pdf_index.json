@@ -11480,32 +11480,6 @@
     "mtime": 1787334985197.499
   },
   {
-    "pdf": "blepharite.pdf",
-    "quality": "online",
-    "hash": "5af438f81a529efa49a91874e2f9eb2cb78323cd4583cf279f77a715104afb8d",
-    "timestamp": "2026-08-22T16:06:41.428Z",
-    "toc": [
-      {
-        "title": "Définition et Clinique",
-        "page": 1
-      },
-      {
-        "title": "Traitement Médical",
-        "page": 1
-      }
-    ],
-    "pages": [
-      {
-        "page": 1,
-        "content": "# <font color=red>Blépharite</font>\n\n● Clinique :\nInflammation du revêtement cutané des paupières\nSouvent d'origine microbienne ou allergique\nŒdème isolé, prurit, sensation de Brûlure à l'intérieur de l'œil +/- sécrétions purulentes.\n\n☑ Traitement : 10j\n☑1 Tobrex / Chibrocardon / Maxidrol collyre\n1 gtt 3/j\n☑2 Sterdex / Maxidrol pmd 1 app le soir\nCompresse chaude 3/j pdt 15 min"
-      },
-      {
-        "page": 2,
-        "content": "Eye"
-      }
-    ]
-  },
-  {
     "pdf": "certificat accident travail.pdf",
     "hash": "98d2ff923beaec962ce40a3a104c922f0af846d3e6987b0dd629c00a342cb371",
     "quality": "online",
@@ -11540,6 +11514,24 @@
       {
         "page": 1,
         "content": "# PANARIS\n\nImage 1\nImage 2\nImage 3\n\n| **FUCIDINE** pmd        | 01 app x 2 / j | 01 bte  |\n| ----------------------- | -------------- | ------- |\n| **LEXIN** cp 01g        | 01 cp x 2 / j  | 02 btes |\n| **HEXOMEDINE** solution | 01 App x 3 / j | 01 bte  |\n| **DOLYC** cp 500 mg     | 01 cp x 3 / j  | 01 btes |\n\n\nSi échec !!! **Après 48 h:**\n\n- Traitement chirurgical"
+      }
+    ]
+  },
+  {
+    "pdf": "blepharite.pdf",
+    "specialty": "Médecine Générale",
+    "quality": "online",
+    "hash": "5af438f81a529efa49a91874e2f9eb2cb78323cd4583cf279f77a715104afb8d",
+    "timestamp": "2026-08-24T18:20:15.453Z",
+    "toc": [],
+    "pages": [
+      {
+        "page": 1,
+        "content": "# <font color=red>Blépharite</font>\n\n● Clinique :\nInflammation du revêtement cutané des paupières\nSouvent d'origine microbienne ou allergique\nŒdème isolé, prurit, sensation de Brûlure à l'intérieur de l'œil +/- sécrétions purulentes.\n\n☑️ Traitement : 10j\n\n☑ 1 Tobrex / Chibrocardon / Maxidrol collyre\n1 gtt 3/j\n\n☑ 2 Sterdex / Maxidrol pmd 1 app le soir\n\nCompresse chaude 3/j pdt 15 min"
+      },
+      {
+        "page": 2,
+        "content": ""
       }
     ]
   }
