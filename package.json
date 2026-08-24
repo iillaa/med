@@ -64,6 +64,7 @@
     "eslint": "^8.57.1",
     "jscpd": "^5.0.12",
     "knip": "^6.27.0",
-    "puppeteer-core": "^23.0.0"
+    "puppeteer-core": "^23.0.0",
+    "wrangler": "^4.125.0"
   }
 }

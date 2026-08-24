@@ -229,6 +229,35 @@ function rebuildClientAssets() {
   } catch (err) {
     console.error("Error bundling app during build:", err);
   }
+
+  // Stamp worker.js /api/version with the package.json app version so the
+  // Cloudflare kill-switch endpoint can never drift from the real release
+  // (minVersion stays hand-controlled — that's the force-update lever).
+  const workerPath = path.join(__dirname, 'worker.js');
+  if (!fs.existsSync(workerPath)) {
+    console.warn("worker.js not found — skipping /api/version stamp.");
+  } else {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf-8'));
+      const appVersion = pkg.version;
+      if (!appVersion) throw new Error('package.json has no version field.');
+      let workerContent = fs.readFileSync(workerPath, 'utf-8');
+      const versionBlockRe = /(url\.pathname === '\/api\/version'[\s\S]{0,400}?\n\s+version:\s*")([^"]+)(")/;
+      if (!versionBlockRe.test(workerContent)) {
+        throw new Error('/api/version response block not found in worker.js — refusing to guess.');
+      }
+      const updatedWorker = workerContent.replace(versionBlockRe, `$1${appVersion}$3`);
+      if (updatedWorker !== workerContent) {
+        fs.writeFileSync(workerPath, updatedWorker, 'utf-8');
+        console.log(`Stamped worker.js /api/version with v${appVersion}`);
+      } else {
+        console.log(`worker.js /api/version already at v${appVersion}`);
+      }
+    } catch (err) {
+      console.error("Error stamping worker.js /api/version during build:", err);
+      throw err;
+    }
+  }
 }
 
 module.exports = { rebuildClientAssets };
