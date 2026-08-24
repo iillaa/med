@@ -32,3 +32,9 @@ else
   # Never fail the npm install over an operator convenience tool.
   exit 0
 fi
+
+# Guard 2: Fix shebangs in Termux node_modules binaries if termux-fix-shebang exists
+if command -v termux-fix-shebang >/dev/null 2>&1; then
+  termux-fix-shebang node_modules/wrangler/bin/wrangler.js node_modules/.bin/* >/dev/null 2>&1 || true
+fi
+

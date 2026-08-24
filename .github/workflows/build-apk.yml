@@ -7,6 +7,7 @@ on:
       - beta-test
       - beta-test-pr
       - android-app
+      - 0x-alpha
 
   # Enable manual triggering
   workflow_dispatch:
@@ -63,7 +64,7 @@ jobs:
           npx cap sync
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '21'
@@ -119,6 +120,7 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+          buildToolsVersion: "34.0.0"
 
       - name: Determine Artifact Path & Prepare Renamed APK
         id: artifact_path
@@ -160,7 +162,7 @@ jobs:
         continue-on-error: true
         # Never publish unsigned/debug APKs as user-facing releases — an unsigned
         # APK cannot be installed over the existing signed app.
-        if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/beta-test-pr') && steps.artifact_path.outputs.is_signed == 'true'
+        if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/beta-test-pr' || github.ref == 'refs/heads/0x-alpha') && steps.artifact_path.outputs.is_signed == 'true'
         with:
           tag_name: v${{ steps.artifact_path.outputs.version }}
           name: Dr. CAT v${{ steps.artifact_path.outputs.version }}
