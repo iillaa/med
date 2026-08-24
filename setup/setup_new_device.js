@@ -83,15 +83,37 @@ async function main() {
   if (!apiKey) {
     console.log('  🔑 La clé Google AI Studio (Gemini) est nécessaire pour le générateur IA.');
     console.log('     (Obtenez-la gratuitement sur : https://aistudio.google.com/app/apikey)\n');
-    const inputKey = await promptUser('  Entrez votre GEMINI_API_KEY (ou Entrée pour ignorer) : ');
+    const inputKey = await promptUser('  Entrez votre GOOGLE_API_KEY / GEMINI_API_KEY (ou Entrée pour ignorer) : ');
+    const crypto = require('crypto');
+    const defaultSyncSecret = crypto.randomBytes(24).toString('hex');
+    const defaultAdminKey = crypto.randomBytes(24).toString('hex');
+    const defaultSessionSecret = crypto.randomBytes(32).toString('hex');
+    const blocklist = '3.7, 3.6, preview, exp';
+
+    const envTemplate = `# Google Gemini API Key (Free on https://aistudio.google.com/)
+GOOGLE_API_KEY=${inputKey || 'your_gemini_api_key_here'}
+GEMINI_BLOCKLIST=${blocklist}
+
+# Server Configuration
+PORT=3000
+NODE_ENV=production
+SESSION_SECRET=${defaultSessionSecret}
+
+# Shared secret for Cloudflare Worker suggestion sync (must match Worker env var)
+SYNC_SECRET=${defaultSyncSecret}
+
+# Admin API key for remote telemetry access (x-api-key header)
+ADMIN_API_KEY=${defaultAdminKey}
+`;
+
     if (inputKey) {
       apiKey = inputKey;
-      fs.writeFileSync(ENV_FILE, `GEMINI_API_KEY=${apiKey}\nSESSION_SECRET=${require('crypto').randomBytes(32).toString('hex')}\n`, 'utf8');
-      console.log('  ✅ Fichier .env créé avec succès.');
+      fs.writeFileSync(ENV_FILE, envTemplate, 'utf8');
+      console.log('  ✅ Fichier .env créé avec succès (GOOGLE_API_KEY, SYNC_SECRET, ADMIN_API_KEY, BLOCKLIST).');
     } else {
       console.log('  ⚠️ Aucune clé renseignée. Le mode IA nécessitera d\'éditer le fichier .env plus tard.');
       if (!fs.existsSync(ENV_FILE)) {
-        fs.writeFileSync(ENV_FILE, `GEMINI_API_KEY=your_gemini_api_key_here\nSESSION_SECRET=${require('crypto').randomBytes(32).toString('hex')}\n`, 'utf8');
+        fs.writeFileSync(ENV_FILE, envTemplate, 'utf8');
       }
     }
   }

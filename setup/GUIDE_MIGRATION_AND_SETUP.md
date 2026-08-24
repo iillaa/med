@@ -1,7 +1,7 @@
 # 📖 Dr. CAT — Guide de Migration & Installation sur Nouvel Appareil
 > **Auteur & Architecte** : Dr. Kibeche Ali Dia Eddine  
 > **Application** : Dr. CAT (Doctor Clinical Action Protocol)  
-> **Version** : v1.10.1+ | **Branche** : `beta-test-pr`
+> **Version** : v1.13.0 | **Branche** : `0x-alpha`
 
 ---
 
@@ -15,8 +15,8 @@ Ce document vous donne **la procédure exacte étape par étape** pour transfér
 Une fois le projet cloné, un **assistant d'installation interactif** configure tout automatiquement :
 
 ```bash
-# 1. Cloner le projet depuis GitHub (Branche de travail)
-git clone -b beta-test-pr https://github.com/votre-compte/med.git
+# 1. Cloner le projet depuis GitHub (Branche de travail 0x-alpha)
+git clone -b 0x-alpha https://github.com/iillaa/med.git
 cd med
 
 # 2. Lancer l'assistant d'installation tout-en-un
@@ -25,8 +25,8 @@ node setup/setup_new_device.js
 
 ### 🪄 Ce que fait le script automatiquement :
 1. ✅ Vérifie la version de Node.js (>= v18).
-2. ✅ Installe toutes les dépendances (`npm install`).
-3. ✅ Configure les clés d'API et le mot de passe Administrateur.
+2. ✅ Installe toutes les dépendances (`npm install` avec patch automatique workerd pour Termux).
+3. ✅ Configure les clés d'API, `SYNC_SECRET`, `ADMIN_API_KEY`, `GEMINI_BLOCKLIST` et le mot de passe Administrateur.
 4. ✅ Compile et minifie les bundles de production (`npm run build`).
 5. ✅ Télécharge et configure les tunnels réseau (`cloudflared` & `ngrok`).
 6. ✅ Installe les raccourcis Termux:Widget et les commandes CLI globales (`med`).
@@ -58,18 +58,25 @@ Si vous préférez exécuter les commandes une par une :
 
 ### Étape 2 : Cloner et Installer les Dépendances
 ```bash
-git clone -b beta-test-pr https://github.com/votre-compte/med.git
+git clone -b 0x-alpha https://github.com/iillaa/med.git
 cd med
 npm install
 ```
 
 ---
 
-### Étape 3 : Créer le Fichier `.env` (Clé d'API Gemini)
-Créez le fichier `.env` à la racine du projet avec votre clé Google AI Studio :
+### Étape 3 : Créer le Fichier `.env` (Clés d'API & Sécurité)
+Créez le fichier `.env` à la racine du projet avec vos clés :
 ```bash
-echo "GEMINI_API_KEY=AIzaSy...VotreCleGeminiIci" > .env
-echo "SESSION_SECRET=$(node -e 'console.log(require("crypto").randomBytes(32).toString("hex"))')" >> .env
+cat << 'EOF' > .env
+GOOGLE_API_KEY=AIzaSy...VotreCleGeminiIci
+GEMINI_BLOCKLIST=3.7, 3.6, preview, exp
+PORT=3000
+NODE_ENV=production
+SESSION_SECRET=$(node -e 'console.log(require("crypto").randomBytes(32).toString("hex"))')
+SYNC_SECRET=$(node -e 'console.log(require("crypto").randomBytes(24).toString("hex"))')
+ADMIN_API_KEY=$(node -e 'console.log(require("crypto").randomBytes(24).toString("hex"))')
+EOF
 ```
 > 💡 *Obtenez votre clé gratuite sur : [Google AI Studio](https://aistudio.google.com/app/apikey)*
 
