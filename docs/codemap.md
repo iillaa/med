@@ -21,7 +21,8 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── cats_db.json.bak             # Automatic database backup (created before writes)
 ├── suggestions.json             # Moderation suggestions queue
 ├── pdf_index.json               # Master indexed PDF page text database
-├── package.json                 # Node dependencies, version (1.8.9), and build scripts
+├── package.json                 # Node dependencies, version (1.12.0), and build scripts
+├── todo0xalpha.md               # Security audit ledger: bugs found → fixes → commits → verify commands (v1.12.0)
 ├── README.md                    # Project landing, features, security and performance overview
 │
 ├── cat_db_generator/            # Database V3.5 Generator Engine & Clinical Labs
@@ -61,7 +62,10 @@ This document outlines the file layout, key data modules, and logic flows of **D
 │
 ├── scripts/                     # Utility & Optimization Scripts
 │   ├── clean_android_assets.js  # Android asset stripper (anti-decompilation protection)
-│   └── compress_pdfs.js         # Ghostscript ultra-compressor
+│   ├── compress_pdfs.js         # Ghostscript ultra-compressor
+│   └── termux-wrangler-fix.sh   # Patches workerd for Termux/ARM after npm install (wrangler CLI fix)
+│
+├── docs/security-hardening-v1.12.0.md  # 0x-alpha audit technical write-up
 │
 ├── tests/                       # Automated Verification & Test Suite
 │   ├── run_all_tests.js         # Master test runner (8 sub-suites)

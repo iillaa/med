@@ -376,9 +376,29 @@ The following critical security patches were applied in v1.5.0:
 | Hardcoded API key removed | `server/routes/version.js` | `ADMIN_API_KEY` now loaded from `.env` only |
 | dotenv loading | `server/index.js` | Secrets loaded at boot from `.env` |
 | X-Forwarded-For spoofing blocked | `server/middleware/rate-limit.js` | XFF only trusted from local socket IPs |
-| Suggestions endpoint auth | `server/routes/suggestions.js` | Requires valid `x-app-key` header + 5KB payload cap |
+| Suggestions endpoint auth | `server/routes/suggestions.js` | Requires valid `x-app-key` header + payload cap |
 | Toast XSS eliminated | `public/js/utils.js` | `textContent` used instead of `innerHTML` |
 | Body size limit | `server/index.js` + `server/routes/pdfs.js` | Global 1MB limit, PDF upload gets local 50MB |
+
+## 🛡️ Security Hardening (v1.12.0 — Audit 0x-alpha)
+
+> Full technical detail: [`security-hardening-v1.12.0.md`](./security-hardening-v1.12.0.md) · verification ledger: [`todo0xalpha.md`](../todo0xalpha.md)
+
+| Fix | File | Detail |
+|---|---|---|
+| Admin API key fallback removed (3 routes) | `server/routes/admin-analytics.js` | `'drcat_secret_api_key_2026'` fallback eliminated; env-only + `crypto.timingSafeEqual` |
+| SSE debug-stream authenticated | `server/routes/cat-generator.js` | Admin token OR loopback required, else 403 |
+| SSE slow-DoS capped | `cat_db_generator/lib/debug-emitter.js` | Max 20 concurrent SSE clients; overflow rejected cleanly |
+| V2/V3 write-path bug fixed | `server/routes/cat-generator.js` | CAT edits wrote to dead `V2_DB_PATH`; read/write paths unified via resolved `dbPath` |
+| Worker relay locked behind shared secret | `worker.js`, `server/services/sync-suggestions.js` | GET/ack/purge require `x-sync-secret` (timing-safe SHA-256); client POST open + `x-app-key` (failover path preserved) |
+| Zod input validation wired | `server/routes/auth.js`, `server/routes/suggestions.js` | Login password schema; suggestion envelope schema (enum type, coerced int catId, field caps) |
+| Notes autosave | `public/js/components/workspace.js` | Debounced save + flush on fiche switch / app hide — no more silent data loss |
+| XSS sinks escaped | `public/js/version-checker.js`, `public/js/components/quiz/ui.js` | Lock-screen config values escaped + http(s)-only URLs; quiz vignettes/hints/results escaped |
+| WebView navigation pinned | `capacitor.config.json` | `"*"` wildcard removed; explicit provider domain list |
+| Touch targets ≥44px | `public/css/layout.css`, `public/css/sidebar.css` | Status pills/buttons, print button on ≤850px layout |
+| CI unsigned-release bug fixed | `.github/workflows/build-apk.yml` | Sign-step condition moved to bash output; unsigned APKs blocked from Releases; `npm ci`; Gradle cache preserved |
+| Lighthouse gate enforced | `.github/workflows/lighthouse.yml` | `\|\| true` removed — score assertions can fail the build |
+| Kill-switch version drift fixed | `build.js`, `worker.js` | `/api/version` version field auto-stamped from `package.json` every build (`minVersion` stays manual) |
 
 ---
 
@@ -492,13 +512,16 @@ The following critical security patches were applied in v1.5.0:
 * **Execution Native Edge (24/7)** : `drcat.dr-cat.workers.dev` exécute nativement les endpoints de l'application (`POST /api/suggestions`, `GET /api/server-providers`, `GET /api/search-status`, `GET /api/version`) directement sur les serveurs Edge de Cloudflare (~90ms).
 * **Persistance Cloudflare KV (`SUGGESTIONS_KV`)** : Les propositions soumises par les utilisateurs web du monde entier sont enregistrées 24/7 dans la base clé-valeur Cloudflare (`d569bf8299a545f182c9e6acedd4d6aa`).
 * **Multi-Provider Failover Registry** :
-  - **Primary (Priority 1)** : `https://drcat.dr-cat.workers.dev` (Cloudflare Worker Edge)
-  - **Secondary (Priority 2)** : `https://rendition-duchess-dry.ngrok-free.dev` (Termux Backend Tunnel)
+  - **Primary (Priority 1)** : `https://rendition-duchess-dry.ngrok-free.dev` (Termux Backend Tunnel — serveur dynamique complet)
+  - **Secondary (Priority 2)** : Tunnel `trycloudflare.com` (backup Termux)
+  - **Fallback statique** : `https://drcat.dr-cat.workers.dev` (Cloudflare Worker Edge, toujours en ligne)
+* **Sécurisation du relay (v1.12.0)** : les routes serveur-à-serveur (`GET /api/suggestions`, `POST /api/suggestions/ack`, `DELETE|POST /api/suggestions/:id`) exigent l'en-tête `x-sync-secret` (comparaison timing-safe SHA-256 contre la variable secrète du Worker). La soumission client `POST /api/suggestions` reste ouverte (chemin de basculement) mais exige l'en-tête `x-app-key`. Le secret doit être identique dans `.env` (Termux) et dans les variables du Worker (`wrangler secret put SYNC_SECRET --name drcat`).
+* **Version Kill-Switch Auto-Timbrée** : `build.js` met à jour le champ `version` de `/api/version` depuis `package.json` à chaque build ; `minVersion` reste le levier manuel de mise à jour forcée.
 
 ### 2. Handshake ACK & Purge 2-Voies (`server/services/sync-suggestions.js`)
-* **Accusé de Réception (`POST /api/suggestions/ack`)** : Lors du démarrage de Termux ou de l'ouverture du Panneau d'Administration, le serveur local interroge Cloudflare KV, stocke les propositions dans `suggestions.json`, et envoie immédiatement un signal ACK (`{ ids: [...] }`) à Cloudflare pour purger les éléments reçus de la file d'attente du cloud.
-* **Purge lors de la Décision (`DELETE /api/suggestions/:id`)** : Lorsque l'administrateur valide ou rejette une proposition dans Termux, un appel DELETE purge définitivement la fiche de la base Cloudflare KV pour éviter toute réapparition en boucle.
-* **Smart Upsert Engine (`server/routes/suggestions.js`)** : Lors de l'approbation d'une proposition, le serveur vérifie la présence d'une CAT existante par ID ou titre identique. Si la carte existe, elle est mise à jour in-place (`"offline"` ➔ `"offlineh"`) sans générer de doublons orphelins dans la base de données.
+* **Accusé de Réception (`POST /api/suggestions/ack`)** : Lors du démarrage de Termux ou de l'ouverture du Panneau d'Administration, le serveur local interroge Cloudflare KV (avec l'en-tête `x-sync-secret`), stocke les propositions dans `suggestions.json`, et envoie immédiatement un signal ACK (`{ ids: [...] }`) à Cloudflare pour purger les éléments reçus de la file d'attente du cloud.
+* **Purge lors de la Décision (`DELETE /api/suggestions/:id`)** : Lorsque l'administrateur valide ou rejette une proposition dans Termux, un appel DELETE authentifié purge définitivement la fiche de la base Cloudflare KV pour éviter toute réapparition en boucle.
+* **Smart Upsert Engine (`server/routes/suggestions.js`)** : Lors de l'approbation d'une proposition, le serveur vérifie la présence d'une CAT existante par ID ou titre identique. Si la carte existe, elle est mise à jour in-place sans générer de doublons orphelins dans la base de données.
 
 
 

@@ -242,23 +242,23 @@ The Admin Diagnostics **"Serveurs Distants Configurés"** card is now **read-onl
 Dr. CAT is compiled into an `.apk` automatically on GitHub.
 
 1. **GitHub Actions Workflow**:
-   The workflow defined in `.github/workflows/build-apk.yml` triggers on every push to the `android-app` and `light-android` branches.
+   The workflow defined in `.github/workflows/build-apk.yml` triggers on every push to the `master`, `beta-test`, `beta-test-pr`, and `android-app` branches.
 2. **Steps performed in Cloud CI**:
-   * Sets up Java 17 and Android SDK.
-   * Installs Node modules.
+   * Sets up JDK 21 and Android SDK.
+   * Installs Node modules with `npm ci`.
    * Checks for a repository secret named `REMOTE_SERVER_URL` and dynamically creates the git-ignored `remote_server_config.json` before building.
-   * Runs `node build.js` to clone JSON databases and write the remote configuration variables into `public/js/remote_config.js`.
+   * Runs `node build.js` to clone JSON databases, write the remote configuration variables into `public/js/remote_config.js`, and auto-stamp the Worker `/api/version` from `package.json`.
    * Runs `npx cap sync` to compile mobile wrapper assets.
-   * Builds and signs the release APK using Gradle.
+   * **Signing is conditional**: a bash pre-step (`Check Signing Secrets`) detects whether `SIGNING_KEY` exists and publishes its result as a step output. The sign step runs only on release builds with signing secrets present; unsigned APKs are uploaded as artifacts but are **never published as GitHub Releases** (an unsigned APK cannot be installed over the signed app users already have).
 3. **Repository Secrets Configuration**:
    To successfully build, sign, and pre-configure the APK, define these secrets in your GitHub repository (**Settings ➔ Secrets and variables ➔ Actions**):
    * `REMOTE_SERVER_URL`: The default public URL of your Node.js/ngrok backend (e.g., `https://rendition-duchess-dry.ngrok-free.dev`). If defined, this is baked directly into the APK so it boots up online out-of-the-box.
-   * `SIGNING_KEY`: The base64-encoded Android Keystore (.jks/.keystore) file.
+   * `SIGNING_KEY`: The base64-encoded Android Keystore (.jks/.keystore) file. Without it, release APKs build unsigned and Releases are skipped.
    * `ALIAS`: The key alias defined when creating the keystore.
    * `KEYSTORE_PASSWORD`: The main password of the keystore file.
    * `KEY_PASSWORD`: The password of the specific key alias.
 4. **Artifact Output**:
-   The resulting `.apk` is saved as a downloadable build artifact on the GitHub Actions run summary page.
+   The resulting `.apk` is saved as a downloadable build artifact on the GitHub Actions run summary page. Signed releases additionally publish to GitHub Releases with tag `v<version>`.
 
 ---
 
@@ -322,6 +322,8 @@ node tests/test_cat_search.js
   }
   ```
 * **Exclusion d'Assets (`public/.assetsignore`)** : Contient `_worker.js` pour empêcher Wrangler de traiter les scripts du serveur comme des ressources téléchargeables publiques.
+* **Secret partagé du relay (v1.12.0)** : Les routes serveur-à-serveur (`GET /api/suggestions`, `/ack`, purge par id) exigent l'en-tête `x-sync-secret`. Le secret doit être identique dans `.env` (`SYNC_SECRET=...`) et sur le Worker (`npx wrangler secret put SYNC_SECRET --name drcat`). La soumission client `POST /api/suggestions` reste ouverte avec l'en-tête `x-app-key` public. Déploiement : `npx wrangler deploy`.
+* **Termux** : après tout `npm install`, exécuter `bash scripts/termux-wrangler-fix.sh` (workerd n'a pas de binaire android-arm64 ; le shim garde `whoami`/`secret put`/`deploy` fonctionnels).
 
 ### 3. Synchronisation Atomique de Version (`scripts/bump_version.js`)
 * **Commande Universelle** : `node scripts/bump_version.js <version>` (ex: `node scripts/bump_version.js 1.8.1`).
@@ -332,6 +334,7 @@ node tests/test_cat_search.js
   4. `public/index.html` (`meta[name="app-version"]`)
   5. `worker.js` (`version`)
   6. Exécute `npm run build` pour re-stamper le bundle et les hashs d'assets.
+* **Filet de sécurité v1.12.0** : en plus du bump manuel, `build.js` re-stampe automatiquement le champ `version` de `/api/version` dans `worker.js` depuis `package.json` à CHAQUE build — le kill-switch ne peut plus prendre de retard sur la version réelle. Ne jamais éditer ce champ à la main ; ne toucher que `minVersion` (levier de force-update).
 
 ### 4. Isolation Complète de la Base de Données de Test (`CATS_DB_PATH`)
 * **Principe** : Les suites de tests automatiques (`test_suggestions.js`, `test_auth.js`) s'exécutent sur une base temporaire isolée (`cats_db_test_*.json`) via la variable d'environnement `CATS_DB_PATH`.
