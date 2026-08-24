@@ -58,16 +58,17 @@ async function discoverDynamicModels(apiKey) {
     });
 
     if (models.length > 0) {
-      cachedDynamicModels = models;
+      const filtered = applyModelBlocklist(models);
+      cachedDynamicModels = filtered;
       lastModelDiscoveryTime = now;
-      console.log(`🤖 [Dynamic LLM Discovery] Discovered ${models.length} active models. Top primary: ${models[0]}`);
-      return models;
+      console.log(`🤖 [Dynamic LLM Discovery] Discovered ${models.length} active models (${models.length - filtered.length} blocklisted). Top primary: ${filtered[0] || 'NONE'}`);
+      return filtered;
     }
   } catch (err) {
     console.warn(`⚠️ Dynamic model discovery failed: ${err.message}. Using fallback model list.`);
   }
 
-  return FALLBACK_GEMINI_MODELS;
+  return applyModelBlocklist(FALLBACK_GEMINI_MODELS);
 }
 
 const V3_DB_PATH = path.join(__dirname, '..', 'cats_db_v3_generated.json');
@@ -167,6 +168,23 @@ function safeParseLLMJson(text) {
 /**
  * Call Gemini REST API with dynamic model discovery, extended thinking budget, token logging, and rate-limit backoff
  */
+/**
+ * Filters out models matching the GEMINI_BLOCKLIST env var (comma-separated substrings).
+ * Protects against a bad/experimental Google model auto-becoming primary via version sort.
+ * Example: GEMINI_BLOCKLIST="flash-preview, exp"
+ */
+function applyModelBlocklist(models) {
+  const blocklist = (process.env.GEMINI_BLOCKLIST || '')
+    .split(',')
+    .map(s => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (!blocklist.length) return Array.isArray(models) ? models.slice() : [];
+  return (models || []).filter(m => {
+    const name = String(m).toLowerCase();
+    return !blocklist.some(b => name.includes(b));
+  });
+}
+
 async function callLLMApi(systemPrompt, userPrompt, options = {}) {
   const apiKey = options.apiKey || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -175,7 +193,11 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
 
   // Discover highest dynamic active models from Google API
   const dynamicModels = await discoverDynamicModels(apiKey);
-  const modelsToTry = options.model ? [options.model, ...dynamicModels] : dynamicModels;
+  let modelsToTry = options.model ? [options.model, ...dynamicModels] : dynamicModels;
+  modelsToTry = applyModelBlocklist(modelsToTry);
+  if (modelsToTry.length === 0) {
+    throw new Error('GEMINI_BLOCKLIST a filtré tous les modèles disponibles. Vérifier la variable GEMINI_BLOCKLIST dans .env.');
+  }
   let lastError = null;
 
   for (const model of modelsToTry) {
@@ -862,5 +884,6 @@ RAPPEL : Génère un objet JSON unique avec "label", "summary" (4 étapes), "red
 module.exports = {
   callLLMApi,
   generateCATWithLLM,
-  generateSubCATWithLLM
+  generateSubCATWithLLM,
+  applyModelBlocklist
 };

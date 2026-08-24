@@ -80,3 +80,16 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
 
 ## Audit Ledger Reference
 - Security audit fixes (v1.12.0, branch `0x-alpha`): verification ledger in `todo0xalpha.md`, technical detail in `docs/security-hardening-v1.12.0.md`.
+
+# LLM Engine Safety Knobs (v1.12.0+)
+
+## GEMINI_BLOCKLIST Rule
+- **Optional env var** `GEMINI_BLOCKLIST` (in `.env`, comma-separated substrings) filters out bad/experimental Google models BEFORE the "highest version wins" auto-sort picks them. Applied to dynamic discovery, fallback list, and per-request overrides.
+- Example: `GEMINI_BLOCKLIST=flash-preview, exp-model`
+- If filtering empties the model list, generation fails LOUDLY with a clear message — never silently.
+- Helper: `applyModelBlocklist(models)` exported from `cat_db_generator/lib/llm-engine.js`.
+
+## Unknown-Molecule Validator Gate
+- `medical-validator.js` section 7f cross-checks every token written next to a dosage against BDPM + Algerian nomenclature + local safety rules + clinical ceilings.
+- Unknown molecules produce a `[DCI Non Référencée]` WARNING (never an error — doctor decides in Generator Lab). Administrative CATs exempt; sub-cat ordonnances scanned.
+- When adding new reference datasets later, extend `getKnownDrugTokens()` so the cross-check stays current.

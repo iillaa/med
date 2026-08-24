@@ -112,8 +112,56 @@ function isAdministrativeCAT(cat) {
   if (!cat) return false;
   const category = (cat.category || '').toLowerCase();
   const title = (cat.title || '').toLowerCase();
-  return category === 'administratif' || 
+  return category === 'administratif' ||
     /certificat|attestation|lettre|rédaction|dossier|médico-légal|arrêt de travail/i.test(title);
+}
+
+// French filler words that can legitimately precede a dosage figure but are not molecules.
+const DRUG_TOKEN_STOPWORDS = new Set([
+  'sirop', 'comprime', 'comprimes', 'gelule', 'gelules', 'sachet', 'sachets',
+  'ampoule', 'ampoules', 'flacon', 'flacons', 'cuillere', 'mesure', 'mesures',
+  'suppositoire', 'suppositoires', 'injection', 'injections', 'application',
+  'goutte', 'gouttes', 'poche', 'poches', 'perfusion', 'spray', 'collyre',
+  'pommade', 'creme', 'pastille', 'pastilles', 'dose', 'doses', 'prise',
+  'prises', 'jour', 'jours', 'fois', 'matin', 'midi', 'soir', 'coucher',
+  'repas', 'maximum', 'maximal', 'maximale', 'minimum', 'seuil', 'cible',
+  'totale', 'journaliere', 'quotidienne', 'unique', 'double', 'demi',
+  'pendant', 'jusqu', 'environ', 'puis', 'soit', 'total', 'repartis',
+  'espacees', 'heure', 'heures', 'semaine', 'semaines', 'mois', 'cure',
+  'traitement', 'adulte', 'enfant', 'nourrisson', 'poids', 'allergie',
+  'allaitement', 'grossesse', 'rein', 'renal', 'renale'
+]);
+
+function normalizeDrugToken(s) {
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z]/g, '');
+}
+
+// Lazily-built union of every known molecule/brand token across ALL reference sources
+// (BDPM France, Algerian nomenclature, local safety rules, clinical ceilings).
+let _knownDrugTokensCache = null;
+function getKnownDrugTokens() {
+  if (_knownDrugTokensCache) return _knownDrugTokensCache;
+  const set = new Set();
+  const addName = (name) => {
+    if (!name || typeof name !== 'string') return;
+    set.add(normalizeDrugToken(name));
+    // Split compound DCIs ("Amoxicilline/Acide Clavulanique") into individual words
+    String(name).split(/[^a-zà-ÿ]+/i).forEach((w) => {
+      const n = normalizeDrugToken(w);
+      if (n.length >= 4) set.add(n);
+    });
+  };
+  try { (BDPM_PHARMACOLOGY && BDPM_PHARMACOLOGY.dcis || []).forEach(e => { addName(e.dci); (e.brands || []).forEach(addName); }); } catch (_) {}
+  try { (ALGERIAN_NOMENCLATURE && ALGERIAN_NOMENCLATURE.dcis || []).forEach(e => { addName(e.dci); (e.brands || []).forEach(addName); }); } catch (_) {}
+  try { Object.values(CLINICAL_CEILINGS).forEach(d => { addName(d.dci); (d.algerian_brands || []).forEach(addName); }); } catch (_) {}
+  try { DRUG_SAFETY_RULES.forEach(r => addName(r.name)); } catch (_) {}
+  set.delete('');
+  _knownDrugTokensCache = set;
+  return set;
 }
 
 /**
@@ -373,6 +421,27 @@ function validateCAT(cat) {
         if (!hasInteractionWarning) {
           errors.push(`[Interaction Médicamenteuse Majeure - ${rule.category}] ${rule.name} : ${rule.clinical_risk} ${rule.recommendation}`);
         }
+      }
+    }
+
+    // --- 7f. UNKNOWN MOLECULE CROSS-CHECK (BDPM + Nomenclature Algérienne + règles locales) ---
+    // A molecule written next to a dosage but absent from ALL reference lists cannot be
+    // safety-checked at all (no ceiling, no CI rule, no interaction pair). Surface it as a
+    // WARNING so the doctor verifies existence & posology manually before promotion.
+    if (!isAdmin) {
+      const knownTokens = getKnownDrugTokens();
+      const unknownMolecules = new Set();
+      const doseTokenRx = /([a-zà-ÿ][a-zà-ÿ\-']{2,})\s*(?:\d+(?:[.,]\d+)?\s*(?:mg\b|g\b|ml\b|ui\b|mg\s*\/\s*kg))/gi;
+      for (const pText of allPrescriptionTexts) {
+        let m;
+        while ((m = doseTokenRx.exec(pText)) !== null) {
+          const norm = normalizeDrugToken(m[1]);
+          if (norm.length < 4 || DRUG_TOKEN_STOPWORDS.has(norm)) continue;
+          if (!knownTokens.has(norm)) unknownMolecules.add(m[1].toLowerCase());
+        }
+      }
+      if (unknownMolecules.size > 0) {
+        warnings.push(`[DCI Non Référencée] Molécule(s) absente(s) de la pharmacopée BDPM, de la nomenclature algérienne et des règles de sécurité locales : ${Array.from(unknownMolecules).join(', ')}. Vérifier l'existence et les posologies manuellement avant promotion.`);
       }
     }
   }

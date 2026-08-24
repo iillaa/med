@@ -48,6 +48,13 @@ Deployed & live on `https://drcat.dr-cat.workers.dev` (Worker Version ID `4ea206
 
 ---
 
+## 🔧 Improvements Implemented After Architecture Review (commit post-`3d85e3d`)
+
+| # | Gap identified in review | Fix | Verify |
+|---|----------|-----------|-------------|
+| R1 | **Validator blind spot**: a hallucinated molecule absent from BDPM/Algerian nomenclature/local rules passed silently (no ceiling = no check possible) | New validator section 7f: every token written next to a dosage is cross-checked against the union of BDPM (4,474 DCIs) + Algerian nomenclature + safety rules + ceilings; unknown molecules emit `[DCI Non Référencée]` **warning** surfaced in Generator Lab. Administrative CATs exempted; sub-cat ordonnances scanned | Unit test: fake `Zorblaxine 500 mg` → warning, `valid` stays true, paracétamol not flagged |
+| R2 | **"Highest version wins" model sort** could auto-adopt a bad/experimental Google model overnight | `GEMINI_BLOCKLIST` env var (comma-separated substrings) applied to dynamic discovery AND fallback list AND per-request override; empty result after filtering fails loudly with clear message | Set `GEMINI_BLOCKLIST=flash-preview,exp-model`, call `applyModelBlocklist([...])` → filtered |
+
 ## ⏳ TODO — Wrangler / Cloudflare Settings (AI: REMEMBER THIS)
 
 > These are environment facts that MUST survive across sessions. Also mirrored in `.agents/AGENTS.md`.
