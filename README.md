@@ -275,20 +275,35 @@ shortcuts/stop_med.sh     # Clean shutdown
 
 ---
 
-## ⚡ Architecture Serverless Cloudflare Edge & Protocole ACK (v1.7.9)
+## ⚡ Architecture Serverless Cloudflare Edge & Protocole ACK (v1.12.0)
 
 ### ☁️ Moteur Edge Cloudflare Workers (`worker.js` & `wrangler.jsonc`)
 - **Execution 24/7 sur Edge Cloudflare** : `https://drcat.dr-cat.workers.dev` exécute nativement les endpoints `/api/suggestions`, `/api/server-providers`, `/api/search-status`, et `/api/version` en ~90ms (**HTTP 200 OK**) sans nécessiter que le serveur Termux soit en ligne.
 - **Stockage Cloudflare KV (`SUGGESTIONS_KV`)** : Les suggestions soumises par les utilisateurs du monde entier sont enregistrées 24h/24 dans la base clé-valeur Cloudflare (`d569bf8299a545f182c9e6acedd4d6aa`).
 - **Serveurs Multi-Fournisseurs avec Basculement** :
-  - **Priorité 1 (Primaire)** : `https://drcat.dr-cat.workers.dev` (Cloudflare CDN Edge)
-  - **Priorité 2 (Secondaire)** : `https://rendition-duchess-dry.ngrok-free.dev` (Tunnel Ngrok Termux)
+  - **Priorité 1 (Primaire)** : `https://rendition-duchess-dry.ngrok-free.dev` (Tunnel Ngrok Termux — serveur dynamique complet)
+  - **Priorité 2 (Secondaire)** : Tunnel `trycloudflare.com` (backup Termux)
+  - **Fallback statique** : `https://drcat.dr-cat.workers.dev` (Edge Cloudflare, toujours en ligne)
+- **Version Kill-Switch Auto-Timbrée** : `build.js` met automatiquement à jour le champ `version` de `/api/version` dans `worker.js` depuis `package.json` à chaque build. Le champ `minVersion` reste contrôlé manuellement (levier de mise à jour forcée).
+
+### 🔒 Sécurisation du Relay Cloudflare (v1.12.0 — Audit 0x-alpha)
+- **Routes serveur-à-serveur verrouillées** : `GET /api/suggestions`, `POST /api/suggestions/ack` et `DELETE /api/suggestions/:id` exigent l'en-tête `x-sync-secret` (comparaison timing-safe SHA-256). Sans lui → **403**.
+- **Soumission client préservée** : `POST /api/suggestions` reste ouvert (chemin de basculement quand ngrok est hors ligne) mais exige désormais l'en-tête `x-app-key` public.
+- **Secret partagé en 2 endroits** : `.env` local (`SYNC_SECRET=...`) ET variable secrète du Worker Cloudflare (`npx wrangler secret put SYNC_SECRET --name drcat`). Ils doivent rester identiques.
 
 ### 🔄 Protocole de Synchronisation 2-Voies & Handshake ACK
-1. **Sync Automatique au Démarrage** : Dès le lancement de `shortcuts/start_med.sh` (ou à l'ouverture du Panneau Admin), Termux interroge `GET /api/suggestions` sur Cloudflare KV et fusionne automatiquement les nouvelles propositions dans `suggestions.json`.
+1. **Sync Automatique au Démarrage** : Dès le lancement de `shortcuts/start_med.sh` (ou à l'ouverture du Panneau Admin), Termux interroge `GET /api/suggestions` sur Cloudflare KV (avec `x-sync-secret`) et fusionne automatiquement les nouvelles propositions dans `suggestions.json`.
 2. **Accusé de Réception ACK (`POST /api/suggestions/ack`)** : Immédiatement après la mise en cache locale, Termux envoie la liste des identifiants reçus (`{ ids: [...] }`) à Cloudflare. Le Worker nettoie la file cloud pour garantir qu'aucune proposition n'est envoyée en double.
 3. **Purge Cloud lors de l'Approbation/Rejet (`DELETE /api/suggestions/:id`)** : Lorsque l'administrateur valide ou rejette une proposition dans Termux, le serveur envoie un signal DELETE à Cloudflare KV pour purger définitivement la fiche du cloud.
 4. **Approbation Intelligente Anti-Doublons (Upsert)** : Lors de l'approbation d'une fiche, le serveur vérifie la présence d'une CAT existante par ID ou titre identique et met à jour la fiche existante in-place au lieu de créer une carte orpheline en double.
+
+---
+
+## 🛡️ Journal d'Audit Sécurité (0x-alpha)
+
+L'audit sécurité complet (13 vulnérabilités corrigées : clé API codée en dur, SSE non authentifié, relay Worker ouvert, APK release non signé en CI, perte de notes, XSS, cibles tactiles, validation Zod…) est documenté ici :
+* [Ledger de vérification](file:///data/data/com.termux/files/home/med/todo0xalpha.md) — tableau bug → fix → commit → commande de vérification.
+* [Détail technique](file:///data/data/com.termux/files/home/med/docs/security-hardening-v1.12.0.md) — analyse par surface (backend, edge, client, CI).
 
 ---
 

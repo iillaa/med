@@ -56,3 +56,25 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
 ## Author Name Display Rule
 - **User-Facing UI Credit**: Display **`Dr. Kibeche Ali`** (in Dashboard footer, About modal, Legal/CGU disclaimer).
 - **Code & Legal Metadata**: Display **`Dr. Kibeche Ali Dia Eddine`** (in `package.json`, `LICENSE`, `server/index.js`, and `android/app/build.gradle`).
+
+# Cloudflare Wrangler & Termux Environment Protocol
+
+## SYNC_SECRET Parity Rule (CRITICAL — REMEMBER ACROSS SESSIONS)
+- **CRITICAL**: The Worker suggestion relay (`worker.js`) is gated behind a shared secret. `SYNC_SECRET` MUST remain IDENTICAL in BOTH locations:
+  1. Local Termux: `.env` → `SYNC_SECRET=<hex>` (read by `server/services/sync-suggestions.js`)
+  2. Cloudflare: Worker secret → `npx wrangler secret put SYNC_SECRET --name drcat`
+- If either side changes, KV suggestion sync fails with 403 (server logs `[CloudSync]` warning; client apps unaffected).
+- Verification: `curl -s -o /dev/null -w "%{http_code}" https://drcat.dr-cat.workers.dev/api/suggestions` → must be 403; with `-H "x-sync-secret: $(grep '^SYNC_SECRET=' .env | cut -d= -f2)"` → must be 200.
+
+## Termux workerd Shim Rule
+- **CRITICAL**: The `workerd` package has NO android-arm64 binary. After ANY `npm install`/`npm ci` that reinstalls workerd, EVERY wrangler command crashes (`Unsupported platform: android arm64 LE`) — even `wrangler --version`.
+- Fix: run `bash scripts/termux-wrangler-fix.sh`. It patches `node_modules/workerd/lib/main.js` to skip native binary resolution.
+- Only `wrangler dev` needs the real binary — it never worked on-device and is not required for `whoami`, `secret put`, or `deploy`.
+
+## Wrangler Deploy & Version Rules
+- Deploy = `npx wrangler deploy` (uploads `worker.js` + `public/` assets together per `wrangler.jsonc`). OAuth token stored at `/root/.config/.wrangler/config/default.toml`.
+- Kill-switch lever = `minVersion` in `worker.js` `/api/version` response — bump deliberately only.
+- The `version` field is AUTO-STAMPED by `build.js` from `package.json` on every build. Never hand-edit it; never let the build fail silently if stamping breaks.
+
+## Audit Ledger Reference
+- Security audit fixes (v1.12.0, branch `0x-alpha`): verification ledger in `todo0xalpha.md`, technical detail in `docs/security-hardening-v1.12.0.md`.
