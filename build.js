@@ -64,33 +64,58 @@ function rebuildClientAssets() {
     throw err;
   }
 
-  // Copy pdf_index.json (minified) and generate pdf_list.json
-  const pdfIndexSource = path.join(__dirname, 'pdf_index.json');
-  if (fs.existsSync(pdfIndexSource)) {
+  // Build clean public/data/pdf_index.json and pdf_list.json directly from public/pdfs/ and data/pdf_cache/
+  const publicPdfsDir = path.join(__dirname, 'public', 'pdfs');
+  const pdfCacheDir = path.join(__dirname, 'data', 'pdf_cache');
+
+  if (fs.existsSync(publicPdfsDir)) {
     try {
-      const rawData = fs.readFileSync(pdfIndexSource, 'utf-8');
-      const parsedIndex = JSON.parse(rawData);
+      const publicFiles = fs.readdirSync(publicPdfsDir)
+        .filter(f => f.toLowerCase().endsWith('.pdf') || f.toLowerCase().endsWith('.docx'));
+
+      const cleanPublicIndex = [];
+      const cleanPublicList = [];
+
+      for (const file of publicFiles) {
+        cleanPublicList.push(file);
+        const cacheFile = path.join(pdfCacheDir, `${file}.json`);
+        if (fs.existsSync(cacheFile)) {
+          try {
+            const cacheData = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+            cleanPublicIndex.push({
+              pdf: file,
+              pages: Array.isArray(cacheData.pages) ? cacheData.pages.map(p => ({
+                page: p.page,
+                content: p.content || p.text || ''
+              })) : []
+            });
+          } catch (_) {
+            cleanPublicIndex.push({ pdf: file, pages: [] });
+          }
+        } else {
+          cleanPublicIndex.push({ pdf: file, pages: [] });
+        }
+      }
+
       fs.writeFileSync(
         path.join(publicDataDir, 'pdf_index.json'),
-        JSON.stringify(parsedIndex),
+        JSON.stringify(cleanPublicIndex),
         'utf-8'
       );
-      console.log("Copied pdf_index.json (minified) to public/data/");
+      console.log(`Generated clean public/data/pdf_index.json (${cleanPublicIndex.length} public books, 0 dev leaks)`);
 
-      // Generate lightweight pdf_list.json for fast rendering of lists
-      const list = parsedIndex.map(doc => doc.pdf);
       fs.writeFileSync(
         path.join(publicDataDir, 'pdf_list.json'),
-        JSON.stringify(list),
+        JSON.stringify(cleanPublicList),
         'utf-8'
       );
-      console.log("Generated and copied pdf_list.json (minified) to public/data/");
+      console.log(`Generated clean public/data/pdf_list.json (${cleanPublicList.length} files)`);
     } catch (err) {
-      console.error("Error processing pdf_index.json during build:", err);
+      console.error("Error generating public pdf_index.json during build:", err);
       throw err;
     }
   } else {
-    console.warn("pdf_index.json not found, skipping copy and list generation.");
+    console.warn("public/pdfs directory not found, skipping public PDF index generation.");
   }
 
   // Generate public/js/remote_config.js from remote_server_config.json

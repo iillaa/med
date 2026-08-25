@@ -69,18 +69,46 @@ function getIndexStatus() {
 function syncPublicDataAssets(indexData) {
   try {
     ensurePdfDirectories();
+    const pdfCacheDir = path.join(__dirname, 'data', 'pdf_cache');
+    const publicFiles = fs.existsSync(PUBLIC_PDF_DIR)
+      ? fs.readdirSync(PUBLIC_PDF_DIR).filter(f => f.toLowerCase().endsWith('.pdf') || f.toLowerCase().endsWith('.docx'))
+      : [];
+
+    const cleanPublicIndex = [];
+    const cleanPublicList = [];
+
+    for (const file of publicFiles) {
+      cleanPublicList.push(file);
+      const cacheFile = path.join(pdfCacheDir, `${file}.json`);
+      if (fs.existsSync(cacheFile)) {
+        try {
+          const cacheData = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+          cleanPublicIndex.push({
+            pdf: file,
+            pages: Array.isArray(cacheData.pages) ? cacheData.pages.map(p => ({
+              page: p.page,
+              content: p.content || p.text || ''
+            })) : []
+          });
+        } catch (_) {
+          cleanPublicIndex.push({ pdf: file, pages: [] });
+        }
+      } else {
+        cleanPublicIndex.push({ pdf: file, pages: [] });
+      }
+    }
+
     fs.writeFileSync(
       path.join(PUBLIC_DATA_DIR, 'pdf_index.json'),
-      JSON.stringify(indexData),
+      JSON.stringify(cleanPublicIndex),
       'utf-8'
     );
-    const list = indexData.map(doc => doc.pdf);
     fs.writeFileSync(
       path.join(PUBLIC_DATA_DIR, 'pdf_list.json'),
-      JSON.stringify(list),
+      JSON.stringify(cleanPublicList),
       'utf-8'
     );
-    console.log('[Indexer] Synchronized public/data/pdf_index.json & public/data/pdf_list.json');
+    console.log(`[Indexer] Synchronized clean public assets (${cleanPublicList.length} files, 0 dev leaks)`);
   } catch (err) {
     console.warn('[Indexer] Failed to sync public data assets:', err.message);
   }
