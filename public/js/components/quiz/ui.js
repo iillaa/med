@@ -479,23 +479,23 @@ function renderQuestion() {
     if (q.type === 'vignette_v2') {
       qMeta.textContent = "Cas Clinique Réel 🏥";
       qMeta.className = "cat-badge";
-      qMeta.style.backgroundColor = "linear-gradient(135deg, var(--color-primary), #10b981)";
+      qMeta.style.background = "linear-gradient(135deg, var(--color-primary), #10b981)";
       qMeta.style.color = "#000";
       qMeta.style.fontWeight = "800";
     } else if (q.type === 'clinical') {
       qMeta.textContent = "Conduite à Tenir 🩺";
       qMeta.className = "cat-badge";
-      qMeta.style.backgroundColor = "var(--color-primary)";
+      qMeta.style.background = "var(--color-primary)";
       qMeta.style.color = "#000";
     } else if (q.type === 'posology') {
       qMeta.textContent = "Ordonnance QCM 💊";
       qMeta.className = "cat-badge";
-      qMeta.style.backgroundColor = "var(--color-warning)";
+      qMeta.style.background = "var(--color-warning)";
       qMeta.style.color = "#000";
     } else if (q.type === 'redflags') {
       qMeta.textContent = "Signes de Gravité ✍️";
       qMeta.className = "cat-badge";
-      qMeta.style.backgroundColor = "var(--color-danger)";
+      qMeta.style.background = "var(--color-danger)";
       qMeta.style.color = "#fff";
     } else {
       qMeta.textContent = "Ordonnance Type ✍️";

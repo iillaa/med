@@ -47,6 +47,7 @@ This document outlines the file layout, key data modules, and logic flows of **D
 │       ├── pdf-extractor.js     # 5-field metadata precision RAG scanner with Pure Signal isolation
 │       ├── web-fetcher.js       # Web RAG scraper with Doctor Custom URL injector
 │       ├── medical-validator.js # Deterministic 8-layer medical & dosage ceiling validator
+│       ├── debug-emitter.js     # Real-time SSE telemetry logger
 │       └── knowledge-library.js # Sub-millisecond clinical library reader
 │
 ├── data/                        # Server Data & Pharmacopeias

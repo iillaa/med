@@ -1,4 +1,4 @@
-export function renderCategoryProgress(categoriesDiv, cats, onSelectCat) {
+export function renderCategoryProgress(categoriesDiv, cats) {
   if (!categoriesDiv) return;
   categoriesDiv.innerHTML = '';
 
