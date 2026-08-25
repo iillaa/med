@@ -1,5 +1,5 @@
 import { state } from '../../state.js';
-import { getCleanPdfName, showToast } from '../../utils.js';
+import { getCleanPdfName, showToast, escapeHTML } from '../../utils.js';
 
 export function createPdfCardElement(file, isGlobal = false) {
   if (!file || typeof file !== 'string') return document.createElement('div');
