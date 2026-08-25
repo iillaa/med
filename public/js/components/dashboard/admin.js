@@ -3,6 +3,7 @@ import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 import { renderAdminPdfTab } from './admin_pdf.js';
 import { renderAdminVersionTab } from './admin_version.js';
+import { renderAdminQuizTab } from './admin_quiz.js';
 
 let onSuggestionHandledCallback = null;
 
@@ -12,6 +13,11 @@ export function initAdminTabListeners(onSuggestionHandled) {
   const pdfPane = document.getElementById('admin-pane-pdfs');
   if (pdfPane) {
     renderAdminPdfTab(pdfPane);
+  }
+
+  const quizPane = document.getElementById('admin-pane-quiz');
+  if (quizPane) {
+    renderAdminQuizTab(quizPane);
   }
 
   const versionPane = document.getElementById('admin-pane-version');
@@ -43,7 +49,9 @@ export function initAdminTabListeners(onSuggestionHandled) {
       const activePane = document.getElementById(targetId);
       if (activePane) {
         activePane.style.display = 'block';
-        if (targetId === 'admin-pane-version') {
+        if (targetId === 'admin-pane-quiz') {
+          renderAdminQuizTab(activePane);
+        } else if (targetId === 'admin-pane-version') {
           renderAdminVersionTab(activePane);
         }
       }
