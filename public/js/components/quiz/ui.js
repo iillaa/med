@@ -1,4 +1,5 @@
 import { state } from '../../state.js';
+import { fetchQuizVignettes } from '../../api.js';
 import { showToast, triggerHaptic, countUp, escapeHTML } from '../../utils.js';
 import { shuffleArray, updateLeitnerStats, updateQuizStreak, requestWakeLock, releaseWakeLock } from './state.js';
 import {
@@ -10,7 +11,7 @@ import { submitWriteInAnswer, saveWriteInGrade } from './scoring.js';
 let quizScreen, welcomeScreen, workspaceView;
 let quizSetupView, quizActiveView, quizResultsView;
 let quizCategorySelect, quizCountSelect;
-let checkboxSpecialty, checkboxRedflags, checkboxPrescription, checkboxPosology;
+let checkboxVignettes, checkboxSpecialty, checkboxRedflags, checkboxPrescription, checkboxPosology;
 let checkboxSpacedRepetition, checkboxTimedMode, selectTimerSeconds;
 let timerWrapper, timerCount, timerFill;
 let hintBtn, hintBox;
@@ -19,6 +20,7 @@ let progressText, progressFill, startQuizBtn;
 let qMeta, qPoints, qTitle, qcmContainer, writeinContainer, userTextArea, submitTextBtn;
 let feedbackPanel, feedbackHeader, feedbackStatus;
 let comparisonGrid, displayUserAnswer, displayCorrectAnswer;
+let rationaleBox, rationaleText;
 let keywordsMatchedPanel, keywordsMatchedTags;
 let selfGradingPanel, btnGradeFull, btnGradePartial, btnGradeZero;
 let viewRefBtn, nextBtn;
@@ -56,6 +58,7 @@ export function initQuiz(onOpenCatCard) {
 
   quizCategorySelect = document.getElementById('quiz-category');
   quizCountSelect = document.getElementById('quiz-count');
+  checkboxVignettes = document.getElementById('quiz-type-vignettes');
   checkboxSpecialty = document.getElementById('quiz-type-specialty');
   checkboxRedflags = document.getElementById('quiz-type-redflags');
   checkboxPrescription = document.getElementById('quiz-type-prescription');
@@ -78,6 +81,8 @@ export function initQuiz(onOpenCatCard) {
   comparisonGrid = document.getElementById('quiz-comparison-grid');
   displayUserAnswer = document.getElementById('quiz-display-user-answer');
   displayCorrectAnswer = document.getElementById('quiz-display-correct-answer');
+  rationaleBox = document.getElementById('quiz-rationale-box');
+  rationaleText = document.getElementById('quiz-rationale-text');
   keywordsMatchedPanel = document.getElementById('quiz-keywords-matched-panel');
   keywordsMatchedTags = document.getElementById('quiz-keywords-matched-tags');
 
@@ -200,17 +205,23 @@ function showQuizSetup() {
   }
 }
 
-function startQuizSession() {
+async function startQuizSession() {
   const selectedCategory = quizCategorySelect ? quizCategorySelect.value : 'all';
   const questionCount = quizCountSelect ? parseInt(quizCountSelect.value) : 10;
+  const includeVignettes = checkboxVignettes ? checkboxVignettes.checked : true;
   const includeClinical = checkboxSpecialty ? checkboxSpecialty.checked : false;
   const includePosology = checkboxPosology ? checkboxPosology.checked : false;
   const includeRedflags = checkboxRedflags ? checkboxRedflags.checked : false;
   const includePrescription = checkboxPrescription ? checkboxPrescription.checked : false;
 
-  if (!includeClinical && !includePosology && !includeRedflags && !includePrescription) {
+  if (!includeVignettes && !includeClinical && !includePosology && !includeRedflags && !includePrescription) {
     alert("Veuillez sélectionner au moins un type de question.");
     return;
+  }
+
+  // Load structured vignettes if not already cached
+  if (includeVignettes && (!state.allQuizVignettes || state.allQuizVignettes.length === 0)) {
+    state.allQuizVignettes = await fetchQuizVignettes();
   }
 
   let filteredCats = selectedCategory === 'all'
@@ -250,6 +261,61 @@ function startQuizSession() {
   }
 
   const generatedQuestions = [];
+
+  // 1. High-Yield Progressive Vignettes (RAG V2)
+  if (includeVignettes && Array.isArray(state.allQuizVignettes) && state.allQuizVignettes.length > 0) {
+    const relevantVignettes = selectedCategory === 'all'
+      ? state.allQuizVignettes
+      : state.allQuizVignettes.filter(v => v.category === selectedCategory);
+
+    relevantVignettes.forEach(vig => {
+      const matchingCat = (state.allCats || []).find(c => c.id === vig.cat_id) || {
+        id: vig.cat_id,
+        title: vig.title,
+        category: vig.category,
+        summary: '',
+        red_flags: '',
+        ordonnance: ''
+      };
+
+      (vig.stages || []).forEach(stage => {
+        const correctOpt = (stage.options || []).find(o => o.correct === true);
+        if (!correctOpt) return;
+
+        const options = (stage.options || []).map(o => o.text);
+        shuffleArray(options);
+
+        // Map text to rationale dictionary
+        const rationales = {};
+        (stage.options || []).forEach(o => {
+          rationales[o.text] = o.rationale || "";
+        });
+
+        const patientBox = `
+          <div style="background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.25); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 12px;">
+            <div style="font-size: 11px; font-weight: 800; color: var(--color-primary); text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-hospital-user"></i> Patient (${vig.patient.sex === 'M' ? 'Homme' : 'Femme'} ${vig.patient.age < 1 ? Math.round(vig.patient.age * 12) + ' mois' : vig.patient.age + ' ans'}) — ${escapeHTML(vig.patient.terrain || 'Standard')}
+            </div>
+            <div style="font-size: 13.5px; color: var(--text-primary); line-height: 1.45;">
+              ${escapeHTML(vig.patient.presentation)}
+            </div>
+          </div>
+        `;
+
+        generatedQuestions.push({
+          type: 'vignette_v2',
+          vignetteId: vig.id,
+          stageType: stage.type,
+          cat: matchingCat,
+          questionText: `${patientBox}<strong>${escapeHTML(stage.title_step || 'Décision Clinique')} :</strong><br><span style="font-size: 14px; font-weight: 600; color: var(--text-primary);">${escapeHTML(stage.prompt)}</span>`,
+          correctAnswer: correctOpt.text,
+          options: options,
+          rationales: rationales,
+          points: 1.0
+        });
+      });
+    });
+  }
 
   filteredCats.forEach(cat => {
     const vignette = generateClinicalVignette(cat);
@@ -410,7 +476,13 @@ function renderQuestion() {
   }
 
   if (qMeta) {
-    if (q.type === 'clinical') {
+    if (q.type === 'vignette_v2') {
+      qMeta.textContent = "Cas Clinique RAG V2 🏥";
+      qMeta.className = "cat-badge";
+      qMeta.style.backgroundColor = "linear-gradient(135deg, var(--color-primary), #10b981)";
+      qMeta.style.color = "#000";
+      qMeta.style.fontWeight = "800";
+    } else if (q.type === 'clinical') {
       qMeta.textContent = "Cas Clinique 🩺";
       qMeta.className = "cat-badge";
       qMeta.style.backgroundColor = "var(--color-primary)";
@@ -437,7 +509,7 @@ function renderQuestion() {
 
   if (feedbackPanel) feedbackPanel.style.display = 'none';
 
-  if (q.type === 'clinical' || q.type === 'posology') {
+  if (q.type === 'vignette_v2' || q.type === 'clinical' || q.type === 'posology') {
     qcmContainer.style.display = 'flex';
     writeinContainer.style.display = 'none';
     generateQCMOptions(q);
@@ -550,20 +622,34 @@ function generateQCMOptions(question) {
       });
 
       updateLeitnerStats(question.cat.id, isCorrect);
-      showQCMFeedback(isCorrect, question.correctAnswer, opt);
+      showQCMFeedback(isCorrect, question.correctAnswer, opt, question);
     });
 
     qcmContainer.appendChild(btn);
   });
 }
 
-function showQCMFeedback(isCorrect, correctAnswer, userAnswer) {
+function showQCMFeedback(isCorrect, correctAnswer, userAnswer, question = null) {
   if (!feedbackPanel) return;
 
   feedbackPanel.style.display = 'flex';
   if (comparisonGrid) comparisonGrid.style.display = 'grid';
   if (keywordsMatchedPanel) keywordsMatchedPanel.style.display = 'none';
   if (selfGradingPanel) selfGradingPanel.style.display = 'none';
+
+  // Display Clinical Rationale if available
+  if (rationaleBox && rationaleText) {
+    let rationaleContent = "";
+    if (question && question.rationales) {
+      rationaleContent = question.rationales[userAnswer] || question.rationales[correctAnswer] || "";
+    }
+    if (rationaleContent && rationaleContent.trim().length > 0) {
+      rationaleText.textContent = rationaleContent;
+      rationaleBox.style.display = 'block';
+    } else {
+      rationaleBox.style.display = 'none';
+    }
+  }
 
   if (displayUserAnswer) {
     displayUserAnswer.textContent = '';

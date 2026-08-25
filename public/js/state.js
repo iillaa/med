@@ -12,6 +12,7 @@ export const state = {
   activePrescriptionVariantIndex: 0,
   prescriptionVariants: [],
   isAdmin: false,
+  allQuizVignettes: [], // Structured clinical vignettes loaded on demand from public/data/quiz_db.json
   quizSession: {
     questions: [],
     currentIndex: 0,
