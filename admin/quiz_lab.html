@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dr.CAT — Clinical Quiz & Staging Studio Lab</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0b1120;
+      --panel: #1e293b;
+      --panel-hover: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #0ea5e9;
+      --primary-hover: #0284c7;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --border: #334155;
+      --card-bg: #131d31;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 18px;
+    }
+    .header-title h1 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-title p {
+      margin: 4px 0 0 0;
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: var(--panel-hover);
+    }
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+    .btn-success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+    }
+    .stat-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 6px;
+    }
+    .main-workspace {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      min-height: 650px;
+    }
+    .sidebar-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13.5px;
+    }
+    .cats-list {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+    }
+    .cat-item {
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .cat-item:hover {
+      border-color: var(--primary);
+    }
+    .cat-item.active {
+      border-color: var(--primary);
+      background: rgba(14, 165, 233, 0.1);
+    }
+    .cat-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .cat-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .badge-success {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+    .badge-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+    .badge-cat {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--primary);
+    }
+    .content-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      overflow-y: auto;
+      max-height: 750px;
+    }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 400px;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 12px;
+    }
+    .vignette-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .qcm-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">
+        <h1><i class="fa-solid fa-brain"></i> Quiz Lab & Staging Studio</h1>
+        <p>Générateur et Modérateur de Banques de Questions Médicales (KFQs, SCTs, QCMs, Ordonnances)</p>
+      </div>
+      <div class="btn-group">
+        <a href="/admin/cat_generator_lab.html" class="btn"><i class="fa-solid fa-stethoscope"></i> Labo CATs V3</a>
+        <a href="/admin/pdf_lab.html" class="btn"><i class="fa-solid fa-file-pdf"></i> Labo PDFs</a>
+        <button id="btn-refresh" class="btn"><i class="fa-solid fa-rotate"></i> Actualiser</button>
+        <button id="btn-publish-all" class="btn btn-success"><i class="fa-solid fa-cloud-arrow-up"></i> 🚀 Publier en Production</button>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Fiches Cliniques</div>
+        <div class="stat-value" id="val-total-cats">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Suites en Staging (Complets)</div>
+        <div class="stat-value" id="val-staged-count" style="color: var(--success);">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Questions Publiées (Production)</div>
+        <div class="stat-value" id="val-public-count" style="color: var(--primary);">--</div>
+      </div>
+    </div>
+
+    <!-- Main Studio Split View -->
+    <div class="main-workspace">
+      <!-- Sidebar List -->
+      <aside class="sidebar-panel">
+        <div class="search-box">
+          <input type="text" id="filter-input" placeholder="🔍 Rechercher une CAT ou Spécialité...">
+        </div>
+        <div class="cats-list" id="cats-list-container">
+          <div style="padding: 20px; text-align: center; color: var(--text-muted);">Chargement des fiches...</div>
+        </div>
+      </aside>
+
+      <!-- Main Inspector -->
+      <main class="content-panel" id="inspector-container">
+        <div class="empty-state">
+          <i class="fa-solid fa-arrow-pointer" style="font-size: 36px; opacity: 0.4;"></i>
+          <h3 style="margin: 0; color: var(--text);">Sélectionnez une Conduite à Tenir</h3>
+          <p style="margin: 0; max-width: 400px; font-size: 13.5px;">Cliquez sur une fiche dans la colonne de gauche pour inspecter sa suite docimologique complète ou déclencher la génération IA en 1 clic.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast-msg"></div>
+
+  <script>
+    let labData = null;
+    let selectedCatId = null;
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast-msg');
+      toast.textContent = msg;
+      toast.style.borderColor = isError ? 'var(--danger)' : 'var(--success)';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    function getAdminToken() {
+      return localStorage.getItem('dr_cat_admin_token') || sessionStorage.getItem('dr_cat_admin_token') || '';
+    }
+
+    async function loadData() {
+      try {
+        const token = getAdminToken();
+        const res = await fetch('/api/admin/quiz-lab/data', {
+          headers: { 'x-admin-token': token }
+        });
+        if (!res.ok) {
+          throw new Error('Erreur HTTP ' + res.status);
+        }
+        labData = await res.json();
+        document.getElementById('val-total-cats').textContent = labData.totalCats || 0;
+        document.getElementById('val-staged-count').textContent = labData.stagedCount || 0;
+        document.getElementById('val-public-count').textContent = labData.publicCount || 0;
+        renderList(labData.items);
+
+        if (selectedCatId) {
+          const found = labData.items.find(c => c.id === selectedCatId);
+          if (found) renderInspector(found);
+        }
+      } catch (err) {
+        showToast('Échec du chargement du Quiz Lab : ' + err.message, true);
+      }
+    }
+
+    function renderList(items) {
+      const container = document.getElementById('cats-list-container');
+      if (!items || items.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune CAT trouvée.</div>';
+        return;
+      }
+
+      container.innerHTML = items.map(cat => {
+        const isActive = cat.id === selectedCatId ? 'active' : '';
+        const badge = cat.hasStagedQuiz
+          ? `<span class="badge badge-success">🟢 Prêt (${cat.vignetteCount} cas)</span>`
+          : `<span class="badge badge-danger">🔴 Non généré</span>`;
+
+        return `
+          <div class="cat-item ${isActive}" onclick="selectCat(${cat.id})">
+            <div class="cat-item-top">
+              <span class="cat-title">${escapeHTML(cat.title)}</span>
+              ${badge}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--text-muted);">
+              <span><i class="fa-solid fa-folder"></i> ${escapeHTML(cat.category)}</span>
+              <span>#${cat.id}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectCat(id) {
+      selectedCatId = id;
+      const cat = (labData.items || []).find(c => c.id === id);
+      if (cat) {
+        renderList(labData.items);
+        renderInspector(cat);
+      }
+    }
+
+    function renderInspector(cat) {
+      const container = document.getElementById('inspector-container');
+      const staged = cat.stagedData || {};
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h2 style="margin: 0; font-size: 18px; color: var(--text);">${escapeHTML(cat.title)}</h2>
+              <span class="badge badge-cat">${escapeHTML(cat.category)}</span>
+            </div>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted);">ID #${cat.id} • Statut Staging : ${cat.hasStagedQuiz ? '🟢 Complet' : '🔴 En attente de génération'}</p>
+          </div>
+          <button id="btn-gen-ai" class="btn btn-primary" onclick="generateAiForCat(${cat.id})">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> ⚡ Générer Quiz IA
+          </button>
+        </div>
+      `;
+
+      if (!cat.hasStagedQuiz) {
+        html += `
+          <div class="empty-state">
+            <i class="fa-solid fa-flask-vial" style="font-size: 40px; opacity: 0.4;"></i>
+            <h3 style="margin: 0;">Aucun quiz généré pour cette CAT</h3>
+            <p style="margin: 0; font-size: 13.5px; max-width: 450px;">Cliquez sur le bouton bleu ci-dessus pour que l'IA crée instantanément les vignettes cliniques progressives, QCMs et Red Flags.</p>
+          </div>
+        `;
+      } else {
+        // Vignettes
+        const vignettes = staged.vignettes || [];
+        html += `<h3 style="color: var(--primary); font-size: 16px; margin: 20px 0 10px 0;"><i class="fa-solid fa-hospital"></i> 1. Cas Cliniques Multi-Étapes (${vignettes.length})</h3>`;
+        vignettes.forEach((v, idx) => {
+          html += `
+            <div class="vignette-box">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <strong>Vignette Clinique N°${idx + 1} (${v.level || 'intermédiaire'})</strong>
+                <span class="badge badge-cat">${v.stages ? v.stages.length : 0} étapes</span>
+              </div>
+              <p style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; font-style: italic; font-size: 13px; margin: 0 0 12px 0;">
+                ${escapeHTML(v.patient ? v.patient.presentation : '')}
+              </p>
+              ${(v.stages || []).map(s => `
+                <div style="margin-top: 10px; border-left: 3px solid var(--primary); padding-left: 10px;">
+                  <div style="font-weight: 700; font-size: 13px; color: var(--text);">${escapeHTML(s.title_step || '')}</div>
+                  <div style="font-size: 13px; margin-top: 2px;">${escapeHTML(s.prompt || '')}</div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        });
+
+        // QCMs Diagnostics
+        const diags = staged.qcm_diagnostics || [];
+        if (diags.length > 0) {
+          html += `<h3 style="color: var(--warning); font-size: 16px; margin: 24px 0 10px 0;"><i class="fa-solid fa-stethoscope"></i> 2. QCMs Diagnostics & Sémiologie (${diags.length})</h3>`;
+          diags.forEach((d, idx) => {
+            html += `
+              <div class="qcm-box">
+                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 6px;">Q${idx + 1} : ${escapeHTML(d.question)}</div>
+                <div style="color: var(--success); font-size: 12.5px; font-weight: 600;">
+                  <i class="fa-solid fa-circle-check"></i> ${escapeHTML(d.options ? d.options[d.correctIndex || 0] : '')}
+                </div>
+                <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px; font-style: italic;">
+                  💡 ${escapeHTML(d.rationale || '')}
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        // QCMs Ordonnances
+        const prescs = staged.qcm_prescriptions || [];
+        if (prescs.length > 0) {
+          html += `<h3 style="color: var(--success); font-size: 16px; margin: 24px 0 10px 0;"><i class="fa-solid fa-pills"></i> 3. QCMs Ordonnances & Posologies (${prescs.length})</h3>`;
+          prescs.forEach((p, idx) => {
+            html += `
+              <div class="qcm-box">
+                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 6px;">Q${idx + 1} : ${escapeHTML(p.question)}</div>
+                <div style="color: var(--success); font-size: 12.5px; font-weight: 600;">
+                  <i class="fa-solid fa-circle-check"></i> ${escapeHTML(p.options ? p.options[p.correctIndex || 0] : '')}
+                </div>
+              </div>
+            `;
+          });
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    async function generateAiForCat(id) {
+      const btn = document.getElementById('btn-gen-ai');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Génération IA en cours...';
+      showToast('Appel LLM Gemini en cours pour la CAT ' + id + '...');
+
+      try {
+        const token = getAdminToken();
+        const res = await fetch('/api/admin/quiz-lab/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-token': token
+          },
+          body: JSON.stringify({ catId: id })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erreur');
+        showToast(data.message || 'Quiz généré avec succès !');
+        await loadData();
+      } catch (err) {
+        showToast(err.message, true);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ⚡ Générer Quiz IA';
+      }
+    }
+
+    async function publishAll() {
+      if (!confirm('Publier l\'ensemble des suites de quiz en staging vers la production ?')) return;
+      showToast('Publication en cours...');
+      try {
+        const token = getAdminToken();
+        const res = await fetch('/api/admin/quiz-lab/publish', {
+          method: 'POST',
+          headers: { 'x-admin-token': token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erreur');
+        showToast(data.message || 'Publié avec succès !');
+        await loadData();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    document.getElementById('btn-refresh').addEventListener('click', loadData);
+    document.getElementById('btn-publish-all').addEventListener('click', publishAll);
+    document.getElementById('filter-input').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!labData || !labData.items) return;
+      const filtered = labData.items.filter(c => c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q));
+      renderList(filtered);
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
