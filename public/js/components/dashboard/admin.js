@@ -15,11 +15,6 @@ export function initAdminTabListeners(onSuggestionHandled) {
     renderAdminPdfTab(pdfPane);
   }
 
-  const quizPane = document.getElementById('admin-pane-quiz');
-  if (quizPane) {
-    renderAdminQuizTab(quizPane);
-  }
-
   const versionPane = document.getElementById('admin-pane-version');
   if (versionPane) {
     renderAdminVersionTab(versionPane);
