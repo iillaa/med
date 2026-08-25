@@ -697,6 +697,30 @@
     padding: 12px !important;
   }
 
+  .admin-tabs-header {
+    flex-wrap: wrap;
+    gap: 4px !important;
+    padding: 6px !important;
+  }
+
+  .admin-tab-btn {
+    flex: 1 1 auto !important;
+    min-width: 100px;
+    padding: 8px 6px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+
+  /* Command Center Lab Cards on mobile */
+  .admin-lab-cards {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .admin-lab-cards > div {
+    padding: 14px !important;
+  }
+
   .suggestion-card {
     padding: 12px;
     gap: 10px;
