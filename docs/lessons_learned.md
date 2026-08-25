@@ -246,7 +246,12 @@ A log of engineering choices, debug logs, and architectural mistakes to avoid wh
 * **Problem**: Manually updating version numbers across multiple config files resulted in discrepancies (e.g., `package.json` at `1.7.9`, `build.gradle` at `1.7.8`, `version.json` at `1.7.8`).
 * **Solution**: Created `scripts/bump_version.js` (`npm run bump <version>`), which atomically updates `package.json`, `android/app/build.gradle` (`versionName` & `versionCode`), `server/config/version.json`, `public/index.html`, and `worker.js`, then stamps the production bundle with `npm run build` in one single command.
 
-
-
-
-
+### 49. Prevention of Vertical Flex-Shrink Collapse & Double Scroll Traps in Mobile WebViews
+* **Problem**: When rendering multi-section dashboards inside mobile WebViews (or mobile browsers zoomed out / in desktop mode), bottom components (such as the Admin Panel or Lab Cards) collapsed upward into a single horizontal hairline strip.
+* **Root Cause**: Two contributing factors in mobile flexbox engines:
+  1. **Unchecked `flex-shrink: 1; flex-basis: 0%` on scroll containers**: Inside a parent container with fixed/hidden height (`.main-content`), when the viewport height decreased or was zoomed, the browser engine prioritized shrinking flex items to fit within the visible viewport instead of naturally expanding and allowing vertical scrolling.
+  2. **Nested `overflow-y: auto` Conflict**: Having both the parent (`.welcome-screen`) and the child container (`.dashboard-container`) set to `overflow-y: auto` created an ambiguous height constraint loop in mobile WebKit/Blink, causing inner contents to squish rather than scroll.
+* **Solution**:
+  - Enforce `flex-shrink: 0; min-height: min-content;` on `.dashboard-container` and its critical cards (`.admin-moderation-panel`, `.admin-lab-cards`).
+  - Unify vertical scrolling exclusively on the outer screen container (`.welcome-screen` with `padding-bottom: 80px`), eliminating nested overflow conflicts.
+  - This ensures 100% stable geometry across all screen heights, orientations, and zoom levels in Android Capacitor and mobile browsers.
