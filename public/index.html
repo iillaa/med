@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.14.0">
-  <meta name="app-build-version" content="2026.08.25.17.48">
+  <meta name="app-build-version" content="2026.08.25.18.03">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608251748" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251748"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251803" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251803"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251748" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251748"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251803" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251803"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608251748" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608251748" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608251748">
+  <link rel="stylesheet" href="style.css?v=2608251803" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251803" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251803">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608251748">
-    <link rel="stylesheet" href="css/utilities.css?v=2608251748">
+    <link rel="stylesheet" href="style.css?v=2608251803">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251803">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608251748"></script>
+  <script type="module" src="js/version-checker.js?v=2608251803"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -845,29 +845,29 @@ body {
       <section class="library-screen" id="library-screen" style="display: none;">
         <div class="dashboard-container">
           <div class="command-center-hero">
-          <div class="command-center-top">
-            <div>
-              <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-                <i class="fa-solid fa-book-medical" style="color: var(--color-primary);"></i> Bibliothèque Médicale des 78 Livres de Référence
-              </h2>
-              <p style="color: var(--text-secondary); font-size: 12.5px; margin-top: 2px;">Consultez les manuels officiels ou effectuez une recherche plein-texte dans les 15 000+ pages indexées.</p>
-            </div>
-            <button class="action-btn" id="library-back-dash-btn" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-arrow-left"></i> Retour Dashboard
-            </button>
-          </div>
-
-          <!-- Deep Search Bar in 78 PDFs -->
-          <div class="omni-search-container">
-            <div class="omni-search-bar">
-              <i class="fa-solid fa-magnifying-glass omni-search-icon"></i>
-              <input type="text" id="lib-deep-search-input" placeholder="Recherche plein-texte dans le contenu des 78 livres (ex: posologie amoxicilline, choc septique)..." autocomplete="off">
-              <button id="lib-deep-search-btn" class="omni-search-btn">
-                <span>Fouiller les PDFs</span> <i class="fa-solid fa-bolt"></i>
+            <div class="command-center-top">
+              <div>
+                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                  <i class="fa-solid fa-book-medical" style="color: var(--color-primary);"></i> Bibliothèque Médicale des 83 Livres de Référence
+                </h2>
+                <p style="color: var(--text-secondary); font-size: 12.5px; margin-top: 2px;">Consultez les manuels officiels ou effectuez une recherche plein-texte dans les 15 000+ pages indexées.</p>
+              </div>
+              <button class="action-btn" id="library-back-dash-btn" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-arrow-left"></i> Retour Dashboard
               </button>
             </div>
+
+            <!-- Deep Search Bar in 83 PDFs -->
+            <div class="omni-search-container">
+              <div class="omni-search-bar">
+                <i class="fa-solid fa-magnifying-glass omni-search-icon"></i>
+                <input type="text" id="lib-deep-search-input" placeholder="Recherche plein-texte dans le contenu des livres (ex: posologie amoxicilline, choc septique)..." autocomplete="off" spellcheck="false">
+                <button id="lib-deep-search-btn" class="omni-search-btn">
+                  <span>Fouiller les PDFs</span> <i class="fa-solid fa-bolt"></i>
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
         <!-- Deep Search Results Box with Retractable View -->
         <div id="lib-search-results-section" style="display: none;" class="lib-results-card">
