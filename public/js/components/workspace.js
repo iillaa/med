@@ -4,7 +4,7 @@ import { parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setBu
 import { buildPrintableText } from './workspace/state.js';
 import { renderSummary } from './workspace/summary.js';
 import { renderPrescription } from './workspace/prescription.js';
-import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList } from './workspace/pdfs.js';
+import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList, initLibraryScreen } from './workspace/pdfs.js';
 import { saveAppStateBeforeNavigation, restoreAppState, printCatDocument } from './workspace/print.js';
 
 let workspace, welcomeScreen;
@@ -207,6 +207,12 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       document.querySelectorAll('.cat-item').forEach(item => item.classList.remove('active'));
     });
   }
+
+  // Initialize Standalone Medical Library Screen
+  initLibraryScreen(() => {
+    const brandLogo = document.getElementById('brand-logo');
+    if (brandLogo) brandLogo.click();
+  });
 
   const printCatBtn = document.getElementById('print-cat-btn');
   if (printCatBtn) {
@@ -711,6 +717,8 @@ export function selectCat(cat, preserveTab = false) {
   if (workspace) workspace.style.display = 'flex';
   const quizScreen = document.getElementById('quiz-screen');
   if (quizScreen) quizScreen.style.display = 'none';
+  const libScreen = document.getElementById('library-screen');
+  if (libScreen) libScreen.style.display = 'none';
 
   const backToQuizBtn = document.getElementById('workspace-back-to-quiz-btn');
   if (backToQuizBtn) {

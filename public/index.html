@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.13.0">
-  <meta name="app-build-version" content="2026.08.25.15.44">
+  <meta name="app-build-version" content="2026.08.25.15.56">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608251544" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251544"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251556" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251556"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251544" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251544"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251556" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251556"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608251544" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608251544" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608251544">
+  <link rel="stylesheet" href="style.css?v=2608251556" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251556" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251556">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608251544">
-    <link rel="stylesheet" href="css/utilities.css?v=2608251544">
+    <link rel="stylesheet" href="style.css?v=2608251556">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251556">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608251544"></script>
+  <script type="module" src="js/version-checker.js?v=2608251556"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -847,6 +847,62 @@ body {
             <button id="open-legal-modal-btn" class="action-btn" style="background: rgba(6, 182, 212, 0.1); color: var(--color-primary); border: 1px solid rgba(6, 182, 212, 0.3); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">
               <i class="fa-solid fa-scale-balanced"></i> Consulter les Mentions Légales & CGU
             </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STANDALONE MEDICAL LIBRARY & PDF SEARCH SCREEN -->
+      <section class="library-screen" id="library-screen" style="display: none; width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; flex-direction: column; gap: 18px;">
+        <div class="command-center-hero">
+          <div class="command-center-top">
+            <div>
+              <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                <i class="fa-solid fa-book-medical" style="color: var(--color-primary);"></i> Bibliothèque Médicale des 78 Livres de Référence
+              </h2>
+              <p style="color: var(--text-secondary); font-size: 12.5px; margin-top: 2px;">Consultez les manuels officiels ou effectuez une recherche plein-texte dans les 15 000+ pages indexées.</p>
+            </div>
+            <button class="action-btn" id="library-back-dash-btn" style="font-size: 11px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-arrow-left"></i> Retour Dashboard
+            </button>
+          </div>
+
+          <!-- Deep Search Bar in 78 PDFs -->
+          <div class="omni-search-container">
+            <div class="omni-search-bar">
+              <i class="fa-solid fa-magnifying-glass omni-search-icon"></i>
+              <input type="text" id="lib-deep-search-input" placeholder="Recherche plein-texte dans le contenu des 78 livres (ex: posologie amoxicilline, choc septique)..." autocomplete="off">
+              <button id="lib-deep-search-btn" class="omni-search-btn">
+                <span>Fouiller les PDFs</span> <i class="fa-solid fa-bolt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deep Search Results Box -->
+        <div id="lib-search-results-section" style="display: none; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin: 0; color: var(--color-primary); font-size: 14px; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-list-check"></i> <span id="lib-search-results-count">Résultats de recherche</span>
+            </h4>
+            <button class="btn-delete-ghost" id="lib-clear-search-btn" style="font-size: 11px; padding: 3px 8px;">
+              <i class="fa-solid fa-xmark"></i> Fermer les résultats
+            </button>
+          </div>
+          <div id="lib-search-loading" style="display: none; padding: 20px; text-align: center; color: var(--text-muted);">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 20px; color: var(--color-primary); margin-bottom: 8px;"></i>
+            <div>Recherche en cours dans l'ensemble des 78 manuels...</div>
+          </div>
+          <div id="lib-search-results-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto;"></div>
+        </div>
+
+        <!-- Browse All 78 Reference PDFs by Alphabetical / Filter List -->
+        <div class="dashboard-block" style="padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+            <h3 style="margin: 0;"><i class="fa-solid fa-folder-open"></i> Tous les Manuels & Livres Disponibles (<span id="lib-pdf-count">78</span>)</h3>
+            <input type="text" id="lib-filter-pdf-input" placeholder="Filtrer par titre de livre..." style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 10px; border-radius: 6px; font-size: 12px; outline: none; width: 220px;">
+          </div>
+          <div class="pdf-list" id="lib-all-pdfs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;">
+            <!-- Injected dynamically by pdfs.js -->
           </div>
         </div>
       </section>
@@ -1458,7 +1514,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-42ZCMAG4.js"></script>
+  <script type="module" src="dist/app-HNXET2A7.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

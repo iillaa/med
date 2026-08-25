@@ -174,8 +174,8 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
   if (tabPdfs) {
     tabPdfs.addEventListener('click', () => {
       setSidebarTabActive(tabPdfs);
-      if (window.openGlobalPdfSearch) {
-        window.openGlobalPdfSearch();
+      if (window.openStandaloneLibrary) {
+        window.openStandaloneLibrary();
       }
       if (window.innerWidth <= 850 && sidebar) {
         sidebar.classList.remove('open');
