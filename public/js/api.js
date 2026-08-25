@@ -505,6 +505,22 @@ export async function fetchCats(since) {
   return res.json();
 }
 
+/**
+ * Fetch structured clinical reasoning vignettes on-demand for Quiz V2
+ */
+export async function fetchQuizVignettes() {
+  try {
+    const res = await fetchWithTimeout('data/quiz_db.json', { headers: STATIC_DATA_HEADERS });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) return data;
+    }
+  } catch (err) {
+    console.warn('[API] fetchQuizVignettes notice:', err.message);
+  }
+  return [];
+}
+
 
 export async function fetchPdfs() {
   const mode = getAppMode();

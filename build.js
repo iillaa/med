@@ -59,8 +59,19 @@ function rebuildClientAssets() {
       'utf-8'
     );
     console.log("Copied cats_db.json (minified with internal AI metrics & history stripped) to public/data/");
+
+    // Package quiz_db.json if staged or existing in public
+    const stagedQuizPath = path.join(__dirname, 'cat_db_generator', 'quiz_db_staged.json');
+    const publicQuizPath = path.join(publicDataDir, 'quiz_db.json');
+    if (fs.existsSync(stagedQuizPath)) {
+      const quizContent = fs.readFileSync(stagedQuizPath, 'utf-8');
+      fs.writeFileSync(publicQuizPath, JSON.stringify(JSON.parse(quizContent)), 'utf-8');
+      console.log("Copied quiz_db_staged.json to public/data/quiz_db.json");
+    } else if (fs.existsSync(publicQuizPath)) {
+      console.log("Preserved existing public/data/quiz_db.json");
+    }
   } catch (err) {
-    console.error("Error packaging cats_db.json during build:", err);
+    console.error("Error packaging cats_db.json / quiz_db.json during build:", err);
     throw err;
   }
 

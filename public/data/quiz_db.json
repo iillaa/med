@@ -1,0 +1,282 @@
+[
+  {
+    "id": "vig_gastro_01",
+    "cat_id": 1,
+    "title": "CAT devant intoxication alimentaire",
+    "category": "Gastro-entérologie",
+    "difficulty": "intermédiaire",
+    "patient": {
+      "age": 34,
+      "sex": "M",
+      "terrain": "Sans antécédent particulier",
+      "presentation": "Consulte aux urgences pour diarrhée profuse aqueuse (8 selles/jour) apparue 4 heures après un repas de fruits de mer, accompagnée de crampes abdominales et de nausées. Constantes : TA 120/75 mmHg, FC 82 bpm, T° 37.4°C, SpO2 99%."
+    },
+    "stages": [
+      {
+        "stage_index": 1,
+        "type": "key_feature",
+        "title_step": "Étape 1 : Évaluation Initiale & Piège des Ralentisseurs",
+        "prompt": "Le patient est très gêné par la fréquence des selles et vous demande un traitement radical pour 'bloquer la diarrhée immédiatement'. Quelle est votre décision clinique ?",
+        "options": [
+          {
+            "text": "Prescrire du Lopéramide 2mg d'emblée à forte dose pour stopper le transit",
+            "correct": false,
+            "rationale": "Erreur : Les ralentisseurs du transit sont à éviter en phase aiguë infectieuse car ils favorisent la stase et l'absorption des toxines bactériennes."
+          },
+          {
+            "text": "Rassurer, prescrire une réhydratation orale abondante (SRO), un antispasmodique (Phloroglucinol) et un pansement digestif (Diosmectite)",
+            "correct": true,
+            "rationale": "Traitement de choix de 1ère intention en l'absence de signes de gravité ou de syndrome dysentérique."
+          },
+          {
+            "text": "Hospitaliser immédiatement en réanimation avec mise à jeun stricte",
+            "correct": false,
+            "rationale": "Le patient est stable hémodynamiquement sans signes de déshydratation sévère."
+          }
+        ]
+      },
+      {
+        "stage_index": 2,
+        "type": "script_concordance",
+        "title_step": "Étape 2 : Évolution & Antibiothérapie Ciblée",
+        "prompt": "À 24h, le patient vous rappelle : apparition d'une fièvre à 39.1°C avec frissons et émission de selles glairo-sanglantes. Quelle est votre adaptation thérapeutique ?",
+        "options": [
+          {
+            "text": "Instauration d'une antibiothérapie probabiliste (Cotrimoxazole 800/160mg 2x/j pendant 5 jours) et coproculture",
+            "correct": true,
+            "rationale": "Le passage à un syndrome invasif/dysentérique fébrile justifie l'antibiothérapie par voie générale."
+          },
+          {
+            "text": "Poursuite de la réhydratation simple sans antibiotique pendant encore 5 jours",
+            "correct": false,
+            "rationale": "Insuffisant : une diarrhée glairo-sanglante fébrile traduit une atteinte muqueuse invasive nécessitant un antibiotique."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vig_uro_01",
+    "cat_id": 2,
+    "title": "CAT devant une Colique Néphrétique",
+    "category": "Urologie",
+    "difficulty": "avancé",
+    "patient": {
+      "age": 42,
+      "sex": "F",
+      "terrain": "Lithiases récidivantes",
+      "presentation": "Admise pour douleur lombaire droite brutale, irradiant vers l'aine, hyperalgique, agitation sans position antalgique. TA 135/85 mmHg, FC 90 bpm, T° 38.9°C."
+    },
+    "stages": [
+      {
+        "stage_index": 1,
+        "type": "key_feature",
+        "title_step": "Étape 1 : Reconnaissance de l'Urgence Vitale",
+        "prompt": "Devant cette colique néphrétique fébrile à 38.9°C, quelle est la priorité absolue ?",
+        "options": [
+          {
+            "text": "Hospitalisation en urgence médico-chirurgicale pour drainage des voies urinaires (sonde JJ) et bi-antibiothérapie IV",
+            "correct": true,
+            "rationale": "Urgence urologique majeure : la colique néphrétique fébrile correspond à un pyonéphrose/obstacle infecté avec risque imminent de choc septique."
+          },
+          {
+            "text": "Prescription d'AINS à forte dose à domicile et scanner dans la semaine",
+            "correct": false,
+            "rationale": "Faute grave : risque de décès par choc septique sur pyélonéphrite obstructive."
+          },
+          {
+            "text": "Antalgie simple et renvoi à domicile après disparition de la douleur",
+            "correct": false,
+            "rationale": "La fièvre signe une rétention septique exigeant un geste de dérivation immédiat."
+          }
+        ]
+      },
+      {
+        "stage_index": 2,
+        "type": "prescription_choice",
+        "title_step": "Étape 2 : Traitement de la Crise Simple (Non compliquée)",
+        "prompt": "Chez un autre patient présentant une colique néphrétique simple apyrétique, quel est le médicament de 1ère intention pour lever le spasme et soulager la douleur ?",
+        "options": [
+          {
+            "text": "Anti-inflammatoire non stéroïdien (ex: Kétoprofène 100mg IV ou per os) associé à une restriction hydrique en phase aiguë",
+            "correct": true,
+            "rationale": "Les AINS diminuent la pression intra-pyélique en réduisant la filtration glomérulaire et l'œdème local."
+          },
+          {
+            "text": "Hyperhydratation par 3 litres d'eau immédiate",
+            "correct": false,
+            "rationale": "L'hyperhydratation en pleine crise augmente la pression intra-rénale et aggrave la douleur."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vig_cardio_01",
+    "cat_id": 3,
+    "title": "CAT devant une Crise Hypertensive",
+    "category": "Cardiologie",
+    "difficulty": "intermédiaire",
+    "patient": {
+      "age": 58,
+      "sex": "M",
+      "terrain": "HTA traitée irrégulièrement",
+      "presentation": "Consulte pour PA mesurée à 200/115 mmHg découverte fortuitement en pharmacie. Patient totalement asymptomatique : pas de céphalée, pas de trouble visuel, pas de douleur thoracique ni de dyspnée."
+    },
+    "stages": [
+      {
+        "stage_index": 1,
+        "type": "key_feature",
+        "title_step": "Étape 1 : Distinction Urgence vs Élévation Tensionnelle",
+        "prompt": "Comment qualifiez-vous ce tableau et quelle est l'attitude thérapeutique recommandée ?",
+        "options": [
+          {
+            "text": "Élévation tensionnelle sans souffrance viscérale (HTA sévère asymptomatique) : repos en pièce calme, réassurance et adaptation du traitement oral ambulatoire",
+            "correct": true,
+            "rationale": "En l'absence de défaillance d'organe cible, une baisse brutale de la PA est dangereuse (risque d'AVC ischémique ou d'insuffisance rénale)."
+          },
+          {
+            "text": "Urgence hypertensive absolue : injection IV immédiate de Nicardipine pour normaliser la PA en 15 minutes",
+            "correct": false,
+            "rationale": "Une normalisation trop rapide par voie IV sans souffrance d'organe est formellement contre-indiquée."
+          },
+          {
+            "text": "Prise sublinguale de Nifédipine en gélule croquée",
+            "correct": false,
+            "rationale": "Pratique dangereuse et abandonnée : risque d'hypotension brutale et de collapsus cérébral."
+          }
+        ]
+      },
+      {
+        "stage_index": 2,
+        "type": "script_concordance",
+        "title_step": "Étape 2 : Survenue d'un Signe de Gravité",
+        "prompt": "Alors qu'il est en observation, le patient signale une douleur thoracique rétrosternale constrictive irradiant au bras gauche. Quelle est votre décision immédiate ?",
+        "options": [
+          {
+            "text": "Appel immédiat du SAMU/SMUR, réalisation d'un ECG 12 dérivations, dérivés nitrés et transfert en USIC",
+            "correct": true,
+            "rationale": "L'apparition d'un angor fait basculer la situation en Urgence Hypertensive avec syndrome coronarien aigu."
+          },
+          {
+            "text": "Donner un anxiolytique oral et attendre 2 heures de plus",
+            "correct": false,
+            "rationale": "Erreur critique : la douleur thoracique chez l'hypertendu sévère est une urgence cardiologique vitale."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vig_ped_01",
+    "cat_id": 4,
+    "title": "CAT devant une Bronchiolite du Nourrisson",
+    "category": "Pédiatrie",
+    "difficulty": "intermédiaire",
+    "patient": {
+      "age": 0.4,
+      "sex": "M",
+      "terrain": "Nourrisson de 5 mois, né à terme",
+      "presentation": "Amené par ses parents pour toux, rhinite préalable et polypnée avec tirage intercostal modéré. FR 48/min, SpO2 96% en air ambiant, prise des biberons conservée à 70%."
+    },
+    "stages": [
+      {
+        "stage_index": 1,
+        "type": "key_feature",
+        "title_step": "Étape 1 : Conduite Thérapeutique Fondamentale",
+        "prompt": "Quelle est la prise en charge de 1ère intention selon les recommandations officielles actuelles ?",
+        "options": [
+          {
+            "text": "Désobstruction rhinopharyngée (DRP) au sérum physiologique avant les repas, fractionnement des biberons, couchage dorsal proclive",
+            "correct": true,
+            "rationale": "La DRP et les mesures de soutien hydrique/alimentaire sont le seul traitement prouvé efficace dans la bronchiolite aiguë non compliquée."
+          },
+          {
+            "text": "Aérosols systématiques de Salbutamol (Ventoline) + Corticoïdes oraux",
+            "correct": false,
+            "rationale": "Les bronchodilatateurs et les corticoïdes ne sont pas recommandés en 1ère intention dans la bronchiolite du nourrisson."
+          },
+          {
+            "text": "Antibiothérapie systématique par Amoxicilline",
+            "correct": false,
+            "rationale": "La bronchiolite est virale (VRS dans 80% des cas) ; l'antibiothérapie est inutile sans surinfection documentée."
+          }
+        ]
+      },
+      {
+        "stage_index": 2,
+        "type": "key_feature",
+        "title_step": "Étape 2 : Critères d'Hospitalisation",
+        "prompt": "Quel signe parmi les suivants impose l'hospitalisation immédiate de ce nourrisson ?",
+        "options": [
+          {
+            "text": "Prise alimentaire inférieure à 50% des rations habituelles ou SpO2 < 92%",
+            "correct": true,
+            "rationale": "Critères majeurs de gravité : risque d'épuisement respiratoire et de déshydratation aiguë."
+          },
+          {
+            "text": "Présence d'une fièvre à 38.0°C isolée",
+            "correct": false,
+            "rationale": "Une fièvre modérée sans détresse respiratoire ni intolérance alimentaire autorise la surveillance à domicile."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vig_pneumo_01",
+    "cat_id": 5,
+    "title": "CAT devant une Exacerbation d'Asthme Aigu",
+    "category": "Pneumologie",
+    "difficulty": "avancé",
+    "patient": {
+      "age": 26,
+      "sex": "F",
+      "terrain": "Asthme allergique connu",
+      "presentation": "Arrive aux urgences en position assise penchée en avant, dyspnée sifflante intense, ne pouvant prononcer que des phrases hachées. FR 32/min, FC 118 bpm, SpO2 91% en air ambiant, silence auscultatoire aux bases."
+    },
+    "stages": [
+      {
+        "stage_index": 1,
+        "type": "key_feature",
+        "title_step": "Étape 1 : Traitement d'Urgence Immédiat (Asthme Aigu Grave)",
+        "prompt": "Devant cet asthme aigu grave avec silence auscultatoire, quelle est la triade thérapeutique d'urgence à débuter dans les 5 premières minutes ?",
+        "options": [
+          {
+            "text": "Oxygénothérapie pour SpO2 93-95% + Bêta-2 mimétiques inhalés à forte dose (Salbutamol 5mg en nébulisation continue sous O2) + Corticothérapie systémique IV/per os précoce",
+            "correct": true,
+            "rationale": "Prise en charge standard de l'AAG : bronchodilatation maximale immédiate et action anti-inflammatoire systémique précoce."
+          },
+          {
+            "text": "Injection d'un sédatif pour calmer l'angoisse et radiographie pulmonaire immédiate",
+            "correct": false,
+            "rationale": "Erreur fatale : les sédatifs sont formellement contre-indiqués (risque d'arrêt respiratoire immédiat)."
+          },
+          {
+            "text": "Théophylline IV en perfusion lente",
+            "correct": false,
+            "rationale": "Molécule de 3ème ligne à marge thérapeutique étroite, supplantée par les nébulisations de Salbutamol/Ipratropium."
+          }
+        ]
+      },
+      {
+        "stage_index": 2,
+        "type": "script_concordance",
+        "title_step": "Étape 2 : Adjonction en cas d'Inhibition Partielle",
+        "prompt": "Après 3 nébulisations de Salbutamol à 15 minutes d'intervalle, la SpO2 reste à 91% et le tirage persiste. Quelle molécule adjuvante ajoutez-vous en nébulisation ?",
+        "options": [
+          {
+            "text": "Bromure d'Ipratropium (Atrovent) 0.5 mg en nébulisation associée au Salbutamol",
+            "correct": true,
+            "rationale": "L'association anticholinergique + bêta-2 mimétique potentialise la bronchodilatation dans les formes sévères réfractaires."
+          },
+          {
+            "text": "Furosémide 40 mg IV direct",
+            "correct": false,
+            "rationale": "Inapproprié : le tableau n'est pas un œdème aigu du poumon cardiogénique."
+          }
+        ]
+      }
+    ]
+  }
+]

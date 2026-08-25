@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.14.0">
-  <meta name="app-build-version" content="2026.08.25.18.03">
+  <meta name="app-build-version" content="2026.08.25.18.23">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608251803" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251803"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251823" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251823"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251803" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251803"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251823" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251823"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608251803" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608251803" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608251803">
+  <link rel="stylesheet" href="style.css?v=2608251823" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251823" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251823">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608251803">
-    <link rel="stylesheet" href="css/utilities.css?v=2608251803">
+    <link rel="stylesheet" href="style.css?v=2608251823">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251823">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608251803"></script>
+  <script type="module" src="js/version-checker.js?v=2608251823"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1194,6 +1194,10 @@ body {
               <div style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-toggle-on"></i> Types de questions à inclure :</div>
               <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
+                  <input type="checkbox" id="quiz-type-vignettes" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
+                  <span style="font-weight: 700; color: var(--color-primary);">Cas Cliniques RAG V2 (Vignettes & KFQs 🏥)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px;">
                   <input type="checkbox" id="quiz-type-specialty" checked style="width: 18px; height: 18px; accent-color: var(--color-primary);">
                   <span>Cas Clinique & Orientation (QCM 🩺)</span>
                 </label>
@@ -1313,6 +1317,14 @@ body {
                   <h4 style="font-size: 13px; color: var(--color-success); margin-bottom: 6px; font-weight: 600;"><i class="fa-solid fa-clipboard-check"></i> Réponse attendue (Fiche officielle) :</h4>
                   <div id="quiz-display-correct-answer" style="font-size: 13px; white-space: pre-wrap; line-height: 1.5; color: var(--text-primary);">...</div>
                 </div>
+              </div>
+
+              <!-- Dedicated Clinical Rationale & Explanation Box -->
+              <div id="quiz-rationale-box" style="display: none; background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.2); border-left: 3px solid var(--color-primary); border-radius: var(--radius-sm); padding: 12px 16px;">
+                <h5 style="margin: 0 0 6px 0; color: var(--color-primary); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-lightbulb"></i> Justification Médicale & Pharmacologique :
+                </h5>
+                <p id="quiz-rationale-text" style="margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;"></p>
               </div>
 
               <!-- Keyword matching tags indicator -->
@@ -1524,7 +1536,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-C74EOS5U.js"></script>
+  <script type="module" src="dist/app-F5AVCI6P.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
