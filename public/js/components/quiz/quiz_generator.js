@@ -72,26 +72,28 @@ export function cleanOrientationOfClues(text, title, category) {
 
 function parseClinicalSigns(cat) {
   if (!cat || !cat.summary) return '';
+
+  // Extract Section 0 (Stabilisation / Urgence) if present
+  let sec0Text = '';
+  const sec0Match = cat.summary.match(/\*\*0\.[^*]+\*\*([\s\S]+?)(?=\*\*1\.|\n\n|$)/);
+  if (sec0Match) sec0Text = sec0Match[1].trim();
+
+  // Extract Section 1 (Évaluation & Diagnostic)
+  let sec1Text = '';
   const sec1Match = cat.summary.match(/\*\*1\.[^*]+\*\*([\s\S]+?)(?=\*\*2\.|\*\*3\.|\*\*4\.|\*\*5\.|\n\n|$)/);
-  if (!sec1Match) return '';
-  const sec1Text = sec1Match[1].trim();
+  if (sec1Match) sec1Text = sec1Match[1].trim();
 
-  const cliniqueMatch = sec1Text.match(/-\s*Clinique\s*:\s*([^\n]+)/i);
-  if (cliniqueMatch) {
-    return cliniqueMatch[1].trim();
+  const combined = (sec1Text || sec0Text || cat.summary)
+    .replace(/\*\*/g, '')
+    .replace(/^-\s*/gm, '')
+    .replace(/\[la pathologie\]/g, '')
+    .trim();
+
+  const lines = combined.split('\n').map(l => l.trim()).filter(l => l.length > 10);
+  if (lines.length > 0) {
+    return lines.slice(0, 3).join('. ');
   }
-
-  const diagMatch = sec1Text.match(/-\s*Diagnostic\s*:\s*([^\n]+)/i);
-  if (diagMatch) {
-    return diagMatch[1].trim();
-  }
-
-  const bullets = sec1Text.split('\n').filter(line => line.trim().startsWith('-'));
-  if (bullets.length > 0) {
-    return bullets.slice(0, 2).map(b => b.replace(/^-\s*/, '').trim()).join('. ');
-  }
-
-  return sec1Text;
+  return combined.substring(0, 240);
 }
 
 export function generateClinicalVignette(cat) {
@@ -101,42 +103,48 @@ export function generateClinicalVignette(cat) {
     .replace(/^Interprétation du\s+/i, '')
     .trim();
 
-  let gender = Math.random() > 0.5 ? "Un patient" : "Une patiente";
-  let age = Math.floor(Math.random() * 50) + 18;
+  let gender = Math.random() > 0.5 ? "Un homme" : "Une femme";
+  let age = Math.floor(Math.random() * 45) + 20;
 
   if (cat.category === 'Pédiatrie') {
-    gender = Math.random() > 0.5 ? "Un enfant" : "Une fillette";
-    age = Math.floor(Math.random() * 10) + 1;
-    if (age === 1) age = "12 mois";
+    gender = Math.random() > 0.5 ? "Un petit garçon" : "Une petite fille";
+    age = Math.floor(Math.random() * 8) + 1;
+    if (age === 1) age = "14 mois";
     else age = `${age} ans`;
   } else if (cat.category === 'Gynécologie / Obstétrique') {
     gender = "Une patiente";
+    age = Math.floor(Math.random() * 20) + 22;
   }
-
-  let signs = parseClinicalSigns(cat);
-  signs = signs.replace(/\*\*/g, '').replace(/\[la pathologie\]/g, cleanTitle).trim();
-
-  signs = signs.substring(0, 220).trim();
-  if (signs.endsWith('.') === false && signs.length > 0) signs += '...';
-
-  const settings = [
-    "se présente à votre cabinet médical",
-    "se présente aux urgences",
-    "vous consulte",
-    "arrive en consultation"
-  ];
-  const setting = settings[Math.floor(Math.random() * settings.length)];
 
   const ageStr = typeof age === 'number' ? `${age} ans` : age;
-  let text = `${gender} de ${ageStr} ${setting}`;
 
-  if (signs && signs.length > 5) {
-    text += ` présentant les signes suivants : "${signs}".`;
-  } else {
-    text += ` pour suspicion de : "${cleanTitle}".`;
+  const places = [
+    "se présente aux urgences médico-chirurgicales",
+    "consulte à votre cabinet médical",
+    "est admis(e) en salle de soins",
+    "vient en consultation de médecine générale"
+  ];
+  const place = places[Math.floor(Math.random() * places.length)];
+
+  let signs = parseClinicalSigns(cat);
+  if (signs && signs.length > 280) {
+    signs = signs.substring(0, 280) + '...';
   }
 
-  return text;
+  let vitals = "";
+  if (cat.category === 'Pédiatrie') {
+    vitals = "Constantes : T° 38.2°C, FC 110 bpm, FR 28/min, bon état général.";
+  } else if (cat.category === 'Cardiologie') {
+    vitals = "Constantes : TA 165/95 mmHg, FC 88 bpm, SpO2 98% en air ambiant.";
+  } else {
+    vitals = "Constantes à l'arrivée : TA 125/80 mmHg, FC 76 bpm, T° 37.3°C, SpO2 99%.";
+  }
+
+  if (signs && signs.length > 10) {
+    return `${gender} de ${ageStr} ${place}.\n\nTableau clinique initial : ${signs}.\n${vitals}`;
+  }
+
+  return `${gender} de ${ageStr} ${place} pour tableau évocateur de : ${cleanTitle}.\n${vitals}`;
 }
 
 function extractKeywords(text) {
