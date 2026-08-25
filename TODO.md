@@ -2,6 +2,27 @@
 
 ---
 
+## 🚀 Version 1.15.0 — Delivered Features & Hardening (Completed)
+
+- [x] **Interactive Quiz Engine V2 Upgrade & Doctor-Grade Docimology (`cat_db_generator/lib/quiz-generator-v2.js`)**:
+  - [x] **Multi-Stage Progressive Clinical Vignettes**: Realistic clinical storylines (Anamnèse ➔ Examen physique & Constantes ➔ Examens complémentaires ➔ Conduite thérapeutique).
+  - [x] **Doctor-Grade Distractor Generation**: Clinically plausible distractors, differential diagnosis traps, and posology edge-cases (contraindications in asthma/pregnancy, renal clearance).
+  - [x] **Contextual Posology & Prescription MCQs**: Validated against BDPM and Algerian Chifa nomenclature.
+  - [x] **Deep Clinical Rationales & Explanations**: Systematic explanation of correct vs incorrect choices with safety alerts.
+  - [x] **Red Flags Free-Recall Write-In Cases**: Memory training for life-threatening clinical presentations.
+- [x] **Decoupled Staging vs Production Database Architecture**:
+  - [x] `cat_db_generator/quiz_db_staged.json` (Full richness with metadata and generation traces).
+  - [x] `public/data/quiz_db.json` (Stripped, minified production bank bundled for web and APK).
+  - [x] CLI generation suite: `node cat_db_generator/scripts/generate_quiz_cli.js --cat <id> --publish`.
+- [x] **Dedicated Quiz Lab & Staging Studio (`admin/quiz_lab.html`)**:
+  - [x] Full-width 1440px workspace for live question inspection, 1-click Gemini Flash generation, and batch production publishing.
+  - [x] Gated securely behind `isLocalhostConnection` and `x-admin-token`.
+- [x] **Command Center of Laboratories & Mobile Touch Optimization**:
+  - [x] Replaced oversized PDF upload block with modern quick-access cards for the 3 major studios (*CAT Generator Lab*, *Quiz Lab*, *PDF Master Lab*).
+  - [x] Resolved mobile flex-shrink collapse and double-scrolling bug on Android WebViews.
+
+---
+
 ## 🚀 Version 1.13.0 — Delivered Features & Hardening (Completed)
 
 - [x] **Zero-Token LlamaParse Cache Slicing ("2 Birds with 1 Stone")**:
@@ -20,7 +41,7 @@
   - Validated self-correcting clinical loops (Asthma, Pregnancy, Chest pain, Acidocétose, Arrêt de travail).
 - [x] **Cloudflare Production Deployment**:
   - Deployed `worker.js` and `public/` assets to `https://drcat.dr-cat.workers.dev`.
-  - Stamped `version.json` and kill-switch lever to `1.13.0`.
+  - Stamped `version.json` and kill-switch lever to `1.15.0`.
 
 ---
 
@@ -37,26 +58,12 @@
 - **User Feedback & Bug Modal:** Provide a "Signaler un problème" button in sidebar/settings.
 - **One-Tap Dispatch:** User reviews logs, taps once, and sends debug log package via `mailto:` pre-filled draft or direct server endpoint with explicit consent toggle.
 
-### 2. Proprietary Engine Privacy & V2 Architecture Safeguards
-- **Dr.CAT v2 Architecture Planning:** Evaluate relocation and enhanced obfuscation/gating for indexing and view data endpoints when scaling to v2 with expanded content libraries.
-
-### 3. Interactive Clinical Decision Trees (Arbre Décisionnel)
+### 2. Interactive Clinical Decision Trees (Arbre Décisionnel)
 - Integrate interactive decision flowcharts (`todo/arbre_decisionnelle_project.md`) into the workspace view for diagnostic guidance.
 
-### 4. Interactive Quiz Engine V2 Upgrade (`quiz_generator.js` & `ui.js`)
-- [ ] **Dual-RAG Clinical Simulation Engine (Gemini Flash-Lite Powered)**:
-  - Multi-stage progressive vignettes: Stage 1 (Anamnèse & Motif) ➔ Stage 2 (Examen Physique & Constantes) ➔ Stage 3 (Examens Complémentaires) ➔ Stage 4 (Ordonnance Thérapeutique).
-  - Contextual Patient Randomizer: Pediatric weights (`mg/kg`), pregnancy trimesters (CRAT constraints), renal insufficiency (clearance calculations).
-- [ ] **AI-Synthesized Contextual Distractors (Smart Distractor Generation)**:
-  - Replace random cross-specialty distractors with **medically plausible differential diagnoses** and **subtle posology traps** (e.g. correct molecule but toxic pediatric dose, contraindication in asthma, wrong duration).
-  - Pharmacological traps: Confusing 1ère Intention vs 2ème Intention, inappropriate combination of macrolides and QT-prolonging drugs.
-- [ ] **Semantic Write-In Auto-Grading & Analytical Feedback**:
-  - LLM-assisted or hybrid token-density scoring for free-text prescriptions and red flags.
-  - Deep Clinical Explanations: Systematic "Pourquoi cette option est fausse" leveraging BDPM and Algerian Chifa drug nomenclature.
-- [ ] **ECNi-Grade Modern Interactive UI & Adaptive Spaced Repetition**:
-  - Full-screen clinical case mode with smooth card transitions and tactile haptic feedback.
-  - Leitner box integration: Weak points auto-feed directly into daily high-yield spaced repetition sessions.
-  - Timed emergency room simulation mode with cardiac arrest and shock countdown timers.
+### 3. Adaptive Spaced Repetition & High-Yield Leitner Expansion
+- **Leitner Box Integration**: Weak points auto-feed directly into daily high-yield spaced repetition sessions.
+- **Timed Emergency Room Simulation**: ER shock and acute distress countdown mode.
 
 ---
 

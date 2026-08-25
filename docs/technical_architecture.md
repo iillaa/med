@@ -107,6 +107,39 @@ Clicking any pill triggers `window.switchToSubProfile(idx)`, instantly re-render
 ### 4. 8-Layer Automated Checksum Loop
 Sub-CATs pass through the complete medical validation pipeline (`validateCAT`), enforcing daily drug ceilings, dangerous interactions, CRAT rules, and pediatric dosing with an automated 3-attempt retry loop on validation failure.
 
+---
+
+## 🧠 Doctor-Grade Docimology & Quiz Engine V2 Architecture (v1.15.0)
+
+Dr. CAT v1.15.0 introduces an advanced clinical question-generation and staging pipeline (`cat_db_generator/lib/quiz-generator-v2.js`):
+
+### 1. 5-Tier Item Typology per CAT Suite:
+* **Cas Cliniques Multi-Étapes (KFQs & SCTs)**: Progressive clinical cases branching across 4 stages (Anamnèse ➔ Examen physique & Constantes ➔ Examens complémentaires ➔ Choix thérapeutique).
+* **QCMs Diagnostics & Sémiologie**: Plausible distractors modeled after real diagnostic dilemmas.
+* **QCMs d'Ordonnance & Posologies**: Verification of therapeutic choices, doses, and contraindications cross-referenced against BDPM & Algerian Chifa pharmacopeia.
+* **Rationales Médicaux Exhaustifs**: Systematic medical justifications provided for correct and incorrect answer choices.
+* **Red Flags Write-in (Free Recall)**: Active recall training for life-threatening presentation signs.
+
+### 2. Decoupled Staging vs Production Database Architecture:
+```text
+  [Gemini Flash Docimology Generator]
+                  │
+                  ▼
+  [cat_db_generator/quiz_db_staged.json]   <--- Staging Sandbox (All suites + generation traces)
+                  │
+                  │ (1-Click Publish in Quiz Lab / CLI --publish)
+                  ▼
+  [public/data/quiz_db.json]               <--- Minified, Stripped Production Bank (Web & APK)
+```
+
+### 3. Studio Endpoints & Security Gate:
+* `GET /api/admin/quiz-lab/data` : Returns metrics (total CATs, staged count, public questions count) and items status.
+* `POST /api/admin/quiz-lab/generate` : Triggers single-CAT AI generation with live staging database update.
+* `POST /api/admin/quiz-lab/publish` : Copies validated staging suites to `public/data/quiz_db.json`.
+* Strictly protected by `isLocalhostConnection` and `x-admin-token` verification.
+
+---
+
 ## 💾 Data Management & Integrity
 
 To guarantee zero data loss on device power cuts or concurrent accesses, the application implements the following write-path:

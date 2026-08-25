@@ -1,28 +1,32 @@
-# Dr. CAT — Rappel Clinique de Poche 🩺
+# Dr. CAT — Rappel Clinique de Poche 🩺 (v1.15.0)
 
-**Dr. CAT** est une application web de révision clinique légère et premium, conçue pour tourner localement sur un smartphone Android via **Termux** et s'ouvrir directement dans votre navigateur mobile.
+**Dr. CAT** est une application web et mobile de révision clinique haute performance (PWA & APK Capacitor), conçue pour tourner localement sur un smartphone Android via **Termux** et s'ouvrir directement dans votre navigateur mobile ou en APK natif 60 FPS.
 
-Elle permet à un médecin généraliste de maîtriser 55+ cas pratiques de **Conduite à Tenir (CAT)**, de s'entraîner avec un système de quiz interactif, de conserver des notes cliniques personnelles, de gérer des ordonnances types adaptatives, et d'accéder instantanément à ses cours PDF de référence.
+Elle permet à un médecin généraliste de maîtriser **62 cas pratiques de Conduite à Tenir (CAT)**, de s'entraîner avec un système de **cas cliniques réels et docimologie médicale avancée**, de conserver des notes cliniques personnelles, de gérer des ordonnances types adaptatives, et d'accéder instantanément à son corpus de **84 manuels PDF de référence indexés**.
 
 ---
 
 ## 🚀 Fonctionnalités Clés
 
 ### 📚 Fiches Cliniques (CAT)
-- **55 fiches pré-remplies** en français : Diagnostic, Clinique, Red Flags, Orientation spécialisée.
+- **62 fiches de pratique médicale quotidienne** en français : Diagnostic, Examen clinique, Signes de gravité (Red Flags), Prise en charge thérapeutique et Orientation spécialisée.
 - Chaque fiche est enrichie de règles claires d'**Orientation et Avis Spécialisé** (quand et vers quel spécialiste référer le patient).
-- Filtres rapides par **statut d'apprentissage** (`À faire`, `En cours`, `Maîtrisé`) et filtre prioritaire ⚠️ **Red Flags** pour les urgences critiques.
-- Barre de recherche full-text : filtre par titre, spécialité, contenu de synthèse, et signes de gravité.
+- Filtres rapides par **statut d'apprentissage** (`À faire`, `En cours`, `Maîtrisé`) et filtre prioritaire ⚠️ **Red Flags** pour les urgences vitales.
+- Barre de recherche omni-search instantanée (Ctrl+K / Cmd+K) : recherche full-text dans les fiches, les 84 livres PDF et la pharmacopée.
 
-### 🧠 Mode Quiz & Entraînement
-- **Questions QCM** : Identifier la spécialité médicale d'un cas clinique parmi plusieurs propositions.
-- **Questions Rédaction (write-in)** : Rédiger de mémoire les Red Flags / signes de gravité, ou l'ordonnance type complète — simule la réalité du cabinet.
-- **Panel de correction automatique** : Comparaison côte-à-côte entre votre réponse et la fiche de référence officielle.
-- **Navigation contextuelle persistante** : Bouton **"Ouvrir la Fiche Référence"** qui permet de quitter le quiz pour aller réviser la fiche associée, et de revenir instantanément au quiz sans perdre vos réponses en cours grâce au bouton **"Retour au Quiz"**.
-- **Détection de mots-clés** : Identification et mise en valeur des termes médicaux importants trouvés dans votre réponse.
-- **Auto-évaluation honnête** : Système de notation en 3 niveaux (100% / Partiel / Revoir).
-- **Score final & historique détaillé** : Tableau de résultats par question avec bouton "Ouvrir la fiche de référence" directement depuis le quiz.
-- **Configuration flexible** : Choix de la spécialité, du nombre de questions (5/10/15/20), et des types de questions.
+### 🧠 Mode Quiz Docimologique & Cas Cliniques Réels (v1.15.0)
+- **Cas Cliniques Multi-Étapes (KFQs & SCTs)** : Simulation de cas réels progressifs (Anamnèse ➔ Examen physique & Constantes ➔ Examens complémentaires ➔ Décision thérapeutique).
+- **QCMs Diagnostics & Sémiologie** : Distracteurs plausibles et pièges cliniques contextualisés.
+- **QCMs d'Ordonnances & Posologies** : Validation des schémas posologiques, adaptation rénale/hépatique, et contre-indications formelles.
+- **Justifications & Rationale Détaillés** : Explication systématique du raisonnement médical pour chaque question.
+- **Questions Rédactionnelles (Free Recall)** : Rédiger de mémoire les Red Flags critiques et les ordonnances complètes.
+- **Architecture à Double Base Découplée** : Séparation stricte entre le Staging Studio (`quiz_db_staged.json`) et la production minifiée client (`public/data/quiz_db.json`).
+
+### 🧪 Command Center des Laboratoires & IA
+- Accès centralisé aux 3 grands studios de développement et d'administration :
+  - 🩺 **CAT Generator Lab** (`/admin/cat_generator_lab.html`) : Moteur de synthèse IA Dual-RAG V3.5, validation anti-hallucination et ordonnances conformes.
+  - 🧠 **Quiz Lab & Staging Studio** (`/admin/quiz_lab.html`) : Studio dédié 1440px de génération IA en 1-clic et modération des banques de questions.
+  - 📄 **PDF Master Lab & Slicer** (`/admin/pdf_lab.html`) : Découpage de pages, extraction OCR haute précision et synchronisation GPS du sommaire.
 
 
 ### 💊 Ordonnances Types Multiples & Adaptatives

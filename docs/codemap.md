@@ -21,25 +21,33 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── cats_db.json.bak             # Automatic database backup (created before writes)
 ├── suggestions.json             # Moderation suggestions queue
 ├── pdf_index.json               # Master indexed PDF page text database
-├── package.json                 # Node dependencies, version (1.12.0), and build scripts
+├── package.json                 # Node dependencies, version (1.15.0), and build scripts
 ├── todo0xalpha.md               # Security audit ledger: bugs found → fixes → commits → verify commands (v1.12.0)
 ├── README.md                    # Project landing, features, security and performance overview
 │
-├── cat_db_generator/            # Database V3.5 Generator Engine & Clinical Labs
-│   ├── generate_cat_db.js   # CLI generator engine (canary self-tests + golden-set regression mode)
-│   ├── golden_set.json         # 5 fixed clinical cases scored after prompt changes (--golden)
-│   ├── cats_db_staged.json     # Staging DB (pure array, fixed name — version in sidecar meta)
-│   ├── GUIDE.md                # V3.5 Generator & Validator documentation
-│   ├── GUIDE_PDF_RAG_STANDARDIZATION.md # Medical lesson formatting guide
-│   ├── clinical_library/       # Tier 2 Action Decision Trees (MedG, Antibioclic, SFMU, Pédiadol, MSF, CRAT)
+├── admin/                       # Standalone Full-Page Administrative Studios (Localhost Only)
+│   ├── cat_generator_lab.html   # Studio V3.5 Dual-RAG CAT Generator & Validation
+│   ├── quiz_lab.html            # Studio V2 Clinical Quiz Lab & Staging Inspector
+│   ├── pdf_lab.html             # Studio PDF Master Slicer & OCR OCR Workbench
+│   └── analytics_lab.html       # Audience and performance analytics monitor
+│
+├── cat_db_generator/            # Database V3.5 & Quiz Docimology Engine
+│   ├── generate_cat_db.js       # CLI CAT generator engine (--canary + --golden regression)
+│   ├── golden_set.json          # 5 fixed clinical cases scored after prompt changes (--golden)
+│   ├── cats_db_staged.json      # Staging CAT DB (pure array, version in sidecar meta)
+│   ├── quiz_db_staged.json      # Staging Quiz DB (vignettes, QCMs, rationales, prescriptions)
+│   ├── GUIDE.md                 # V3.5 Generator & Validator documentation
+│   ├── clinical_library/        # Tier 2 Action Decision Trees (MedG, Antibioclic, SFMU, Pédiadol, MSF, CRAT)
+│   ├── scripts/
+│   │   └── generate_quiz_cli.js # CLI tool for quiz suite generation & staging publishing
 │   └── lib/
-│       ├── llm-engine.js       # Gemini Flash Dual RAG & Active Learning engine
-│       ├── db-paths.js         # Canonical staging path resolver + schema-version sidecar reader
-│       ├── pdf-extractor.js    # 5-field metadata precision RAG scanner with Pure Signal isolation
-│       ├── web-fetcher.js      # Web RAG scraper with Doctor Custom URL injector
-│       ├── medical-validator.js# Deterministic 8-layer medical & dosage ceiling validator (+ unknown-DCI gate)
-│       ├── debug-emitter.js    # Real-time SSE telemetry logger
-│       └── knowledge-library.js# Sub-millisecond clinical library reader
+│       ├── quiz-generator-v2.js # Doctor-grade docimology engine (KFQs, SCTs, differential distractors)
+│       ├── llm-engine.js        # Gemini Flash Dual RAG & Active Learning engine
+│       ├── db-paths.js          # Canonical staging path resolver + schema-version sidecar reader
+│       ├── pdf-extractor.js     # 5-field metadata precision RAG scanner with Pure Signal isolation
+│       ├── web-fetcher.js       # Web RAG scraper with Doctor Custom URL injector
+│       ├── medical-validator.js # Deterministic 8-layer medical & dosage ceiling validator
+│       └── knowledge-library.js # Sub-millisecond clinical library reader
 │
 ├── data/                        # Server Data & Pharmacopeias
 │   ├── pdf_masters/             # Uncompressed master original PDFs for AI indexing
@@ -52,16 +60,13 @@ This document outlines the file layout, key data modules, and logic flows of **D
 │   ├── index.js                 # Server routes & middleware bootstrap
 │   ├── routes/
 │   │   ├── cat-generator.js     # V3.5 Generator Lab endpoints & SSE telemetry
+│   │   ├── quiz-lab.js          # Studio V2 Quiz staging, generation & publish routes
 │   │   ├── pdfs.js              # PDF Lab 2.0 Ingestion, Visual Slicer, GPS Sommaire & Staging API
 │   │   ├── cats.js              # CAT CRUD API with client IP protection sanitization
 │   │   ├── search.js            # High-speed PDF search routes
 │   │   └── version.js           # Version checker & Kill Switch API
 │   └── services/
 │       └── data-store.js        # Safe async JSON read/write queues
-│
-├── admin/                       # Admin Workbench Interfaces
-│   ├── cat_generator_lab.html   # V3.5 Generator Lab (SSE telemetry, Diff Inspector, 1-Tap Promote)
-│   └── pdf_lab.html             # PDF Lab 2.0 (Staging Sandbox, Visual Slicer Canvas, GPS Sommaire)
 │
 ├── scripts/                     # Utility & Optimization Scripts
 │   ├── clean_android_assets.js  # Android asset stripper (anti-decompilation protection)
@@ -72,7 +77,7 @@ This document outlines the file layout, key data modules, and logic flows of **D
 ├── docs/security-hardening-v1.12.0.md  # 0x-alpha audit technical write-up
 │
 ├── tests/                       # Automated Verification & Test Suite
-│   ├── run_all_tests.js         # Master test runner (8 sub-suites)
+│   ├── run_all_tests.js         # Master test runner (10 sub-suites)
 │   ├── test_api.js              # Server API smoke tests
 │   ├── test_auth.js             # Authentication tests
 │   └── test_suggestions.js      # Suggestion lifecycle tests
