@@ -141,10 +141,33 @@ npm run set:password    # Interactive password setter
 npm run build           # Compile static assets & minify JSON DBs (auto-stamps worker /api/version)
 npm run reindex         # Re-index master PDFs (from data/pdf_masters/)
 npm run compress:pdfs   # Compress PDFs using Ghostscript ultra engine
-npm run test:suite      # Run master automated test suite
-npm run cap:sync        # Sync Capacitor assets
+npm run test:suite      # Run master automated test suite (10 test suites)
+npm run cap:sync        # Sync Capacitor assets with asset hardening
 npm run generate        # CAT generator CLI (see Generator section below)
 ```
+
+---
+
+## 🧠 Clinical Quiz & Docimology Generation Workflow (v1.15.0)
+
+Dr. CAT uses a decoupled doctor-grade docimology engine (`cat_db_generator/lib/quiz-generator-v2.js`) producing multi-stage vignettes, differential distractors, and prescription validation.
+
+### 1. Generate Quiz Suite via CLI:
+```bash
+# Generate quiz suite for a specific CAT (e.g. CAT #1: Intoxication Alimentaire)
+node cat_db_generator/scripts/generate_quiz_cli.js --cat 1
+
+# Generate and immediately publish to production quiz_db.json
+node cat_db_generator/scripts/generate_quiz_cli.js --cat 1 --publish
+
+# Batch generate quiz suites for all 62 CATs
+node cat_db_generator/scripts/generate_quiz_cli.js --all --publish
+```
+
+### 2. Live Inspector & Staging Studio (`admin/quiz_lab.html`):
+- Open `http://localhost:3000/admin/quiz_lab.html` (Localhost + Admin Token required).
+- Review generated vignettes and posology MCQs.
+- Click **`🚀 Publier en Production`** to copy validated staging suites to `public/data/quiz_db.json`.
 
 ---
 
