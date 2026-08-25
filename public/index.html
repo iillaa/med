@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.13.0">
-  <meta name="app-build-version" content="2026.08.25.15.07">
+  <meta name="app-build-version" content="2026.08.25.15.34">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608251507" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251507"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251534" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251534"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251507" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251507"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251534" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251534"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608251507" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608251507" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608251507">
+  <link rel="stylesheet" href="style.css?v=2608251534" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251534" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251534">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608251507">
-    <link rel="stylesheet" href="css/utilities.css?v=2608251507">
+    <link rel="stylesheet" href="style.css?v=2608251534">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251534">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608251507"></script>
+  <script type="module" src="js/version-checker.js?v=2608251534"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -691,22 +691,11 @@ body {
               <div id="omni-search-results" class="omni-search-results" style="display: none;"></div>
             </div>
 
-            <!-- Emergency Protocol Shortcuts -->
+            <!-- Dynamic Emergency Protocol Shortcuts (Daily Rotating Circle) -->
             <div class="emergency-shortcuts-row">
-              <span class="emergency-shortcuts-label"><i class="fa-solid fa-truck-medical" style="color: var(--color-danger);"></i> Urgences Fréquentes :</span>
-              <div class="emergency-shortcuts-chips">
-                <button class="emergency-chip" onclick="window.quickOpenCatSearch('anaphylaxie')">
-                  <i class="fa-solid fa-syringe"></i> Anaphylaxie / Choc
-                </button>
-                <button class="emergency-chip" onclick="window.quickOpenCatSearch('arrêt cardio')">
-                  <i class="fa-solid fa-heart-pulse"></i> Arrêt Cardio (ACR)
-                </button>
-                <button class="emergency-chip" onclick="window.quickOpenCatSearch('asthme')">
-                  <i class="fa-solid fa-lungs"></i> Asthme Aigu Grave
-                </button>
-                <button class="emergency-chip" onclick="window.quickOpenCatSearch('colique néphrétique')">
-                  <i class="fa-solid fa-droplet"></i> Colique Néphrétique
-                </button>
+              <span class="emergency-shortcuts-label"><i class="fa-solid fa-truck-medical" style="color: var(--color-danger);"></i> Urgences du Jour :</span>
+              <div id="emergency-shortcuts-chips-container" class="emergency-shortcuts-chips">
+                <!-- Dynamically populated from real DB with daily deterministic rotation -->
               </div>
             </div>
           </div>
@@ -1461,7 +1450,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-CG3MS6RD.js"></script>
+  <script type="module" src="dist/app-YWRX552T.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

@@ -1,6 +1,6 @@
 import { state } from '../state.js';
 import * as api from '../api.js';
-import { exportDataFile, showToast } from '../utils.js';
+import { exportDataFile, showToast, escapeHTML } from '../utils.js';
 import { calculateStats, getStreakCount } from './dashboard/stats.js';
 import { renderResumeList } from './dashboard/resume.js';
 import { renderCategoryProgress } from './dashboard/progress.js';
@@ -17,6 +17,34 @@ function computeDashSignature() {
   const doing = state.allCats.filter(c => c.status === 'doing').length;
   const admin = state.isAdmin ? 1 : 0;
   return `${total}|${done}|${doing}|${admin}`;
+}
+
+/**
+ * Deterministic daily rotation for 4 featured emergency/clinical CATs
+ */
+function getDailyRotatedEmergencyCats(allCats) {
+  if (!Array.isArray(allCats) || allCats.length === 0) return [];
+  
+  // Prioritize urgent/emergency CATs if keywords match, else rotate across entire database
+  const emergencyKeywords = ['urgence', 'aigu', 'choc', 'détresse', 'hémorragie', 'coma', 'convulsion', 'douleur', 'brûlure', 'intoxication', 'anaphylaxie', 'asthme', 'céphalée'];
+  const candidates = allCats.filter(c => {
+    const title = (c.title || '').toLowerCase();
+    const flags = (c.red_flags || '').toLowerCase();
+    return emergencyKeywords.some(kw => title.includes(kw) || flags.includes(kw));
+  });
+
+  const pool = candidates.length >= 4 ? candidates : allCats;
+  
+  // Daily seed based on current calendar date (e.g. 20260825)
+  const now = new Date();
+  const dateSeed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  
+  const startIndex = dateSeed % pool.length;
+  const result = [];
+  for (let i = 0; i < Math.min(4, pool.length); i++) {
+    result.push(pool[(startIndex + i) % pool.length]);
+  }
+  return result;
 }
 
 export function initDashboard(onSelectCat, onSuggestionHandled) {
@@ -46,7 +74,26 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
 
   initAdminTabListeners(onSuggestionHandled);
 
-  // Omni-Search Central Handler
+  // Render Daily Rotated Emergency Protocol Chips
+  function renderDailyEmergencyChips() {
+    const chipsContainer = document.getElementById('emergency-shortcuts-chips-container');
+    if (!chipsContainer || !state.allCats || state.allCats.length === 0) return;
+    
+    const featuredCats = getDailyRotatedEmergencyCats(state.allCats);
+    chipsContainer.innerHTML = '';
+
+    featuredCats.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'emergency-chip';
+      btn.innerHTML = `<i class="fa-solid fa-heart-pulse"></i> <span>${escapeHTML(cat.title)}</span>`;
+      btn.onclick = () => {
+        if (onSelectCat) onSelectCat(cat);
+      };
+      chipsContainer.appendChild(btn);
+    });
+  }
+
+  // Omni-Search Central Handler with Unified CAT + PDF Matching
   const omniInput = document.getElementById('omni-search-input');
   const omniBtn = document.getElementById('omni-search-btn');
   const omniResults = document.getElementById('omni-search-results');
@@ -66,39 +113,72 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       const ord = (c.ordonnance || '').toLowerCase();
       const kw = Array.isArray(c.keywords) ? c.keywords.join(' ').toLowerCase() : '';
       return title.includes(query) || catg.includes(query) || summ.includes(query) || ord.includes(query) || kw.includes(query);
-    }).slice(0, 8);
+    }).slice(0, 6);
 
-    if (matchedCats.length === 0) {
-      omniResults.innerHTML = `<div style="padding: 12px; font-size: 12.5px; color: var(--text-muted); text-align: center;">Aucune CAT trouvée pour "${escapeHTML(query)}". <br><a href="#" id="omni-search-pdf-fallback" style="color: var(--color-primary); font-weight: 700; display: inline-block; margin-top: 6px;">🔍 Chercher dans les 78 Livres PDF ➔</a></div>`;
+    const matchedPdfs = (state.allPdfs || []).filter(pdf => {
+      if (!pdf || typeof pdf !== 'string') return false;
+      return pdf.toLowerCase().includes(query);
+    }).slice(0, 4);
+
+    if (matchedCats.length === 0 && matchedPdfs.length === 0) {
+      omniResults.innerHTML = `
+        <div style="padding: 14px; font-size: 12.5px; color: var(--text-muted); text-align: center;">
+          Aucun résultat direct pour "<strong>${escapeHTML(query)}</strong>".
+          <div style="margin-top: 8px;">
+            <button id="omni-search-pdf-deep" class="action-btn" style="display: inline-flex; font-size: 11.5px; margin: 0 auto; gap: 6px;">
+              <i class="fa-solid fa-file-magnifying-glass" style="color: var(--color-primary);"></i> Fouiller le texte intégral des 78 Livres PDF ➔
+            </button>
+          </div>
+        </div>
+      `;
       omniResults.style.display = 'flex';
-      const pdfFallback = document.getElementById('omni-search-pdf-fallback');
-      if (pdfFallback) {
-        pdfFallback.onclick = (e) => {
-          e.preventDefault();
+      const deepBtn = document.getElementById('omni-search-pdf-deep');
+      if (deepBtn) {
+        deepBtn.onclick = () => {
+          omniResults.style.display = 'none';
           window.openGlobalPdfSearch(query);
         };
       }
       return;
     }
 
-    let html = `<div style="padding: 6px 10px; font-size: 11px; font-weight: 700; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;"><span>FICHES CAT TROUVÉES (${matchedCats.length})</span><span style="color: var(--color-primary); cursor: pointer;" id="omni-search-pdf-link"><i class="fa-solid fa-file-pdf"></i> Chercher dans les PDFs ➔</span></div>`;
+    let html = '';
 
-    matchedCats.forEach(c => {
-      html += `
-        <div class="omni-result-item" data-cat-id="${c.id}" style="padding: 8px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: background 0.15s ease;">
-          <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
-            <strong style="font-size: 12.5px; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(c.title)}</strong>
-            <span style="font-size: 10.5px; color: var(--color-primary);">${escapeHTML(c.category || '')}</span>
+    if (matchedCats.length > 0) {
+      html += `<div style="padding: 6px 10px; font-size: 10.5px; font-weight: 700; color: var(--text-secondary); background: rgba(0,0,0,0.15); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;"><span>FICHES CAT (${matchedCats.length})</span><span style="color: var(--color-primary); cursor: pointer;" id="omni-search-pdf-link"><i class="fa-solid fa-file-pdf"></i> Fouiller les PDFs ➔</span></div>`;
+      matchedCats.forEach(c => {
+        html += `
+          <div class="omni-result-item" data-cat-id="${c.id}" style="padding: 8px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: background 0.15s ease;">
+            <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+              <strong style="font-size: 12px; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(c.title)}</strong>
+              <span style="font-size: 10px; color: var(--color-primary);">${escapeHTML(c.category || '')}</span>
+            </div>
+            <span style="font-size: 10px; padding: 2px 6px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--text-muted);">${c.status === 'done' ? '✅' : (c.status === 'doing' ? '⏳' : '⚪')}</span>
           </div>
-          <span style="font-size: 10px; padding: 2px 6px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--text-muted);">${c.status === 'done' ? '✅' : (c.status === 'doing' ? '⏳' : '⚪')}</span>
-        </div>
-      `;
-    });
+        `;
+      });
+    }
+
+    if (matchedPdfs.length > 0) {
+      html += `<div style="padding: 6px 10px; font-size: 10.5px; font-weight: 700; color: var(--color-success); background: rgba(0,0,0,0.15); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">MANUELS & DOCUMENTS PDF (${matchedPdfs.length})</div>`;
+      matchedPdfs.forEach(pdf => {
+        const cleanPdfName = pdf.replace(/^\d+[\s\-_]*/, '').replace(/\.pdf$/i, '').replace(/_/g, ' ');
+        html += `
+          <a class="omni-result-item" href="pdf_viewer.html?file=${encodeURIComponent(pdf)}&page=1" style="padding: 8px 10px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: background 0.15s ease;">
+            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+              <i class="fa-solid fa-file-pdf" style="color: var(--color-danger); font-size: 14px;"></i>
+              <strong style="font-size: 12px; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(cleanPdfName)}</strong>
+            </div>
+            <span style="font-size: 10px; color: var(--color-primary); font-weight: 600;">Ouvrir ➔</span>
+          </a>
+        `;
+      });
+    }
 
     omniResults.innerHTML = html;
     omniResults.style.display = 'flex';
 
-    omniResults.querySelectorAll('.omni-result-item').forEach(item => {
+    omniResults.querySelectorAll('.omni-result-item[data-cat-id]').forEach(item => {
       item.onclick = () => {
         const catId = parseInt(item.getAttribute('data-cat-id'), 10);
         const targetCat = (state.allCats || []).find(c => c.id === catId);
@@ -123,38 +203,27 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
   if (omniInput) {
     omniInput.addEventListener('input', () => {
       clearTimeout(window._omniTimer);
-      window._omniTimer = setTimeout(handleOmniSearch, 250);
+      window._omniTimer = setTimeout(handleOmniSearch, 200);
     });
     omniInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleOmniSearch();
+      if (e.key === 'Escape') {
+        if (omniResults) omniResults.style.display = 'none';
+      }
     });
   }
   if (omniBtn) {
     omniBtn.addEventListener('click', handleOmniSearch);
   }
 
-  // Quick Open Shortcut Function
-  window.quickOpenCatSearch = function(searchTerm) {
-    const term = searchTerm.toLowerCase();
-    const found = (state.allCats || []).find(c => (c.title || '').toLowerCase().includes(term) || (c.keywords || []).some(k => k.toLowerCase().includes(term)));
-    if (found && onSelectCat) {
-      onSelectCat(found);
-    } else {
-      if (omniInput) {
-        omniInput.value = searchTerm;
-        handleOmniSearch();
+  // Dismiss Omni-Search on Outside Click
+  document.addEventListener('click', (e) => {
+    if (omniResults && omniResults.style.display !== 'none') {
+      if (!e.target.closest('.omni-search-container')) {
+        omniResults.style.display = 'none';
       }
     }
-  };
-
-  // Quick Quiz Shortcut Card
-  const quickQuizCard = document.getElementById('dash-quick-quiz-card');
-  if (quickQuizCard) {
-    quickQuizCard.onclick = () => {
-      const quizNavBtn = document.getElementById('start-quiz-nav-btn');
-      if (quizNavBtn) quizNavBtn.click();
-    };
-  }
+  });
 
   // Global PDF Search Opener
   window.openGlobalPdfSearch = function(query = '') {
@@ -171,6 +240,9 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       }
     }
   };
+
+  // Expose Emergency Renderer
+  window.renderDailyEmergencyChips = renderDailyEmergencyChips;
 
   const exportBtn = document.getElementById('export-progress-btn');
   if (exportBtn) {
@@ -406,7 +478,10 @@ export async function renderDashboard(onSelectCat) {
 
   const activeCats = state.allCats.filter(c => c.status === 'doing' || c.status === 'done');
   renderResumeList(resumeList, activeCats, onSelectCat);
-  renderCategoryProgress(categoriesDiv, state.allCats);
+  renderCategoryProgress(categoriesDiv, state.allCats, onSelectCat);
+  if (typeof renderDailyEmergencyChips === 'function') {
+    renderDailyEmergencyChips();
+  }
 
   const firstRunBanner = document.getElementById('dash-first-run-banner');
   if (firstRunBanner) {
