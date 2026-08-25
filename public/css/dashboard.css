@@ -960,3 +960,187 @@
   background: #f8fafc !important;
   border-color: var(--color-primary) !important;
 }
+
+/* Dashboard Legal Compact Footer */
+.dashboard-legal-footer {
+  margin-top: 24px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dashboard-legal-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.legal-badge-beta {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--color-primary);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legal-link-btn {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.legal-link-btn:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: var(--color-primary);
+}
+
+.light-theme .dashboard-legal-footer {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+/* Retractable Search Results in Library */
+.lib-results-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.lib-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.lib-collapse-btn {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.lib-collapse-btn:hover {
+  background: rgba(6, 182, 212, 0.2);
+}
+
+.lib-search-container-full {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 450px;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+}
+
+.lib-search-container-collapsed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow: hidden;
+}
+
+.lib-show-all-btn {
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px dashed var(--color-primary);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.lib-show-all-btn:hover {
+  background: rgba(6, 182, 212, 0.16);
+}
+
+/* Specialties Toolbar & Enhanced Filter */
+.lib-specialties-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.lib-filter-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 260px;
+}
+
+.lib-filter-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.lib-filter-wrapper input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 12px 8px 34px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.lib-filter-wrapper input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+}
+
+.light-theme .lib-filter-wrapper input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.light-theme .lib-results-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
