@@ -870,3 +870,87 @@
     gap: 3px !important;
   }
 }
+
+/* ── Crisp Clean Light Theme Overrides (Medical Grade Clarity) ── */
+.light-theme .command-center-hero {
+  background: linear-gradient(135deg, rgba(14, 116, 144, 0.06), #ffffff);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06);
+}
+
+.light-theme .omni-search-bar {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.light-theme .omni-search-bar:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.15);
+}
+
+.light-theme .omni-search-results {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+}
+
+.light-theme .emergency-chip {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.light-theme .emergency-chip:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.light-theme .dash-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.light-theme .dash-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.light-theme .dashboard-block {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.light-theme .lib-category-section {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.light-theme .lib-cat-header {
+  background: #f8fafc !important;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.light-theme .pdf-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.light-theme .pdf-card:hover {
+  background: #f8fafc;
+  border-color: var(--color-primary);
+}
+
+.light-theme .pdf-search-result-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light-theme .pdf-search-result-card:hover {
+  background: #f8fafc !important;
+  border-color: var(--color-primary) !important;
+}
