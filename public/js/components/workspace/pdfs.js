@@ -1,4 +1,5 @@
 import { state } from '../../state.js';
+import * as api from '../../api.js';
 import { getCleanPdfName, showToast, escapeHTML } from '../../utils.js';
 
 export function createPdfCardElement(file, isGlobal = false) {
