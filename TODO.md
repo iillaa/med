@@ -43,8 +43,20 @@
 ### 3. Interactive Clinical Decision Trees (Arbre Décisionnel)
 - Integrate interactive decision flowcharts (`todo/arbre_decisionnelle_project.md`) into the workspace view for diagnostic guidance.
 
-### 4. Interactive Quiz Engine V2 Upgrade (`quiz_generator.js`)
-- **Dynamic QCM Distractor & Vignette Synthesis V2**: Expand `public/js/components/quiz/quiz_generator.js` with multi-stage clinical vignette generation, differential diagnosis options, and AI-driven question variations (just like CAT Generator V2!).
+### 4. Interactive Quiz Engine V2 Upgrade (`quiz_generator.js` & `ui.js`)
+- [ ] **Dual-RAG Clinical Simulation Engine (Gemini Flash-Lite Powered)**:
+  - Multi-stage progressive vignettes: Stage 1 (Anamnèse & Motif) ➔ Stage 2 (Examen Physique & Constantes) ➔ Stage 3 (Examens Complémentaires) ➔ Stage 4 (Ordonnance Thérapeutique).
+  - Contextual Patient Randomizer: Pediatric weights (`mg/kg`), pregnancy trimesters (CRAT constraints), renal insufficiency (clearance calculations).
+- [ ] **AI-Synthesized Contextual Distractors (Smart Distractor Generation)**:
+  - Replace random cross-specialty distractors with **medically plausible differential diagnoses** and **subtle posology traps** (e.g. correct molecule but toxic pediatric dose, contraindication in asthma, wrong duration).
+  - Pharmacological traps: Confusing 1ère Intention vs 2ème Intention, inappropriate combination of macrolides and QT-prolonging drugs.
+- [ ] **Semantic Write-In Auto-Grading & Analytical Feedback**:
+  - LLM-assisted or hybrid token-density scoring for free-text prescriptions and red flags.
+  - Deep Clinical Explanations: Systematic "Pourquoi cette option est fausse" leveraging BDPM and Algerian Chifa drug nomenclature.
+- [ ] **ECNi-Grade Modern Interactive UI & Adaptive Spaced Repetition**:
+  - Full-screen clinical case mode with smooth card transitions and tactile haptic feedback.
+  - Leitner box integration: Weak points auto-feed directly into daily high-yield spaced repetition sessions.
+  - Timed emergency room simulation mode with cardiac arrest and shock countdown timers.
 
 ---
 

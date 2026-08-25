@@ -131,9 +131,9 @@ export function generateClinicalVignette(cat) {
   let text = `${gender} de ${ageStr} ${setting}`;
 
   if (signs && signs.length > 5) {
-    text += ` présentant les signes suivants : <br><em>"${signs}"</em>.`;
+    text += ` présentant les signes suivants : "${signs}".`;
   } else {
-    text += ` pour suspicion de : <br><strong>"${cleanTitle}"</strong>.`;
+    text += ` pour suspicion de : "${cleanTitle}".`;
   }
 
   return text;

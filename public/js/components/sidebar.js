@@ -151,6 +151,49 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
     });
   }
 
+  // Sidebar Navigation Tabs Switcher (Fiches / PDFs / Quiz)
+  const tabCats = document.getElementById('sidebar-tab-cats');
+  const tabPdfs = document.getElementById('sidebar-tab-pdfs');
+  const tabQuiz = document.getElementById('sidebar-tab-quiz');
+
+  function setSidebarTabActive(btn) {
+    [tabCats, tabPdfs, tabQuiz].forEach(b => { if (b) b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+  }
+
+  if (tabCats) {
+    tabCats.addEventListener('click', () => {
+      setSidebarTabActive(tabCats);
+      const welcome = document.getElementById('welcome-screen');
+      if (welcome && (!state.activeCat || welcome.style.display !== 'none')) {
+        // Show dashboard or active CAT
+      }
+    });
+  }
+
+  if (tabPdfs) {
+    tabPdfs.addEventListener('click', () => {
+      setSidebarTabActive(tabPdfs);
+      if (window.openGlobalPdfSearch) {
+        window.openGlobalPdfSearch();
+      }
+      if (window.innerWidth <= 850 && sidebar) {
+        sidebar.classList.remove('open');
+      }
+    });
+  }
+
+  if (tabQuiz) {
+    tabQuiz.addEventListener('click', () => {
+      setSidebarTabActive(tabQuiz);
+      const quizBtn = document.getElementById('start-quiz-nav-btn');
+      if (quizBtn) quizBtn.click();
+      if (window.innerWidth <= 850 && sidebar) {
+        sidebar.classList.remove('open');
+      }
+    });
+  }
+
   // Controls panel collapsible toggle
   const controlsToggleBtn = document.getElementById('controls-toggle-btn');
   const controlsPanel = document.getElementById('controls-panel');

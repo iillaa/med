@@ -65,49 +65,50 @@
   line-height: 1.35;
 }
 
-/* Sub-CAT Segmented Bar (Non-scrollable, zero gesture conflict with swipe navigation) */
-.subcat-selector-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  padding: 2px 0;
-}
-
-.subcat-pill {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+/* Compact Clinical Profile / Sub-CAT Selector Chip */
+.workspace-profile-wrapper {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
-  touch-action: manipulation;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 50px;
+  padding: 1px 8px 1px 6px;
+  transition: all 0.15s ease;
+  max-width: 220px;
 }
 
-.subcat-pill:hover {
-  background: rgba(6, 182, 212, 0.08);
-  border-color: rgba(6, 182, 212, 0.35);
-  color: var(--color-primary);
-}
-
-.subcat-pill.active {
-  background: var(--color-primary);
-  color: #ffffff;
+.workspace-profile-wrapper:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.3);
+  background: rgba(6, 182, 212, 0.06);
 }
 
-.subcat-pill-icon {
+.profile-select-label {
+  font-size: 10px;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+}
+
+.workspace-profile-select {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
   font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  padding: 2px 0;
+  max-width: 180px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.workspace-profile-select option {
+  background: var(--bg-sidebar);
+  color: var(--text-primary);
 }
 
 .status-selector-area {
@@ -126,7 +127,7 @@
   display: flex;
   border-radius: var(--radius-md);
   background-color: var(--bg-card);
-  padding: 3px;
+  padding: 2px;
   border: 1px solid var(--border-color);
 }
 
@@ -134,16 +135,17 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  padding: 8px 14px;
+  padding: 4px 9px;
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   transition: var(--transition-smooth);
+  white-space: nowrap;
 }
 
 .status-btn.active {
