@@ -64,9 +64,14 @@ function rebuildClientAssets() {
     const stagedQuizPath = path.join(__dirname, 'cat_db_generator', 'quiz_db_staged.json');
     const publicQuizPath = path.join(publicDataDir, 'quiz_db.json');
     if (fs.existsSync(stagedQuizPath)) {
-      const quizContent = fs.readFileSync(stagedQuizPath, 'utf-8');
-      fs.writeFileSync(publicQuizPath, JSON.stringify(JSON.parse(quizContent)), 'utf-8');
-      console.log("Copied quiz_db_staged.json to public/data/quiz_db.json");
+      try {
+        const quizContent = fs.readFileSync(stagedQuizPath, 'utf-8');
+        const parsed = JSON.parse(quizContent);
+        fs.writeFileSync(publicQuizPath, JSON.stringify(parsed), 'utf-8');
+        console.log("Copied quiz_db_staged.json to public/data/quiz_db.json");
+      } catch (quizErr) {
+        console.warn("⚠️ Warning: Failed to parse quiz_db_staged.json during build. Preserving existing public quiz_db.json:", quizErr.message);
+      }
     } else if (fs.existsSync(publicQuizPath)) {
       console.log("Preserved existing public/data/quiz_db.json");
     }

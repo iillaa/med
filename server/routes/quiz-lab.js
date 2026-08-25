@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { isAdminRequest: checkIsAdmin } = require('../services/auth-service');
+const { isLocalhostConnection } = require('../utils/request');
 const { state: cache } = require('../services/cache');
 const { generateQuizSuiteForCat, exportToPublicQuizDb, QUIZ_STAGED_PATH, QUIZ_PROD_PATH } = require('../../cat_db_generator/lib/quiz-generator-v2');
 
@@ -8,8 +9,8 @@ const PROD_DB_PATH = process.env.CATS_DB_PATH || path.join(__dirname, '..', '..'
 
 function registerQuizGeneratorRoutes(app) {
   function verifyAdminAccess(req, res) {
-    if (!checkIsAdmin(req, cache.activeTokens)) {
-      res.status(403).json({ error: 'Accès interdit. Vous devez être administrateur pour accéder au Quiz Staging Lab.' });
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      res.status(403).json({ error: 'Accès interdit. Vous devez être administrateur local (localhost) pour accéder au Quiz Staging Lab.' });
       return false;
     }
     return true;

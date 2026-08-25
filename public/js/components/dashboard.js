@@ -511,7 +511,7 @@ export async function renderDashboard(onSelectCat) {
 
   const activeCats = state.allCats.filter(c => c.status === 'doing' || c.status === 'done');
   renderResumeList(resumeList, activeCats, onSelectCat);
-  renderCategoryProgress(categoriesDiv, state.allCats, onSelectCat);
+  renderCategoryProgress(categoriesDiv, state.allCats);
   if (typeof renderDailyEmergencyChips === 'function') {
     renderDailyEmergencyChips();
   }
