@@ -277,9 +277,7 @@
 /* Welcome Screen & Library Screen */
 .welcome-screen,
 .library-screen {
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: 0%;
+  flex: 1 1 auto;
   min-height: 0;
   height: 100%;
   display: flex;
@@ -290,6 +288,18 @@
   padding: 0;
   width: 100%;
   background-color: var(--bg-app);
+}
+
+.dashboard-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 20px 60px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex-shrink: 0;
+  min-height: min-content;
 }
 
 .welcome-screen::-webkit-scrollbar,
@@ -620,18 +630,25 @@
 /* Mobile Dashboard Adjustments */
 @media (max-width: 680px) {
   .dashboard-container {
-    padding: 16px 16px 60px 16px;
-    gap: 16px;
+    padding: 12px 10px 80px 10px !important;
+    gap: 14px !important;
+    flex-shrink: 0 !important;
+    min-height: min-content !important;
   }
 
-
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .dash-card {
+    padding: 10px 12px;
+    gap: 8px;
   }
 
   .dashboard-content-split {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
   .categories-list {
@@ -676,21 +693,9 @@
     gap: 4px;
   }
 
-  .dashboard-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .dash-card {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-
-  .dashboard-container {
-    padding: 12px 10px 16px;
-    gap: 14px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+  .admin-moderation-panel {
+    flex-shrink: 0 !important;
+    margin-bottom: 16px !important;
   }
 
   .admin-panes-container {
@@ -705,7 +710,7 @@
 
   .admin-tab-btn {
     flex: 1 1 auto !important;
-    min-width: 100px;
+    min-width: 90px;
     padding: 8px 6px !important;
     font-size: 11px !important;
     gap: 4px !important;
