@@ -180,6 +180,8 @@ function showQuizSetup() {
   if (timerIntervalId) clearInterval(timerIntervalId);
   if (workspaceView) workspaceView.style.display = 'none';
   if (welcomeScreen) welcomeScreen.style.display = 'none';
+  const libScreen = document.getElementById('library-screen');
+  if (libScreen) libScreen.style.display = 'none';
   if (quizScreen) quizScreen.style.display = 'flex';
 
   if (quizSetupView) quizSetupView.style.display = 'flex';

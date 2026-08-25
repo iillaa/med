@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.13.0">
-  <meta name="app-build-version" content="2026.08.25.15.56">
+  <meta name="app-build-version" content="2026.08.25.16.15">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608251556" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251556"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251615" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251615"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251556" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251556"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251615" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251615"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608251556" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608251556" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608251556">
+  <link rel="stylesheet" href="style.css?v=2608251615" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251615" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251615">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608251556">
-    <link rel="stylesheet" href="css/utilities.css?v=2608251556">
+    <link rel="stylesheet" href="style.css?v=2608251615">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251615">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608251556"></script>
+  <script type="module" src="js/version-checker.js?v=2608251615"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -515,19 +515,6 @@ body {
 
       <!-- LEVEL 2: Collapsible Controls Band -->
       <div class="sidebar-controls" id="sidebar-controls">
-
-        <!-- Mode Switcher Tabs (Fiches vs PDFs vs Quiz) -->
-        <div class="sidebar-nav-tabs" role="tablist">
-          <button class="sidebar-tab-btn active" id="sidebar-tab-cats" data-mode="cats" title="Consulter les 62 Fiches CAT">
-            <i class="fa-solid fa-file-medical"></i> <span>Fiches</span>
-          </button>
-          <button class="sidebar-tab-btn" id="sidebar-tab-pdfs" data-mode="pdfs" title="Consulter les 78 Livres PDF et Rechercher">
-            <i class="fa-solid fa-book-medical"></i> <span>PDFs (78)</span>
-          </button>
-          <button class="sidebar-tab-btn" id="sidebar-tab-quiz" data-mode="quiz" title="S'entraîner sur les cas cliniques">
-            <i class="fa-solid fa-brain"></i> <span>Quiz</span>
-          </button>
-        </div>
 
         <!-- Always-visible: Search + Toggle chevron -->
         <div class="search-row">
@@ -723,11 +710,11 @@ body {
               </div>
             </div>
 
-            <div class="dash-card streak-card animate-entrance delay-3" style="padding: 12px 14px; border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.02);">
-              <div class="dash-card-icon" style="width: 38px; height: 38px; font-size: 16px; color: var(--color-warning); background: rgba(245, 158, 11, 0.08);"><i class="fa-solid fa-fire"></i></div>
+            <div class="dash-card library-shortcut-card animate-entrance delay-3" id="dash-quick-lib-card" style="padding: 12px 14px; cursor: pointer; border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.04);">
+              <div class="dash-card-icon" style="width: 38px; height: 38px; font-size: 16px; color: var(--color-primary); background: rgba(6, 182, 212, 0.1);"><i class="fa-solid fa-book-medical"></i></div>
               <div class="dash-card-info">
-                <span class="dash-card-label" style="font-size: 12px;">Série d'Études</span>
-                <span class="dash-card-val" id="dash-streak-count" style="font-size: 13px;">0 jour</span>
+                <span class="dash-card-label" style="font-size: 12px; color: var(--color-primary);">Bibliothèque 78 PDFs</span>
+                <span class="dash-card-desc" style="font-size: 11px;">Consulter les manuels ➔</span>
               </div>
             </div>
 
@@ -895,14 +882,14 @@ body {
           <div id="lib-search-results-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto;"></div>
         </div>
 
-        <!-- Browse All 78 Reference PDFs by Alphabetical / Filter List -->
+        <!-- Browse All 78 Reference PDFs Grouped by Medical Specialty (Collapsible) -->
         <div class="dashboard-block" style="padding: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
-            <h3 style="margin: 0;"><i class="fa-solid fa-folder-open"></i> Tous les Manuels & Livres Disponibles (<span id="lib-pdf-count">78</span>)</h3>
-            <input type="text" id="lib-filter-pdf-input" placeholder="Filtrer par titre de livre..." style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 10px; border-radius: 6px; font-size: 12px; outline: none; width: 220px;">
+            <h3 style="margin: 0;"><i class="fa-solid fa-folder-open"></i> Manuels & Guides par Spécialité (<span id="lib-pdf-count">78</span>)</h3>
+            <input type="text" id="lib-filter-pdf-input" placeholder="Filtrer par mot ou spécialité..." style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 5px 12px; border-radius: 6px; font-size: 12px; outline: none; width: 240px;">
           </div>
-          <div class="pdf-list" id="lib-all-pdfs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;">
-            <!-- Injected dynamically by pdfs.js -->
+          <div id="lib-specialties-container" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Grouped category accordions injected dynamically by pdfs.js -->
           </div>
         </div>
       </section>
@@ -1514,7 +1501,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-HNXET2A7.js"></script>
+  <script type="module" src="dist/app-VARODDOX.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

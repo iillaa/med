@@ -111,6 +111,26 @@ export function filterAllPdfsList() {
 }
 
 /**
+ * Categorize PDF filenames into clinical specialties
+ */
+function categorizePdf(fileName) {
+  const f = (fileName || '').toLowerCase();
+  if (f.includes('urgenc') || f.includes('reanimat') || f.includes('choc') || f.includes('ecg') || f.includes('reflex')) return 'Urgences & Réanimation';
+  if (f.includes('pediatr') || f.includes('eruptiv') || f.includes('nourrisson')) return 'Pédiatrie';
+  if (f.includes('gyneco') || f.includes('grossesse') || f.includes('contracept') || f.includes('femme')) return 'Gynécologie & Obstétrique';
+  if (f.includes('gastro') || f.includes('digestif') || f.includes('asp')) return 'Gastro-Entérologie';
+  if (f.includes('dermato') || f.includes('gale') || f.includes('panaris')) return 'Dermatologie';
+  if (f.includes('pneumo') || f.includes('thoracique') || f.includes('poumon')) return 'Pneumologie';
+  if (f.includes('cardio') || f.includes('hta') || f.includes('coronaire')) return 'Cardiologie';
+  if (f.includes('orl') || f.includes('ophtalmo') || f.includes('blepharite')) return 'ORL & Ophtalmologie';
+  if (f.includes('infect') || f.includes('antibiot') || f.includes('inflammatoire')) return 'Infectiologie & Antibiothérapie';
+  if (f.includes('neuro') || f.includes('psycho') || f.includes('psychiatr')) return 'Neurologie & Psychiatrie';
+  if (f.includes('medicament') || f.includes('ordonnance') || f.includes('posolog') || f.includes('formule')) return 'Thérapeutique & Pharmacologie';
+  if (f.includes('radio') || f.includes('bilan') || f.includes('certificat') || f.includes('accident')) return 'Imagerie, Bilans & Législation';
+  return 'Médecine Générale & Divers';
+}
+
+/**
  * Initialize Standalone Library Screen (78 Reference Books + Global PDF Text Search)
  */
 export function initLibraryScreen(onReturnDashboard) {
@@ -124,18 +144,82 @@ export function initLibraryScreen(onReturnDashboard) {
     backBtn.onclick = () => onReturnDashboard();
   }
 
+  function renderGroupedSpecialties(filterQuery = '') {
+    const container = document.getElementById('lib-specialties-container');
+    const countEl = document.getElementById('lib-pdf-count');
+    if (!container || !Array.isArray(state.allPdfs)) return;
+
+    const q = filterQuery.toLowerCase().trim();
+    const groups = {};
+
+    state.allPdfs.forEach(file => {
+      if (!file || typeof file !== 'string') return;
+      const cleanName = getCleanPdfName(file);
+      const category = categorizePdf(file);
+      if (q && !cleanName.toLowerCase().includes(q) && !category.toLowerCase().includes(q)) {
+        return;
+      }
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(file);
+    });
+
+    const categories = Object.keys(groups).sort();
+    let totalVisible = 0;
+    categories.forEach(c => { totalVisible += groups[c].length; });
+    if (countEl) countEl.textContent = totalVisible;
+
+    if (categories.length === 0) {
+      container.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-muted);">Aucun manuel ne correspond à votre recherche "${escapeHTML(filterQuery)}".</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    categories.forEach((catName, idx) => {
+      const pdfsInCat = groups[catName];
+      const section = document.createElement('div');
+      section.className = 'lib-category-section';
+      section.style.background = 'var(--bg-card)';
+      section.style.border = '1px solid var(--border-color)';
+      section.style.borderRadius = 'var(--radius-md)';
+      section.style.overflow = 'hidden';
+
+      const isOpenByDefault = q.length > 0 || idx < 3; // Open first 3 by default, or all if searching
+
+      section.innerHTML = `
+        <div class="lib-cat-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(0,0,0,0.18); cursor: pointer; user-select: none;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: var(--color-primary);">
+            <i class="fa-solid fa-folder"></i> <span>${escapeHTML(catName)}</span>
+            <span style="font-size: 11px; padding: 1px 6px; border-radius: 10px; background: rgba(6, 182, 212, 0.15); color: var(--color-primary);">${pdfsInCat.length}</span>
+          </div>
+          <i class="fa-solid fa-chevron-down lib-cat-chevron" style="font-size: 11px; color: var(--text-muted); transition: transform 0.2s ease; transform: ${isOpenByDefault ? 'rotate(180deg)' : 'rotate(0deg)'};"></i>
+        </div>
+        <div class="lib-cat-body" style="display: ${isOpenByDefault ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; padding: 12px;"></div>
+      `;
+
+      const header = section.querySelector('.lib-cat-header');
+      const body = section.querySelector('.lib-cat-body');
+      const chevron = section.querySelector('.lib-cat-chevron');
+
+      pdfsInCat.forEach(file => {
+        const card = createPdfCardElement(file, false);
+        body.appendChild(card);
+      });
+
+      header.onclick = () => {
+        const open = body.style.display !== 'none';
+        body.style.display = open ? 'none' : 'grid';
+        chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+      };
+
+      container.appendChild(section);
+    });
+  }
+
   // Filter input in library
   const filterInput = document.getElementById('lib-filter-pdf-input');
   if (filterInput) {
     filterInput.addEventListener('input', () => {
-      const q = (filterInput.value || '').toLowerCase().trim();
-      const grid = document.getElementById('lib-all-pdfs-grid');
-      if (grid) {
-        grid.querySelectorAll('.pdf-card').forEach(card => {
-          const title = (card.textContent || '').toLowerCase();
-          card.style.display = !q || title.includes(q) ? 'flex' : 'none';
-        });
-      }
+      renderGroupedSpecialties(filterInput.value || '');
     });
   }
 
@@ -178,7 +262,9 @@ export function initLibraryScreen(onReturnDashboard) {
       let html = '';
       results.forEach(res => {
         const cleanName = getCleanPdfName(res.pdf);
-        const highlighted = escapeHTML(res.snippet).replace(new RegExp(`(${query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
+        const escapedSnippet = escapeHTML(res.snippet);
+        const escapedQuery = escapeHTML(query).replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
+        const highlighted = escapedSnippet.replace(new RegExp(`(${escapedQuery})`, 'gi'), '<mark>$1</mark>');
         html += `
           <div class="pdf-search-result-card" data-pdf="${encodeURIComponent(res.pdf)}" data-page="${res.page}" style="padding: 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--color-primary);">
@@ -222,17 +308,7 @@ export function initLibraryScreen(onReturnDashboard) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Populate grid
-    const grid = document.getElementById('lib-all-pdfs-grid');
-    const countEl = document.getElementById('lib-pdf-count');
-    if (grid && Array.isArray(state.allPdfs)) {
-      if (countEl) countEl.textContent = state.allPdfs.length;
-      grid.innerHTML = '';
-      state.allPdfs.forEach(file => {
-        const card = createPdfCardElement(file, true);
-        grid.appendChild(card);
-      });
-    }
+    renderGroupedSpecialties(filterInput ? filterInput.value : '');
 
     if (initialQuery && searchInput) {
       searchInput.value = initialQuery;

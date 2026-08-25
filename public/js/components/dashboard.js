@@ -225,6 +225,24 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     }
   });
 
+  // Quick Action Shortcut Cards
+  const quickLibCard = document.getElementById('dash-quick-lib-card');
+  if (quickLibCard) {
+    quickLibCard.onclick = () => {
+      if (window.openStandaloneLibrary) {
+        window.openStandaloneLibrary();
+      }
+    };
+  }
+
+  const quickQuizCard = document.getElementById('dash-quick-quiz-card');
+  if (quickQuizCard) {
+    quickQuizCard.onclick = () => {
+      const quizNavBtn = document.getElementById('start-quiz-nav-btn');
+      if (quizNavBtn) quizNavBtn.click();
+    };
+  }
+
   // Global PDF Search Opener via Standalone Medical Library
   window.openGlobalPdfSearch = function(query = '') {
     if (window.openStandaloneLibrary) {
