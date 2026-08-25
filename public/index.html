@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.14.0">
-  <meta name="app-build-version" content="2026.08.25.17.26">
+  <meta name="app-build-version" content="2026.08.25.17.48">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608251726" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251726"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251748" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251748"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251726" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251726"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251748" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251748"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608251726" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608251726" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608251726">
+  <link rel="stylesheet" href="style.css?v=2608251748" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251748" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251748">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608251726">
-    <link rel="stylesheet" href="css/utilities.css?v=2608251726">
+    <link rel="stylesheet" href="style.css?v=2608251748">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251748">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608251726"></script>
+  <script type="module" src="js/version-checker.js?v=2608251748"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -828,13 +828,16 @@ body {
             </div>
           </div>
 
-          <!-- Legal & Compliance Button -->
-          <div class="dashboard-block" style="margin-top: 20px; border-color: rgba(6, 182, 212, 0.15); background: rgba(30, 41, 59, 0.25); padding: 16px; text-align: center; border-radius: var(--radius-md);">
-            <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 12px 0;">Application éducative en version BETA conçue par Dr. Kibeche Ali.</p>
-            <button id="open-legal-modal-btn" class="action-btn" style="background: rgba(6, 182, 212, 0.1); color: var(--color-primary); border: 1px solid rgba(6, 182, 212, 0.3); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">
-              <i class="fa-solid fa-scale-balanced"></i> Consulter les Mentions Légales & CGU
+          <!-- Legal & Compliance Compact Bar -->
+          <footer class="dashboard-legal-footer">
+            <div class="dashboard-legal-info">
+              <span class="legal-badge-beta"><i class="fa-solid fa-flask"></i> Version BETA</span>
+              <span class="legal-author">Développé par le <strong>Dr. Kibeche Ali</strong></span>
+            </div>
+            <button id="open-legal-modal-btn" class="legal-link-btn">
+              <i class="fa-solid fa-scale-balanced"></i> Mentions Légales & CGU
             </button>
-          </div>
+          </footer>
         </div>
       </section>
 
@@ -866,30 +869,48 @@ body {
           </div>
         </div>
 
-        <!-- Deep Search Results Box -->
-        <div id="lib-search-results-section" style="display: none; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h4 style="margin: 0; color: var(--color-primary); font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <!-- Deep Search Results Box with Retractable View -->
+        <div id="lib-search-results-section" style="display: none;" class="lib-results-card">
+          <div class="lib-results-header">
+            <h4 style="margin: 0; color: var(--color-primary); font-size: 13.5px; display: flex; align-items: center; gap: 8px;">
               <i class="fa-solid fa-list-check"></i> <span id="lib-search-results-count">Résultats de recherche</span>
             </h4>
-            <button class="btn-delete-ghost" id="lib-clear-search-btn" style="font-size: 11px; padding: 3px 8px;">
-              <i class="fa-solid fa-xmark"></i> Fermer les résultats
-            </button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button class="lib-collapse-btn" id="lib-toggle-results-btn" title="Réduire / Agrandir la liste">
+                <i class="fa-solid fa-compress" id="lib-toggle-results-icon"></i> <span id="lib-toggle-results-text">Réduire</span>
+              </button>
+              <button class="btn-delete-ghost" id="lib-clear-search-btn" style="font-size: 11px; padding: 4px 8px;">
+                <i class="fa-solid fa-xmark"></i> Fermer
+              </button>
+            </div>
           </div>
           <div id="lib-search-loading" style="display: none; padding: 20px; text-align: center; color: var(--text-muted);">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 20px; color: var(--color-primary); margin-bottom: 8px;"></i>
-            <div>Recherche en cours dans l'ensemble des 78 manuels...</div>
+            <div>Recherche en cours dans l'ensemble des livres de référence...</div>
           </div>
-          <div id="lib-search-results-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto;"></div>
+          <div id="lib-search-results-container" class="lib-search-container-full"></div>
+          <div id="lib-search-expand-banner" style="display: none; text-align: center; padding: 8px 0 2px 0;">
+            <button id="lib-show-all-results-btn" class="lib-show-all-btn">
+              <i class="fa-solid fa-angles-down"></i> Voir tous les <span id="lib-remaining-results-count">0</span> résultats restants
+            </button>
+          </div>
         </div>
 
-        <!-- Browse All 78 Reference PDFs Grouped by Medical Specialty (Collapsible) -->
+        <!-- Browse All Reference PDFs Grouped by Medical Specialty (Collapsible) -->
         <div class="dashboard-block" style="padding: 18px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
-            <h3 style="margin: 0;"><i class="fa-solid fa-folder-open"></i> Manuels & Guides par Spécialité (<span id="lib-pdf-count">78</span>)</h3>
-            <input type="text" id="lib-filter-pdf-input" placeholder="Filtrer par mot ou spécialité..." style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 5px 12px; border-radius: 6px; font-size: 12px; outline: none; width: 240px;">
+          <div class="lib-specialties-toolbar">
+            <div>
+              <h3 style="margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-folder-open" style="color: var(--color-primary);"></i> Manuels & Guides par Spécialité (<span id="lib-pdf-count">83</span>)
+              </h3>
+              <p style="margin: 3px 0 0 0; font-size: 12px; color: var(--text-secondary);">Organisés dynamiquement selon les protocoles cliniques</p>
+            </div>
+            <div class="lib-filter-wrapper">
+              <i class="fa-solid fa-filter lib-filter-icon"></i>
+              <input type="text" id="lib-filter-pdf-input" placeholder="Filtrer un manuel ou une spécialité..." autocomplete="off">
+            </div>
           </div>
-          <div id="lib-specialties-container" style="display: flex; flex-direction: column; gap: 12px;">
+          <div id="lib-specialties-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
             <!-- Grouped category accordions injected dynamically by pdfs.js -->
           </div>
         </div>
@@ -1503,7 +1524,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-PN35SYYI.js"></script>
+  <script type="module" src="dist/app-C74EOS5U.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

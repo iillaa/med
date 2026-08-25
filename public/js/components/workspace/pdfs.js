@@ -161,6 +161,22 @@ export function initLibraryScreen(onReturnDashboard) {
     backBtn.onclick = () => onReturnDashboard();
   }
 
+  // Retrieve saved accordion states
+  let savedAccordionStates = {};
+  try {
+    const raw = localStorage.getItem('drcat_lib_accordions_state');
+    if (raw) savedAccordionStates = JSON.parse(raw);
+  } catch (_) {}
+
+  // Retrieve saved search collapsed state (default: false = full)
+  let isSearchCollapsed = localStorage.getItem('drcat_lib_search_collapsed') === 'true';
+
+  function saveAccordionStates() {
+    try {
+      localStorage.setItem('drcat_lib_accordions_state', JSON.stringify(savedAccordionStates));
+    } catch (_) {}
+  }
+
   function renderGroupedSpecialties(filterQuery = '') {
     const container = document.getElementById('lib-specialties-container');
     const countEl = document.getElementById('lib-pdf-count');
@@ -200,7 +216,10 @@ export function initLibraryScreen(onReturnDashboard) {
       section.style.borderRadius = 'var(--radius-md)';
       section.style.overflow = 'hidden';
 
-      const isOpenByDefault = q.length > 0 || idx < 3; // Open first 3 by default, or all if searching
+      // Use saved state if available, or default open for top 3/search
+      const isOpen = q.length > 0
+        ? true
+        : (savedAccordionStates[catName] !== undefined ? savedAccordionStates[catName] : idx < 3);
 
       section.innerHTML = `
         <div class="lib-cat-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(0,0,0,0.18); cursor: pointer; user-select: none;">
@@ -208,9 +227,9 @@ export function initLibraryScreen(onReturnDashboard) {
             <i class="fa-solid fa-folder"></i> <span>${escapeHTML(catName)}</span>
             <span style="font-size: 11px; padding: 1px 6px; border-radius: 10px; background: rgba(6, 182, 212, 0.15); color: var(--color-primary);">${pdfsInCat.length}</span>
           </div>
-          <i class="fa-solid fa-chevron-down lib-cat-chevron" style="font-size: 11px; color: var(--text-muted); transition: transform 0.2s ease; transform: ${isOpenByDefault ? 'rotate(180deg)' : 'rotate(0deg)'};"></i>
+          <i class="fa-solid fa-chevron-down lib-cat-chevron" style="font-size: 11px; color: var(--text-muted); transition: transform 0.2s ease; transform: ${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};"></i>
         </div>
-        <div class="lib-cat-body" style="display: ${isOpenByDefault ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; padding: 12px;"></div>
+        <div class="lib-cat-body" style="display: ${isOpen ? 'grid' : 'none'}; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; padding: 12px;"></div>
       `;
 
       const header = section.querySelector('.lib-cat-header');
@@ -223,9 +242,12 @@ export function initLibraryScreen(onReturnDashboard) {
       });
 
       header.onclick = () => {
-        const open = body.style.display !== 'none';
-        body.style.display = open ? 'none' : 'grid';
-        chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+        const currentlyOpen = body.style.display !== 'none';
+        const nextState = !currentlyOpen;
+        body.style.display = nextState ? 'grid' : 'none';
+        chevron.style.transform = nextState ? 'rotate(180deg)' : 'rotate(0deg)';
+        savedAccordionStates[catName] = nextState;
+        saveAccordionStates();
       };
 
       container.appendChild(section);
@@ -248,6 +270,48 @@ export function initLibraryScreen(onReturnDashboard) {
   const resultsCount = document.getElementById('lib-search-results-count');
   const loading = document.getElementById('lib-search-loading');
   const clearBtn = document.getElementById('lib-clear-search-btn');
+  const toggleResultsBtn = document.getElementById('lib-toggle-results-btn');
+  const toggleResultsIcon = document.getElementById('lib-toggle-results-icon');
+  const toggleResultsText = document.getElementById('lib-toggle-results-text');
+  const expandBanner = document.getElementById('lib-search-expand-banner');
+  const showAllResultsBtn = document.getElementById('lib-show-all-results-btn');
+  const remainingCountEl = document.getElementById('lib-remaining-results-count');
+
+  let currentSearchResults = [];
+
+  function applySearchResultsCollapseState() {
+    if (!resultsContainer) return;
+    if (isSearchCollapsed && currentSearchResults.length > 4) {
+      resultsContainer.className = 'lib-search-container-collapsed';
+      if (toggleResultsIcon) toggleResultsIcon.className = 'fa-solid fa-expand';
+      if (toggleResultsText) toggleResultsText.textContent = 'Agrandir';
+      if (expandBanner) {
+        expandBanner.style.display = 'block';
+        if (remainingCountEl) remainingCountEl.textContent = currentSearchResults.length - 4;
+      }
+    } else {
+      resultsContainer.className = 'lib-search-container-full';
+      if (toggleResultsIcon) toggleResultsIcon.className = 'fa-solid fa-compress';
+      if (toggleResultsText) toggleResultsText.textContent = 'Réduire';
+      if (expandBanner) expandBanner.style.display = 'none';
+    }
+  }
+
+  if (toggleResultsBtn) {
+    toggleResultsBtn.onclick = () => {
+      isSearchCollapsed = !isSearchCollapsed;
+      try { localStorage.setItem('drcat_lib_search_collapsed', String(isSearchCollapsed)); } catch (_) {}
+      applySearchResultsCollapseState();
+    };
+  }
+
+  if (showAllResultsBtn) {
+    showAllResultsBtn.onclick = () => {
+      isSearchCollapsed = false;
+      try { localStorage.setItem('drcat_lib_search_collapsed', 'false'); } catch (_) {}
+      applySearchResultsCollapseState();
+    };
+  }
 
   if (clearBtn && resultsSection) {
     clearBtn.onclick = () => { resultsSection.style.display = 'none'; };
@@ -258,6 +322,7 @@ export function initLibraryScreen(onReturnDashboard) {
     if (resultsSection) resultsSection.style.display = 'block';
     if (loading) loading.style.display = 'block';
     if (resultsContainer) resultsContainer.innerHTML = '';
+    if (expandBanner) expandBanner.style.display = 'none';
     if (resultsCount) resultsCount.textContent = `Recherche pour "${query}"...`;
 
     try {
@@ -268,16 +333,16 @@ export function initLibraryScreen(onReturnDashboard) {
         return;
       }
       const data = await response.json();
-      const results = data.results || [];
-      if (resultsCount) resultsCount.textContent = `${results.length} passage(s) trouvé(s) pour "${query}"`;
+      currentSearchResults = data.results || [];
+      if (resultsCount) resultsCount.textContent = `${currentSearchResults.length} passage(s) trouvé(s) pour "${query}"`;
 
-      if (results.length === 0) {
-        if (resultsContainer) resultsContainer.innerHTML = `<p class="text-muted" style="padding: 16px; text-align: center;">Aucun passage trouvé pour cette expression dans les 78 livres.</p>`;
+      if (currentSearchResults.length === 0) {
+        if (resultsContainer) resultsContainer.innerHTML = `<p class="text-muted" style="padding: 16px; text-align: center;">Aucun passage trouvé pour cette expression dans les livres de référence.</p>`;
         return;
       }
 
       let html = '';
-      results.forEach(res => {
+      currentSearchResults.forEach(res => {
         const cleanName = getCleanPdfName(res.pdf);
         const escapedSnippet = escapeHTML(res.snippet);
         const escapedQuery = escapeHTML(query).replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -292,6 +357,7 @@ export function initLibraryScreen(onReturnDashboard) {
           </div>
         `;
       });
+
       if (resultsContainer) {
         resultsContainer.innerHTML = html;
         resultsContainer.querySelectorAll('.pdf-search-result-card').forEach(card => {
@@ -302,6 +368,8 @@ export function initLibraryScreen(onReturnDashboard) {
           };
         });
       }
+
+      applySearchResultsCollapseState();
     } catch (e) {
       if (loading) loading.style.display = 'none';
       if (resultsContainer) resultsContainer.innerHTML = `<p class="text-danger" style="padding: 12px; text-align: center;">Erreur lors de la recherche dans les documents.</p>`;
