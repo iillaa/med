@@ -225,6 +225,28 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     }
   });
 
+  // Global Ctrl+K / Cmd+K shortcut to focus Omni-Search or Sidebar Search
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      const omni = document.getElementById('omni-search-input');
+      const sideSearch = document.getElementById('search-input');
+      const ws = document.getElementById('workspace');
+      const isWsActive = ws && ws.style.display !== 'none';
+      if (!isWsActive && omni && omni.offsetParent !== null) {
+        omni.focus();
+        omni.select();
+      } else if (sideSearch) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && !sidebar.classList.contains('open') && window.innerWidth <= 850) {
+          sidebar.classList.add('open');
+        }
+        sideSearch.focus();
+        sideSearch.select();
+      }
+    }
+  });
+
   // Quick Action Shortcut Cards
   const quickLibCard = document.getElementById('dash-quick-lib-card');
   if (quickLibCard) {
