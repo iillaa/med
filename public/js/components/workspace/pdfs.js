@@ -109,3 +109,134 @@ export function filterAllPdfsList() {
     item.style.display = !query || text.includes(query) ? 'block' : 'none';
   });
 }
+
+/**
+ * Initialize Standalone Library Screen (78 Reference Books + Global PDF Text Search)
+ */
+export function initLibraryScreen(onReturnDashboard) {
+  const libScreen = document.getElementById('library-screen');
+  const welcomeScreen = document.getElementById('welcome-screen');
+  const workspace = document.getElementById('workspace');
+  const quizScreen = document.getElementById('quiz-screen');
+  const backBtn = document.getElementById('library-back-dash-btn');
+
+  if (backBtn && onReturnDashboard) {
+    backBtn.onclick = () => onReturnDashboard();
+  }
+
+  // Filter input in library
+  const filterInput = document.getElementById('lib-filter-pdf-input');
+  if (filterInput) {
+    filterInput.addEventListener('input', () => {
+      const q = (filterInput.value || '').toLowerCase().trim();
+      const grid = document.getElementById('lib-all-pdfs-grid');
+      if (grid) {
+        grid.querySelectorAll('.pdf-card').forEach(card => {
+          const title = (card.textContent || '').toLowerCase();
+          card.style.display = !q || title.includes(q) ? 'flex' : 'none';
+        });
+      }
+    });
+  }
+
+  // Deep Full-Text PDF Search in Library
+  const searchInput = document.getElementById('lib-deep-search-input');
+  const searchBtn = document.getElementById('lib-deep-search-btn');
+  const resultsSection = document.getElementById('lib-search-results-section');
+  const resultsContainer = document.getElementById('lib-search-results-container');
+  const resultsCount = document.getElementById('lib-search-results-count');
+  const loading = document.getElementById('lib-search-loading');
+  const clearBtn = document.getElementById('lib-clear-search-btn');
+
+  if (clearBtn && resultsSection) {
+    clearBtn.onclick = () => { resultsSection.style.display = 'none'; };
+  }
+
+  async function executeLibrarySearch(query) {
+    if (!query) return;
+    if (resultsSection) resultsSection.style.display = 'block';
+    if (loading) loading.style.display = 'block';
+    if (resultsContainer) resultsContainer.innerHTML = '';
+    if (resultsCount) resultsCount.textContent = `Recherche pour "${query}"...`;
+
+    try {
+      const response = await api.searchPdfsContent(query);
+      if (loading) loading.style.display = 'none';
+      if (!response.ok) {
+        if (resultsContainer) resultsContainer.innerHTML = `<p class="text-warning" style="padding: 12px; text-align: center;">Service de recherche temporairement indisponible.</p>`;
+        return;
+      }
+      const data = await response.json();
+      const results = data.results || [];
+      if (resultsCount) resultsCount.textContent = `${results.length} passage(s) trouvé(s) pour "${query}"`;
+
+      if (results.length === 0) {
+        if (resultsContainer) resultsContainer.innerHTML = `<p class="text-muted" style="padding: 16px; text-align: center;">Aucun passage trouvé pour cette expression dans les 78 livres.</p>`;
+        return;
+      }
+
+      let html = '';
+      results.forEach(res => {
+        const cleanName = getCleanPdfName(res.pdf);
+        const highlighted = escapeHTML(res.snippet).replace(new RegExp(`(${query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
+        html += `
+          <div class="pdf-search-result-card" data-pdf="${encodeURIComponent(res.pdf)}" data-page="${res.page}" style="padding: 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--color-primary);">
+              <span><i class="fa-solid fa-book-open"></i> ${escapeHTML(cleanName)}</span>
+              <span style="color: var(--color-warning);">Page ${res.page}</span>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4;">${highlighted}</div>
+          </div>
+        `;
+      });
+      if (resultsContainer) {
+        resultsContainer.innerHTML = html;
+        resultsContainer.querySelectorAll('.pdf-search-result-card').forEach(card => {
+          card.onclick = () => {
+            const pdf = decodeURIComponent(card.getAttribute('data-pdf'));
+            const page = card.getAttribute('data-page');
+            window.location.href = `pdf_viewer.html?file=${encodeURIComponent(pdf)}&page=${page}`;
+          };
+        });
+      }
+    } catch (e) {
+      if (loading) loading.style.display = 'none';
+      if (resultsContainer) resultsContainer.innerHTML = `<p class="text-danger" style="padding: 12px; text-align: center;">Erreur lors de la recherche dans les documents.</p>`;
+    }
+  }
+
+  if (searchBtn && searchInput) {
+    searchBtn.onclick = () => executeLibrarySearch(searchInput.value.trim());
+    searchInput.onkeydown = (e) => { if (e.key === 'Enter') executeLibrarySearch(searchInput.value.trim()); };
+  }
+
+  // Global Opener Function for Library
+  window.openStandaloneLibrary = function(initialQuery = '') {
+    state.activeCat = null;
+    document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
+    if (workspace) workspace.style.display = 'none';
+    if (welcomeScreen) welcomeScreen.style.display = 'none';
+    if (quizScreen) quizScreen.style.display = 'none';
+    if (libScreen) {
+      libScreen.style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Populate grid
+    const grid = document.getElementById('lib-all-pdfs-grid');
+    const countEl = document.getElementById('lib-pdf-count');
+    if (grid && Array.isArray(state.allPdfs)) {
+      if (countEl) countEl.textContent = state.allPdfs.length;
+      grid.innerHTML = '';
+      state.allPdfs.forEach(file => {
+        const card = createPdfCardElement(file, true);
+        grid.appendChild(card);
+      });
+    }
+
+    if (initialQuery && searchInput) {
+      searchInput.value = initialQuery;
+      executeLibrarySearch(initialQuery);
+    }
+  };
+}

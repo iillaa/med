@@ -225,19 +225,10 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     }
   });
 
-  // Global PDF Search Opener
+  // Global PDF Search Opener via Standalone Medical Library
   window.openGlobalPdfSearch = function(query = '') {
-    if (state.allCats && state.allCats.length > 0 && onSelectCat) {
-      const firstCat = state.allCats[0];
-      onSelectCat(firstCat);
-      const searchTabBtn = document.querySelector('.tab-btn[data-tab="tab-search-pdf"]');
-      if (searchTabBtn) searchTabBtn.click();
-      const pdfInput = document.getElementById('pdf-content-search-input');
-      const pdfBtn = document.getElementById('pdf-content-search-btn');
-      if (pdfInput && query) {
-        pdfInput.value = query;
-        if (pdfBtn) pdfBtn.click();
-      }
+    if (window.openStandaloneLibrary) {
+      window.openStandaloneLibrary(query);
     }
   };
 
@@ -414,6 +405,8 @@ export function showDashboard(onSelectCat) {
   if (welcomeScreen) welcomeScreen.style.display = 'flex';
   const quizScreen = document.getElementById('quiz-screen');
   if (quizScreen) quizScreen.style.display = 'none';
+  const libScreen = document.getElementById('library-screen');
+  if (libScreen) libScreen.style.display = 'none';
 
   if (window.innerWidth <= 850 && sidebar) {
     sidebar.classList.remove('open');
