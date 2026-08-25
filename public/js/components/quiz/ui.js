@@ -477,13 +477,13 @@ function renderQuestion() {
 
   if (qMeta) {
     if (q.type === 'vignette_v2') {
-      qMeta.textContent = "Cas Clinique RAG V2 🏥";
+      qMeta.textContent = "Cas Clinique Réel 🏥";
       qMeta.className = "cat-badge";
       qMeta.style.backgroundColor = "linear-gradient(135deg, var(--color-primary), #10b981)";
       qMeta.style.color = "#000";
       qMeta.style.fontWeight = "800";
     } else if (q.type === 'clinical') {
-      qMeta.textContent = "Cas Clinique 🩺";
+      qMeta.textContent = "Conduite à Tenir 🩺";
       qMeta.className = "cat-badge";
       qMeta.style.backgroundColor = "var(--color-primary)";
       qMeta.style.color = "#000";

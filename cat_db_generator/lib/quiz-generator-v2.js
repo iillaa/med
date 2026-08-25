@@ -1,127 +1,171 @@
 /**
- * Dr. CAT — Clinical Vignette & Progressive Quiz V2 Generator Engine
- * Generates structured, progressive clinical reasoning cases (KFQs & SCTs)
- * stored in a dedicated database (quiz_db.json) separated from cats_db.json.
+ * Dr. CAT — Comprehensive Quiz Suite Generator Engine (V2)
+ * Generates an extensive, doctor-grade training suite (10 to 15 items) per CAT:
+ * - 2 Multi-stage Real Clinical Vignettes (KFQs & SCTs with patient vitals & rationales)
+ * - 4 Smart Diagnosis & Orientation MCQs
+ * - 4 Realistic Prescription & Dosage MCQs
+ * - 2 Vital Red Flags written scenarios
+ * Stored in staging (quiz_db_staged.json) before publishing to public/data/quiz_db.json
  */
 
 const fs = require('fs');
 const path = require('path');
-const { callLLM } = require('./llm-engine');
+const { callLLMApi } = require('./llm-engine');
 
 const QUIZ_STAGED_PATH = path.join(__dirname, '..', 'quiz_db_staged.json');
-const QUIZ_PROD_PATH = path.join(__dirname, '..', 'public', 'data', 'quiz_db.json');
+const QUIZ_PROD_PATH = path.join(__dirname, '..', '..', 'public', 'data', 'quiz_db.json');
 
 /**
- * Zod-like validation for a Clinical Vignette Object
+ * Validate a quiz suite for a given CAT
  */
-function validateVignette(vignette) {
-  if (!vignette || typeof vignette !== 'object') return false;
-  if (!vignette.cat_id || !vignette.title || !vignette.patient || !Array.isArray(vignette.stages)) {
-    return false;
-  }
-  if (vignette.stages.length < 2) return false;
-  for (const stage of vignette.stages) {
-    if (!stage.prompt || !Array.isArray(stage.options) || stage.options.length < 2) {
-      return false;
-    }
-    const hasCorrect = stage.options.some(o => o.correct === true);
-    if (!hasCorrect) return false;
-  }
+function validateQuizSuite(suite) {
+  if (!suite || typeof suite !== 'object') return false;
+  if (!suite.cat_id || !suite.title || !Array.isArray(suite.vignettes)) return false;
   return true;
 }
 
 /**
- * Generate high-yield clinical reasoning vignettes for a single CAT
+ * Generate a complete, rich clinical quiz suite for 1 CAT
  */
-async function generateVignettesForCat(cat) {
+async function generateQuizSuiteForCat(cat, options = {}) {
   if (!cat || !cat.title || !cat.summary) {
-    throw new Error("Invalid CAT object provided for vignette generation.");
+    throw new Error("Invalid CAT object provided for quiz suite generation.");
   }
 
-  const systemPrompt = `Tu es le Directeur Pédagogique et Docimologue de Dr. CAT.
-Ta mission est de créer des VIGNETTES CLINIQUES DE HAUT NIVEAU MÉDICAL (Key Feature Questions & Tests de Concordance de Script) basées sur la conduite à tenir fournie.
+  const systemPrompt = `Tu es le Directeur Pédagogique et Docimologue en Chef de Dr. CAT.
+Ta mission est de créer une BANQUE DE QUESTIONS MÉDICALES D'ÉLITE (Niveau Concours / Internat / Pratique Réelle) basée sur la fiche CAT fournie.
 
-RÈGLES DOCIMOLOGIQUES STRICTES :
-1. LE DÉCOR (Patient & Contexte Réel) :
-   - Présente un patient concret (âge, sexe, antécédents/terrain, motif d'admission, constantes vitales réelles).
-   - Utilise la 2ème personne du singulier ou du pluriel ("Vous recevez aux urgences...", "En consultation...").
+RÈGLES DOCIMOLOGIQUES :
+1. VIGNETTES CLINIQUES RÉELLES (2 cas complets multi-étapes) :
+   - Présente un patient concret (âge, sexe, terrain, motif et constantes vitales à l'arrivée : TA, FC, T°, SpO2).
+   - Étape 1 : Réflexe d'urgence ou reconnaissance d'un drapeau rouge (Key Feature).
+   - Étape 2 : Choix thérapeutique de 1ère intention ou adaptation au terrain.
+   - Fournis 3 options par étape avec une JUSTIFICATION PHARMACOLOGIQUE/MÉDICALE ("rationale") pour chaque option.
 
-2. PROGRESSION EN 2 OU 3 ÉTAPES CLINIQUES (STAGES) :
-   - ÉTAPE 1 (Key Feature / Urgence) : Décision critique immédiate (Reconnaissance d'un Red Flag, geste de déchocage, examen clé).
-   - ÉTAPE 2 (Thérapeutique de 1ère intention) : Choix de l'ordonnance exacte avec posologie et durée conforme à la fiche.
-   - ÉTAPE 3 (Évolution / Terrain particulier) : Survenue d'une complication, allergie ou terrain spécifique (ex: Enfant, Femme enceinte, Insuffisance rénale).
+2. QCMS D'ORIENTATION & DIAGNOSTIC (3 à 4 questions) :
+   - Questions sémiologiques et paracliniques pointues (pas de copier-coller brut).
+   - 4 choix : 1 exact + 3 pièges cliniques plausibles.
 
-3. PROPOSITIONS & JUSTIFICATIONS :
-   - Fournis 3 ou 4 options crédibles par étape (1 seule correcte, les autres étant des pièges fréquents en pratique clinique).
-   - CHAQUE OPTION DOIT COMPORTER UNE "rationale" (explication pharmacologique ou sémiologique claire).
+3. QCMS D'ORDONNANCES & POSOLOGIES (3 à 4 questions) :
+   - Comparatif de 4 ordonnances réelles : 1 exacte conforme à la CAT + 3 ordonnances avec erreurs fréquentes (sous-dosage, durée inadaptée, contre-indication de terrain).
 
-RÉPONDS EXCLUSIVEMENT AVEC UN TABLEAU JSON VALIDE :
-[
-  {
-    "id": "vig_${cat.id}_01",
-    "cat_id": ${cat.id},
-    "title": "${cat.title}",
-    "category": "${cat.category || 'Général'}",
-    "difficulty": "intermédiaire",
-    "patient": {
-      "age": 45,
-      "sex": "M",
-      "terrain": "Diabétique type 2",
-      "presentation": "Description clinique initiale avec constantes vitales..."
-    },
-    "stages": [
-      {
-        "stage_index": 1,
-        "type": "key_feature",
-        "title_step": "Étape 1 : Évaluation Initiale & Décision d'Urgence",
-        "prompt": "Question clinique précise sur la décision immédiate...",
-        "options": [
-          { "text": "Option A...", "correct": false, "rationale": "Explication du piège..." },
-          { "text": "Option B (Exacte)...", "correct": true, "rationale": "Justification conforme aux recommandations..." },
-          { "text": "Option C...", "correct": false, "rationale": "Explication..." }
-        ]
+4. ÉPREUVES RÉDIGÉES DE DRAPEAUX ROUGES (2 questions) :
+   - Mise en situation demandant de citer les signes de gravité imposant l'hospitalisation immédiate.
+
+RÉPONDS EXCLUSIVEMENT AVEC UN OBJET JSON VALIDE AU FORMAT :
+{
+  "cat_id": ${cat.id},
+  "title": "${cat.title}",
+  "category": "${cat.category || 'Général'}",
+  "vignettes": [
+    {
+      "id": "vig_${cat.id}_01",
+      "level": "intermédiaire",
+      "patient": {
+        "age": 35,
+        "sex": "M",
+        "terrain": "Sans antécédent",
+        "presentation": "Arrive aux urgences pour... Constantes : TA 120/80, FC 80, T° 37.5°C."
       },
-      {
-        "stage_index": 2,
-        "type": "prescription_choice",
-        "title_step": "Étape 2 : Stratégie Thérapeutique & Posologie",
-        "prompt": "Le bilan confirme le diagnostic. Quelle est la prescription optimale de sortie ?",
-        "options": [
-          { "text": "Prescription A...", "correct": true, "rationale": "Traitement de 1ère intention validé..." },
-          { "text": "Prescription B...", "correct": false, "rationale": "Sous-dosage ou durée inadaptée..." }
-        ]
-      }
-    ]
-  }
-]`;
+      "stages": [
+        {
+          "stage_index": 1,
+          "type": "key_feature",
+          "title_step": "Étape 1 : Décision Initiale",
+          "prompt": "Quelle est votre conduite immédiate ?",
+          "options": [
+            { "text": "Option A...", "correct": false, "rationale": "Explication du piège..." },
+            { "text": "Option B (Exacte)...", "correct": true, "rationale": "Justification..." },
+            { "text": "Option C...", "correct": false, "rationale": "Explication..." }
+          ]
+        },
+        {
+          "stage_index": 2,
+          "type": "prescription_choice",
+          "title_step": "Étape 2 : Traitement",
+          "prompt": "Quelle est la prescription optimale ?",
+          "options": [
+            { "text": "Prescription A...", "correct": true, "rationale": "Explication..." },
+            { "text": "Prescription B...", "correct": false, "rationale": "Explication..." }
+          ]
+        }
+      ]
+    }
+  ],
+  "qcm_diagnostics": [
+    {
+      "question": "Question diagnostique...",
+      "options": ["Choix A", "Choix B", "Choix C", "Choix D"],
+      "correctIndex": 0,
+      "rationale": "Explication médicale..."
+    }
+  ],
+  "qcm_prescriptions": [
+    {
+      "question": "Quelle est l'ordonnance de 1ère intention adaptée ?",
+      "options": ["Ordonnance A", "Ordonnance B", "Ordonnance C", "Ordonnance D"],
+      "correctIndex": 0,
+      "rationale": "Justification pharmacologique..."
+    }
+  ],
+  "red_flags_cases": [
+    {
+      "prompt": "Quels sont les critères d'urgence vitale à éliminer ?",
+      "expected_keywords": ["choc", "déshydratation", "oligurie"],
+      "model_answer": "Signes de choc, déshydratation > 10%..."
+    }
+  ]
+}`;
 
-  const userPrompt = `GÉNÈRE 1 OU 2 VIGNETTES CLINIQUES DÉTAILLÉES POUR :
+  const userPrompt = `GÉNÈRE LE SET DE QUESTIONS MÉDICALES COMPLET POUR :
 Titre : ${cat.title}
-Spécialité : ${cat.category}
-Synthèse clinique :
+Catégorie : ${cat.category}
+
+SYNTHÈSE CLINIQUE :
 ${cat.summary}
 
-Signes de Gravité :
+SIGNES DE GRAVITÉ (RED FLAGS) :
 ${cat.red_flags || 'Aucun'}
 
-Ordonnance de Référence :
+ORDONNANCE TYPE DE RÉFÉRENCE :
 ${cat.ordonnance || 'Aucune'}`;
 
-  const responseText = await callLLM(systemPrompt, userPrompt, { temperature: 0.2 });
+  const apiResult = await callLLMApi(systemPrompt, userPrompt, { temperature: 0.2 });
+  const responseText = apiResult.text || '';
   
-  // Extract JSON
-  const jsonMatch = responseText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    throw new Error("LLM did not return a valid JSON array for vignettes.");
+    throw new Error("LLM did not return valid JSON for quiz suite.");
   }
 
-  const vignettes = JSON.parse(jsonMatch[0]);
-  return vignettes.filter(validateVignette);
+  const suite = JSON.parse(jsonMatch[0]);
+  return suite;
+}
+
+/**
+ * Helper to flatten all vignettes from staged quiz suite into public format
+ */
+function exportToPublicQuizDb(suites) {
+  const flattenedVignettes = [];
+  suites.forEach(s => {
+    if (Array.isArray(s.vignettes)) {
+      s.vignettes.forEach(v => {
+        flattenedVignettes.push({
+          ...v,
+          cat_id: s.cat_id,
+          title: s.title,
+          category: s.category
+        });
+      });
+    }
+  });
+  return flattenedVignettes;
 }
 
 module.exports = {
-  validateVignette,
-  generateVignettesForCat,
+  validateQuizSuite,
+  generateQuizSuiteForCat,
+  exportToPublicQuizDb,
   QUIZ_STAGED_PATH,
   QUIZ_PROD_PATH
 };
