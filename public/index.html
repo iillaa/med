@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.13.0">
-  <meta name="app-build-version" content="2026.08.25.15.34">
+  <meta name="app-build-version" content="2026.08.25.15.44">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608251534" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251534"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251544" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251544"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251534" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251534"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251544" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251544"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608251534" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608251534" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608251534">
+  <link rel="stylesheet" href="style.css?v=2608251544" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251544" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251544">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608251534">
-    <link rel="stylesheet" href="css/utilities.css?v=2608251534">
+    <link rel="stylesheet" href="style.css?v=2608251544">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251544">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608251534"></script>
+  <script type="module" src="js/version-checker.js?v=2608251544"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -654,11 +654,10 @@ body {
           <div class="command-center-hero">
             <div class="command-center-top">
               <div>
-                <h2 style="font-size: 22px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
                   <i class="fa-solid fa-stethoscope" style="color: var(--color-primary);"></i> Espace Praticien & Décision Clinique
-                  <span style="font-size: 10px; font-weight: 800; background: rgba(6, 182, 212, 0.15); color: var(--color-primary); border: 1px solid rgba(6, 182, 212, 0.3); padding: 2px 6px; border-radius: 4px;">POINT-OF-CARE</span>
                 </h2>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-top: 2px;">Accès immédiat aux conduites à tenir, ordonnances types et 78 manuels médicaux de référence.</p>
+                <p style="color: var(--text-secondary); font-size: 12.5px; margin-top: 2px;">Accès immédiat aux conduites à tenir, ordonnances types et manuels de référence.</p>
               </div>
 
               <!-- Compact Toolbar Actions -->
@@ -824,11 +823,20 @@ body {
               </ul>
             </div>
 
-            <!-- Categories progress block -->
-            <div class="dashboard-block categories-block animate-entrance delay-4">
-              <h3><i class="fa-solid fa-chart-pie"></i> Progrès par spécialité</h3>
-              <div class="categories-list" id="dash-categories-progress">
-                <!-- Dynamically populated -->
+            <!-- Categories progress block (Collapsible Accordion) -->
+            <div class="dashboard-block categories-block animate-entrance delay-4" id="categories-progress-block">
+              <div class="collapsible-block-header" id="categories-progress-toggle" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;">
+                <h3 style="margin: 0;"><i class="fa-solid fa-chart-pie"></i> Progrès par spécialité</h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span id="categories-summary-badge" style="font-size: 11px; color: var(--text-muted); font-weight: 600;"></span>
+                  <i class="fa-solid fa-chevron-down collapsible-chevron" id="categories-toggle-chevron" style="font-size: 12px; color: var(--text-muted); transition: transform 0.2s ease;"></i>
+                </div>
+              </div>
+              <div class="collapsible-block-content" id="categories-progress-content" style="display: none;">
+                <p class="block-desc" style="margin: 6px 0 10px 0;">Répartition de votre maîtrise par domaine médical :</p>
+                <div class="categories-list" id="dash-categories-progress">
+                  <!-- Dynamically populated -->
+                </div>
               </div>
             </div>
           </div>
@@ -1450,7 +1458,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-YWRX552T.js"></script>
+  <script type="module" src="dist/app-42ZCMAG4.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

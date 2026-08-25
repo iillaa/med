@@ -631,6 +631,58 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Mobile Command Center Adjustments */
+  .command-center-hero {
+    padding: 12px;
+    gap: 10px;
+    border-radius: var(--radius-md);
+  }
+
+  .command-center-top h2 {
+    font-size: 16px !important;
+  }
+
+  .omni-search-bar {
+    padding: 3px 4px 3px 10px;
+    border-radius: 8px;
+  }
+
+  #omni-search-input {
+    font-size: 12.5px;
+  }
+
+  .omni-search-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .omni-search-btn span {
+    display: none;
+  }
+
+  .emergency-chip {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    gap: 4px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .dash-card {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .dashboard-container {
+    padding: 12px 10px;
+    gap: 14px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .admin-panes-container {
     padding: 12px !important;
   }
