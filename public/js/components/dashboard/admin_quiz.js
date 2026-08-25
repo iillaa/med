@@ -78,6 +78,14 @@ export async function renderAdminQuizTab(container) {
 async function loadQuizLabData(container) {
   try {
     const token = localStorage.getItem('dr_cat_admin_token') || sessionStorage.getItem('dr_cat_admin_token') || '';
+    if (!token) {
+      const listEl = document.getElementById('admin-quiz-cats-list');
+      if (listEl) {
+        listEl.innerHTML = `<p class="text-muted text-center" style="padding: 20px;">Veuillez vous connecter en tant qu'administrateur pour charger le Quiz Lab.</p>`;
+      }
+      return;
+    }
+
     const res = await fetch('/api/admin/quiz-lab/data', {
       headers: {
         'x-admin-token': token
