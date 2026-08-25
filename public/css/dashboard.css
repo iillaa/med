@@ -57,8 +57,10 @@
   flex-shrink: 0;
 }
 
-#omni-search-input {
+#omni-search-input,
+#lib-deep-search-input {
   flex: 1;
+  width: 100%;
   background: transparent;
   border: none;
   color: var(--text-primary);
@@ -67,6 +69,8 @@
   font-weight: 500;
   outline: none;
   min-width: 0;
+  box-shadow: none;
+  padding: 8px 4px;
 }
 
 .omni-search-btn {
