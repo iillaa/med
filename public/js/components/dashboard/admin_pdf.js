@@ -3,43 +3,107 @@ import { showToast } from '../../utils.js';
 
 export function renderAdminPdfTab(containerEl) {
   containerEl.innerHTML = `
-    <div style="margin-bottom: 24px;">
-      <h3 style="margin-top: 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-file-pdf" style="color: var(--color-danger);"></i> Gestion des PDFs
-      </h3>
-      <p style="color: var(--text-secondary); font-size: 13.5px; line-height: 1.5; margin-bottom: 20px;">
-        Uploadez des documents PDF médicaux. Ils seront automatiquement hashés, indexés et stockés dans la base de données de recherche pour l'application mobile.
-      </p>
-      
-      <div class="pdf-upload-card" style="background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--radius-md); padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; transition: var(--transition-smooth);">
-        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: var(--color-primary);"></i>
-        <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Déposez un fichier PDF ici ou cliquez pour parcourir</div>
-        <input type="file" id="admin-pdf-upload-input" accept=".pdf" style="display: none;">
-        <button class="btn-gradient-primary" id="admin-pdf-trigger-btn" style="padding: 8px 16px; border-radius: var(--radius-sm); border: none; color: white; cursor: pointer; font-weight: 600;">
-          <i class="fa-solid fa-folder-open"></i> Sélectionner un fichier
-        </button>
-        <div id="admin-pdf-filename" style="font-size: 12px; color: var(--text-muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: none;"></div>
-        
-        <button class="btn-outline-success" id="admin-pdf-submit-btn" disabled style="display: none; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; width: 100%; max-width: 250px;">
-          <i class="fa-solid fa-upload"></i> Démarrer l'Indexation
-        </button>
+    <div style="margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="margin: 0; color: var(--text-primary); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-flask" style="color: var(--color-primary);"></i> Command Center des Laboratoires & IA
+          </h3>
+          <p style="color: var(--text-secondary); font-size: 13px; margin: 4px 0 0 0;">
+            Accédez aux studios de développement, de génération de cas cliniques et d'extraction de documents médicaux :
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-      <h4 style="margin-top: 0; color: var(--text-primary); font-size: 14px;">🛠️ Outils de Développement & Laboratoires</h4>
-      <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;">Accédez aux laboratoires isolés d'extraction PDF, d'analyse d'audience et de génération de base V3.</p>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="/admin/quiz_lab.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: #10b981; text-decoration: none; border-radius: var(--radius-sm); font-size: 12px; transition: background 0.2s;">
-          <i class="fa-solid fa-brain"></i> Ouvrir le Labo Quiz V2
-        </a>
-        <a href="/admin/pdf_lab.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-sm); font-size: 12px; transition: background 0.2s;">
-          <i class="fa-solid fa-flask"></i> Ouvrir le Labo PDF
-        </a>
-        <a href="/admin/cat_generator_lab.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--color-primary); text-decoration: none; border-radius: var(--radius-sm); font-size: 12px; transition: background 0.2s;">
-          <i class="fa-solid fa-stethoscope"></i> Ouvrir le Labo CAT Generator V3
-        </a>
+      <!-- 3 Featured Lab Cards Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 24px;">
+        
+        <!-- CARD 1: CAT GENERATOR LAB -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md, 8px); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: var(--shadow-sm); transition: transform 0.2s ease, border-color 0.2s ease;">
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(14, 165, 233, 0.12); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                  <i class="fa-solid fa-stethoscope"></i>
+                </div>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary);">CAT Generator Lab</h4>
+              </div>
+              <span class="cat-badge" style="font-size: 10px;">V3.5 Dual-RAG</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+              Générez, synthétisez et validez les fiches médicales avec Gemini Dual-RAG, checksum anti-hallucination et ordonnances conformes.
+            </p>
+          </div>
+          <a href="/admin/cat_generator_lab.html" target="_blank" style="padding: 9px 14px; background: rgba(14, 165, 233, 0.1); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 6px; text-decoration: none; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le Labo CATs V3
+          </a>
+        </div>
+
+        <!-- CARD 2: QUIZ & STAGING LAB -->
+        <div style="background: var(--bg-card); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md, 8px); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: var(--shadow-sm); transition: transform 0.2s ease, border-color 0.2s ease;">
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                  <i class="fa-solid fa-brain"></i>
+                </div>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary);">Quiz Lab & Staging</h4>
+              </div>
+              <span class="cat-badge" style="font-size: 10px; background: rgba(16, 185, 129, 0.2); color: var(--color-success);">Docimologie V2</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+              Concevez et modérez les cas cliniques progressifs (KFQs/SCTs), QCMs d'ordonnances, justifications et publication du staging.
+            </p>
+          </div>
+          <a href="/admin/quiz_lab.html" target="_blank" style="padding: 9px 14px; background: linear-gradient(135deg, var(--color-success), #059669); color: #fff; border: none; border-radius: 6px; text-decoration: none; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le Labo Quiz V2
+          </a>
+        </div>
+
+        <!-- CARD 3: PDF MASTER LAB -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md, 8px); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: var(--shadow-sm); transition: transform 0.2s ease, border-color 0.2s ease;">
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(239, 68, 68, 0.12); color: var(--color-danger); display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary);">PDF Lab & Slicer</h4>
+              </div>
+              <span class="cat-badge" style="font-size: 10px;">84 Livres</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+              Découpez des sections de manuels, extrayez le texte brut des cours, synchronisez la table des matières GPS et compressez pour APK.
+            </p>
+          </div>
+          <a href="/admin/pdf_lab.html" target="_blank" style="padding: 9px 14px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); color: var(--color-danger); border-radius: 6px; text-decoration: none; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le Labo PDF Master
+          </a>
+        </div>
+
       </div>
+
+      <!-- Quick Compact PDF Upload Strip -->
+      <div style="background: rgba(0,0,0,0.15); border: 1px dashed var(--border-color); border-radius: var(--radius-md, 8px); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size: 20px; color: var(--color-primary);"></i>
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Upload Rapide d'un nouveau document PDF</div>
+            <div style="font-size: 11.5px; color: var(--text-muted);">Ajout immédiat au corpus médical avec auto-indexation.</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="file" id="admin-pdf-upload-input" accept=".pdf" style="display: none;">
+          <button class="action-btn" id="admin-pdf-trigger-btn" style="padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-folder-open"></i> Parcourir
+          </button>
+          <span id="admin-pdf-filename" style="font-size: 11.5px; color: var(--text-muted); max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: none;"></span>
+          <button class="btn-outline-success" id="admin-pdf-submit-btn" disabled style="display: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; font-weight: 600;">
+            <i class="fa-solid fa-upload"></i> Indexer
+          </button>
+        </div>
+      </div>
+
     </div>
   `;
 
