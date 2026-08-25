@@ -111,22 +111,38 @@ export function filterAllPdfsList() {
 }
 
 /**
- * Categorize PDF filenames into clinical specialties
+ * Dynamically categorize PDF filenames using active database specialties and clinical keywords
  */
 function categorizePdf(fileName) {
   const f = (fileName || '').toLowerCase();
+  const cleanF = getCleanPdfName(fileName).toLowerCase();
+
+  // 1. Dynamic Matching against real Specialties present in cats_db
+  if (Array.isArray(state.allCats)) {
+    const existingSpecialties = Array.from(new Set(state.allCats.map(c => c.category))).filter(Boolean);
+    for (const spec of existingSpecialties) {
+      const specLower = spec.toLowerCase();
+      // Match exact specialty name or core root in filename
+      if (cleanF.includes(specLower) || f.includes(specLower.slice(0, 5))) {
+        return spec;
+      }
+    }
+  }
+
+  // 2. Dynamic Clinical Keywords Fallback for Medical Books
   if (f.includes('urgenc') || f.includes('reanimat') || f.includes('choc') || f.includes('ecg') || f.includes('reflex')) return 'Urgences & Réanimation';
   if (f.includes('pediatr') || f.includes('eruptiv') || f.includes('nourrisson')) return 'Pédiatrie';
-  if (f.includes('gyneco') || f.includes('grossesse') || f.includes('contracept') || f.includes('femme')) return 'Gynécologie & Obstétrique';
-  if (f.includes('gastro') || f.includes('digestif') || f.includes('asp')) return 'Gastro-Entérologie';
+  if (f.includes('gyneco') || f.includes('grossesse') || f.includes('contracept') || f.includes('femme')) return 'Gynécologie - Obstétrique';
+  if (f.includes('gastro') || f.includes('digestif') || f.includes('asp')) return 'Gastro-entérologie';
   if (f.includes('dermato') || f.includes('gale') || f.includes('panaris')) return 'Dermatologie';
   if (f.includes('pneumo') || f.includes('thoracique') || f.includes('poumon')) return 'Pneumologie';
   if (f.includes('cardio') || f.includes('hta') || f.includes('coronaire')) return 'Cardiologie';
   if (f.includes('orl') || f.includes('ophtalmo') || f.includes('blepharite')) return 'ORL & Ophtalmologie';
-  if (f.includes('infect') || f.includes('antibiot') || f.includes('inflammatoire')) return 'Infectiologie & Antibiothérapie';
+  if (f.includes('infect') || f.includes('antibiot') || f.includes('inflammatoire')) return 'Infectiologie';
   if (f.includes('neuro') || f.includes('psycho') || f.includes('psychiatr')) return 'Neurologie & Psychiatrie';
   if (f.includes('medicament') || f.includes('ordonnance') || f.includes('posolog') || f.includes('formule')) return 'Thérapeutique & Pharmacologie';
   if (f.includes('radio') || f.includes('bilan') || f.includes('certificat') || f.includes('accident')) return 'Imagerie, Bilans & Législation';
+  
   return 'Médecine Générale & Divers';
 }
 
