@@ -995,54 +995,46 @@ export function loadRelatedPdfs(cat) {
 }
 
 /**
- * Render fluid Sub-CAT / Clinical Profile Segmented Bar
+ * Render sleek Sub-CAT / Clinical Profile Dropdown Selector
  */
 function renderSubCatBar(cat) {
-  const subCatBar = document.getElementById('subcat-selector-bar');
-  if (!subCatBar) return;
+  const profileWrapper = document.getElementById('workspace-profile-wrapper');
+  const profileSelect = document.getElementById('workspace-profile-select');
+  if (!profileWrapper || !profileSelect) return;
 
   const subCats = Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0 ? cat.sub_cats : [];
   if (subCats.length === 0) {
-    subCatBar.style.display = 'none';
-    subCatBar.innerHTML = '';
+    profileWrapper.style.display = 'none';
+    profileSelect.innerHTML = '';
     return;
   }
 
-  subCatBar.style.display = 'flex';
-  subCatBar.innerHTML = '';
+  profileWrapper.style.display = 'inline-flex';
+  profileSelect.innerHTML = '';
 
   const profiles = [
-    {
-      label: '⭐ Fiche Principale',
-      summary: cat.summary,
-      red_flags: cat.red_flags,
-      ordonnance: cat.ordonnance
-    },
+    { label: '⭐ Fiche Principale' },
     ...subCats
   ];
 
   profiles.forEach((prof, idx) => {
-    const pill = document.createElement('button');
-    pill.type = 'button';
-    pill.className = `subcat-pill ${state.activeSubCatIndex === idx ? 'active' : ''}`;
-    pill.setAttribute('role', 'tab');
-    pill.setAttribute('aria-selected', state.activeSubCatIndex === idx ? 'true' : 'false');
-    
-    const iconClass = getSubCatIcon(prof.label);
-    pill.innerHTML = `<i class="fa-solid ${iconClass} subcat-pill-icon"></i> <span>${escapeHTML(prof.label || `Profil ${idx}`)}</span>`;
-    
-    pill.addEventListener('click', (e) => {
-      e.stopPropagation();
-      window.switchToSubProfile(idx);
-    });
-
-    subCatBar.appendChild(pill);
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = prof.label || `Profil ${idx}`;
+    if (state.activeSubCatIndex === idx) {
+      opt.selected = true;
+    }
+    profileSelect.appendChild(opt);
   });
+
+  profileSelect.onchange = (e) => {
+    window.switchToSubProfile(parseInt(e.target.value, 10));
+  };
 }
 
 /**
  * Global In-Place Sub-Profile Switcher
- * Callable directly by contextual in-text badges or top segmented bar!
+ * Callable directly by contextual in-text badges or top dropdown!
  */
 window.switchToSubProfile = function(idx) {
   if (!state.activeCat) return;
@@ -1069,18 +1061,10 @@ window.switchToSubProfile = function(idx) {
   renderPrescription(prof.ordonnance || state.activeCat.ordonnance);
   triggerHaptic(true);
 
-  // Update active pill styling
-  const subCatBar = document.getElementById('subcat-selector-bar');
-  if (subCatBar) {
-    subCatBar.querySelectorAll('.subcat-pill').forEach((p, pIdx) => {
-      if (pIdx === targetIdx) {
-        p.classList.add('active');
-        p.setAttribute('aria-selected', 'true');
-      } else {
-        p.classList.remove('active');
-        p.setAttribute('aria-selected', 'false');
-      }
-    });
+  // Synchronize dropdown state
+  const profileSelect = document.getElementById('workspace-profile-select');
+  if (profileSelect) {
+    profileSelect.value = String(targetIdx);
   }
 
   // Smooth scroll back to top of summary view

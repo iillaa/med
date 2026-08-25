@@ -1,15 +1,20 @@
 {
-  "primaryProvider": "ngrok",
+  "primaryProvider": "cloudflare",
   "servers": [
     {
-      "url": "https://rendition-duchess-dry.ngrok-free.dev",
-      "provider": "ngrok",
+      "url": "https://drcat.dr-cat.workers.dev",
+      "provider": "cloudflare",
       "priority": 1
     },
     {
-      "url": "https://suggesting-scale-worm-rip.trycloudflare.com",
-      "provider": "cloudflare",
+      "url": "https://rendition-duchess-dry.ngrok-free.dev",
+      "provider": "ngrok",
       "priority": 2
+    },
+    {
+      "url": "https://nov-detective-unsubscribe-unlike.trycloudflare.com",
+      "provider": "cloudflare",
+      "priority": 3
     }
   ]
 }

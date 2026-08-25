@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.13.0">
-  <meta name="app-build-version" content="2026.08.24.21.34">
+  <meta name="app-build-version" content="2026.08.25.15.07">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608242134" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608242134"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608251507" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608251507"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608242134" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608242134"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608251507" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608251507"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608242134" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608242134" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608242134">
+  <link rel="stylesheet" href="style.css?v=2608251507" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608251507" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608251507">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608242134">
-    <link rel="stylesheet" href="css/utilities.css?v=2608242134">
+    <link rel="stylesheet" href="style.css?v=2608251507">
+    <link rel="stylesheet" href="css/utilities.css?v=2608251507">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608242134"></script>
+  <script type="module" src="js/version-checker.js?v=2608251507"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -515,6 +515,19 @@ body {
 
       <!-- LEVEL 2: Collapsible Controls Band -->
       <div class="sidebar-controls" id="sidebar-controls">
+
+        <!-- Mode Switcher Tabs (Fiches vs PDFs vs Quiz) -->
+        <div class="sidebar-nav-tabs" role="tablist">
+          <button class="sidebar-tab-btn active" id="sidebar-tab-cats" data-mode="cats" title="Consulter les 62 Fiches CAT">
+            <i class="fa-solid fa-file-medical"></i> <span>Fiches</span>
+          </button>
+          <button class="sidebar-tab-btn" id="sidebar-tab-pdfs" data-mode="pdfs" title="Consulter les 78 Livres PDF et Rechercher">
+            <i class="fa-solid fa-book-medical"></i> <span>PDFs (78)</span>
+          </button>
+          <button class="sidebar-tab-btn" id="sidebar-tab-quiz" data-mode="quiz" title="S'entraîner sur les cas cliniques">
+            <i class="fa-solid fa-brain"></i> <span>Quiz</span>
+          </button>
+        </div>
 
         <!-- Always-visible: Search + Toggle chevron -->
         <div class="search-row">
@@ -637,76 +650,107 @@ body {
       <!-- Welcome/Dashboard screen -->
       <section class="welcome-screen" id="welcome-screen">
         <div class="dashboard-container">
-          <header class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <h2>Tableau de Bord 🩺 <span style="font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.2); color: var(--color-warning); border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px;">BETA</span></h2>
-              <p>Suivi de votre apprentissage des <span id="total-cats-count">55</span> conduites à tenir</p>
-            </div>
-             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-              <div class="specialty-export-container" style="display: none; align-items: center; gap: 6px; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 6px; border-radius: var(--radius-md);">
-                <select id="export-specialty-select" aria-label="Sélectionner une spécialité à exporter" style="background: none; border: none; color: var(--text-primary); font-size: 11.5px; outline: none; cursor: pointer; padding: 4px; max-width: 140px;">
-                  <option value="">Sélectionner spécialité...</option>
-                </select>
-                <button class="action-btn" id="export-specialty-btn" style="font-size: 11px; padding: 4px 8px; border: none; background: rgba(6,182,212,0.1); color: var(--color-primary); cursor: pointer; display: flex; align-items: center; gap: 4px; border-radius: 4px; font-weight: 600;">
-                  <i class="fa-solid fa-file-export"></i> Exporter
+          <!-- CLINICAL COMMAND CENTER (Doctor-Grade Header) -->
+          <div class="command-center-hero">
+            <div class="command-center-top">
+              <div>
+                <h2 style="font-size: 22px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-stethoscope" style="color: var(--color-primary);"></i> Espace Praticien & Décision Clinique
+                  <span style="font-size: 10px; font-weight: 800; background: rgba(6, 182, 212, 0.15); color: var(--color-primary); border: 1px solid rgba(6, 182, 212, 0.3); padding: 2px 6px; border-radius: 4px;">POINT-OF-CARE</span>
+                </h2>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-top: 2px;">Accès immédiat aux conduites à tenir, ordonnances types et 78 manuels médicaux de référence.</p>
+              </div>
+
+              <!-- Compact Toolbar Actions -->
+              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <button class="action-btn" id="export-progress-btn" style="font-size: 11px; padding: 4px 8px;" title="Exporter vos notes et fiches">
+                  <i class="fa-solid fa-download"></i> Sauvegarder
+                </button>
+                <button class="action-btn" id="import-progress-btn" style="font-size: 11px; padding: 4px 8px;" title="Importer vos données">
+                  <i class="fa-solid fa-upload"></i> Restaurer
+                </button>
+                <input type="file" id="import-progress-file" accept=".json" style="display: none;">
+                <button class="action-btn" id="admin-login-btn" style="font-size: 11px; padding: 4px 8px; display: none;">
+                  <i class="fa-solid fa-lock"></i> Admin
+                </button>
+                <button class="cancel-btn" id="reset-progress-btn" style="font-size: 11px; padding: 4px 8px; border-color: rgba(239, 68, 68, 0.3); color: var(--color-danger);" title="Effacer la progression locale">
+                  <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
-              <button class="action-btn" id="export-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
-                <i class="fa-solid fa-download"></i> Exporter Progrès
-              </button>
-              <button class="action-btn" id="import-progress-btn" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-primary);">
-                <i class="fa-solid fa-upload"></i> Importer Progrès
-              </button>
-              <input type="file" id="import-progress-file" accept=".json" style="display: none;">
-              <button class="action-btn" id="admin-login-btn" style="font-size: 12px; padding: 6px 12px; display: none; align-items: center; gap: 6px;">
-                <i class="fa-solid fa-lock"></i> Connexion Admin
-              </button>
-              <button class="cancel-btn" id="reset-progress-btn" style="border-color: rgba(239, 68, 68, 0.4); color: var(--color-danger); font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
-                <i class="fa-solid fa-trash-can"></i> Réinitialiser la progression
-              </button>
             </div>
-          </header>
-          
-            <!-- Quick Stats Grid -->
-            <div class="dashboard-grid">
-              <div class="dash-card mastery-card animate-entrance delay-1">
-                <div class="mastery-circular-container">
-                  <svg class="progress-ring" width="52" height="52">
-                    <circle class="progress-ring-circle-bg" stroke="var(--border-color)" stroke-width="3.5" fill="transparent" r="22" cx="26" cy="26"/>
-                    <circle class="progress-ring-circle" id="dash-mastery-ring" stroke="var(--color-primary)" stroke-width="3.5" stroke-linecap="round" fill="transparent" r="22" cx="26" cy="26" stroke-dasharray="138.23" stroke-dashoffset="138.23"/>
-                  </svg>
-                  <div class="mastery-value" id="dash-mastery-rate">0%</div>
-                </div>
-                <div class="dash-card-info">
-                  <span class="dash-card-label">Taux de Maîtrise</span>
-                  <span class="dash-card-desc">Progression globale</span>
-                </div>
+
+            <!-- Global Omni-Search Bar (Fiches + Livres PDF + Médicaments) -->
+            <div class="omni-search-container">
+              <div class="omni-search-bar">
+                <i class="fa-solid fa-magnifying-glass omni-search-icon"></i>
+                <input type="text" id="omni-search-input" placeholder="Recherche universelle : Pathologie, Médicament, Posologie, Urgence (ex: Asthme, Amoxicilline)..." autocomplete="off" spellcheck="false">
+                <button id="omni-search-btn" class="omni-search-btn">
+                  <span>Rechercher</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
               </div>
-              
-              <div class="dash-card done-card animate-entrance delay-2">
-                <div class="dash-card-icon"><i class="fa-solid fa-circle-check"></i></div>
-                <div class="dash-card-info">
-                  <span class="dash-card-label">Maîtrisés</span>
-                  <span class="dash-card-val" id="dash-count-done">0 / 55</span>
-                </div>
+              <div id="omni-search-results" class="omni-search-results" style="display: none;"></div>
+            </div>
+
+            <!-- Emergency Protocol Shortcuts -->
+            <div class="emergency-shortcuts-row">
+              <span class="emergency-shortcuts-label"><i class="fa-solid fa-truck-medical" style="color: var(--color-danger);"></i> Urgences Fréquentes :</span>
+              <div class="emergency-shortcuts-chips">
+                <button class="emergency-chip" onclick="window.quickOpenCatSearch('anaphylaxie')">
+                  <i class="fa-solid fa-syringe"></i> Anaphylaxie / Choc
+                </button>
+                <button class="emergency-chip" onclick="window.quickOpenCatSearch('arrêt cardio')">
+                  <i class="fa-solid fa-heart-pulse"></i> Arrêt Cardio (ACR)
+                </button>
+                <button class="emergency-chip" onclick="window.quickOpenCatSearch('asthme')">
+                  <i class="fa-solid fa-lungs"></i> Asthme Aigu Grave
+                </button>
+                <button class="emergency-chip" onclick="window.quickOpenCatSearch('colique néphrétique')">
+                  <i class="fa-solid fa-droplet"></i> Colique Néphrétique
+                </button>
               </div>
-  
-              <div class="dash-card doing-card animate-entrance delay-3">
-                <div class="dash-card-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
-                <div class="dash-card-info">
-                  <span class="dash-card-label">En cours</span>
-                  <span class="dash-card-val" id="dash-count-doing">0 / 55</span>
-                </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats Grid (Compact Clinical Style) -->
+          <div class="dashboard-grid">
+            <div class="dash-card mastery-card animate-entrance delay-1" style="padding: 12px 14px;">
+              <div class="mastery-circular-container">
+                <svg class="progress-ring" width="46" height="46">
+                  <circle class="progress-ring-circle-bg" stroke="var(--border-color)" stroke-width="3" fill="transparent" r="19" cx="23" cy="23"/>
+                  <circle class="progress-ring-circle" id="dash-mastery-ring" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" fill="transparent" r="19" cx="23" cy="23" stroke-dasharray="119.38" stroke-dashoffset="119.38"/>
+                </svg>
+                <div class="mastery-value" id="dash-mastery-rate" style="font-size: 11px;">0%</div>
               </div>
-  
-              <div class="dash-card streak-card animate-entrance delay-4" style="border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.02);">
-                <div class="dash-card-icon" style="color: var(--color-warning); background: rgba(245, 158, 11, 0.08);"><i class="fa-solid fa-fire"></i></div>
-                <div class="dash-card-info">
-                  <span class="dash-card-label">Série d'Études</span>
-                  <span class="dash-card-val" id="dash-streak-count">0 jour</span>
-                </div>
+              <div class="dash-card-info">
+                <span class="dash-card-label" style="font-size: 12px;">Maîtrise Globale</span>
+                <span class="dash-card-desc" id="dash-count-done" style="font-size: 11px;">0 / 55 fiches</span>
               </div>
-            </div><!-- /.dashboard-grid -->
+            </div>
+            
+            <div class="dash-card doing-card animate-entrance delay-2" style="padding: 12px 14px;">
+              <div class="dash-card-icon" style="width: 38px; height: 38px; font-size: 16px;"><i class="fa-solid fa-spinner fa-spin"></i></div>
+              <div class="dash-card-info">
+                <span class="dash-card-label" style="font-size: 12px;">En cours</span>
+                <span class="dash-card-val" id="dash-count-doing" style="font-size: 13px;">0 fiches</span>
+              </div>
+            </div>
+
+            <div class="dash-card streak-card animate-entrance delay-3" style="padding: 12px 14px; border-color: rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.02);">
+              <div class="dash-card-icon" style="width: 38px; height: 38px; font-size: 16px; color: var(--color-warning); background: rgba(245, 158, 11, 0.08);"><i class="fa-solid fa-fire"></i></div>
+              <div class="dash-card-info">
+                <span class="dash-card-label" style="font-size: 12px;">Série d'Études</span>
+                <span class="dash-card-val" id="dash-streak-count" style="font-size: 13px;">0 jour</span>
+              </div>
+            </div>
+
+            <div class="dash-card quiz-shortcut-card animate-entrance delay-4" id="dash-quick-quiz-card" style="padding: 12px 14px; cursor: pointer; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.04);">
+              <div class="dash-card-icon" style="width: 38px; height: 38px; font-size: 16px; color: #10b981; background: rgba(16, 185, 129, 0.1);"><i class="fa-solid fa-brain"></i></div>
+              <div class="dash-card-info">
+                <span class="dash-card-label" style="font-size: 12px; color: #10b981;">Quiz Clinique</span>
+                <span class="dash-card-desc" style="font-size: 11px;">Entraînement rapide ➔</span>
+              </div>
+            </div>
+          </div><!-- /.dashboard-grid -->
 
           <!-- First-Run Welcome Banner (hidden after first CAT started) -->
           <div id="first-run-banner" style="display: none; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.07), rgba(16,185,129,0.05)); border: 1px solid rgba(6,182,212,0.2); border-radius: var(--radius-lg); padding: 24px 28px; margin-bottom: 20px; flex-wrap: wrap;">
@@ -816,9 +860,13 @@ body {
         <header class="workspace-header">
           <div class="title-area">
             <div class="title-header-row">
-              <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span class="cat-badge" id="workspace-cat-category" style="margin-bottom: 0;">Gastro-entérologie</span>
-                <button id="workspace-back-to-quiz-btn" class="action-btn" style="display: none; padding: 4px 10px; font-size: 11px; font-weight: 700; align-items: center; gap: 4px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; border-radius: var(--radius-sm);">
+                <div id="workspace-profile-wrapper" class="workspace-profile-wrapper" style="display: none;">
+                  <span class="profile-select-label"><i class="fa-solid fa-user-tag"></i></span>
+                  <select id="workspace-profile-select" class="workspace-profile-select" aria-label="Sélectionner une variante clinique"></select>
+                </div>
+                <button id="workspace-back-to-quiz-btn" class="action-btn" style="display: none; padding: 3px 8px; font-size: 11px; font-weight: 700; align-items: center; gap: 4px; background: linear-gradient(135deg, var(--color-primary), #10b981) !important; color: #000 !important; border: none; border-radius: var(--radius-sm);">
                   <i class="fa-solid fa-arrow-left-long"></i> Retour au Quiz
                 </button>
               </div>
@@ -832,7 +880,6 @@ body {
               </div>
             </div>
             <h2 id="workspace-cat-title">CAT devant intoxication alimentaire</h2>
-            <div id="subcat-selector-bar" class="subcat-selector-bar" style="display:none;" role="tablist" aria-label="Variantes et profils cliniques"></div>
           </div>
           
           <div class="status-selector-area">
@@ -1414,7 +1461,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-UNEVMVAU.js"></script>
+  <script type="module" src="dist/app-CG3MS6RD.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

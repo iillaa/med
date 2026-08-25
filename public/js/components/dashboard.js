@@ -46,6 +46,132 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
 
   initAdminTabListeners(onSuggestionHandled);
 
+  // Omni-Search Central Handler
+  const omniInput = document.getElementById('omni-search-input');
+  const omniBtn = document.getElementById('omni-search-btn');
+  const omniResults = document.getElementById('omni-search-results');
+
+  async function handleOmniSearch() {
+    if (!omniInput || !omniResults) return;
+    const query = omniInput.value.trim().toLowerCase();
+    if (!query) {
+      omniResults.style.display = 'none';
+      return;
+    }
+
+    const matchedCats = (state.allCats || []).filter(c => {
+      const title = (c.title || '').toLowerCase();
+      const catg = (c.category || '').toLowerCase();
+      const summ = (c.summary || '').toLowerCase();
+      const ord = (c.ordonnance || '').toLowerCase();
+      const kw = Array.isArray(c.keywords) ? c.keywords.join(' ').toLowerCase() : '';
+      return title.includes(query) || catg.includes(query) || summ.includes(query) || ord.includes(query) || kw.includes(query);
+    }).slice(0, 8);
+
+    if (matchedCats.length === 0) {
+      omniResults.innerHTML = `<div style="padding: 12px; font-size: 12.5px; color: var(--text-muted); text-align: center;">Aucune CAT trouvée pour "${escapeHTML(query)}". <br><a href="#" id="omni-search-pdf-fallback" style="color: var(--color-primary); font-weight: 700; display: inline-block; margin-top: 6px;">🔍 Chercher dans les 78 Livres PDF ➔</a></div>`;
+      omniResults.style.display = 'flex';
+      const pdfFallback = document.getElementById('omni-search-pdf-fallback');
+      if (pdfFallback) {
+        pdfFallback.onclick = (e) => {
+          e.preventDefault();
+          window.openGlobalPdfSearch(query);
+        };
+      }
+      return;
+    }
+
+    let html = `<div style="padding: 6px 10px; font-size: 11px; font-weight: 700; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;"><span>FICHES CAT TROUVÉES (${matchedCats.length})</span><span style="color: var(--color-primary); cursor: pointer;" id="omni-search-pdf-link"><i class="fa-solid fa-file-pdf"></i> Chercher dans les PDFs ➔</span></div>`;
+
+    matchedCats.forEach(c => {
+      html += `
+        <div class="omni-result-item" data-cat-id="${c.id}" style="padding: 8px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: background 0.15s ease;">
+          <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+            <strong style="font-size: 12.5px; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(c.title)}</strong>
+            <span style="font-size: 10.5px; color: var(--color-primary);">${escapeHTML(c.category || '')}</span>
+          </div>
+          <span style="font-size: 10px; padding: 2px 6px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--text-muted);">${c.status === 'done' ? '✅' : (c.status === 'doing' ? '⏳' : '⚪')}</span>
+        </div>
+      `;
+    });
+
+    omniResults.innerHTML = html;
+    omniResults.style.display = 'flex';
+
+    omniResults.querySelectorAll('.omni-result-item').forEach(item => {
+      item.onclick = () => {
+        const catId = parseInt(item.getAttribute('data-cat-id'), 10);
+        const targetCat = (state.allCats || []).find(c => c.id === catId);
+        if (targetCat && onSelectCat) {
+          omniResults.style.display = 'none';
+          onSelectCat(targetCat);
+        }
+      };
+      item.onmouseenter = () => { item.style.background = 'rgba(6, 182, 212, 0.1)'; };
+      item.onmouseleave = () => { item.style.background = 'transparent'; };
+    });
+
+    const pdfLink = document.getElementById('omni-search-pdf-link');
+    if (pdfLink) {
+      pdfLink.onclick = () => {
+        omniResults.style.display = 'none';
+        window.openGlobalPdfSearch(query);
+      };
+    }
+  }
+
+  if (omniInput) {
+    omniInput.addEventListener('input', () => {
+      clearTimeout(window._omniTimer);
+      window._omniTimer = setTimeout(handleOmniSearch, 250);
+    });
+    omniInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleOmniSearch();
+    });
+  }
+  if (omniBtn) {
+    omniBtn.addEventListener('click', handleOmniSearch);
+  }
+
+  // Quick Open Shortcut Function
+  window.quickOpenCatSearch = function(searchTerm) {
+    const term = searchTerm.toLowerCase();
+    const found = (state.allCats || []).find(c => (c.title || '').toLowerCase().includes(term) || (c.keywords || []).some(k => k.toLowerCase().includes(term)));
+    if (found && onSelectCat) {
+      onSelectCat(found);
+    } else {
+      if (omniInput) {
+        omniInput.value = searchTerm;
+        handleOmniSearch();
+      }
+    }
+  };
+
+  // Quick Quiz Shortcut Card
+  const quickQuizCard = document.getElementById('dash-quick-quiz-card');
+  if (quickQuizCard) {
+    quickQuizCard.onclick = () => {
+      const quizNavBtn = document.getElementById('start-quiz-nav-btn');
+      if (quizNavBtn) quizNavBtn.click();
+    };
+  }
+
+  // Global PDF Search Opener
+  window.openGlobalPdfSearch = function(query = '') {
+    if (state.allCats && state.allCats.length > 0 && onSelectCat) {
+      const firstCat = state.allCats[0];
+      onSelectCat(firstCat);
+      const searchTabBtn = document.querySelector('.tab-btn[data-tab="tab-search-pdf"]');
+      if (searchTabBtn) searchTabBtn.click();
+      const pdfInput = document.getElementById('pdf-content-search-input');
+      const pdfBtn = document.getElementById('pdf-content-search-btn');
+      if (pdfInput && query) {
+        pdfInput.value = query;
+        if (pdfBtn) pdfBtn.click();
+      }
+    }
+  };
+
   const exportBtn = document.getElementById('export-progress-btn');
   if (exportBtn) {
     exportBtn.addEventListener('click', () => {

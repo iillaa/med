@@ -53,10 +53,10 @@
     "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c": {
       "installId": "drcat-inst-e915cfe0-a160-449c-acd2-e5fc806eee6c",
       "firstSeen": "2026-08-03T22:12:43.913Z",
-      "requestCount": 2350,
-      "appVersion": "1.10.1",
+      "requestCount": 2435,
+      "appVersion": "1.13.0",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-19T23:55:30.138Z",
+      "lastSeen": "2026-08-24T22:55:36.628Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
@@ -303,11 +303,11 @@
     "drcat-inst-acbd7870-f773-4e81-8efb-4aa24ade3439": {
       "installId": "drcat-inst-acbd7870-f773-4e81-8efb-4aa24ade3439",
       "firstSeen": "2026-08-14T14:07:17.021Z",
-      "requestCount": 25,
-      "appVersion": "1.8.0",
+      "requestCount": 26,
+      "appVersion": "1.13.0",
       "platform": "web_pwa",
-      "lastSeen": "2026-08-15T15:46:51.247Z",
-      "lastIp": "154.121.155.209",
+      "lastSeen": "2026-08-24T21:57:12.905Z",
+      "lastIp": "154.121.162.161",
       "isAdminDevice": false
     },
     "drcat-inst-64e5c48f-3437-4132-9fcb-43f11cabaae5": {
@@ -499,7 +499,17 @@
       "lastSeen": "2026-08-23T22:42:21.010Z",
       "lastIp": "::1",
       "isAdminDevice": true
+    },
+    "drcat-inst-f675d4f8-11e2-4f01-ab02-575127c16362": {
+      "installId": "drcat-inst-f675d4f8-11e2-4f01-ab02-575127c16362",
+      "firstSeen": "2026-08-24T21:56:57.677Z",
+      "requestCount": 39,
+      "appVersion": "1.13.0",
+      "platform": "android_apk",
+      "lastSeen": "2026-08-24T22:50:48.620Z",
+      "lastIp": "154.121.162.161",
+      "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-08-24T16:54:46.079Z"
+  "lastUpdated": "2026-08-24T22:55:38.241Z"
 }

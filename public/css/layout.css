@@ -161,12 +161,9 @@ html, body {
   }
 
   .status-btn {
-    min-height: 44px;
-    padding: 10px 12px !important;
-    font-size: 12px !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    padding: 3px 6px !important;
+    font-size: 10.5px !important;
+    gap: 4px !important;
   }
 
   .print-compact-btn {
