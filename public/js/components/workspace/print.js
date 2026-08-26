@@ -2,17 +2,52 @@ import { state } from '../../state.js';
 import { escapeHTML } from '../../utils.js';
 
 export function saveAppStateBeforeNavigation() {
+  const libScreen = document.getElementById('library-screen');
+  const quizScreen = document.getElementById('quiz-screen');
+  const workspace = document.getElementById('workspace');
+
+  let currentView = 'dashboard';
+  if (libScreen && libScreen.style.display !== 'none') {
+    currentView = 'library';
+  } else if (quizScreen && quizScreen.style.display !== 'none') {
+    currentView = 'quiz';
+  } else if (workspace && workspace.style.display !== 'none' && state.activeCat) {
+    currentView = 'workspace';
+  }
+
+  // Active Tab in Workspace
   const activeTabBtn = document.querySelector('.tab-btn.active');
   const activeTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : null;
 
+  // Workspace related PDFs search
   const searchInput = document.getElementById('pdf-content-search-input');
   const searchResultsContainer = document.getElementById('pdf-search-results-container');
 
+  // Standalone Library state
+  const libSearchInput = document.getElementById('lib-deep-search-input');
+  const libFilterInput = document.getElementById('lib-filter-input');
+  const libSearchResultsContainer = document.getElementById('lib-search-results-container');
+  const libSearchResultsCard = document.getElementById('lib-search-results-card');
+
+  // Omni-search state
+  const omniSearchInput = document.getElementById('omni-search-input');
+  const omniResults = document.getElementById('omni-search-results');
+
   const stateToSave = {
+    currentView,
+    scrollY: window.scrollY || document.documentElement.scrollTop || 0,
     activeCatId: state.activeCat ? state.activeCat.id : null,
+    activeSubCatIndex: typeof state.activeSubCatIndex === 'number' ? state.activeSubCatIndex : 0,
     activeTab: activeTab,
+    activePrescriptionVariantIndex: state.activePrescriptionVariantIndex || 0,
     pdfSearchQuery: searchInput ? searchInput.value : '',
-    pdfSearchResultsHTML: searchResultsContainer ? searchResultsContainer.innerHTML : ''
+    pdfSearchResultsHTML: searchResultsContainer ? searchResultsContainer.innerHTML : '',
+    libSearchQuery: libSearchInput ? libSearchInput.value : '',
+    libFilterQuery: libFilterInput ? libFilterInput.value : '',
+    libSearchResultsHTML: libSearchResultsContainer ? libSearchResultsContainer.innerHTML : '',
+    libResultsVisible: libSearchResultsCard ? libSearchResultsCard.style.display !== 'none' : false,
+    omniQuery: omniSearchInput ? omniSearchInput.value : '',
+    omniVisible: omniResults ? omniResults.style.display !== 'none' : false
   };
 
   localStorage.setItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
@@ -26,40 +61,106 @@ export function restoreAppState() {
     const data = JSON.parse(saved);
     localStorage.removeItem('dr_cat_navigation_state');
 
+    // ── 1. Restore Standalone Library View ──
+    if (data.currentView === 'library') {
+      if (typeof window.openStandaloneLibrary === 'function') {
+        window.openStandaloneLibrary(data.libSearchQuery || '');
+      }
+
+      if (data.libFilterQuery) {
+        const filterInput = document.getElementById('lib-filter-input');
+        if (filterInput) {
+          filterInput.value = data.libFilterQuery;
+          filterInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+
+      if (data.libSearchResultsHTML && data.libSearchResultsHTML.trim().length > 0) {
+        const libContainer = document.getElementById('lib-search-results-container');
+        const libCard = document.getElementById('lib-search-results-card');
+        if (libContainer) {
+          libContainer.innerHTML = data.libSearchResultsHTML;
+          if (libCard && data.libResultsVisible) {
+            libCard.style.display = 'block';
+          }
+          // Re-bind click handlers on restored PDF search cards in library
+          libContainer.querySelectorAll('.pdf-search-result-card, [data-pdf]').forEach(card => {
+            card.addEventListener('click', () => {
+              saveAppStateBeforeNavigation();
+              const pdf = decodeURIComponent(card.getAttribute('data-pdf') || '');
+              const page = card.getAttribute('data-page') || '1';
+              if (pdf) {
+                window.location.href = `pdf_viewer.html?file=${encodeURIComponent(pdf)}&page=${page}`;
+              }
+            });
+          });
+        }
+      }
+
+      if (typeof data.scrollY === 'number' && data.scrollY > 0) {
+        setTimeout(() => window.scrollTo({ top: data.scrollY, behavior: 'instant' }), 60);
+      }
+      return;
+    }
+
+    // ── 2. Restore Workspace CAT Fiche View ──
     if (data.activeCatId) {
       const catCard = document.querySelector(`.cat-item[data-id="${data.activeCatId}"]`);
       if (catCard) {
         catCard.click();
       }
-    }
 
-    if (data.activeTab && data.activeTab !== 'tab-summary') {
-      const tabBtn = document.querySelector(`.tab-btn[data-tab="${data.activeTab}"]`);
-      if (tabBtn) {
-        tabBtn.click();
+      // Restore Sub-profile pill if active
+      if (typeof data.activeSubCatIndex === 'number' && data.activeSubCatIndex > 0) {
+        setTimeout(() => {
+          const pill = document.querySelector(`.subcat-pill[data-sub-index="${data.activeSubCatIndex}"]`);
+          if (pill) pill.click();
+        }, 40);
       }
-    }
 
-    if (data.pdfSearchQuery) {
-      const searchInput = document.getElementById('pdf-content-search-input');
-      if (searchInput) {
-        searchInput.value = data.pdfSearchQuery;
+      // Restore Active Tab
+      if (data.activeTab && data.activeTab !== 'tab-summary') {
+        setTimeout(() => {
+          const tabBtn = document.querySelector(`.tab-btn[data-tab="${data.activeTab}"]`);
+          if (tabBtn) {
+            tabBtn.click();
+          }
+        }, 60);
       }
-    }
-    if (data.pdfSearchResultsHTML) {
-      const resultsContainer = document.getElementById('pdf-search-results-container');
-      if (resultsContainer) {
-        resultsContainer.innerHTML = data.pdfSearchResultsHTML;
 
-        resultsContainer.querySelectorAll('.pdf-search-result-card').forEach(card => {
-          card.addEventListener('click', () => {
-            saveAppStateBeforeNavigation();
-            const pdfFile = decodeURIComponent(card.getAttribute('data-pdf'));
-            const page = card.getAttribute('data-page');
-            window.location.href = `pdf_viewer.html?file=${encodeURIComponent(pdfFile)}&page=${page}`;
+      // Restore PDF Search in CAT Workspace
+      if (data.pdfSearchQuery) {
+        const searchInput = document.getElementById('pdf-content-search-input');
+        if (searchInput) {
+          searchInput.value = data.pdfSearchQuery;
+        }
+      }
+      if (data.pdfSearchResultsHTML) {
+        const resultsContainer = document.getElementById('pdf-search-results-container');
+        if (resultsContainer) {
+          resultsContainer.innerHTML = data.pdfSearchResultsHTML;
+
+          resultsContainer.querySelectorAll('.pdf-search-result-card').forEach(card => {
+            card.addEventListener('click', () => {
+              saveAppStateBeforeNavigation();
+              const pdfFile = decodeURIComponent(card.getAttribute('data-pdf'));
+              const page = card.getAttribute('data-page');
+              window.location.href = `pdf_viewer.html?file=${encodeURIComponent(pdfFile)}&page=${page}`;
+            });
           });
-        });
+        }
       }
+
+      if (typeof data.scrollY === 'number' && data.scrollY > 0) {
+        setTimeout(() => window.scrollTo({ top: data.scrollY, behavior: 'instant' }), 90);
+      }
+      return;
+    }
+
+    // ── 3. Restore Quiz View ──
+    if (data.currentView === 'quiz') {
+      const quizNavBtn = document.getElementById('start-quiz-nav-btn');
+      if (quizNavBtn) quizNavBtn.click();
     }
   } catch (err) {
     console.error("Failed to restore app navigation state:", err);

@@ -1,6 +1,7 @@
 import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { getCleanPdfName, showToast, escapeHTML } from '../../utils.js';
+import { saveAppStateBeforeNavigation } from './print.js';
 
 export function createPdfCardElement(file, isGlobal = false) {
   if (!file || typeof file !== 'string') return document.createElement('div');
@@ -362,6 +363,7 @@ export function initLibraryScreen(onReturnDashboard) {
         resultsContainer.innerHTML = html;
         resultsContainer.querySelectorAll('.pdf-search-result-card').forEach(card => {
           card.onclick = () => {
+            saveAppStateBeforeNavigation();
             const pdf = decodeURIComponent(card.getAttribute('data-pdf'));
             const page = card.getAttribute('data-page');
             window.location.href = `pdf_viewer.html?file=${encodeURIComponent(pdf)}&page=${page}`;
