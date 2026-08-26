@@ -5,6 +5,7 @@ import { calculateStats, getStreakCount } from './dashboard/stats.js';
 import { renderResumeList } from './dashboard/resume.js';
 import { renderCategoryProgress } from './dashboard/progress.js';
 import { initAdminTabListeners, loadPendingSuggestions } from './dashboard/admin.js';
+import { safeGetItem, safeSetItem } from '../lib/safeStorage.js';
 
 let welcomeScreen, workspace, sidebar;
 let dashMasteryRate, dashCountDone, dashCountDoing, dashCountTodo;
@@ -278,7 +279,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
   const exportBtn = document.getElementById('export-progress-btn');
   if (exportBtn) {
     exportBtn.addEventListener('click', () => {
-      const progressData = localStorage.getItem('dr_cat_user_progress');
+      const progressData = safeGetItem('dr_cat_user_progress');
       if (!progressData || progressData === '{}') {
         showToast("Aucune progression enregistrée à exporter.", "fa-circle-exclamation", 3000);
         return;
@@ -306,7 +307,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
           const importedData = JSON.parse(event.target.result);
           const keys = Object.keys(importedData);
           if (keys.length > 0 && typeof importedData[keys[0]] === 'object') {
-            localStorage.setItem('dr_cat_user_progress', JSON.stringify(importedData));
+            safeSetItem('dr_cat_user_progress', JSON.stringify(importedData));
             showToast("Progression importée avec succès ! L'application va se recharger.", "fa-circle-check", 4000);
             location.reload();
           } else {

@@ -3,6 +3,8 @@
  * Generates and preserves a persistent UUID per app installation.
  */
 
+import { safeGetItem, safeSetItem } from './lib/safeStorage.js';
+
 const INSTALL_ID_KEY = 'dr_cat_install_id';
 
 /**
@@ -25,13 +27,13 @@ function generateUUID() {
  */
 export function getInstallId() {
   try {
-    let installId = localStorage.getItem(INSTALL_ID_KEY);
+    let installId = safeGetItem(INSTALL_ID_KEY);
     if (!installId) {
       const uuid = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
         ? crypto.randomUUID()
         : generateUUID();
       installId = `drcat-inst-${uuid}`;
-      localStorage.setItem(INSTALL_ID_KEY, installId);
+      safeSetItem(INSTALL_ID_KEY, installId);
       console.log('[InstallID] Generated new anonymous installation ID:', installId);
     }
     return installId;
@@ -46,12 +48,12 @@ export function getInstallId() {
  */
 export function preserveInstallId(action) {
   try {
-    const existingId = localStorage.getItem(INSTALL_ID_KEY);
+    const existingId = safeGetItem(INSTALL_ID_KEY);
     if (typeof action === 'function') {
       action();
     }
     if (existingId) {
-      localStorage.setItem(INSTALL_ID_KEY, existingId);
+      safeSetItem(INSTALL_ID_KEY, existingId);
     }
   } catch (err) {
     console.warn('[InstallID] Error preserving install ID:', err);

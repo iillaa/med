@@ -51,7 +51,10 @@ export const MEMORY_SAMPLE_INTERVAL_MS = 10000;
 
 // ── Logging ──────────────────────────────────────────────────
 /** Set to true to enable verbose console.log output in production. */
-export const DEBUG = (
-  (typeof process !== 'undefined' && process.env && process.env.DEBUG === 'true') ||
-  (typeof window !== 'undefined' && localStorage.getItem('drCatDebug') === 'true')
-);
+export const DEBUG = (function() {
+  try {
+    if (typeof process !== 'undefined' && process.env && process.env.DEBUG === 'true') return true;
+    if (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('drCatDebug') === 'true') return true;
+  } catch (_) {}
+  return false;
+})();

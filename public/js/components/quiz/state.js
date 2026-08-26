@@ -1,3 +1,5 @@
+import { safeGetItem, safeSetItem, safeParseJSON } from '../../lib/safeStorage.js';
+
 export const FRENCH_STOP_WORDS = new Set([
   'pour', 'avec', 'dans', 'chez', 'mais', 'sans', 'plus', 'moins', 'sous',
   'fois', 'jour', 'sont', 'cette', 'dont', 'votre', 'leur', 'leurs',
@@ -14,12 +16,7 @@ export function shuffleArray(array) {
 }
 
 export function updateLeitnerStats(catId, wasCorrect) {
-  let leitnerData = {};
-  try {
-    leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}') || {};
-  } catch (e) {
-    console.warn("Failed to parse Leitner spaced repetition data", e);
-  }
+  let leitnerData = safeParseJSON(safeGetItem('dr_cat_leitner'), {}) || {};
   const current = leitnerData[catId] || { box: 1, lastQuizzed: 0 };
 
   if (wasCorrect) {
@@ -30,22 +27,13 @@ export function updateLeitnerStats(catId, wasCorrect) {
   current.lastQuizzed = Date.now();
 
   leitnerData[catId] = current;
-  try {
-    localStorage.setItem('dr_cat_leitner', JSON.stringify(leitnerData));
-  } catch (e) {
-    /* ignore quota errors */
-  }
+  safeSetItem('dr_cat_leitner', JSON.stringify(leitnerData));
 }
 
 export function updateQuizStreak() {
   const d = new Date();
   const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  let streakInfo = { count: 0, lastDate: "" };
-  try {
-    streakInfo = JSON.parse(localStorage.getItem('dr_cat_streak') || '{"count":0,"lastDate":""}') || { count: 0, lastDate: "" };
-  } catch (e) {
-    console.warn("Failed to parse study streak info", e);
-  }
+  let streakInfo = safeParseJSON(safeGetItem('dr_cat_streak'), { count: 0, lastDate: "" }) || { count: 0, lastDate: "" };
 
   if (streakInfo.lastDate === todayStr) {
     return;
@@ -62,11 +50,7 @@ export function updateQuizStreak() {
   }
 
   streakInfo.lastDate = todayStr;
-  try {
-    localStorage.setItem('dr_cat_streak', JSON.stringify(streakInfo));
-  } catch (e) {
-    /* ignore quota errors */
-  }
+  safeSetItem('dr_cat_streak', JSON.stringify(streakInfo));
 
   const streakCountEl = document.getElementById('dash-streak-count');
   if (streakCountEl) {

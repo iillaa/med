@@ -8,9 +8,29 @@
   const LOCK_STORAGE_KEY = 'dr_cat_app_lock_state';
   const isNativeApk = !!window.Capacitor || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || (navigator.userAgent && navigator.userAgent.toLowerCase().includes('capacitor'));
 
+  function storageGet(key) {
+    try {
+      return (typeof window !== 'undefined' && window.localStorage) ? window.localStorage.getItem(key) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function storageSet(key, val) {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) window.localStorage.setItem(key, val);
+    } catch (_) {}
+  }
+
+  function storageRemove(key) {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) window.localStorage.removeItem(key);
+    } catch (_) {}
+  }
+
   // ── Localhost & Admin Exemption (Only for Web Browser development, NOT native Android APK) ──
   const isLocalhost = !isNativeApk && (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1');
-  const isAdmin = !isNativeApk && !!localStorage.getItem('dr_cat_admin_token');
+  const isAdmin = !isNativeApk && !!storageGet('dr_cat_admin_token');
   if (isLocalhost || isAdmin) {
     console.log('[VersionChecker] Web browser developer/admin session detected. Version lock screen bypassed.');
     return;
@@ -62,7 +82,7 @@
    */
   function purgeStaleNetworkCacheOnLock() {
     try {
-      localStorage.removeItem('dr_cat_synced_db');
+      storageRemove('dr_cat_synced_db');
     } catch (err) {
       console.warn('[VersionChecker] Error clearing network cache on lock:', err);
     }
@@ -231,7 +251,7 @@
    */
   if (isNativeApk) {
     try {
-      const cachedRaw = localStorage.getItem(LOCK_STORAGE_KEY);
+      const cachedRaw = storageGet(LOCK_STORAGE_KEY);
       if (cachedRaw) {
         const cached = JSON.parse(cachedRaw);
         if (cached.forceUpdateActive && compareVersions(CLIENT_VERSION, cached.minVersion) < 0) {
@@ -297,7 +317,7 @@
 
           if (config.forceUpdateActive && compareVersions(CLIENT_VERSION, config.minVersion) < 0) {
             try {
-              localStorage.setItem(LOCK_STORAGE_KEY, JSON.stringify({
+              storageSet(LOCK_STORAGE_KEY, JSON.stringify({
                 minVersion: config.minVersion,
                 latestVersion: config.latestVersion,
                 forceUpdateActive: true,
@@ -320,7 +340,7 @@
           } else {
             console.log(`[VersionChecker] Version check passed via ${serverBase}. Client v${CLIENT_VERSION} is authorized.`);
             try {
-              localStorage.removeItem(LOCK_STORAGE_KEY);
+              storageRemove(LOCK_STORAGE_KEY);
             } catch (_) {}
 
             if (isLocked) {
@@ -347,7 +367,7 @@
       console.warn('[VersionChecker] Remote version check unreachable, using offline rules:', err.message || err);
       if (isNativeApk) {
         try {
-          const cachedRaw = localStorage.getItem(LOCK_STORAGE_KEY);
+          const cachedRaw = storageGet(LOCK_STORAGE_KEY);
           if (cachedRaw) {
             const cached = JSON.parse(cachedRaw);
             if (cached.forceUpdateActive && compareVersions(CLIENT_VERSION, cached.minVersion) < 0) {
@@ -358,10 +378,10 @@
               console.log('[VersionChecker] Version check passed. Client v' + CLIENT_VERSION + ' is authorized.');
             }
           } else {
-            console.log('[VersionChecker] Version check passed. Client v' + CLIENT_VERSION + ' is authorized.');
+            console.log('[VersionChecker] Offline mode active without prior lock. Client v' + CLIENT_VERSION + ' is authorized.');
           }
-        } catch (cacheErr) {
-          console.error('[VersionChecker] Offline fallback evaluation error:', cacheErr);
+        } catch (_) {
+          console.log('[VersionChecker] Offline check error ignored. Client v' + CLIENT_VERSION + ' is authorized.');
         }
       }
     }

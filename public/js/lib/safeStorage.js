@@ -1,16 +1,35 @@
 /**
- * Safe localStorage wrapper — crash-proof getItem/setItem.
+ * Safe localStorage wrapper — crash-proof getItem/setItem with in-memory fallback.
  *
- * Replaces the duplicate Storage.prototype monkey-patches that were scattered
- * across main.js and performance.js with a single, explicit utility module.
- * Callers use safeGetItem / safeSetItem instead of raw localStorage access.
- *
- * The wrappers catch QuotaExceededError (evicting the sync cache on overflow)
- * and any other exceptions (private browsing, corrupted data, etc.) so the
- * app never crashes from a storage read/write.
+ * Provides bulletproof resilience against:
+ * 1. SecurityError (denied access in cross-origin iframes / third-party storage partitioning)
+ * 2. QuotaExceededError (automatic protected LRU cache eviction)
+ * 3. Private Browsing / Incognito mode restrictions
+ * 4. Corrupted JSON strings
  */
 
 const SYNC_CACHE_KEY_PREFIX = 'dr_cat_synced_database';
+
+// In-Memory Storage Fallback (used when browser blocks window.localStorage)
+const memoryStorage = new Map();
+let isStorageUsable = null;
+
+function checkStorageAvailability() {
+  if (isStorageUsable !== null) return isStorageUsable;
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      isStorageUsable = false;
+      return false;
+    }
+    const testKey = '__drcat_storage_probe__';
+    window.localStorage.setItem(testKey, testKey);
+    window.localStorage.removeItem(testKey);
+    isStorageUsable = true;
+  } catch (_) {
+    isStorageUsable = false;
+  }
+  return isStorageUsable;
+}
 
 // Keys that MUST NEVER be automatically evicted on quota overflow
 const PROTECTED_KEY_PATTERNS = [
@@ -35,14 +54,15 @@ function isProtectedKey(key) {
  * Strictly preserves user notes, study streaks, and progress.
  */
 function evictTransientStorage() {
+  if (!checkStorageAvailability()) return;
   const evictableKeys = [];
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
       if (k && !isProtectedKey(k)) {
         let size = 0;
         try {
-          const val = localStorage.getItem(k);
+          const val = window.localStorage.getItem(k);
           size = val ? val.length : 0;
         } catch (_) {}
         // Prioritize synccache first, then large transient caches
@@ -56,7 +76,7 @@ function evictTransientStorage() {
 
     for (const item of evictableKeys) {
       try {
-        localStorage.removeItem(item.key);
+        window.localStorage.removeItem(item.key);
       } catch (_) {}
     }
   } catch (_) {
@@ -65,37 +85,51 @@ function evictTransientStorage() {
 }
 
 export function safeGetItem(key, fallback = null) {
+  if (!checkStorageAvailability()) {
+    return memoryStorage.has(key) ? memoryStorage.get(key) : fallback;
+  }
   try {
-    return localStorage.getItem(key);
+    const val = window.localStorage.getItem(key);
+    return val !== null ? val : (memoryStorage.has(key) ? memoryStorage.get(key) : fallback);
   } catch (_) {
-    return fallback;
+    return memoryStorage.has(key) ? memoryStorage.get(key) : fallback;
   }
 }
 
 export function safeSetItem(key, value) {
+  const strVal = String(value);
+  // Always mirror in memory for instantaneous zero-throw fallbacks
+  memoryStorage.set(key, strVal);
+
+  if (!checkStorageAvailability()) {
+    return true;
+  }
+
   try {
-    localStorage.setItem(key, value);
+    window.localStorage.setItem(key, strVal);
     return true;
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.number === -2147024882)) {
       console.warn('[storage] Quota exceeded, executing protected LRU eviction for key:', key);
       evictTransientStorage();
-      // Retry once after eviction
       try {
-        localStorage.setItem(key, value);
+        window.localStorage.setItem(key, strVal);
         return true;
-      } catch (retryErr) {
-        console.error('[storage] Failed to set item even after eviction:', key, retryErr);
-        return false;
+      } catch (_) {
+        return true; // Still preserved in memoryStorage
       }
     }
-    return false;
+    return true; // Preserved in memoryStorage
   }
 }
 
 export function safeRemoveItem(key) {
+  memoryStorage.delete(key);
+  if (!checkStorageAvailability()) {
+    return true;
+  }
   try {
-    localStorage.removeItem(key);
+    window.localStorage.removeItem(key);
     return true;
   } catch (_) {
     return false;

@@ -10,6 +10,7 @@ import { setupKeyboardHandling } from './components/native.js';
 import { showToast, runSuggestionWithUI, prefersReducedMotion, initTapFeedback, closeModalAnimated } from './utils.js';
 import { PROVIDERS, getExtraHeaders } from './server-providers.js';
 import { isOfflineCat, mergeCatsWithLocalState } from './lib/helpers.js';
+import { safeGetItem, safeSetItem, safeRemoveItem, safeParseJSON } from './lib/safeStorage.js';
 
 // ── Phase 5.2: lazy-loaded feature modules ──
 // quiz / diagnostics / performance are route/feature-scoped and not needed
@@ -196,7 +197,7 @@ async function bootstrapApp() {
         rootEl.classList.add('theme-switching');
 
         const isLight = rootEl.classList.toggle('light-theme');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        safeSetItem('theme', isLight ? 'light' : 'dark');
         rootEl.style.colorScheme = isLight ? 'light' : 'dark';
 
         if (themeToggleIcon) {
@@ -345,10 +346,10 @@ async function bootstrapApp() {
             closeAddCatModal();
             // Clear any stale local overrides for the new CAT ID
             try {
-              const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+              const localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
               if (localOverrides[result.cat.id]) {
                 delete localOverrides[result.cat.id];
-                localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+                safeSetItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
               }
             } catch (_) {
               /* ignore local override purge failure */
@@ -460,7 +461,7 @@ async function bootstrapApp() {
   };
 
   // Check if consent or dismissal was already given
-  if (!localStorage.getItem('drcat_legal_consent_v1')) {
+  if (!safeGetItem('drcat_legal_consent_v1')) {
     if (cookieBanner) {
       cookieBanner.style.display = 'flex';
       setTimeout(() => cookieBanner.classList.remove('hidden'), 500);
@@ -471,14 +472,14 @@ async function bootstrapApp() {
 
   if (acceptCookieBtn) {
     acceptCookieBtn.addEventListener('click', () => {
-      localStorage.setItem('drcat_legal_consent_v1', 'true');
+      safeSetItem('drcat_legal_consent_v1', 'true');
       hideCookieBanner();
     });
   }
 
   if (dismissCookieBtn) {
     dismissCookieBtn.addEventListener('click', () => {
-      localStorage.setItem('drcat_legal_consent_v1', 'dismissed');
+      safeSetItem('drcat_legal_consent_v1', 'dismissed');
       hideCookieBanner();
     });
   }
@@ -643,11 +644,11 @@ async function initApp() {
   let localOverrides = {};
   let customCreatedCats = [];
   try {
-    localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    const rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
+    const rawCustom = safeParseJSON(safeGetItem('dr_cat_custom_created_cats'), []);
     customCreatedCats = rawCustom.map(c => ({ ...c, isOffline: true }));
   } catch (_) {
-    // no-op: localStorage parse failure leaves defaults intact
+    // no-op: storage parse failure leaves defaults intact
   }
 
   if (api.isOfflineApp) {
@@ -833,7 +834,7 @@ export async function runBackgroundSync() {
       api.setAppMode(api.APP_MODES.ANDROID_ONLINE);
       state.isOnlineAtStartup = true;
 
-      const lastSyncTimeStr = localStorage.getItem('dr_cat_last_sync_time');
+      const lastSyncTimeStr = safeGetItem('dr_cat_last_sync_time');
       const lastSyncTime = lastSyncTimeStr ? parseInt(lastSyncTimeStr) : null;
       const freshCats = await api.fetchCats(lastSyncTime);
 
@@ -842,7 +843,7 @@ export async function runBackgroundSync() {
       let activeIdsSet = null;
       let customCats = [];
       try {
-        customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+        customCats = safeParseJSON(safeGetItem('dr_cat_custom_created_cats'), []);
       } catch (_) {
         customCats = [];
       }
@@ -861,7 +862,7 @@ export async function runBackgroundSync() {
 
       if (freshCats.length === 0 && !hasDeletions) {
         console.log('[Background Sync] Remote database is in sync. No action needed.');
-        localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+        safeSetItem('dr_cat_last_sync_time', Date.now().toString());
         if (wasOffline) {
           showToast('📡 Connexion serveur établie. Données synchronisées !', 'fa-cloud-arrow-up', 4000);
         }
@@ -922,7 +923,7 @@ export async function runBackgroundSync() {
         );
       } else {
         console.log('[Background Sync] Remote database is in sync. No action needed.');
-        localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+        safeSetItem('dr_cat_last_sync_time', Date.now().toString());
       }
 
       if (wasOffline) {
@@ -941,7 +942,7 @@ export async function runBackgroundSync() {
 // Helper to safely apply background sync updates to the UI
 function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
   const localProgress = getLocalProgress();
-  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  const localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
 
   if (isIncremental) {
     // Incremental merge: update or insert fiches inside state.allCats
@@ -969,7 +970,7 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
     if (activeIdsSet) {
       let customCats = [];
       try {
-        customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+        customCats = safeParseJSON(safeGetItem('dr_cat_custom_created_cats'), []);
       } catch (_) {
         customCats = [];
       }
@@ -986,7 +987,7 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
     const existingIds = new Set(freshCats.map(c => c.id));
     let rawCustom = [];
     try {
-      rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+      rawCustom = safeParseJSON(safeGetItem('dr_cat_custom_created_cats'), []);
     } catch (_) {
       rawCustom = [];
     }
@@ -997,7 +998,7 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
     state.allCats = mergeCatsWithLocalState([...freshCats, ...customCats], localProgress, localOverrides);
   }
 
-  localStorage.setItem('dr_cat_last_sync_time', Date.now().toString());
+  safeSetItem('dr_cat_last_sync_time', Date.now().toString());
   sidebar.renderCatList(state.allCats, selectCatWrapper);
   calculateStats();
   dashboard.renderDashboard(selectCatWrapper);
@@ -1052,11 +1053,11 @@ async function refreshCatsAndRender() {
   let localOverrides = {};
   let customCreatedCats = [];
   try {
-    localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
-    const rawCustom = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+    localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
+    const rawCustom = safeParseJSON(safeGetItem('dr_cat_custom_created_cats'), []);
     customCreatedCats = rawCustom.map(c => ({ ...c, isOffline: true }));
   } catch (_) {
-    // no-op: localStorage parse failure leaves defaults intact
+    // no-op: storage parse failure leaves defaults intact
   }
 
   if (api.isOfflineApp) {

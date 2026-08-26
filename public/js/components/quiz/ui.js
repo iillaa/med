@@ -1,6 +1,7 @@
 import { state } from '../../state.js';
 import { fetchQuizVignettes } from '../../api.js';
 import { showToast, triggerHaptic, countUp, escapeHTML } from '../../utils.js';
+import { safeGetItem, safeParseJSON } from '../../lib/safeStorage.js';
 import { shuffleArray, updateLeitnerStats, updateQuizStreak, requestWakeLock, releaseWakeLock } from './state.js';
 import {
   getOrientationText, cleanTextOfClues, cleanOrientationOfClues,
@@ -233,12 +234,7 @@ async function startQuizSession() {
     return;
   }
 
-  let leitnerData = {};
-  try {
-    leitnerData = JSON.parse(localStorage.getItem('dr_cat_leitner') || '{}') || {};
-  } catch (e) {
-    console.warn("Failed to parse Leitner spaced repetition data", e);
-  }
+  let leitnerData = safeParseJSON(safeGetItem('dr_cat_leitner'), {}) || {};
 
   const boxIntervals = {
     1: 1  * 24 * 60 * 60 * 1000,
