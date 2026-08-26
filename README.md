@@ -294,6 +294,7 @@ shortcuts/stop_med.sh     # Clean shutdown
   - **Priorité 2 (Secondaire)** : Tunnel `trycloudflare.com` (backup Termux)
   - **Fallback statique** : `https://drcat.dr-cat.workers.dev` (Edge Cloudflare, toujours en ligne)
 - **Version Kill-Switch Auto-Timbrée** : `build.js` met automatiquement à jour le champ `version` de `/api/version` dans `worker.js` depuis `package.json` à chaque build. Le champ `minVersion` reste contrôlé manuellement (levier de mise à jour forcée).
+- **Passerelle Domaine Public & Redirection** : `http://www.drcat.qd.je` (et `http://drcat.qd.je`) redirige en mode cloqué vers `https://drcat.dr-cat.workers.dev` via FreeDNS / DigitalPlat (renouvellement gratuit annuel à effectuer avant le 25 août 2027, idéalement vers juillet 2027).
 
 ### 🔒 Sécurisation du Relay Cloudflare (v1.12.0 — Audit 0x-alpha)
 - **Routes serveur-à-serveur verrouillées** : `GET /api/suggestions`, `POST /api/suggestions/ack` et `DELETE /api/suggestions/:id` exigent l'en-tête `x-sync-secret` (comparaison timing-safe SHA-256). Sans lui → **403**.

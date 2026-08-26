@@ -32,9 +32,26 @@ At startup, `main.js` evaluates the runtime context via `api.getAppMode()` and a
 | `android_offline` | Capacitor APK, no server reachable | Bundled JSONs + localStorage |
 | `android_online` | Capacitor APK, server reachable | Server API (synced) |
 | `browser_local` | Browser on same device as server | Full server API + admin |
-| `browser_remote` | Browser via public tunnel | Server API, read-only suggestions |
-
 The mode can switch dynamically at runtime via `api.setAppMode()`, which dispatches a `drcat-app-mode-changed` DOM event so all components can react without a page reload.
+
+### 🌐 Public Web Domain, DNS & Renewal Architecture (`drcat.qd.je`)
+
+Dr. CAT is accessible globally via a branded free domain gateway:
+
+| Property | Value / Configuration |
+|---|---|
+| **Public Domain** | `http://www.drcat.qd.je` / `http://drcat.qd.je` |
+| **Registrar** | **DigitalPlat Foundation** ([dash.domain.digitalplat.org](https://dash.domain.digitalplat.org/)) |
+| **Administrator** | Dr. Kibeche Ali Dia Eddine |
+| **Lifecycle** | Permanent Domain (Free Tier) |
+| **Registration Date** | August 25, 2026 |
+| **Expiration Date** | **August 25, 2027** |
+| **Renewal Protocol** | Free renewal opens 120 days before expiration. **Action required: Renew ~30 days before expiry (by July 25, 2027)** via DigitalPlat Dashboard. |
+| **Privacy Status** | **WHOIS Privacy Enabled** (Personal information hidden) |
+| **Authoritative DNS** | **FreeDNS (Afraid.org)** via Nameservers `ns1.afraid.org` to `ns4.afraid.org` |
+| **Forwarding Mode** | **Cloaked Web Forwarding** (`Page Title`: `Dr.CAT — Rappel Clinique & Conduites à Tenir Médicales`) |
+| **Target Origin** | `https://drcat.dr-cat.workers.dev` (Cloudflare Global Edge Network) |
+| **Future PSL Migration** | When `.qd.je` is merged into Mozilla's Public Suffix List (PSL), native Cloudflare Custom Domain (`https://www.drcat.qd.je`) will be bound directly with automatic TLS certificates. |
 
 ---
 
