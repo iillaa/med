@@ -1,5 +1,6 @@
 import { state, getLocalProgress, saveLocalProgress } from '../state.js';
 import * as api from '../api.js';
+import { safeRemoveItem } from '../lib/safeStorage.js';
 import { parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading, triggerHaptic, prefersReducedMotion } from '../utils.js';
 import { buildPrintableText } from './workspace/state.js';
 import { renderSummary } from './workspace/summary.js';
@@ -515,10 +516,10 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener('click', async () => {
       if (confirm("Voulez-vous vraiment réinitialiser toute votre progression et vos notes ? Cette action est irréversible et n'affectera que ce navigateur.")) {
-        localStorage.removeItem('dr_cat_user_progress');
-        localStorage.removeItem('dr_cat_leitner');
-        localStorage.removeItem('dr_cat_streak');
-        localStorage.removeItem('dr_cat_local_overrides');
+        safeRemoveItem('dr_cat_user_progress');
+        safeRemoveItem('dr_cat_leitner');
+        safeRemoveItem('dr_cat_streak');
+        safeRemoveItem('dr_cat_local_overrides');
 
         state.allCats.forEach(c => {
           c.status = 'todo';

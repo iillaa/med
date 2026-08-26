@@ -1,3 +1,5 @@
+import { safeGetItem, safeSetItem } from '../../lib/safeStorage.js';
+
 export function renderCategoryProgress(categoriesDiv, cats) {
   if (!categoriesDiv) return;
   categoriesDiv.innerHTML = '';
@@ -49,7 +51,7 @@ export function renderCategoryProgress(categoriesDiv, cats) {
     toggleBtn._hasListener = true;
     
     // Restore saved state (default: collapsed to save vertical space)
-    const isExpanded = localStorage.getItem('dash_categories_expanded') === 'true';
+    const isExpanded = safeGetItem('dash_categories_expanded') === 'true';
     if (isExpanded) {
       content.style.display = 'block';
       chevron.style.transform = 'rotate(180deg)';
@@ -63,11 +65,11 @@ export function renderCategoryProgress(categoriesDiv, cats) {
       if (currentlyOpen) {
         content.style.display = 'none';
         chevron.style.transform = 'rotate(0deg)';
-        localStorage.setItem('dash_categories_expanded', 'false');
+        safeSetItem('dash_categories_expanded', 'false');
       } else {
         content.style.display = 'block';
         chevron.style.transform = 'rotate(180deg)';
-        localStorage.setItem('dash_categories_expanded', 'true');
+        safeSetItem('dash_categories_expanded', 'true');
       }
     });
   }

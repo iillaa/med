@@ -1,5 +1,6 @@
 import { state } from '../../state.js';
 import { escapeHTML } from '../../utils.js';
+import { safeGetItem, safeSetItem, safeRemoveItem, safeParseJSON } from '../../lib/safeStorage.js';
 
 export function saveAppStateBeforeNavigation() {
   const libScreen = document.getElementById('library-screen');
@@ -50,16 +51,16 @@ export function saveAppStateBeforeNavigation() {
     omniVisible: omniResults ? omniResults.style.display !== 'none' : false
   };
 
-  localStorage.setItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
+  safeSetItem('dr_cat_navigation_state', JSON.stringify(stateToSave));
 }
 
 export function restoreAppState() {
-  const saved = localStorage.getItem('dr_cat_navigation_state');
+  const saved = safeGetItem('dr_cat_navigation_state');
   if (!saved) return;
 
   try {
-    const data = JSON.parse(saved);
-    localStorage.removeItem('dr_cat_navigation_state');
+    const data = safeParseJSON(saved, {});
+    safeRemoveItem('dr_cat_navigation_state');
 
     // ── 1. Restore Standalone Library View ──
     if (data.currentView === 'library') {

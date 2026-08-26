@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { setupSwipeGestures, debounce, prefersReducedMotion, escapeHTML } from '../utils.js';
+import { safeGetItem, safeSetItem } from '../lib/safeStorage.js';
 
 // DOM Elements
 let catList, searchInput, categoryFilter, sidebar, sidebarOverlay;
@@ -200,7 +201,7 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
   const controlsToggleIcon = document.getElementById('controls-toggle-icon');
 
   // Restore saved state (default: expanded)
-  const savedCollapsed = localStorage.getItem('sidebar_controls_collapsed') === 'true';
+  const savedCollapsed = safeGetItem('sidebar_controls_collapsed') === 'true';
   if (savedCollapsed && controlsPanel) {
     controlsPanel.classList.add('collapsed');
     if (controlsToggleIcon) controlsToggleIcon.classList.add('rotated');
@@ -210,7 +211,7 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
     controlsToggleBtn.addEventListener('click', () => {
       const isNowCollapsed = controlsPanel.classList.toggle('collapsed');
       if (controlsToggleIcon) controlsToggleIcon.classList.toggle('rotated', isNowCollapsed);
-      localStorage.setItem('sidebar_controls_collapsed', isNowCollapsed);
+      safeSetItem('sidebar_controls_collapsed', isNowCollapsed);
     });
   }
 

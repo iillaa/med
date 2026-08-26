@@ -1,5 +1,6 @@
 // Debug Console — automatic capture & floating UI for Android/mobile
 import { showToast } from './utils.js';
+import { safeGetItem, safeSetItem, safeRemoveItem } from './lib/safeStorage.js';
 let logBuffer = [];
 const MAX_LOGS = 200;
 let isViewerOpen = false;
@@ -322,8 +323,8 @@ function createUI() {
     btn.id = 'debug-toggle-btn';
     btn.innerHTML = '🐛<span class="badge" id="debug-badge"></span>';
     
-    // Hidden by default, unless developer mode is enabled in localStorage
-    const isVisible = localStorage.getItem('drCatDebugConsoleVisible') === 'true';
+    // Hidden by default, unless developer mode is enabled in storage
+    const isVisible = safeGetItem('drCatDebugConsoleVisible') === 'true';
     btn.style.display = isVisible ? 'flex' : 'none';
     
     document.body.appendChild(btn);
@@ -403,11 +404,11 @@ export function initDebugConsole() {
         const currentlyVisible = btn.style.display === 'flex';
         if (currentlyVisible) {
           btn.style.display = 'none';
-          localStorage.removeItem('drCatDebugConsoleVisible');
+          safeRemoveItem('drCatDebugConsoleVisible');
           showToast("🐛 Mode Débogage désactivé.", "fa-bug", 3000);
         } else {
           btn.style.setProperty('display', 'flex', 'important');
-          localStorage.setItem('drCatDebugConsoleVisible', 'true');
+          safeSetItem('drCatDebugConsoleVisible', 'true');
           showToast("🐛 Mode Débogage activé !", "fa-bug", 5000);
         }
       }

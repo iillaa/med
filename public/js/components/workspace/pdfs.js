@@ -2,6 +2,7 @@ import { state } from '../../state.js';
 import * as api from '../../api.js';
 import { getCleanPdfName, showToast, escapeHTML } from '../../utils.js';
 import { saveAppStateBeforeNavigation } from './print.js';
+import { safeGetItem, safeSetItem, safeParseJSON } from '../../lib/safeStorage.js';
 
 export function createPdfCardElement(file, isGlobal = false) {
   if (!file || typeof file !== 'string') return document.createElement('div');
@@ -163,19 +164,13 @@ export function initLibraryScreen(onReturnDashboard) {
   }
 
   // Retrieve saved accordion states
-  let savedAccordionStates = {};
-  try {
-    const raw = localStorage.getItem('drcat_lib_accordions_state');
-    if (raw) savedAccordionStates = JSON.parse(raw);
-  } catch (_) {}
+  let savedAccordionStates = safeParseJSON(safeGetItem('drcat_lib_accordions_state'), {}) || {};
 
   // Retrieve saved search collapsed state (default: false = full)
-  let isSearchCollapsed = localStorage.getItem('drcat_lib_search_collapsed') === 'true';
+  let isSearchCollapsed = safeGetItem('drcat_lib_search_collapsed') === 'true';
 
   function saveAccordionStates() {
-    try {
-      localStorage.setItem('drcat_lib_accordions_state', JSON.stringify(savedAccordionStates));
-    } catch (_) {}
+    safeSetItem('drcat_lib_accordions_state', JSON.stringify(savedAccordionStates));
   }
 
   function renderGroupedSpecialties(filterQuery = '') {
@@ -301,7 +296,7 @@ export function initLibraryScreen(onReturnDashboard) {
   if (toggleResultsBtn) {
     toggleResultsBtn.onclick = () => {
       isSearchCollapsed = !isSearchCollapsed;
-      try { localStorage.setItem('drcat_lib_search_collapsed', String(isSearchCollapsed)); } catch (_) {}
+      safeSetItem('drcat_lib_search_collapsed', String(isSearchCollapsed));
       applySearchResultsCollapseState();
     };
   }
@@ -309,7 +304,7 @@ export function initLibraryScreen(onReturnDashboard) {
   if (showAllResultsBtn) {
     showAllResultsBtn.onclick = () => {
       isSearchCollapsed = false;
-      try { localStorage.setItem('drcat_lib_search_collapsed', 'false'); } catch (_) {}
+      safeSetItem('drcat_lib_search_collapsed', 'false');
       applySearchResultsCollapseState();
     };
   }

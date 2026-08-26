@@ -6,6 +6,7 @@ import { getExtraHeaders } from './server-providers.js';
 import { isOfflineCat } from './lib/helpers.js';
 import { FETCH_TIMEOUT_MS, PING_TIMEOUT_MS, SYNC_MAX_RETRIES, SYNC_RETRY_DELAY_MS } from './config.js';
 import { getInstallId } from './install-id.js';
+import { safeGetItem, safeSetItem, safeRemoveItem, safeParseJSON } from './lib/safeStorage.js';
 export { REMOTE_SERVER_URL, getInstallId };
 
 
@@ -55,7 +56,7 @@ export const isOfflineApp =
   (window.location.hostname === 'localhost' && window.location.port !== '3000' && window.location.port !== '8080') ||
   !!window.Capacitor ||
   navigator.userAgent.toLowerCase().includes('capacitor') ||
-  localStorage.getItem('dr_cat_force_offline') === 'true';
+  safeGetItem('dr_cat_force_offline') === 'true';
 
 console.log("[API] Offline Standalone Mode:", isOfflineApp);
 
@@ -240,7 +241,7 @@ const STATIC_DATA_HEADERS = {
 };
 
 export function getHeaders(extraHeaders = {}) {
-  const token = localStorage.getItem('dr_cat_admin_token');
+  const token = safeGetItem('dr_cat_admin_token');
   const installId = getInstallId();
   const metaVer = document.querySelector('meta[name="app-version"]')?.content || document.querySelector('meta[name="app-build-version"]')?.content || '1.5.2';
   const configuredUrl = getRemoteServerUrl() || REMOTE_SERVER_URL;
@@ -272,14 +273,14 @@ export async function loginAdmin(password) {
   });
   const data = await res.json();
   if (res.ok && data.token) {
-    localStorage.setItem('dr_cat_admin_token', data.token);
+    safeSetItem('dr_cat_admin_token', data.token);
   }
   return data;
 }
  
 export async function logoutAdmin() {
   if (isOfflineApp) {
-    localStorage.removeItem('dr_cat_admin_token');
+    safeRemoveItem('dr_cat_admin_token');
     return;
   }
  
@@ -291,12 +292,12 @@ export async function logoutAdmin() {
   } catch (err) {
     console.error("Logout failed:", err);
   }
-  localStorage.removeItem('dr_cat_admin_token');
+  safeRemoveItem('dr_cat_admin_token');
 }
  
 export async function checkAdminStatus() {
   if (isOfflineApp) return false; // No admin for Android app
-  const token = localStorage.getItem('dr_cat_admin_token');
+  const token = safeGetItem('dr_cat_admin_token');
   if (!token) return false;
   if (isOfflineApp && navigator.onLine === false) return false;
  
@@ -345,7 +346,7 @@ export async function fetchCats(since) {
 
   // 2. STATIC CDN (Cloudflare/Pages) or ANDROID_OFFLINE: Load cached synced database or static fallback instantly (unless ANDROID_ONLINE mode is active)
   if (mode === APP_MODES.ANDROID_OFFLINE || (mode !== APP_MODES.ANDROID_ONLINE && isStaticCdnHost())) {
-    const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
+    const cachedDb = safeGetItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
       try {
         const parsed = JSON.parse(cachedDb);
@@ -393,7 +394,7 @@ export async function fetchCats(since) {
 
   if (!reachable) {
     console.log('[fetchCats] No remote server reachable within timeout — falling back to local bundle instantly.');
-    const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
+    const cachedDb = safeGetItem(SYNC_CACHE_KEY);
     if (cachedDb && !queryParam) {
       try {
         const parsed = JSON.parse(cachedDb);
@@ -424,15 +425,15 @@ export async function fetchCats(since) {
         }
         console.log('[API] fetchCats: loaded from remote server', remoteUrl, data.length);
         
-        // Cache updates locally in localStorage for offline availability!
+        // Cache updates locally in storage for offline availability!
         try {
           if (since === undefined || since === null) {
             // Full database fetch: overwrite cache
-            localStorage.setItem(SYNC_CACHE_KEY, JSON.stringify(data));
+            safeSetItem(SYNC_CACHE_KEY, JSON.stringify(data));
           } else {
             // Incremental fetch: merge with existing cache
             let currentCached = [];
-            const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
+            const cachedDb = safeGetItem(SYNC_CACHE_KEY);
             if (cachedDb) {
               try {
                 currentCached = JSON.parse(cachedDb);
@@ -460,7 +461,7 @@ export async function fetchCats(since) {
               const activeSet = new Set(activeIds.split(',').map(id => parseInt(id)));
               let customCats = [];
               try {
-                customCats = JSON.parse(localStorage.getItem('dr_cat_custom_created_cats') || '[]');
+                customCats = safeParseJSON(safeGetItem('dr_cat_custom_created_cats'), []);
               } catch (_) {
                 customCats = [];
               }
@@ -472,7 +473,7 @@ export async function fetchCats(since) {
               });
             }
 
-            localStorage.setItem(SYNC_CACHE_KEY, JSON.stringify(currentCached));
+            safeSetItem(SYNC_CACHE_KEY, JSON.stringify(currentCached));
           }
         } catch (cacheErr) {
           console.error('[API] Failed to cache synced database:', cacheErr);
@@ -488,7 +489,7 @@ export async function fetchCats(since) {
 
   // Ultimate fallback
   console.warn('[API] fetchCats: all remote attempts failed, using local bundle.');
-  const cachedDb = localStorage.getItem(SYNC_CACHE_KEY);
+  const cachedDb = safeGetItem(SYNC_CACHE_KEY);
   if (cachedDb && !queryParam) {
     try {
       const parsed = JSON.parse(cachedDb);
@@ -564,10 +565,10 @@ export async function saveCatDataToServer(id, data) {
     if (res.ok) {
       // Clear any stale local overrides since server now holds authoritative data
       try {
-        const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+        const localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
         if (localOverrides[id]) {
           delete localOverrides[id];
-          localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+          safeSetItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
         }
       } catch (_) {
         /* ignore local override purge failure */
@@ -578,13 +579,13 @@ export async function saveCatDataToServer(id, data) {
     console.warn('[API] saveCatDataToServer failed:', err.message);
   }
 
-  // Fallback: save to local overrides (persisted to localStorage)
-  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  // Fallback: save to local overrides (persisted to storage)
+  const localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
   if (!localOverrides[id]) localOverrides[id] = {};
   if (data.summary !== undefined) localOverrides[id].customSummary = data.summary;
   if (data.ordonnance !== undefined) localOverrides[id].customOrdonnance = data.ordonnance;
   localOverrides[id].updatedAt = Date.now();
-  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+  safeSetItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
   return { success: true, message: "Modifications enregistrées localement." };
 }
 
@@ -601,10 +602,10 @@ export async function deleteCatFromServer(id) {
   }
 
   // Fallback: mark as deleted in local storage overrides
-  const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+  const localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
   if (!localOverrides[id]) localOverrides[id] = {};
   localOverrides[id].deleted = true;
-  localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+  safeSetItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
   return { success: true, message: "Fiche supprimée localement." };
 }
 
@@ -725,10 +726,10 @@ export async function approveSuggestionOnServer(id) {
   const result = await res.json();
   if (result.success && result.cat) {
     try {
-      const localOverrides = JSON.parse(localStorage.getItem('dr_cat_local_overrides') || '{}');
+      const localOverrides = safeParseJSON(safeGetItem('dr_cat_local_overrides'), {});
       if (localOverrides[result.cat.id]) {
         delete localOverrides[result.cat.id];
-        localStorage.setItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
+        safeSetItem('dr_cat_local_overrides', JSON.stringify(localOverrides));
       }
     } catch (_) {
       /* ignore local override purge failure */
@@ -1062,7 +1063,7 @@ async function api_pingHealth(url) {
 }
 
 export function getAdminToken() {
-  return localStorage.getItem('dr_cat_admin_token') || '';
+  return safeGetItem('dr_cat_admin_token') || '';
 }
 
 
