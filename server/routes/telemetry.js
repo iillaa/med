@@ -36,30 +36,90 @@ async function saveReports(reports) {
   }
 }
 
+function computeFingerprint(error = '', stack = '') {
+  const cleanError = String(error).trim().split('\n')[0].replace(/:\d+:\d+/g, '');
+  const firstStackLine = String(stack).split('\n').find(l => l.includes('.js') || l.includes('at ')) || '';
+  const cleanStack = firstStackLine.replace(/https?:\/\/[^\/]+\//g, '').replace(/:\d+:\d+/g, '').trim();
+  const raw = `${cleanError}::${cleanStack}`.toLowerCase();
+  
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'fp_' + Math.abs(hash).toString(36);
+}
+
 function registerTelemetryRoutes(app) {
-  // Public endpoint for crash & log reporting
+  // Public endpoint for crash & log reporting with Incident Aggregation
   app.post('/api/telemetry', async (req, res) => {
     try {
       const body = req.body || {};
-      const reportId = `tel_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const now = Date.now();
+      const fingerprint = body.fingerprint || computeFingerprint(body.error, body.stack);
+      const dev = typeof body.device === 'object' && body.device !== null ? body.device : {};
+      const devModel = dev.model || 'Inconnu';
       
-      const newReport = {
-        id: reportId,
-        timestamp: Date.now(),
-        type: body.type || 'unhandled_error',
-        error: String(body.error || 'Erreur non spécifiée').substring(0, 1000),
-        stack: String(body.stack || '').substring(0, 5000),
-        device: typeof body.device === 'object' && body.device !== null ? body.device : {},
-        appVersion: String(body.appVersion || 'inconnu').substring(0, 20),
-        installId: String(body.installId || '').substring(0, 50),
-        logs: Array.isArray(body.logs) ? body.logs.slice(-50) : [],
-        userNote: String(body.userNote || '').substring(0, 500),
-        ip: req.ip || req.headers['x-forwarded-for'] || 'unknown'
-      };
-
       const reports = getReports();
-      reports.unshift(newReport);
-      
+      const existingIdx = reports.findIndex(r => r && (r.fingerprint === fingerprint || r.id === fingerprint));
+
+      let reportId;
+
+      if (existingIdx !== -1) {
+        // Incident already exists -> Aggregate & Bump Occurrences
+        const item = reports[existingIdx];
+        item.occurrences = (item.occurrences || 1) + 1;
+        item.lastSeen = now;
+        
+        // Severity Switch based on frequency
+        if (item.occurrences >= 20) {
+          item.severity = 'critical'; // 🔴 Global Outage / Mass Crash
+        } else if (item.occurrences >= 5) {
+          item.severity = 'warning';  // 🟠 Recurring
+        } else {
+          item.severity = 'info';     // 🟡 Minor
+        }
+
+        // Track affected device models
+        if (!item.affectedDevices || typeof item.affectedDevices !== 'object') {
+          item.affectedDevices = {};
+        }
+        item.affectedDevices[devModel] = (item.affectedDevices[devModel] || 0) + 1;
+
+        if (body.stack && (!item.stack || item.stack.length < body.stack.length)) {
+          item.stack = String(body.stack).substring(0, 1500);
+        }
+        if (body.logs && Array.isArray(body.logs) && body.logs.length > 0) {
+          item.logs = body.logs.slice(-20);
+        }
+
+        reportId = item.id;
+        // Move to top of active feed
+        reports.splice(existingIdx, 1);
+        reports.unshift(item);
+      } else {
+        // New Incident Group
+        reportId = `tel_${now}_${Math.random().toString(36).substring(2, 9)}`;
+        const newIncident = {
+          id: reportId,
+          fingerprint,
+          firstSeen: now,
+          lastSeen: now,
+          occurrences: 1,
+          severity: 'info',
+          type: body.type || 'unhandled_error',
+          error: String(body.error || 'Erreur non spécifiée').substring(0, 500),
+          stack: String(body.stack || '').substring(0, 1500),
+          device: dev,
+          affectedDevices: { [devModel]: 1 },
+          appVersion: String(body.appVersion || '1.16.0').substring(0, 20),
+          installId: String(body.installId || '').substring(0, 50),
+          logs: Array.isArray(body.logs) ? body.logs.slice(-20) : [],
+          userNote: String(body.userNote || '').substring(0, 500)
+        };
+        reports.unshift(newIncident);
+      }
+
       if (reports.length > MAX_REPORTS) {
         reports.length = MAX_REPORTS;
       }
@@ -69,6 +129,7 @@ function registerTelemetryRoutes(app) {
       return res.status(200).json({
         success: true,
         id: reportId,
+        fingerprint,
         message: 'Rapport de diagnostic transmis au Dr. Ali.'
       });
     } catch (err) {

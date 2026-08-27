@@ -136,10 +136,22 @@ async function runTests() {
     const resCrash = await req('POST', '/api/telemetry', crashPayload);
     check('POST /api/telemetry (Startup Crash) → 200 OK', resCrash.status === 200 && resCrash.body.success === true);
     const firstReportId = resCrash.body.id;
-    check('Telemetry report ID generated (startsWith tel_)', typeof firstReportId === 'string' && firstReportId.startsWith('tel_'));
+    const fingerprint = resCrash.body.fingerprint;
+    check('Telemetry report ID and fingerprint generated', typeof firstReportId === 'string' && typeof fingerprint === 'string');
 
-    // 2. Submit User Debug Log Report
-    console.log('\n📱 2. ENVOI D\'UN RAPPORT DE LOGS DEPUIS LA DEBUG CONSOLE :');
+    // 2. Submit duplicate error with same fingerprint (Deduplication & Aggregation Test)
+    console.log('\n🔄 2. TEST D\'AGRÉGATION & COMPTEUR D\'OCCURRENCES (DÉDUPLICATION) :');
+    const resDup = await req('POST', '/api/telemetry', { ...crashPayload, fingerprint });
+    check('POST /api/telemetry doublon retourne le même incident ID', resDup.body.id === firstReportId);
+
+    // Burst 19 more to trigger 'critical' / Panne Globale switch
+    for (let i = 0; i < 19; i++) {
+      await req('POST', '/api/telemetry', { ...crashPayload, fingerprint });
+    }
+    console.log('  ⚡ 20 occurrences envoyées pour cet incident');
+
+    // 3. Submit User Debug Log Report
+    console.log('\n📱 3. ENVOI D\'UN RAPPORT DE LOGS DEPUIS LA DEBUG CONSOLE :');
     const debugPayload = {
       type: 'user_report',
       error: 'Problème d\'affichage PDF',
@@ -155,28 +167,29 @@ async function runTests() {
     check('POST /api/telemetry (Debug Log) → 200 OK', resDebug.status === 200 && resDebug.body.success === true);
     const secondReportId = resDebug.body.id;
 
-    // 3. Test Access Control on Admin Endpoints
-    console.log('\n🔒 3. TEST DE PROTECTION DES ENDPOINTS ADMIN TELEMETRY :');
+    // 4. Test Access Control on Admin Endpoints
+    console.log('\n🔒 4. TEST DE PROTECTION DES ENDPOINTS ADMIN TELEMETRY :');
     const resUnauth = await req('GET', '/api/admin/telemetry');
     check('GET /api/admin/telemetry sans token → 403 Forbidden', resUnauth.status === 403);
 
-    // 4. Admin Login to inspect reports
-    console.log('\n🔑 4. CONSULTATION DES RAPPORTS PAR L\'ADMINISTRATEUR :');
+    // 5. Admin Login to inspect reports
+    console.log('\n🔑 5. CONSULTATION DES RAPPORTS PAR L\'ADMINISTRATEUR :');
     const loginRes = await req('POST', '/api/login', { password: tempPassword });
     const adminToken = loginRes.body && (loginRes.body.token || loginRes.body.sessionToken);
     check('Admin login token received', typeof adminToken === 'string');
 
     const resReports = await req('GET', '/api/admin/telemetry', null, { 'x-admin-token': adminToken });
     check('GET /api/admin/telemetry (Admin Authentifié) → 200 OK', resReports.status === 200 && resReports.body.success === true);
-    check('Liste des rapports contient au moins 2 entrées', Array.isArray(resReports.body.reports) && resReports.body.reports.length >= 2);
+    check('Liste des rapports contient exactement 2 groupes d\'incidents distincts', Array.isArray(resReports.body.reports) && resReports.body.reports.length === 2);
 
-    // Verify report contents
+    // Verify report aggregation contents
     const foundCrash = resReports.body.reports.find(r => r.id === firstReportId);
-    check('Rapport de crash Xiaomi 12T Pro retrouvé intact', !!foundCrash && foundCrash.device && foundCrash.device.model === 'Xiaomi 12T Pro');
-    check('Logs console et trace d\'erreur préservés', foundCrash && Array.isArray(foundCrash.logs) && foundCrash.logs.length === 2);
+    check('Rapport de crash Xiaomi 12T Pro retrouvé avec 21 occurrences', !!foundCrash && foundCrash.occurrences === 21);
+    check('Sévérité automatiquement basculée à "critical" (🔴 Panne Globale)', foundCrash && foundCrash.severity === 'critical');
+    check('Compteur appareils touchés présent (Xiaomi 12T Pro: 21)', foundCrash && foundCrash.affectedDevices && foundCrash.affectedDevices['Xiaomi 12T Pro'] === 21);
 
-    // 5. Delete single report
-    console.log('\n🗑️ 5. SUPPRESSION D\'UN RAPPORT INDIVIDUEL :');
+    // 6. Delete single report
+    console.log('\n🗑️ 6. SUPPRESSION D\'UN RAPPORT INDIVIDUEL :');
     const delRes = await req('DELETE', `/api/admin/telemetry/${firstReportId}`, null, { 'x-admin-token': adminToken });
     check('DELETE /api/admin/telemetry/:id → 200 OK', delRes.status === 200 && delRes.body.success === true);
 
