@@ -57,6 +57,11 @@ async function runTests() {
   const tempPassword = 'test-telemetry-pass-999';
   fs.writeFileSync(PASSWORD_FILE, tempPassword, 'utf-8');
 
+  const TELEMETRY_FILE = path.join(ROOT, 'server', 'data', 'telemetry_reports.json');
+  if (fs.existsSync(TELEMETRY_FILE)) {
+    fs.writeFileSync(TELEMETRY_FILE, '[]', 'utf-8');
+  }
+
   function cleanup() {
     if (serverProcess) {
       try { serverProcess.kill('SIGKILL'); } catch (_) {}

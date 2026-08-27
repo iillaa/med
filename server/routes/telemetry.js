@@ -143,6 +143,11 @@ function registerTelemetryRoutes(app) {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     try {
       try {
         const { syncCloudflareTelemetry } = require('../services/sync-suggestions');

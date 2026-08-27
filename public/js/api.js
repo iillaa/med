@@ -760,7 +760,12 @@ export async function updateSuggestionOnServer(id, updatedData) {
 }
 
 export async function fetchTelemetryReports() {
-  const res = await fetchWithTimeout(getApiUrl('/api/admin/telemetry'), { headers: getHeaders() });
+  const base = getApiUrl('/api/admin/telemetry');
+  const cacheBustUrl = base.includes('?') ? `${base}&_t=${Date.now()}` : `${base}?_t=${Date.now()}`;
+  const res = await fetchWithTimeout(cacheBustUrl, { 
+    headers: getHeaders(),
+    cache: 'no-store'
+  });
   if (res.status === 403) throw new Error('403 Forbidden');
   if (!res.ok) throw new Error('Failed to fetch telemetry reports');
   const data = await res.json();
@@ -768,9 +773,12 @@ export async function fetchTelemetryReports() {
 }
 
 export async function deleteTelemetryReportOnServer(id) {
-  const res = await fetchWithTimeout(getApiUrl(`/api/admin/telemetry/${id}`), {
+  const base = getApiUrl(`/api/admin/telemetry/${encodeURIComponent(id)}`);
+  const cacheBustUrl = base.includes('?') ? `${base}&_t=${Date.now()}` : `${base}?_t=${Date.now()}`;
+  const res = await fetchWithTimeout(cacheBustUrl, {
     method: 'DELETE',
-    headers: getHeaders()
+    headers: getHeaders(),
+    cache: 'no-store'
   });
   if (res.status === 403) throw new Error('403 Forbidden');
   if (!res.ok) throw new Error('Failed to delete telemetry report');
