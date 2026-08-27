@@ -356,7 +356,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.16.0">
-  <meta name="app-build-version" content="2026.08.27.17.11">
+  <meta name="app-build-version" content="2026.08.27.17.25">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -436,22 +436,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2608271711" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608271711"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2608271725" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2608271725"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2608271711" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608271711"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2608271725" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2608271725"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2608271711" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2608271711" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2608271711">
+  <link rel="stylesheet" href="style.css?v=2608271725" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2608271725" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2608271725">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2608271711">
-    <link rel="stylesheet" href="css/utilities.css?v=2608271711">
+    <link rel="stylesheet" href="style.css?v=2608271725">
+    <link rel="stylesheet" href="css/utilities.css?v=2608271725">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2608271711"></script>
+  <script type="module" src="js/version-checker.js?v=2608271725"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1575,8 +1575,47 @@ body {
 
       var lastStartupError = null;
 
+      function sendSilentCrashTelemetry(errorText) {
+        try {
+          var metaVer = document.querySelector('meta[name="app-version"]');
+          var payload = {
+            type: 'startup_crash',
+            error: errorText.split('\n')[0] || 'Startup Crash',
+            stack: errorText,
+            appVersion: metaVer ? metaVer.getAttribute('content') : '1.16.0',
+            timestamp: Date.now(),
+            device: {
+              userAgent: navigator.userAgent || 'unknown',
+              screen: window.innerWidth + 'x' + window.innerHeight,
+              online: !!navigator.onLine
+            }
+          };
+
+          var targetUrls = [];
+          if (window.REMOTE_SERVER_URLS && Array.isArray(window.REMOTE_SERVER_URLS)) {
+            window.REMOTE_SERVER_URLS.forEach(function(u) {
+              if (u) targetUrls.push(u.replace(/\/+$/, '') + '/api/telemetry');
+            });
+          }
+          if (targetUrls.indexOf('https://drcat.dr-cat.workers.dev/api/telemetry') === -1) {
+            targetUrls.push('https://drcat.dr-cat.workers.dev/api/telemetry');
+          }
+          targetUrls.push('/api/telemetry');
+
+          for (var i = 0; i < targetUrls.length; i++) {
+            fetch(targetUrls[i], {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-app-key': 'drcat_pub_2f7a91c4e8' },
+              body: JSON.stringify(payload)
+            }).catch(function() {});
+          }
+        } catch (_) {}
+      }
+
       function showError(text) {
         lastStartupError = text;
+        sendSilentCrashTelemetry(text);
+
         if (msg) {
           msg.textContent = text;
           msg.style.display = 'block';
@@ -1594,6 +1633,7 @@ body {
         var reportBtn = document.getElementById('report-startup-error-btn');
         if (reportBtn) {
           reportBtn.style.display = 'inline-flex';
+          reportBtn.textContent = '✉️ Écrire au Dr. Ali';
         }
         if (overlay) {
           overlay.style.opacity = '1';
@@ -1641,65 +1681,10 @@ body {
       var reportBtn = document.getElementById('report-startup-error-btn');
       if (reportBtn) {
         reportBtn.addEventListener('click', function() {
-          if (!lastStartupError) return;
-          reportBtn.disabled = true;
-          reportBtn.textContent = '⏳ Envoi en cours...';
-
-          var metaVer = document.querySelector('meta[name="app-version"]');
-          var appVer = metaVer ? metaVer.getAttribute('content') : '1.15.2';
-
-          var payload = {
-            type: 'startup_crash',
-            error: lastStartupError.split('\n')[0] || 'Startup Crash',
-            stack: lastStartupError,
-            appVersion: appVer,
-            timestamp: Date.now(),
-            device: {
-              userAgent: navigator.userAgent || 'unknown',
-              screen: window.innerWidth + 'x' + window.innerHeight,
-              online: !!navigator.onLine
-            }
-          };
-
-          var targetUrls = [];
-          if (window.REMOTE_SERVER_URLS && Array.isArray(window.REMOTE_SERVER_URLS)) {
-            window.REMOTE_SERVER_URLS.forEach(function(u) {
-              if (u) targetUrls.push(u.replace(/\/+$/, '') + '/api/telemetry');
-            });
-          }
-          if (targetUrls.indexOf('https://drcat.dr-cat.workers.dev/api/telemetry') === -1) {
-            targetUrls.push('https://drcat.dr-cat.workers.dev/api/telemetry');
-          }
-          targetUrls.push('/api/telemetry');
-          var sent = false;
-
-          function trySend(idx) {
-            if (idx >= targetUrls.length) {
-              // Fallback to mailto
-              var mailto = 'mailto:airdrop257@gmail.com?subject=' + encodeURIComponent('[Dr. CAT Startup Crash] ' + payload.error) +
-                '&body=' + encodeURIComponent('Bonjour Dr. Ali,\n\nCrash au démarrage Dr. CAT :\n\n' + payload.stack + '\n\nAppareil: ' + payload.device.userAgent);
-              window.location.href = mailto;
-              reportBtn.textContent = '✉️ Email de rapport ouvert';
-              return;
-            }
-
-            fetch(targetUrls[idx], {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'x-app-key': 'drcat_pub_2f7a91c4e8' },
-              body: JSON.stringify(payload)
-            }).then(function(res) {
-              if (res.ok) {
-                reportBtn.textContent = '✅ Rapport envoyé au Dr. Ali !';
-                reportBtn.style.background = '#059669';
-              } else {
-                trySend(idx + 1);
-              }
-            }).catch(function() {
-              trySend(idx + 1);
-            });
-          }
-
-          trySend(0);
+          var err = lastStartupError || 'Erreur inconnue au démarrage';
+          var mailto = 'mailto:airdrop257@gmail.com?subject=' + encodeURIComponent('[Dr. CAT] Rapport d\'erreur utilisateur') +
+            '&body=' + encodeURIComponent('Bonjour Dr. Ali,\n\nJ\'ai rencontré un problème au démarrage de Dr. CAT :\n\n' + err + '\n\nAppareil: ' + navigator.userAgent);
+          window.location.href = mailto;
         });
       }
 
