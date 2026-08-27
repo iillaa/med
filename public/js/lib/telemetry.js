@@ -63,29 +63,76 @@ export function getInstallId() {
 }
 
 /**
- * Send Error Report to Remote Endpoint
+ * Generate a deterministic fingerprint for an error
+ */
+export function generateErrorFingerprint(error = '', stack = '') {
+  const cleanError = String(error).trim().split('\n')[0].replace(/:\d+:\d+/g, '');
+  const firstStackLine = String(stack).split('\n').find(l => l.includes('.js') || l.includes('at ')) || '';
+  const cleanStack = firstStackLine.replace(/https?:\/\/[^\/]+\//g, '').replace(/:\d+:\d+/g, '').trim();
+  const raw = `${cleanError}::${cleanStack}`.toLowerCase();
+  
+  // Simple fast string hash
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'fp_' + Math.abs(hash).toString(36);
+}
+
+// Client-side rate-limiting and deduplication state
+const sentFingerprints = new Set();
+let clientReportCount = 0;
+let lastReportWindowStart = Date.now();
+const MAX_REPORTS_PER_10_MIN = 3;
+
+/**
+ * Send Error Report to Remote Endpoint with Client-side Deduplication
  */
 export async function sendErrorReport({
   error = 'Erreur inconnue',
   stack = '',
   logs = [],
   type = 'unhandled_error',
-  userNote = ''
+  userNote = '',
+  force = false
 } = {}) {
+  const now = Date.now();
+  if (now - lastReportWindowStart > 10 * 60 * 1000) {
+    clientReportCount = 0;
+    lastReportWindowStart = now;
+  }
+
+  const fingerprint = generateErrorFingerprint(error, stack);
+
+  // Deduplication: Avoid sending the exact same error multiple times per session
+  if (!force && sentFingerprints.has(fingerprint)) {
+    return { success: true, deduplicated: true, message: 'Erreur déjà signalée récemment.' };
+  }
+
+  // Rate-limiting: Don't spam more than MAX_REPORTS_PER_10_MIN
+  if (!force && clientReportCount >= MAX_REPORTS_PER_10_MIN) {
+    return { success: false, throttled: true, message: 'Limite de rapports atteinte pour cette session.' };
+  }
+
+  sentFingerprints.add(fingerprint);
+  clientReportCount++;
+
   const device = collectDeviceInfo();
   const appVersion = getAppVersion();
   const installId = getInstallId();
 
   const payload = {
     type,
-    error: String(error),
-    stack: String(stack),
-    logs: Array.isArray(logs) ? logs.slice(-50) : [],
+    fingerprint,
+    error: String(error).slice(0, 500),
+    stack: String(stack).slice(0, 1500),
+    logs: Array.isArray(logs) ? logs.slice(-20) : [],
     device,
     appVersion,
     installId,
-    userNote,
-    timestamp: Date.now()
+    userNote: String(userNote).slice(0, 500),
+    timestamp: now
   };
 
   // Determine target API endpoints
@@ -111,7 +158,7 @@ export async function sendErrorReport({
 
       if (res.ok) {
         const data = await res.json();
-        return { success: true, id: data.id, message: 'Rapport envoyé avec succès !' };
+        return { success: true, id: data.id, fingerprint, message: 'Rapport envoyé avec succès !' };
       }
     } catch (err) {
       lastError = err;

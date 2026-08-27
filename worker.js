@@ -174,37 +174,98 @@ export default {
       }
     }
 
-    // 5. /api/telemetry (Crash reports & mobile debug telemetry)
+    // 5. /api/telemetry (Crash reports & mobile debug telemetry with Incident Aggregation)
     if (url.pathname === '/api/telemetry') {
       if (request.method === 'POST') {
         try {
           const body = await request.json();
-          const reportId = `tel_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-          const report = {
-            id: reportId,
-            timestamp: Date.now(),
-            type: body.type || 'unhandled_error',
-            error: String(body.error || 'Erreur non spécifiée').substring(0, 1000),
-            stack: String(body.stack || '').substring(0, 5000),
-            device: typeof body.device === 'object' && body.device !== null ? body.device : {},
-            appVersion: String(body.appVersion || 'inconnu').substring(0, 20),
-            installId: String(body.installId || '').substring(0, 50),
-            logs: Array.isArray(body.logs) ? body.logs.slice(-50) : [],
-            userNote: String(body.userNote || '').substring(0, 500)
-          };
+          const now = Date.now();
+          
+          // Generate or extract fingerprint
+          let fingerprint = body.fingerprint;
+          if (!fingerprint) {
+            const cleanErr = String(body.error || '').trim().split('\n')[0].replace(/:\d+:\d+/g, '');
+            const cleanStack = String(body.stack || '').split('\n')[0].replace(/https?:\/\/[^\/]+\//g, '').replace(/:\d+:\d+/g, '');
+            const raw = `${cleanErr}::${cleanStack}`.toLowerCase();
+            let hash = 0;
+            for (let i = 0; i < raw.length; i++) {
+              hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+              hash |= 0;
+            }
+            fingerprint = 'fp_' + Math.abs(hash).toString(36);
+          }
+
+          const dev = typeof body.device === 'object' && body.device !== null ? body.device : {};
+          const devModel = dev.model || 'Inconnu';
+          let reportId = null;
 
           if (env && env.SUGGESTIONS_KV) {
             let list = [];
             const raw = await env.SUGGESTIONS_KV.get("telemetry_reports");
             if (raw) { try { list = JSON.parse(raw); } catch (_) { list = []; } }
-            list.unshift(report);
-            if (list.length > 100) list = list.slice(0, 100);
+
+            const existingIdx = list.findIndex(r => r && (r.fingerprint === fingerprint || r.id === fingerprint));
+            
+            if (existingIdx !== -1) {
+              // Existing Incident -> Bump occurrences & update severity
+              const item = list[existingIdx];
+              item.occurrences = (item.occurrences || 1) + 1;
+              item.lastSeen = now;
+
+              if (item.occurrences >= 20) {
+                item.severity = 'critical'; // 🔴 Global Outage
+              } else if (item.occurrences >= 5) {
+                item.severity = 'warning';  // 🟠 Recurring
+              } else {
+                item.severity = 'info';
+              }
+
+              if (!item.affectedDevices || typeof item.affectedDevices !== 'object') {
+                item.affectedDevices = {};
+              }
+              item.affectedDevices[devModel] = (item.affectedDevices[devModel] || 0) + 1;
+
+              if (body.stack && (!item.stack || item.stack.length < body.stack.length)) {
+                item.stack = String(body.stack).substring(0, 1500);
+              }
+              if (body.logs && Array.isArray(body.logs) && body.logs.length > 0) {
+                item.logs = body.logs.slice(-20);
+              }
+
+              reportId = item.id;
+              list.splice(existingIdx, 1);
+              list.unshift(item);
+            } else {
+              // New Incident Group
+              reportId = `tel_${now}_${Math.random().toString(36).substring(2, 9)}`;
+              const newIncident = {
+                id: reportId,
+                fingerprint,
+                firstSeen: now,
+                lastSeen: now,
+                occurrences: 1,
+                severity: 'info',
+                type: body.type || 'unhandled_error',
+                error: String(body.error || 'Erreur non spécifiée').substring(0, 500),
+                stack: String(body.stack || '').substring(0, 1500),
+                device: dev,
+                affectedDevices: { [devModel]: 1 },
+                appVersion: String(body.appVersion || '1.16.0').substring(0, 20),
+                installId: String(body.installId || '').substring(0, 50),
+                logs: Array.isArray(body.logs) ? body.logs.slice(-20) : [],
+                userNote: String(body.userNote || '').substring(0, 500)
+              };
+              list.unshift(newIncident);
+            }
+
+            if (list.length > 50) list = list.slice(0, 50);
             await env.SUGGESTIONS_KV.put("telemetry_reports", JSON.stringify(list));
           }
 
           return new Response(JSON.stringify({
             success: true,
             id: reportId,
+            fingerprint,
             message: "Rapport de diagnostic transmis au Dr. Ali."
           }), {
             status: 200,
@@ -331,7 +392,7 @@ export default {
     // 10. GET /api/version
     if (url.pathname === '/api/version') {
       return new Response(JSON.stringify({
-        version: "1.16.0",
+        version: "1.16.1",
         minVersion: "1.0.0"
       }), {
         status: 200,

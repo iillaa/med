@@ -60,10 +60,38 @@ export async function renderAdminTelemetryTab(container) {
     }
 
     listEl.innerHTML = reports.map(r => {
-      const dateStr = new Date(r.timestamp || Date.now()).toLocaleString('fr-FR');
+      const firstSeenStr = new Date(r.firstSeen || r.timestamp || Date.now()).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const lastSeenStr = new Date(r.lastSeen || r.timestamp || Date.now()).toLocaleString('fr-FR');
       const dev = r.device || {};
-      const typeLabel = r.type === 'startup_crash' ? '💥 Crash Démarrage' : (r.type === 'user_report' ? '📝 Diagnostic Manuel' : '⚠️ Erreur Runtime');
-      const typeBg = r.type === 'startup_crash' ? '#ef4444' : '#0e7490';
+      const occurrences = r.occurrences || 1;
+      const severity = r.severity || (occurrences >= 20 ? 'critical' : (occurrences >= 5 ? 'warning' : 'info'));
+      
+      let severityBadge = '<span style="background: #059669; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;">🟢 MINEUR</span>';
+      let cardBorder = 'var(--border-color)';
+
+      if (severity === 'critical') {
+        severityBadge = '<span style="background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 4px; box-shadow: 0 0 8px rgba(239,68,68,0.5); animation: pulse 2s infinite;"><i class="fa-solid fa-triangle-exclamation"></i> 🔴 PANNE GLOBALE</span>';
+        cardBorder = '#ef4444';
+      } else if (severity === 'warning') {
+        severityBadge = '<span style="background: #f59e0b; color: #000; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;"><i class="fa-solid fa-bell"></i> 🟠 FRÉQUENT</span>';
+        cardBorder = '#f59e0b';
+      }
+
+      // Format affected devices list
+      let devicesHtml = '';
+      if (r.affectedDevices && typeof r.affectedDevices === 'object') {
+        devicesHtml = Object.entries(r.affectedDevices).map(([mod, count]) => `
+          <span style="font-size: 11px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); padding: 1px 6px; border-radius: 4px; color: var(--text-secondary);">
+            <i class="fa-solid fa-mobile-screen"></i> ${escapeHTML(mod)} <strong>(${count})</strong>
+          </span>
+        `).join(' ');
+      } else {
+        devicesHtml = `
+          <span style="font-size: 11px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); padding: 1px 6px; border-radius: 4px; color: var(--text-secondary);">
+            <i class="fa-solid fa-mobile-screen"></i> ${escapeHTML(dev.model || 'Inconnu')}
+          </span>
+        `;
+      }
       
       const logsCount = Array.isArray(r.logs) ? r.logs.length : 0;
       const logsHtml = logsCount > 0 
@@ -71,25 +99,34 @@ export async function renderAdminTelemetryTab(container) {
         : '<p class="text-muted" style="font-size: 11px; margin: 0;">Aucun log joint.</p>';
 
       return `
-        <div class="telemetry-card" style="background: var(--surface-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; box-shadow: var(--shadow-sm);">
+        <div class="telemetry-card" style="background: var(--surface-card); border: 1.5px solid ${cardBorder}; border-radius: var(--radius-md); padding: 14px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <span style="background: ${typeBg}; color: #fff; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">${typeLabel}</span>
-              <span style="font-size: 11.5px; color: var(--text-muted);"><i class="fa-regular fa-clock"></i> ${escapeHTML(dateStr)}</span>
-              <span style="font-size: 11.5px; background: rgba(14,116,144,0.1); color: var(--color-primary); padding: 2px 6px; border-radius: 4px;">
-                <i class="fa-solid fa-mobile-screen"></i> ${escapeHTML(dev.model || 'Inconnu')} (${escapeHTML(dev.appMode || 'Web')})
+              ${severityBadge}
+              <span style="background: rgba(14,116,144,0.15); color: var(--color-primary); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+                ⚡ ${occurrences} ${occurrences > 1 ? 'événements' : 'événement'}
               </span>
-              <span style="font-size: 11px; color: var(--text-muted);">v${escapeHTML(r.appVersion || '1.15.2')}</span>
+              <span style="font-size: 11px; color: var(--text-muted);">
+                <i class="fa-regular fa-clock"></i> Dernier: ${escapeHTML(lastSeenStr)}
+              </span>
+              <span style="font-size: 10.5px; color: var(--text-muted); font-family: monospace;">
+                #${escapeHTML(r.fingerprint || r.id || 'incident')}
+              </span>
             </div>
-            <button class="delete-report-btn" data-id="${escapeHTML(r.id)}" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 12px; transition: color 0.2s;">
+            <button class="delete-report-btn" data-id="${escapeHTML(r.id)}" title="Supprimer cet incident" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 12px; transition: color 0.2s;">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
 
-          <div style="background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; padding: 8px 12px; border-radius: 4px; margin-bottom: 8px;">
+          <div style="background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px;">
             <p style="margin: 0; font-family: monospace; font-size: 12px; color: var(--text-primary); font-weight: 600; word-break: break-word;">
               ${escapeHTML(r.error || 'Erreur inconnue')}
             </p>
+          </div>
+
+          <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Appareils touchés :</span>
+            ${devicesHtml}
           </div>
 
           ${r.stack ? `
@@ -104,7 +141,7 @@ export async function renderAdminTelemetryTab(container) {
           ${logsCount > 0 ? `
             <details>
               <summary style="font-size: 11.5px; color: var(--color-primary); cursor: pointer; font-weight: 500;">
-                <i class="fa-solid fa-list-check"></i> Traces console jointes (${logsCount} logs)
+                <i class="fa-solid fa-list-check"></i> Traces console (${logsCount} logs)
               </summary>
               <div style="margin-top: 6px; background: rgba(0,0,0,0.25); padding: 8px; border-radius: 4px; max-height: 160px; overflow-y: auto;">
                 ${logsHtml}
