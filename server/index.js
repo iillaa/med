@@ -34,6 +34,7 @@ const { registerVersionRoutes } = require('./routes/version');
 const { registerAdminAnalyticsRoutes } = require('./routes/admin-analytics');
 const { registerCatGeneratorRoutes } = require('./routes/cat-generator');
 const { registerQuizGeneratorRoutes } = require('./routes/quiz-lab');
+const { registerTelemetryRoutes } = require('./routes/telemetry');
 const { versionGuardMiddleware } = require('./middleware/version-guard');
 const { recordDeviceActivity } = require('./services/active-devices');
 const allowedOriginsSvc = require('./services/allowed-origins');
@@ -349,6 +350,7 @@ registerSuggestionRoutes(app, cache);
 registerSearchRoutes(app, cache);
 registerServerProviderRoutes(app, cache);
 registerPdfRoutes(app, cache);
+registerTelemetryRoutes(app);
 
 app.use(express.static(path.join(__dirname, '..', 'public'), {
   etag: false,

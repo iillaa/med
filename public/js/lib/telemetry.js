@@ -1,0 +1,154 @@
+/**
+ * Dr.CAT — Telemetry & Crash Reporting Module
+ * Captures device context, logs, and error stack traces for 1-tap transmission to admin.
+ */
+
+import { safeGetItem } from './safeStorage.js';
+
+export const SUPPORT_EMAIL = 'airdrop257@gmail.com';
+
+/**
+ * Identify detailed device and browser environment
+ */
+export function collectDeviceInfo() {
+  if (typeof window === 'undefined') return {};
+
+  const ua = navigator.userAgent || '';
+  let model = 'Appareil inconnu';
+  
+  if (/Xiaomi/i.test(ua)) model = 'Xiaomi';
+  else if (/Poco/i.test(ua) || /2311DRK48G|22081212UG/i.test(ua)) model = 'Xiaomi / Poco';
+  else if (/Redmi/i.test(ua)) model = 'Redmi';
+  else if (/Samsung|SM-/i.test(ua)) model = 'Samsung Galaxy';
+  else if (/Huawei|Honor/i.test(ua)) model = 'Huawei / Honor';
+  else if (/Pixel/i.test(ua)) model = 'Google Pixel';
+  else if (/iPhone/i.test(ua)) model = 'Apple iPhone';
+  else if (/iPad/i.test(ua)) model = 'Apple iPad';
+  else if (/Android/i.test(ua)) model = 'Android Device';
+  else if (/Windows/i.test(ua)) model = 'Windows PC';
+  else if (/Macintosh/i.test(ua)) model = 'macOS';
+  else if (/Linux/i.test(ua)) model = 'Linux';
+
+  const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator?.standalone;
+  const isCapacitor = !!window.Capacitor;
+  const appMode = isCapacitor ? 'Android APK' : (isStandalone ? 'PWA' : 'Web Browser');
+
+  return {
+    model,
+    userAgent: ua,
+    appMode,
+    screen: `${window.innerWidth}x${window.innerHeight} (dpr: ${window.devicePixelRatio || 1})`,
+    language: navigator.language || 'fr-FR',
+    online: !!navigator.onLine,
+    connection: navigator.connection?.effectiveType || 'unknown',
+    memory: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'unknown',
+    timestamp: new Date().toISOString()
+  };
+}
+
+/**
+ * Get current App Version from meta tag
+ */
+export function getAppVersion() {
+  if (typeof document === 'undefined') return '1.15.2';
+  const meta = document.querySelector('meta[name="app-version"]');
+  return meta ? meta.getAttribute('content') : '1.15.2';
+}
+
+/**
+ * Get Install ID from safe storage
+ */
+export function getInstallId() {
+  return safeGetItem('dr_cat_install_id') || 'unknown';
+}
+
+/**
+ * Send Error Report to Remote Endpoint
+ */
+export async function sendErrorReport({
+  error = 'Erreur inconnue',
+  stack = '',
+  logs = [],
+  type = 'unhandled_error',
+  userNote = ''
+} = {}) {
+  const device = collectDeviceInfo();
+  const appVersion = getAppVersion();
+  const installId = getInstallId();
+
+  const payload = {
+    type,
+    error: String(error),
+    stack: String(stack),
+    logs: Array.isArray(logs) ? logs.slice(-50) : [],
+    device,
+    appVersion,
+    installId,
+    userNote,
+    timestamp: Date.now()
+  };
+
+  // Determine target API endpoints
+  const endpoints = [];
+  
+  if (typeof window !== 'undefined' && window.REMOTE_SERVER_URLS && Array.isArray(window.REMOTE_SERVER_URLS)) {
+    window.REMOTE_SERVER_URLS.forEach(u => endpoints.push(`${u.replace(/\/+$/, '')}/api/telemetry`));
+  }
+  endpoints.push('/api/telemetry');
+
+  let lastError = null;
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-app-key': 'drcat_pub_2f7a91c4e8',
+          'ngrok-skip-browser-warning': 'true'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return { success: true, id: data.id, message: 'Rapport envoyé avec succès !' };
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  // If network transmission fails, fallback to mailto
+  console.warn('[Telemetry] Remote transmission failed, offering email fallback:', lastError);
+  return { success: false, fallbackToMail: true, payload };
+}
+
+/**
+ * Open Email Client Pre-filled with Crash Diagnostics
+ */
+export function openMailtoFallback({ error, stack, logs, device, userNote }) {
+  const subject = encodeURIComponent(`[Dr. CAT Diagnostic] ${error || 'Rapport de bug'}`);
+  const dev = device || collectDeviceInfo();
+  
+  let body = `Bonjour Dr. Ali,\n\nVoici le rapport de diagnostic de Dr. CAT :\n\n`;
+  body += `📌 Appareil : ${dev.model} (${dev.appMode})\n`;
+  body += `📱 Écran : ${dev.screen}\n`;
+  body += `📦 Version : ${getAppVersion()}\n\n`;
+  body += `❌ Erreur : ${error}\n\n`;
+  if (stack) body += `StackTrace :\n${stack}\n\n`;
+  if (userNote) body += `Note utilisateur :\n${userNote}\n\n`;
+  
+  if (Array.isArray(logs) && logs.length > 0) {
+    body += `📜 Derniers logs :\n` + logs.slice(-15).map(l => `[${l.timestamp || ''}] [${l.level || 'log'}] ${l.message || ''}`).join('\n');
+  }
+
+  const mailtoUrl = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
+  
+  if (typeof window !== 'undefined') {
+    if (window.Capacitor && window.Capacitor.Commands && typeof window.Capacitor.Commands.openUrl === 'function') {
+      window.Capacitor.Commands.openUrl({ url: mailtoUrl });
+    } else {
+      window.open(mailtoUrl, '_system');
+    }
+  }
+}
