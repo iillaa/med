@@ -38,6 +38,10 @@ function captureLog(level, args) {
 
 function triggerAutoTelemetry(errorMsg, stack = '', type = 'runtime_error') {
   try {
+    const text = String(errorMsg || '');
+    if (text.includes('403') || text.includes('Forbidden') || text.includes('Unauthorized') || text.includes('Failed to load reports')) {
+      return; // Ignore normal non-admin access denials
+    }
     sendErrorReport({
       error: errorMsg,
       stack: stack,

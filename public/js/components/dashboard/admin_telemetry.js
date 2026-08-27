@@ -149,6 +149,12 @@ export async function renderAdminTelemetryTab(container) {
               <summary style="font-size: 11.5px; color: var(--color-primary); cursor: pointer; font-weight: 500;">
                 <i class="fa-solid fa-code"></i> Afficher la pile d'exécution (Stack trace)
               </summary>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                <span style="font-size: 11px; color: var(--text-muted);">Pile JavaScript :</span>
+                <button class="copy-stack-ai-btn action-btn" data-id="${escapeHTML(r.id)}" style="padding: 3px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; background: rgba(6,182,212,0.15); border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                  <i class="fa-solid fa-robot"></i> 📋 Copier pour l'IA
+                </button>
+              </div>
               <pre style="margin: 6px 0 0 0; background: rgba(0,0,0,0.25); padding: 8px; border-radius: 4px; font-size: 10.5px; max-height: 160px; overflow-y: auto; color: var(--text-secondary); white-space: pre-wrap;">${escapeHTML(r.stack)}</pre>
             </details>
           ` : ''}
@@ -158,6 +164,12 @@ export async function renderAdminTelemetryTab(container) {
               <summary style="font-size: 11.5px; color: var(--color-primary); cursor: pointer; font-weight: 500;">
                 <i class="fa-solid fa-list-check"></i> Traces console (${logsCount} logs)
               </summary>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                <span style="font-size: 11px; color: var(--text-muted);">${logsCount} traces enregistrées :</span>
+                <button class="copy-logs-btn action-btn" data-id="${escapeHTML(r.id)}" style="padding: 3px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; cursor: pointer; transition: all 0.2s;">
+                  <i class="fa-solid fa-copy"></i> Copier les logs
+                </button>
+              </div>
               <div style="margin-top: 6px; background: rgba(0,0,0,0.25); padding: 8px; border-radius: 4px; max-height: 160px; overflow-y: auto;">
                 ${logsHtml}
               </div>
@@ -166,6 +178,79 @@ export async function renderAdminTelemetryTab(container) {
         </div>
       `;
     }).join('');
+
+    // Attach AI Prompt copy button
+    listEl.querySelectorAll('.copy-stack-ai-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        const r = reports.find(item => item && item.id === id);
+        if (!r) return;
+
+        const dev = r.device || {};
+        const devList = r.affectedDevices && typeof r.affectedDevices === 'object'
+          ? Object.entries(r.affectedDevices).map(([d, c]) => `${d} (${c})`).join(', ')
+          : (dev.model || 'Inconnu');
+
+        const logsText = Array.isArray(r.logs) && r.logs.length > 0
+          ? r.logs.map(l => `[${l.timestamp || ''}] [${l.level || 'LOG'}] ${l.message || ''}`).join('\n')
+          : 'Aucun log console disponible.';
+
+        const promptText = `🚨 [Dr. CAT Diagnostic Incident Report]
+• Incident ID: #${r.fingerprint || r.id}
+• Type: ${r.type || 'runtime_error'}
+• Sévérité: ${(r.severity || 'info').toUpperCase()}
+• Occurrences: ${r.occurrences || 1}
+• App Version: v${r.appVersion || '1.16.2'}
+• Appareils touchés: ${devList}
+• Dernier signalement: ${new Date(r.lastSeen || r.timestamp || Date.now()).toLocaleString('fr-FR')}
+
+--- ERREUR & STACK TRACE ---
+${r.error || 'Erreur non spécifiée'}
+${r.stack || '(Aucune trace JavaScript disponible)'}
+
+--- TRACES CONSOLE JOINTES ---
+${logsText}
+
+👉 Instruction pour l'IA :
+Analyse cette trace d'erreur et ces logs de Dr. CAT, diagnostique la cause exacte du problème et fournis les modifications de code précises pour le corriger.`;
+
+        navigator.clipboard?.writeText(promptText).then(() => {
+          showToast("📋 Rapport complet formaté pour l'IA copié !", "fa-robot", 3000);
+        }).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = promptText;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast("📋 Rapport complet formaté pour l'IA copié !", "fa-robot", 3000);
+        });
+      });
+    });
+
+    // Attach raw logs copy button
+    listEl.querySelectorAll('.copy-logs-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        const r = reports.find(item => item && item.id === id);
+        if (!r || !Array.isArray(r.logs)) return;
+
+        const rawLogs = r.logs.map(l => `[${l.timestamp || ''}] [${l.level || 'LOG'}] ${l.message || ''}`).join('\n');
+        navigator.clipboard?.writeText(rawLogs).then(() => {
+          showToast("Logs console copiés !", "fa-copy", 2000);
+        }).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = rawLogs;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast("Logs console copiés !", "fa-copy", 2000);
+        });
+      });
+    });
 
     // Attach individual delete buttons
     listEl.querySelectorAll('.delete-report-btn').forEach(btn => {
