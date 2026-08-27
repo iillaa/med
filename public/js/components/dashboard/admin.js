@@ -9,21 +9,6 @@ let onSuggestionHandledCallback = null;
 
 export function initAdminTabListeners(onSuggestionHandled) {
   onSuggestionHandledCallback = onSuggestionHandled;
-  
-  const pdfPane = document.getElementById('admin-pane-pdfs');
-  if (pdfPane) {
-    renderAdminPdfTab(pdfPane);
-  }
-
-  const versionPane = document.getElementById('admin-pane-version');
-  if (versionPane) {
-    renderAdminVersionTab(versionPane);
-  }
-
-  const telemetryPane = document.getElementById('admin-pane-telemetry');
-  if (telemetryPane) {
-    renderAdminTelemetryTab(telemetryPane);
-  }
 
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
   adminTabBtns.forEach(btn => {
@@ -53,6 +38,8 @@ export function initAdminTabListeners(onSuggestionHandled) {
           renderAdminVersionTab(activePane);
         } else if (targetId === 'admin-pane-telemetry') {
           renderAdminTelemetryTab(activePane);
+        } else if (targetId === 'admin-pane-pdfs') {
+          renderAdminPdfTab(activePane);
         }
       }
 
