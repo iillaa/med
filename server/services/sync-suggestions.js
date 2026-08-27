@@ -93,7 +93,7 @@ const CLOUDFLARE_TELEMETRY_URL = 'https://drcat.dr-cat.workers.dev/api/telemetry
 const TELEMETRY_FILE = path.join(__dirname, '..', 'data', 'telemetry_reports.json');
 
 async function syncCloudflareTelemetry() {
-  if (!process.env.SYNC_SECRET) return;
+  if (!process.env.SYNC_SECRET || process.env.NODE_ENV === 'test') return;
   return new Promise((resolve) => {
     https.get(CLOUDFLARE_TELEMETRY_URL, { headers: syncHeaders() }, (res) => {
       let rawData = '';

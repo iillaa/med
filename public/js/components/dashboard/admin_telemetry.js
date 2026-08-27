@@ -36,14 +36,29 @@ export async function renderAdminTelemetryTab(container) {
   const clearAllBtn = container.querySelector('#admin-telemetry-clear-all-btn');
   const listEl = container.querySelector('#admin-telemetry-list');
 
-  async function loadReports() {
+  async function loadReports(isManualRefresh = false) {
     try {
-      listEl.innerHTML = `<p class="text-muted text-center" style="padding: 20px 0;"><i class="fa-solid fa-spinner fa-spin"></i> Chargement des rapports...</p>`;
+      if (isManualRefresh && refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin"></i> Actualisation...`;
+      } else {
+        listEl.innerHTML = `<p class="text-muted text-center" style="padding: 20px 0;"><i class="fa-solid fa-spinner fa-spin"></i> Chargement des rapports...</p>`;
+      }
+
       const reports = await api.fetchTelemetryReports();
       renderReportsList(reports);
+
+      if (isManualRefresh) {
+        showToast("Flux d'incidents actualisé.", "fa-check", 2000);
+      }
     } catch (err) {
       console.error('[AdminTelemetry] Failed to load reports:', err);
       listEl.innerHTML = `<p class="text-danger text-center" style="padding: 20px 0;">Erreur lors de la récupération des rapports : ${escapeHTML(err.message)}</p>`;
+    } finally {
+      if (refreshBtn) {
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> Actualiser`;
+      }
     }
   }
 
@@ -169,7 +184,7 @@ export async function renderAdminTelemetryTab(container) {
   }
 
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', loadReports);
+    refreshBtn.addEventListener('click', () => loadReports(true));
   }
 
   if (clearAllBtn) {

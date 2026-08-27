@@ -289,12 +289,20 @@ export default {
           }
           return new Response(JSON.stringify(list), {
             status: 200,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+              "Cache-Control": "no-store, no-cache, must-revalidate"
+            }
           });
         } catch (err) {
           return new Response(JSON.stringify([]), {
             status: 200,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+              "Cache-Control": "no-store, no-cache, must-revalidate"
+            }
           });
         }
       }
@@ -392,7 +400,7 @@ export default {
     // 10. GET /api/version
     if (url.pathname === '/api/version') {
       return new Response(JSON.stringify({
-        version: "1.16.1",
+        version: "1.16.2",
         minVersion: "1.0.0"
       }), {
         status: 200,
