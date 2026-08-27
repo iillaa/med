@@ -89,4 +89,48 @@ async function purgeCloudflareSuggestion(id) {
   });
 }
 
-module.exports = { syncCloudflareSuggestions, purgeCloudflareSuggestion, ackCloudflareSuggestions };
+const CLOUDFLARE_TELEMETRY_URL = 'https://drcat.dr-cat.workers.dev/api/telemetry';
+const TELEMETRY_FILE = path.join(__dirname, '..', 'data', 'telemetry_reports.json');
+
+async function syncCloudflareTelemetry() {
+  if (!process.env.SYNC_SECRET) return;
+  return new Promise((resolve) => {
+    https.get(CLOUDFLARE_TELEMETRY_URL, { headers: syncHeaders() }, (res) => {
+      let rawData = '';
+      res.on('data', chunk => rawData += chunk);
+      res.on('end', async () => {
+        try {
+          if (res.statusCode === 200) {
+            const cloudReports = JSON.parse(rawData);
+            if (Array.isArray(cloudReports) && cloudReports.length > 0) {
+              const { getReports, saveReports } = require('../routes/telemetry');
+              const localReports = getReports();
+              let addedCount = 0;
+              for (const cr of cloudReports) {
+                if (!cr || !cr.id) continue;
+                const exists = localReports.some(lr => lr.id === cr.id);
+                if (!exists) {
+                  localReports.unshift(cr);
+                  addedCount++;
+                }
+              }
+              if (addedCount > 0) {
+                if (localReports.length > 100) localReports.length = 100;
+                await saveReports(localReports);
+                console.log(`[CloudSync] Synced ${addedCount} telemetry report(s) from Cloudflare KV.`);
+              }
+            }
+          }
+        } catch (_) {}
+        resolve();
+      });
+    }).on('error', () => resolve());
+  });
+}
+
+module.exports = {
+  syncCloudflareSuggestions,
+  purgeCloudflareSuggestion,
+  ackCloudflareSuggestions,
+  syncCloudflareTelemetry
+};
