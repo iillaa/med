@@ -18,11 +18,14 @@ Dr. CAT operates in a **Dual-Rail Hybrid Network Architecture** across edge CDN 
 2. 🔒 10% Admin Control Rail (Termux Node.js Ngrok Server)
    [Android APK / Admin Lab] <--- HTTPS Tunnel ---> [Termux Express Backend (server.js)]
                                                             |
-                                                  [Security Lock Gate & Kill Switch]
-                                                  [Version Checker /api/version]
-                                                  [Suggestion Moderation & Active Learning]
-                                                  [V3 CAT Generator Engine]
+                                                   [Security Lock Gate & Kill Switch]
+                                                   [Version Checker /api/version]
+                                                   [Suggestion Moderation & Active Learning]
+                                                   [Sentry-Grade Telemetry & Incident Intelligence]
+                                                   [V3 CAT Generator Engine]
 ```
+
+> 📖 **Incident Intelligence Reference** : Pour l'architecture complète du système d'auto-diagnostic, déduplication anti-DDoS, et prompt-generator pour IA, voir [`docs/TELEMETRY_CRASH_INTELLIGENCE.md`](./TELEMETRY_CRASH_INTELLIGENCE.md).
 
 ### App Mode Detection
 At startup, `main.js` evaluates the runtime context via `api.getAppMode()` and assigns one of four modes:
