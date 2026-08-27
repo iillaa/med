@@ -12,6 +12,7 @@ const testFiles = [
   { name: 'Auth & Security Test', file: 'tests/test_auth.js' },
   { name: 'Remote & Tunnel Security Isolation Test', file: 'tests/test_security_remote_access.js' },
   { name: 'PDF Lab & Extraction Endpoints Test', file: 'tests/test_pdf_lab_endpoints.js' },
+  { name: 'Telemetry & Crash Reporting Test', file: 'tests/test_telemetry.js' },
   { name: 'API & Server Smoke Test', file: 'tests/test_api.js' }
 ];
 

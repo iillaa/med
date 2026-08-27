@@ -3,6 +3,7 @@ import * as api from '../../api.js';
 import { escapeHTML, showToast, closeModalAnimated } from '../../utils.js';
 import { renderAdminPdfTab } from './admin_pdf.js';
 import { renderAdminVersionTab } from './admin_version.js';
+import { renderAdminTelemetryTab } from './admin_telemetry.js';
 
 let onSuggestionHandledCallback = null;
 
@@ -17,6 +18,11 @@ export function initAdminTabListeners(onSuggestionHandled) {
   const versionPane = document.getElementById('admin-pane-version');
   if (versionPane) {
     renderAdminVersionTab(versionPane);
+  }
+
+  const telemetryPane = document.getElementById('admin-pane-telemetry');
+  if (telemetryPane) {
+    renderAdminTelemetryTab(telemetryPane);
   }
 
   const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
@@ -45,6 +51,8 @@ export function initAdminTabListeners(onSuggestionHandled) {
         activePane.style.display = 'block';
         if (targetId === 'admin-pane-version') {
           renderAdminVersionTab(activePane);
+        } else if (targetId === 'admin-pane-telemetry') {
+          renderAdminTelemetryTab(activePane);
         }
       }
 

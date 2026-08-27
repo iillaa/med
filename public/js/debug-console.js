@@ -1,6 +1,7 @@
 // Debug Console — automatic capture & floating UI for Android/mobile
 import { showToast } from './utils.js';
 import { safeGetItem, safeSetItem, safeRemoveItem } from './lib/safeStorage.js';
+import { sendErrorReport, openMailtoFallback } from './lib/telemetry.js';
 let logBuffer = [];
 const MAX_LOGS = 200;
 let isViewerOpen = false;
@@ -342,6 +343,7 @@ function createUI() {
       <div class="header">
         <h3>🐛 Debug Console <span style="font-size: 11px; color: #64748b; font-weight:400;">(${MAX_LOGS} max)</span></h3>
         <div class="actions">
+          <button id="debug-send-btn" style="background: #0e7490; color: #fff; border-color: #0e7490;">📤 Envoyer</button>
           <button id="debug-copy-btn">📋 Copier</button>
           <button id="debug-clear-btn">🗑 Vider</button>
           <button class="close-btn" id="debug-close-btn">✕ Fermer</button>
@@ -357,6 +359,53 @@ function createUI() {
       logBuffer = [];
       renderLogs();
     });
+
+    const sendBtn = document.getElementById('debug-send-btn');
+    if (sendBtn) {
+      sendBtn.addEventListener('click', async () => {
+        sendBtn.disabled = true;
+        const originalText = sendBtn.textContent;
+        sendBtn.textContent = '⏳ Envoi...';
+
+        const lastError = logBuffer.slice().reverse().find(l => l.level === 'error');
+        const errorMsg = lastError ? lastError.message : 'Rapport utilisateur (Debug Console)';
+
+        try {
+          const res = await sendErrorReport({
+            error: errorMsg,
+            stack: '',
+            logs: logBuffer,
+            type: 'user_report'
+          });
+
+          if (res.success) {
+            showToast("📡 Rapport de diagnostic envoyé au Dr. Ali !", "fa-paper-plane", 4000);
+            sendBtn.textContent = '✅ Envoyé !';
+            setTimeout(() => {
+              sendBtn.disabled = false;
+              sendBtn.textContent = originalText;
+            }, 3000);
+          } else if (res.fallbackToMail) {
+            openMailtoFallback({
+              error: errorMsg,
+              logs: logBuffer,
+              device: res.payload?.device
+            });
+            sendBtn.textContent = '✉️ Email ouvert';
+            setTimeout(() => {
+              sendBtn.disabled = false;
+              sendBtn.textContent = originalText;
+            }, 3000);
+          }
+        } catch (err) {
+          console.error('[DebugConsole] Send error report failed:', err);
+          openMailtoFallback({ error: errorMsg, logs: logBuffer });
+          sendBtn.disabled = false;
+          sendBtn.textContent = originalText;
+        }
+      });
+    }
+
     document.getElementById('debug-copy-btn')?.addEventListener('click', () => {
       const text = logBuffer.map(l => `[${l.timestamp}] [${l.level}] ${l.message}`).join('\n');
       navigator.clipboard?.writeText(text).then(() => {

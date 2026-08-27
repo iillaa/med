@@ -759,6 +759,24 @@ export async function updateSuggestionOnServer(id, updatedData) {
   return res.json();
 }
 
+export async function fetchTelemetryReports() {
+  const res = await fetchWithTimeout(getApiUrl('/api/admin/telemetry'), { headers: getHeaders() });
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to fetch telemetry reports');
+  const data = await res.json();
+  return Array.isArray(data) ? data : (data.reports || []);
+}
+
+export async function deleteTelemetryReportOnServer(id) {
+  const res = await fetchWithTimeout(getApiUrl(`/api/admin/telemetry/${id}`), {
+    method: 'DELETE',
+    headers: getHeaders()
+  });
+  if (res.status === 403) throw new Error('403 Forbidden');
+  if (!res.ok) throw new Error('Failed to delete telemetry report');
+  return res.json();
+}
+
 export async function fetchSearchStatus() {
   try {
     const res = await fetchWithTimeout(getApiUrl('/api/search-status'), { headers: getHeaders() });

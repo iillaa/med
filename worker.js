@@ -174,6 +174,100 @@ export default {
       }
     }
 
+    // 5. /api/telemetry (Crash reports & mobile debug telemetry)
+    if (url.pathname === '/api/telemetry') {
+      if (request.method === 'POST') {
+        try {
+          const body = await request.json();
+          const reportId = `tel_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+          const report = {
+            id: reportId,
+            timestamp: Date.now(),
+            type: body.type || 'unhandled_error',
+            error: String(body.error || 'Erreur non spécifiée').substring(0, 1000),
+            stack: String(body.stack || '').substring(0, 5000),
+            device: typeof body.device === 'object' && body.device !== null ? body.device : {},
+            appVersion: String(body.appVersion || 'inconnu').substring(0, 20),
+            installId: String(body.installId || '').substring(0, 50),
+            logs: Array.isArray(body.logs) ? body.logs.slice(-50) : [],
+            userNote: String(body.userNote || '').substring(0, 500)
+          };
+
+          if (env && env.SUGGESTIONS_KV) {
+            let list = [];
+            const raw = await env.SUGGESTIONS_KV.get("telemetry_reports");
+            if (raw) { try { list = JSON.parse(raw); } catch (_) { list = []; } }
+            list.unshift(report);
+            if (list.length > 100) list = list.slice(0, 100);
+            await env.SUGGESTIONS_KV.put("telemetry_reports", JSON.stringify(list));
+          }
+
+          return new Response(JSON.stringify({
+            success: true,
+            id: reportId,
+            message: "Rapport de diagnostic transmis au Dr. Ali."
+          }), {
+            status: 200,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        } catch (err) {
+          return new Response(JSON.stringify({ success: false, error: err.message }), {
+            status: 400,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        }
+      }
+
+      if (request.method === 'GET') {
+        if (!(await requireSyncSecret(request, env))) return syncDenied();
+        try {
+          let list = [];
+          if (env && env.SUGGESTIONS_KV) {
+            const raw = await env.SUGGESTIONS_KV.get("telemetry_reports");
+            if (raw) { try { list = JSON.parse(raw); } catch (_) { list = []; } }
+          }
+          return new Response(JSON.stringify(list), {
+            status: 200,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        } catch (err) {
+          return new Response(JSON.stringify([]), {
+            status: 200,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        }
+      }
+    }
+
+    // 6. Delete telemetry report: DELETE /api/admin/telemetry/:id
+    if (url.pathname.startsWith('/api/admin/telemetry')) {
+      if (!(await requireSyncSecret(request, env))) return syncDenied();
+      const parts = url.pathname.split('/');
+      const targetId = parts[4];
+      try {
+        if (env && env.SUGGESTIONS_KV) {
+          let list = [];
+          const raw = await env.SUGGESTIONS_KV.get("telemetry_reports");
+          if (raw) { try { list = JSON.parse(raw); } catch (_) { list = []; } }
+          if (targetId === 'all' || !targetId) {
+            list = [];
+          } else {
+            list = list.filter(r => r && r.id !== targetId);
+          }
+          await env.SUGGESTIONS_KV.put("telemetry_reports", JSON.stringify(list));
+        }
+        return new Response(JSON.stringify({ success: true, message: "Rapport supprimé" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ success: false, error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+    }
+
     // Helper: fetch static asset with CORS headers (query strings stripped via clean asset URL)
     async function fetchStaticAsset(assetPath) {
       try {
@@ -237,7 +331,7 @@ export default {
     // 10. GET /api/version
     if (url.pathname === '/api/version') {
       return new Response(JSON.stringify({
-        version: "1.15.2",
+        version: "1.16.0",
         minVersion: "1.0.0"
       }), {
         status: 200,
