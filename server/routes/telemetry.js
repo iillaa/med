@@ -78,11 +78,16 @@ function registerTelemetryRoutes(app) {
   });
 
   // Admin endpoint: List all telemetry reports
-  app.get('/api/admin/telemetry', (req, res) => {
+  app.get('/api/admin/telemetry', async (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
     }
     try {
+      try {
+        const { syncCloudflareTelemetry } = require('../services/sync-suggestions');
+        await syncCloudflareTelemetry();
+      } catch (_) {}
+
       const reports = getReports();
       return res.status(200).json({ success: true, reports });
     } catch (err) {
