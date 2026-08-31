@@ -452,15 +452,18 @@ ${sourcesSummary}
    Exemple : Abcès dentaire chez la femme enceinte → AINS proscrits → Spiramycine/Métronidazole + Paracétamol pur.
    CONTRE-EXEMPLE (INTERDIT) : Ne JAMAIS créer un Sub-CAT pédiatrique pour l'OMA ou la Bronchiolite, car la pédiatrie EST DÉJÀ le cœur de la fiche principale avec ses posologies en mg/kg/j.
 
-   C. RÈGLE D'ABSTENTION (0 Sub-CAT OBLIGATOIRE) :
-   Si AUCUN des 4 critères n'est satisfait, le tableau "sub_cats" DOIT être vide [].
-   Exemples de CATs à 0 Sub-CAT : Bouchon de Cérumen, Phtiriase pubienne, Aphtose buccale, Furoncle simple, Hémorragie sous-conjonctivale, Constipation fonctionnelle simple.
-   INTERDICTION FORMELLE d'inventer des sous-fiches de remplissage ou des templates génériques (Enfant / Grossesse / Sujet âgé) par défaut sans justification clinique.
+   C. RÈGLE D'ABSTENTION (0 Sub-CAT OBLIGATOIRE) & PRINCIPE DE LA FICHE RÉFLEXE (PAS UNE ENCYCLOPÉDIE) :
+   - Dr. CAT est un GUIDE D'ACTION CLINIQUE PRATIQUE, pas un traité de médecine de 1000 pages.
+   - RÈGLE DES 3 LIGNES (PÉDIATRIE & GROSSESSE) : Si une adaptation pédiatrique (ex: posologie en mg/kg/j) ou une précaution de grossesse (ex: "Grossesse : AINS interdits, Paracétamol OK") tient en 2 ou 3 lignes, elle DOIT OBLIGATOIREMENT figurer dans la fiche principale (Étape 3bis & Ordonnance) et ne JAMAIS donner lieu à une sous-fiche Sub-CAT.
+   - INTERDICTION STRICTE DES COMPLICATIONS HYPER-RARES : Ne crée JAMAIS une sous-fiche pour une complication anecdotique ou théorique (ex: inventer un "Furoncle nécrosant" pour un furoncle simple). Une complication ne justifie un Sub-CAT que si elle est CLINICIQUEMENT MAJEURE (urgence vitale décompensée, risque chirurgical immédiat, défaillance viscérale).
+   - Si AUCUN des 4 critères n'est satisfait, le tableau "sub_cats" DOIT impérativement être vide [].
+   - Exemples de CATs à 0 Sub-CAT : Bouchon de Cérumen, Phtiriase pubienne, Aphtose buccale, Furoncle simple, Hémorragie sous-conjonctivale, Constipation fonctionnelle simple, Blepharite simple.
+   - INTERDICTION FORMELLE d'inventer des sous-fiches de remplissage ou des templates génériques (Enfant / Grossesse / Sujet âgé) par défaut sans rupture thérapeutique majeure.
 
    D. CONTRAT DE COHÉRENCE MASTER ↔ SUB-CAT :
    - COMPLÉMENTARITÉ STRICTE : La sous-fiche est un zoom chirurgical. Elle ne répète JAMAIS les généralités, la physiopathologie ou les définitions déjà présentes dans le Master. Elle part du contexte du Master et se concentre EXCLUSIVEMENT sur ce qui change.
    - NON-CONTRADICTION : La sous-fiche ne contredit JAMAIS la ligne thérapeutique du Master, sauf pour substituer formellement une molécule contre-indiquée sur le terrain spécifique.
-   - NON-DUPLICATION : Si le Master couvre DÉJÀ un terrain dans ses posologies (ex: OMA avec mg/kg/j pédiatriques), ne PAS créer une sous-fiche redondante pour ce terrain.
+   - NON-DUPLICATION : Si le Master couvre DÉJÀ un terrain dans ses posologies (ex: OMA avec mg/kg/j pédiatriques, Angine avec TDR enfant/adulte), ne PAS créer une sous-fiche redondante pour ce terrain.
    - LIMITES DE CONTENU : Master summary = physiopathologie, diagnostic, bilan, traitement standard, orientation. Sub-CAT summary = UNIQUEMENT ce qui diverge : posologies adaptées, molécules spécifiques, protocole de réanimation, critères de transfert.
 
    E. FORMAT OBLIGATOIRE DE CHAQUE SOUS-FICHE :
