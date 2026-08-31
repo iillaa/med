@@ -681,12 +681,12 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   }
 }
 
-export function selectCat(cat, preserveTab = false) {
+export function selectCat(cat, preserveTab = false, initialSubIndex = 0) {
   if (window.perf) window.perf.startMeasure('workspace.selectCat');
   clearTimeout(notesDebounceTimer);
   persistNotesToActiveCat();
   state.activeCat = cat;
-  state.activeSubCatIndex = 0;
+  state.activeSubCatIndex = initialSubIndex;
   state.activePrescriptionVariantIndex = 0;
 
   if (!cat) {
@@ -771,11 +771,19 @@ export function selectCat(cat, preserveTab = false) {
 
   renderSubCatBar(cat);
 
-  renderSummary(cat.customSummary || cat.summary, cat);
+  // If deep-linking to a specific sub-cat tab (e.g. from search), render that
+  // sub-cat's content directly instead of the Master's default content.
+  if (initialSubIndex > 0 && Array.isArray(cat.sub_cats) && cat.sub_cats[initialSubIndex - 1]) {
+    const subProf = cat.sub_cats[initialSubIndex - 1];
+    renderSummary(subProf.summary || cat.summary, cat, subProf.label);
+    if (wsRedFlags) wsRedFlags.textContent = subProf.red_flags || cat.red_flags;
+    renderPrescription(subProf.ordonnance || cat.ordonnance);
+  } else {
+    renderSummary(cat.customSummary || cat.summary, cat);
+    renderPrescription(cat.customOrdonnance || cat.ordonnance);
+  }
 
   if (notesInput) notesInput.value = cat.notes || '';
-
-  renderPrescription(cat.customOrdonnance || cat.ordonnance);
 
   const prescriptionEditor = document.getElementById('prescription-editor');
   const prescriptionEditorActions = document.getElementById('prescription-editor-actions');

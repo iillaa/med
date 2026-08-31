@@ -34,27 +34,31 @@ function ensureCacheDir() {
 /**
  * Main Strategy Manager for PDF Extraction.
  * Handles hashing, caching, and fallback logic.
+ * @param {string} filePath - Absolute path to PDF file
+ * @param {boolean} force - Force cache bypass
+ * @param {boolean} allowCloud - Explicit permission to use cloud AI extractors (LlamaParse/Gemini). Default: false for batch indexing.
  */
-async function extractPdfData(filePath, force = false) {
+async function extractPdfData(filePath, force = false, allowCloud = false) {
   ensureCacheDir();
   
   const fileName = path.basename(filePath);
   const cacheFilePath = path.join(CACHE_DIR, `${fileName}.json`);
+  const highQualityTiers = ['online', 'online-google', 'llama', 'llamaparse', 'gemini', 'llama_cached_slice', 'curated_master', 'curated', 'ai_smart_sliced'];
   
   // 1. Calculate the file hash
   const currentHash = await calculateHash(filePath);
   
   // 2. Check Cache
-  if (!force && fs.existsSync(cacheFilePath)) {
+  if (fs.existsSync(cacheFilePath)) {
     try {
       const cacheContent = await fs.promises.readFile(cacheFilePath, 'utf-8');
       const cachedData = JSON.parse(cacheContent);
       
-      // If hash matches, return cached data immediately
-      if (cachedData.hash === currentHash) {
+      // If hash matches or if existing cache is high quality and not explicitly forced with allowCloud
+      if (!force && (cachedData.hash === currentHash || (highQualityTiers.includes(cachedData.quality) && !allowCloud))) {
         console.log(`[Cache Hit] ${fileName} (Quality: ${cachedData.quality})`);
         return cachedData;
-      } else {
+      } else if (!force) {
         console.log(`[Cache Miss] ${fileName} hash changed. Re-indexing...`);
       }
     } catch (err) {
@@ -64,35 +68,34 @@ async function extractPdfData(filePath, force = false) {
     console.log(`[Cache Miss] ${fileName} is new. Indexing...`);
   }
 
-  // 3. Extraction Strategy
+  // 3. Extraction Strategy (Cloud vs Offline)
+  let result = null;
   const llamaKey = process.env.LLAMAPARSE_API_KEY;
   const googleKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
-  let result = null;
   
-  if (llamaKey) {
-    try {
-      console.log(`[Extractor] Attempting LlamaParse for ${fileName}...`);
-      result = await extractWithLlamaParse(filePath, llamaKey);
-    } catch (err) {
-      console.error(`[Extractor] LlamaParse failed for ${fileName}.`, err.message);
+  if (allowCloud) {
+    if (llamaKey) {
+      try {
+        console.log(`[Extractor] Attempting LlamaParse for ${fileName}...`);
+        result = await extractWithLlamaParse(filePath, llamaKey);
+      } catch (err) {
+        console.error(`[Extractor] LlamaParse failed for ${fileName}.`, err.message);
+      }
     }
-  } else {
-    console.log(`[Extractor] No LLAMAPARSE_API_KEY found.`);
+
+    if (!result && googleKey) {
+      try {
+        console.log(`[Extractor] Attempting Google Gemini for ${fileName}...`);
+        result = await extractWithGoogle(filePath, googleKey);
+      } catch (err) {
+        console.error(`[Extractor] Google Gemini failed for ${fileName}.`, err.message);
+      }
+    }
   }
 
-  if (!result && googleKey) {
-    try {
-      console.log(`[Extractor] Attempting Google Gemini for ${fileName}...`);
-      result = await extractWithGoogle(filePath, googleKey);
-    } catch (err) {
-      console.error(`[Extractor] Google Gemini failed for ${fileName}.`, err.message);
-    }
-  } else if (!result) {
-    console.log(`[Extractor] No GOOGLE_API_KEY found.`);
-  }
-
+  // Fallback / Default to Offline Parser
   if (!result) {
-    console.log(`[Extractor] Falling back to Offline parser for ${fileName}...`);
+    console.log(`[Extractor] Running Offline parser for ${fileName}...`);
     try {
       result = await extractWithOffline(filePath);
     } catch (err) {
@@ -106,14 +109,13 @@ async function extractPdfData(filePath, force = false) {
     result = { quality: 'failed', pages: [] };
   }
 
-  // If existing cache exists with high-quality AI extraction (online, online-google, llama, or gemini) and new result is offline/failed, preserve existing cache
+  // STRICT IMMUTABILITY GUARD: If existing cache exists with high-quality AI extraction and new result is offline/failed, NEVER downgrade
   if (fs.existsSync(cacheFilePath)) {
     try {
       const existingCacheData = JSON.parse(fs.readFileSync(cacheFilePath, 'utf-8'));
-      const highQualityTiers = ['online', 'online-google', 'llama', 'gemini'];
       if (existingCacheData && highQualityTiers.includes(existingCacheData.quality)) {
         if (result.quality === 'offline' || result.quality === 'failed') {
-          console.warn(`[Extractor] New extraction for ${fileName} degraded to '${result.quality}', preserving existing '${existingCacheData.quality}' cache.`);
+          console.warn(`[Extractor] New extraction for ${fileName} degraded to '${result.quality}', preserving existing high-quality '${existingCacheData.quality}' cache.`);
           return existingCacheData;
         }
       }
@@ -130,7 +132,7 @@ async function extractPdfData(filePath, force = false) {
   };
   
   await fs.promises.writeFile(cacheFilePath, JSON.stringify(finalData, null, 2));
-  console.log(`[Cache Saved] ${fileName}`);
+  console.log(`[Cache Saved] ${fileName} (Quality: ${result.quality})`);
   
   return finalData;
 }

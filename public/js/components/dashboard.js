@@ -107,14 +107,31 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       return;
     }
 
-    const matchedCats = (state.allCats || []).filter(c => {
+    const matchedCats = [];
+    (state.allCats || []).forEach(c => {
       const title = (c.title || '').toLowerCase();
       const catg = (c.category || '').toLowerCase();
       const summ = (c.summary || '').toLowerCase();
       const ord = (c.ordonnance || '').toLowerCase();
-      const kw = Array.isArray(c.keywords) ? c.keywords.join(' ').toLowerCase() : '';
-      return title.includes(query) || catg.includes(query) || summ.includes(query) || ord.includes(query) || kw.includes(query);
-    }).slice(0, 6);
+      const kw = Array.isArray(c.search_keywords) ? c.search_keywords.join(' ').toLowerCase()
+               : (Array.isArray(c.pdf_keywords) ? c.pdf_keywords.join(' ').toLowerCase() : '');
+      const subCatsStr = Array.isArray(c.sub_cats)
+        ? c.sub_cats.map(s => `${s.label || ''} ${s.summary || ''} ${s.ordonnance || ''}`).join(' ').toLowerCase()
+        : '';
+      const matches = title.includes(query) || catg.includes(query) || summ.includes(query) || ord.includes(query) || kw.includes(query) || subCatsStr.includes(query);
+      if (matches && matchedCats.length < 6) {
+        // Detect which sub-cat matched for deep-link
+        let matchedSubIdx = -1;
+        if (Array.isArray(c.sub_cats) && c.sub_cats.length > 0 && !title.includes(query) && !catg.includes(query)) {
+          for (let si = 0; si < c.sub_cats.length; si++) {
+            const sub = c.sub_cats[si];
+            const subStr = `${(sub.label || '').toLowerCase()} ${(sub.summary || '').toLowerCase()} ${(sub.ordonnance || '').toLowerCase()}`;
+            if (subStr.includes(query)) { matchedSubIdx = si; break; }
+          }
+        }
+        matchedCats.push({ cat: c, matchedSubIdx });
+      }
+    });
 
     const matchedPdfs = (state.allPdfs || []).filter(pdf => {
       if (!pdf || typeof pdf !== 'string') return false;
@@ -147,12 +164,19 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
 
     if (matchedCats.length > 0) {
       html += `<div style="padding: 6px 10px; font-size: 10.5px; font-weight: 700; color: var(--text-secondary); background: rgba(0,0,0,0.15); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;"><span>FICHES CAT (${matchedCats.length})</span><span style="color: var(--color-primary); cursor: pointer;" id="omni-search-pdf-link"><i class="fa-solid fa-file-pdf"></i> Fouiller les PDFs ➔</span></div>`;
-      matchedCats.forEach(c => {
+      matchedCats.forEach(({ cat: c, matchedSubIdx }) => {
+        let subBadge = '';
+        if (matchedSubIdx >= 0 && c.sub_cats[matchedSubIdx]) {
+          const subLabel = c.sub_cats[matchedSubIdx].label || `Sous-fiche ${matchedSubIdx + 1}`;
+          const displayLabel = subLabel.length > 30 ? subLabel.substring(0, 27) + '…' : subLabel;
+          subBadge = `<div style="font-size:9px; padding:1px 5px; margin-top:1px; border-radius:4px; background:rgba(168,85,247,0.12); color:#c084fc; border:1px solid rgba(168,85,247,0.25); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><i class="fa-solid fa-arrow-turn-down" style="margin-right:2px;"></i> ${escapeHTML(displayLabel)}</div>`;
+        }
         html += `
-          <div class="omni-result-item" data-cat-id="${c.id}" style="padding: 8px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: background 0.15s ease;">
+          <div class="omni-result-item" data-cat-id="${c.id}" data-sub-idx="${matchedSubIdx >= 0 ? matchedSubIdx + 1 : 0}" style="padding: 8px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: background 0.15s ease;">
             <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
               <strong style="font-size: 12px; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(c.title)}</strong>
               <span style="font-size: 10px; color: var(--color-primary);">${escapeHTML(c.category || '')}</span>
+              ${subBadge}
             </div>
             <span style="font-size: 10px; padding: 2px 6px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--text-muted);">${c.status === 'done' ? '✅' : (c.status === 'doing' ? '⏳' : '⚪')}</span>
           </div>
@@ -182,10 +206,11 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     omniResults.querySelectorAll('.omni-result-item[data-cat-id]').forEach(item => {
       item.onclick = () => {
         const catId = parseInt(item.getAttribute('data-cat-id'), 10);
+        const subIdx = parseInt(item.getAttribute('data-sub-idx') || '0', 10);
         const targetCat = (state.allCats || []).find(c => c.id === catId);
         if (targetCat && onSelectCat) {
           omniResults.style.display = 'none';
-          onSelectCat(targetCat);
+          onSelectCat(targetCat, subIdx);
         }
       };
       item.onmouseenter = () => { item.style.background = 'rgba(6, 182, 212, 0.1)'; };

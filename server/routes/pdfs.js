@@ -121,11 +121,59 @@ function registerPdfRoutes(app, cache) {
 
       res.json({ success: true, message: `PDF ${cleanFilename} uploaded and compressed.` });
 
-      // Run extraction asynchronously on master original in background
-      extractPdfData(masterPath)
-        .then(async () => {
-          console.log(`[Background Task] Extraction finished for ${cleanFilename}. Rebuilding global index...`);
-          await indexPdfs(false);
+      // Run extraction asynchronously for ONLY this single master original in background (allow cloud on single explicit upload)
+      extractPdfData(masterPath, false, true)
+        .then(async (extractedData) => {
+          if (!extractedData) return;
+          console.log(`[Background Task] Extraction finished for ${cleanFilename}. Updating index atomically...`);
+          
+          if (!Array.isArray(cache.pdfIndex)) {
+            try {
+              cache.pdfIndex = fs.existsSync(INDEX_FILE) ? JSON.parse(fs.readFileSync(INDEX_FILE, 'utf-8')) : [];
+            } catch (_) {
+              cache.pdfIndex = [];
+            }
+          }
+
+          const existingIdx = cache.pdfIndex.findIndex(d => d.pdf === cleanFilename);
+          const indexRecord = {
+            pdf: cleanFilename,
+            specialty: extractedData.specialty || (existingIdx !== -1 ? cache.pdfIndex[existingIdx].specialty : 'Médecine Générale'),
+            quality: extractedData.quality || 'offline',
+            hash: extractedData.hash,
+            timestamp: new Date().toISOString(),
+            toc: extractedData.toc || (existingIdx !== -1 ? cache.pdfIndex[existingIdx].toc : []),
+            pages: extractedData.pages || []
+          };
+
+          if (existingIdx >= 0) {
+            cache.pdfIndex[existingIdx] = indexRecord;
+          } else {
+            cache.pdfIndex.unshift(indexRecord);
+          }
+
+          // Persist index files atomically
+          const PUBLIC_INDEX_FILE = path.join(__dirname, '..', '..', 'public', 'data', 'pdf_index.json');
+          const PUBLIC_LIST_FILE = path.join(__dirname, '..', '..', 'public', 'data', 'pdf_list.json');
+          try {
+            await fs.promises.writeFile(INDEX_FILE, JSON.stringify(cache.pdfIndex, null, 2), 'utf-8');
+            if (fs.existsSync(path.dirname(PUBLIC_INDEX_FILE))) {
+              const cleanPublicIndex = cache.pdfIndex.map(doc => ({
+                pdf: doc.pdf,
+                pages: Array.isArray(doc.pages) ? doc.pages.map(p => ({ page: p.page, content: p.content || p.text || '' })) : []
+              }));
+              await fs.promises.writeFile(PUBLIC_INDEX_FILE, JSON.stringify(cleanPublicIndex), 'utf-8');
+            }
+            if (fs.existsSync(path.dirname(PUBLIC_LIST_FILE))) {
+              const publicFiles = fs.readdirSync(PUBLIC_PDF_DIR).filter(f => f.toLowerCase().endsWith('.pdf') || f.toLowerCase().endsWith('.docx'));
+              await fs.promises.writeFile(PUBLIC_LIST_FILE, JSON.stringify(publicFiles), 'utf-8');
+            }
+            if (cache.searchCache && typeof cache.searchCache.clear === 'function') {
+              cache.searchCache.clear();
+            }
+          } catch (saveErr) {
+            console.warn('[PDF Upload] Error updating index files:', saveErr.message);
+          }
         })
         .catch(err => {
           console.error(`[Background Task] Extraction failed for ${cleanFilename}`, err);
@@ -138,7 +186,7 @@ function registerPdfRoutes(app, cache) {
   });
 
   // POST /api/admin/delete-pdf
-  // Deletes PDF from master folder, public folder, cache, and index
+  // Deletes PDF from master folder, public folder, cache, and index (Instant & Atomic)
   app.post('/api/admin/delete-pdf', async (req, res) => {
     if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
       return res.status(403).json({ error: 'Accès interdit.' });
@@ -147,19 +195,25 @@ function registerPdfRoutes(app, cache) {
       const { filename } = req.body;
       if (!filename) return res.status(400).json({ error: 'Filename is required.' });
 
+      const cleanFilename = path.basename(filename);
       const { deletePdfFile } = require('../../scripts/delete_pdf');
-      const success = deletePdfFile(filename);
+      const success = deletePdfFile(cleanFilename);
       
       if (success) {
-        // Refresh in-memory index cache
-        await indexPdfs(false);
-        res.json({ success: true, message: `PDF ${filename} deleted successfully.` });
+        // Atomic in-memory cache update (instant & isolated, 0 batch reindexing)
+        if (Array.isArray(cache.pdfIndex)) {
+          cache.pdfIndex = cache.pdfIndex.filter(doc => doc.pdf !== cleanFilename);
+        }
+        if (cache.searchCache && typeof cache.searchCache.clear === 'function') {
+          cache.searchCache.clear();
+        }
+        res.json({ success: true, message: `PDF "${cleanFilename}" supprimé avec succès.` });
       } else {
-        res.status(404).json({ error: `PDF ${filename} not found on server.` });
+        res.status(404).json({ error: `PDF "${cleanFilename}" non trouvé sur le serveur.` });
       }
     } catch (err) {
       console.error('[PDF Delete Error]', err);
-      res.status(500).json({ error: 'Failed to delete PDF from server storage.' });
+      res.status(500).json({ error: 'Échec de suppression du PDF.' });
     }
   });
 
@@ -758,6 +812,71 @@ function registerPdfRoutes(app, cache) {
     } catch (err) {
       console.error('[Slice PDF Error]', err);
       res.status(500).json({ error: err.message || 'Failed to slice PDF' });
+    }
+  });
+
+  // 🧽 POST /api/admin/erase-pdf-zone
+  // Visual Zone Eraser / Redactor endpoint: draws a clean vector mask over unwanted spillover headers/footers
+  const { rgb } = require('pdf-lib');
+  app.post('/api/admin/erase-pdf-zone', pdfUploadBodyParser, async (req, res) => {
+    if (!isLocalhostConnection(req) || !checkIsAdmin(req, cache.activeTokens)) {
+      return res.status(403).json({ error: 'Accès interdit.' });
+    }
+    try {
+      const { filename, pageNum, zone } = req.body;
+      if (!filename || !pageNum || !zone) {
+        return res.status(400).json({ error: 'filename, pageNum et zone sont obligatoires.' });
+      }
+
+      const masterPath = path.join(PDF_MASTERS_DIR, path.basename(filename));
+      if (!fs.existsSync(masterPath)) {
+        return res.status(404).json({ error: `Fichier PDF introuvable : ${filename}` });
+      }
+
+      const srcBuffer = await fs.promises.readFile(masterPath);
+      const pdfDoc = await PDFDocument.load(srcBuffer);
+      const totalPages = pdfDoc.getPageCount();
+      const pIdx = Math.max(0, Math.min((parseInt(pageNum, 10) || 1) - 1, totalPages - 1));
+      const page = pdfDoc.getPage(pIdx);
+
+      const { width: pdfW, height: pdfH } = page.getSize();
+      const canvasW = zone.canvasWidth || pdfW;
+      const canvasH = zone.canvasHeight || pdfH;
+
+      const scaleX = pdfW / canvasW;
+      const scaleY = pdfH / canvasH;
+
+      const rectX = Math.max(0, zone.x * scaleX);
+      const rectW = Math.min(pdfW - rectX, zone.width * scaleX);
+      const rectH = Math.min(pdfH, zone.height * scaleY);
+      const rectY = Math.max(0, pdfH - ((zone.y + zone.height) * scaleY));
+
+      // Apply clean opaque white mask over the unwanted spillover area
+      page.drawRectangle({
+        x: rectX,
+        y: rectY,
+        width: rectW,
+        height: rectH,
+        color: rgb(1, 1, 1)
+      });
+
+      const updatedBuffer = Buffer.from(await pdfDoc.save());
+      await fs.promises.writeFile(masterPath, updatedBuffer);
+
+      const publicPath = path.join(PUBLIC_PDF_DIR, path.basename(filename));
+      compressPdfFile(masterPath, publicPath);
+
+      if (cache.searchCache) cache.searchCache.clear();
+
+      res.json({
+        success: true,
+        message: `🧽 Zone masquée avec succès sur la page ${pIdx + 1} de "${path.basename(filename)}" !`,
+        filename: path.basename(filename),
+        pageNum: pIdx + 1
+      });
+    } catch (err) {
+      console.error('[Erase PDF Zone Error]', err);
+      res.status(500).json({ error: err.message || 'Failed to erase PDF zone' });
     }
   });
 

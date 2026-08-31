@@ -115,7 +115,9 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
       if (isNaN(catId)) return;
       const targetCat = state.allCats.find(c => c.id === catId);
       if (targetCat) {
-        onSelectCat(targetCat);
+        // Read matched sub-cat index from search deep-link badge (0 = Master)
+        const matchedSub = parseInt(item.getAttribute('data-matched-subcat') || '0', 10);
+        onSelectCat(targetCat, matchedSub);
         if (window.innerWidth <= 850 && sidebar) {
           sidebar.classList.remove('open');
         }
@@ -273,6 +275,18 @@ function buildCatItem(cat) {
     branchBadge = '<span class="badge" style="font-size:9.5px; padding:1px 5px; background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3);"><i class="fa-solid fa-code-branch"></i> Sous-fiche</span>';
   }
 
+  // Sub-CAT search match badge: shows which sub-cat matched the query
+  let subCatBadge = '';
+  if (cat._matchedSubCatIdx >= 0 && Array.isArray(cat.sub_cats) && cat.sub_cats[cat._matchedSubCatIdx]) {
+    const matchedLabel = cat.sub_cats[cat._matchedSubCatIdx].label || `Sous-fiche ${cat._matchedSubCatIdx + 1}`;
+    // Clean label for display (truncate if too long)
+    const displayLabel = matchedLabel.length > 35 ? matchedLabel.substring(0, 32) + '…' : matchedLabel;
+    subCatBadge = `<div class="cat-item-subcat-match" style="font-size:9.5px; padding:2px 6px; margin-top:2px; border-radius:6px; background:rgba(168,85,247,0.12); color:#c084fc; border:1px solid rgba(168,85,247,0.25); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;"><i class="fa-solid fa-arrow-turn-down" style="margin-right:3px;"></i> ${escapeHTML(displayLabel)}</div>`;
+    li.setAttribute('data-matched-subcat', String(cat._matchedSubCatIdx + 1)); // 1-based index for switchToSubProfile
+  } else {
+    li.setAttribute('data-matched-subcat', '0');
+  }
+
   li.innerHTML = `
     <div class="cat-indicator ${cat.status}"></div>
     <div class="cat-item-content">
@@ -282,6 +296,7 @@ function buildCatItem(cat) {
         ${branchBadge}
         <span class="cat-item-status">${getStatusLabel(cat.status)}</span>
       </div>
+      ${subCatBadge}
     </div>
   `;
   return li;
@@ -299,6 +314,29 @@ function paintCatItem(li, cat) {
   if (statusEl) statusEl.textContent = getStatusLabel(cat.status);
   const indicator = li.querySelector('.cat-indicator');
   if (indicator) indicator.className = `cat-indicator ${cat.status}`;
+
+  // Update sub-cat match badge on re-paint (search query may have changed)
+  const existingBadge = li.querySelector('.cat-item-subcat-match');
+  if (cat._matchedSubCatIdx >= 0 && Array.isArray(cat.sub_cats) && cat.sub_cats[cat._matchedSubCatIdx]) {
+    const matchedLabel = cat.sub_cats[cat._matchedSubCatIdx].label || `Sous-fiche ${cat._matchedSubCatIdx + 1}`;
+    const displayLabel = matchedLabel.length > 35 ? matchedLabel.substring(0, 32) + '…' : matchedLabel;
+    li.setAttribute('data-matched-subcat', String(cat._matchedSubCatIdx + 1));
+    if (existingBadge) {
+      existingBadge.innerHTML = `<i class="fa-solid fa-arrow-turn-down" style="margin-right:3px;"></i> ${escapeHTML(displayLabel)}`;
+    } else {
+      const content = li.querySelector('.cat-item-content');
+      if (content) {
+        const badge = document.createElement('div');
+        badge.className = 'cat-item-subcat-match';
+        badge.style.cssText = 'font-size:9.5px; padding:2px 6px; margin-top:2px; border-radius:6px; background:rgba(168,85,247,0.12); color:#c084fc; border:1px solid rgba(168,85,247,0.25); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;';
+        badge.innerHTML = `<i class="fa-solid fa-arrow-turn-down" style="margin-right:3px;"></i> ${escapeHTML(displayLabel)}`;
+        content.appendChild(badge);
+      }
+    }
+  } else {
+    li.setAttribute('data-matched-subcat', '0');
+    if (existingBadge) existingBadge.remove();
+  }
 }
 
 // Animate a list item out, then remove it from the DOM (Phase 3.3).
@@ -443,6 +481,24 @@ function filterCats(onFilterTriggered) {
 
     // 1. Search text match (every search token must appear somewhere in the CAT content)
     const matchesQuery = queryTokens.length === 0 || queryTokens.every(token => cat._searchTokenStr.includes(token));
+
+    // Detect which specific sub-cat label matched the search query for deep-link badges.
+    // Only runs when the query matches AND is not trivially matching the Master title itself.
+    cat._matchedSubCatIdx = -1; // -1 = no specific sub-cat match (show Master)
+    if (matchesQuery && queryTokens.length > 0 && Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0) {
+      const masterStr = `${(cat.title || '').toLowerCase()} ${(cat.category || '').toLowerCase()}`;
+      const matchesMasterDirectly = queryTokens.every(t => masterStr.includes(t));
+      if (!matchesMasterDirectly) {
+        for (let si = 0; si < cat.sub_cats.length; si++) {
+          const sub = cat.sub_cats[si];
+          const subStr = `${(sub.label || '').toLowerCase()} ${(sub.summary || '').toLowerCase()} ${(sub.ordonnance || '').toLowerCase()} ${(sub.red_flags || '').toLowerCase()}`;
+          if (queryTokens.every(t => subStr.includes(t))) {
+            cat._matchedSubCatIdx = si;
+            break;
+          }
+        }
+      }
+    }
 
     // 2. Category filter match
     const matchesCategory = selectedCat === 'all' || cat.category === selectedCat;

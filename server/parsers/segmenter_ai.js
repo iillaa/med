@@ -159,7 +159,12 @@ Utilise le GUIDE STRUCTUREL pour identifier avec précision le début et la fin 
 RÈGLES IMPORTANTES :
 1. Ignore les pages d'introduction, préfaces, tables des matières ou pages de garde non cliniques.
 2. Si le document contient plusieurs molécules ou plusieurs pathologies distinctes (ex: Amoxicilline, Augmentin, Oxacilline, Céfazoline, Céfixime, Azithromycine, Ciprofloxacine, etc.), GÉNÈRE UNE FICHE GRANULAIRE DISTINCTE pour chaque molécule/pathologie avec ses pages exactes (ex: startPage: 1, endPage: 2).
-3. Pour chaque fiche identifiée :
+3. RÈGLE DE SÉCURITÉ CLINIQUE & MARGE DE SÉCURITÉ (CRITIQUE) :
+   - Mieux vaut TOUJOURS inclure une page de marge supplémentaire plutôt que de risquer de couper une posologie, un tableau, un schéma thérapeutique ou une ordonnance.
+   - Si une pathologie commence au milieu ou en bas de la page N, commence à la page N.
+   - Si une pathologie déborde en haut de la page N+1 (même pour 2 lignes de posologie ou de conclusion), ÉTENDS impérativement endPage à la page N+1.
+   - Si une page intermédiaire contient une image, un ECG, un schéma anatomique ou un arbre décisionnel, conserve-la obligatoirement dans la fiche.
+4. Pour chaque fiche identifiée :
    - "pathology" : Nom médical clair et précis (ex: "Amoxicilline", "Amoxicilline + Acide Clavulanique", "Asthme Aigu Grave", "Colique Néphrétique").
    - "title" : Nom de fichier court et canonique sans accents ni espaces (ex: "Amoxicilline.pdf", "Augmentin_Amox_Clav.pdf", "Colique_Nephretique.pdf").
    - "specialty" : Une spécialité médicale parmi : Cardiologie, Pneumologie, Gastro-entérologie, Neurologie, Dermatologie, Pédiatrie, Gynécologie-Obstétrique, Urgences & Réanimation, Infectiologie, Endocrinologie, Rhumatologie, ORL, Ophtalmologie, Néphrologie & Urologie, Hématologie, Psychiatrie, Médecine Interne, Thérapeutique Générale.

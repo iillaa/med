@@ -422,13 +422,56 @@ ${sourcesSummary}
    - Insuffisance Rénale / Gériatrie : Adapter les doses selon le DFG (Cockcroft) et éliminer les molécules néphrotoxiques.
    - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie ne la concerne pas.
 
-4. SOUS-PROFILS CLINIQUES ET SUB-CATS DÉDIÉS :
-   - Pour CHAQUE sous-fiche ("sub_cats"), le champ "summary" DOIT suivre ce format condensé en 4 étapes :
+4. ARCHITECTURE MASTER CAT & SOUS-FICHES (SUB-CATS) — CHARTE CLINIQUE FONDATRICE :
+
+   A. IDENTITÉ DU MASTER CAT (Fiche Principale) :
+   - Le Master CAT représente UNE pathologie précise et autonome de consultation ou d'urgence (ex: Diabète de type 2, Otite Moyenne Aiguë, Épistaxis, Abcès Dentaire).
+   - INTERDICTION FORMELLE de regrouper artificiellement des maladies différentes sous un titre parapluie (ex: ne JAMAIS fusionner Otite + Sinusite + Épistaxis + Abcès Dentaire dans un seul Master — chacune est une CAT distincte).
+   - Le Master DOIT être 100% fonctionnel et autosuffisant pour le cas type que le médecin rencontrera le plus souvent. Son ordonnance est complète en 4 sections. Le médecin ne doit JAMAIS être obligé d'ouvrir un sous-onglet pour trouver la posologie du cas standard.
+   - Le Master mentionne dans ses drapeaux rouges ou sa section "Conduite immédiate si drapeau rouge" les complications graves qui ont leur propre sous-fiche dédiée (ex: "Si signes d'acidocétose (polypnée de Kussmaul, haleine acétonique, glycémie > 3g/L) → protocole d'urgence dédié"). Ceci permet au médecin de savoir quand basculer sur le sous-onglet.
+
+   B. LES 4 CRITÈRES DE DÉCISION POUR CRÉER UNE SOUS-FICHE (Sub-CAT) :
+   Ne créer une sous-fiche QUE SI la situation satisfait au moins l'un de ces 4 critères cliniques :
+
+   CRITÈRE 1 — RUPTURE THÉRAPEUTIQUE MAJEURE :
+   La classe pharmacologique, la voie d'administration ou la stratégie thérapeutique change radicalement par rapport au Master.
+   Exemple : Asthme stable (Symbicort inhalé) → Sub-CAT "Asthme Aigu Grave" (Nébulisation Salbutamol+Ipratropium sous O2 + Corticoïdes IV).
+
+   CRITÈRE 2 — COMPLICATION AIGUË / URGENCE VITALE DÉCOMPENSÉE :
+   La maladie décompense vers une défaillance d'organe, un état de choc ou un risque vital nécessitant réanimation ou chirurgie urgente.
+   Exemple : Diabète 2 → Sub-CAT "Acidocétose Diabétique" (Réhydratation NaCl 0.9% + Insuline IV titrée).
+   Exemple : Ulcère gastro-duodénal → Sub-CAT "Hémorragie Digestive Haute" (IPP IV 80mg bolus + 8mg/h IVSE, FOGD urgente).
+
+   CRITÈRE 3 — VARIANTE CLINIQUE / PHÉNOTYPIQUE DISTINCTE :
+   Deux formes de la maladie se présentent différemment au cabinet et nécessitent des diagnostics et traitements distincts.
+   Exemple : Otite → Sub-CAT "Otite Externe Diffuse" (Gouttes Polydexa locales, PAS d'ATB oral) distincte de l'OMA (Amoxicilline orale).
+   Exemple : Gale → Sub-CAT "Gale Norvégienne Hyperkératosique" (Ivermectine orale + Isolement strict).
+
+   CRITÈRE 4 — TERRAIN AVEC CONTRE-INDICATION FORMELLE MODIFIANT LA DCI :
+   Créer un sous-profil Grossesse ou Pédiatrie UNIQUEMENT si les médicaments de 1ère intention du Master sont formellement proscrits sur ce terrain, nécessitant une substitution complète de molécule.
+   Exemple : Abcès dentaire chez la femme enceinte → AINS proscrits → Spiramycine/Métronidazole + Paracétamol pur.
+   CONTRE-EXEMPLE (INTERDIT) : Ne JAMAIS créer un Sub-CAT pédiatrique pour l'OMA ou la Bronchiolite, car la pédiatrie EST DÉJÀ le cœur de la fiche principale avec ses posologies en mg/kg/j.
+
+   C. RÈGLE D'ABSTENTION (0 Sub-CAT OBLIGATOIRE) :
+   Si AUCUN des 4 critères n'est satisfait, le tableau "sub_cats" DOIT être vide [].
+   Exemples de CATs à 0 Sub-CAT : Bouchon de Cérumen, Phtiriase pubienne, Aphtose buccale, Furoncle simple, Hémorragie sous-conjonctivale, Constipation fonctionnelle simple.
+   INTERDICTION FORMELLE d'inventer des sous-fiches de remplissage ou des templates génériques (Enfant / Grossesse / Sujet âgé) par défaut sans justification clinique.
+
+   D. CONTRAT DE COHÉRENCE MASTER ↔ SUB-CAT :
+   - COMPLÉMENTARITÉ STRICTE : La sous-fiche est un zoom chirurgical. Elle ne répète JAMAIS les généralités, la physiopathologie ou les définitions déjà présentes dans le Master. Elle part du contexte du Master et se concentre EXCLUSIVEMENT sur ce qui change.
+   - NON-CONTRADICTION : La sous-fiche ne contredit JAMAIS la ligne thérapeutique du Master, sauf pour substituer formellement une molécule contre-indiquée sur le terrain spécifique.
+   - NON-DUPLICATION : Si le Master couvre DÉJÀ un terrain dans ses posologies (ex: OMA avec mg/kg/j pédiatriques), ne PAS créer une sous-fiche redondante pour ce terrain.
+   - LIMITES DE CONTENU : Master summary = physiopathologie, diagnostic, bilan, traitement standard, orientation. Sub-CAT summary = UNIQUEMENT ce qui diverge : posologies adaptées, molécules spécifiques, protocole de réanimation, critères de transfert.
+
+   E. FORMAT OBLIGATOIRE DE CHAQUE SOUS-FICHE :
+   - Le champ "label" : Emoji distinctif + Intitulé médical précis (ex: "🚨 Acidocétose Diabétique", "🤰 Grossesse & AINS Proscrits").
+   - Le champ "summary" DOIT suivre ce format condensé en 4 étapes :
      **0. Spécificités & Urgence du Profil :** (Mesures réflexes, détresse, seuils d'alerte vitale)
      **1. Diagnostic & Particularités Cliniques :** (Formes atypiques, examens spécifiques à ce profil)
      **2. Prise en Charge & Adaptation Thérapeutique :** (Molécules autorisées, posologies adaptées mg/kg/j ou DFG, exclusions)
      **3. Surveillance, Hospitalisation & Suivi :** (Critères d'admission, délai de contrôle)
    - Le champ "ordonnance" de chaque sous-fiche DOIT suivre la réplique en 4 sections (**TRAITEMENT NON MÉDICAMENTEUX & RHD**, **1ère INTENTION**, **ALTERNATIVES [OU]**, **TRAITEMENT SYMPTOMATIQUE / ADJUVANT**).
+   - Le champ "red_flags" contient les signaux d'alarme PROPRES à ce sous-profil (distincts de ceux du Master).
    - INTERDICTION STRICTE DE LIENS MARKDOWN DANS LE SUMMARY : Ne génère JAMAIS de liens ou boutons markdown type [🚨 Ouvrir la Sous-Fiche ...](subcat:1) ou [👶 Sous-Fiche ...](subcat:2) dans le texte du summary principal. L'application affiche automatiquement des onglets interactifs.
 `;
 
@@ -450,8 +493,13 @@ Ne génère AUCUNE sous-fiche ("sub_cats": []). Concentre toute l'information es
 `;
   } else {
     systemPrompt += `
-MODE STANDARD AUTOMATIQUE :
-Si la pathologie présente des complications aiguës majeures, des formes graves ou des profils cliniques distincts nécessitant une prise en charge dédiée (ex: Diabète ➔ Acidocétose, Diarrhée ➔ SRO Enfant / Forme fébrile glairo-sanglante, HTA ➔ Urgence hypertensive), génère 1 à 3 sous-fiches pertinentes dans "sub_cats" selon le besoin clinique réel. Si la pathologie est simple ou univoque, "sub_cats" sera vide [].
+MODE STANDARD AUTOMATIQUE (APPLIQUE LA CHARTE CLINIQUE SECTION 4) :
+Applique strictement les 4 critères de décision (Section 4.B) pour déterminer le nombre de sous-fiches :
+- Si la pathologie est simple ou univoque et qu'AUCUN critère n'est satisfait : "sub_cats" DOIT être vide [].
+- Si 1 à 4 critères sont satisfaits : génère de 1 à 7 sous-fiches pertinentes selon la complexité clinique RÉELLE (pas de templates artificiels).
+- Exemples de sous-fiches légitimes : Diabète 2 → Acidocétose / Coma Hyperosmolaire / Pied Diabétique ; Asthme → AAG ; Ulcère → Hémorragie Digestive Haute ; Abcès dentaire → Cellulite Cervico-Faciale.
+- INTERDIT : Ne JAMAIS créer de sous-fiches par défaut de type "Enfant" / "Grossesse" / "Sujet âgé" sauf si le Critère 4 (contre-indication formelle modifiant la DCI) est explicitement satisfait.
+- Respecte le contrat de cohérence Master ↔ Sub-CAT (Section 4.D) : complémentarité, non-contradiction, non-duplication.
 `;
   }
 

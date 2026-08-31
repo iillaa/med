@@ -59,7 +59,17 @@
       "lastSeen": "2026-08-26T15:23:57.550Z",
       "lastIp": "154.121.161.85",
       "isAdminDevice": false
+    },
+    "drcat-inst-bbe18cff-3c1b-470f-a7ae-220a05552790": {
+      "installId": "drcat-inst-bbe18cff-3c1b-470f-a7ae-220a05552790",
+      "firstSeen": "2026-08-30T21:02:47.450Z",
+      "requestCount": 58,
+      "appVersion": "1.16.3",
+      "platform": "web_pwa",
+      "lastSeen": "2026-08-30T23:52:31.774Z",
+      "lastIp": "::1",
+      "isAdminDevice": true
     }
   },
-  "lastUpdated": "2026-08-27T17:08:32.295Z"
+  "lastUpdated": "2026-08-30T23:52:33.453Z"
 }

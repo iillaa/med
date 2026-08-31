@@ -400,7 +400,7 @@ export default {
     // 10. GET /api/version
     if (url.pathname === '/api/version') {
       return new Response(JSON.stringify({
-        version: "1.16.3",
+        version: "1.17.0",
         minVersion: "1.0.0"
       }), {
         status: 200,
