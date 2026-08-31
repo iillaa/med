@@ -419,7 +419,8 @@ ${sourcesSummary}
 3. RÈGLES DE SÉCURITÉ CLINIQUE PAR TERRAIN (INVARIANTS TRANSVERSAUX) :
    - Pédiatrie : Posologies obligatoirement exprimées en dose-poids (mg/kg/j ou cuillère-mesure selon le poids). Rappel du seuil néonatal (< 2 mois = avis spécialisé/hospitalier).
    - Grossesse / Allaitement : Respect strict des données du CRAT. Mentionner les contre-indications absolues (ex: IEC/ARA2, AINS aux T2/T3).
-   - Insuffisance Rénale / Gériatrie : Adapter les doses selon le DFG (Cockcroft) et éliminer les molécules néphrotoxiques.
+   - Insuffisance Rénale & Gériatrie : Adapter les posologies selon le DFG (Cockcroft) et la fragilité globale (règle « start low, go slow »). Proscrire les molécules inappropriées chez le sujet âgé (BZD à demi-vie longue, molécules anticholinergiques comme l'Hydroxyzine ➔ risque majeur de chutes, rétention d'urine et confusion).
+   - Psychiatrie & Volet Médico-Légal (Algérie) : Évaluation systématique du Risque Suicidaire (Grille RUD : Risque / Urgence / Dangerosité) pour les troubles de l'humeur et états d'agitation. Utiliser exclusivement les termes légaux « Hospitalisation Libre » ou « Hospitalisation Sans Consentement / Placement d'Office » (Loi sanitaire n° 18-11).
    - Anti-Hallucination : N'invente AUCUNE section pédiatrique ou gynécologique si la pathologie ne la concerne pas.
 
 4. ARCHITECTURE MASTER CAT & SOUS-FICHES (SUB-CATS) — CHARTE CLINIQUE FONDATRICE :

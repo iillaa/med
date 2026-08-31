@@ -155,6 +155,8 @@ const VALID_CATEGORIES = [
   'Urologie',
   'Néphrologie',
   'Endocrinologie',
+  'Stomatologie',
+  'Odontostomatologie',
   'Urgences',
   'Administratif'
 ];
