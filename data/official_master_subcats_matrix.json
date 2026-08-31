@@ -1,0 +1,3048 @@
+{
+  "version": "1.17.0",
+  "generatedAt": "2026-08-31T14:03:40.473Z",
+  "stats": {
+    "totalMasters": 60,
+    "totalSubCats": 63,
+    "masterGrades": {
+      "A": 51,
+      "B": 6,
+      "C": 3
+    },
+    "subGrades": {
+      "A": 43,
+      "B": 7,
+      "C": 13
+    }
+  },
+  "taxonomy": [
+    {
+      "id": 1,
+      "title": "Reflux Gastro-Œsophagien (RGO)",
+      "category": "Gastro-entérologie",
+      "keywords": [
+        "reflux gastro-oesophagien",
+        "rgo",
+        "pyrosis",
+        "regurgitation",
+        "oesophagite",
+        "ipp",
+        "omeprazole",
+        "gaviscon"
+      ],
+      "sub_cats": [
+        {
+          "id": "1.1",
+          "label": "🚨 Œsophagite Sévère & Sténose Peptique (Endoscopie / Dysphagie)",
+          "keywords": [
+            "oesophagite peptique",
+            "stenose",
+            "dysphagie",
+            "endoscopie",
+            "fibroscopie",
+            "savary miller"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 15,
+            "matchedPdfs": [
+              "CAT ORL.pdf",
+              "Formes d_administration des médicaments.pdf",
+              "Gastrologie_.pdf",
+              "Infectieux_.pdf"
+            ]
+          }
+        },
+        {
+          "id": "1.2",
+          "label": "🤰 RGO de la Femme Enceinte (Mesures posturales / Alginates)",
+          "keywords": [
+            "rgo grossesse",
+            "femme enceinte",
+            "pyrosis gravidique",
+            "alginate",
+            "gaviscon"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 33,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "1médicaments.pdf",
+              "1Médicaments(1).pdf",
+              "2Médicaments.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 34,
+        "matchedPdfs": [
+          "CAT Gynécologie_(3).pdf",
+          "Médicaments en Gastrologie_.pdf",
+          "150 Ordonnances types.pdf",
+          "1médicaments.pdf"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Ulcère Gastro-Duodénal (UGD)",
+      "category": "Gastro-entérologie",
+      "keywords": [
+        "ulcere gastro duodenal",
+        "ugd",
+        "ulcere gastrique",
+        "ulcere duodenal",
+        "epigastralgie",
+        "crampe",
+        "helicobacter pylori"
+      ],
+      "sub_cats": [
+        {
+          "id": "2.1",
+          "label": "🚨 Hémorragie Digestive Haute Ulcéreuse (Hématémèse / Méléna / IPP IV)",
+          "keywords": [
+            "hemorragie digestive",
+            "hematemese",
+            "melena",
+            "ipp bolus",
+            "perfusion",
+            "fogd urgente"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 23,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "Antibiotiques .pdf",
+              "Cardiologie_1.pdf",
+              "CAT Dr_Boughoufala.pdf"
+            ]
+          }
+        },
+        {
+          "id": "2.2",
+          "label": "🚨 Perforation Ulcéreuse & Péritonite Aiguë (Ventre de bois / Pneumopéritoine)",
+          "keywords": [
+            "perforation ulcere",
+            "peritonite",
+            "ventre de bois",
+            "pneumoperitoine",
+            "abdomen aigu"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 1,
+            "matchedPdfs": [
+              "Gastrologie_.pdf"
+            ]
+          }
+        },
+        {
+          "id": "2.3",
+          "label": "🦠 Éradication d'Helicobacter pylori (Quadrithérapie bismuthée Pylera)",
+          "keywords": [
+            "eradication helicobacter",
+            "pylera",
+            "bismuth",
+            "quadritherapie",
+            "test respiratoire"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 0,
+            "matchedPdfs": []
+          }
+        }
+      ],
+      "sub_cats_count": 3,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 17,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Cardiologie_1.pdf",
+          "Gastrologie_.pdf",
+          "Médicaments des Urgences_1.pdf"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Gastro-entérite Aiguë & TIAC",
+      "category": "Gastro-entérologie",
+      "keywords": [
+        "gastro enterite",
+        "diarrhee aigue",
+        "tiac",
+        "intoxication alimentaire",
+        "vomissement",
+        "sro",
+        "rehydratation"
+      ],
+      "sub_cats": [
+        {
+          "id": "3.1",
+          "label": "🚨 Déshydratation Sévère & Choc Hypovolémique (Remplissage NaCl 0.9%)",
+          "keywords": [
+            "deshydratation severe",
+            "choc hypovolemique",
+            "pli cutane",
+            "marbrures",
+            "remplissage"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 12,
+            "matchedPdfs": [
+              "Pédiatrie_.pdf",
+              "Cardiologie_1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "Entretiens_.pdf"
+            ]
+          }
+        },
+        {
+          "id": "3.2",
+          "label": "🚨 Diarrhée Invasive & Syndrome Dysentérique Fébriles (Selles sanglantes / ATB)",
+          "keywords": [
+            "syndrome dysenterique",
+            "selles sanglantes",
+            "glaires",
+            "ciprofloxacine",
+            "cotrimoxazole",
+            "shigella"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 12,
+            "matchedPdfs": [
+              "Cardiologie_1.pdf",
+              "Entretiens_.pdf",
+              "Gastrologie_.pdf",
+              "1Antibiotiques.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 40,
+        "matchedPdfs": [
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf",
+          "150 Ordonnances types.pdf",
+          "Antibiotiques .pdf"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Colopathie Fonctionnelle / Syndrome de l'Intestin Irritable",
+      "category": "Gastro-entérologie",
+      "keywords": [
+        "colopathie fonctionnelle",
+        "intestin irritable",
+        "sii",
+        "douleur abdominale",
+        "ballonnement",
+        "spasfon",
+        "meteorisme"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 33,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Autres CAT.pdf",
+          "CAT Pédiatrie_(2).pdf",
+          "CAT Dr_Abouimed_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Constipation Fonctionnelle de l'Adulte",
+      "category": "Gastro-entérologie",
+      "keywords": [
+        "constipation",
+        "transit",
+        "macrogol",
+        "forlax",
+        "laxatif",
+        "fibres",
+        "exonération"
+      ],
+      "sub_cats": [
+        {
+          "id": "5.1",
+          "label": "🚨 Fécalome Obstructif du Sujet Âgé (Toucher rectal / Normacol / Évacuation)",
+          "keywords": [
+            "fecalome",
+            "fausse diarrhee",
+            "toucher rectal",
+            "normacol",
+            "sujet age"
+          ],
+          "evaluation": {
+            "score": 84,
+            "grade": "Grade A",
+            "pdfCount": 7,
+            "matchedPdfs": [
+              "CAT Pédiatrie_(4).pdf",
+              "150 Ordonnances types.pdf",
+              "1médicaments.pdf",
+              "1Médicaments(1).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 30,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Médicaments en Pédiatrie .pdf",
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "title": "Crise Hémorroïdaire & Thrombose",
+      "category": "Gastro-entérologie",
+      "keywords": [
+        "hemorroides",
+        "crise hemorroidaire",
+        "rectorragie",
+        "veinotonique",
+        "daflon",
+        "proctologie"
+      ],
+      "sub_cats": [
+        {
+          "id": "6.1",
+          "label": "🚨 Thrombose Hémorroïdaire Externe Hyperalgique (Incision / Excision)",
+          "keywords": [
+            "thrombose hemorroidaire",
+            "nodule bleute",
+            "incision",
+            "excision",
+            "anesthesie locale"
+          ],
+          "evaluation": {
+            "score": 58,
+            "grade": "Grade B",
+            "pdfCount": 5,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "CAT Gynécologie_(3).pdf",
+              "Contraception_.pdf",
+              "Dermatologie_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 67,
+        "grade": "Grade B",
+        "pdfCount": 5,
+        "matchedPdfs": [
+          "Gastrologie_.pdf",
+          "Médicaments en Gastrologie.pdf",
+          "150 Ordonnances types.pdf",
+          "CAT Gynécologie_(3).pdf"
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "title": "Hypertension Artérielle Essentielle (HTA)",
+      "category": "Cardiologie",
+      "keywords": [
+        "hypertension arterielle",
+        "hta",
+        "pression arterielle",
+        "mapa",
+        "automesure",
+        "iec",
+        "ara2",
+        "amlodipine"
+      ],
+      "sub_cats": [
+        {
+          "id": "7.1",
+          "label": "🚨 Urgence Hypertensive avec Souffrance Viscérale (Nicardipine Loxen IVSE)",
+          "keywords": [
+            "urgence hypertensive",
+            "encephalopathie",
+            "oap",
+            "dissection",
+            "nicardipine",
+            "loxen iv"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 21,
+            "matchedPdfs": [
+              "Cardiologie_1.pdf",
+              "CAT Gynécologie_(3).pdf",
+              "Entretiens_.pdf",
+              "CAT Urgences(1).pdf"
+            ]
+          }
+        },
+        {
+          "id": "7.2",
+          "label": "🤰 HTA Gravidique & Pré-éclampsie (Méthyldopa / Nicardipine / Protéinurie)",
+          "keywords": [
+            "hta gravidique",
+            "preeclampsie",
+            "grossesse",
+            "methyldopa",
+            "aldomet",
+            "proteinurie"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 36,
+            "matchedPdfs": [
+              "CAT Gynécologie_(3).pdf",
+              "Contraception_.pdf",
+              "Entretiens_.pdf",
+              "Gynécologie_1.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 42,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1CAT Gynécologie_.pdf",
+          "1Médicaments(1).pdf",
+          "2Médicaments.pdf"
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "title": "Insuffisance Cardiaque Chronique",
+      "category": "Cardiologie",
+      "keywords": [
+        "insuffisance cardiaque",
+        "dyspnee d effort",
+        "oedemes membres inferieurs",
+        "bnp",
+        "fevg",
+        "lasilix",
+        "furosemide"
+      ],
+      "sub_cats": [
+        {
+          "id": "8.1",
+          "label": "🚨 Œdème Aigu du Poumon (OAP Décompensé / Furosemide IV / O2 / VNI)",
+          "keywords": [
+            "oap",
+            "oedeme aigu du poumon",
+            "rales crepitants",
+            "furosemide iv",
+            "lasilix iv",
+            "vni",
+            "urgence vitale"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 17,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "Cardiologie_1.pdf",
+              "CAT Dr_Abouimed_.pdf",
+              "CAT Dr_Boughoufala.pdf"
+            ]
+          }
+        },
+        {
+          "id": "8.2",
+          "label": "🫘 Insuffisance Cardiaque à FEVG Altérée (Quadrithérapie HFrEF : IEC/ARNI + BB + iSGLT2 + Spironolactone)",
+          "keywords": [
+            "hfref",
+            "fevg alteree",
+            "sacubitril",
+            "entresto",
+            "dapagliflozine",
+            "bisoprolol",
+            "spironolactone"
+          ],
+          "evaluation": {
+            "score": 36,
+            "grade": "Grade C",
+            "pdfCount": 3,
+            "matchedPdfs": [
+              "Cardiologie_1.pdf",
+              "ECG.pdf",
+              "Antibiotiques1.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 16,
+        "matchedPdfs": [
+          "CAT Dr_Boughoufala.pdf",
+          "CAT Gynécologie_(3).pdf",
+          "Médicaments des urgences .pdf",
+          "Médicaments des Urgences_1.pdf"
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "title": "Douleur Thoracique Aiguë & Suspicion de Syndrome Coronarien Aigu (SCA)",
+      "category": "Cardiologie",
+      "keywords": [
+        "douleur thoracique",
+        "syndrome coronarien",
+        "sca",
+        "infarctus",
+        "troponine",
+        "ecg",
+        "angor",
+        "stemi",
+        "nstemi"
+      ],
+      "sub_cats": [
+        {
+          "id": "9.1",
+          "label": "🚨 SCA ST+ (Infarctus du Myocarde STEMI / Coronarographie / SAMU 15)",
+          "keywords": [
+            "stemi",
+            "infarctus",
+            "sus decalage st",
+            "coronarographie",
+            "angioplastie",
+            "thrombolyse",
+            "clopidogrel"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 16,
+            "matchedPdfs": [
+              "CAT Gynécologie_(3).pdf",
+              "ECG.pdf",
+              "Entretiens_.pdf",
+              "Réanimation_.pdf"
+            ]
+          }
+        },
+        {
+          "id": "9.2",
+          "label": "🚨 Angor Instable & SCA Non-ST+ (NSTEMI / Double antiagrégation / Fondaparinux)",
+          "keywords": [
+            "nstemi",
+            "angor instable",
+            "troponine elevee",
+            "aspirine",
+            "ticagrelor",
+            "fondaparinux"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 20,
+            "matchedPdfs": [
+              "ECG.pdf",
+              "Médicaments des urgences .pdf",
+              "Médicaments des Urgences_1.pdf",
+              "1Anti-inflammatoires.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 41,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Cardiologie_1.pdf",
+          "CAT Dr_Boughoufala.pdf",
+          "CAT Urgences1.pdf"
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "title": "Fibrillation Atriale (FA)",
+      "category": "Cardiologie",
+      "keywords": [
+        "fibrillation atriale",
+        "fa",
+        "arythmie",
+        "palpitations",
+        "anticoagulant",
+        "aod",
+        "avk",
+        "chads vasc"
+      ],
+      "sub_cats": [
+        {
+          "id": "10.1",
+          "label": "🚨 FA Rapide Mal Tolérée & Choc Électrique Externe (Insuffisance cardiaque aiguë)",
+          "keywords": [
+            "fa rapide",
+            "choc electrique",
+            "cardioversion",
+            "amiodarone",
+            "cordarone",
+            "instabilite hemodynamique"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 11,
+            "matchedPdfs": [
+              "Cardiologie_1.pdf",
+              "ECG.pdf",
+              "Antibiotiques1.pdf",
+              "CAT Dr_Boughoufala.pdf"
+            ]
+          }
+        },
+        {
+          "id": "10.2",
+          "label": "⚖️ Gestion des Anticoagulants & Relais Chirurgical (AVK / AOD / Fenêtre)",
+          "keywords": [
+            "relais avk",
+            "heparine",
+            "inr cible",
+            "aod chirurgie",
+            "fenetre therapeutique",
+            "prevention avc"
+          ],
+          "evaluation": {
+            "score": 71,
+            "grade": "Grade B",
+            "pdfCount": 6,
+            "matchedPdfs": [
+              "Cardiologie_1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "Antibiotiques1.pdf",
+              "CAT Dr_Kacem.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 75,
+        "matchedPdfs": [
+          "ECG.pdf",
+          "150 Ordonnances types.pdf",
+          "1Anti-inflammatoires.pdf",
+          "1Antibiotiques.pdf"
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "title": "Thrombose Veineuse Profonde (TVP) & Phlébite",
+      "category": "Cardiologie",
+      "keywords": [
+        "thrombose veineuse profonde",
+        "tvp",
+        "phlebite",
+        "gros mollet",
+        "d dimeres",
+        "echo doppler",
+        "anticoagulant"
+      ],
+      "sub_cats": [
+        {
+          "id": "11.1",
+          "label": "🚨 Embolie Pulmonaire Aiguë (Dyspnée brutale / Douleur thoracique / Scanner TAP)",
+          "keywords": [
+            "embolie pulmonaire",
+            "ep",
+            "angioscanner",
+            "dyspnee brutale",
+            "tachycardie",
+            "coeur pulmonaire aigu"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 71,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "Cardiologie_1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Gynécologie_(3).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 22,
+        "matchedPdfs": [
+          "Cardiologie_1.pdf",
+          "Contraception_.pdf",
+          "Signes pathognomoniques.pdf",
+          "CAT Dr_Abouimed_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "title": "Asthme de l'Adulte",
+      "category": "Pneumologie",
+      "keywords": [
+        "asthme",
+        "crise d asthme",
+        "sibilants",
+        "bronchospasme",
+        "salbutamol",
+        "ventoline",
+        "corticoides inhales"
+      ],
+      "sub_cats": [
+        {
+          "id": "12.1",
+          "label": "🚨 Asthme Aigu Grave (AAG / Nébulisation Salbutamol+Ipratropium sous O2 + Corticoïdes IV)",
+          "keywords": [
+            "asthme aigu grave",
+            "aag",
+            "nebulisation",
+            "salbutamol",
+            "ipratropium",
+            "atrovent",
+            "dep",
+            "silence auscultatoire"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 36,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Gynécologie_(3).pdf",
+              "Médicaments des urgences .pdf",
+              "Médicaments des Urgences_1.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 33,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Médicaments en Pédiatrie .pdf",
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "title": "Bronchite Aiguë de l'Adulte Sain",
+      "category": "Pneumologie",
+      "keywords": [
+        "bronchite aigue",
+        "toux",
+        "expectoration",
+        "fievre",
+        "paracetamol",
+        "pas d antibiotique"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 35,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Antibiotiques.pdf",
+          "2Médicaments.pdf",
+          "Pneumologie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "title": "Pneumopathie Aiguë Communautaire (PAC)",
+      "category": "Pneumologie",
+      "keywords": [
+        "pneumopathie",
+        "pac",
+        "foyer pulmonaire",
+        "crepitants",
+        "amoxicilline",
+        "radiographie thoracique",
+        "crb65"
+      ],
+      "sub_cats": [
+        {
+          "id": "14.1",
+          "label": "🚨 PAC Grave & Sepsis Respiratoire (Score CRB65 ≥ 2 / Hospitalisation / C3G IV + Macrolide)",
+          "keywords": [
+            "pac grave",
+            "crb65",
+            "sepsis",
+            "ceftriaxone",
+            "clarithromycine",
+            "detresse respiratoire"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 23,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "Dermatologie_.pdf",
+              "Entretiens_.pdf",
+              "Pédiatrie_.pdf"
+            ]
+          }
+        },
+        {
+          "id": "14.2",
+          "label": "🦠 Pneumopathie Atypique à Mycoplasma pneumoniae (Macrolides / Sujet jeune)",
+          "keywords": [
+            "pneumopathie atypique",
+            "mycoplasme",
+            "chlamydia",
+            "azithromycine",
+            "erythromycine",
+            "sujet jeune"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 27,
+            "matchedPdfs": [
+              "CAT Gynécologie_(3).pdf",
+              "Antibiotiques .pdf",
+              "150 Ordonnances types.pdf",
+              "CAT Dr_Kacem.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 50,
+        "matchedPdfs": [
+          "1Antibiotiques.pdf",
+          "1Médicaments(1).pdf",
+          "2Médicaments.pdf",
+          "Antibiotiques .pdf"
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "title": "Exacerbation Aiguë de BPCO",
+      "category": "Pneumologie",
+      "keywords": [
+        "bpco",
+        "exacerbation bpco",
+        "emphyseme",
+        "bronchite chronique",
+        "dyspnee",
+        "anthonisen",
+        "antibiotherapie"
+      ],
+      "sub_cats": [
+        {
+          "id": "15.1",
+          "label": "🚨 Décompensation BPCO & Acidose Respiratoire (VNI / Transfert Réanimation / Gazométrie)",
+          "keywords": [
+            "decompensation bpco",
+            "hypercapnie",
+            "acidose respiratoire",
+            "vni",
+            "gaz du sang",
+            "encombrement"
+          ],
+          "evaluation": {
+            "score": 87,
+            "grade": "Grade A",
+            "pdfCount": 7,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Dr_Abouimed_.pdf",
+              "Entretiens_.pdf",
+              "Pneumologie_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 10,
+        "matchedPdfs": [
+          "CAT Dr_Boughoufala.pdf",
+          "ECG.pdf",
+          "Entretiens_.pdf",
+          "Formes d_administration des médicaments.pdf"
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "title": "Otite Moyenne Aiguë (OMA) Purulente",
+      "category": "ORL",
+      "keywords": [
+        "otite moyenne aigue",
+        "oma",
+        "tympan bombe",
+        "otalgie",
+        "amoxicilline",
+        "otoscopie",
+        "paracentese"
+      ],
+      "sub_cats": [
+        {
+          "id": "16.1",
+          "label": "🚨 Mastoïdite Aiguë & Complications Endocrâniennes (Oedème rétro-auriculaire / Scanner)",
+          "keywords": [
+            "mastoidite",
+            "retro auriculaire",
+            "decollement pavillon",
+            "scanner rochers",
+            "ceftriaxone iv"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 1,
+            "matchedPdfs": [
+              "Urologie_.pdf"
+            ]
+          }
+        },
+        {
+          "id": "16.2",
+          "label": "👶 Syndrome Otite-Conjonctivite à Haemophilus influenzae (Augmentin)",
+          "keywords": [
+            "otite conjonctivite",
+            "haemophilus",
+            "augmentin",
+            "amoxicilline acide clavulanique",
+            "nourrisson"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 45,
+            "matchedPdfs": [
+              "Antibiotiques .pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Gynécologie_(3).pdf",
+              "CAT Pédiatrie_1.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 66,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "ORL.pdf",
+          "1Anti-inflammatoires.pdf",
+          "1Antibiotiques.pdf"
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "title": "Otite Externe Diffuse (Baignade / Otomycose)",
+      "category": "ORL",
+      "keywords": [
+        "otite externe",
+        "douleur tragus",
+        "conduit oedemateux",
+        "gouttes auriculaires",
+        "polydexa",
+        "otomycose"
+      ],
+      "sub_cats": [
+        {
+          "id": "17.1",
+          "label": "🚨 Otite Externe Nécrosante / Maligne du Diabétique (Pseudomonas aeruginosa / Ciprofloxacine)",
+          "keywords": [
+            "otite externe maligne",
+            "otite necrosante",
+            "diabetique",
+            "pseudomonas",
+            "ciprofloxacine",
+            "paralysie faciale"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 19,
+            "matchedPdfs": [
+              "ORL.pdf",
+              "1médicaments.pdf",
+              "1Médicaments(1).pdf",
+              "CAT ORL.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 77,
+        "grade": "Grade A",
+        "pdfCount": 6,
+        "matchedPdfs": [
+          "CAT ORL.pdf",
+          "Médicaments1 .pdf",
+          "ORL.pdf",
+          "Antibiotiques1.pdf"
+        ]
+      }
+    },
+    {
+      "id": 18,
+      "title": "Bouchon de Cérumen",
+      "category": "ORL",
+      "keywords": [
+        "bouchon de cerumen",
+        "cerumen",
+        "hypoacousie",
+        "cerulyx",
+        "lavage d oreille"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 58,
+        "grade": "Grade B",
+        "pdfCount": 5,
+        "matchedPdfs": [
+          "CAT Dr_Abouimed_.pdf",
+          "CAT ORL.pdf",
+          "Antibiotiques .pdf",
+          "Neurologie.pdf"
+        ]
+      }
+    },
+    {
+      "id": 19,
+      "title": "Angine Aiguë (Érythémateuse & Pultacée)",
+      "category": "ORL",
+      "keywords": [
+        "angine aigue",
+        "odynophagie",
+        "tdr streptocoque",
+        "mac isaac",
+        "amoxicilline",
+        "amygdales"
+      ],
+      "sub_cats": [
+        {
+          "id": "19.1",
+          "label": "🚨 Phlegmon Péri-Amygdalien (Trismus / Déviation luette / Drainage chirurgical)",
+          "keywords": [
+            "phlegmon",
+            "peri amygdalien",
+            "trismus",
+            "deviation luette",
+            "ponction",
+            "drainage"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 16,
+            "matchedPdfs": [
+              "2Médicaments.pdf",
+              "CAT Gynécologie_(3).pdf",
+              "CAT Pédiatrie_1.pdf",
+              "Rhumatologie_.pdf"
+            ]
+          }
+        },
+        {
+          "id": "19.2",
+          "label": "👅 Angine de Vincent & Ulcéro-nécrotique (Fuso-spirillaire / Métronidazole)",
+          "keywords": [
+            "angine de vincent",
+            "ulcero necrotique",
+            "haleine fetide",
+            "metronidazole",
+            "flagyl"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 36,
+            "matchedPdfs": [
+              "ORL.pdf",
+              "150 Ordonnances types.pdf",
+              "1Antibiotiques.pdf",
+              "1médicaments.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 32,
+        "matchedPdfs": [
+          "CAT Pédiatrie_1.pdf",
+          "Gastrologie_.pdf",
+          "150 Ordonnances types.pdf",
+          "1Antibiotiques.pdf"
+        ]
+      }
+    },
+    {
+      "id": 20,
+      "title": "Sinusite Aiguë Maxillaire",
+      "category": "ORL",
+      "keywords": [
+        "sinusite maxillaire",
+        "sinusite aigue",
+        "douleur sous orbitaire",
+        "rhinorrhee purulente",
+        "amoxicilline"
+      ],
+      "sub_cats": [
+        {
+          "id": "20.1",
+          "label": "🚨 Sinusite Sphénoïdale / Ethmoïdite & Complications Orbitaires (Cellulite / TDM)",
+          "keywords": [
+            "ethmoidite",
+            "sinusite sphenoidale",
+            "cellulite orbitaire",
+            "oedeme palpebral",
+            "scanner sinus"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 1,
+            "matchedPdfs": [
+              "CAT Pédiatrie_1.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 31,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Entretiens_.pdf",
+          "ORL.pdf",
+          "1Antibiotiques.pdf"
+        ]
+      }
+    },
+    {
+      "id": 21,
+      "title": "Épistaxis (Saignement de Nez)",
+      "category": "ORL",
+      "keywords": [
+        "epistaxis",
+        "saignement de nez",
+        "tamponnement",
+        "tache vasculaire",
+        "coalgan",
+        "mèche"
+      ],
+      "sub_cats": [
+        {
+          "id": "21.1",
+          "label": "🚨 Épistaxis Postérieure Massive & Incoercible (Tamponnement postérieur / Sonde à double ballonnet)",
+          "keywords": [
+            "epistaxis posterieure",
+            "tamponnement posterieur",
+            "sonde double ballonnet",
+            "dechoquage",
+            "anemie aigue"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 0,
+            "matchedPdfs": []
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 69,
+        "grade": "Grade B",
+        "pdfCount": 6,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "CAT Dr_Abouimed_.pdf",
+          "CAT ORL.pdf",
+          "Hématologie.pdf"
+        ]
+      }
+    },
+    {
+      "id": 22,
+      "title": "Laryngite Aiguë Sous-Glottique de l'Enfant",
+      "category": "ORL",
+      "keywords": [
+        "laryngite",
+        "toux rauque",
+        "bradypnee inspiratoire",
+        "stridor",
+        "dexamethasone",
+        "corticoides"
+      ],
+      "sub_cats": [
+        {
+          "id": "22.1",
+          "label": "🚨 Détresse Laryngée Sévère & Épiglottite (Nébulisation Adrénaline + Oxygène)",
+          "keywords": [
+            "epiglottite",
+            "detresse laryngee",
+            "nebulisation adrenaline",
+            "position assise",
+            "intubation"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 9,
+            "matchedPdfs": [
+              "CAT Pédiatrie_(4).pdf",
+              "CAT Urgences(1).pdf",
+              "Pneumologie_.pdf",
+              "Signes pathognomoniques.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 28,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Médicaments en Pédiatrie .pdf",
+          "CAT Gynécologie_(3).pdf",
+          "CAT Pédiatrie_(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "title": "Abcès Dentaire & Parodontite Aiguë",
+      "category": "Stomatologie",
+      "keywords": [
+        "abces dentaire",
+        "dent",
+        "douleur pulsatile",
+        "augmentin",
+        "amoxicilline acide clavulanique",
+        "birodogyl"
+      ],
+      "sub_cats": [
+        {
+          "id": "23.1",
+          "label": "🚨 Cellulite Cervico-Faciale Diffuse & Trismus (Urgence chirurgicale / Débridement / ATB IV)",
+          "keywords": [
+            "cellulite faciale",
+            "cervico faciale",
+            "trismus",
+            "angine de ludwig",
+            "drainage chirurgical",
+            "ceftriaxone"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 14,
+            "matchedPdfs": [
+              "Infectieux_.pdf",
+              "150 Ordonnances types.pdf",
+              "CAT Dr_Kacem.pdf",
+              "ORL.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 55,
+        "matchedPdfs": [
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf",
+          "2Médicaments.pdf",
+          "Médicaments 02.pdf"
+        ]
+      }
+    },
+    {
+      "id": 24,
+      "title": "Aphtose Buccale Bénigne",
+      "category": "Stomatologie",
+      "keywords": [
+        "aphte",
+        "aphtose buccale",
+        "ulceration",
+        "bain de bouche",
+        "anesthesique local",
+        "gel buccal"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 14,
+        "matchedPdfs": [
+          "1Médicaments(1).pdf",
+          "3Médicaments .pdf",
+          "CAT ORL.pdf",
+          "CAT Pédiatrie_(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 25,
+      "title": "Conjonctivite Aiguë (Bactérienne / Virale / Allergique)",
+      "category": "Ophtalmologie",
+      "keywords": [
+        "conjonctivite",
+        "oeil rouge",
+        "secretions purulentes",
+        "prurit oculaire",
+        "collyre antibiotique",
+        "rifamycine"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 20,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Médicaments en Pédiatrie .pdf",
+          "CAT Ophtalmologie_.pdf",
+          "CAT Pédiatrie_(4).pdf"
+        ]
+      }
+    },
+    {
+      "id": 26,
+      "title": "Blépharite & Dysfonctionnement Meibomien",
+      "category": "Ophtalmologie",
+      "keywords": [
+        "blepharite",
+        "bord libre",
+        "meibomius",
+        "chalazion",
+        "compresses chaudes",
+        "tobrex"
+      ],
+      "sub_cats": [
+        {
+          "id": "26.1",
+          "label": "🚨 Blépharite à Demodex Réfractaire (Huile d'arbre à thé / Ivermectine PO)",
+          "keywords": [
+            "demodex",
+            "blephademodex",
+            "tea tree",
+            "ivermectine",
+            "manchons cylindriques"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 1,
+            "matchedPdfs": [
+              "Dermatologie_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 12,
+        "matchedPdfs": [
+          "CAT Ophtalmologie_.pdf",
+          "150 Ordonnances types.pdf",
+          "Dermatologie_1.pdf",
+          "Ophtalmologie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 27,
+      "title": "Orgelet & Chalazion",
+      "category": "Ophtalmologie",
+      "keywords": [
+        "orgelet",
+        "chalazion",
+        "nodule palpebral",
+        "pommade antibiotique",
+        "sterdex",
+        "incision"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 13,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "CAT Ophtalmologie_.pdf",
+          "Dermatologie_1.pdf",
+          "Ophtalmologie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 28,
+      "title": "Corps Étranger Oculaire & Kératite Aiguë",
+      "category": "Ophtalmologie",
+      "keywords": [
+        "corps etranger oculaire",
+        "keratite",
+        "fluoresceine",
+        "douleur oculaire",
+        "collyre cicatrisant"
+      ],
+      "sub_cats": [
+        {
+          "id": "28.1",
+          "label": "🚨 Brûlure Oculaire Chimique (Lavage immédiat abondant NaCl 0.9% / Avis ophtalmo urgent)",
+          "keywords": [
+            "brulure oculaire",
+            "brulure chimique",
+            "acide",
+            "base",
+            "lavage oculaire",
+            "perfusion oculaire"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 48,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "1Anti-inflammatoires.pdf",
+              "1Antibiotiques.pdf",
+              "1médicaments.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 30,
+        "grade": "Grade C",
+        "pdfCount": 0,
+        "matchedPdfs": []
+      }
+    },
+    {
+      "id": 29,
+      "title": "Gale (Scabiose)",
+      "category": "Dermatologie",
+      "keywords": [
+        "gale",
+        "scabiose",
+        "prurit nocturne",
+        "sillons scabieux",
+        "ivermectine",
+        "ascabiol",
+        "traitement entourage"
+      ],
+      "sub_cats": [
+        {
+          "id": "29.1",
+          "label": "🚨 Gale Norvégienne / Hyperkératosique Profuse (Isolement strict / Doses répétées Ivermectine)",
+          "keywords": [
+            "gale norvegienne",
+            "gale hyperkeratosique",
+            "gale profuse",
+            "immunodeprime",
+            "isolement",
+            "croutes"
+          ],
+          "evaluation": {
+            "score": 69,
+            "grade": "Grade B",
+            "pdfCount": 6,
+            "matchedPdfs": [
+              "Antibiotiques .pdf",
+              "Entretiens_.pdf",
+              "Gynécologie_1.pdf",
+              "Infectieux_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 25,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Antibiotiques1.pdf",
+          "Cardiologie_1.pdf",
+          "CAT Dermatologie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 30,
+      "title": "Pédiculose & Phtiriase (Poux et Morpions)",
+      "category": "Dermatologie",
+      "keywords": [
+        "pediculose",
+        "poux",
+        "lentes",
+        "phtiriase",
+        "dimeticone",
+        "shampoing anti-poux"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 9,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Dermatologie_.pdf",
+          "Antibiotiques .pdf",
+          "CAT Dr_Kacem.pdf"
+        ]
+      }
+    },
+    {
+      "id": 31,
+      "title": "Érysipèle / Dermo-hypodermite Bactérienne Non Nécrosante",
+      "category": "Dermatologie",
+      "keywords": [
+        "erysipele",
+        "dermo hypodermite",
+        "bourrelet périphérique",
+        "jambe rouge aigue",
+        "amoxicilline",
+        "porte d entree"
+      ],
+      "sub_cats": [
+        {
+          "id": "31.1",
+          "label": "🚨 Dermohypodermite Nécrosante / Fasciite Nécrosante (DHBNN / Urgence vitale chirurgicale)",
+          "keywords": [
+            "fasciite necrosante",
+            "dermo hypodermite necrosante",
+            "choc septique",
+            "crepitation",
+            "debridement chirurgical",
+            "urgence chirurgicale"
+          ],
+          "evaluation": {
+            "score": 81,
+            "grade": "Grade A",
+            "pdfCount": 7,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "Entretiens_.pdf",
+              "Médicaments des urgences .pdf",
+              "Médicaments des Urgences_1.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 32,
+        "matchedPdfs": [
+          "Médicaments en Pédiatrie .pdf",
+          "150 Ordonnances types.pdf",
+          "1Antibiotiques.pdf",
+          "1Médicaments en Pédiatrie .pdf"
+        ]
+      }
+    },
+    {
+      "id": 32,
+      "title": "Furoncle & Anthrax Cutané",
+      "category": "Dermatologie",
+      "keywords": [
+        "furoncle",
+        "anthrax",
+        "folliculite",
+        "bourbillon",
+        "fucidine",
+        "acide fusidique",
+        "amoxicilline acide clavulanique"
+      ],
+      "sub_cats": [
+        {
+          "id": "32.1",
+          "label": "🚨 Staphylococcie Maligne de la Face (Thrombophlébite du sinus caverneux / ATB IV)",
+          "keywords": [
+            "staphylococcie maligne",
+            "aile du nez",
+            "sinus caverneux",
+            "ceftriaxone",
+            "vancomycine",
+            "veine faciale"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 13,
+            "matchedPdfs": [
+              "Antibiotiques .pdf",
+              "Antibiotiques 1.pdf",
+              "CAT Dr_Kacem.pdf",
+              "CAT Pédiatrie_(4).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 26,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "CAT Dermatologie_.pdf",
+          "CAT Dermatologie_(1).pdf",
+          "CAT ORL.pdf"
+        ]
+      }
+    },
+    {
+      "id": 33,
+      "title": "Urticaire Aiguë & Œdème de Quincke",
+      "category": "Dermatologie",
+      "keywords": [
+        "urticaire",
+        "papules prurigineuses",
+        "antihistaminique",
+        "cetirizine",
+        "desloratadine",
+        "oedeme de quincke"
+      ],
+      "sub_cats": [
+        {
+          "id": "33.1",
+          "label": "🚨 Choc Anaphylactique & Œdème Laryngé (Adrénaline IM 0.5 mg / SMUR 15)",
+          "keywords": [
+            "choc anaphylactique",
+            "adrenaline im",
+            "anaphylaxie",
+            "oedeme larynge",
+            "detresse respiratoire",
+            "hypotension"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 14,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Gynécologie_(3).pdf",
+              "CAT Pédiatrie_(4).pdf",
+              "CAT Urgences(1).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 28,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "CAT Dr_Boughoufala.pdf",
+          "CAT Dr_Kacem.pdf",
+          "CAT Pédiatrie_(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 34,
+      "title": "Zona & Névralgies Post-Zostériennes",
+      "category": "Dermatologie",
+      "keywords": [
+        "zona",
+        "vesicules unilateral",
+        "metamere",
+        "valaciclovir",
+        "zelitrex",
+        "douleurs neuropathiques"
+      ],
+      "sub_cats": [
+        {
+          "id": "34.1",
+          "label": "🚨 Zona Ophtalmique (Atteinte branche V1 / Signe de Hutchinson / Kératite)",
+          "keywords": [
+            "zona ophtalmique",
+            "signe de hutchinson",
+            "atteinte cornee",
+            "valaciclovir iv",
+            "avis ophtalmo"
+          ],
+          "evaluation": {
+            "score": 59,
+            "grade": "Grade B",
+            "pdfCount": 5,
+            "matchedPdfs": [
+              "Ophtalmologie_.pdf",
+              "CAT Urgences(1).pdf",
+              "Dermatologie_.pdf",
+              "Infectieux_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 10,
+        "matchedPdfs": [
+          "3Médicaments .pdf",
+          "CAT Dermatologie_.pdf",
+          "CAT Dermatologie_(1).pdf",
+          "CAT Gynécologie_(3).pdf"
+        ]
+      }
+    },
+    {
+      "id": 35,
+      "title": "Cystite Aiguë Simple & Récurrente",
+      "category": "Urologie / Néphrologie",
+      "keywords": [
+        "cystite aigue",
+        "brulures mictionnelles",
+        "pollakiurie",
+        "bandelette urinaire",
+        "fosfomycine",
+        "trometamol",
+        "monuril"
+      ],
+      "sub_cats": [
+        {
+          "id": "35.1",
+          "label": "🤰 Cystite Gravidique & Bactériurie Asymptomatique de la Grossesse (ECBU / ATB ciblé)",
+          "keywords": [
+            "cystite grossesse",
+            "femme enceinte",
+            "bacteriurie asymptomatique",
+            "ecbu",
+            "amoxicilline",
+            "cefixime"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 47,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "1médicaments.pdf",
+              "1Médicaments(1).pdf",
+              "2Médicaments.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 9,
+        "matchedPdfs": [
+          "CAT Ophtalmologie_.pdf",
+          "Entretiens_.pdf",
+          "Gastrologie_.pdf",
+          "Signes pathognomoniques.pdf"
+        ]
+      }
+    },
+    {
+      "id": 36,
+      "title": "Pyélonéphrite Aiguë (PNA)",
+      "category": "Urologie / Néphrologie",
+      "keywords": [
+        "pyelonephrite",
+        "pna",
+        "fievre",
+        "frissons",
+        "douleur fosse lombaire",
+        "ceftriaxone",
+        "ciprofloxacine",
+        "ecbu"
+      ],
+      "sub_cats": [
+        {
+          "id": "36.1",
+          "label": "🚨 PNA Obstructive sur Lithiase (Urgence dérivation des urines / Sonde JJ / Néphrostomie)",
+          "keywords": [
+            "pna obstructive",
+            "lithiase urinaire",
+            "sonde jj",
+            "nephrostomie",
+            "choc septique urologique",
+            "derivation"
+          ],
+          "evaluation": {
+            "score": 46,
+            "grade": "Grade C",
+            "pdfCount": 4,
+            "matchedPdfs": [
+              "Antibiotiques1.pdf",
+              "Médicaments 02.pdf",
+              "Pédiatrie_.pdf",
+              "Urologie_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 31,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "2Médicaments.pdf",
+          "Entretiens_.pdf",
+          "Pédiatrie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 37,
+      "title": "Colique Néphrétique Aiguë",
+      "category": "Urologie / Néphrologie",
+      "keywords": [
+        "colique nephretique",
+        "calcul renal",
+        "douleur lombaire irradiant organes genitaux",
+        "ains",
+        "ketoprofene",
+        "prodafalgan"
+      ],
+      "sub_cats": [
+        {
+          "id": "37.1",
+          "label": "🚨 Colique Néphrétique Compliquée (Fébrille, Anurie, Rein unique, Femme enceinte / Drainage)",
+          "keywords": [
+            "colique nephretique compliquee",
+            "fievre",
+            "anurie",
+            "rein unique",
+            "grossesse",
+            "sonde jj urgente"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 40,
+            "matchedPdfs": [
+              "1médicaments.pdf",
+              "1Médicaments(1).pdf",
+              "2Médicaments.pdf",
+              "CAT Dr_Boughoufala.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 46,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Anti-inflammatoires.pdf",
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 38,
+      "title": "Prostatite Aiguë & Rétention Aiguë d'Urines",
+      "category": "Urologie / Néphrologie",
+      "keywords": [
+        "prostatite aigue",
+        "toucher rectal douloureux",
+        "fievre mictionnelle",
+        "fluoroquinolones",
+        "ofloxacine",
+        "retention urine"
+      ],
+      "sub_cats": [
+        {
+          "id": "38.1",
+          "label": "🚨 Rétention Aiguë d'Urines (Globe vésical / Cathétérisme sus-pubien vs Sonde urinaire)",
+          "keywords": [
+            "retention aigue urine",
+            "globe vesical",
+            "catheter sus pubien",
+            "sondage urinaire",
+            "decharge"
+          ],
+          "evaluation": {
+            "score": 35,
+            "grade": "Grade C",
+            "pdfCount": 3,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "Réanimation_.pdf",
+              "Urologie_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 13,
+        "matchedPdfs": [
+          "Antibiotiques .pdf",
+          "Médicaments et Grossesse.pdf",
+          "Ophtalmologie_.pdf",
+          "1Antibiotiques.pdf"
+        ]
+      }
+    },
+    {
+      "id": 39,
+      "title": "Diabète de Type 2 de l'Adulte",
+      "category": "Endocrinologie",
+      "keywords": [
+        "diabete de type 2",
+        "hyperglycemie",
+        "hba1c",
+        "metformine",
+        "glucophage",
+        "glimepiride",
+        "surveillance podologique"
+      ],
+      "sub_cats": [
+        {
+          "id": "39.1",
+          "label": "🚨 Acidocétose Diabétique & Coma Métabolique (NaCl 0.9% + Insuline IVSE + KCl)",
+          "keywords": [
+            "acidocetose",
+            "haleine acetonique",
+            "dyspnee kussmaul",
+            "insuline ivse",
+            "rehydratation",
+            "kcl"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 16,
+            "matchedPdfs": [
+              "CAT Pédiatrie_(4).pdf",
+              "CAT Urgences(1).pdf",
+              "1médicaments.pdf",
+              "Médicaments en Gastrologie.pdf"
+            ]
+          }
+        },
+        {
+          "id": "39.2",
+          "label": "🚨 Coma Hyperosmolaire du Sujet Âgé (Glycémie > 6 g/L / Réhydratation massive)",
+          "keywords": [
+            "coma hyperosmolaire",
+            "hyperosmolarite",
+            "deshydratation massive",
+            "sujet age",
+            "glycemie 60"
+          ],
+          "evaluation": {
+            "score": 35,
+            "grade": "Grade C",
+            "pdfCount": 3,
+            "matchedPdfs": [
+              "CAT Urgences(1).pdf",
+              "1médicaments.pdf",
+              "1Médicaments(1).pdf"
+            ]
+          }
+        },
+        {
+          "id": "39.3",
+          "label": "🦶 Pied Diabétique Infecté & Mal Perforant Plantaire (Décharge / ATB / Soins locaux)",
+          "keywords": [
+            "pied diabetique",
+            "mal perforant",
+            "ulcere",
+            "osteite",
+            "decharge",
+            "amoxicilline clavulanique"
+          ],
+          "evaluation": {
+            "score": 82,
+            "grade": "Grade A",
+            "pdfCount": 7,
+            "matchedPdfs": [
+              "1Médicaments(1).pdf",
+              "Médicaments 02.pdf",
+              "1médicaments.pdf",
+              "2Médicaments.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 3,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 17,
+        "matchedPdfs": [
+          "Cardiologie_1.pdf",
+          "Dermatologie_.pdf",
+          "Endocrinologie_.pdf",
+          "Entretiens_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 40,
+      "title": "Hypoglycémie Médicamenteuse Aiguë",
+      "category": "Endocrinologie",
+      "keywords": [
+        "hypoglycemie",
+        "sueurs",
+        "tremblements",
+        "resucrage",
+        "g30",
+        "glucagon"
+      ],
+      "sub_cats": [
+        {
+          "id": "40.1",
+          "label": "🚨 Coma Hypoglycémique Sévère (Glucosé 30% IVD bolus / Glucagon IM)",
+          "keywords": [
+            "coma hypoglycemique",
+            "g30 iv",
+            "glucagon im",
+            "perfusion glucose",
+            "surveillance"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 30,
+            "matchedPdfs": [
+              "Cardiologie_1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Dr_Kacem.pdf",
+              "CAT Gynécologie_(1).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 15,
+        "matchedPdfs": [
+          "Troubles ioniques.pdf",
+          "150 Ordonnances types.pdf",
+          "Cardiologie_1.pdf",
+          "CAT Dr_Boughoufala.pdf"
+        ]
+      }
+    },
+    {
+      "id": 41,
+      "title": "Hypothyroïdie Primitive",
+      "category": "Endocrinologie",
+      "keywords": [
+        "hypothyroidie",
+        "tsh elevee",
+        "levothyrox",
+        "levothyroxine",
+        "asthenie",
+        "prise de poids",
+        "frilosite"
+      ],
+      "sub_cats": [
+        {
+          "id": "41.1",
+          "label": "🚨 Coma Myxœdémateux (Hypothermie / Bradycardie / Hormones thyroïdiennes IV)",
+          "keywords": [
+            "coma myxoedemateux",
+            "hypothermie",
+            "l thyroxine iv",
+            "hydrocortisone",
+            "reanimation"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 14,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Dr_Kacem.pdf",
+              "CAT Urgences(1).pdf",
+              "Entretiens_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 10,
+        "matchedPdfs": [
+          "CAT Urgences(1).pdf",
+          "Endocrinologie_.pdf",
+          "Antibiotiques1.pdf",
+          "CAT Gynécologie_(3).pdf"
+        ]
+      }
+    },
+    {
+      "id": 42,
+      "title": "Céphalées Aiguës & Crise de Migraine",
+      "category": "Neurologie / Psychiatrie",
+      "keywords": [
+        "migraine",
+        "cephalee",
+        "triptan",
+        "sumatriptan",
+        "zomig",
+        "anti inflammatoire",
+        "aura"
+      ],
+      "sub_cats": [
+        {
+          "id": "42.1",
+          "label": "🚨 Céphalée Brutale en Coup de Tonnerre (Suspicion d'Hémorragie Méningée / Scanner TDM + PL)",
+          "keywords": [
+            "hemorragie meningee",
+            "coup de tonnerre",
+            "rupture d anevrisme",
+            "scanner cerebral",
+            "ponction lombaire"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 2,
+            "matchedPdfs": [
+              "Neurologie.pdf",
+              "Réflexes.pdf"
+            ]
+          }
+        },
+        {
+          "id": "42.2",
+          "label": "🚨 État de Mal Migraineux (Crise > 72h / Sumatriptan SC / Solumédrol IV)",
+          "keywords": [
+            "etat de mal migraineux",
+            "sumatriptan sc",
+            "antiemetique iv",
+            "solumedrol"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 23,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "1Médicaments en Pédiatrie .pdf",
+              "2Médicaments.pdf",
+              "CAT Dr_Boughoufala.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 16,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf",
+          "2Médicaments.pdf"
+        ]
+      }
+    },
+    {
+      "id": 43,
+      "title": "Suspicion d'Accident Vasculaire Cérébral (AVC / AIT)",
+      "category": "Neurologie / Psychiatrie",
+      "keywords": [
+        "avc",
+        "accident vasculaire cerebral",
+        "ait",
+        "deficit neurologique",
+        "hemiplegie",
+        "aphasie",
+        "fast",
+        "irm cerebrale"
+      ],
+      "sub_cats": [
+        {
+          "id": "43.1",
+          "label": "🚨 AVC Ischémique Aigu en Fenêtre Thrombolytique (< 4h30 / Filière Alerte Thrombolyse)",
+          "keywords": [
+            "thrombolyse",
+            "thrombectomie",
+            "rtpa",
+            "fenetre 4h30",
+            "irm diffusion",
+            "nihss"
+          ],
+          "evaluation": {
+            "score": 71,
+            "grade": "Grade B",
+            "pdfCount": 6,
+            "matchedPdfs": [
+              "Cardiologie_1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Dr_Kacem.pdf",
+              "CAT Urgences(1).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 66,
+        "matchedPdfs": [
+          "Cardiologie_1.pdf",
+          "CAT Dr_Abouimed_.pdf",
+          "CAT Dr_Boughoufala.pdf",
+          "CAT Dr_Kacem.pdf"
+        ]
+      }
+    },
+    {
+      "id": 44,
+      "title": "Crise d'Épilepsie de l'Adulte",
+      "category": "Neurologie / Psychiatrie",
+      "keywords": [
+        "epilepsie",
+        "crise tonico clonique",
+        "morsure de langue",
+        "perte de connaissance",
+        "phase post critique",
+        "antiepileptique"
+      ],
+      "sub_cats": [
+        {
+          "id": "44.1",
+          "label": "🚨 État de Mal Épileptique (> 5 min / Clonazépam Rivotril IV / Réanimation)",
+          "keywords": [
+            "etat de mal epileptique",
+            "crises subintrantes",
+            "clonazepam",
+            "rivotril iv",
+            "diazepam",
+            "keppra iv"
+          ],
+          "evaluation": {
+            "score": 72,
+            "grade": "Grade B",
+            "pdfCount": 6,
+            "matchedPdfs": [
+              "CAT Urgences(1).pdf",
+              "Antibiotiques1.pdf",
+              "Médicaments 02.pdf",
+              "CAT Gynécologie_(3).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 81,
+        "grade": "Grade A",
+        "pdfCount": 7,
+        "matchedPdfs": [
+          "CAT Gynécologie_(3).pdf",
+          "Médicaments des urgences .pdf",
+          "Psychotropes .pdf",
+          "ECG.pdf"
+        ]
+      }
+    },
+    {
+      "id": 45,
+      "title": "Épisode Dépressif Caractérisé (EDC)",
+      "category": "Neurologie / Psychiatrie",
+      "keywords": [
+        "depression",
+        "episode depressif",
+        "tristesse",
+        "anhedonie",
+        "sertraline",
+        "isrs",
+        "psychotherapie"
+      ],
+      "sub_cats": [
+        {
+          "id": "45.1",
+          "label": "🚨 Crise Suicidaire Imminente & Dépression Mélancolique (Grille RUD élevée / Hospitalisation d'urgence)",
+          "keywords": [
+            "risque suicidaire",
+            "crise suicidaire",
+            "grille rud",
+            "stupeur melancolique",
+            "hospitalisation d office",
+            "tercian"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 2,
+            "matchedPdfs": [
+              "Antibiotiques1.pdf",
+              "Médicaments 02.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 30,
+        "grade": "Grade C",
+        "pdfCount": 1,
+        "matchedPdfs": [
+          "Antibiotiques1.pdf"
+        ]
+      }
+    },
+    {
+      "id": 46,
+      "title": "Attaque de Panique & Trouble Anxieux Aigu",
+      "category": "Neurologie / Psychiatrie",
+      "keywords": [
+        "attaque de panique",
+        "crise d angoisse",
+        "hyperventilation",
+        "spasmophilie",
+        "alprazolam",
+        "reassurance"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 58,
+        "grade": "Grade B",
+        "pdfCount": 5,
+        "matchedPdfs": [
+          "Entretiens_.pdf",
+          "Neurologie.pdf",
+          "CAT Dr_Boughoufala.pdf",
+          "Antibiotiques1.pdf"
+        ]
+      }
+    },
+    {
+      "id": 47,
+      "title": "Agitation Aiguë Psychomotrice & Ivresse Pathologique",
+      "category": "Neurologie / Psychiatrie",
+      "keywords": [
+        "agitation aigue",
+        "delirium",
+        "confusion mentale",
+        "sedation",
+        "cyamemazine",
+        "tercian",
+        "loxapine"
+      ],
+      "sub_cats": [
+        {
+          "id": "47.1",
+          "label": "🚨 Delirium Tremens & Sevrage Alcoolique Aigu (BZD fortes doses + Vitamine B1 IV)",
+          "keywords": [
+            "delirium tremens",
+            "sevrage alcoolique",
+            "vitamine b1",
+            "diazepam iv",
+            "hydratation"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 34,
+            "matchedPdfs": [
+              "CAT Gynécologie_(3).pdf",
+              "Médicaments des urgences1.pdf",
+              "Réanimation_.pdf",
+              "Bilans_medicale.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 59,
+        "grade": "Grade B",
+        "pdfCount": 5,
+        "matchedPdfs": [
+          "CAT Gynécologie_(3).pdf",
+          "Médicaments des urgences1.pdf",
+          "Médicaments des urgences .pdf",
+          "Antibiotiques1.pdf"
+        ]
+      }
+    },
+    {
+      "id": 48,
+      "title": "Lombalgie Aiguë Commune (Lumbago)",
+      "category": "Rhumatologie / Traumatologie",
+      "keywords": [
+        "lombalgie",
+        "lumbago",
+        "tour de rein",
+        "paracetamol",
+        "ains",
+        "decontracturant",
+        "maintien activite"
+      ],
+      "sub_cats": [
+        {
+          "id": "48.1",
+          "label": "🚨 Syndrome de la Queue de Cheval (Anesthésie en selle / Rétention urine / IRM urgente)",
+          "keywords": [
+            "queue de cheval",
+            "anesthesie en selle",
+            "incontinence",
+            "sciatica paralysante",
+            "irm lombaire urgente"
+          ],
+          "evaluation": {
+            "score": 58,
+            "grade": "Grade B",
+            "pdfCount": 5,
+            "matchedPdfs": [
+              "Antibiotiques1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "Médicaments 02.pdf",
+              "Réanimation_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 48,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Rhumatologie_.pdf",
+          "Urologie_.pdf",
+          "1médicaments.pdf"
+        ]
+      }
+    },
+    {
+      "id": 49,
+      "title": "Crise de Goutte Aiguë (Arthrite Microcristalline)",
+      "category": "Rhumatologie / Traumatologie",
+      "keywords": [
+        "goutte",
+        "arthrite aigue",
+        "gros orteil",
+        "colchicine",
+        "hyperuricemie",
+        "anti inflammatoire"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 34,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Médicaments en Pédiatrie .pdf",
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 50,
+      "title": "Arthrose des Membres (Gonarthrose & Coxarthrose)",
+      "category": "Rhumatologie / Traumatologie",
+      "keywords": [
+        "gonarthrose",
+        "coxarthrose",
+        "arthrose genou",
+        "douleur mecanique",
+        "paracetamol",
+        "infiltration corticoides"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 10,
+        "matchedPdfs": [
+          "Radiographies_.pdf",
+          "Rhumatologie_.pdf",
+          "1médicaments.pdf",
+          "1Médicaments(1).pdf"
+        ]
+      }
+    },
+    {
+      "id": 51,
+      "title": "Entorse Récente de la Cheville",
+      "category": "Rhumatologie / Traumatologie",
+      "keywords": [
+        "entorse cheville",
+        "criteres d ottawa",
+        "ligament lateral externe",
+        "attelle",
+        "protocole rice",
+        "glace"
+      ],
+      "sub_cats": [
+        {
+          "id": "51.1",
+          "label": "🚨 Entorse Grave avec Rupture Ligamentaire / Fracture associée (Critères d'Ottawa positifs / Radio)",
+          "keywords": [
+            "entorse grave",
+            "rupture ligamentaire",
+            "criteres ottawa",
+            "radiographie cheville",
+            "platre",
+            "botte de marche"
+          ],
+          "evaluation": {
+            "score": 30,
+            "grade": "Grade C",
+            "pdfCount": 1,
+            "matchedPdfs": [
+              "Rhumatologie_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 97,
+        "grade": "Grade A",
+        "pdfCount": 8,
+        "matchedPdfs": [
+          "Entretiens_.pdf",
+          "Radiographies_.pdf",
+          "Réanimation_.pdf",
+          "Rhumatologie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 52,
+      "title": "Fièvre Aiguë du Nourrisson et de l'Enfant",
+      "category": "Pédiatrie",
+      "keywords": [
+        "fievre nourrisson",
+        "fievre enfant",
+        "paracetamol sirop",
+        "dose poids",
+        "recherche foyer",
+        "hydratation"
+      ],
+      "sub_cats": [
+        {
+          "id": "52.1",
+          "label": "🚨 Fièvre chez le Nourrisson de Moins de 3 Mois (Bilan infectieux complet / Hospitalisation)",
+          "keywords": [
+            "nourrisson 3 mois",
+            "fievre neonatale",
+            "ponction lombaire",
+            "sepsis neonatal",
+            "hospitalisation"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 29,
+            "matchedPdfs": [
+              "Neurologie.pdf",
+              "Réflexes.pdf",
+              "150 Ordonnances types.pdf",
+              "Cardiologie_1.pdf"
+            ]
+          }
+        },
+        {
+          "id": "52.2",
+          "label": "🚨 Convulsion Fébrilie Simple vs Complexe (Diazépam intra-rectal Valium)",
+          "keywords": [
+            "convulsion febrile",
+            "diazepam intrarectal",
+            "valium",
+            "duree crise",
+            "eeg"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 19,
+            "matchedPdfs": [
+              "CAT Urgences(1).pdf",
+              "150 Ordonnances types.pdf",
+              "1Médicaments en Pédiatrie .pdf",
+              "CAT Dr_Boughoufala.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 2,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 31,
+        "matchedPdfs": [
+          "Médicaments en Pédiatrie 01.pdf",
+          "ORL.pdf",
+          "150 Ordonnances types.pdf",
+          "1médicaments.pdf"
+        ]
+      }
+    },
+    {
+      "id": 53,
+      "title": "Bronchiolite Aiguë du Nourrisson",
+      "category": "Pédiatrie",
+      "keywords": [
+        "bronchiolite",
+        "nourrisson",
+        "vrs",
+        "frein expiratoire",
+        "lavage de nez",
+        "drs",
+        "fractionnement repas"
+      ],
+      "sub_cats": [
+        {
+          "id": "53.1",
+          "label": "🚨 Forme Grave & Critères d'Hospitalisation (SpO2 < 92% / Tirage sus-sternal / Diminution prises alimentaires > 50%)",
+          "keywords": [
+            "bronchiolite grave",
+            "hospitalisation",
+            "spo2",
+            "oxygene",
+            "tirage",
+            "apnees",
+            "sonde gastrique"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 30,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "Cardiologie_1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Gynécologie_(3).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 26,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "CAT Pédiatrie_(1).pdf",
+          "CAT Pédiatrie_1.pdf",
+          "Entretiens_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 54,
+      "title": "Déshydratation Aiguë du Nourrisson & SRO",
+      "category": "Pédiatrie",
+      "keywords": [
+        "deshydratation nourrisson",
+        "sro",
+        "perte de poids",
+        "pli cutane",
+        "fontanelle deprimee",
+        "rehydratation orale"
+      ],
+      "sub_cats": [
+        {
+          "id": "54.1",
+          "label": "🚨 Déshydratation Sévère > 10% du Poids Corporel (Perfusion solutés hydro-électrolytiques IV)",
+          "keywords": [
+            "deshydratation 10",
+            "perfusion iv",
+            "yeux cernes",
+            "troubles conscience",
+            "anurie",
+            "reanimation pediatrique"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 11,
+            "matchedPdfs": [
+              "Antibiotiques .pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Gynécologie_(3).pdf",
+              "Maladies éruptives.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 14,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Médicaments en Pédiatrie .pdf",
+          "CAT Dr_Abouimed_.pdf",
+          "CAT Pédiatrie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 55,
+      "title": "Éruptions Fébriles Infantiles (Varicelle, Rougeole, Scarlatine)",
+      "category": "Pédiatrie",
+      "keywords": [
+        "varicelle",
+        "rougeole",
+        "scarlatine",
+        "exantheme",
+        "vesicules",
+        "desquamation",
+        "eviction scolaire"
+      ],
+      "sub_cats": [
+        {
+          "id": "55.1",
+          "label": "🚨 Surinfection Cutanée Bactérienne / Syndrome de Choc Toxique Streptococcique (Impétiginisation / ATB)",
+          "keywords": [
+            "surinfection varicelle",
+            "impetigo",
+            "choc toxique",
+            "cefaclor",
+            "amoxicilline acide clavulanique"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 10,
+            "matchedPdfs": [
+              "CAT Dermatologie_(1).pdf",
+              "CAT Pédiatrie_(1).pdf",
+              "Médicaments en Pédiatrie .pdf",
+              "Maladies éruptives.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 15,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "1Antibiotiques.pdf",
+          "1Médicaments en Pédiatrie .pdf",
+          "3Médicaments .pdf"
+        ]
+      }
+    },
+    {
+      "id": 56,
+      "title": "Vaginite & Leucorrhées Pathologiques (Mycose / Trichomonase / Vaginose)",
+      "category": "Gynécologie / Obstétrique",
+      "keywords": [
+        "leucorrhees",
+        "vaginite",
+        "mycose vaginale",
+        "ovule",
+        "econazole",
+        "vaginose",
+        "metronidazole",
+        "trichomonas"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 21,
+        "matchedPdfs": [
+          "CAT Dr_Kacem.pdf",
+          "150 Ordonnances types.pdf",
+          "Antibiotiques .pdf",
+          "CAT Gynécologie_(3).pdf"
+        ]
+      }
+    },
+    {
+      "id": 57,
+      "title": "Métrorragies du Premier Trimestre & Menace de Fausse Couche",
+      "category": "Gynécologie / Obstétrique",
+      "keywords": [
+        "metrorragies",
+        "premier trimestre",
+        "saignement grossesse",
+        "beta hcg",
+        "echographie pelvienne",
+        "fausse couche"
+      ],
+      "sub_cats": [
+        {
+          "id": "57.1",
+          "label": "🚨 Grossesse Extra-Utérine (GEU Décompensée / Hémopéritoine / Cœlioscopie)",
+          "keywords": [
+            "geu",
+            "grossesse extra uterine",
+            "hemoperitoine",
+            "choc hemorragique",
+            "coelioscopie",
+            "methotrexate"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 24,
+            "matchedPdfs": [
+              "150 Ordonnances types.pdf",
+              "1CAT Gynécologie_.pdf",
+              "Cardiologie_1.pdf",
+              "CAT Gynécologie_(1).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 72,
+        "grade": "Grade B",
+        "pdfCount": 6,
+        "matchedPdfs": [
+          "CAT Dr_Kacem.pdf",
+          "CAT Gynécologie_(2).pdf",
+          "Gynécologie_1.pdf",
+          "Dermatologie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 58,
+      "title": "Brûlures Thermiques Cutanées Aiguës",
+      "category": "Urgences",
+      "keywords": [
+        "brulure",
+        "regle des 9 de wallace",
+        "flammazine",
+        "refroidissement eau 15 15",
+        "pansement gras",
+        "tulle gras"
+      ],
+      "sub_cats": [
+        {
+          "id": "58.1",
+          "label": "🚨 Brûlure Grave & Étendue > 10% (Remplissage formule de Parkland / Centre des Brûlés)",
+          "keywords": [
+            "brulure grave",
+            "formule parkland",
+            "ringer lactate",
+            "centre des brules",
+            "inhalation fumee",
+            "surface corporelle"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 10,
+            "matchedPdfs": [
+              "CAT Dr_Boughoufala.pdf",
+              "CAT Urgences(1).pdf",
+              "150 Ordonnances types.pdf",
+              "CAT Dermatologie_.pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 8,
+        "matchedPdfs": [
+          "150 Ordonnances types.pdf",
+          "Dermatologie_1.pdf",
+          "Entretiens_.pdf",
+          "CAT Pédiatrie_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 59,
+      "title": "Morsures & Envenimations (Scorpion & Vipère)",
+      "category": "Urgences",
+      "keywords": [
+        "piqure de scorpion",
+        "morsure vipere",
+        "envenimation",
+        "serum antiscorpionique",
+        "glace proscrite",
+        "surveillance hospitaliere"
+      ],
+      "sub_cats": [
+        {
+          "id": "59.1",
+          "label": "🚨 Envenimation Scorpionique de Classe III (Choc cardiogénique / OAP / Réanimation)",
+          "keywords": [
+            "classe 3",
+            "choc scorpionique",
+            "oap scorpion",
+            "serum",
+            "dopamine",
+            "reanimation"
+          ],
+          "evaluation": {
+            "score": 100,
+            "grade": "Grade A",
+            "pdfCount": 14,
+            "matchedPdfs": [
+              "Antibiotiques1.pdf",
+              "CAT Dr_Boughoufala.pdf",
+              "CAT ORL.pdf",
+              "CAT Pédiatrie_(4).pdf"
+            ]
+          }
+        }
+      ],
+      "sub_cats_count": 1,
+      "evaluation": {
+        "score": 30,
+        "grade": "Grade C",
+        "pdfCount": 2,
+        "matchedPdfs": [
+          "Entretiens_.pdf",
+          "Réanimation_.pdf"
+        ]
+      }
+    },
+    {
+      "id": 60,
+      "title": "Certificats Médicaux Usuels, ITT & Documents Légaux",
+      "category": "Administratif",
+      "keywords": [
+        "certificat medical",
+        "itt",
+        "accident du travail",
+        "non contre indication",
+        "secret medical",
+        "requisition judiciaire"
+      ],
+      "sub_cats": [],
+      "sub_cats_count": 0,
+      "evaluation": {
+        "score": 100,
+        "grade": "Grade A",
+        "pdfCount": 12,
+        "matchedPdfs": [
+          "certificat accident travail.pdf",
+          "1Médicaments(1).pdf",
+          "2Médicaments.pdf",
+          "Antibiotiques1.pdf"
+        ]
+      }
+    }
+  ]
+}
