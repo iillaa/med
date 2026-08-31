@@ -1017,8 +1017,8 @@ function applySyncUpdates(freshCats, isIncremental, activeIdsSet) {
 
 
 // Select CAT wrapper that delegates to workspace component
-function selectCatWrapper(cat) {
-  workspace.selectCat(cat);
+function selectCatWrapper(cat, initialSubIndex) {
+  workspace.selectCat(cat, false, initialSubIndex || 0);
 }
 
 // Side-effect callback when status updates

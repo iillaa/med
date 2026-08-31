@@ -442,49 +442,65 @@
             <h4 style="margin: 0; color: #38bdf8; font-size: 14px;">🏷️ Paramètres de Découpage</h4>
 
             <div class="form-group">
-              <label>Mode de Découpage :</label>
+              <label>Mode de Travail :</label>
               <select id="slicer-mode-select" onchange="toggleSlicerMode()" style="background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 6px; border-radius: 6px; font-size: 12px;">
                 <option value="image_crop">🖼️ Recadrage Visuel (Zone Rectangulaire)</option>
                 <option value="page_range">📄 Plage de Pages Entières (PDF Vectoriel 15ms)</option>
+                <option value="zone_eraser">🧽 Masquage de Zone / Nettoyeur (Zone Eraser)</option>
               </select>
             </div>
 
-            <div class="form-group">
-              <label>Titre du Nouveau PDF :</label>
-              <input type="text" id="slice-title-input" placeholder="Ex: Cardiologie_HTA_Urgences.pdf" />
-            </div>
-
-            <div class="form-group">
-              <label>Spécialité :</label>
-              <select id="slice-specialty-select" onchange="handleSpecialtyChange('slice-specialty-select', 'slice-custom-specialty')">
-                <!-- Full 22 Specialties injected via JS -->
-              </select>
-              <input type="text" id="slice-custom-specialty" placeholder="Précisez votre spécialité personnalisée..." style="display: none; margin-top: 6px;" />
-            </div>
-
-            <div class="form-group">
-              <label>Pathologie(s) Cible(s) :</label>
-              <input type="text" id="slice-pathology-input" placeholder="Ex: HTA, OAP, Urgence Hypertensive" />
-            </div>
-
-            <div id="page-range-controls" style="display: none;" class="grid-form">
+            <!-- Standard Slicer Fields -->
+            <div id="standard-slicer-fields" style="display: flex; flex-direction: column; gap: 12px;">
               <div class="form-group">
-                <label>Page Début :</label>
-                <input type="number" id="slice-start-page" min="1" value="1" />
+                <label>Titre du Nouveau PDF :</label>
+                <input type="text" id="slice-title-input" placeholder="Ex: Cardiologie_HTA_Urgences.pdf" />
               </div>
+
               <div class="form-group">
-                <label>Page Fin :</label>
-                <input type="number" id="slice-end-page" min="1" value="1" />
+                <label>Spécialité :</label>
+                <select id="slice-specialty-select" onchange="handleSpecialtyChange('slice-specialty-select', 'slice-custom-specialty')">
+                  <!-- Full 22 Specialties injected via JS -->
+                </select>
+                <input type="text" id="slice-custom-specialty" placeholder="Précisez votre spécialité personnalisée..." style="display: none; margin-top: 6px;" />
               </div>
+
+              <div class="form-group">
+                <label>Pathologie(s) Cible(s) :</label>
+                <input type="text" id="slice-pathology-input" placeholder="Ex: HTA, OAP, Urgence Hypertensive" />
+              </div>
+
+              <div id="page-range-controls" style="display: none;" class="grid-form">
+                <div class="form-group">
+                  <label>Page Début :</label>
+                  <input type="number" id="slice-start-page" min="1" value="1" />
+                </div>
+                <div class="form-group">
+                  <label>Page Fin :</label>
+                  <input type="number" id="slice-end-page" min="1" value="1" />
+                </div>
+              </div>
+
+              <div style="background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 6px; border: 1px solid var(--primary); font-size: 11.5px; color: #bae6fd; line-height: 1.4;">
+                🛡️ <strong>Marge de sécurité automatique :</strong> Une marge de <strong>+15px</strong> est ajoutée pour protéger les titres et les posologies.
+              </div>
+
+              <button onclick="executeSliceAction()" class="btn-success" style="padding: 12px; font-size: 14px; font-weight: bold; justify-content: center;">
+                ✂️ DÉCOUPER & CRÉER LE NOUVEAU PDF
+              </button>
             </div>
 
-            <div style="background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 6px; border: 1px solid var(--primary); font-size: 11.5px; color: #bae6fd; line-height: 1.4;">
-              🛡️ <strong>Marge de sécurité automatique :</strong> Une marge de <strong>+15px</strong> est ajoutée pour protéger les titres et les posologies.
+            <!-- Dedicated Zone Eraser Controls -->
+            <div id="zone-eraser-controls" style="display: none; flex-direction: column; gap: 12px;">
+              <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning); padding: 12px; border-radius: 6px; font-size: 12px; color: #fde68a; line-height: 1.5;">
+                🧽 <strong>Nettoyeur de Zone (Zone Eraser) :</strong><br>
+                1. Déplacez le cadre bleu sur l'en-tête, le bas de page ou le paragraphe indésirable issu d'une autre pathologie.<br>
+                2. Cliquez sur le bouton ci-dessous pour appliquer un masque opaque vectoriel propre sur cette page.
+              </div>
+              <button onclick="applyVisualZoneErase()" class="btn-warning" style="padding: 12px; font-size: 13.5px; font-weight: bold; justify-content: center; background: #f59e0b; color: #000; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                🧽 MASQUER & EFFACER CETTE ZONE SUR LE PDF
+              </button>
             </div>
-
-            <button onclick="executeSliceAction()" class="btn-success" style="padding: 12px; font-size: 14px; font-weight: bold; justify-content: center;">
-              ✂️ DÉCOUPER & CRÉER LE NOUVEAU PDF
-            </button>
           </div>
         </div>
       </div>
@@ -1278,6 +1294,8 @@
     function toggleSlicerMode() {
       const mode = document.getElementById('slicer-mode-select').value;
       const pageRangeControls = document.getElementById('page-range-controls');
+      const standardFields = document.getElementById('standard-slicer-fields');
+      const zoneEraserControls = document.getElementById('zone-eraser-controls');
       const handles = [
         document.getElementById('crop-handle-top'),
         document.getElementById('crop-handle-bottom'),
@@ -1287,9 +1305,18 @@
       ];
 
       if (mode === 'page_range') {
+        if (standardFields) standardFields.style.display = 'flex';
+        if (zoneEraserControls) zoneEraserControls.style.display = 'none';
         pageRangeControls.style.display = 'grid';
         handles.forEach(el => el.style.display = 'none');
+      } else if (mode === 'zone_eraser') {
+        if (standardFields) standardFields.style.display = 'none';
+        if (zoneEraserControls) zoneEraserControls.style.display = 'flex';
+        pageRangeControls.style.display = 'none';
+        handles.forEach(el => el.style.display = 'block');
       } else {
+        if (standardFields) standardFields.style.display = 'flex';
+        if (zoneEraserControls) zoneEraserControls.style.display = 'none';
         pageRangeControls.style.display = 'none';
         handles.forEach(el => el.style.display = 'block');
       }
@@ -1441,6 +1468,57 @@
         fetchStagingList();
       } catch (err) {
         alert(`Échec découpage: ${err.message}`);
+      } finally {
+        overlay.style.display = 'none';
+      }
+    }
+
+    // 🧽 VISUAL ZONE ERASER (MASQUAGE / NETTOYAGE VECTORIEL)
+    async function applyVisualZoneErase() {
+      const filename = slicerSourceFilename || document.getElementById('slicer-file-select').value;
+      if (!filename) return alert('Veuillez d\'abord charger un PDF dans le Découpeur.');
+
+      const canvas = document.getElementById('pdf-canvas');
+      if (!canvas) return alert('Canvas introuvable.');
+
+      const zoneH = cropBottomY - cropTopY;
+      if (zoneH <= 5) return alert('Veuillez définir une zone à masquer en glissant le cadre bleu.');
+
+      const confirmErase = confirm(`🧽 Masquer cette zone sur la page ${currentSlicerPageNum} de "${filename}" ?\nCette action appliquera un masque vectoriel blanc propre directement sur le document.`);
+      if (!confirmErase) return;
+
+      const overlay = document.getElementById('overlay');
+      const overlayText = document.getElementById('overlay-text');
+      overlay.style.display = 'flex';
+      overlayText.textContent = `Masquage de la zone sur la page ${currentSlicerPageNum}...`;
+
+      try {
+        const payload = {
+          filename,
+          pageNum: currentSlicerPageNum,
+          zone: {
+            x: 0,
+            y: cropTopY,
+            width: canvas.width,
+            height: zoneH,
+            canvasWidth: canvas.width,
+            canvasHeight: canvas.height
+          }
+        };
+
+        const res = await fetch('/api/admin/erase-pdf-zone', {
+          method: 'POST',
+          headers: API_HEADERS,
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        alert(`✅ ${data.message}`);
+        // Reload current PDF document and re-render current page
+        await loadPdfIntoSlicer(filename, currentSlicerPageNum);
+      } catch (err) {
+        alert(`Échec masquage: ${err.message}`);
       } finally {
         overlay.style.display = 'none';
       }

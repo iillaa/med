@@ -456,8 +456,8 @@ function validateCAT(cat) {
     if (!Array.isArray(cat.sub_cats)) {
       errors.push('Field "sub_cats" must be an array of specialized profile objects.');
     } else {
-      if (cat.sub_cats.length > 2) {
-        warnings.push(`Too many sub-profiles (${cat.sub_cats.length}). Maximum recommended is 2 specialized sub-CATs.`);
+      if (cat.sub_cats.length > 7) {
+        warnings.push(`Too many sub-profiles (${cat.sub_cats.length}). Maximum allowed is 7 specialized sub-CATs per Master.`);
       }
       cat.sub_cats.forEach((sub, sIdx) => {
         if (!sub.label || typeof sub.label !== 'string') {
@@ -468,6 +468,9 @@ function validateCAT(cat) {
         }
         if (!sub.ordonnance || typeof sub.ordonnance !== 'string' || sub.ordonnance.length < 15) {
           errors.push(`Sub-CAT #${sIdx + 1} ("${sub.label || 'Sans nom'}"): "ordonnance" is required.`);
+        }
+        if (!sub.red_flags || typeof sub.red_flags !== 'string' || sub.red_flags.length < 10) {
+          warnings.push(`Sub-CAT #${sIdx + 1} ("${sub.label || 'Sans nom'}"): "red_flags" field is recommended for clinical safety.`);
         }
       });
     }

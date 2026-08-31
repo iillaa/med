@@ -13,15 +13,6 @@ function ensurePdfDirectories() {
   if (!fs.existsSync(PDF_MASTERS_DIR)) fs.mkdirSync(PDF_MASTERS_DIR, { recursive: true });
   if (!fs.existsSync(PUBLIC_PDF_DIR)) fs.mkdirSync(PUBLIC_PDF_DIR, { recursive: true });
   if (!fs.existsSync(PUBLIC_DATA_DIR)) fs.mkdirSync(PUBLIC_DATA_DIR, { recursive: true });
-
-  // Auto-sync any existing public PDFs to pdf_masters if missing
-  const publicFiles = fs.existsSync(PUBLIC_PDF_DIR) ? fs.readdirSync(PUBLIC_PDF_DIR).filter(f => f.endsWith('.pdf')) : [];
-  for (const file of publicFiles) {
-    const masterPath = path.join(PDF_MASTERS_DIR, file);
-    if (!fs.existsSync(masterPath)) {
-      try { fs.copyFileSync(path.join(PUBLIC_PDF_DIR, file), masterPath); } catch (_) {}
-    }
-  }
 }
 
 // Status object to track indexing state in memory
@@ -116,10 +107,11 @@ function syncPublicDataAssets(indexData) {
 
 /**
  * Indexes PDF files in data/pdf_masters directory page by page.
- * Automatically merges & promotes valid staged PDFs from data/pdf_staging_index.json into the master index.
  * Caches results in pdf_index.json and synchronizes public/data/ assets.
+ * @param {boolean} force - Force re-parsing even if hash unchanged
+ * @param {boolean} allowCloud - Explicit permission to use cloud extractors (default: false, strictly offline)
  */
-async function indexPdfs(force = false) {
+async function indexPdfs(force = false, allowCloud = false) {
   if (indexState.isIndexing) {
     console.log("PDF Indexing is already running...");
     return;
@@ -128,7 +120,7 @@ async function indexPdfs(force = false) {
   ensurePdfDirectories();
   indexState.isIndexing = true;
   indexState.currentFile = 'Initialisation...';
-  console.log("Starting PDF text indexing from master originals (data/pdf_masters/)...");
+  console.log(`Starting PDF text indexing from master originals (data/pdf_masters/) [Mode: ${allowCloud ? 'Cloud Permitted' : 'Offline Safe'}]...`);
 
   try {
     let index = [];
@@ -163,8 +155,8 @@ async function indexPdfs(force = false) {
         console.log(`[Indexer] Parsing master original "${file}"...`);
         const parseStart = Date.now();
         
-        // Strategy Manager extracts from uncompressed master original
-        const extractedData = await extractPdfData(masterPath, force);
+        // Strategy Manager extracts from uncompressed master original (offline-safe by default)
+        const extractedData = await extractPdfData(masterPath, force, allowCloud);
         extractedData.mtime = stats.mtimeMs;
         
         // Compare with old index to detect changes
@@ -224,9 +216,10 @@ module.exports = {
   syncPublicDataAssets
 };
 
-// When run directly (npm run reindex), (re)build the PDF index.
+// When run directly (npm run reindex), (re)build the PDF index in safe offline mode unless --cloud is passed.
 if (require.main === module) {
-  indexPdfs(true).catch(err => {
+  const allowCloud = process.argv.includes('--cloud');
+  indexPdfs(true, allowCloud).catch(err => {
     console.error('Reindex failed:', err);
     process.exit(1);
   });

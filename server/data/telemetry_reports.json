@@ -1,1 +1,537 @@
-[]
+[
+  {
+    "id": "tel_1788123795355_i0ons1d",
+    "fingerprint": "fp_z6qk3h",
+    "firstSeen": 1788123795355,
+    "lastSeen": 1788127092402,
+    "occurrences": 2,
+    "severity": "info",
+    "type": "console_error",
+    "error": "Request timed out after 10000ms: /api/suggestions",
+    "stack": "Error: Request timed out after 10000ms: /api/suggestions\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async rt (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:16304)\n    at async Fe (http://localhost:3000/dist/app-NBARGY3O.js:1027:1170)\n    at async Ne (http://localhost:3000/dist/app-NBARGY3O.js:1077:7038)",
+    "device": {
+      "model": "Android Device",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "appMode": "Web Browser",
+      "screen": "1730x913 (dpr: 1.701209545135498)",
+      "language": "en-US",
+      "online": true,
+      "connection": "4g",
+      "memory": "8 GB",
+      "timestamp": "2026-08-30T21:03:15.320Z"
+    },
+    "affectedDevices": {
+      "Android Device": 2
+    },
+    "appVersion": "1.16.3",
+    "installId": "drcat-inst-bbe18cff-3c1b-470f-a7ae-220a05552790",
+    "logs": [
+      {
+        "timestamp": "22:58:01",
+        "level": "INFO",
+        "message": "🚀 Debug Console initialized."
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "LOG",
+        "message": "📱 Dr.CAT Debug Console active."
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "LOG",
+        "message": "[App Mode] Detected: admin_local (Host: localhost, Static CDN: false)."
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "LOG",
+        "message": "[Startup] Mode: admin_local"
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "NETWORK",
+        "message": "GET /api/server-providers → 200 (14ms)",
+        "network": {
+          "url": "/api/server-providers",
+          "method": "GET",
+          "status": 200,
+          "duration": 14
+        }
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "NETWORK",
+        "message": "GET /api/is-admin → 200 (33ms)",
+        "network": {
+          "url": "/api/is-admin",
+          "method": "GET",
+          "status": 200,
+          "duration": 33
+        }
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "LOG",
+        "message": "Admin mode: true"
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "NETWORK",
+        "message": "GET /api/cats → 200 (64ms)",
+        "network": {
+          "url": "/api/cats",
+          "method": "GET",
+          "status": 200,
+          "duration": 64
+        }
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "NETWORK",
+        "message": "GET /api/search-status → 200 (44ms)",
+        "network": {
+          "url": "/api/search-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 44
+        }
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "NETWORK",
+        "message": "GET /api/pdf-index-status → 200 (16ms)",
+        "network": {
+          "url": "/api/pdf-index-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 16
+        }
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "NETWORK",
+        "message": "GET /api/pdfs → 200 (18ms)",
+        "network": {
+          "url": "/api/pdfs",
+          "method": "GET",
+          "status": 200,
+          "duration": 18
+        }
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "LOG",
+        "message": "[Background] PDFs loaded."
+      },
+      {
+        "timestamp": "22:58:01",
+        "level": "NETWORK",
+        "message": "GET /api/search-status → 200 (24ms)",
+        "network": {
+          "url": "/api/search-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 24
+        }
+      },
+      {
+        "timestamp": "22:58:12",
+        "level": "ERROR",
+        "message": "GET /api/suggestions → FAILED (10558ms): signal is aborted without reason",
+        "network": {
+          "url": "/api/suggestions",
+          "method": "GET",
+          "status": 0,
+          "duration": 10558
+        }
+      },
+      {
+        "timestamp": "22:58:12",
+        "level": "ERROR",
+        "message": "Failed to load suggestions: Request timed out after 10000ms: /api/suggestions\nError: Request timed out after 10000ms: /api/suggestions\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async rt (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:16304)\n    at async Fe (http://localhost:3000/dist/app-NBARGY3O.js:1027:1170)\n    at async Ne (http://localhost:3000/dist/app-NBARGY3O.js:1077:7038)"
+      }
+    ],
+    "userNote": ""
+  },
+  {
+    "id": "tel_1788123804888_hyznh51",
+    "fingerprint": "fp_k3myjy",
+    "firstSeen": 1788123804888,
+    "lastSeen": 1788123804888,
+    "occurrences": 1,
+    "severity": "info",
+    "type": "console_error",
+    "error": "Request timed out after 10000ms: /api/admin/telemetry?_t=1788123794877",
+    "stack": "Error: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123794877\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async st (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:17487)\n    at async r (http://localhost:3000/dist/app-NBARGY3O.js:895:437)",
+    "device": {
+      "model": "Android Device",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "appMode": "Web Browser",
+      "screen": "1730x913 (dpr: 1.701209545135498)",
+      "language": "en-US",
+      "online": true,
+      "connection": "4g",
+      "memory": "8 GB",
+      "timestamp": "2026-08-30T21:03:24.879Z"
+    },
+    "affectedDevices": {
+      "Android Device": 1
+    },
+    "appVersion": "1.16.3",
+    "installId": "drcat-inst-bbe18cff-3c1b-470f-a7ae-220a05552790",
+    "logs": [
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "📱 Dr.CAT Debug Console active."
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "[App Mode] Detected: admin_local (Host: localhost, Static CDN: false)."
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "[Startup] Mode: admin_local"
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/server-providers → 200 (30ms)",
+        "network": {
+          "url": "/api/server-providers",
+          "method": "GET",
+          "status": 200,
+          "duration": 30
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/is-admin → 200 (26ms)",
+        "network": {
+          "url": "/api/is-admin",
+          "method": "GET",
+          "status": 200,
+          "duration": 26
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "Admin mode: true"
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/cats → 200 (75ms)",
+        "network": {
+          "url": "/api/cats",
+          "method": "GET",
+          "status": 200,
+          "duration": 75
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/search-status → 200 (64ms)",
+        "network": {
+          "url": "/api/search-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 64
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/pdf-index-status → 200 (13ms)",
+        "network": {
+          "url": "/api/pdf-index-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 13
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/pdfs → 200 (19ms)",
+        "network": {
+          "url": "/api/pdfs",
+          "method": "GET",
+          "status": 200,
+          "duration": 19
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "[Background] PDFs loaded."
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/search-status → 200 (26ms)",
+        "network": {
+          "url": "/api/search-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 26
+        }
+      },
+      {
+        "timestamp": "22:03:15",
+        "level": "ERROR",
+        "message": "GET /api/suggestions → FAILED (10002ms): signal is aborted without reason",
+        "network": {
+          "url": "/api/suggestions",
+          "method": "GET",
+          "status": 0,
+          "duration": 10002
+        }
+      },
+      {
+        "timestamp": "22:03:15",
+        "level": "ERROR",
+        "message": "Failed to load suggestions: Request timed out after 10000ms: /api/suggestions\nError: Request timed out after 10000ms: /api/suggestions\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async rt (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:16304)\n    at async Fe (http://localhost:3000/dist/app-NBARGY3O.js:1027:1170)\n    at async Ne (http://localhost:3000/dist/app-NBARGY3O.js:1077:7038)"
+      },
+      {
+        "timestamp": "22:03:15",
+        "level": "NETWORK",
+        "message": "POST /api/telemetry → 200 (40ms)",
+        "network": {
+          "url": "/api/telemetry",
+          "method": "POST",
+          "status": 200,
+          "duration": 40
+        }
+      },
+      {
+        "timestamp": "22:03:21",
+        "level": "ERROR",
+        "message": "GET /api/admin/telemetry?_t=1788123791616 → FAILED (10000ms): signal is aborted without reason",
+        "network": {
+          "url": "/api/admin/telemetry?_t=1788123791616",
+          "method": "GET",
+          "status": 0,
+          "duration": 10000
+        }
+      },
+      {
+        "timestamp": "22:03:21",
+        "level": "ERROR",
+        "message": "[AdminTelemetry] Failed to load reports: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123791616\nError: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123791616\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async st (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:17487)\n    at async r (http://localhost:3000/dist/app-NBARGY3O.js:895:437)"
+      },
+      {
+        "timestamp": "22:03:21",
+        "level": "NETWORK",
+        "message": "POST /api/telemetry → 200 (26ms)",
+        "network": {
+          "url": "/api/telemetry",
+          "method": "POST",
+          "status": 200,
+          "duration": 26
+        }
+      },
+      {
+        "timestamp": "22:03:24",
+        "level": "ERROR",
+        "message": "GET /api/admin/telemetry?_t=1788123794877 → FAILED (10000ms): signal is aborted without reason",
+        "network": {
+          "url": "/api/admin/telemetry?_t=1788123794877",
+          "method": "GET",
+          "status": 0,
+          "duration": 10000
+        }
+      },
+      {
+        "timestamp": "22:03:24",
+        "level": "ERROR",
+        "message": "[AdminTelemetry] Failed to load reports: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123794877\nError: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123794877\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async st (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:17487)\n    at async r (http://localhost:3000/dist/app-NBARGY3O.js:895:437)"
+      }
+    ],
+    "userNote": ""
+  },
+  {
+    "id": "tel_1788123801635_8n28bvs",
+    "fingerprint": "fp_8fs5xk",
+    "firstSeen": 1788123801635,
+    "lastSeen": 1788123801635,
+    "occurrences": 1,
+    "severity": "info",
+    "type": "console_error",
+    "error": "Request timed out after 10000ms: /api/admin/telemetry?_t=1788123791616",
+    "stack": "Error: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123791616\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async st (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:17487)\n    at async r (http://localhost:3000/dist/app-NBARGY3O.js:895:437)",
+    "device": {
+      "model": "Android Device",
+      "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+      "appMode": "Web Browser",
+      "screen": "1730x913 (dpr: 1.701209545135498)",
+      "language": "en-US",
+      "online": true,
+      "connection": "4g",
+      "memory": "8 GB",
+      "timestamp": "2026-08-30T21:03:21.620Z"
+    },
+    "affectedDevices": {
+      "Android Device": 1
+    },
+    "appVersion": "1.16.3",
+    "installId": "drcat-inst-bbe18cff-3c1b-470f-a7ae-220a05552790",
+    "logs": [
+      {
+        "timestamp": "22:03:05",
+        "level": "INFO",
+        "message": "🚀 Debug Console initialized."
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "📱 Dr.CAT Debug Console active."
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "[App Mode] Detected: admin_local (Host: localhost, Static CDN: false)."
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "[Startup] Mode: admin_local"
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/server-providers → 200 (30ms)",
+        "network": {
+          "url": "/api/server-providers",
+          "method": "GET",
+          "status": 200,
+          "duration": 30
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/is-admin → 200 (26ms)",
+        "network": {
+          "url": "/api/is-admin",
+          "method": "GET",
+          "status": 200,
+          "duration": 26
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "Admin mode: true"
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/cats → 200 (75ms)",
+        "network": {
+          "url": "/api/cats",
+          "method": "GET",
+          "status": 200,
+          "duration": 75
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/search-status → 200 (64ms)",
+        "network": {
+          "url": "/api/search-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 64
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/pdf-index-status → 200 (13ms)",
+        "network": {
+          "url": "/api/pdf-index-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 13
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/pdfs → 200 (19ms)",
+        "network": {
+          "url": "/api/pdfs",
+          "method": "GET",
+          "status": 200,
+          "duration": 19
+        }
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "LOG",
+        "message": "[Background] PDFs loaded."
+      },
+      {
+        "timestamp": "22:03:05",
+        "level": "NETWORK",
+        "message": "GET /api/search-status → 200 (26ms)",
+        "network": {
+          "url": "/api/search-status",
+          "method": "GET",
+          "status": 200,
+          "duration": 26
+        }
+      },
+      {
+        "timestamp": "22:03:15",
+        "level": "ERROR",
+        "message": "GET /api/suggestions → FAILED (10002ms): signal is aborted without reason",
+        "network": {
+          "url": "/api/suggestions",
+          "method": "GET",
+          "status": 0,
+          "duration": 10002
+        }
+      },
+      {
+        "timestamp": "22:03:15",
+        "level": "ERROR",
+        "message": "Failed to load suggestions: Request timed out after 10000ms: /api/suggestions\nError: Request timed out after 10000ms: /api/suggestions\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async rt (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:16304)\n    at async Fe (http://localhost:3000/dist/app-NBARGY3O.js:1027:1170)\n    at async Ne (http://localhost:3000/dist/app-NBARGY3O.js:1077:7038)"
+      },
+      {
+        "timestamp": "22:03:15",
+        "level": "NETWORK",
+        "message": "POST /api/telemetry → 200 (40ms)",
+        "network": {
+          "url": "/api/telemetry",
+          "method": "POST",
+          "status": 200,
+          "duration": 40
+        }
+      },
+      {
+        "timestamp": "22:03:21",
+        "level": "ERROR",
+        "message": "GET /api/admin/telemetry?_t=1788123791616 → FAILED (10000ms): signal is aborted without reason",
+        "network": {
+          "url": "/api/admin/telemetry?_t=1788123791616",
+          "method": "GET",
+          "status": 0,
+          "duration": 10000
+        }
+      },
+      {
+        "timestamp": "22:03:21",
+        "level": "ERROR",
+        "message": "[AdminTelemetry] Failed to load reports: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123791616\nError: Request timed out after 10000ms: /api/admin/telemetry?_t=1788123791616\n    at u (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:10348)\n    at async st (http://localhost:3000/dist/chunk-O3DBDXRF.js:1:17487)\n    at async r (http://localhost:3000/dist/app-NBARGY3O.js:895:437)"
+      }
+    ],
+    "userNote": ""
+  }
+]
