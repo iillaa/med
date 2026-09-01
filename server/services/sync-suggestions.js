@@ -22,11 +22,13 @@ async function ackCloudflareSuggestions(syncedIds) {
     const payload = JSON.stringify({ ids: syncedIds });
     const req = https.request(`${CLOUDFLARE_URL}/ack`, {
       method: 'POST',
+      timeout: 10000,
       headers: syncHeaders({
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload)
       })
     }, () => resolve());
+    req.setTimeout(10000, () => { req.destroy(); resolve(); });
     req.on('error', () => resolve());
     req.write(payload);
     req.end();
@@ -38,7 +40,7 @@ async function syncCloudflareSuggestions() {
     console.warn('[CloudSync] SYNC_SECRET non défini — le worker refusera la synchronisation (503/403). Ajoutez-le dans .env et dans les variables du Worker.');
   }
   return new Promise((resolve) => {
-    https.get(CLOUDFLARE_URL, { headers: syncHeaders() }, (res) => {
+    const req = https.get(CLOUDFLARE_URL, { headers: syncHeaders(), timeout: 10000 }, (res) => {
       let rawData = '';
       res.on('data', chunk => rawData += chunk);
       res.on('end', async () => {
@@ -71,9 +73,9 @@ async function syncCloudflareSuggestions() {
         }
         resolve();
       });
-    }).on('error', () => {
-      resolve();
     });
+    req.setTimeout(10000, () => { req.destroy(); resolve(); });
+    req.on('error', () => resolve());
   });
 }
 
@@ -82,8 +84,10 @@ async function purgeCloudflareSuggestion(id) {
   return new Promise((resolve) => {
     const req = https.request(`${CLOUDFLARE_URL}/${encodeURIComponent(id)}`, {
       method: 'DELETE',
+      timeout: 10000,
       headers: syncHeaders()
     }, () => resolve());
+    req.setTimeout(10000, () => { req.destroy(); resolve(); });
     req.on('error', () => resolve());
     req.end();
   });
@@ -95,7 +99,7 @@ const TELEMETRY_FILE = path.join(__dirname, '..', 'data', 'telemetry_reports.jso
 async function syncCloudflareTelemetry() {
   if (!process.env.SYNC_SECRET || process.env.NODE_ENV === 'test') return;
   return new Promise((resolve) => {
-    https.get(CLOUDFLARE_TELEMETRY_URL, { headers: syncHeaders() }, (res) => {
+    const req = https.get(CLOUDFLARE_TELEMETRY_URL, { headers: syncHeaders(), timeout: 10000 }, (res) => {
       let rawData = '';
       res.on('data', chunk => rawData += chunk);
       res.on('end', async () => {
@@ -124,7 +128,9 @@ async function syncCloudflareTelemetry() {
         } catch (_) {}
         resolve();
       });
-    }).on('error', () => resolve());
+    });
+    req.setTimeout(10000, () => { req.destroy(); resolve(); });
+    req.on('error', () => resolve());
   });
 }
 

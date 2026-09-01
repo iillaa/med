@@ -87,6 +87,9 @@ function registerCatRoutes(app) {
       if (!Array.isArray(importList)) {
         return res.status(400).json({ error: 'L\'importation doit être un tableau de fiches.' });
       }
+      if (importList.length > 500) {
+        return res.status(400).json({ error: 'Le volume d\'importation maximal est limité à 500 fiches par requête.' });
+      }
 
       for (const item of importList) {
         if (!item.title || !item.category) {

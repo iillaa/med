@@ -264,7 +264,7 @@ app.use((req, res, next) => {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:* https://*.ngrok.io https://*.ngrok-free.app https://*.ngrok-free.dev https://*.trycloudflare.com https://*.cfargotunnel.com https://*.pages.dev https://*.is-an.app https://*.is-a.dev wss:",
+      "connect-src 'self' http://localhost:* https://*.workers.dev https://*.ngrok.io https://*.ngrok-free.app https://*.ngrok-free.dev https://*.trycloudflare.com https://*.cfargotunnel.com https://*.pages.dev https://*.is-an.app https://*.is-a.dev wss:",
       "frame-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",

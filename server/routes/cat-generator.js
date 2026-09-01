@@ -197,7 +197,7 @@ function registerCatGeneratorRoutes(app) {
         db.push(result.cat);
       }
 
-      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+      await safeWriteJsonAsync(dbPath, db);
 
       res.json({
         success: true,
@@ -398,8 +398,8 @@ function registerCatGeneratorRoutes(app) {
       const validation = validateCAT(updatedCat);
 
       db[catIdx] = updatedCat;
-      // Async write — avoids blocking the event loop; write to the SAME resolved path we read from
-      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+      // Safe atomic async write — avoids blocking the event loop and corruption
+      await safeWriteJsonAsync(dbPath, db);
 
       res.json({
         success: true,
@@ -478,7 +478,7 @@ function registerCatGeneratorRoutes(app) {
       } else {
         db.push(targetCat);
       }
-      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+      await safeWriteJsonAsync(dbPath, db);
 
       const validation = validateCAT(targetCat);
 
@@ -526,7 +526,7 @@ function registerCatGeneratorRoutes(app) {
       }
 
       db[catIdx] = targetCat;
-      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+      await safeWriteJsonAsync(dbPath, db);
 
       res.json({
         success: true,
@@ -562,7 +562,7 @@ function registerCatGeneratorRoutes(app) {
         return res.status(404).json({ error: `Fiche avec l'ID ${id} introuvable.` });
       }
 
-      await fs.promises.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8');
+      await safeWriteJsonAsync(dbPath, db);
       res.json({ success: true, message: `Fiche #${id} supprimée de la base V3 générée.` });
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -646,7 +646,7 @@ function registerCatGeneratorRoutes(app) {
           if (idx >= 0) v2Db[idx] = fullCatObj;
           else v2Db.push(fullCatObj);
 
-          fs.writeFileSync(dbPath, JSON.stringify(v2Db, null, 2), 'utf8');
+          await safeWriteJsonAsync(dbPath, v2Db);
 
           addProgressLog(`✅ [#${cat.id}] "${cat.title}" générée avec succès (${resObj.metrics.totalTokens} tok | ${resObj.metrics.latencyMs}ms)`, 'success');
         } catch (err) {
@@ -829,7 +829,7 @@ function registerCatGeneratorRoutes(app) {
         if (existingIdx >= 0) db[existingIdx] = result.cat;
         else db.push(result.cat);
 
-        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8');
+        await safeWriteJsonAsync(dbPath, db);
       }
 
       res.json({

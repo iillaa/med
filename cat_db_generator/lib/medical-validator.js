@@ -402,10 +402,27 @@ function validateCAT(cat) {
     }
 
     // --- 7d. DANGEROUS UNIT TYPO SAFEGUARD (mg vs g typographical confusion) ---
+    const TYPO_DRUG_MAP = {
+      'paracetamol': 4,
+      'amoxicilline': 3,
+      'ibuprofene': 2.4,
+      'metronidazole': 2,
+      'cetirizine': 0.02,
+      'azithromycine': 1,
+      'clarithromycine': 1,
+      'ciprofloxacine': 1.5,
+      'ramipril': 0.02,
+      'amlodipine': 0.02
+    };
     for (const pText of allPrescriptionTexts) {
-      const lethalGramTypoMatch = pText.match(/(?:parac[eé]tamol|amoxicilline|ibuprof[eè]ne|m[eé]tronidazole|c[eé]tirizine|azithromycine|clarithromycine|ciprofloxacine|ramipril|amlodipine)\s*(?:[^\n.]*?)(\d{2,4})\s*g\b(?!\s*\/\s*(?:l|100ml|kg))/i);
-      if (lethalGramTypoMatch && parseFloat(lethalGramTypoMatch[1]) >= 10) {
-        errors.push(`[Erreur Typographique Unité] Posologie aberrante détectée : "${lethalGramTypoMatch[0]}". Confusion probable entre "mg" et "g". Corriger l'unité en mg.`);
+      const lethalGramTypoMatch = pText.match(/(parac[eé]tamol|amoxicilline|ibuprof[eè]ne|m[eé]tronidazole|c[eé]tirizine|azithromycine|clarithromycine|ciprofloxacine|ramipril|amlodipine)\s*(?:[^\n.]*?)(\d+(?:[.,]\d+)?)\s*g\b(?!\s*\/\s*(?:l|100ml|kg))/i);
+      if (lethalGramTypoMatch) {
+        const drugToken = normalizeDrugToken(lethalGramTypoMatch[1]);
+        const parsedGrams = parseFloat(lethalGramTypoMatch[2].replace(',', '.'));
+        const maxGrams = TYPO_DRUG_MAP[drugToken] || 4;
+        if (parsedGrams > maxGrams) {
+          errors.push(`[Erreur Typographique Unité] Posologie aberrante détectée : "${lethalGramTypoMatch[0]}" (${parsedGrams}g dépasse le seuil max de ${maxGrams}g). Confusion probable entre "mg" et "g". Corriger l'unité en mg.`);
+        }
       }
     }
 

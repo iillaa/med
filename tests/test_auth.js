@@ -10,10 +10,19 @@ const BASE = `http://127.0.0.1:${PORT}`;
 function req(method, reqPath, body, headers = {}) {
   return new Promise((resolve, reject) => {
     const url = new URL(reqPath, BASE);
+    const payload = (body && method !== 'GET') ? JSON.stringify(body) : null;
+    const reqHeaders = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...headers
+    };
+    if (payload) {
+      reqHeaders['Content-Length'] = Buffer.byteLength(payload);
+    }
     const opts = {
       hostname: url.hostname, port: url.port,
       path: url.pathname + url.search, method,
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...headers }
+      headers: reqHeaders
     };
     const r = http.request(opts, res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => {
@@ -22,7 +31,7 @@ function req(method, reqPath, body, headers = {}) {
       });
     });
     r.on('error', reject);
-    if (body && method !== 'GET') r.write(JSON.stringify(body));
+    if (payload) r.write(payload);
     r.end();
   });
 }
@@ -79,8 +88,15 @@ async function runTests() {
       serverReady = true;
     }
   };
-  serverProcess.stdout.on('data', onData);
-  serverProcess.stderr.on('data', onData);
+  serverProcess.stdout.on('data', (d) => {
+    const text = d.toString();
+    if (text.includes('Local Access:') || text.includes('Clinical Assistant') || text.includes('Dr. CAT') || text.includes('App is running')) {
+      serverReady = true;
+    }
+  });
+  serverProcess.stderr.on('data', (d) => {
+    console.error('[Server STDERR]', d.toString());
+  });
 
   for (let i = 0; i < 60; i++) {
     await new Promise(r => setTimeout(r, 500));
@@ -122,7 +138,6 @@ async function runTests() {
     const testCatId = newCat.body.cat.id;
 
     check('POST /api/cats/:id → 200', (await req('POST', '/api/cats/' + testCatId, { summary: 'auth test' }, { 'x-admin-token': token })).status === 200);
-    check('POST /api/reindex → 200', (await req('POST', '/api/reindex', {}, { 'x-admin-token': token })).status === 200);
     check('GET  /api/suggestions → 200', (await req('GET', '/api/suggestions', null, { 'x-admin-token': token })).status === 200);
 
     console.log('\n4. Suggestion lifecycle:');
@@ -141,7 +156,9 @@ async function runTests() {
 
     await req('DELETE', '/api/cats/' + testCatId, {}, { 'x-admin-token': token });
 
-    console.log('\n5. Logout:');
+    console.log('\n5. Reindex & Logout:');
+    check('POST /api/reindex → 200', (await req('POST', '/api/reindex', {}, { 'x-admin-token': token })).status === 200);
+
     const logout = await req('POST', '/api/logout', {}, { 'x-admin-token': token });
     check('POST /api/logout → 200', logout.status === 200);
 

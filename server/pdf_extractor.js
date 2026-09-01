@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { extractWithOffline } = require('./parsers/extractor_offline');
 const { extractWithLlamaParse } = require('./parsers/extractor_llamaparse');
 const { extractWithGoogle } = require('./parsers/extractor_google');
+const { safeWriteJsonAsync } = require('./services/data-store');
 
 require('dotenv').config();
 
@@ -131,7 +132,7 @@ async function extractPdfData(filePath, force = false, allowCloud = false) {
     pages: result.pages
   };
   
-  await fs.promises.writeFile(cacheFilePath, JSON.stringify(finalData, null, 2));
+  await safeWriteJsonAsync(cacheFilePath, finalData);
   console.log(`[Cache Saved] ${fileName} (Quality: ${result.quality})`);
   
   return finalData;

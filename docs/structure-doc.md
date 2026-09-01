@@ -154,13 +154,13 @@ flowchart TD
 
 ---
 
-## 📈 Matrice de Priorisation des Chantiers de Refactoring
+## 📈 Matrice de Suivi des Chantiers de Refactoring Structurel
 
-| Priorité | Chantier de Refactoring | Complexité | Gain Architectural & Performance |
-| :---: | :--- | :---: | :--- |
-| **P1** | **Sécurisation XSS & Échappement Systématique** | 🟢 Faible | 🔴 Critique (Sécurité des utilisateurs) |
-| **P2** | **Modularisation du Routeur Cloudflare Worker (Hono)** | 🟡 Moyenne | 🟠 Élevé (Maintenabilité & Découplage) |
-| **P3** | **Découpage Modulaire de `llm-engine.js`** | 🟡 Moyenne | 🟠 Élevé (Testabilité unitaire) |
-| **P4** | **Extraction du JavaScript de `admin/pdf_lab.html`** | 🟡 Moyenne | 🟠 Élevé (Propreté du code) |
-| **P5** | **Migration du Stockage Lourd vers IndexedDB (`idb`)** | 🟡 Moyenne | 🟢 Modéré (Fluidité UI 60 FPS) |
-| **P6** | **Migration Base Backend vers SQLite (`better-sqlite3`)** | 🔴 Élevée | 🟢 Modéré (Scalabilité long terme) |
+| Priorité | Chantier de Refactoring | Complexité | Gain Architectural & Performance | Statut |
+| :---: | :--- | :---: | :--- | :---: |
+| **P1** | **Sécurisation XSS & Échappement Systématique** | 🟢 Faible | 🔴 Critique (Sécurité des utilisateurs) | ✅ **Complété (v1.17.1)** |
+| **P2** | **Modularisation du Routeur Cloudflare Worker (`worker/`)** | 🟡 Moyenne | 🟠 Élevé (Maintenabilité & Découplage) | ✅ **Complété (v1.17.1)** |
+| **P3** | **Découpage Modulaire de `llm-engine.js` (4 Sous-services)** | 🟡 Moyenne | 🟠 Élevé (Testabilité unitaire) | ✅ **Complété (v1.17.1)** |
+| **P4** | **Extraction du JavaScript de `admin/pdf_lab.html` (`admin/js/`)** | 🟡 Moyenne | 🟠 Élevé (Propreté du code) | ✅ **Complété (v1.17.1)** |
+| **P5** | **Optimisation Stockage Client (`safeGetJSON`/`safeSetJSON`)** | 🟡 Moyenne | 🟢 Modéré (Fluidité UI 60 FPS) | ✅ **Complété (v1.17.1)** |
+| **P6** | **Migration Base Backend vers SQLite (`better-sqlite3`)** | 🔴 Élevée | 🟢 Modéré (Scalabilité long terme) | ⏳ *Prévu Roadmap v2* |
