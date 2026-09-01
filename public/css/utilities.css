@@ -374,6 +374,7 @@ button i,
 /* ── Tactile tap feedback (Phase 3.2) ───────────────────────
    Subtle press-scale on interactive controls so taps feel physical.
    Honors reduced-motion via the global media rule (transitions disabled). */
+/* Interactive control tactile feedback and 0ms instant touch response */
 .cat-item,
 .tab-btn,
 .status-pill,
@@ -384,7 +385,13 @@ button i,
 .close-modal-btn,
 .theme-toggle-btn,
 .action-btn,
-.cancel-btn {
+.cancel-btn,
+.primary-btn,
+.sidebar-nav-tab-btn,
+.filter-btn,
+.calc-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: transform var(--motion-fast) var(--ease-standard), background-color var(--transition-color);
 }
 .cat-item:active,
