@@ -48,17 +48,30 @@ async function computeEmbedding(text, apiKey) {
     return cache[cleanText];
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${key}`;
-  const res = await fetch(url, {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${key}`;
+  let res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'models/text-embedding-004',
       content: {
         parts: [{ text: cleanText }]
       }
     })
   });
+
+  if (!res.ok) {
+    // Fallback to gemini-embedding-001
+    const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${key}`;
+    res = await fetch(fallbackUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: {
+          parts: [{ text: cleanText }]
+        }
+      })
+    });
+  }
 
   if (!res.ok) {
     const errBody = await res.text();
@@ -104,39 +117,68 @@ async function searchSemanticPDFs(query, options = {}) {
 
     const { getPdfIndex } = require('./pdf-extractor');
     const allDocs = getPdfIndex();
+    const cache = getEmbeddingsCache();
 
-    const scoredSnippets = [];
+    // 1. Pre-select candidate pages: Prioritize staging/slices and documents matching query tokens
+    const cleanQuery = query.toLowerCase().replace(/^cat\s+devant\s+/i, '').trim();
+    const queryTokens = cleanQuery.split(/\s+/).filter(t => t.length >= 3);
 
+    const candidatePages = [];
     for (const doc of allDocs) {
-      const fileName = doc.pdf || 'unknown.pdf';
+      const fileName = (doc.pdf || '').toLowerCase();
+      const isStagingOrSlice = doc.quality === 'staging' || doc.isSlice || fileName.includes('slice');
+      const isDedicated = queryTokens.some(t => fileName.includes(t));
       const pages = Array.isArray(doc.pages) ? doc.pages : [];
 
       for (const page of pages) {
         const content = page.content || '';
         if (content.length < 50) continue;
-
-        // Extract substantive clinical block
         const snippet = content.slice(0, 1200);
-        let snippetVector = null;
+        const isCached = !!cache[snippet.replace(/\s+/g, ' ').trim().slice(0, 2048)];
 
-        try {
-          snippetVector = await computeEmbedding(snippet, apiKey);
-        } catch (_) {
-          continue;
+        // Always include cached passages, staging slices, or token-matching pages
+        if (isCached || isStagingOrSlice || isDedicated || queryTokens.some(t => content.toLowerCase().includes(t))) {
+          candidatePages.push({
+            doc,
+            page,
+            snippet,
+            isCached,
+            isStagingOrSlice,
+            isDedicated
+          });
         }
+      }
+    }
 
-        if (snippetVector) {
-          const sim = cosineSimilarity(queryVector, snippetVector);
-          if (sim >= 0.55) { // Minimum semantic relevance threshold
-            scoredSnippets.push({
-              pdfFile: fileName,
-              page: page.page || 1,
-              score: Math.round(sim * 100),
-              similarity: sim,
-              snippet: snippet,
-              quality: doc.quality || 'master'
-            });
-          }
+    // Sort candidate pages: cached & slices first, cap uncached requests to at most 12
+    candidatePages.sort((a, b) => {
+      if (a.isStagingOrSlice !== b.isStagingOrSlice) return b.isStagingOrSlice ? 1 : -1;
+      if (a.isCached !== b.isCached) return b.isCached ? 1 : -1;
+      return 0;
+    });
+
+    const evaluatedPages = candidatePages.slice(0, 25);
+    const scoredSnippets = [];
+
+    for (const item of evaluatedPages) {
+      let snippetVector = null;
+      try {
+        snippetVector = await computeEmbedding(item.snippet, apiKey);
+      } catch (_) {
+        continue;
+      }
+
+      if (snippetVector) {
+        const sim = cosineSimilarity(queryVector, snippetVector);
+        if (sim >= 0.50) { // Minimum semantic relevance threshold
+          scoredSnippets.push({
+            pdfFile: item.doc.pdf || 'unknown.pdf',
+            page: item.page.page || 1,
+            score: Math.round(sim * 100),
+            similarity: sim,
+            snippet: item.snippet,
+            quality: item.doc.quality || 'master'
+          });
         }
       }
     }
