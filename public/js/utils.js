@@ -291,24 +291,36 @@ function getStepTheme(headerText) {
     return { themeClass: 'step-theme-emergency', icon: 'fa-truck-medical' };
   }
 
-  // 1. Diagnostic / Triage / Bilan / Cadre Légal
-  if (/^1\./.test(h) || h.includes('diagnostic') || h.includes('triage') || h.includes('bilan') || h.includes('cadre')) {
+  // 1. Diagnostic / Évaluation / Triage / Cadre Légal
+  if (/^1\./.test(h) || h.includes('diagnostic') || h.includes('évaluation') || h.includes('evaluation') || h.includes('triage') || h.includes('cadre')) {
     return { themeClass: 'step-theme-diagnostic', icon: 'fa-stethoscope' };
   }
 
-  // 2. Traitement / Posologie / Conduite / Structure
-  if (/^2\./.test(h) || h.includes('traitement') || h.includes('posologie') || h.includes('conduite') || h.includes('structure')) {
-    return { themeClass: 'step-theme-treatment', icon: 'fa-pills' };
+  // 2. Traitement / Posologie / Conduite / Structure / Drapeau rouge / Alerte
+  if (/^2\./.test(h) || h.includes('traitement') || h.includes('posologie') || h.includes('conduite') || h.includes('structure') || h.includes('drapeau') || h.includes('rouge') || h.includes('alerte')) {
+    const isRedFlag = h.includes('drapeau') || h.includes('rouge') || h.includes('alerte');
+    return {
+      themeClass: isRedFlag ? 'step-theme-emergency' : 'step-theme-treatment',
+      icon: isRedFlag ? 'fa-triangle-exclamation' : 'fa-pills'
+    };
   }
 
-  // 3. / 3bis. Terrain Particulier / Grossesse / Comorbidités / Formules
-  if (/^3/.test(h) || h.includes('terrain') || h.includes('grossesse') || h.includes('comorbidit') || h.includes('formule')) {
-    return { themeClass: 'step-theme-terrain', icon: 'fa-person-pregnant' };
+  // 3. / 3bis. Terrain Particulier / Grossesse / Comorbidités / Formules / Examens
+  if (/^3/.test(h) || h.includes('terrain') || h.includes('grossesse') || h.includes('comorbidit') || h.includes('formule') || h.includes('examen') || h.includes('biologie')) {
+    const isLabs = h.includes('examen') || h.includes('complémentaire') || h.includes('complementaire') || h.includes('biologie');
+    return {
+      themeClass: isLabs ? 'step-theme-default' : 'step-theme-terrain',
+      icon: isLabs ? 'fa-flask' : 'fa-shield-heart'
+    };
   }
 
-  // 4. / 5. Critères d'Hospitalisation / Transfert / MDO
-  if (/^[456]\./.test(h) || h.includes('crit') || h.includes('hospitalis') || h.includes('transfert') || h.includes('mdo')) {
-    return { themeClass: 'step-theme-hospital', icon: 'fa-hospital-user' };
+  // 4. / 5. Prise en charge / Hospitalisation / Transfert / MDO / Orientation
+  if (/^[456]\./.test(h) || h.includes('crit') || h.includes('hospitalis') || h.includes('transfert') || h.includes('mdo') || h.includes('orientation') || h.includes('suivi')) {
+    const isHospital = h.includes('crit') || h.includes('hospitalis') || h.includes('transfert') || h.includes('mdo') || h.includes('orientation') || h.includes('suivi');
+    return {
+      themeClass: isHospital ? 'step-theme-hospital' : 'step-theme-treatment',
+      icon: isHospital ? 'fa-hospital-user' : 'fa-pills'
+    };
   }
 
   return { themeClass: 'step-theme-default', icon: 'fa-circle-info' };
@@ -325,9 +337,9 @@ export function parseSummaryMarkdown(text) {
 
   const raw = text.trim();
 
-  // Pattern matching: **0. Step Name :** or ### 0. Step Name or 0. Step Name :
+  // Pattern matching: **0. Step Name :** or # 0. Step Name or ### 0. Step Name or 0. Step Name :
   // Matches full header line up to newline without leaving stray ** or colons in content
-  const stepRegex = /(?:^|\n)(?:\*\*|#{2,4}\s*)?([0-9]+(?:bis|ter)?\.\s*[^\n]+?)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*(?:\n|$)/gi;
+  const stepRegex = /(?:^|\n)(?:\*\*|#{1,4}\s*)?([0-9]+(?:bis|ter)?\.\s*[^\n]+?)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*(?:\n|$)/gi;
   const matches = [...raw.matchAll(stepRegex)];
 
   // If 2 or more clinical steps are found, render clean retractable title sections
@@ -338,7 +350,7 @@ export function parseSummaryMarkdown(text) {
     for (let i = 0; i < matches.length; i++) {
       const match = matches[i];
       const headerTitle = match[1].trim()
-        .replace(/^(\*\*|#{2,4}\s*)/, '')
+        .replace(/^(\*\*|#{1,4}\s*)/, '')
         .replace(/(\*\*|:|\s)+$/, '')
         .trim();
       const matchStart = match.index;
