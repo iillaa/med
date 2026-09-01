@@ -276,18 +276,32 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
   // Quick Action Shortcut Cards
   const quickLibCard = document.getElementById('dash-quick-lib-card');
   if (quickLibCard) {
-    quickLibCard.onclick = () => {
+    const handleOpenLib = () => {
       if (window.openStandaloneLibrary) {
         window.openStandaloneLibrary();
+      }
+    };
+    quickLibCard.onclick = handleOpenLib;
+    quickLibCard.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleOpenLib();
       }
     };
   }
 
   const quickQuizCard = document.getElementById('dash-quick-quiz-card');
   if (quickQuizCard) {
-    quickQuizCard.onclick = () => {
+    const handleOpenQuiz = () => {
       const quizNavBtn = document.getElementById('start-quiz-nav-btn');
       if (quizNavBtn) quizNavBtn.click();
+    };
+    quickQuizCard.onclick = handleOpenQuiz;
+    quickQuizCard.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleOpenQuiz();
+      }
     };
   }
 
@@ -538,8 +552,8 @@ export async function renderDashboard(onSelectCat) {
   const activeCats = state.allCats.filter(c => c.status === 'doing' || c.status === 'done');
   renderResumeList(resumeList, activeCats, onSelectCat);
   renderCategoryProgress(categoriesDiv, state.allCats);
-  if (typeof renderDailyEmergencyChips === 'function') {
-    renderDailyEmergencyChips();
+  if (typeof window.renderDailyEmergencyChips === 'function') {
+    window.renderDailyEmergencyChips();
   }
 
   const firstRunBanner = document.getElementById('dash-first-run-banner');

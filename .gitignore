@@ -47,8 +47,9 @@ data/*.csv
 *.log
 nohup.out
 
-# Suggestions database
+# Suggestions database & device telemetry
 suggestions.json*
+server/data/active_devices.json
 !remote_server_config.json
 
 # Admin Password
