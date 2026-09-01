@@ -449,49 +449,59 @@ export function updateSidebarItemUI(cat) {
   if (metaStatus) metaStatus.textContent = getStatusLabel(cat.status);
 }
 
+export function normalizeSearchText(str) {
+  if (!str) return '';
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[`'’"“”«»\-–—_:;,?.!/\\()[\]{}*+]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Filter CAT list based on search, category, and quick status filter selections
 function filterCats(onFilterTriggered) {
-  const rawQuery = searchInput.value.toLowerCase().trim();
+  const normalizedQuery = normalizeSearchText(searchInput.value);
   const selectedCat = categoryFilter.value;
 
-  // Split query into terms for multi-keyword search (e.g. "otomycose orl")
-  const queryTokens = rawQuery ? rawQuery.split(/\s+/).filter(Boolean) : [];
+  // Split query into terms for multi-keyword search (e.g. "otomycose orl", "hta", "avc")
+  const queryTokens = normalizedQuery ? normalizedQuery.split(/\s+/).filter(Boolean) : [];
 
   const filtered = state.allCats.filter(cat => {
     if (!cat) return false;
 
-    // Use pre-cached searchable text index string to avoid string allocations during typing
+    // Use pre-cached normalized searchable text index string to avoid string allocations during typing
     if (!cat._searchTokenStr) {
-      const titleStr = (cat.title || '').toLowerCase();
-      const summaryStr = (cat.summary || cat.customSummary || '').toLowerCase();
-      const ordonnanceStr = (cat.ordonnance || cat.customOrdonnance || '').toLowerCase();
-      const redFlagsStr = (cat.red_flags || '').toLowerCase();
-      const categoryStr = (cat.category || '').toLowerCase();
-      const notesStr = (cat.notes || '').toLowerCase();
+      const titleStr = normalizeSearchText(cat.title);
+      const summaryStr = normalizeSearchText(cat.summary || cat.customSummary);
+      const ordonnanceStr = normalizeSearchText(cat.ordonnance || cat.customOrdonnance);
+      const redFlagsStr = normalizeSearchText(cat.red_flags);
+      const categoryStr = normalizeSearchText(cat.category);
+      const notesStr = normalizeSearchText(cat.notes);
       const keywordsStr = Array.isArray(cat.pdf_keywords)
-        ? cat.pdf_keywords.filter(k => k && typeof k === 'string').join(' ').toLowerCase()
-        : (cat.pdf_keywords || '').toLowerCase();
+        ? cat.pdf_keywords.filter(k => k && typeof k === 'string').map(k => normalizeSearchText(k)).join(' ')
+        : normalizeSearchText(cat.pdf_keywords);
       const subCatsStr = Array.isArray(cat.sub_cats)
-        ? cat.sub_cats.map(s => `${s.label || ''} ${s.summary || ''} ${s.ordonnance || ''}`).join(' ').toLowerCase()
+        ? cat.sub_cats.map(s => `${normalizeSearchText(s.label)} ${normalizeSearchText(s.summary)} ${normalizeSearchText(s.ordonnance)}`).join(' ')
         : '';
       const idStr = cat.id !== undefined && cat.id !== null ? String(cat.id) : '';
 
       cat._searchTokenStr = `${idStr} ${titleStr} ${categoryStr} ${summaryStr} ${ordonnanceStr} ${redFlagsStr} ${keywordsStr} ${notesStr} ${subCatsStr}`;
     }
 
-    // 1. Search text match (every search token must appear somewhere in the CAT content)
+    // 1. Search text match (every search token must appear somewhere in the normalized CAT content)
     const matchesQuery = queryTokens.length === 0 || queryTokens.every(token => cat._searchTokenStr.includes(token));
 
     // Detect which specific sub-cat label matched the search query for deep-link badges.
-    // Only runs when the query matches AND is not trivially matching the Master title itself.
     cat._matchedSubCatIdx = -1; // -1 = no specific sub-cat match (show Master)
     if (matchesQuery && queryTokens.length > 0 && Array.isArray(cat.sub_cats) && cat.sub_cats.length > 0) {
-      const masterStr = `${(cat.title || '').toLowerCase()} ${(cat.category || '').toLowerCase()}`;
+      const masterStr = `${normalizeSearchText(cat.title)} ${normalizeSearchText(cat.category)}`;
       const matchesMasterDirectly = queryTokens.every(t => masterStr.includes(t));
       if (!matchesMasterDirectly) {
         for (let si = 0; si < cat.sub_cats.length; si++) {
           const sub = cat.sub_cats[si];
-          const subStr = `${(sub.label || '').toLowerCase()} ${(sub.summary || '').toLowerCase()} ${(sub.ordonnance || '').toLowerCase()} ${(sub.red_flags || '').toLowerCase()}`;
+          const subStr = `${normalizeSearchText(sub.label)} ${normalizeSearchText(sub.summary)} ${normalizeSearchText(sub.ordonnance)} ${normalizeSearchText(sub.red_flags)}`;
           if (queryTokens.every(t => subStr.includes(t))) {
             cat._matchedSubCatIdx = si;
             break;
