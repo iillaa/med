@@ -416,10 +416,12 @@
 
 /* ── LEVEL 3: CAT List — takes all remaining space ── */
 .cat-list-wrapper {
-  flex: 1;          /* Grow to fill whatever is left */
+  flex: 1;
   min-height: 0;    /* Critical: lets flex-child shrink below content size */
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
   padding: 6px 8px 60px;
   position: relative; /* anchor the pull-to-refresh indicator */
   contain: content;  /* Isolate list layout & paint bounds for 60 FPS mobile scrolling */
@@ -453,7 +455,7 @@
   z-index: 5;
 }
 .ptr-indicator.visible {
-  transform: translate(-50%, 0) rotate(0deg);
+  opacity: 1;
 }
 .ptr-indicator.spinning {
   animation: ptrSpin 0.8s linear infinite;
@@ -494,6 +496,7 @@
   background-color: var(--surface-card);
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: var(--transition-gpu), var(--transition-paint);
+  touch-action: manipulation;
   /* Skip rendering off-screen list items (cheap win for long lists). The
      intrinsic size keeps the scrollbar stable so there's no jump on scroll. */
   content-visibility: auto;
