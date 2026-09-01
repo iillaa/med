@@ -16,6 +16,7 @@ const debugEmitter = require('./debug-emitter');
 const { FALLBACK_GEMINI_MODELS, applyModelBlocklist, discoverDynamicModels } = require('./model-registry');
 const { safeParseLLMJson } = require('./json-sanitizer');
 const { callLLMApi } = require('./gemini-client');
+const { MASTER_CAT_SCHEMA, SUB_CAT_SCHEMA } = require('./gemini-schemas');
 const {
   getHumanEditMemory,
   composeMasterCATSystemPrompt,
@@ -118,7 +119,10 @@ DIRECTIVE ABSOLUE : Conserve impérativement les préférences de prescription, 
         `\n👉 INSTRUCTION DE CORRECTION : Corrige STRICTEMENT ces erreurs médicales/structurelles dans ta nouvelle réponse JSON !`;
     }
 
-    const apiResult = await callLLMApi(systemPrompt, currentPrompt, options);
+    const apiResult = await callLLMApi(systemPrompt, currentPrompt, {
+      ...options,
+      responseSchema: options.responseSchema || MASTER_CAT_SCHEMA
+    });
     executionMetrics = apiResult.metrics;
 
     try {
@@ -325,7 +329,10 @@ RAPPEL : Génère un objet JSON unique avec "label", "summary" (4 étapes), "red
         `\n👉 INSTRUCTION DE CORRECTION : Corrige STRICTEMENT ces erreurs médicales/structurelles dans ta nouvelle réponse JSON !`;
     }
 
-    const apiResult = await callLLMApi(systemPrompt, currentPrompt, options);
+    const apiResult = await callLLMApi(systemPrompt, currentPrompt, {
+      ...options,
+      responseSchema: options.responseSchema || SUB_CAT_SCHEMA
+    });
 
     try {
       subResult = safeParseLLMJson(apiResult.text);

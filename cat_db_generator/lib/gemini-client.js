@@ -43,6 +43,10 @@ async function callLLMApi(systemPrompt, userPrompt, options = {}) {
           responseMimeType: 'application/json'
         };
 
+        if (options.responseSchema) {
+          generationConfig.responseSchema = options.responseSchema;
+        }
+
         // Apply thinkingConfig only to full Flash/Pro models — exclude lite variants that don't support it
         if (/gemini-(3|2\.5|2\.0)/i.test(model) && !/lite/i.test(model)) {
           const defaultBudget = /pro/i.test(model) ? 4096 : 2048;

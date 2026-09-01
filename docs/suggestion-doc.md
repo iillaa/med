@@ -89,13 +89,13 @@ flowchart TD
 
 ---
 
-### 1. Structured Outputs Natifs (Google Gemini)
+### 1. Structured Outputs Natifs (Google Gemini `responseSchema`) — ✅ Implémenté (v1.17.1)
 - **Objectif** :
   Remplacer la demande de format JSON textuel non garanti par l'API native `responseSchema` de Google AI Studio.
-- **Bénéfices** :
-  - **Garantie mathématique de validité JSON** : Zéro tentative de parsing échouée.
-  - **Élimination du code de repli par regex** : Suppression des 100 lignes de regex fragiles dans `llm-engine.js`.
-  - **Gain de token et de latence** : Le modèle n'a plus besoin d'explications superflues sur le formatage dans le prompt système.
+- **Bénéfices & Réalisation** :
+  - **Garantie mathématique de validité JSON** : `cat_db_generator/lib/gemini-schemas.js` fournit les schémas OpenAPI stricts pour les Master CATs et Sub-CATs.
+  - **Constrained Decoding** : Forcé au niveau de l'échantillonnage de tokens par Gemini.
+  - **Gain de token et de latence** : Zéro bavardage markdown, génération ultra-rapide.
 
 ---
 
