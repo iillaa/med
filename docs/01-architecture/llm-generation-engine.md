@@ -1,8 +1,8 @@
-# 🤖 Architecture : Moteur de Génération Médicale LLM V3.5
+# 🤖 Architecture : Moteur de Génération Médicale LLM V3.6
 
 > **Quadrant Diátaxis** : *01-Architecture (Explanations)*  
-> **Statut** : Production (v1.17.0+)  
-> **Composants Clés** : `cat_db_generator/generate_cat_db.js`, `cat_db_generator/lib/llm-engine.js`, `cat_db_generator/lib/medical-validator.js`
+> **Statut** : Production (v1.18.0+)  
+> **Composants Clés** : `cat_db_generator/generate_cat_db.js`, `cat_db_generator/lib/llm-engine.js`, `cat_db_generator/lib/semantic-rag.js`, `cat_db_generator/lib/medical-validator.js`, `cat_db_generator/lib/gemini-schemas.js`
 
 ---
 
@@ -10,39 +10,42 @@
 
 La génération automatisée de Conduites à Tenir (CAT) médicales exige un niveau de fiabilité, de rigueur pharmacologique et de sécurité absolue qu'un simple appel LLM non encadré ne peut garantir.
 
-Le moteur **Dr. CAT LLM Engine V3.5** repose sur une architecture multi-flux garantissant :
-1. **Zéro Hallucination Pharmacologique** : Validation systématique contre la base BDPM et la nomenclature locale algérienne.
-2. **Découverte Dynamique Robuste** : Sélection automatique du meilleur modèle Google Gemini disponible avec liste noire de protection (`GEMINI_BLOCKLIST`).
-3. **Double Filet de Sécurité Clinique** : Tests auto-diagnostiques Canaries (parsers de dosage) et suite de régression clinique Golden Set.
+Le moteur **Dr. CAT LLM Engine V3.6** repose sur une architecture multi-flux garantissant :
+1. **Garantie Mathématique de Structure (Gemini `responseSchema`)** : Utilisation des schémas OpenAPI stricts pour les Master et Sub-CATs via `lib/gemini-schemas.js`.
+2. **Dual RAG Sémantique Vectoriel** : Recherche de passages de cours par similarité cosinus dense (`gemini-embedding-2` / 3 072 dimensions) avec cache disque permanent `data/pdf_embeddings_cache.json`.
+3. **Moniteur de Surcharge de Prompt** : Alerte en temps réel lorsque le contexte combiné dépasse 10 000 caractères.
+4. **Boucle de Double-Check Pharmacologique Automatique** : Auto-correction immédiate en 2ème tentative si une posologie ou une DCI non répertoriée est détectée.
+5. **Zéro Hallucination Pharmacologique** : Validation systématique contre la base BDPM (4 474 DCIs) et la nomenclature algérienne (1 358 DCIs).
 
 ```mermaid
 flowchart TD
-    Request["🎯 Demande de Génération (ex: CAT Pneumonie Aiguë)"]
+    Request["🎯 Demande de Génération (ex: CAT Crise d'Asthme Aiguë)"]
     
-    subgraph StreamEngine["Les 5 Flux de Connaissances & Règles"]
-        Stream1["📄 1. Extraits RAG Corpus PDF Réel (Polycopiés/Consensus)"]
-        Stream2["💊 2. Nomenclature Algérienne & Dictionnaires BDPM"]
-        Stream3["⚡ 3. Directives Cliniques & Arbre Décisionnel d'Urgence"]
-        Stream4["🛡️ 4. Plafonds de Posologie & Règles Gériatriques/Pédiatriques"]
-        Stream5["📝 5. Règles Pragmatismes (Ordonnance 3 Lignes Max)"]
+    subgraph StreamEngine["Les Canaux de Connaissances RAG"]
+        Stream1["🧠 1. RAG Sémantique Vectoriel (gemini-embedding-2)"]
+        Stream2["📄 2. Extraits RAG Corpus PDF Réel (78 livres / 2 702 pages)"]
+        Stream3["🌐 3. Web RAG Médical (PubMed, Manuel MSD, MedG)"]
+        Stream4["💊 4. Nomenclature Algérienne & Pharmacopée BDPM"]
+        Stream5["🛡️ 5. Plafonds de Posologie & Règles Cliniques (81 molécules)"]
     end
 
     subgraph LLMExecution["Exécution & Découverte de Modèles"]
-        GeminiDiscovery["🔍 Dynamic Model Discovery (Gemini Pro / Flash)"]
-        BlocklistFilter["🚫 GEMINI_BLOCKLIST Filter (Exclusion preview/exp)"]
+        GeminiDiscovery["🔍 Dynamic Model Discovery (Gemini 3.5 Flash / Pro)"]
+        BlocklistFilter["🚫 GEMINI_BLOCKLIST Filter"]
+        SchemaConstraint["📐 responseSchema Constraint Lock"]
         GenerationPrompt["🧠 Synthesis Prompt Execution"]
-        GeminiDiscovery --> BlocklistFilter --> GenerationPrompt
+        GeminiDiscovery --> BlocklistFilter --> SchemaConstraint --> GenerationPrompt
     end
 
     subgraph ValidationGates["Barrières de Validation (medical-validator.js)"]
-        SchemaGate["1. Validation Schéma JSON Strict"]
+        SchemaGate["1. Validation Schéma JSON OpenAPI"]
         CanaryGate["2. Test Canaries (Parser de Posologie)"]
-        DoseGate["3. Vérification des Plafonds Posologiques (Section 7f)"]
-        MoleculeGate["4. Unknown-Molecule Gate (DCI Non Référencée)"]
+        DoseGate["3. Vérification des Plafonds Posologiques (81 molécules)"]
+        MoleculeGate["4. Auto-Correction DCI (Double-Check Loop)"]
         GoldenGate["5. Golden Set Clinical Regression Score"]
     end
 
-    Output["✅ Fiche Clinique Certifiée (cats_db_staged.json)"]
+    Output["✅ Fiche Clinique Certifiée (cats_db_staged.json -> cats_db.json)"]
 
     Request --> StreamEngine --> GenerationPrompt
     GenerationPrompt --> ValidationGates --> Output
