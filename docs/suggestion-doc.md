@@ -99,11 +99,13 @@ flowchart TD
 
 ---
 
-### 2. RAG Sémantique Local avec Embeddings Médicaux
+### 2. RAG Sémantique avec Embeddings Google (`text-embedding-004`) — ✅ Implémenté (v1.17.1)
 - **Objectif** :
-  Remplacer la recherche lexicale par mots-clés (`searchLocalPDFs`) par un index vectoriel local basé sur des embeddings denses (ex: modèle d'embeddings multilingue compact via `hnswlib-node`).
-- **Bénéfices** :
-  - Compréhension sémantique fine des expressions médicales complexes (ex: relier *"douleur thoracique transfixiante avec asymétrie tensionnelle"* à la fiche *"Dissection Aortique"* même si les termes exacts ne figurent pas dans le titre).
+  Enrichir la recherche de sources cliniques locales par similarité vectorielle sémantique et surveillance du volume de RAG.
+- **Bénéfices & Réalisation** :
+  - `cat_db_generator/lib/semantic-rag.js` utilise `text-embedding-004` (768 dimensions) avec mise en cache disque `data/pdf_embeddings_cache.json`.
+  - Calcul de similarité cosinus pure JavaScript (`cosineSimilarity`).
+  - Moniteur de surcharge RAG dans `llm-engine.js` avec alertes console et événements SSE `rag_overload_warning`.
 
 ---
 
