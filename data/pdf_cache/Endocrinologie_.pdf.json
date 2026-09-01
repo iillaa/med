@@ -18,7 +18,7 @@
     },
     {
       "page": 4,
-      "content": "# TLT(foyer)\n\n# ECG\n\n# Bilan:\n\n- FNS/CRP\n- Gly\n- Urée/Créat\n- ECBU\n- Ionogramme\n\n# Traitement: Réhydratation + Insulinothérapie\n\n# Réhydratation :\n\n| 1l en 1h | =>1l SSI 2flacons 5% chaque 1/2h |\n| -------- | -------------------------------- |\n| 1l en 2h | =>1l SSI 1h                      |\n| 1l en 3h | =>1l SSI si 1h30min              |\n| 1l en 4h | =>1l SSI 2h                      |"
+      "content": "# TLT(foyer)\n\n# ECG\n\n# Bilan:\n\n- FNS/CRP\n- Gly\n- Urée/Créat\n- ECBU\n- Ionogramme\n\n# Traitement: Réhydratation + Insulinothérapie\n\n# Réhydratation :\n\n| 1l en 1h | =>1l SSI 2flacons 5% chaque 1/2h |\n| -------- | -------------------------------- |\n| 1l en 2h | =>1l SSI 1h |\n| 1l en 3h | =>1l SSI si 1h30min |\n| 1l en 4h | =>1l SSI 2h |"
     },
     {
       "page": 5,
@@ -26,7 +26,7 @@
     },
     {
       "page": 6,
-      "content": "# Insulinothérapie\n\n- en IV jusqu'à (-) des CC\n- 50cc SSI + 0.1Ui/kg/h\n- Si CC(-) passe en Sc/h\n- 10Ui IO en Sc/h\n\n# Glycémie\n\n- Gly > 2.5 => SSI 0.9%\n- 1.5 &#x3C; Gly &#x3C; 2.5 => SG5%\n- Gly &#x3C; 1.5 => SG10%\n\n# Ionogramme/2h\n\n- K &#x3C; 3mmol/l => KCl 2g/l dans 2h\n- 3 &#x3C; K &#x3C; 4 => KCl 1.5g/l\n- K > 4 => KCl 0.5g/l\n- 5.5 => Rien\n- 6.5 - 7 + anomalies ECG ➡️ Avis Réa"
+      "content": "# Insulinothérapie\n\n- en IV jusqùà (-) des CC\n- 50cc SSI + 0.1Ui/kg/h\n- Si CC(-) passe en Sc/h\n- 10Ui IO en Sc/h\n\n# Glycémie\n\n- Gly > 2.5 => SSI 0.9%\n- 1.5 &#x3C; Gly &#x3C; 2.5 => SG5%\n- Gly &#x3C; 1.5 => SG10%\n\n# Ionogramme/2h\n\n- K &#x3C; 3mmol/l => KCl 2g/l dans 2h\n- 3 &#x3C; K &#x3C; 4 => KCl 1.5g/l\n- K > 4 => KCl 0.5g/l\n- 5.5 => Rien\n- 6.5 - 7 + anomalies ECG ➡️ Avis Réa"
     },
     {
       "page": 7,
@@ -34,11 +34,11 @@
     },
     {
       "page": 8,
-      "content": "# Asthénie\n\n# Bilan :\n\n- FNS\n- Ferritinémie\n- Gly/HbA1C\n- TSH/T4\n- Cortisolémie\n- Rénal\n- Hépatique\n- Lipidique\n- Ionogramme\n- Dosage de Vit D\n- ECG"
+      "content": "# Asthénie\n\n# Bilan :\n\n- FNS\n- Ferritinémie\n- Gly/HbAlC\n- TSH/T4\n- Cortisolémie\n- Rénal\n- Hépatique\n- Lipidique\n- Ionogramme\n- Dosage de Vit D\n- ECG"
     },
     {
       "page": 9,
-      "content": "# Traitement\n\n- Gelphore amp 1 amp 2/j\n- Ou Sargenor amp 1 amp 2/j\n- Mag ou Solyne Mg + Vit B6\n- Vitamine C\n- +/_ Vit D3 1 amp/mois\n\n⇨ Arginor, Tonic, Gel Royale, Alvityl"
+      "content": "# Traitement\n\n- Gelphore amp 1 amp 2/j\n- Ou Sargenor amp 1 amp 2/j\n- Mag ou Solyne Mg + Vit B6\n- Vitamine C\n- +/_ Vit D3 1 amp/mois\n\n⇨ Arginor, Toniç Gel Royale, Alvityl"
     },
     {
       "page": 10,
@@ -46,7 +46,7 @@
     },
     {
       "page": 11,
-      "content": "# Glycémie à jeun (8h)\n\n=ou>1.26g/l 7mmol/l\n\nA 2 reprises (48h d’intervalle)\n\n# HbA1C\n\n= ou >6.5%\n\n# à n’importe quel moment de la journée\n\n>2g/l 11.1mmol/l\n\n# Complications de diabète :\n\n- Acidocétose diabétique\n- Hyperglycémie Hyperosmolaire\n- Acidose lactique\n- Hypoglycémie"
+      "content": "# Glycémie à jeun (8h)\n\n=ou>1.26g/l 7mmol/l\n\nA 2 reprises (48h d’intervalle)\n\n# HbAlC\n\n= ou >6.5%\n\n# à n’importe quel moment de la journée\n\n>2g/l 11.1mmol/l\n\n# Complications de diabète :\n\n- Acidocétose diabétique\n- Hyperglycémie Hyperosmolaire\n- Acidose lactique\n- Hypoglycémie"
     },
     {
       "page": 12,
@@ -66,15 +66,15 @@
     },
     {
       "page": 16,
-      "content": "# Hirsutisme\n\n# Clinique :\n\nApparition d’une pilosité excessive répartie selon un type masculin, dans des zones normalement glabres chez la femme.\n\n# Bilan :\n\n3eme j du cycle\n\n- FSH/LH\n- HBA1C\n- Prolactine\n- Testostérone\n- Cortisolémie\n- 17_OH_progésterone\n- Delta 4_Androstenedione\n\n# Si bilan normal :\n\nÉchographie AP => SOPK"
+      "content": "# Hirsutisme\n\n# Clinique :\n\nApparition d’une pilosité excessive répartie selon un type masculin, dans des zones normalement glabres chez la femme.\n\n# Bilan :\n\n3eme j du cycle\n\n- FSH/LH\n- HBAlC\n- Prolactine\n- Testostérone\n- Cortisolémie\n- 17_OH_progésterone\n- Delta 4_Androstenedione\n\n# Si bilan normal :\n\nÉchographie AP => SOPK"
     },
     {
       "page": 17,
-      "content": "# Hyperglycémie\n\n# sans cétose / avec cétose\n\n# Clinique :\n\n- Sujet diabétique : mauvaise prise du traitement ou infection\n- Sujet non diabétique : Vertige, asthénie..\n\n# CAT : Adulte\n\nDextro >2.5g/l Labstix : CC(-)\n\n- Ionogramme avant Insulinothérapie pour corriger une Hypokalémie (Traitement préventif durant ces 24h)\n\n# Insulinothérapie\n\n=> 10Ui en Sc/h ou 0.1Ui/kg/h\n\nSi : CC(+) => 10Ui en IV/h jusqu’à (-) des CC\n\nDès (-) => 5Ui en IVD et 5Ui en Sc (hiatus)\n\nPuis après 6h : 10Ui/6h en Sc"
+      "content": "# Hyperglycémie\n\n# sans cétose / avec cétose\n\n# Clinique :\n\n- Sujet diabétique : mauvaise prise du traitement ou infection\n- Sujet non diabétique : Vertige, asthénie..\n\n# CAT : Adulte\n\nDextro >2.5g/l Labstix : CC(-)\n\n- Ionogramme avant Insulinothérapie pour corriger une Hypokalémie (Traitement préventif durant ces 24h)\n\n# Insulinothérapie\n\n=> 10Ui en Sc/h ou 0.1Ui/kg/h\n\nSi : CC(+) => 10Ui en IV/h jusqùà (-) des CC\n\nDès (-) => 5Ui en IVD et 5Ui en Sc (hiatus)\n\nPuis après 6h : 10Ui/6h en Sc"
     },
     {
       "page": 18,
-      "content": "# Protocoles de traitement\n\nOu 0.1Ui/kg si (-) des CC=> 0.05Ui/kg jusqu’à 24h\n\nSi Gly&#x3C;2.5g : SSI=> SG\n\n- Réhydratation => boire 1.5l eau dans 2h\n- Perfusion SSI : 50cc/kg/24h\n- 1l pdt 1h puis 1l pdt 2h puis 1l pdt 3h puis 3l pdt 6h\n- 1amp de K dans le flacon à partir de la 4ème h\n\nGly&#x3C;2.5g/l=> SG5%\n\nGly&#x3C;1.5g/l=> SG10%\n\nGly&#x3C;1g/l=> SG30%\n\n- Si : FDR + découverte de Gly ↗️ : Hospitalisation\n- Si : CC(+) + Gly ↗️ : Hospitalisation"
+      "content": "# Protocoles de traitement\n\nOu 0.1Ui/kg si (-) des CC=> 0.05Ui/kg jusqùà 24h\n\nSi Gly&#x3C;2.5g : SSI=> SG\n\n- Réhydratation => boire 1.5l eau dans 2h\n- Perfusion SSI : 50cc/kg/24h\n- 1l pdt 1h puis 1l pdt 2h puis 1l pdt 3h puis 3l pdt 6h\n- 1amp de K dans le flacon à partir de la 4ème h\n\nGly&#x3C;2.5g/l=> SG5%\n\nGly&#x3C;1.5g/l=> SG10%\n\nGly&#x3C;1g/l=> SG30%\n\n- Si : FDR + découverte de Gly ↗️ : Hospitalisation\n- Si : CC(+) + Gly ↗️ : Hospitalisation"
     },
     {
       "page": 19,
@@ -102,15 +102,15 @@
     },
     {
       "page": 25,
-      "content": "# Adaptation des doses de l'insuline\n\nOu 50cc de SG 30% en 15min\n\n50cc SG 10% en 1h\n\nRelais 1 flacon SG 5%/8h\n\n# Adapter les doses de l'insuline :\n\n- Si on trouve la cause de l'hypoglycémie => pas d'adaptation on traite la cause\n- Si on ne trouve pas une cause => la dose\n\n| Dose    | Adaptation |\n| ------- | ---------- |\n| < 5     | 0.5        |\n| 5 << 15 | 1          |\n| > 15    | 2          |\n\nChez le diabétique risque de rechute ou si voie d'abord difficile => 1-2 mg 1 amp Glucagon en IM ou SC\n\n- 1 amp 1 mg > 25 kg\n- 1/2 amp 0.5 mg &#x3C; 25 kg\n\nAprès 20 min si Gly => 2ème amp\n\nGlucagon est CI chez un sujet sous sulfamides hypoglycémiants ou alcoolique"
+      "content": "# Adaptation des doses de l'insuline\n\nOu 50cc de SG 30% en 15min\n\n50cc SG 10% en 1h\n\nRelais 1 flacon SG 5%/8h\n\n# Adapter les doses de l'insuline :\n\n- Si on trouve la cause de l'hypoglycémie => pas d'adaptation on traite la cause\n- Si on ne trouve pas une cause => la dose\n\n| Dose | Adaptation |\n| ------- | ---------- |\n| < 5 | 0.5 |\n| 5 << 15 | 1 |\n| > 15 | 2 |\n\nChez le diabétique risque de rechute ou si voie d'abord difficile => 1-2 mg 1 amp Glucagon en IM ou SC\n\n- 1 amp 1 mg > 25 kg\n- 1/2 amp 0.5 mg &#x3C; 25 kg\n\nAprès 20 min si Gly => 2ème amp\n\nGlucagon est CI chez un sujet sous sulfamides hypoglycémiants ou alcoolique"
     },
     {
       "page": 26,
-      "content": "# Femme enceinte\n\n80cc de SG30% Puis sucre lent\n\n# Bilan :\n\n- Gly à jeûne/HBA1C\n- Insulinémie\n- ACTH\n- Cortisol à 8h\n- CU\n- ECBU"
+      "content": "# Femme enceinte\n\n80cc de SG30% Puis sucre lent\n\n# Bilan :\n\n- Gly à jeûne/HBAlC\n- Insulinémie\n- ACTH\n- Cortisol à 8h\n- CU\n- ECBU"
     },
     {
       "page": 27,
-      "content": "# Hypersudation\n\n# Bilan :\n\n- FNS\n- CRP\n- Gly/HbA1C\n- Cortisolémie\n- TSH/T4\n- Vit D\n- IDR\n- TLT\n\n- Sérologie de Wright\n- Rechercher un syndrome tumoral : ADP, HPMG, SPMG"
+      "content": "# Hypersudation\n\n# Bilan :\n\n- FNS\n- CRP\n- Gly/HbAlC\n- Cortisolémie\n- TSH/T4\n- Vit D\n- IDR\n- TLT\n\n- Sérologie de Wright\n- Rechercher un syndrome tumoral : ADP, HPMG, SPMG"
     },
     {
       "page": 28,
@@ -134,7 +134,7 @@
     },
     {
       "page": 33,
-      "content": "# Conduite à tenir\n\n# TSH augmentée\n\n# Contrôle à 1 mois\n\n# TSH augmentée\n\n| T4L normale          | T4L basse             |\n| -------------------- | --------------------- |\n| Hypothyroidie fruste | Hypothyroidie patente |\n\n- Anticorps anti-TPO\n- +/- dépistage M. coeliaque\n- Échographie cervicale\n- ECG\n\n# Traitement par lévothyroxine\n\n| Adulte                | Enfant              |\n| --------------------- | ------------------- |\n| Débuter à 1,7 μg/kg/j | Débuter à 2 μg/kg/j |\n\n# Fragilité\n\n- Sujet âgé: Débuter à 1,7 μg/kg/j\n- Coronarien: Débuter à 12,5 μg/j"
+      "content": "# Conduite à tenir\n\n# TSH augmentée\n\n# Contrôle à 1 mois\n\n# TSH augmentée\n\n| T4L normale | T4L basse |\n| -------------------- | --------------------- |\n| Hypothyroidie fruste | Hypothyroidie patente |\n\n- Anticorps anti-TPO\n- +/- dépistage M. coeliaque\n- Échographie cervicale\n- ECG\n\n# Traitement par lévothyroxine\n\n| Adulte | Enfant |\n| --------------------- | ------------------- |\n| Débuter à 1,7 μg/kg/j | Débuter à 2 μg/kg/j |\n\n# Fragilité\n\n- Sujet âgé: Débuter à 1,7 μg/kg/j\n- Coronarien: Débuter à 12,5 μg/j"
     },
     {
       "page": 34,
@@ -158,7 +158,7 @@
     },
     {
       "page": 39,
-      "content": "# Que faire en cas de déficit / insuffisance en vitamine D ?\n\n| Poids de l'enfant | Taux de 25OH vitamine D        | Dose de cholecalciférol                                                   |\n| ----------------- | ------------------------------ | ------------------------------------------------------------------------- |\n| <20 kg            | <30 ng/ml (< 75 nmol/L)        | 100 000 UI                                                                |\n|                   | <10 ng/ml (< 25 nmol/L)        | 100 000 UI par mois pendant 2 mois (200 000 UI au total)                  |\n| 20 - 60 kg        | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 6 semaines pendant 2 mois (200 000 UI au total)     |\n|                   | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI                                                                |\n|                   | <10 ng/ml (< 25 nmol/L)        | 100 000 UI toutes les 2 semaines pendant 2 mois (400 000 UI au total)     |\n| >60 kg            | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 2 semaines pendant 6 semaines (300 000 UI au total) |\n|                   | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI toutes les 2 semaines pendant 4 semaines (200 000 UI au total) |\n\nAumde ot at European Journal of Pedisines (2020)"
+      "content": "# Que faire en cas de déficit / insuffisance en vitamine D ?\n\n| Poids de l'enfant | Taux de 25OH vitamine D | Dose de cholecalciférol |\n| ----------------- | ------------------------------ | ------------------------------------------------------------------------- |\n| <20 kg | <30 ng/ml (< 75 nmol/L) | 100 000 UI |\n| | <10 ng/ml (< 25 nmol/L) | 100 000 UI par mois pendant 2 mois (200 000 UI au total) |\n| 20 - 60 kg | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 6 semaines pendant 2 mois (200 000 UI au total) |\n| | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI |\n| | <10 ng/ml (< 25 nmol/L) | 100 000 UI toutes les 2 semaines pendant 2 mois (400 000 UI au total) |\n| >60 kg | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 2 semaines pendant 6 semaines (300 000 UI au total) |\n| | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI toutes les 2 semaines pendant 4 semaines (200 000 UI au total) |\n\nAumde ot at European Journal of Pedisines (2020)"
     }
   ]
 }

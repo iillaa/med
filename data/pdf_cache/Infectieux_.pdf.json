@@ -18,7 +18,7 @@
     },
     {
       "page": 4,
-      "content": "# Accident d'exposition au sang\n\n- Soins d’urgence : laver au savon pdt au (-) 5min puis désinfecter par un antiseptique alcool, Dakin..\n- Connaître le statut vaccinal/évaluer le risque infectieux\n- Selon le type d’AES : calibre d’aiguille, aiguille creusée ou pleine, profondeur de blessure..\n- Faire les sérologies pour la source/victime :\n\n1️⃣HVB=> victime\nSi correctement vacciné + titrage >10U=> Rien\nSi non vacciné + titrage &#x3C;10U=> Demande une sérologie de la source\n(si (-)= Rien /si (+)=> Demander une sérologie HVB pour victime (J1-8 M1M3M6) + ALAT/ALAT.."
+      "content": "# Accident d'exposition au sang\n\n- Soins d’urgence : laver au savon pdt au (-) 5min puis désinfecter par un antiseptique alcool, Dakin..\n- Connaître le statut vaccinal/évaluer le risque infectieux\n- Selon le type d’AES : calibre d’aiguille, aiguille creusée ou pleine, profondeur de blessure..\n- Faire les sérologies pour la source/victime :\n\n1️⃣HVB=> victime\nSi correctement vacciné + titrage >10U=> Rien\nSi non vacciné + titrage &#x3C;10U=> Demande une sérologie de la source\n(si (-)= Rien /si (+)=> Demander une sérologie HVB pour victime (J1-8 MlM3M6) + ALAT/ALAT.."
     },
     {
       "page": 5,
@@ -82,19 +82,19 @@
     },
     {
       "page": 20,
-      "content": "Adulte : Augmentin cp 1g 1cp 2/j\n\nEnfant : Augmentin sirop 1ddp 2/j\n\nPréventif pdt 5j si signes d’infection 10j\n\nSi allergie aux bétalactamines => Doxycycline\n\nVAT si sujet adulte\n\n1. Stade I : Rien\n2. Stade II :\n\n- VAR => J1J2J3J4J5J6 en sc periombilical\n- Ou Verorab Tnder en J1J7J21 (J0 : 2 doses / J7 : 1 dose / J21 : 1 dose) en IM\n\nAdulte et enfant >5ans => 2cc\n\nEnfant => 1cc (1/2 amp)\n\nPuis les rappels en intradermique J11J15\n\nAdulte et enfant >5ans => 0.25cc en 2 Points différentes\n\n&#x3C;5ans => 0.1cc"
+      "content": "Adulte : Augmentin cp 1g 1cp 2/j\n\nEnfant : Augmentin sirop 1ddp 2/j\n\nPréventif pdt 5j si signes d’infection 10j\n\nSi allergie aux bétalactamines => Doxycycline\n\nVAT si sujet adulte\n\n1. Stade I : Rien\n2. Stade II :\n\n- VAR => JlJ2J3J4JsJ6 en sc periombilical\n- Ou Verorab Tnder en JlJ7J21 (J0 : 2 doses / J7 : 1 dose / J21 : 1 dose) en IM\n\nAdulte et enfant >5ans => 2cc\n\nEnfant => 1cc (1/2 amp)\n\nPuis les rappels en intradermique J11J15\n\nAdulte et enfant >5ans => 0.25cc en 2 Points différentes\n\n&#x3C;5ans => 0.1cc"
     },
     {
       "page": 21,
-      "content": "# Rappels J30J90 en ID si grande lésion\n\nOu Adulte et enfant : muscle deltoïde\n\n&#x3C;2ans : antéro latéral de cuisse\n\n# 3️⃣Stade III :\n\nVAR + SAR + VAT\n\nSAR : Dose= (40×poids)/200\n\nUn flacon => 5ml\n\nUne quantité de la dose est infiltrée autour la plaie et le reste en IM après un test (0.1ml en sc 15min après 0.25ml en sc 15min après :\n\n- Si réaction (-)> la totalité du reste en IM\n- Si réaction (+)> 0.25ml chaque 15min jusqu’à l’épuisement de la dose.\n\nOu 5ui/kg Max 15ui\n\nPoids/5 Max 15cc"
+      "content": "# Rappels J30J90 en ID si grande lésion\n\nOu Adulte et enfant : muscle deltoïde\n\n&#x3C;2ans : antéro latéral de cuisse\n\n# 3️⃣Stade III :\n\nVAR + SAR + VAT\n\nSAR : Dose= (40×poids)/200\n\nUn flacon => 5ml\n\nUne quantité de la dose est infiltrée autour la plaie et le reste en IM après un test (0.1ml en sc 15min après 0.25ml en sc 15min après :\n\n- Si réaction (-)> la totalité du reste en IM\n- Si réaction (+)> 0.25ml chaque 15min jusqùà l’épuisement de la dose.\n\nOu 5ui/kg Max 15ui\n\nPoids/5 Max 15cc"
     },
     {
       "page": 22,
-      "content": "# Schéma tissulaire : VAR\n\n7 doses en périombilical\n\nPuis rappels en ID au niveau de l’avant bras :\n\n| Grade II  | J10 | J14 | J29 | J90 |     |\n| --------- | --- | --- | --- | --- | --- |\n| Grade III | J10 | J14 | J24 | J34 | J90 |\n\n# Schéma cellulaire : Rabipure Grade II et III\n\nEssens : 2 doses en J0\n\nPuis rappels en IM deltoïde : J3 J7 J14\n\nZagreb : 2 doses en J0\n\nPuis rappels en IM deltoïde : J7 J21\n\n(&#x3C;2ans à la face antérolatérale de cuisse)"
+      "content": "# Schéma tissulaire : VAR\n\n7 doses en périombilical\n\nPuis rappels en ID au niveau de l’avant bras :\n\n| Grade II | J10 | J14 | J29 | J90 | |\n| --------- | --- | --- | --- | --- | --- |\n| Grade III | J10 | J14 | J24 | J34 | J90 |\n\n# Schéma cellulaire : Rabipure Grade II et III\n\nEssens : 2 doses en J0\n\nPuis rappels en IM deltoïde : J3 J7 J14\n\nZagreb : 2 doses en J0\n\nPuis rappels en IM deltoïde : J7 J21\n\n(&#x3C;2ans à la face antérolatérale de cuisse)"
     },
     {
       "page": 23,
-      "content": "# Morsure au niveau oculaire\n\n- Lavage abondant au SSI\n- Sérothérapie : la quantité calculée\n- Rinçage de l’œil avec SAR dilué dans SSI 0.9%\n- Infiltration autour de l’œil en périorbitaire\n- Si reste : injecter en IM\n- VAR +/_ VDT\n- Avis ophtalmologie\n\n# 1- Apprécier la nature de l'agression et ses caractères :\n\n- contact direct avec un animal (la personne l'a touché ou nourri),\n- lechage de la peau intacte.\n- morsure(s) ou griffure(s) sans saignement siègeant ailleurs\n- qu'à la tête, aux extrémités et aux organes génitaux.\n- morsure(s) ou griffure(s), même sans saignement, siègeant\n- à la face, à la tête, au cou, aux mains, aux pieds, aux organes génitaux,\n- morsure ou griffure unique ou multiple avec saignement ou\n- ayant traversé le derme\n- morsure(s) par animal sauvage\n- exposition à une chauve-souris (morsure ou griffure ou manipulation),\n- lechage ou contamination des muqueuses par la salive,\n- projection de bave sur les muqueuses en particulier les yeux\n- lechage sur peau lésée."
+      "content": "# Morsure au niveau oculaire\n\n- Lavage abondant au SSI\n- Sérothérapie : la quantité calculée\n- Rinçage de l’œil avec SAR dilué dans SSI 0.9%\n- Infiltration autour de l’œil en périorbitaire\n- Si reste : injecter en IM\n- VAR +/_ VDT\n- Avis ophtalmologie\n\n# 1- Apprécier la nature de l'agression et ses caractères :\n\n- contact direct avec un animal (la personne l'a touché ou nourri),\n- lechage de la peau intacte.\n- morsure(s) ou griffure(s) sans saignement siègeant ailleurs\n- qùà la tête, aux extrémités et aux organes génitaux.\n- morsure(s) ou griffure(s), même sans saignement, siègeant\n- à la face, à la tête, au cou, aux mains, aux pieds, aux organes génitaux,\n- morsure ou griffure unique ou multiple avec saignement ou\n- ayant traversé le derme\n- morsure(s) par animal sauvage\n- exposition à une chauve-souris (morsure ou griffure ou manipulation),\n- lechage ou contamination des muqueuses par la salive,\n- projection de bave sur les muqueuses en particulier les yeux\n- lechage sur peau lésée."
     },
     {
       "page": 24,
@@ -102,7 +102,7 @@
     },
     {
       "page": 25,
-      "content": "# Traitement\n\n# Si pas de signes généreux :\n\n- Augmentin 2g/j\n- Désinfection locale\n- Surveillance 24h\n\n# Œdème + signes généreux :\n\n- Prodaf 1g en IVL\n- Augmentin 2g/j\n- Gentamycine 80mg/j\n- SAV 1amp de 4ml diluée dans 100cc SSI 9% passé sur 1h\n- À répéter chaque 5h jusqu’à disparition des signes\n\n# Œdème + signes généreux + complications :\n\n- Précédent + Héparine si CIVD"
+      "content": "# Traitement\n\n# Si pas de signes généreux :\n\n- Augmentin 2g/j\n- Désinfection locale\n- Surveillance 24h\n\n# Œdème + signes généreux :\n\n- Prodaf 1g en IVL\n- Augmentin 2g/j\n- Gentamycine 80mg/j\n- SAV 1amp de 4ml diluée dans 100cc SSI 9% passé sur 1h\n- À répéter chaque 5h jusqùà disparition des signes\n\n# Œdème + signes généreux + complications :\n\n- Précédent + Héparine si CIVD"
     },
     {
       "page": 26,
@@ -110,7 +110,7 @@
     },
     {
       "page": 27,
-      "content": "# CONDUTE A TENIR DEVANT UN CAS DE MORSURE DE SERPENT\n\n| GRADE DE MORSURE | TABLEAU CLINIQUE                                                                                                                                  | CONDUITE A TENIR                                                                                                                                                                                                                                                                                                                                |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| GRADE 0:         | -TRACES DE CROCHETS AU NIVEAU DE LA MORSURE -ABSENCE D'OEDEME OU DE REACTION LOCALE -EN GENERAL INDOLORE                                          | -SURVEILLANCE DE 4 HEURES AUX URGENCES (APPARITION D'OEDEME) -AU-DELA, UNE EVOLUTION VERS GRADE I EST IMPROBABLE -DESINFECTION LOCALE ET CONTROLE DE LA VACCINATION ANTITETANIQUE                                                                                     "
+      "content": "# CONDUTE A TENIR DEVANT UN CAS DE MORSURE DE SERPENT\n\n| GRADE DE MORSURE | TABLEAU CLINIQUE | CONDUITE A TENIR |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| GRADE 0: | -TRACES DE CROCHETS AU NIVEAU DE LA MORSURE -ABSENCE D'OEDEME OU DE REACTION LOCALE -EN GENERAL INDOLORE | -SURVEILLANCE DE 4 HEURES AUX URGENCES (APPARITION D'OEDEME) -AU-DELA, UNE EVOLUTION VERS GRADE I EST IMPROBABLE -DESINFECTION LOCALE ET CONTROLE DE LA VACCINATION ANTITETANIQUE"
     },
     {
       "page": 28,
@@ -150,7 +150,7 @@
     },
     {
       "page": 37,
-      "content": "# Rubéole\n\n# Clinique :\n\n- BEG, fièvre, courbatures, myalgies, arthralgies, rhinorrhée, toux, conjonctivite, ADP\n- Exanthèmes maculo papuleux, début au visage pas cuir chevelu, tronc, membres supérieurs puis inférieur, pas prurit\n- Respecte la région palmoplantaire\n- Exanthème maculopapuleux rose au niveau de la face puis thorax sans atteinte de cuir chevelu\n\n# Bilan :\n\n- FNS => Leucopénie/Sd mononucléose : Hyperlymphocytose\n- PCR\n- Sérologie"
+      "content": "# Rubéole\n\n# Clinique :\n\n- BEG, fièvre, courbatures, myalgies, arthralgies, rhinorrhée, toux, conjonctivite, ADP\n- Exanthèmes maculo papuleux, début au visage pas cuir chevelu, tronç membres supérieurs puis inférieur, pas prurit\n- Respecte la région palmoplantaire\n- Exanthème maculopapuleux rose au niveau de la face puis thorax sans atteinte de cuir chevelu\n\n# Bilan :\n\n- FNS => Leucopénie/Sd mononucléose : Hyperlymphocytose\n- PCR\n- Sérologie"
     },
     {
       "page": 38,
@@ -162,11 +162,11 @@
     },
     {
       "page": 40,
-      "content": "# Syphilis\n\n# Clinique :\n\n- Syphilis primaire : chancre ou érosion indolore avec ADP inguinales ++\n- Syphilis secondaire : manifestations cutanéomuqueuses (roséole, plaques muqueuses génitales ou buccales..)\n- Syphilis latente : asymptomatique, la découverte est fortuite par sérologie\n- Syphilis tertiaire : complications viscérales (cardiaques neurologiques osseuses)\n\n# Tests et Traitement :\n\n- TPHA(+)/VDRL(-) => Syphilis traitée\n- Extencilline 2.4MU inj IM unique, 3 inj à 8j d’intervalle\n- Contrôle : Clinique et biologique 3 mois, 6 mois, 1 an puis chaque année jusqu’à (-)"
+      "content": "# Syphilis\n\n# Clinique :\n\n- Syphilis primaire : chancre ou érosion indolore avec ADP inguinales ++\n- Syphilis secondaire : manifestations cutanéomuqueuses (roséole, plaques muqueuses génitales ou buccales..)\n- Syphilis latente : asymptomatique, la découverte est fortuite par sérologie\n- Syphilis tertiaire : complications viscérales (cardiaques neurologiques osseuses)\n\n# Tests et Traitement :\n\n- TPHA(+)/VDRL(-) => Syphilis traitée\n- Extencilline 2.4MU inj IM unique, 3 inj à 8j d’intervalle\n- Contrôle : Clinique et biologique 3 mois, 6 mois, 1 an puis chaque année jusqùà (-)"
     },
     {
       "page": 41,
-      "content": "# VDRL doit être (-) :\n\n1. 1an après traitement de Syphilis I\n2. 2an après traitement de Syphilis II\n\n| VDRL                  | TPHA             | FTAtou IgM       |\n| --------------------- | ---------------- | ---------------- |\n| Positif               | Negatif          | Negatif          |\n| Faux positif (VDRL≤4) |                  |                  |\n| Positif               | Chancre          | Negatif          |\n| Positif               | Syphilis latente | Syphilis latente |\n| Negatif               | Cicatrice        | TPHA haut (640)  |\n| Faux positif          |                  |                  |\n| VDRL haut (8)         | IgM              | Cicatrice        |\n| Positif               | Syphilis active  | TPHA bas (≤ 640) |\n| Positif               | Positif          | Cicatrice        |\n| VDRL bas (≤4)         | Negatif          | Syphilis latente |\n| Réinfection           |                  |                  |"
+      "content": "# VDRL doit être (-) :\n\n1. 1an après traitement de Syphilis I\n2. 2an après traitement de Syphilis II\n\n| VDRL | TPHA | FTAtou IgM |\n| --------------------- | ---------------- | ---------------- |\n| Positif | Negatif | Negatif |\n| Faux positif (VDRL≤4) | | |\n| Positif | Chancre | Negatif |\n| Positif | Syphilis latente | Syphilis latente |\n| Negatif | Cicatrice | TPHA haut (640) |\n| Faux positif | | |\n| VDRL haut (8) | IgM | Cicatrice |\n| Positif | Syphilis active | TPHA bas (≤ 640) |\n| Positif | Positif | Cicatrice |\n| VDRL bas (≤4) | Negatif | Syphilis latente |\n| Réinfection | | |"
     },
     {
       "page": 42,
@@ -178,7 +178,7 @@
     },
     {
       "page": 44,
-      "content": "REPUBLIQUE ALGERIENNE DEMOCRATIQUE ET POPULAIRE\n\nMINISTERE DE LA SANTE\n\nETABLISSEMENT PUBLIC DE SANTE DE PROXIMITE EL. AMRIA\n\nSERVICE D'EPIDEMOLOGIE ET DE MEDECINE PREVENTIVE\n\n# Conduite a tenir devant une plaie a risque tetanigene\n\n| Statut vaccinal                                   | Risque modere                                                               | Risque eleve     |                                                                             |     |\n| ------------------------------------------------- | --------------------------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------- | --- |\n| Nature du risque                                  | Risque modere                                                               | Nature du risque | Risque eleve                                                                |     |\n|                                                   | -plaies minimes                                                             | -ulceres cutanes | -intervention chirurgicale                                                  |     |\n| DT                                                | SAT                                                                         | DT               | SAT                                                                         |     |\n| Sujet bien vaccine                                | NON                                   "
+      "content": "REPUBLIQUE ALGERIENNE DEMOCRATIQUE ET POPULAIRE\n\nMINISTERE DE LA SANTE\n\nETABLISSEMENT PUBLIC DE SANTE DE PROXIMITE EL. AMRIA\n\nSERVICE D'EPIDEMOLOGIE ET DE MEDECINE PREVENTIVE\n\n# Conduite a tenir devant une plaie a risque tetanigene\n\n| Statut vaccinal | Risque modere | Risque eleve | | |\n| ------------------------------------------------- | --------------------------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------- | --- |\n| Nature du risque | Risque modere | Nature du risque | Risque eleve | |\n| | -plaies minimes | -ulceres cutanes | -intervention chirurgicale | |\n| DT | SAT | DT | SAT | |\n| Sujet bien vaccine | NON"
     },
     {
       "page": 45,
@@ -214,11 +214,11 @@
     },
     {
       "page": 53,
-      "content": "# Prescriptions\n\n# Medications\n\n| 1️⃣ | Aciclovir cp                     | 10mg/kg | 200mg | 4cp          | 4\\_5/j | pdt 7j |\n| --- | -------------------------------- | ------- | ----- | ------------ | ------ | ------ |\n| 2️⃣ | Aciclovir pmd                    | 1app    | 2/j   | 1tube        |        |        |\n| 3️⃣ | Chlorhexidine/Eosine aqueuse sol | 3app/j  |       |              |        |        |\n| 4️⃣ | Dolyc cp                         | 1g      | 1cp   | 3/j          |        |        |\n| 5️⃣ | Neurovit B1B6B12 cp              | 1cp     | 2/j   | pdt 1\\_3mois |        |        |\n\n# Additional Medications\n\n| 1️⃣ | Zovirax cp                   | 200/400mg | 1cp | 2/j |   |   |\n| --- | ---------------------------- | --------- | --- | --- | - | - |\n| 2️⃣ | Zovirax pmd                  | 1app      | 4/j |     |   |   |\n| 3️⃣ | Chlorhexidine/Eosine aqueuse |           |     |     |   |   |\n| 4️⃣ | Antalgique                   |           |     |     |   |   |\n| 5️⃣ | Neurovit                     |           |     |     |   |   |\n\n# Warnings\n\n⚠️Éviter l’Eosine aqueuse, puisque la coloration peut masquer une surinfection.\n\n# If Surinfection:\n\n| 1️⃣ | Keforal cp | 1g | 1cp | 3/j | pdt 7j |   |\n| --- | ---------- | -- | --- | --- | ------ | - |"
+      "content": "# Prescriptions\n\n# Medications\n\n| 1️⃣ | Aciclovir cp | 10mg/kg | 200mg | 4cp | 4\\_5/j | pdt 7j |\n| --- | -------------------------------- | ------- | ----- | ------------ | ------ | ------ |\n| 2️⃣ | Aciclovir pmd | 1app | 2/j | 1tube | | |\n| 3️⃣ | Chlorhexidine/Eosine aqueuse sol | 3app/j | | | | |\n| 4️⃣ | Dolyc cp | 1g | 1cp | 3/j | | |\n| 5️⃣ | Neurovit BlB6B12 cp | 1cp | 2/j | pdt 1\\_3mois | | |\n\n# Additional Medications\n\n| 1️⃣ | Zovirax cp | 200/400mg | 1cp | 2/j | | |\n| --- | ---------------------------- | --------- | --- | --- | - | - |\n| 2️⃣ | Zovirax pmd | 1app | 4/j | | | |\n| 3️⃣ | Chlorhexidine/Eosine aqueuse | | | | | |\n| 4️⃣ | Antalgique | | | | | |\n| 5️⃣ | Neurovit | | | | | |\n\n# Warnings\n\n⚠️Éviter l’Eosine aqueuse, puisque la coloration peut masquer une surinfection.\n\n# If Surinfection:\n\n| 1️⃣ | Keforal cp | 1g | 1cp | 3/j | pdt 7j | |\n| --- | ---------- | -- | --- | --- | ------ | - |"
     },
     {
       "page": 54,
-      "content": "# Si sujet jeune => rechercher une immunodépression\n\n# Bilan :\n\n- ID\n- FNS\n- Glycémie à jeûn/HBA1C\n- Rénal\n- Hépatique\n- Sérologie :"
+      "content": "# Si sujet jeune => rechercher une immunodépression\n\n# Bilan :\n\n- ID\n- FNS\n- Glycémie à jeûn/HBAlC\n- Rénal\n- Hépatique\n- Sérologie :"
     },
     {
       "page": 55,

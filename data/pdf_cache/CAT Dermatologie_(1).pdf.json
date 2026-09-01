@@ -6,7 +6,7 @@
   "pages": [
     {
       "page": 1,
-      "content": "# PANARIS\n\nImage 1\nImage 2\nImage 3\n\n| Medication              | Dosage         | Quantity |\n| ----------------------- | -------------- | -------- |\n| **FUCIDINE** pmd        | 01 app x 2 / j | 01 bte   |\n| **LEXIN** cp 01g        | 01 cp x 2 / j  | 02 btes  |\n| **HEXOMEDINE** solution | 01 App x 3 / j | 01 bte   |\n| **DOLYC** cp 500 mg     | 01 cp x 3 / j  | 01 btes  |\n\n\nSi échec !!! **Après 48 h:**\n\n- <font color=\"orange\">Traitement chirurgical</font>\n\n----\n\n© Yassine Boughoufala\nLogo\n© the.happy.7"
+      "content": "# PANARIS\n\nImage 1\nImage 2\nImage 3\n\n| Medication | Dosage | Quantity |\n| ----------------------- | -------------- | -------- |\n| **FUCIDINE** pmd | 01 app x 2 / j | 01 bte |\n| **LEXIN** cp 01g | 01 cp x 2 / j | 02 btes |\n| **HEXOMEDINE** solution | 01 App x 3 / j | 01 bte |\n| **DOLYC** cp 500 mg | 01 cp x 3 / j | 01 btes |\n\nSi échec !!! **Après 48 h:**\n\n- <font color=\"orange\">Traitement chirurgical</font>\n\n----\n\n© Yassine Boughoufala\nLogo\n© the.happy.7"
     },
     {
       "page": 2,
@@ -14,7 +14,7 @@
     },
     {
       "page": 3,
-      "content": "# ZONA INTERCOSTALE\n\nImage 1\nImage 2\nImage 3\n\n|                             |                |             |\n| --------------------------- | -------------- | ----------- |\n| **CICLOVIR** cp 200 mg      | 01 cp x 5 / j  | QSP 05 jrs  |\n| **CICLOVIR** crème          | 01 App x 3 / j | 01 bte      |\n| **EOSINE AQUEUSE** solution | 01 App x 3 / j | 01 bte      |\n| **TROIS B** vit             | 01 cp x 3 / j  | QSP 01 mois |\n| **CODOLYC** cp              | 01 cp x 3 / j  | 01 bte      |\n\n\n📷 Yassine Boughoufala\n🏷️\n📷 the.happy.7"
+      "content": "# ZONA INTERCOSTALE\n\nImage 1\nImage 2\nImage 3\n\n| | | |\n| --------------------------- | -------------- | ----------- |\n| **CICLOVIR** cp 200 mg | 01 cp x 5 / j | QSP 05 jrs |\n| **CICLOVIR** crème | 01 App x 3 / j | 01 bte |\n| **EOSINE AQUEUSE** solution | 01 App x 3 / j | 01 bte |\n| **TROIS B** vit | 01 cp x 3 / j | QSP 01 mois |\n| **CODOLYC** cp | 01 cp x 3 / j | 01 bte |\n\n📷 Yassine Boughoufala\n🏷️\n📷 the.happy.7"
     },
     {
       "page": 4,
@@ -26,7 +26,7 @@
     },
     {
       "page": 6,
-      "content": "# VARICELLE\n\n| Medication              | Dosage/Frequency | Notes      |\n| ----------------------- | ---------------- | ---------- |\n| **ANTIHISTAMINIQUE**    | le soir          | QSP 05 jrs |\n| **DOLIPRANE**           | 15 mg / kg / 6h  | 01 bte     |\n| **HEXOMEDINE** solution | 01 app x 3 / j   | 01 bte     |\n\n\nf Yassine Boughoufala\n\nthe.happy.7"
+      "content": "# VARICELLE\n\n| Medication | Dosage/Frequency | Notes |\n| ----------------------- | ---------------- | ---------- |\n| **ANTIHISTAMINIQUE** | le soir | QSP 05 jrs |\n| **DOLIPRANE** | 15 mg / kg / 6h | 01 bte |\n| **HEXOMEDINE** solution | 01 app x 3 / j | 01 bte |\n\nf Yassine Boughoufala\n\nthe.happy.7"
     },
     {
       "page": 7,
@@ -34,23 +34,23 @@
     },
     {
       "page": 8,
-      "content": "| Product           | Instructions                                           | Duration/Quantity |\n| ----------------- | ------------------------------------------------------ | ----------------- |\n| **BETACYL** crème | 01 app / j pdt 10 jrs<br/>01 app \\* 01j / 2 pdt 10 jrs | QSP 01 mois       |\n| **DEXERYL** crème | 01 app x 2 / j                                         | 02 btes           |"
+      "content": "| Product | Instructions | Duration/Quantity |\n| ----------------- | ------------------------------------------------------ | ----------------- |\n| **BETACYL** crème | 01 app / j pdt 10 jrs<br/>01 app \\* 01j / 2 pdt 10 jrs | QSP 01 mois |\n| **DEXERYL** crème | 01 app x 2 / j | 02 btes |"
     },
     {
       "page": 9,
-      "content": "# ANTHRAX\n\n| Medication              | Dosage         | Duration |\n| ----------------------- | -------------- | -------- |\n| **LEXIN** cp 01g        | 01 cp x 2 / j  | 02 btes  |\n| **CEFACET** amp         | 01 inj / j     | 07 btes  |\n| **HEXOMEDINE** solution | 01 App x 3 / j | 01 bte   |\n\n\nf Yassine Boughoufala\n\nthe.happy.7"
+      "content": "# ANTHRAX\n\n| Medication | Dosage | Duration |\n| ----------------------- | -------------- | -------- |\n| **LEXIN** cp 01g | 01 cp x 2 / j | 02 btes |\n| **CEFACET** amp | 01 inj / j | 07 btes |\n| **HEXOMEDINE** solution | 01 App x 3 / j | 01 bte |\n\nf Yassine Boughoufala\n\nthe.happy.7"
     },
     {
       "page": 10,
-      "content": "| Medication          | Application    | Oral   |\n| ------------------- | -------------- | ------ |\n| CICLOVIR pmd        | 01 app x 4 / j | 01 bte |\n| HEXOMEDINE solution | 01 App x 3 / j | 01 bte |"
+      "content": "| Medication | Application | Oral |\n| ------------------- | -------------- | ------ |\n| CICLOVIR pmd | 01 app x 4 / j | 01 bte |\n| HEXOMEDINE solution | 01 App x 3 / j | 01 bte |"
     },
     {
       "page": 11,
-      "content": "# FURONCLE\n\n| Medication              | Dosage | Frequency           |\n| ----------------------- | ------ | ------------------- |\n| **FUCIDINE** pmd        | 01 app | x 2 / j<br/>01 bte  |\n| **LEXIN** cp 01g        | 01 cp  | x 2 / j<br/>02 btes |\n| **HEXOMEDINE** solution | 01 App | x 3 / j<br/>01 bte  |\n\n\nf Yassine Boughoufala\n\nthe.happy.7"
+      "content": "# FURONCLE\n\n| Medication | Dosage | Frequency |\n| ----------------------- | ------ | ------------------- |\n| **FUCIDINE** pmd | 01 app | x 2 / j<br/>01 bte |\n| **LEXIN** cp 01g | 01 cp | x 2 / j<br/>02 btes |\n| **HEXOMEDINE** solution | 01 App | x 3 / j<br/>01 bte |\n\nf Yassine Boughoufala\n\nthe.happy.7"
     },
     {
       "page": 12,
-      "content": "# IMPETIGO\n\nImage 1\nImage 2\nImage 3\n\n| **FUCIDINE** pmd        | 01 app x 2 / j | QSP 10 jrs |\n| ----------------------- | -------------- | ---------- |\n| **HEXOMEDINE** solution | 01 App x 3 / j | 01 bte     |\n\n\n📷 Yassine Boughoufala\n🏠\n📷 the.happy.7"
+      "content": "# IMPETIGO\n\nImage 1\nImage 2\nImage 3\n\n| **FUCIDINE** pmd | 01 app x 2 / j | QSP 10 jrs |\n| ----------------------- | -------------- | ---------- |\n| **HEXOMEDINE** solution | 01 App x 3 / j | 01 bte |\n\n📷 Yassine Boughoufala\n🏠\n📷 the.happy.7"
     },
     {
       "page": 13,
@@ -66,11 +66,11 @@
     },
     {
       "page": 16,
-      "content": "# ECZEMA\n\n| Medication              | Description                                                               | Dosage                                                                       | Duration                  |\n| ----------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------- |\n| **CLOTASOL**            | crème ( pli. suintent )<br/>pommad( peau sèche )<br/>gèl ( zone pileuse ) | 01 \\*app\\* x 2 / j<br/>puis 01 \\*app\\* / j<br/>puis 01 \\*app\\* x 2 / semaine | QSP 07 jrs<br/>QSP 15 jrs |\n| **VASELINE** 10%        |                                                                           | 01 App x 2/ j                                                                | 02 bte                    |\n| **HEXOMEDINE** solution |                                                                           | 01 App x 3 / j                                                               | 01 bte                    |\n| **DESLOR** cp           |                                                                           | 01 cp / le soir                                                              | 01 bte                    |\n\n\nf Yassine Boughoufala\n\nthe.happy.7"
+      "content": "# ECZEMA\n\n| Medication | Description | Dosage | Duration |\n| ----------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------- |\n| **CLOTASOL** | crème ( pli. suintent )<br/>pommad( peau sèche )<br/>gèl ( zone pileuse ) | 01 \\*app\\* x 2 / j<br/>puis 01 \\*app\\* / j<br/>puis 01 \\*app\\* x 2 / semaine | QSP 07 jrs<br/>QSP 15 jrs |\n| **VASELINE** 10% | | 01 App x 2/ j | 02 bte |\n| **HEXOMEDINE** solution | | 01 App x 3 / j | 01 bte |\n| **DESLOR** cp | | 01 cp / le soir | 01 bte |\n\nf Yassine Boughoufala\n\nthe.happy.7"
     },
     {
       "page": 17,
-      "content": "# PITYRIASIS VERSICOLOR\n\nImage 1\nImage 2\nImage 3\n\n- **KETOCONAZOLE** crème 2% *01 app / le soir* QSP 01 mois\n- **KETOCONAZOLE** gèl moussant.st *01 app .5min.rinçage / sem* QSP 01 mois\n- **MYCOSTER** spray *01 app sur peau humide* QSP 01 mois\n\nSi forme étendue / résistante / récidivante :\n\n- **FULKAS** gel 150 mg *01 gel /sem* QSP 03 sem\n\n| Medication                           | Dosage                         | Duration    |\n| ------------------------------------ | ------------------------------ | ----------- |\n| \\*\\*KETOCONAZOLE\\*\\* crème 2%        | \\*01 app / le soir\\*           | QSP 01 mois |\n| \\*\\*KETOCONAZOLE\\*\\* gèl moussant.st | \\*01 app .5min.rinçage / sem\\* | QSP 01 mois |\n| \\*\\*MYCOSTER\\*\\* spray               | \\*01 app sur peau humide\\*     | QSP 01 mois |\n| \\*\\*FULKAS\\*\\* gel 150 mg            | \\*01 gel /sem\\*                | QSP 03 sem  |\n\n\n📘 Yassine Boughoufala\n🏥\n📷 the.happy.7"
+      "content": "# PITYRIASIS VERSICOLOR\n\nImage 1\nImage 2\nImage 3\n\n- **KETOCONAZOLE** crème 2% *01 app / le soir* QSP 01 mois\n- **KETOCONAZOLE** gèl moussant.st *01 app .5min.rinçage / sem* QSP 01 mois\n- **MYCOSTER** spray *01 app sur peau humide* QSP 01 mois\n\nSi forme étendue / résistante / récidivante :\n\n- **FULKAS** gel 150 mg *01 gel /sem* QSP 03 sem\n\n| Medication | Dosage | Duration |\n| ------------------------------------ | ------------------------------ | ----------- |\n| \\*\\*KETOCONAZOLE\\*\\* crème 2% | \\*01 app / le soir\\* | QSP 01 mois |\n| \\*\\*KETOCONAZOLE\\*\\* gèl moussant.st | \\*01 app .5min.rinçage / sem\\* | QSP 01 mois |\n| \\*\\*MYCOSTER\\*\\* spray | \\*01 app sur peau humide\\* | QSP 01 mois |\n| \\*\\*FULKAS\\*\\* gel 150 mg | \\*01 gel /sem\\* | QSP 03 sem |\n\n📘 Yassine Boughoufala\n🏥\n📷 the.happy.7"
     },
     {
       "page": 18,
@@ -78,7 +78,7 @@
     },
     {
       "page": 19,
-      "content": "ABD0KCAAQgAQQigUQQzoGCAAQBxAeOgYIABAIEB46CAgAEIAEELEDOg.\n\n| Condition          | Description                                                                  |\n| ------------------ | ---------------------------------------------------------------------------- |\n| *Herpes Simplex*   | Vesicle on erythematous base                                                 |\n| *Impetigo*         | *Honey-colored* crusting lesions in a perioral distribution                  |\n| *Aphthous Ulcer*   | Shallow, round, painful ulceration with yellow center surrounded by erythema |\n| Dyshidrotic Eczema | Small, \"tapioca-like\", deep vesicles, appear in clusters                     |\n\n\n[signature]\n\ncs\ntre soumises à des droits d'auteur. En savoir plus\n\n< Partager\n☑ Enregistrer"
+      "content": "ABDoKCAAQgAQQigUQQzoGCAAQBxAeOgYIABAIEB46CAgAEIAEELEDOg.\n\n| Condition | Description |\n| ------------------ | ---------------------------------------------------------------------------- |\n| *Herpes Simplex* | Vesicle on erythematous base |\n| *Impetigo* | *Honey-colored* crusting lesions in a perioral distribution |\n| *Aphthous Ulcer* | Shallow, round, painful ulceration with yellow center surrounded by erythema |\n| Dyshidrotic Eczema | Small, \"tapioca-like\", deep vesicles, appear in clusters |\n\n[signature]\n\ncs\ntre soumises à des droits d'auteur. En savoir plus\n\n< Partager\n☑ Enregistrer"
     }
   ]
 }

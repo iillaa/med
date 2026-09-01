@@ -26,7 +26,7 @@
     },
     {
       "page": 6,
-      "content": "# Anorexie\n\n- Perte de l’appétit\n\n| Appétito sirop 1flc : | <3ans : 1cac 3/j   |\n| --------------------- | ------------------ |\n|                       | 3\\_6ans : 2cac 3/j |\n|                       | >6ans : 3cac 3/j   |\n\nOu Appetitina\n\n>5mois: 1cac 2/j\n>5ans: 2cac 2/j\n\nOu Grossivit sirop\n\nVitatine sirop\n\nPediakid appétit sirop\n\nAppétit kid sirop"
+      "content": "# Anorexie\n\n- Perte de l’appétit\n\n| Appétito sirop 1flc : | <3ans : 1cac 3/j |\n| --------------------- | ------------------ |\n| | 3\\_6ans : 2cac 3/j |\n| | >6ans : 3cac 3/j |\n\nOu Appetitina\n\n>5mois: 1cac 2/j\n>5ans: 2cac 2/j\n\nOu Grossivit sirop\n\nVitatine sirop\n\nPediakid appétit sirop\n\nAppétit kid sirop"
     },
     {
       "page": 7,
@@ -42,7 +42,7 @@
     },
     {
       "page": 10,
-      "content": "PARA CLINIQUE BILAN RADIOLOGIQUE\n\n# Stades de STEINBROCKER\n\n| Stade I:   | Gonflement des parties molles, ostéopénie, appositions périostées |\n| ---------- | ----------------------------------------------------------------- |\n| Stade II:  | stade I + pincement articulaire                                   |\n| Stade III: | stade II + érosions osseuses sous chondrales                      |\n| Stade IV:  | stade II + fusion (ankylose articulaire)                          |"
+      "content": "PARA CLINIQUE BILAN RADIOLOGIQUE\n\n# Stades de STEINBROCKER\n\n| Stade I: | Gonflement des parties molles, ostéopénie, appositions périostées |\n| ---------- | ----------------------------------------------------------------- |\n| Stade II: | stade I + pincement articulaire |\n| Stade III: | stade II + érosions osseuses sous chondrales |\n| Stade IV: | stade II + fusion (ankylose articulaire) |"
     },
     {
       "page": 11,
@@ -82,11 +82,11 @@
     },
     {
       "page": 20,
-      "content": "# Autres schémas de Réhydratation :\n\n# H0_h2\n\n10cc/kg/h en absence de collapsus\n\nSi non 20cc/kg en 30min à renouveler jusqu’à correction\n\n# H2_h24\n\n3l/m2/j\n\nSupplémentation 4g NaCl + 3g KCl + 1g Gluconate de Ca/l\n\nSurface corporelle = (4×Poids +7)/(90+Poids)\n\nBien pincer la peau et le tissu sous cutané pour chercher le pli de deshydratation"
+      "content": "# Autres schémas de Réhydratation :\n\n# H0_h2\n\n10cc/kg/h en absence de collapsus\n\nSi non 20cc/kg en 30min à renouveler jusqùà correction\n\n# H2_h24\n\n3l/m2/j\n\nSupplémentation 4g NaCl + 3g KCl + 1g Gluconate de Ca/l\n\nSurface corporelle = (4×Poids +7)/(90+Poids)\n\nBien pincer la peau et le tissu sous cutané pour chercher le pli de deshydratation"
     },
     {
       "page": 21,
-      "content": "# Signes de déshydratation\n\n| fontanelle   | enfant déprimée          | somnolent        |\n| ------------ | ------------------------ | ---------------- |\n| -yeux creux  | pouls très rapide, petit | -langue sèche    |\n| pas d'urines | -pli cutane              | depuis 12 heures |\n| forme grave  |                          |                  |\n| forme sévère |                          |                  |"
+      "content": "# Signes de déshydratation\n\n| fontanelle | enfant déprimée | somnolent |\n| ------------ | ------------------------ | ---------------- |\n| -yeux creux | pouls très rapide, petit | -langue sèche |\n| pas d'urines | -pli cutane | depuis 12 heures |\n| forme grave | | |\n| forme sévère | | |"
     },
     {
       "page": 22,
@@ -102,7 +102,7 @@
     },
     {
       "page": 25,
-      "content": "Classification Détresse Respiratoire\n\n# DR minime\n\nScore de Silverman &#x3C; 4 et FiO2 : 21%\n\n# DR modérée\n\nScore de Silverman [4-6] et FiO2: 21% - 40%\n\n# DR sévère\n\nScore de Silverman > 6 et FiO2 > 40%\n\n# Evaluation de la fonction respiratoire du nouveau-ne selon le score de SILVERMAN\n\n| Parametres                                    | 0      | 1                                       | 2                                                     |\n| --------------------------------------------- | ------ | --------------------------------------- | ----------------------------------------------------- |\n| Balancement thoraco-abdominal à l'inspiration | Absent | Thorax immobile (respiration synchrone) | Respiration paradoxale (abdomen seulement se souleve) |\n| Tirage                                        | absent | intercostal discret                     | intercostal + sus et sous sternal                     |\n| Entonnoir xyphoidien                          | absent | modéré                                  | intense                                               |\n| Batement des ailes du nez                     | absent | modere                                  | intense                                               |\n| Geignement expiratoire                        | absent | percu an sthetoscope                    | audible continu                                       |"
+      "content": "Classification Détresse Respiratoire\n\n# DR minime\n\nScore de Silverman &#x3C; 4 et FiO2 : 21%\n\n# DR modérée\n\nScore de Silverman [4-6] et FiO2: 21% - 40%\n\n# DR sévère\n\nScore de Silverman > 6 et FiO2 > 40%\n\n# Evaluation de la fonction respiratoire du nouveau-ne selon le score de SILVERMAN\n\n| Parametres | 0 | 1 | 2 |\n| --------------------------------------------- | ------ | --------------------------------------- | ----------------------------------------------------- |\n| Balancement thoraco-abdominal à l'inspiration | Absent | Thorax immobile (respiration synchrone) | Respiration paradoxale (abdomen seulement se souleve) |\n| Tirage | absent | intercostal discret | intercostal + sus et sous sternal |\n| Entonnoir xyphoidien | absent | modéré | intense |\n| Batement des ailes du nez | absent | modere | intense |\n| Geignement expiratoire | absent | percu an sthetoscope | audible continu |"
     },
     {
       "page": 26,
@@ -134,7 +134,7 @@
     },
     {
       "page": 33,
-      "content": "# Glucagon est déconseillé chez le diabétique sous sulfamides\n\n# Bilan :\n\n- Glycémie à jeûne\n- HBA1C\n- Insulinémie\n- ACTH\n- Cortisol à 8h\n- CU\n- ECBU"
+      "content": "# Glucagon est déconseillé chez le diabétique sous sulfamides\n\n# Bilan :\n\n- Glycémie à jeûne\n- HBAlC\n- Insulinémie\n- ACTH\n- Cortisol à 8h\n- CU\n- ECBU"
     },
     {
       "page": 34,
@@ -174,7 +174,7 @@
     },
     {
       "page": 43,
-      "content": "# Traitement\n\n- Nébulisation Adrénaline 1cc Dexa 2cc dans 3cc SSI 20min (jusqu’à 3 séance)\n- Aérosol d’Adrénaline : 5mg/10ml NaCl 9% 15min\n\nSi réponse => Traitement de sortie\n\n# ✅️Traitement de sortie :\n\n1. CTC per os pdt 5j le matin :\n- &#x3C;10Kg=> Celestene 10gtt/kg max 400gtt\n- >10Kg=> Solupred cp 5mg 1mg/kg/j max : 40mg\n- Predo sirop : poids/3= ?ml 1/j\n2. ATB si : Laryngite sévère ou fébrile\n- Augmentin sirop 1ddp 2/j pdt 7j 80mg/kg/j\n3. Paracétamol\n4. AH : Tifen ou Deslor sirop. Si NRS : Primalan\n5. SSI"
+      "content": "# Traitement\n\n- Nébulisation Adrénaline 1cc Dexa 2cc dans 3cc SSI 20min (jusqùà 3 séance)\n- Aérosol d’Adrénaline : 5mg/10ml NaCl 9% 15min\n\nSi réponse => Traitement de sortie\n\n# ✅️Traitement de sortie :\n\n1. CTC per os pdt 5j le matin :\n- &#x3C;10Kg=> Celestene 10gtt/kg max 400gtt\n- >10Kg=> Solupred cp 5mg 1mg/kg/j max : 40mg\n- Predo sirop : poids/3= ?ml 1/j\n2. ATB si : Laryngite sévère ou fébrile\n- Augmentin sirop 1ddp 2/j pdt 7j 80mg/kg/j\n3. Paracétamol\n4. AH : Tifen ou Deslor sirop. Si NRS : Primalan\n5. SSI"
     },
     {
       "page": 44,
@@ -218,7 +218,7 @@
     },
     {
       "page": 54,
-      "content": "# Rubéole\n\n# Clinique :\n\n- BEG, fièvre, courbatures, myalgies, arthralgies, rhinorrhée, toux, conjonctivite, ADP\n- Exanthèmes maculo papuleux, début au visage pas cuir chevelu, tronc, membres supérieurs puis inférieur, pas prurit\n- Respecte la région palmoplantaire\n- Exanthème maculopapuleux rose au nv de la face puis thorax sans atteinte de cuir chevelu\n\n# Bilan :\n\n- FNS => Leucopénie/Sd mononucléose : Hyperlymphocytose\n- PCR\n- Sérologie"
+      "content": "# Rubéole\n\n# Clinique :\n\n- BEG, fièvre, courbatures, myalgies, arthralgies, rhinorrhée, toux, conjonctivite, ADP\n- Exanthèmes maculo papuleux, début au visage pas cuir chevelu, tronç membres supérieurs puis inférieur, pas prurit\n- Respecte la région palmoplantaire\n- Exanthème maculopapuleux rose au nv de la face puis thorax sans atteinte de cuir chevelu\n\n# Bilan :\n\n- FNS => Leucopénie/Sd mononucléose : Hyperlymphocytose\n- PCR\n- Sérologie"
     },
     {
       "page": 55,
@@ -234,11 +234,11 @@
     },
     {
       "page": 58,
-      "content": "# Supplémentation en vitamine D\n\n# En cas de déficit :\n\n- 50.000Ui/sem pdt 6-8sem (capsule molle ou solution buvable)\n- Refaire le dosage après 8sem\n- Pour prévenir des rechutes: dose d'entretien 50.000UI/mois\n\n# Exposition au soleil/Alimentation\n\n# Que faire en cas de déficit / insuffisance en vitamine D ?\n\n| Poids de l'enfant | Taux de 25OH vitamine D        | dose coldcaiciferol                                                       |\n| ----------------- | ------------------------------ | ------------------------------------------------------------------------- |\n| <20 kg            | < 30 ng/ml (< 75 nmol/L)       | 100 000 UR                                                                |\n|                   | < 10ng/ml (<25 nmol/L)         | 100 000 Ul par mois pendant 2 mois (200 000 Ul au total)                  |\n| 20 - 60 kg        | 10 - 20 ng/ml (25- 50 nmol/L)  | 100 000 UI toutes les 6 semaines pendant 2 mois (200 000 Ul au total)     |\n|                   | 20 - 30 ng/ml (50 -75 nmol/L)  | 100 000 UI                                                                |\n|                   | < 10 ng/ml (< 25 nmol/L)       | 100 000 Ul toutes les 2 semaines pendant 2 mois (400 000 Ul au total)     |\n| > 60 kg           | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 2 semaines pendant 6 semaines (300 000 Ul au total) |\n|                   | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI toutes les 2 semaines pendant 4 semaines (200 000 Ui au total) |\n\nAurelie et"
+      "content": "# Supplémentation en vitamine D\n\n# En cas de déficit :\n\n- 50.000Ui/sem pdt 6-8sem (capsule molle ou solution buvable)\n- Refaire le dosage après 8sem\n- Pour prévenir des rechutes: dose d'entretien 50.000UI/mois\n\n# Exposition au soleil/Alimentation\n\n# Que faire en cas de déficit / insuffisance en vitamine D ?\n\n| Poids de l'enfant | Taux de 25OH vitamine D | dose coldcaiciferol |\n| ----------------- | ------------------------------ | ------------------------------------------------------------------------- |\n| <20 kg | < 30 ng/ml (< 75 nmol/L) | 100 000 UR |\n| | < 10ng/ml (<25 nmol/L) | 100 000 Ul par mois pendant 2 mois (200 000 Ul au total) |\n| 20 - 60 kg | 10 - 20 ng/ml (25- 50 nmol/L) | 100 000 UI toutes les 6 semaines pendant 2 mois (200 000 Ul au total) |\n| | 20 - 30 ng/ml (50 -75 nmol/L) | 100 000 UI |\n| | < 10 ng/ml (< 25 nmol/L) | 100 000 Ul toutes les 2 semaines pendant 2 mois (400 000 Ul au total) |\n| > 60 kg | 10 - 20 ng/ml (25 - 50 nmol/L) | 100 000 UI toutes les 2 semaines pendant 6 semaines (300 000 Ul au total) |\n| | 20 - 30 ng/ml (50 - 75 nmol/L) | 100 000 UI toutes les 2 semaines pendant 4 semaines (200 000 Ui au total) |\n\nAurelie et"
     },
     {
       "page": 59,
-      "content": "# A la naissance :\n\nDose : 100.000ui donc 1/2amp de 200.000ui\n\n| 1 mois | 6 mois | 12 mois | 18 mois | 24 mois |\n| ------ | ------ | ------- | ------- | ------- |\n\nPuis chaque année (janvier) jusqu’à 14 ans"
+      "content": "# A la naissance :\n\nDose : 100.000ui donc 1/2amp de 200.000ui\n\n| 1 mois | 6 mois | 12 mois | 18 mois | 24 mois |\n| ------ | ------ | ------- | ------- | ------- |\n\nPuis chaque année (janvier) jusqùà 14 ans"
     },
     {
       "page": 60,

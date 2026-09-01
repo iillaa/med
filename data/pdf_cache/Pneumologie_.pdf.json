@@ -26,7 +26,7 @@
     },
     {
       "page": 6,
-      "content": "- [x] Traitement de fond:\n  - [ ] 1 Ventoline pour les crises\n  - [ ] 2 CTC inhalée\n    +/_ CTC locale=> spray nasal si Rhinite allergique\n    +/_ AH\n\n  - [ ] 1 Ventoline spray 2 bouffées 3/j pdt 7j\n  - [ ] 2 Solupred cp 20mg 1mg/kg 2cp/j 1/j matin au milieu de repas pdt 5j"
+      "content": "- [x] Traitement de fond:\n - [ ] 1 Ventoline pour les crises\n - [ ] 2 CTC inhalée\n +/_ CTC locale=> spray nasal si Rhinite allergique\n +/_ AH\n\n - [ ] 1 Ventoline spray 2 bouffées 3/j pdt 7j\n - [ ] 2 Solupred cp 20mg 1mg/kg 2cp/j 1/j matin au milieu de repas pdt 5j"
     },
     {
       "page": 7,
@@ -34,7 +34,7 @@
     },
     {
       "page": 8,
-      "content": "- [x] Traitement de fond: 3mois\n  - >2ans: Budecort spray 200ug 1 bouffée 2/j\n  - <2ans: Flixotide\n  - <9mois: Pulmicort 0.5mg\n\nContrôle➔ Pédiatre"
+      "content": "- [x] Traitement de fond: 3mois\n - >2ans: Budecort spray 200ug 1 bouffée 2/j\n - <2ans: Flixotide\n - <9mois: Pulmicort 0.5mg\n\nContrôle➔ Pédiatre"
     },
     {
       "page": 9,
@@ -62,7 +62,7 @@
     },
     {
       "page": 15,
-      "content": "▪️O2 thérapie 8_10l/min dépend de SaO2<92%\n➡️Avis Réa\n▪️ATB : si fièvre >5j, CRP↗️, réapparition de fièvre,\nToux purulent\n▪️Augmentin inj 1g 3/j pdt 10j\nOu Claforan inj 1g 1g/8h pdt 10j\nOu Ciprolon 200 2/j en perfusion pdt 10j.\n\n▪️Anticoagulants : Lovenox si DD>500, IMC>25,\nallaité.\nIMC<30 : 0.4 / IMC>30 : 0.6 en Sc 1/j pdt 10j\nOu Innohep 3500Ui <30=> 1inj 7500Ui >30=>\n2inj\nPdt 10j jusqu’à 1mois si malade sous O2.\n\n▪️Si DD<500 : arrête Lovenox\n▪️Si DD↗️ on ↗️la dose si non➡️ Avis Cardiologie"
+      "content": "▪️O2 thérapie 8_10l/min dépend de SaO2<92%\n➡️Avis Réa\n▪️ATB : si fièvre >5j, CRP↗️, réapparition de fièvre,\nToux purulent\n▪️Augmentin inj 1g 3/j pdt 10j\nOu Claforan inj 1g 1g/8h pdt 10j\nOu Ciprolon 200 2/j en perfusion pdt 10j.\n\n▪️Anticoagulants : Lovenox si DD>500, IMC>25,\nallaité.\nIMC<30 : 0.4 / IMC>30 : 0.6 en Sc 1/j pdt 10j\nOu Innohep 3500Ui <30=> 1inj 7500Ui >30=>\n2inj\nPdt 10j jusqùà 1mois si malade sous O2.\n\n▪️Si DD<500 : arrête Lovenox\n▪️Si DD↗️ on ↗️la dose si non➡️ Avis Cardiologie"
     },
     {
       "page": 16,
@@ -70,7 +70,7 @@
     },
     {
       "page": 17,
-      "content": "| Category                | Range     | Rate (min) |\n| ----------------------- | --------- | ---------- |\n| NN                      | 0\\_28j    | 40\\_60     |\n| NRS                     | 28j\\_2ans | 30\\_60     |\n| Enfant < âge de puberté | -         | 22\\_30     |\n| Adulte                  | -         | 14\\_22     |"
+      "content": "| Category | Range | Rate (min) |\n| ----------------------- | --------- | ---------- |\n| NN | 0\\_28j | 40\\_60 |\n| NRS | 28j\\_2ans | 30\\_60 |\n| Enfant < âge de puberté | - | 22\\_30 |\n| Adulte | - | 14\\_22 |"
     },
     {
       "page": 18,
@@ -78,11 +78,11 @@
     },
     {
       "page": 19,
-      "content": "◾️Asthme :\nTerrain atopique, bradypnée expiatoire,\nsibilants, nocturne\n\n◾️Pneumopathies :\nSyndrome infectieux, fièvre, syndrome de\ncondensation parenchymateuse\n\n◾️Chez un sujet Obèse : نهجة\n▪️Rechercher un diabète :\nSignes de résistance à l’insuline\nSyndrome d’apnée de sommeil\n\n◾️Bilan :\n▪️TSH\n▪️Gly à jeûne/HbA1C\n▪️Lipidique"
+      "content": "◾️Asthme :\nTerrain atopique, bradypnée expiatoire,\nsibilants, nocturne\n\n◾️Pneumopathies :\nSyndrome infectieux, fièvre, syndrome de\ncondensation parenchymateuse\n\n◾️Chez un sujet Obèse : نهجة\n▪️Rechercher un diabète :\nSignes de résistance à l’insuline\nSyndrome d’apnée de sommeil\n\n◾️Bilan :\n▪️TSH\n▪️Gly à jeûne/HbAlC\n▪️Lipidique"
     },
     {
       "page": 20,
-      "content": "▪️Hépatique + Echographie hépatique => à\nRechercher une stéatose hépatique\n\nClassification de la New York Heart\n          Association (NYHA) :\n Classe I : dyspnée d'effort exclusive pour des efforts\n inhabituels ; le patient n'éprouve aucune gène dans la\n vie courante.\n Classe Il : dyspnée d'effort exclusive pour des efforts\n importants de la vie courante, comme la marche\n rapide ou la montée de plus de 2 étages.\n Classe Ill : dyspnée d'effort exclusive pour des efforts\n modestes de la vie courante, comme la marche en\n terrain plat a vitesse normale.\n Classe IV : dyspnée permanente, de repos comme\n d'effort."
+      "content": "▪️Hépatique + Echographie hépatique => à\nRechercher une stéatose hépatique\n\nClassification de la New York Heart\n Association (NYHA) :\n Classe I : dyspnée d'effort exclusive pour des efforts\n inhabituels ; le patient n'éprouve aucune gène dans la\n vie courante.\n Classe Il : dyspnée d'effort exclusive pour des efforts\n importants de la vie courante, comme la marche\n rapide ou la montée de plus de 2 étages.\n Classe Ill : dyspnée d'effort exclusive pour des efforts\n modestes de la vie courante, comme la marche en\n terrain plat a vitesse normale.\n Classe IV : dyspnée permanente, de repos comme\n d'effort."
     },
     {
       "page": 21,
@@ -90,7 +90,7 @@
     },
     {
       "page": 22,
-      "content": "- Surveillance de volume Hémoptysie\n- Faible abondance : traitement étiologique et surveillance\n- Moyenne ou grande abondance :\n  Vasoconstricteur en IV\n  Fibroscopie bronchique ou bronchoscopie"
+      "content": "- Surveillance de volume Hémoptysie\n- Faible abondance : traitement étiologique et surveillance\n- Moyenne ou grande abondance :\n Vasoconstricteur en IV\n Fibroscopie bronchique ou bronchoscopie"
     },
     {
       "page": 23,
@@ -106,7 +106,7 @@
     },
     {
       "page": 26,
-      "content": "# <font color=red>Pneumonie sévère</font>\n\nDétrresse respiratoire fébrile\n\n- [x] Traitement :\n  - Claforan inj 150mg/kg/j 3/j en IVL\n  - Ou Vancomycine 60mg/kg/j 3/j en IVL\n  - Genta inj 5mg/kg/j pdt 3_5j\n  - +/- Flagyl inj 15mg/kg/8h 45mg/kg/j\n  - Si jeune : Amoxicilline 3g/j\n  - Âgé ou comorbidité : Augmentin\n\nX-ray image"
+      "content": "# <font color=red>Pneumonie sévère</font>\n\nDétrresse respiratoire fébrile\n\n- [x] Traitement :\n - Claforan inj 150mg/kg/j 3/j en IVL\n - Ou Vancomycine 60mg/kg/j 3/j en IVL\n - Genta inj 5mg/kg/j pdt 3_5j\n - +/- Flagyl inj 15mg/kg/8h 45mg/kg/j\n - Si jeune : Amoxicilline 3g/j\n - Âgé ou comorbidité : Augmentin\n\nX-ray image"
     },
     {
       "page": 27,
@@ -118,7 +118,7 @@
     },
     {
       "page": 29,
-      "content": "# <font color=red>**Traumatisme thoracique**</font>\n\n- **■ Si : Fracture costale 1<sup>er</sup> et 2<sup>ème</sup> côte :**\n\n  - [1] Elastoplast N°5 1app/j\n  - [2] Doliprane cp 1g 1cp 3/j\n  - [3] Voltarene cp 75mg ou Profinid cp 1cp 3/j\n  - [4] Lomac gel 20mg 1gel 2/j\n\n- **■ Si : Atteinte musculaire :**\n\n  - [1] Kefentech patch 1app 2/j\n  - [2] Doliprane cp 1g 1cp 3/j\n\n> >3côtes==> **Admission et surveillance**"
+      "content": "# <font color=red>**Traumatisme thoracique**</font>\n\n- **■ Si : Fracture costale 1<sup>er</sup> et 2<sup>ème</sup> côte :**\n\n - [1] Elastoplast N°5 1app/j\n - [2] Doliprane cp 1g 1cp 3/j\n - [3] Voltarene cp 75mg ou Profinid cp 1cp 3/j\n - [4] Lomac gel 20mg 1gel 2/j\n\n- **■ Si : Atteinte musculaire :**\n\n - [1] Kefentech patch 1app 2/j\n - [2] Doliprane cp 1g 1cp 3/j\n\n> >3côtes==> **Admission et surveillance**"
     },
     {
       "page": 30,

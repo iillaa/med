@@ -38,7 +38,7 @@
     },
     {
       "page": 9,
-      "content": "# SYNDROME MÉDIASTINAL :\n\n| Compartiment | Étage                     | Anterieur            | Moyen                       | Posterieur |\n| ------------ | ------------------------- | -------------------- | --------------------------- | ---------- |\n| Supérieur    | Goitre thyroidien         | Adénopathies         | Tumeur neurogène            |            |\n| Moyen        | Lésions thymiques         | Adénopathies         | Tumeur kyste bronchogenique |            |\n| Inferieur    | Kyste pleuro péricardique | Kyste bronchogenique | Tumeur neurogène            |            |\n\n# Cardiomegalie :\n\nIndex cardio-thoracique > 0,55 : largeur du cæur / largeur max du thorax"
+      "content": "# SYNDROME MÉDIASTINAL :\n\n| Compartiment | Étage | Anterieur | Moyen | Posterieur |\n| ------------ | ------------------------- | -------------------- | --------------------------- | ---------- |\n| Supérieur | Goitre thyroidien | Adénopathies | Tumeur neurogène | |\n| Moyen | Lésions thymiques | Adénopathies | Tumeur kyste bronchogenique | |\n| Inferieur | Kyste pleuro péricardique | Kyste bronchogenique | Tumeur neurogène | |\n\n# Cardiomegalie :\n\nIndex cardio-thoracique > 0,55 : largeur du cæur / largeur max du thorax"
     },
     {
       "page": 10,

@@ -42,7 +42,7 @@
     },
     {
       "page": 10,
-      "content": "# Traitement :\n\n- Antalgique/Antipyrétique\n- Poche de glace\n\n⛔️AINS sont CI\n\n# Orientation Chirurgie\n\n| Rovsing's Sign                                                                                                                                                                    | Signe de Mac Burney |\n| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |\n| une douleur provoquée à la palpation au point de Mac Burney (tiers externe de la ligne reliant l'épine iliaque antéro-supérieure droite à l'ombilic) en faveur d'une appendicite. |                     |\n\nPalpate here (LLQ)\n\nPain elicited in RLQ\n\nSuggestive of acute appendicitis\n\n# RECHERCHE MEDICALE"
+      "content": "# Traitement :\n\n- Antalgique/Antipyrétique\n- Poche de glace\n\n⛔️AINS sont CI\n\n# Orientation Chirurgie\n\n| Rovsing's Sign | Signe de Mac Burney |\n| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |\n| une douleur provoquée à la palpation au point de Mac Burney (tiers externe de la ligne reliant l'épine iliaque antéro-supérieure droite à l'ombilic) en faveur d'une appendicite. | |\n\nPalpate here (LLQ)\n\nPain elicited in RLQ\n\nSuggestive of acute appendicitis\n\n# RECHERCHE MEDICALE"
     },
     {
       "page": 11,
@@ -86,7 +86,7 @@
     },
     {
       "page": 21,
-      "content": "# CAT :\n\n- Eliminer l’urgence\n- RHD : régime riche en légumes\n\nÉviter le riz, chocolat, carottes..\n\n# Laxatifs lubrifiants :\n\n- Huile de paraffine sirop à éviter chez NRS\n\n| Âge     | Dosage  |\n| ------- | ------- |\n| < 1 an  | 1 cac/j |\n| 1-6 ans | 2 cac/j |\n| > 6 ans | 3 cac/j |\n\n# Laxatifs osmotiques :\n\n- Lacutolose sirop ou Forlax st : 4-10g\n\n| Âge           | Dosage       |\n| ------------- | ------------ |\n| 6 mois - 1 an | 1 st 4g/j    |\n| 1-4 ans       | 2 st 4g/j    |\n| 4-8 ans       | 2-4 st 4g/j  |\n| > 8 ans       | 1-2 st 10g/j |"
+      "content": "# CAT :\n\n- Eliminer l’urgence\n- RHD : régime riche en légumes\n\nÉviter le riz, chocolat, carottes..\n\n# Laxatifs lubrifiants :\n\n- Huile de paraffine sirop à éviter chez NRS\n\n| Âge | Dosage |\n| ------- | ------- |\n| < 1 an | 1 cac/j |\n| 1-6 ans | 2 cac/j |\n| > 6 ans | 3 cac/j |\n\n# Laxatifs osmotiques :\n\n- Lacutolose sirop ou Forlax st : 4-10g\n\n| Âge | Dosage |\n| ------------- | ------------ |\n| 6 mois - 1 an | 1 st 4g/j |\n| 1-4 ans | 2 st 4g/j |\n| 4-8 ans | 2-4 st 4g/j |\n| > 8 ans | 1-2 st 10g/j |"
     },
     {
       "page": 22,
@@ -98,7 +98,7 @@
     },
     {
       "page": 24,
-      "content": "# Enfant\n\n1. Débridat sirop 1ddp 3/j\n\nOu si E>12ans Trimebutine cp 1cp 2/j\n2. Duphalac sirop 4g :\n\n| <1ans  | 1cac 1/j |\n| ------ | -------- |\n| 1-6ans | 1cac 2/j |\n| >6ans  | 1cac 3/j |\n\nOu Forlax st\n\nOu Glycérine suppo 1/2suppo 1-2/j"
+      "content": "# Enfant\n\n1. Débridat sirop 1ddp 3/j\n\nOu si E>12ans Trimebutine cp 1cp 2/j\n2. Duphalac sirop 4g :\n\n| <1ans | 1cac 1/j |\n| ------ | -------- |\n| 1-6ans | 1cac 2/j |\n| >6ans | 1cac 3/j |\n\nOu Forlax st\n\nOu Glycérine suppo 1/2suppo 1-2/j"
     },
     {
       "page": 25,
@@ -174,7 +174,7 @@
     },
     {
       "page": 43,
-      "content": "# EPIGASTRE\n\nEstomac, Pancréas, Foie/VB, Cólon\n\nCardiaque, Vasculaire\n\n# HYPOCHONDRE DROIT\n\nFoie/VB\n\nCôlon\n\nUrinaire\n\nPieuro-pulmonaire\n\n# HYPOCHONDRE GAUCHE\n\nPancreas caudal, Rate\n\nColon\n\nUrinaire\n\nPleuro-pulmonaire\n\n# FLANC DROIT\n\nColon\n\nGrèle\n\nUrinaire\n\nGynecologique\n\n# FLANC GAUCHE\n\nColon\n\nGréle\n\nUrinaire\n\nGynecologique\n\n# FOSSE ILIAQUE DROITE\n\nCôlon, Appendice\n\nGrèle (lleon)\n\nGynecologique\n\n# FOSSE ILIAQUE GAUCHE\n\nCôlon (diverticules)\n\nGrèle\n\nGynecologique\n\n# HYPOGASTRE\n\nColon, Vesico-prostatique, Gynecologique\n\nFigure 2: Orientation étiologique des douleurs abdominales en fonction du siège"
+      "content": "# EPIGASTRE\n\nEstomaç Pancréas, Foie/VB, Cólon\n\nCardiaque, Vasculaire\n\n# HYPOCHONDRE DROIT\n\nFoie/VB\n\nCôlon\n\nUrinaire\n\nPieuro-pulmonaire\n\n# HYPOCHONDRE GAUCHE\n\nPancreas caudal, Rate\n\nColon\n\nUrinaire\n\nPleuro-pulmonaire\n\n# FLANC DROIT\n\nColon\n\nGrèle\n\nUrinaire\n\nGynecologique\n\n# FLANC GAUCHE\n\nColon\n\nGréle\n\nUrinaire\n\nGynecologique\n\n# FOSSE ILIAQUE DROITE\n\nCôlon, Appendice\n\nGrèle (lleon)\n\nGynecologique\n\n# FOSSE ILIAQUE GAUCHE\n\nCôlon (diverticules)\n\nGrèle\n\nGynecologique\n\n# HYPOGASTRE\n\nColon, Vesico-prostatique, Gynecologique\n\nFigure 2: Orientation étiologique des douleurs abdominales en fonction du siège"
     },
     {
       "page": 44,
@@ -222,15 +222,15 @@
     },
     {
       "page": 55,
-      "content": "Selon les résultats on décide si on donne le traitement ou pas: Ig/Vaccination\n\nOrientation infectieux\n\n# PRINCIPALES ORIENTATIONS selon le degré de cytolyse\n\n| ALAT < 5N                             | ALAT 5-15 N                | ALAT > 15 N                  |\n| ------------------------------------- | -------------------------- | ---------------------------- |\n| - Hépatites B et C                    | Causes précédentes         | Causes précédentes           |\n| Alcool                                | Hépatites aiguës           | EBV, CMV, herpès             |\n| Stéatose non alcoolique (NASH)        | . A (lgM)                  | Acétaminophène (paracétamol) |\n| Génétiques                            | . B (Ag HBs, IgM anti-HBc) | (si + : ARN du VHC)          |\n| . Hémochromatose ++                   | . voire E (IgM)            | Foie ischémique              |\n| . Maladie de Wilson                   |                            |                              |\n| . Déficit Alpha-1 antitrypsine (PiZZ) |                            |                              |\n| Hépatite auto-immune                  |                            |                              |\n| Médicaments, plantes...               |                            |                              |\n\n# PRINCIPALES ORIENTATIONS selon le type de cytolyse\n\n| Hépatique                   | Hépatique                                |                                       |\n| --------------------------- | -----------------"
+      "content": "Selon les résultats on décide si on donne le traitement ou pas: Ig/Vaccination\n\nOrientation infectieux\n\n# PRINCIPALES ORIENTATIONS selon le degré de cytolyse\n\n| ALAT < 5N | ALAT 5-15 N | ALAT > 15 N |\n| ------------------------------------- | -------------------------- | ---------------------------- |\n| - Hépatites B et C | Causes précédentes | Causes précédentes |\n| Alcool | Hépatites aiguës | EBV, CMV, herpès |\n| Stéatose non alcoolique (NASH) | . A (lgM) | Acétaminophène (paracétamol) |\n| Génétiques | . B (Ag HBs, IgM anti-HBc) | (si + : ARN du VHC) |\n| . Hémochromatose ++ | . voire E (IgM) | Foie ischémique |\n| . Maladie de Wilson | | |\n| . Déficit Alpha-1 antitrypsine (PiZZ) | | |\n| Hépatite auto-immune | | |\n| Médicaments, plantes... | | |\n\n# PRINCIPALES ORIENTATIONS selon le type de cytolyse\n\n| Hépatique | Hépatique | |\n| --------------------------- | -----------------"
     },
     {
       "page": 56,
-      "content": "# Hoquet\n\n# Clinique :\n\nRéflexe ventilatoire caractérisé par une succession de contractions inspiratoires spasmodiques, incontrôlables et involontaires\n\nRGO, tabac, cancer, pancréatite, HIC, iléus post op, diabète, IR, AVC, stress, anxiété..\n\n- Ionogramme sanguin : Hypokalémie\n- ECG + Troponines : IDM\n- TLT : Pneumonie, hernie hiatale\n- Échographie ou scanner AP si non :\n- TDM cérébrale : Atteinte neurologique centrale"
+      "content": "# Hoquet\n\n# Clinique :\n\nRéflexe ventilatoire caractérisé par une succession de contractions inspiratoires spasmodiques, incontrôlables et involontaires\n\nRGO, tabaç cancer, pancréatite, HIC, iléus post op, diabète, IR, AVC, stress, anxiété..\n\n- Ionogramme sanguin : Hypokalémie\n- ECG + Troponines : IDM\n- TLT : Pneumonie, hernie hiatale\n- Échographie ou scanner AP si non :\n- TDM cérébrale : Atteinte neurologique centrale"
     },
     {
       "page": 57,
-      "content": "# Traitement :\n\n1. Primperan inj 10mg en IM 1/j puis relais\n2. Primperan cp 10mg 1cp 3/j 1/4h avant repas jusqu’à l’amélioration des symptômes\n\nOu Zophren"
+      "content": "# Traitement :\n\n1. Primperan inj 10mg en IM 1/j puis relais\n2. Primperan cp 10mg 1cp 3/j 1/4h avant repas jusqùà l’amélioration des symptômes\n\nOu Zophren"
     },
     {
       "page": 58,
@@ -286,11 +286,11 @@
     },
     {
       "page": 71,
-      "content": "# Fongique\n\n- Eau oxygénée\n- Econazole crème pdt 15j\n\n# Bilan\n\n- FNS\n- CRP/VS\n- Glycémie à jeûne\n- HBA1C\n- Urée/Créat\n- ECB du pus"
+      "content": "# Fongique\n\n- Eau oxygénée\n- Econazole crème pdt 15j\n\n# Bilan\n\n- FNS\n- CRP/VS\n- Glycémie à jeûne\n- HBAlC\n- Urée/Créat\n- ECB du pus"
     },
     {
       "page": 72,
-      "content": "# Oxyurose\n\n# Clinique :\n\nPrurit anal nocturne majoré par le grattage parfois vulvo vaginite chez la fille, récidive +++\n\nConfirmer par: scotch test le matin sur la marge anale\n\n# ✅️Traitement:\n\n- RHD + traitement de toute la famille\n- Couper les ongles et laver les mains\n- Changement des vêtements chaque matin\n\n◾️Fluvermal sirop 1cac une seule prise: J1J2J3\n\nA renouveler le J15\n\nOu cp 100mg 1cp/j"
+      "content": "# Oxyurose\n\n# Clinique :\n\nPrurit anal nocturne majoré par le grattage parfois vulvo vaginite chez la fille, récidive +++\n\nConfirmer par: scotch test le matin sur la marge anale\n\n# ✅️Traitement:\n\n- RHD + traitement de toute la famille\n- Couper les ongles et laver les mains\n- Changement des vêtements chaque matin\n\n◾️Fluvermal sirop 1cac une seule prise: JlJ2J3\n\nA renouveler le J15\n\nOu cp 100mg 1cp/j"
     },
     {
       "page": 73,
@@ -306,7 +306,7 @@
     },
     {
       "page": 76,
-      "content": "# ALAT\n\norigine lithiasique\n\n# Ca\n\nBilirubine\n\n# CAT : Hospitalisation\n\n- VVP/arrêt de l’alimentation\n- Antalgique 1amp Spasfon en IVD\n- Sonde NG si Vomissements\n- Réhydratation\n- Correction des troubles hydrolytiques\n- Nutrition IV\n- Lithiasique ➡️ Chirurgie si non médecine interne\n\n| A             | B                  |\n| ------------- | ------------------ |\n| Cullen's sign | Grey Turner's sign |"
+      "content": "# ALAT\n\norigine lithiasique\n\n# Ca\n\nBilirubine\n\n# CAT : Hospitalisation\n\n- VVP/arrêt de l’alimentation\n- Antalgique 1amp Spasfon en IVD\n- Sonde NG si Vomissements\n- Réhydratation\n- Correction des troubles hydrolytiques\n- Nutrition IV\n- Lithiasique ➡️ Chirurgie si non médecine interne\n\n| A | B |\n| ------------- | ------------------ |\n| Cullen's sign | Grey Turner's sign |"
     },
     {
       "page": 77,

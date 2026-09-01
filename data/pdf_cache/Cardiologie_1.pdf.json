@@ -26,7 +26,7 @@
     },
     {
       "page": 6,
-      "content": "# Valeurs des INR cibles selon les indications\n\n| Indication                                                                                                             | INR cible |\n| ---------------------------------------------------------------------------------------------------------------------- | --------- |\n| TVP, embolie pulmonaire                                                                                                | 2-3       |\n| Fibrillation auriculaire avec facteurs de risque thromboembolique                                                      | 2-3       |\n| Infarctus du myocarde complique d'un thrombus murale, dysfonction ventriculaire gauche severe ou dyskinesie emboligene | 2-3       |\n| Valvulopathie mitrale                                                                                                  | 3-4,5     |\n| Prothese valvulaire mecanique\\*                                                                                        | 2,5-4,5\\* |\n\nLINR cible varie en fonction du type de valve et de sa position (mitrale ou aortique)"
+      "content": "# Valeurs des INR cibles selon les indications\n\n| Indication | INR cible |\n| ---------------------------------------------------------------------------------------------------------------------- | --------- |\n| TVP, embolie pulmonaire | 2-3 |\n| Fibrillation auriculaire avec facteurs de risque thromboembolique | 2-3 |\n| Infarctus du myocarde complique d'un thrombus murale, dysfonction ventriculaire gauche severe ou dyskinesie emboligene | 2-3 |\n| Valvulopathie mitrale | 3-4,5 |\n| Prothese valvulaire mecanique\\* | 2,5-4,5\\* |\n\nLINR cible varie en fonction du type de valve et de sa position (mitrale ou aortique)"
     },
     {
       "page": 7,
@@ -34,7 +34,7 @@
     },
     {
       "page": 8,
-      "content": "# Orientation cardiologie pour instaurer un traitement anticoagulant le plus tôt possible\n\n(consultation cette semaine)\n\n- Si c'est mal toléré : choc, OAP, syncope, Hypotension, douleur thoracique => CEE\n- Avis cardiologie en urgence pour une cardioversion en urgence\n\nSi non:\n\n1. Traitement ralentisseur: cible Fc 110/mn\n- 250cc de SSI + Mg + 1K\n- Bétabloquant: Bisoprolol 5mg 1cp per os\nà répéter après 15min jusqu'à 2cp\n- Digoxine si fonction rénale correcte:\n1/2 amp en IVD\nà répéter après 15min jusqu'à 2amp"
+      "content": "# Orientation cardiologie pour instaurer un traitement anticoagulant le plus tôt possible\n\n(consultation cette semaine)\n\n- Si c'est mal toléré : choç OAP, syncope, Hypotension, douleur thoracique => CEE\n- Avis cardiologie en urgence pour une cardioversion en urgence\n\nSi non:\n\n1. Traitement ralentisseur: cible Fc 110/mn\n- 250cc de SSI + Mg + 1K\n- Bétabloquant: Bisoprolol 5mg 1cp per os\nà répéter après 15min jusqùà 2cp\n- Digoxine si fonction rénale correcte:\n1/2 amp en IVD\nà répéter après 15min jusqùà 2amp"
     },
     {
       "page": 9,
@@ -58,7 +58,7 @@
     },
     {
       "page": 14,
-      "content": "# CAT :\n\n- Surveillance => FC/TA\n- Antalgiques\n- Corriger la PA : but &#x3C;100mmhg et FC&#x3C; à 60/min\n- Bétabloquant +/_ Inhibiteur calcique\n- Esmolol 0.5_1mg/kg en bolus puis 50_300mg/kg/min à la SAP\n- Loxen 5_15mg/h à la SAP à ↗️/20min avec 2.5mg jusqu’à atteindre le cible tensionnel\n\n# ⛔️Attention aux CI de Bétabloquant\n\n- ➡️Orientation pour angioscan aortique et chirurgie vasculaire"
+      "content": "# CAT :\n\n- Surveillance => FC/TA\n- Antalgiques\n- Corriger la PA : but &#x3C;100mmhg et FC&#x3C; à 60/min\n- Bétabloquant +/_ Inhibiteur calcique\n- Esmolol 0.5_1mg/kg en bolus puis 50_300mg/kg/min à la SAP\n- Loxen 5_15mg/h à la SAP à ↗️/20min avec 2.5mg jusqùà atteindre le cible tensionnel\n\n# ⛔️Attention aux CI de Bétabloquant\n\n- ➡️Orientation pour angioscan aortique et chirurgie vasculaire"
     },
     {
       "page": 15,
@@ -82,7 +82,7 @@
     },
     {
       "page": 20,
-      "content": "# Pancréatite aigue :\n\n- Epigastrique violente transfixiante, calmée en chien de fusil\n\n| Pericardite aigue | SCA            | Embolie     | Dissection de F'aorte |\n| ----------------- | -------------- | ----------- | --------------------- |\n| Grippe            | Accouchement   | HTA         |                       |\n| Terrain           | Fièvre         | FDR +++     | Chirurgie             |\n| Marfan            | Myalgie        | Arthralgies | Long Voyage           |\n| Grossesse         | immobilisation |             |                       |\n\n# Caracteristiques de la DLR\n\n- Retrostemnale\n- Inspiration\n- Constrictive\n- Basithoracique\n- Migratrice\n- Assise\n- Polypnee\n- Máchoire et MS\n\n# Examen clinique\n\n- Parfois\n- Souvent normal en dehors des complications\n- Signes de thrombophlébite\n- IAo\n- Abolition\n- Déficit neuro\n\n# ECG\n\n- Troubles diffus de la repolarisation systématisées\n- Tachycardie sinusale\n- Souvent normal\n- 8BDI, axe Droit\n\n# Téléthorax\n\n- Cardiomegalie\n- Normal\n- Infarctus pulm\n- Élargissement du mediastin"
+      "content": "# Pancréatite aigue :\n\n- Epigastrique violente transfixiante, calmée en chien de fusil\n\n| Pericardite aigue | SCA | Embolie | Dissection de F'aorte |\n| ----------------- | -------------- | ----------- | --------------------- |\n| Grippe | Accouchement | HTA | |\n| Terrain | Fièvre | FDR +++ | Chirurgie |\n| Marfan | Myalgie | Arthralgies | Long Voyage |\n| Grossesse | immobilisation | | |\n\n# Caracteristiques de la DLR\n\n- Retrostemnale\n- Inspiration\n- Constrictive\n- Basithoracique\n- Migratrice\n- Assise\n- Polypnee\n- Máchoire et MS\n\n# Examen clinique\n\n- Parfois\n- Souvent normal en dehors des complications\n- Signes de thrombophlébite\n- IAo\n- Abolition\n- Déficit neuro\n\n# ECG\n\n- Troubles diffus de la repolarisation systématisées\n- Tachycardie sinusale\n- Souvent normal\n- 8BDI, axe Droit\n\n# Téléthorax\n\n- Cardiomegalie\n- Normal\n- Infarctus pulm\n- Élargissement du mediastin"
     },
     {
       "page": 21,
@@ -90,7 +90,7 @@
     },
     {
       "page": 22,
-      "content": "# Bilan:\n\n- Glycémie à jeun\n- HBA1C\n- Urée/Créat\n- Hépatique\n- TSH\n- IMC\n\n# Traitement:\n\n- RHD+++\n- Régime sans sucre/diminuer le poids/Activité physique\n- Complément alimentaire Oméga3\n- Calculer le risque cardio_Vx\n- Refaire le bilan après 3 mois si toujours :\n\n# Traitement\n\n- Cholestérol Statines\n- Triglycérides Fibrates + Omega3 riche en EPA\n- Si TG >5g/l: Lipanthyl (Fibrates)\n- Lipanor cp 100mg 1cp/j pdt 1mois"
+      "content": "# Bilan:\n\n- Glycémie à jeun\n- HBAlC\n- Urée/Créat\n- Hépatique\n- TSH\n- IMC\n\n# Traitement:\n\n- RHD+++\n- Régime sans sucre/diminuer le poids/Activité physique\n- Complément alimentaire Oméga3\n- Calculer le risque cardio_Vx\n- Refaire le bilan après 3 mois si toujours :\n\n# Traitement\n\n- Cholestérol Statines\n- Triglycérides Fibrates + Omega3 riche en EPA\n- Si TG >5g/l: Lipanthyl (Fibrates)\n- Lipanor cp 100mg 1cp/j pdt 1mois"
     },
     {
       "page": 23,
@@ -98,7 +98,7 @@
     },
     {
       "page": 24,
-      "content": "# Embolie pulmonaire\n\n# Clinique :\n\n- Syncope, lipothymie, tachycardie >100, douleur angineuse, pouls paradoxal, cyanose, dyspnée, toux..\n- Etat de choc : marbrures, collapsus\n- ATCD de TVP, immobilisation, Néo, grossesse, pour césarienne ou post op..\n\n# TLT :\n\npour éliminer autre cause de dyspnée\n\n# ECG :\n\n- Troubles de repolarisation : T/V1V2V3\n- Aspect S1Q3\n- BBD\n\n# Hypoxie sévère :\n\nPaO2&#x3C;60%, Acidose.\n\n# DDIMÈRES (-) :\n\nécarte le diagnostic"
+      "content": "# Embolie pulmonaire\n\n# Clinique :\n\n- Syncope, lipothymie, tachycardie >100, douleur angineuse, pouls paradoxal, cyanose, dyspnée, toux..\n- Etat de choc : marbrures, collapsus\n- ATCD de TVP, immobilisation, Néo, grossesse, pour césarienne ou post op..\n\n# TLT :\n\npour éliminer autre cause de dyspnée\n\n# ECG :\n\n- Troubles de repolarisation : T/VlV2V3\n- Aspect SlQ3\n- BBD\n\n# Hypoxie sévère :\n\nPaO2&#x3C;60%, Acidose.\n\n# DDIMÈRES (-) :\n\nécarte le diagnostic"
     },
     {
       "page": 25,
@@ -106,7 +106,7 @@
     },
     {
       "page": 26,
-      "content": "# Embolie pulmonaire\n\n\"Inverted T waves in the precordial leads are the most frequent ECG sign of massive PE with the best sensitivity and negative predictive values for diagnosing PE\" (Ferrari, Chest 1997; 11:537)\n\n\"Even a moderate-size PE can cause these ECG changes\" (Sarin, J Electrocardiol 2005)\n\n| 18 mn/mU            | 18 mm/mU     |    |    |\n| ------------------- | ------------ | -- | -- |\n| aUR                 | Retard droit | U4 |    |\n| S1Q3                | sD1          | <0 | Us |\n| Tachycardie 120/min | T<0          |    |    |\n| aUF                 | U3           | US |    |\n| Onde Q3             | T\\<O         |    |    |"
+      "content": "# Embolie pulmonaire\n\n\"Inverted T waves in the precordial leads are the most frequent ECG sign of massive PE with the best sensitivity and negative predictive values for diagnosing PE\" (Ferrari, Chest 1997; 11:537)\n\n\"Even a moderate-size PE can cause these ECG changes\" (Sarin, J Electrocardiol 2005)\n\n| 18 mn/mU | 18 mm/mU | | |\n| ------------------- | ------------ | -- | -- |\n| aUR | Retard droit | U4 | |\n| SlQ3 | sD1 | <0 | Us |\n| Tachycardie 120/min | T<0 | | |\n| aUF | U3 | US | |\n| Onde Q3 | T\\<O | | |"
     },
     {
       "page": 27,
@@ -154,7 +154,7 @@
     },
     {
       "page": 38,
-      "content": "# Protocoles de traitement\n\n◾️ Si TA > 110 mmHg : 40 mg Lasilix en IVD/20 min\n\n▪️ 20-30 min si TA toujours ↗️ : 40 mg Lasilix en IVD\n\n▪️ Si persistance de l’OAP jusqu’à 160 à 200 mg Ou Lenitral 1 mg IVD Ou Risordan 2 mg IVD\n\n◾️ Si non réponse : ➡️ Avis Réa\n\n◾️ Si TA &#x3C; 110 mmHg :\n\n- Rassurer le patient\n- Position demi assise\n- O2 8-10 l/min\n- VVP/scope/sonde vésicale\n\n➡️ Avis Réa : Dobutrex 5 µg/kg/min\n\n▪️ Si non : 1-2 amp Dobutrex dans 250 cc SG5% Ou SSI9% jusqu’à ↗️ de TA\n\n▪️ Avec surveillance de FC et TA, jusqu’à l’obtention de TA normale\n\n▪️ Donc on peut inj Lasilix"
+      "content": "# Protocoles de traitement\n\n◾️ Si TA > 110 mmHg : 40 mg Lasilix en IVD/20 min\n\n▪️ 20-30 min si TA toujours ↗️ : 40 mg Lasilix en IVD\n\n▪️ Si persistance de l’OAP jusqùà 160 à 200 mg Ou Lenitral 1 mg IVD Ou Risordan 2 mg IVD\n\n◾️ Si non réponse : ➡️ Avis Réa\n\n◾️ Si TA &#x3C; 110 mmHg :\n\n- Rassurer le patient\n- Position demi assise\n- O2 8-10 l/min\n- VVP/scope/sonde vésicale\n\n➡️ Avis Réa : Dobutrex 5 µg/kg/min\n\n▪️ Si non : 1-2 amp Dobutrex dans 250 cc SG5% Ou SSI9% jusqùà ↗️ de TA\n\n▪️ Avec surveillance de FC et TA, jusqùà l’obtention de TA normale\n\n▪️ Donc on peut inj Lasilix"
     },
     {
       "page": 39,
@@ -174,7 +174,7 @@
     },
     {
       "page": 43,
-      "content": "# Diagnostic Médical\n\n- IDM : douleur thoracique constructive irradie vers l’épaule gauche + ECG\n- Rétinopathies Hypertensives\n- Pré éclampsie…\n\n# CAT :\n\n- Prise : FC/FR/PA/SaO2/VVP\n- O2 thérapie 3-4l/min : pas si SaO2 correcte\n- 1/2amp Mg dans 250cc de SG5% Ou 1cc Mg dans 3cc de SG 5% en IVD\n- Après 30min si TA normal => Bilan HTA\n\n# Bilan HTA :\n\n- FNS/TSH/Gly à jeûn/HbA1C\n- Urée/Creat\n- LDL/HDL\n- TG/CT\n- Uricémie"
+      "content": "# Diagnostic Médical\n\n- IDM : douleur thoracique constructive irradie vers l’épaule gauche + ECG\n- Rétinopathies Hypertensives\n- Pré éclampsie…\n\n# CAT :\n\n- Prise : FC/FR/PA/SaO2/VVP\n- O2 thérapie 3-4l/min : pas si SaO2 correcte\n- 1/2amp Mg dans 250cc de SG5% Ou 1cc Mg dans 3cc de SG 5% en IVD\n- Après 30min si TA normal => Bilan HTA\n\n# Bilan HTA :\n\n- FNS/TSH/Gly à jeûn/HbAlC\n- Urée/Creat\n- LDL/HDL\n- TG/CT\n- Uricémie"
     },
     {
       "page": 44,
@@ -214,7 +214,7 @@
     },
     {
       "page": 53,
-      "content": "# Syncope\n\n# Cardiaque :\n\n- Hypotension orthostatique : passage en position debout + preuve de l’hypotension orthostatique\n- Arythmie : devant un ECG anormal : Bradycardie Fc &#x3C; 40b/min, bloc sino-auriculaire, pause cardiaque 3sec, BAV2 Mobitz 2 ou 3, tachycardie ventriculaire ou TSV rapide, TSV non soutenue, syndrome QT long ou court\n- Ischémie : ST(+)\n- Autres maladies : HTAP, embolie pulmonaire, Dissection aortique, sténose aortique..\n- Syncope vaso vagale : stress\n- Hypoglycémie\n- Crise épileptique, AIT\n- Maladie de Ménière : vertige + acouphènes + baisse de l’audition .."
+      "content": "# Syncope\n\n# Cardiaque :\n\n- Hypotension orthostatique : passage en position debout + preuve de l’hypotension orthostatique\n- Arythmie : devant un ECG anormal : Bradycardie Fc &#x3C; 40b/min, bloc sino-auriculaire, pause cardiaque 3seç BAV2 Mobitz 2 ou 3, tachycardie ventriculaire ou TSV rapide, TSV non soutenue, syndrome QT long ou court\n- Ischémie : ST(+)\n- Autres maladies : HTAP, embolie pulmonaire, Dissection aortique, sténose aortique..\n- Syncope vaso vagale : stress\n- Hypoglycémie\n- Crise épileptique, AIT\n- Maladie de Ménière : vertige + acouphènes + baisse de l’audition .."
     },
     {
       "page": 54,
@@ -222,7 +222,7 @@
     },
     {
       "page": 55,
-      "content": "# Tachycardie sinusale\n\n# Clinique :\n\nBénigne FC=100/min\n\nEffort, stress, consommation de tabac, café, Fièvre, anémie, déshydratation, crise de panique, Hyperthyroïdie.\n\n# CAT :\n\n- O2 thérapie\n- Mg 1/2amp diluée dans 250 SG5%\n\n# Bilan :\n\n- FNS\n- TSH\n- DDIMÈRES\n- Ionogramme\n\n# ECG\n\n➡️Orientation Cardiologie"
+      "content": "# Tachycardie sinusale\n\n# Clinique :\n\nBénigne FC=100/min\n\nEffort, stress, consommation de tabaç café, Fièvre, anémie, déshydratation, crise de panique, Hyperthyroïdie.\n\n# CAT :\n\n- O2 thérapie\n- Mg 1/2amp diluée dans 250 SG5%\n\n# Bilan :\n\n- FNS\n- TSH\n- DDIMÈRES\n- Ionogramme\n\n# ECG\n\n➡️Orientation Cardiologie"
     },
     {
       "page": 56,
@@ -230,7 +230,7 @@
     },
     {
       "page": 57,
-      "content": "# Thrombose veineuse profonde TVP\n\n# Phlébite\n\n# Clinique :\n\nDouleur, œdème (dur, résistant, prend le godet), peau rouge chaude, cyanose, dilatation des veines superficielles, fébricule 38°c, pouls ↗️\n\nTVP ➡️ EP\n\n# ✅️CAT :\n\n- Hospitalisation en urgence\n- Alitement stricte, surélévation du membre\n- Bas de contention\n- VVP\n\n# Traitement\n\n- Anticoagulant (Lovenox) en aigu dose curative\n- Anticoagulant prolongé"
+      "content": "# Thrombose veineuse profonde TVP\n\n# Phlébite\n\n# Clinique :\n\nDouleur, œdème (dur, résistant, prend le godet), peau rouge chaude, cyanose, dilatation des veines superficielles, fébricule 38°ç pouls ↗️\n\nTVP ➡️ EP\n\n# ✅️CAT :\n\n- Hospitalisation en urgence\n- Alitement stricte, surélévation du membre\n- Bas de contention\n- VVP\n\n# Traitement\n\n- Anticoagulant (Lovenox) en aigu dose curative\n- Anticoagulant prolongé"
     },
     {
       "page": 58,
@@ -254,7 +254,7 @@
     },
     {
       "page": 63,
-      "content": "# Echodoppler des MI\n\nSelon le diamètre de la veine saphène:\n\n| Si < 0,8mm | hygiène de vie + bas de contention |\n| ---------- | ---------------------------------- |\n| Si > 0,8mm | Traitement chirurgical             |"
+      "content": "# Echodoppler des MI\n\nSelon le diamètre de la veine saphène:\n\n| Si < 0,8mm | hygiène de vie + bas de contention |\n| ---------- | ---------------------------------- |\n| Si > 0,8mm | Traitement chirurgical |"
     }
   ]
 }
