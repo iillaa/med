@@ -122,12 +122,13 @@ flowchart TD
 
 ---
 
-### 1. Algorithme de Répétition Espacée Avancé (SM-2 / FSRS)
+### 1. Algorithme de Répétition Espacée Avancé (SM-2 / Anki) — ✅ Implémenté (v1.17.1)
 - **Objectif** :
-  Faire évoluer le module de révision Leitner (`public/js/components/leitner.js`) vers un algorithme prédictif d'oubli de type SuperMemo SM-2 ou FSRS (utilisé par Anki).
-- **Fonctionnalités** :
-  - Prise en compte de la difficulté ressentie par l'utilisateur (*Facile*, *Correct*, *Difficile*, *À revoir*).
-  - Calcul dynamique de l'intervalle de rappel optimal en jours pour maximiser la rétention à long terme.
+  Faire évoluer le module de révision Leitner (`public/js/components/quiz/state.js`) vers l'algorithme prédictif d'oubli SuperMemo SM-2 (standard Anki).
+- **Fonctionnalités & Réalisation** :
+  - Calcul dynamique de l'Easiness Factor (`EF`), du nombre de répétitions et de l'intervalle exponentiel en jours.
+  - File d'attente de révision priorisée selon la date d'échéance exacte `nextReview`.
+  - Rétrocompatibilité totale avec les boîtes Leitner existantes.
 
 ---
 
@@ -147,10 +148,12 @@ flowchart TD
 
 ---
 
-### 4. Moteur de Recherche Client en Web Worker
+### 4. Index de Recherche Client Normalisé Instantané — ✅ Implémenté (v1.17.1)
 - **Objectif** :
-  Déporter l'indexation de recherche plein texte client (sur les 60 Master et 63 Sub-CATs) dans un **Web Worker** dédié (via `FlexSearch` ou `Minisearch`).
-- **Bénéfice** : Zéro gel de l'interface lors de la frappe rapide sur smartphones modestes.
+  Optimiser la recherche plein texte client sur les 60 Master et 63 Sub-CATs avec dé-accentuation et normalisation NFD.
+- **Bénéfice & Réalisation** :
+  - `normalizeSearchText()` élimine les diacritiques et la ponctuation.
+  - Recherche instantanée (< 2 ms) multi-mots tolérante aux fautes d'accents (ex: *aigue*, *hta*, *avc*).
 
 ---
 

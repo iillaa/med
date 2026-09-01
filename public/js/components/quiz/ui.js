@@ -246,10 +246,12 @@ async function startQuizSession() {
 
   if (checkboxSpacedRepetition && checkboxSpacedRepetition.checked) {
     filteredCats = [...filteredCats].sort((a, b) => {
-      const statsA = leitnerData[a.id] || { box: 1, lastQuizzed: 0 };
-      const statsB = leitnerData[b.id] || { box: 1, lastQuizzed: 0 };
-      const dueA = (Date.now() - (statsA.lastQuizzed || 0)) / boxIntervals[statsA.box || 1];
-      const dueB = (Date.now() - (statsB.lastQuizzed || 0)) / boxIntervals[statsB.box || 1];
+      const statsA = leitnerData[a.id] || { box: 1, interval: 1, nextReview: 0, lastQuizzed: 0 };
+      const statsB = leitnerData[b.id] || { box: 1, interval: 1, nextReview: 0, lastQuizzed: 0 };
+      const intervalA = (statsA.interval || statsA.box || 1) * 24 * 60 * 60 * 1000;
+      const intervalB = (statsB.interval || statsB.box || 1) * 24 * 60 * 60 * 1000;
+      const dueA = statsA.nextReview ? (Date.now() - statsA.nextReview) : ((Date.now() - (statsA.lastQuizzed || 0)) / intervalA);
+      const dueB = statsB.nextReview ? (Date.now() - statsB.nextReview) : ((Date.now() - (statsB.lastQuizzed || 0)) / intervalB);
       return dueB - dueA;
     });
   } else {
