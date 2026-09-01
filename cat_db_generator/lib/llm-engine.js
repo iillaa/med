@@ -10,6 +10,7 @@ const { validateCAT, isAdministrativeCAT } = require('./medical-validator');
 const { buildSearchQueries } = require('./medical-sources');
 const { fetchAndCacheWebSources, getCachedWebSources, extractSmartKeywords } = require('./web-fetcher');
 const { queryClinicalLibrary } = require('./knowledge-library');
+const { searchSemanticPDFs } = require('./semantic-rag');
 const debugEmitter = require('./debug-emitter');
 
 // Modular sub-services
@@ -48,11 +49,26 @@ async function generateCATWithLLM(title, category, options = {}) {
   const catObjPlaceholder = { title: cleanTitle, category: category || 'Gastro-entérologie' };
   const isAdmin = isAdministrativeCAT(catObjPlaceholder);
 
-  // 1. Tier 1: Core Curated Reference Documents (PDF Index)
-  console.log(`🔍 [Tier 1 Core References] Searching pdf_index.json for "${cleanTitle}" (category: ${category})...`);
-  const pdfMatches = await searchLocalPDFs(cleanTitle, { maxMatchesPerFile: 3, category });
-  const ragSnippets = pdfMatches.flatMap(p => p.matches.map(m => `[Core Reference: ${p.pdfFile}] ${m.snippet}`)).join('\n');
-  const pdfKeywords = pdfMatches.map(p => p.pdfFile.replace(/\.pdf$/i, '')).slice(0, 4);
+  // 1. Tier 1: Core Curated Reference Documents (Semantic Vector RAG with Lexical Fallback)
+  let pdfMatches = [];
+  let ragSnippets = '';
+  let pdfKeywords = [];
+
+  try {
+    const semanticMatches = await searchSemanticPDFs(cleanTitle, { maxResults: 4, apiKey: options.apiKey });
+    if (semanticMatches.length > 0) {
+      console.log(`🤖 [Semantic Vector RAG] Found ${semanticMatches.length} high-similarity passages via text-embedding-004!`);
+      ragSnippets = semanticMatches.map(m => `[Core Reference (Semantic Score: ${m.score}%): ${m.pdfFile} p.${m.page}]\n${m.snippet}`).join('\n\n');
+      pdfKeywords = semanticMatches.map(m => m.pdfFile.replace(/\.pdf$/i, '')).slice(0, 4);
+    }
+  } catch (_) {}
+
+  if (!ragSnippets) {
+    console.log(`🔍 [Tier 1 Core References] Searching pdf_index.json for "${cleanTitle}" (category: ${category})...`);
+    pdfMatches = await searchLocalPDFs(cleanTitle, { maxMatchesPerFile: 3, category });
+    ragSnippets = pdfMatches.flatMap(p => p.matches.map(m => `[Core Reference: ${p.pdfFile}] ${m.snippet}`)).join('\n');
+    pdfKeywords = pdfMatches.map(p => p.pdfFile.replace(/\.pdf$/i, '')).slice(0, 4);
+  }
 
   // 1bis. Tier 2: Standard Clinical Guidelines Library (MSF, HAS, SFMU, Colleges)
   const libraryMatches = queryClinicalLibrary(cleanTitle, options.search_keywords);
@@ -91,6 +107,20 @@ DIRECTIVE ABSOLUE : Conserve impérativement les préférences de prescription, 
   const systemPrompt = composeMasterCATSystemPrompt(cleanTitle, category, isAdmin, options);
   const userPrompt = composeMasterCATUserPrompt(cleanTitle, category, activeLearningText, webSnippets, ragSnippets, librarySnippets);
 
+  // 4bis. RAG Context Volume Overload Monitor
+  const totalRagChars = (ragSnippets || '').length + (librarySnippets || '').length + (webSnippets || '').length;
+  const estimatedRagTokens = Math.ceil(totalRagChars / 4);
+
+  if (totalRagChars > 10000) {
+    console.warn(`⚠️ [RAG Context Alert] High RAG volume: ${totalRagChars} chars (~${estimatedRagTokens} tokens). Multiple source channels active.`);
+    debugEmitter.emitEvent('rag_overload_warning', {
+      title: cleanTitle,
+      totalRagChars,
+      estimatedRagTokens,
+      warning: `Volume RAG élevé (${totalRagChars} caractères, ~${estimatedRagTokens} tokens). Vérifier la granularité des slices si la génération est surchargée.`
+    });
+  }
+
   // 5. Execution & Automated Anti-Hallucination Validation Checksum Loop (Up to 3 Attempts)
   let attempts = 0;
   const maxAttempts = 3;
@@ -105,7 +135,9 @@ DIRECTIVE ABSOLUE : Conserve impérativement les préférences de prescription, 
     userPromptChars: userPrompt.length,
     estimatedTokens: Math.ceil((systemPrompt.length + userPrompt.length) / 4),
     ragWebCount: webSources.length,
-    ragPdfCount: pdfMatches.length
+    ragPdfCount: pdfMatches.length,
+    totalRagChars: totalRagChars,
+    isOverloaded: totalRagChars > 10000
   });
 
   while (attempts < maxAttempts) {
