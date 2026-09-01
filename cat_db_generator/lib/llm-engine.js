@@ -34,7 +34,7 @@ function sanitizeMarkdownText(text) {
   clean = clean.replace(/\*\*\s*\*\*/g, '');
   clean = clean.replace(/\*\*([^*\n]+):\*(?!\*)/g, '**$1:**');
   clean = clean.replace(/:\*\*\s*:/g, ':**');
-  clean = clean.replace(/(?:^|\n)(?:\*\*|#{2,4}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*:?\s*(?:\n|$)/gi, (m, title) => {
+  clean = clean.replace(/(?:^|\n)(?:\*\*|#{1,6}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+?)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*:?\s*(?:\n|$)/gi, (m, title) => {
     return '\n\n**' + title.trim() + ' :**\n';
   });
   clean = clean.replace(/\n{3,}/g, '\n\n');

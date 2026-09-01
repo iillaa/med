@@ -21,7 +21,7 @@ function sanitizeMarkdownText(text) {
   clean = clean.replace(/:\*\*\s*:/g, ':**');
 
   // 5. Ensure step headers are clean and followed by newline
-  clean = clean.replace(/(?:^|\n)(?:\*\*|#{2,4}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*:?\s*(?:\n|$)/gi, (m, title) => {
+  clean = clean.replace(/(?:^|\n)(?:\*\*|#{1,6}\s*)([0-9]+(?:bis|ter)?\.\s*[^:\n*]+?)(?:\*\*)?\s*:?\s*(?:\*\*)?\s*:?\s*(?:\n|$)/gi, (m, title) => {
     return '\n\n**' + title.trim() + ' :**\n';
   });
 
