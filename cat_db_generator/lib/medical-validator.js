@@ -137,6 +137,7 @@ function normalizeDrugToken(s) {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/^(?:d['’]|l['’]|de\s+|du\s+|au\s+)/i, '')
     .replace(/[^a-z]/g, '');
 }
 

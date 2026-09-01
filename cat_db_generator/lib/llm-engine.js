@@ -218,7 +218,15 @@ DIRECTIVE ABSOLUE : Conserve impérativement les préférences de prescription, 
         warnings: validation.warnings
       });
 
-      if (validation.valid) {
+      // Check if there are critical unknown DCI warnings that should be double-checked on attempt 1
+      const unknownDciWarning = validation.warnings.find(w => w.includes('[DCI Non Référencée]'));
+      if (validation.valid && unknownDciWarning && attempts === 1) {
+        console.warn(`🔍 [Pharma Double-Check] Unknown DCI detected on Attempt 1: ${unknownDciWarning}. Requesting LLM confirmation/substitution...`);
+        previousValidationErrors = [
+          `Vérification Pharmacologique Requise : ${unknownDciWarning}`,
+          `Instruction : Vérifie l'orthographe exacte de la DCI (sans préposition d'/l') ou utilise une molécule de référence standard enregistrée.`
+        ];
+      } else if (validation.valid) {
         console.log(`✅ Medical Checksum PASSED on Attempt ${attempts}!`);
         catResult._execution_metrics = executionMetrics;
         debugEmitter.emitEvent('generation_done', {
