@@ -972,7 +972,7 @@ export function attachTapFeedback(el, opts = {}) {
  */
 export function initTapFeedback() {
   const selectors = [
-    '.tab-btn', '.status-pill', '.suggestion-btn', '.theme-toggle-btn',
+    '.tab-btn', '.status-pill', '.suggestion-btn',
     '.admin-tab-btn', '.action-btn', '.cancel-btn', '.cat-item', '.close-modal-btn'
   ];
   document.querySelectorAll(selectors.join(','))

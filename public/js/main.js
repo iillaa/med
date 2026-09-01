@@ -189,22 +189,67 @@ async function bootstrapApp() {
     requestAnimationFrame(() => rootEl.classList.remove('theme-booting'));
   });
 
+  // Platform / Browser metadata tag
+  const isFirefox = /firefox|fxios/i.test(navigator.userAgent);
+  if (isFirefox) {
+    rootEl.classList.add('is-firefox');
+  }
+
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
-      const isLight = rootEl.classList.toggle('light-theme');
-      safeSetItem('theme', isLight ? 'light' : 'dark');
-      rootEl.style.colorScheme = isLight ? 'light' : 'dark';
+      themeToggleBtn.blur();
 
-      if (themeToggleIcon) {
-        // Fast, tactile spring flip on the icon
-        themeToggleIcon.style.transform = 'rotate(180deg) scale(0.65)';
-        setTimeout(() => {
+      const swapTheme = () => {
+        const isLight = rootEl.classList.toggle('light-theme');
+        safeSetItem('theme', isLight ? 'light' : 'dark');
+        rootEl.style.colorScheme = isLight ? 'light' : 'dark';
+
+        if (themeToggleIcon) {
           themeToggleIcon.classList.toggle('fa-sun', isLight);
           themeToggleIcon.classList.toggle('fa-moon', !isLight);
-          themeToggleIcon.style.transform = 'rotate(0deg) scale(1)';
-        }, 90);
+        }
+        applyThemeChrome(isLight);
+      };
+
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!document.startViewTransition || reduceMotion) {
+        swapTheme();
+        return;
       }
-      applyThemeChrome(isLight);
+
+      const rect = themeToggleBtn.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+
+      // Supply exact center coordinates for Firefox pre-clip CSS
+      rootEl.style.setProperty('--theme-x', `${x}px`);
+      rootEl.style.setProperty('--theme-y', `${y}px`);
+
+      const transition = document.startViewTransition(() => {
+        swapTheme();
+      });
+
+      const animDuration = isFirefox ? 750 : 520;
+
+      transition.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`
+            ]
+          },
+          {
+            duration: animDuration,
+            easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+            pseudoElement: '::view-transition-new(root)'
+          }
+        );
+      }).catch(() => {});
     });
   }
   
