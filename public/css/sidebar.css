@@ -73,16 +73,32 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none;
   transition: var(--transition-smooth);
 }
 
-#theme-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-primary);
+#theme-toggle-btn:focus,
+#theme-toggle-btn:focus-visible,
+#theme-toggle-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
-.light-theme #theme-toggle-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+@media (hover: hover) and (pointer: fine) {
+  #theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--color-primary);
+  }
+
+  .light-theme #theme-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+  }
 }
 
 /* ── LEVEL 2: Controls band ── */

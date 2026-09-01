@@ -131,9 +131,8 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-/* ── Theme-switch Smooth Color Morph ──────────────────────────
-   Smooth 180ms CSS transitions for background and borders across
-   all primary surfaces, avoiding heavy full-page raster snapshots. */
+/* ── Theme-switch Boot Flicker Guard ─────────────────────────
+   Prevents initial flash on cold boot while theme restores from localStorage. */
 html.theme-booting *,
 html.theme-booting *::before,
 html.theme-booting *::after {
@@ -141,25 +140,28 @@ html.theme-booting *::after {
   animation: none !important;
 }
 
-body,
-#sidebar,
-.workspace,
-.main-content,
-.dash-card,
-.cat-item,
-.modal-card,
-.modal-bottom-sheet,
-header,
-input,
-select,
-textarea {
-  transition: background-color var(--motion-base) var(--ease-standard),
-              border-color var(--motion-base) var(--ease-standard),
-              color var(--motion-fast) ease;
-}
-
 #theme-toggle-icon {
   transition: transform var(--motion-fast) var(--ease-spring);
+}
+
+/* ── View Transitions Circular Reveal (Chrome, Firefox & PWA Standard) ── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* Firefox Gecko Pre-clip (eliminates 1-frame unclipped snapshot flash) */
+html.is-firefox ::view-transition-new(root) {
+  clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%));
 }
 
 /* ── Respect the OS "Reduce Motion" accessibility setting ─────
@@ -246,25 +248,28 @@ html.theme-booting *::after {
   animation: none !important;
 }
 
-body,
-#sidebar,
-.workspace,
-.main-content,
-.dash-card,
-.cat-item,
-.modal-card,
-.modal-bottom-sheet,
-header,
-input,
-select,
-textarea {
-  transition: background-color var(--motion-base) var(--ease-standard),
-              border-color var(--motion-base) var(--ease-standard),
-              color var(--motion-fast) ease;
-}
-
 #theme-toggle-icon {
   transition: transform var(--motion-fast) var(--ease-spring);
+}
+
+/* ── View Transitions Circular Reveal (Chrome, Firefox & PWA Standard) ── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* Firefox Gecko Pre-clip (eliminates 1-frame unclipped snapshot flash) */
+html.is-firefox ::view-transition-new(root) {
+  clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%));
 }
 
 /* ── Respect the OS "Reduce Motion" accessibility setting ─────
@@ -509,7 +514,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.18.0">
-  <meta name="app-build-version" content="2026.09.01.21.23">
+  <meta name="app-build-version" content="2026.09.01.23.03">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -589,22 +594,22 @@ body {
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request,
        works fully offline. Loaded non-render-blocking. -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2609012123" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fonts.css?v=2609012123"></noscript>
+  <link rel="stylesheet" href="css/fonts.css?v=2609012303" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fonts.css?v=2609012303"></noscript>
   <!-- FontAwesome Icons (non-blocking) -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2609012123" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2609012123"></noscript>
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2609012303" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="css/fa/all.min.css?v=2609012303"></noscript>
   <!-- Full app stylesheet: loaded non-render-blocking so first paint
        (critical CSS is inlined above) never waits on this network request.
        The media="print" onload swap flips it to all once fetched. -->
-  <link rel="stylesheet" href="style.css?v=2609012123" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/utilities.css?v=2609012123" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/update-modal.css?v=2609012123">
+  <link rel="stylesheet" href="style.css?v=2609012303" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/utilities.css?v=2609012303" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/update-modal.css?v=2609012303">
   <noscript>
-    <link rel="stylesheet" href="style.css?v=2609012123">
-    <link rel="stylesheet" href="css/utilities.css?v=2609012123">
+    <link rel="stylesheet" href="style.css?v=2609012303">
+    <link rel="stylesheet" href="css/utilities.css?v=2609012303">
   </noscript>
-  <script type="module" src="js/version-checker.js?v=2609012123"></script>
+  <script type="module" src="js/version-checker.js?v=2609012303"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1698,7 +1703,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-BIE7EH4Q.js"></script>
+  <script type="module" src="dist/app-CXWUG45N.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
