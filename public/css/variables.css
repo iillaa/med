@@ -125,22 +125,35 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-/* ── Theme-switch flicker control ─────────────────────────────
-   Premium apps make the theme swap feel *atomic* (everything changes at
-   once) instead of a staggered wipe where some elements animate over 0.2s
-   and others snap. We do that by hard-disabling every transition/animation
-   for one frame while the .light-theme class flips, then re-enabling.
-   - .theme-booting: set in <head> before first paint, removed after load,
-     so the initial render never animates.
-   - .theme-switching: set by the toggle handler for a single frame. */
+/* ── Theme-switch Smooth Color Morph ──────────────────────────
+   Smooth 180ms CSS transitions for background and borders across
+   all primary surfaces, avoiding heavy full-page raster snapshots. */
 html.theme-booting *,
 html.theme-booting *::before,
-html.theme-booting *::after,
-html.theme-switching *,
-html.theme-switching *::before,
-html.theme-switching *::after {
+html.theme-booting *::after {
   transition: none !important;
   animation: none !important;
+}
+
+body,
+#sidebar,
+.workspace,
+.main-content,
+.dash-card,
+.cat-item,
+.modal-card,
+.modal-bottom-sheet,
+header,
+input,
+select,
+textarea {
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-fast) ease;
+}
+
+#theme-toggle-icon {
+  transition: transform var(--motion-fast) var(--ease-spring);
 }
 
 /* ── Respect the OS "Reduce Motion" accessibility setting ─────
@@ -157,19 +170,6 @@ html.theme-switching *::after {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ── Theme-toggle circular reveal (Phase 3.5, View Transitions API) ──
-   The new theme is revealed via a clip-path circle from the toggle button
-   (keyframes injected in main.js). The old snapshot is hidden instantly so
-   only the circular reveal of the new theme is visible. */
-::view-transition-old(root) {
-  animation: none;
-  opacity: 0;
-}
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
 }
 
 

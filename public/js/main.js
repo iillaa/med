@@ -191,63 +191,20 @@ async function bootstrapApp() {
 
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
-      const swap = () => {
-        // Atomic swap: kill all transitions for one frame so the whole UI
-        // repaints in the new theme at once (no staggered wipe), then re-enable.
-        rootEl.classList.add('theme-switching');
+      const isLight = rootEl.classList.toggle('light-theme');
+      safeSetItem('theme', isLight ? 'light' : 'dark');
+      rootEl.style.colorScheme = isLight ? 'light' : 'dark';
 
-        const isLight = rootEl.classList.toggle('light-theme');
-        safeSetItem('theme', isLight ? 'light' : 'dark');
-        rootEl.style.colorScheme = isLight ? 'light' : 'dark';
-
-        if (themeToggleIcon) {
+      if (themeToggleIcon) {
+        // Fast, tactile spring flip on the icon
+        themeToggleIcon.style.transform = 'rotate(180deg) scale(0.65)';
+        setTimeout(() => {
           themeToggleIcon.classList.toggle('fa-sun', isLight);
           themeToggleIcon.classList.toggle('fa-moon', !isLight);
-        }
-        applyThemeChrome(isLight);
-
-        // Re-enable transitions after the swap frame has painted.
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => rootEl.classList.remove('theme-switching'));
-        });
-      };
-
-      // Phase 3.5: circular reveal from the toggle button via View Transitions
-      // API, with graceful fallback to the instant atomic swap.
-      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const vt = document.startViewTransition && !reduce ? document.startViewTransition : null;
-      if (vt) {
-        const rect = themeToggleBtn.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-        const style = document.createElement('style');
-        style.textContent = `
-          ::view-transition-new(root) {
-            animation: themeReveal var(--motion-slow) var(--ease-emphasized);
-          }
-          @keyframes themeReveal {
-            from { clip-path: circle(0px at ${x}px ${y}px); }
-            to { clip-path: circle(${endRadius}px at ${x}px ${y}px); }
-          }
-        `;
-        document.head.appendChild(style);
-        const transition = vt.call(document, swap);
-        if (transition) {
-          if (transition.finished && typeof transition.finished.catch === 'function') {
-            transition.finished.catch(() => {});
-          }
-          if (transition.ready && typeof transition.ready.catch === 'function') {
-            transition.ready.catch(() => {});
-          }
-          if (transition.updateCallbackDone && typeof transition.updateCallbackDone.catch === 'function') {
-            transition.updateCallbackDone.catch(() => {});
-          }
-        }
-        setTimeout(() => style.remove(), 400);
-      } else {
-        swap();
+          themeToggleIcon.style.transform = 'rotate(0deg) scale(1)';
+        }, 90);
       }
+      applyThemeChrome(isLight);
     });
   }
   
