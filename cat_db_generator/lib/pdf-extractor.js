@@ -456,6 +456,7 @@ function listAvailablePDFs() {
 }
 
 module.exports = {
+  getPdfIndex,
   searchLocalPDFs,
   searchPDFIndex: searchLocalPDFs,
   listAvailablePDFs,
