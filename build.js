@@ -80,6 +80,14 @@ function rebuildClientAssets() {
     throw err;
   }
 
+  // Clean and synchronize PDF indexes
+  const { syncAndOptimizePdfIndexes } = require('./scripts/sync_pdf_index');
+  try {
+    syncAndOptimizePdfIndexes();
+  } catch (syncErr) {
+    console.warn('[Build] Warning during PDF index sync:', syncErr.message);
+  }
+
   // Build clean public/data/pdf_index.json and pdf_list.json directly from public/pdfs/ and data/pdf_cache/
   const publicPdfsDir = path.join(__dirname, 'public', 'pdfs');
   const pdfCacheDir = path.join(__dirname, 'data', 'pdf_cache');

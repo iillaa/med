@@ -14,7 +14,7 @@
     },
     {
       "page": 3,
-      "content": "# **Tableau des Fractures et leurs Attelles/Plâtres**\n\n| Type de Fracture                  | Nom de l'Attelle/Plâtre                                          |\n| --------------------------------- | ---------------------------------------------------------------- |\n| Fracture de la clavicule          | Attelle en '8' (bandage en 8)                                    |\n| Fracture de l'humérus proximal    | Écharpe (écharpe de soutien simple)                              |\n| Fracture diaphysaire de l'humérus | Attelle humérale fonctionnelle (attelle de Sarmiento)            |\n| Fracture du coude                 | Attelle brachio-antébrachiale (position de flexion du coude)     |\n| Fracture de l'avant-bras          | Plâtre brachio-antébrachial                                      |\n| Fracture du poignet (Colles)      | Plâtre antébrachial                                              |\n| Fracture des métacarpiens         | Attelle palmaire ou position intrinsèque ('position d'écriture') |\n| Fracture du bassin                | Pas d'attelle spécifique (mobilisation adaptée)                  |\n| Fracture de la hanche             | Immobilisation temporaire par traction                           |\n| Fracture du fémur                 | Traction de Russell ou de Thomas                                 |\n| Fracture de la rotule             | Attelle de Zimmer ou genouillère rigide                          |\n| Fracture du tibia et fibula       | Plâtre cruro-pédieux                                             |\n| Fracture de la cheville           | Plâtre jambier                                                   |\n| Fracture du pied (métatarses)     | Botte plâtrée ou attelle de marche                               |"
+      "content": "# **Tableau des Fractures et leurs Attelles/Plâtres**\n\n| Type de Fracture | Nom de l'Attelle/Plâtre |\n| --------------------------------- | ---------------------------------------------------------------- |\n| Fracture de la clavicule | Attelle en '8' (bandage en 8) |\n| Fracture de l'humérus proximal | Écharpe (écharpe de soutien simple) |\n| Fracture diaphysaire de l'humérus | Attelle humérale fonctionnelle (attelle de Sarmiento) |\n| Fracture du coude | Attelle brachio-antébrachiale (position de flexion du coude) |\n| Fracture de l'avant-bras | Plâtre brachio-antébrachial |\n| Fracture du poignet (Colles) | Plâtre antébrachial |\n| Fracture des métacarpiens | Attelle palmaire ou position intrinsèque ('position d'écrituré) |\n| Fracture du bassin | Pas d'attelle spécifique (mobilisation adaptée) |\n| Fracture de la hanche | Immobilisation temporaire par traction |\n| Fracture du fémur | Traction de Russell ou de Thomas |\n| Fracture de la rotule | Attelle de Zimmer ou genouillère rigide |\n| Fracture du tibia et fibula | Plâtre cruro-pédieux |\n| Fracture de la cheville | Plâtre jambier |\n| Fracture du pied (métatarses) | Botte plâtrée ou attelle de marche |"
     },
     {
       "page": 4,
@@ -26,7 +26,7 @@
     },
     {
       "page": 6,
-      "content": "X-ray image of a hand with a red circle around the metacarpal bones\n\n🦴 Un sujet jeune qui présente un traumatisme fermé de sa main\n\n⚠️ <font color=red>Fracture de M4</font>\n\n- Le patient bénéficie une attelle intrinsèque + avis traumato\n- Le traumato dit que le patient ne nécessite pas une attelage, juste un traitement médical\n\n- Mais en réalité y a un risque de déplacement / Cal vicieux+++ donc :\n  ⇒ Manchette ou Attelle plâtrée jusqu'à une ostéosynthèse"
+      "content": "X-ray image of a hand with a red circle around the metacarpal bones\n\n🦴 Un sujet jeune qui présente un traumatisme fermé de sa main\n\n⚠️ <font color=red>Fracture de M4</font>\n\n- Le patient bénéficie une attelle intrinsèque + avis traumato\n- Le traumato dit que le patient ne nécessite pas une attelage, juste un traitement médical\n\n- Mais en réalité y a un risque de déplacement / Cal vicieux+++ donc :\n ⇒ Manchette ou Attelle plâtrée jusqùà une ostéosynthèse"
     },
     {
       "page": 7,
@@ -50,11 +50,11 @@
     },
     {
       "page": 12,
-      "content": "X-ray image of a knee with a red circle highlighting an area\n\n# <font color=red>**Maladie d'Osgood Schalatter**</font>\n\nAffection du genou ; c'est une apophyse « ostéochondrose tibiale antérieure » puisqu'il s'agit d'une souffrance de l'insertion basse du tendon rotulien au niveau de la tubérosité tibiale antérieure..\n\nAdolescents de 11_12ans et plus...\n\nOstéochondrose au point d'insertion de tendon rotulien résultat de sollicitation violente et répétée chez les adolescents, son traitement est le repos, arrêt de l'activité sportive pdt 3mois et privilégie la natation."
+      "content": "X-ray image of a knee with a red circle highlighting an area\n\n# <font color=red>**Maladie d'Osgood Schalatter**</font>\n\nAffection du genou ; c'est une apophyse « ostéochondrose tibiale antérieure » puisqùil s'agit d'une souffrance de l'insertion basse du tendon rotulien au niveau de la tubérosité tibiale antérieure..\n\nAdolescents de 11_12ans et plus...\n\nOstéochondrose au point d'insertion de tendon rotulien résultat de sollicitation violente et répétée chez les adolescents, son traitement est le repos, arrêt de l'activité sportive pdt 3mois et privilégie la natation."
     },
     {
       "page": 13,
-      "content": "- [x] CAT :\n- - Repos/Surveillance +++\n- - Antalgiques\n- - Anti-inflammatoires\n- - Attelle cruropédieuse pour la phase aiguë qui suit le traumatisme pour limiter les mouvements de flexion ( ça nécessite pas un plâtre)\n- [→] Orientation vers un orthopédiste\n- (surveillance jusqu'à l'âge de 18 ans..)"
+      "content": "- [x] CAT :\n- - Repos/Surveillance +++\n- - Antalgiques\n- - Anti-inflammatoires\n- - Attelle cruropédieuse pour la phase aiguë qui suit le traumatisme pour limiter les mouvements de flexion ( ça nécessite pas un plâtre)\n- [→] Orientation vers un orthopédiste\n- (surveillance jusqùà l'âge de 18 ans..)"
     },
     {
       "page": 14,
@@ -66,7 +66,7 @@
     },
     {
       "page": 16,
-      "content": "- Rechercher une impotence fonctionnelle\n- Si le malade est capable de faire un \"STOP\"\n- Rechercher un comblement de Tabatière anatomique\n=> Attelle en Cravate\n\n⚠️ Tout traumatisme du poignet est une fracture du scaphoïde jusqu'à preuve du contraire\n\n✅ La clinique peut révéler une fracture du scaphoïde mais, infra-radiologique:\n- Immobilise de poignet par une attelle antérieure et on le réévalue dans 15j par un Rx incidence de Schneck\n- Si y a une fracture elle se faire montrer par les phénomènes de résorption périfracturaire\nFracture du scaphoïde négligée = arthrose, instabilité, pseudarthrose du poignet .."
+      "content": "- Rechercher une impotence fonctionnelle\n- Si le malade est capable de faire un \"STOP\"\n- Rechercher un comblement de Tabatière anatomique\n=> Attelle en Cravate\n\n⚠️ Tout traumatisme du poignet est une fracture du scaphoïde jusqùà preuve du contraire\n\n✅ La clinique peut révéler une fracture du scaphoïde mais, infra-radiologique:\n- Immobilise de poignet par une attelle antérieure et on le réévalue dans 15j par un Rx incidence de Schneck\n- Si y a une fracture elle se faire montrer par les phénomènes de résorption périfracturaire\nFracture du scaphoïde négligée = arthrose, instabilité, pseudarthrose du poignet .."
     },
     {
       "page": 17,
@@ -142,7 +142,7 @@
     },
     {
       "page": 35,
-      "content": "- [x] Traitement antalgique classique mais seule une infiltration pourra faire céder la douleur\n\n- Demander une TDM à la recherche d'une irritation du nerf sciatique (donc entre L4-S3) car la discopathie L2L3 ne peut pas donner de sciatalgie..\n\n- Pour différencier de \"Tassement vertébral\"\n\n- Il faut que la hauteur vertébrale soit diminuée et qu'elle soit associée à une fracture vertébrale : ce qui n'est pas le cas ici\n\n- Ici, c'est le disque intervertébral qui est complètement aplati : discarthropathie dégénérative.."
+      "content": "- [x] Traitement antalgique classique mais seule une infiltration pourra faire céder la douleur\n\n- Demander une TDM à la recherche d'une irritation du nerf sciatique (donc entre L4-S3) car la discopathie L2L3 ne peut pas donner de sciatalgie..\n\n- Pour différencier de \"Tassement vertébral\"\n\n- Il faut que la hauteur vertébrale soit diminuée et qùelle soit associée à une fracture vertébrale : ce qui n'est pas le cas ici\n\n- Ici, c'est le disque intervertébral qui est complètement aplati : discarthropathie dégénérative.."
     },
     {
       "page": 36,
@@ -154,7 +154,7 @@
     },
     {
       "page": 38,
-      "content": "X-ray image of shoulder\n\n🦴 Sujet âgé après une chute\n\n**Rx: <font color=red>Col chirurgical</font>**\n\n- En fonction de l'âge:\n  - Sujet âgé: Bandage en coude au corps pdt 21j et Traitement médicale\n  - Sujet jeune: Visage\n\n📍 Orientation orthopédie"
+      "content": "X-ray image of shoulder\n\n🦴 Sujet âgé après une chute\n\n**Rx: <font color=red>Col chirurgical</font>**\n\n- En fonction de l'âge:\n - Sujet âgé: Bandage en coude au corps pdt 21j et Traitement médicale\n - Sujet jeune: Visage\n\n📍 Orientation orthopédie"
     },
     {
       "page": 39,
@@ -210,11 +210,11 @@
     },
     {
       "page": 52,
-      "content": "- [x] CAT :\n  - Traitement symptomatique\n  - Bilan : CRP/VS\n  - Rx poignet controlatéral, pied\n  - TLT\n  - [ ] Avis Rhumatologie"
+      "content": "- [x] CAT :\n - Traitement symptomatique\n - Bilan : CRP/VS\n - Rx poignet controlatéral, pied\n - TLT\n - [ ] Avis Rhumatologie"
     },
     {
       "page": 53,
-      "content": "X-ray of a hand\n\n💀 Fille 8ans, chute sur la main\n\nPoint d'impact: petit doigt\n\n**Rx: <font color=red>Luxation métacarpo phalangienne</font>**\n\n- [x] CAT:\n  - Réduction\n  - Antalgique\n  - [→] Avis CCI"
+      "content": "X-ray of a hand\n\n💀 Fille 8ans, chute sur la main\n\nPoint d'impact: petit doigt\n\n**Rx: <font color=red>Luxation métacarpo phalangienne</font>**\n\n- [x] CAT:\n - Réduction\n - Antalgique\n - [→] Avis CCI"
     },
     {
       "page": 54,
@@ -222,7 +222,7 @@
     },
     {
       "page": 55,
-      "content": "- [x] CAT:\n  - Immobilisation du pied par une attelle plâtrée/résine ou une botte sans appui entre 45_60j\n  - Si absence de consolidation lors des radiographies de contrôle à 6 semaines:\n  - [→] Traitement chirurgical\n    (fixation par une vis insérée depuis la base du 5<sup>ème</sup> métatarsien à l'intérieur de la cavité osseuse)"
+      "content": "- [x] CAT:\n - Immobilisation du pied par une attelle plâtrée/résine ou une botte sans appui entre 45_60j\n - Si absence de consolidation lors des radiographies de contrôle à 6 semaines:\n - [→] Traitement chirurgical\n (fixation par une vis insérée depuis la base du 5<sup>ème</sup> métatarsien à l'intérieur de la cavité osseuse)"
     },
     {
       "page": 56,
@@ -238,7 +238,7 @@
     },
     {
       "page": 59,
-      "content": "Classification de Rockwood\n\n| Stade       | Description                                                                                |\n| ----------- | ------------------------------------------------------------------------------------------ |\n| **Stade 1** | Etirement du ligament acromio-daviculaire                                                  |\n| **Stade 2** | Déchirure du ligament acromio-claviculaire                                                 |\n| **Stade 3** | Déchirure du ligament acromio-claviculaire et des ligaments coraco-claviculaire            |\n| **Stade 4** | Idem stade 3<br/>Avec luxation postérieure de la clavicule, au travers du muscle trapèze   |\n| **Stade 5** | Idem stade 3<br/>Avec désinsertion des muscles trapèze et deltoïde de la clavicule distale |\n| **Stade 6** | Idem stade 3<br/>Avec luxation inférieure de la clavicule, sous la coracoïde               |"
+      "content": "Classification de Rockwood\n\n| Stade | Description |\n| ----------- | ------------------------------------------------------------------------------------------ |\n| **Stade 1** | Etirement du ligament acromio-daviculaire |\n| **Stade 2** | Déchirure du ligament acromio-claviculaire |\n| **Stade 3** | Déchirure du ligament acromio-claviculaire et des ligaments coraco-claviculaire |\n| **Stade 4** | Idem stade 3<br/>Avec luxation postérieure de la clavicule, au travers du muscle trapèze |\n| **Stade 5** | Idem stade 3<br/>Avec désinsertion des muscles trapèze et deltoïde de la clavicule distale |\n| **Stade 6** | Idem stade 3<br/>Avec luxation inférieure de la clavicule, sous la coracoïde |"
     },
     {
       "page": 60,
@@ -250,7 +250,7 @@
     },
     {
       "page": 62,
-      "content": "- Rx de l'avant bras (Profil) qui inclut les articulations sus et sous jacentes pour confirmer l'absence d'un déplacement\n\n- Si déplacement (+):\n  - ✓ Attelle BABP de transport\n  - ✓ Orienter vers CCI pour une éventuelle réduction + suivi à leur niveau\n\n- Si absence de déplacement :\n  - ✓ Attelle BABP\n  - ✓ contrôle après une semaine (avec une radio de l'avant bras F+P faite la veille du RDV)\n\n- Si déplacement : ➡ orienter vers CCI\n\n- Sinon contrôle après 3 semaines (pour évaluer et décider l'ablation ou la prolongation de la durée jusqu'à 5-6 semaines)\n  - ✓ Paracétamol"
+      "content": "- Rx de l'avant bras (Profil) qui inclut les articulations sus et sous jacentes pour confirmer l'absence d'un déplacement\n\n- Si déplacement (+):\n - ✓ Attelle BABP de transport\n - ✓ Orienter vers CCI pour une éventuelle réduction + suivi à leur niveau\n\n- Si absence de déplacement :\n - ✓ Attelle BABP\n - ✓ contrôle après une semaine (avec une radio de l'avant bras F+P faite la veille du RDV)\n\n- Si déplacement : ➡ orienter vers CCI\n\n- Sinon contrôle après 3 semaines (pour évaluer et décider l'ablation ou la prolongation de la durée jusqùà 5-6 semaines)\n - ✓ Paracétamol"
     },
     {
       "page": 63,
@@ -262,7 +262,7 @@
     },
     {
       "page": 65,
-      "content": "- Examen vasculaire (pouls radial+++)\n- Si plaie associé (fracture ouvert = Extrême urgences)\n- Perfusion Prodaf 500\n- Immobilisation provisoire par Attelle BABP ➔\n  Orientation Traumatologie ou CCI\n- **Souvent nécessite un traitement chirurgicale par embrochage percutané**"
+      "content": "- Examen vasculaire (pouls radial+++)\n- Si plaie associé (fracture ouvert = Extrême urgences)\n- Perfusion Prodaf 500\n- Immobilisation provisoire par Attelle BABP ➔\n Orientation Traumatologie ou CCI\n- **Souvent nécessite un traitement chirurgicale par embrochage percutané**"
     },
     {
       "page": 66,

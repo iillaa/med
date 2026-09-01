@@ -22,7 +22,7 @@
     },
     {
       "page": 5,
-      "content": "# Enfant :\n\n# Sirop :\n\n| 125/250/500mg | 1càm 2\\_3/j |\n| ------------- | ----------- |\n| <8kg          | 125mg       |\n| 8\\_16kg       | 250mg       |\n| 16\\_40kg      | 500mg       |\n\n# Cp :\n\n| >40kg | Cp 1g | 1cp 2\\_3/j |\n| ----- | ----- | ---------- |\n\n# Inj :\n\n| 1inj en IM/j N°7\\_10 |       |\n| -------------------- | ----- |\n| >12ans               | 500mg |\n| Adulte               | 1g    |"
+      "content": "# Enfant :\n\n# Sirop :\n\n| 125/250/500mg | 1càm 2\\_3/j |\n| ------------- | ----------- |\n| <8kg | 125mg |\n| 8\\_16kg | 250mg |\n| 16\\_40kg | 500mg |\n\n# Cp :\n\n| >40kg | Cp 1g | 1cp 2\\_3/j |\n| ----- | ----- | ---------- |\n\n# Inj :\n\n| 1inj en IM/j N°7\\_10 | |\n| -------------------- | ----- |\n| >12ans | 500mg |\n| Adulte | 1g |"
     },
     {
       "page": 6,
@@ -34,15 +34,15 @@
     },
     {
       "page": 8,
-      "content": "# 4️⃣ Oxacilline\n\n- Bristopen / Oxacil / Oxaline / Oxal / Oxcare\n\n| Dosage  | 50mg/kg/j     |\n| ------- | ------------- |\n| Gel     | 2-3/j         |\n| >12 ans | 1 gel         |\n| Adulte  | 2 gel         |\n| Inj     | 1 inj/j en IM |\n| Adulte  | 1 g           |\n| Enfant  | 500 mg        |"
+      "content": "# 4️⃣ Oxacilline\n\n- Bristopen / Oxacil / Oxaline / Oxal / Oxcare\n\n| Dosage | 50mg/kg/j |\n| ------- | ------------- |\n| Gel | 2-3/j |\n| >12 ans | 1 gel |\n| Adulte | 2 gel |\n| Inj | 1 inj/j en IM |\n| Adulte | 1 g |\n| Enfant | 500 mg |"
     },
     {
       "page": 9,
-      "content": "# 5. Ampicilline\n\n- Ampilline / Ampal / Ampinax / Totapen\n\n| Dosage    | Forme | Âge     | Posologie         |\n| --------- | ----- | ------- | ----------------- |\n| 50mg/kg/j | Sirop | 2-6 ans | 1 cam 2-3/j       |\n|           | Gel   | >12 ans | 1 gel 2-3/j       |\n|           |       | Adulte  | 2 gel 2-3/j       |\n|           | Inj   | Adulte  | 1g => inj/j en IM |"
+      "content": "# 5. Ampicilline\n\n- Ampilline / Ampal / Ampinax / Totapen\n\n| Dosage | Forme | Âge | Posologie |\n| --------- | ----- | ------- | ----------------- |\n| 50mg/kg/j | Sirop | 2-6 ans | 1 cam 2-3/j |\n| | Gel | >12 ans | 1 gel 2-3/j |\n| | | Adulte | 2 gel 2-3/j |\n| | Inj | Adulte | 1g => inj/j en IM |"
     },
     {
       "page": 10,
-      "content": "# 6️⃣ Extencilline\n\n# ➡️ Retarcilline / Retarmex / Retarpen\n\n| Inj :     | 1inj/21j |\n| --------- | -------- |\n| • <27kg : | 0.6MU    |\n| • >27kg : | 1.2MU    |"
+      "content": "# 6️⃣ Extencilline\n\n# ➡️ Retarcilline / Retarmex / Retarpen\n\n| Inj : | 1inj/21j |\n| --------- | -------- |\n| • <27kg : | 0.6MU |\n| • >27kg : | 1.2MU |"
     },
     {
       "page": 11,
@@ -70,7 +70,7 @@
     },
     {
       "page": 17,
-      "content": "# Macrolides\n\n# 1️⃣ Clarithromycine\n\n# ➡️ Zeclar\n\n| 50mg/kg/j | Pdt 7j |\n| --------- | ------ |\n\n# Sirop\n\n| 1ddp 2/j |       |          |\n| -------- | ----- | -------- |\n| 125mg    | 25/ml | <20kg    |\n| 250mg    | 50/ml | 20\\_40kg |\n\n# Cp\n\n| 250mg   | 500mg | >40kg |\n| ------- | ----- | ----- |\n| 1cp/j   | 500mg |       |\n| 1cp 2/j | 250mg |       |"
+      "content": "# Macrolides\n\n# 1️⃣ Clarithromycine\n\n# ➡️ Zeclar\n\n| 50mg/kg/j | Pdt 7j |\n| --------- | ------ |\n\n# Sirop\n\n| 1ddp 2/j | | |\n| -------- | ----- | -------- |\n| 125mg | 25/ml | <20kg |\n| 250mg | 50/ml | 20\\_40kg |\n\n# Cp\n\n| 250mg | 500mg | >40kg |\n| ------- | ----- | ----- |\n| 1cp/j | 500mg | |\n| 1cp 2/j | 250mg | |"
     },
     {
       "page": 18,
@@ -82,7 +82,7 @@
     },
     {
       "page": 20,
-      "content": "# 5️⃣ Orogyl\n\n# Biorogyl\n\n| Cp        | 1cp 2/j pdt 6j    |\n| --------- | ----------------- |\n| Enfant    | >12ans 750.000Ui  |\n| 6\\_10ans  | 1cp 2/j           |\n| 10\\_15ans | 1cp 3/j           |\n| Adulte    | 1.5MUI 2cp 2\\_3/j |\n\n# 6️⃣ Spiramycine\n\n# Rovamycine\n\n| Sirop  | 1cam 2/j Enfant |\n| ------ | --------------- |\n| Cp     | 1cp 2/j         |\n| Enfant | 1.5U            |\n| Adulte | 3UI             |"
+      "content": "# 5️⃣ Orogyl\n\n# Biorogyl\n\n| Cp | 1cp 2/j pdt 6j |\n| --------- | ----------------- |\n| Enfant | >12ans 750.000Ui |\n| 6\\_10ans | 1cp 2/j |\n| 10\\_15ans | 1cp 3/j |\n| Adulte | 1.5MUI 2cp 2\\_3/j |\n\n# 6️⃣ Spiramycine\n\n# Rovamycine\n\n| Sirop | 1cam 2/j Enfant |\n| ------ | --------------- |\n| Cp | 1cp 2/j |\n| Enfant | 1.5U |\n| Adulte | 3UI |"
     },
     {
       "page": 21,
@@ -98,7 +98,7 @@
     },
     {
       "page": 24,
-      "content": "Nibiol\n\n# Dosage\n\n| Cp     | 50mg | 100mg  |\n| ------ | ---- | ------ |\n| Adulte | 2cp  | 2\\_3/j |\n\n# Pyostacine\n\n| Dosage | 50mg/kg/j | 2\\_3/j |\n| ------ | --------- | ------ |\n| Cp     | 250mg     | 500mg  |\n| >12ans | 1\\_2cp    | 2\\_3/j |\n| Adulte | 1g        | 2\\_3/j |"
+      "content": "Nibiol\n\n# Dosage\n\n| Cp | 50mg | 100mg |\n| ------ | ---- | ------ |\n| Adulte | 2cp | 2\\_3/j |\n\n# Pyostacine\n\n| Dosage | 50mg/kg/j | 2\\_3/j |\n| ------ | --------- | ------ |\n| Cp | 250mg | 500mg |\n| >12ans | 1\\_2cp | 2\\_3/j |\n| Adulte | 1g | 2\\_3/j |"
     },
     {
       "page": 25,
@@ -106,11 +106,11 @@
     },
     {
       "page": 26,
-      "content": "# Ciprolon\n\nDosage: 10-20 mg/kg/j\n\nFrequency: 2/j pdt 5-14j\n\n| Concentration | 250 mg | 500 mg | 750 mg |\n| ------------- | ------ | ------ | ------ |\n| Dosage Form   | 1 cp   | 2/j    |        |"
+      "content": "# Ciprolon\n\nDosage: 10-20 mg/kg/j\n\nFrequency: 2/j pdt 5-14j\n\n| Concentration | 250 mg | 500 mg | 750 mg |\n| ------------- | ------ | ------ | ------ |\n| Dosage Form | 1 cp | 2/j | |"
     },
     {
       "page": 27,
-      "content": "# Paracétamol\n\n# Doliprane / Efferalgan\n\n- 60mg/kg/j\n- 15mg/kg chaque 6h\n- 10mg/kg chaque 4h\n\nSirop: Poids/10= nb des cam=> 1ddp/6h\n\n# Suppo/Sachet:\n\n| Poids (kg) | Dosage   | Fréquence     |\n| ---------- | -------- | ------------- |\n| 3-4        | 100mg    | 1/2 suppo 4/j |\n| 6-8        | 100mg    | 1 supp 4/j    |\n| 8-12       | 150mg    |               |\n| 11-16      | 200mg    |               |\n| 16-24      | 300mg    |               |\n| 27-40      | cp 500mg |               |"
+      "content": "# Paracétamol\n\n# Doliprane / Efferalgan\n\n- 60mg/kg/j\n- 15mg/kg chaque 6h\n- 10mg/kg chaque 4h\n\nSirop: Poids/10= nb des cam=> 1ddp/6h\n\n# Suppo/Sachet:\n\n| Poids (kg) | Dosage | Fréquence |\n| ---------- | -------- | ------------- |\n| 3-4 | 100mg | 1/2 suppo 4/j |\n| 6-8 | 100mg | 1 supp 4/j |\n| 8-12 | 150mg | |\n| 11-16 | 200mg | |\n| 16-24 | 300mg | |\n| 27-40 | cp 500mg | |"
     },
     {
       "page": 28,
@@ -130,7 +130,7 @@
     },
     {
       "page": 32,
-      "content": "# 3️⃣ Bedelix\n\n| Sachet    |             |\n| --------- | ----------- |\n| < 2 ans:  | 1/2 sac 2/j |\n| 2-5 ans:  | 1/2 sac 3/j |\n| 5-10 ans: | 1 sac 2/j   |\n| Adulte:   | 1 sac 3/j   |\n\n# 4️⃣ Stop colic ou Stop gaz\n\n| Sirop:       |             |\n| ------------ | ----------- |\n| < 1 mois:    | 1/2 cac 3/j |\n| 1-6 mois:    | 1 cac 3/j   |\n| 6 mois-1 an: | 2 cac 3/j   |\n| > 1 an:      | 2-3 cac 3/j |"
+      "content": "# 3️⃣ Bedelix\n\n| Sachet | |\n| --------- | ----------- |\n| < 2 ans: | 1/2 sac 2/j |\n| 2-5 ans: | 1/2 sac 3/j |\n| 5-10 ans: | 1 sac 2/j |\n| Adulte: | 1 sac 3/j |\n\n# 4️⃣ Stop colic ou Stop gaz\n\n| Sirop: | |\n| ------------ | ----------- |\n| < 1 mois: | 1/2 cac 3/j |\n| 1-6 mois: | 1 cac 3/j |\n| 6 mois-1 an: | 2 cac 3/j |\n| > 1 an: | 2-3 cac 3/j |"
     },
     {
       "page": 33,
@@ -138,7 +138,7 @@
     },
     {
       "page": 34,
-      "content": "# Antiémétiques\n\n15min avant repas\n\n| Domperidone          | 0.25mg/kg/j Ou 0.25ml/kg/j |\n| -------------------- | -------------------------- |\n| >12ans               | Sirop: 1ddp 3/j            |\n| Cp:10mg >35kg >13ans | 1cp 1\\_3/j                 |\n| Max 30mg/j           | 1sem                       |"
+      "content": "# Antiémétiques\n\n15min avant repas\n\n| Domperidone | 0.25mg/kg/j Ou 0.25ml/kg/j |\n| -------------------- | -------------------------- |\n| >12ans | Sirop: 1ddp 3/j |\n| Cp:10mg >35kg >13ans | 1cp 1\\_3/j |\n| Max 30mg/j | 1sem |"
     },
     {
       "page": 35,
@@ -146,19 +146,19 @@
     },
     {
       "page": 36,
-      "content": "# Vogalene\n\n| 1mg/kg/j | 1\\_3/j |\n| -------- | ------ |\n\n# Sirop\n\n| >15kg: | 1/2\\_1cac |\n| ------ | --------- |\n\n# Suppo\n\n| 2.5mg  | >7.5kg       |                                 |\n| ------ | ------------ | ------------------------------- |\n| <6ans: | 1suppo/5kg/j | 1/2 suppo 5mg (ou 1suppo 2.5mg) |\n| >6ans: | 1suppo       |                                 |\n\n# Cp lyoc\n\n| >6ans       | 1lyoc 2\\_3/j |\n| ----------- | ------------ |\n| >12ans      | 1lyoc 2\\_4/j |\n| 15kg\\_12ans | 1lyoc 1\\_2/j |\n\n# Gélules\n\n| >12ans         | 1gel 1\\_2/j |\n| -------------- | ----------- |\n| 6\\_12ans >15kg | 1gel 1/j    |"
+      "content": "# Vogalene\n\n| 1mg/kg/j | 1\\_3/j |\n| -------- | ------ |\n\n# Sirop\n\n| >15kg: | 1/2\\_1cac |\n| ------ | --------- |\n\n# Suppo\n\n| 2.5mg | >7.5kg | |\n| ------ | ------------ | ------------------------------- |\n| <6ans: | 1suppo/5kg/j | 1/2 suppo 5mg (ou 1suppo 2.5mg) |\n| >6ans: | 1suppo | |\n\n# Cp lyoc\n\n| >6ans | 1lyoc 2\\_3/j |\n| ----------- | ------------ |\n| >12ans | 1lyoc 2\\_4/j |\n| 15kg\\_12ans | 1lyoc 1\\_2/j |\n\n# Gélules\n\n| >12ans | 1gel 1\\_2/j |\n| -------------- | ----------- |\n| 6\\_12ans >15kg | 1gel 1/j |"
     },
     {
       "page": 37,
-      "content": "# Vomiteb\n\n# CI &#x3C; 1 ans\n\n# Sirop:\n\n| 1 ans - 5 ans  | 1 cac 2/j |\n| -------------- | --------- |\n| 5 ans - 12 ans | 1 cac 3/j |\n| > 12 ans       | 2 cac 3/j |\n| Adulte         | 1 cas 3/j |\n\n# Cp:\n\n1 cp 3/j"
+      "content": "# Vomiteb\n\n# CI &#x3C; 1 ans\n\n# Sirop:\n\n| 1 ans - 5 ans | 1 cac 2/j |\n| -------------- | --------- |\n| 5 ans - 12 ans | 1 cac 3/j |\n| > 12 ans | 2 cac 3/j |\n| Adulte | 1 cas 3/j |\n\n# Cp:\n\n1 cp 3/j"
     },
     {
       "page": 38,
-      "content": "# Antidiarrhéiques\n\n# 1️⃣ Tiopam / Tiorfan\n\n- Durée max: 7j\n- 1.5mg/kg par prise\n\n# Sachet\n\n| Poids         | Dosage | Fréquence |\n| ------------- | ------ | --------- |\n| <15kg         | 10mg   | 1sac 3/j  |\n| 1-9 mois      |        | 1sac 3/j  |\n| 9-30 mois     |        | 2sac 3/j  |\n| >15kg         | 30mg   |           |\n| 30 mois-9 ans |        | 1sac 3/j  |\n| >9 ans        |        | 2sac 3/j  |\n\n# Gel\n\n- 100mg 1gel 2-3/j"
+      "content": "# Antidiarrhéiques\n\n# 1️⃣ Tiopam / Tiorfan\n\n- Durée max: 7j\n- 1.5mg/kg par prise\n\n# Sachet\n\n| Poids | Dosage | Fréquence |\n| ------------- | ------ | --------- |\n| <15kg | 10mg | 1sac 3/j |\n| 1-9 mois | | 1sac 3/j |\n| 9-30 mois | | 2sac 3/j |\n| >15kg | 30mg | |\n| 30 mois-9 ans | | 1sac 3/j |\n| >9 ans | | 2sac 3/j |\n\n# Gel\n\n- 100mg 1gel 2-3/j"
     },
     {
       "page": 39,
-      "content": "# 2️⃣ Smecta\n\n| Sachet:           | pdt 5j max 7j |\n| ----------------- | ------------- |\n| < 6 mois:         | 1/2 sac 1/j   |\n| 6 mois - 1 an:    | 1 sac 1/j     |\n| 1 an - 2 ans:     | 1 sac 2/j     |\n| > 2 ans:          | 1 sac 3/j     |\n| Adulte:           | 1 sac 2 - 3/j |\n| Mais normalement: | > 2 ans!!     |\n\n# 3️⃣ Loperamide\n\n| Sirop:  | 0.03 mg/kg/j Soit 0.15 ml/kg/j |\n| ------- | ------------------------------ |\n| > 2 ans | 1 ddp 3/j                      |\n| Gel:    | 2 mg 1 gel 2 - 3/j             |"
+      "content": "# 2️⃣ Smecta\n\n| Sachet: | pdt 5j max 7j |\n| ----------------- | ------------- |\n| < 6 mois: | 1/2 sac 1/j |\n| 6 mois - 1 an: | 1 sac 1/j |\n| 1 an - 2 ans: | 1 sac 2/j |\n| > 2 ans: | 1 sac 3/j |\n| Adulte: | 1 sac 2 - 3/j |\n| Mais normalement: | > 2 ans!! |\n\n# 3️⃣ Loperamide\n\n| Sirop: | 0.03 mg/kg/j Soit 0.15 ml/kg/j |\n| ------- | ------------------------------ |\n| > 2 ans | 1 ddp 3/j |\n| Gel: | 2 mg 1 gel 2 - 3/j |"
     },
     {
       "page": 40,
@@ -174,7 +174,7 @@
     },
     {
       "page": 43,
-      "content": "# 2️⃣ Forlax\n\n| Sachet: matin |                                                                       |\n| ------------- | --------------------------------------------------------------------- |\n| 4g:           | * 6mois\\_1ans: 1sac 1/j\n* 1ans\\_4ans: 1sac 2/j\n* 4ans\\_8ans: 1sac 3/j |\n| 10g >8ans:    | 1\\_2sac 1/j                                                           |\n\n# 3️⃣ Huile de paraffine\n\n| Sirop: 1flc |             |\n| ----------- | ----------- |\n| <1ans:      | 1cac 1/j    |\n| 1ans\\_6ans: | 1cac 2/j    |\n| >6ans:      | 1cac 3/j    |\n| Adulte:     | 1cas 2\\_3/j |"
+      "content": "# 2️⃣ Forlax\n\n| Sachet: matin | |\n| ------------- | --------------------------------------------------------------------- |\n| 4g: | * 6mois\\_1ans: 1sac 1/j\n* 1ans\\_4ans: 1sac 2/j\n* 4ans\\_8ans: 1sac 3/j |\n| 10g >8ans: | 1\\_2sac 1/j |\n\n# 3️⃣ Huile de paraffine\n\n| Sirop: 1flc | |\n| ----------- | ----------- |\n| <1ans: | 1cac 1/j |\n| 1ans\\_6ans: | 1cac 2/j |\n| >6ans: | 1cac 3/j |\n| Adulte: | 1cas 2\\_3/j |"
     },
     {
       "page": 44,
@@ -186,7 +186,7 @@
     },
     {
       "page": 46,
-      "content": "# 2️⃣Histagan\n\n# Cutané++\n\n# Polaramine\n\n| Sirop:         | 3/j 1flc   |\n| -------------- | ---------- |\n| <30mois:       | 1/2càm     |\n| 30mois\\_10ans: | 1càm       |\n| 10ans\\_15ans:  | 2càm       |\n| >15ans:        | 4càm ou cp |\n\n| Cp:       | 5mg 1cp 3/j 1bte |\n| --------- | ---------------- |\n| >12ans:   | 1cp 3\\_4/j       |\n| 6\\_12ans: | 1/2cp 2\\_3/j     |"
+      "content": "# 2️⃣Histagan\n\n# Cutané++\n\n# Polaramine\n\n| Sirop: | 3/j 1flc |\n| -------------- | ---------- |\n| <30mois: | 1/2càm |\n| 30mois\\_10ans: | 1càm |\n| 10ans\\_15ans: | 2càm |\n| >15ans: | 4càm ou cp |\n\n| Cp: | 5mg 1cp 3/j 1bte |\n| --------- | ---------------- |\n| >12ans: | 1cp 3\\_4/j |\n| 6\\_12ans: | 1/2cp 2\\_3/j |"
     },
     {
       "page": 47,
@@ -218,7 +218,7 @@
     },
     {
       "page": 54,
-      "content": "Toplexil\n\n# Toux sèche allergique, irritative, non productive, nocturne max 5j\n\n| 13-20kg | 2ans-6ans:     | 1cac 3/j | 5ml 2-3/j  |\n| ------- | -------------- | -------- | ---------- |\n| 20-30kg | 6ans-10ans:    | 2cac 2/j | 10ml 2-3/j |\n| 30-40kg | 10ans-12ans:   | 2cac 3/j | 10ml 3-4/j |\n| >40kg   | >12ans Adulte: | 1cas 3/j | 10ml 4/j   |\n\n# Sinecod\n\n# Toux sèche, diabétique, CI chez la FE et asthmatique\n\n| 6-12ans:       | 10ml 3/j |          |\n| -------------- | -------- | -------- |\n| >12ans:        | 15ml 3/j |          |\n| >16ans Adulte: | 1cas 3/j | 15ml 4/j |"
+      "content": "Toplexil\n\n# Toux sèche allergique, irritative, non productive, nocturne max 5j\n\n| 13-20kg | 2ans-6ans: | 1cac 3/j | 5ml 2-3/j |\n| ------- | -------------- | -------- | ---------- |\n| 20-30kg | 6ans-10ans: | 2cac 2/j | 10ml 2-3/j |\n| 30-40kg | 10ans-12ans: | 2cac 3/j | 10ml 3-4/j |\n| >40kg | >12ans Adulte: | 1cas 3/j | 10ml 4/j |\n\n# Sinecod\n\n# Toux sèche, diabétique, CI chez la FE et asthmatique\n\n| 6-12ans: | 10ml 3/j | |\n| -------------- | -------- | -------- |\n| >12ans: | 15ml 3/j | |\n| >16ans Adulte: | 1cas 3/j | 15ml 4/j |"
     },
     {
       "page": 55,
@@ -230,11 +230,11 @@
     },
     {
       "page": 57,
-      "content": "# Rhinathiol\n\nToux grasse\n\n| 5 ans:   | 1 cac 3/j |\n| -------- | --------- |\n| 2-5 ans: | 1 cac 2/j |\n\n# Fluimucil\n\nToux grasse\n\n1 sachet 3/j"
+      "content": "# Rhinathiol\n\nToux grasse\n\n| 5 ans: | 1 cac 3/j |\n| -------- | --------- |\n| 2-5 ans: | 1 cac 2/j |\n\n# Fluimucil\n\nToux grasse\n\n1 sachet 3/j"
     },
     {
       "page": 58,
-      "content": "AINS\n▪️Max: 5j au milieu de repas\n\n+ IPP 20mg\n\n⛔️CI: Ulcère, grossesse, allaitement, IR, IC,\n\nAsthme, Crohn, Antiagrégants, AVK\n\nInj CI chez les Cardiopathes ..\n\n# 1️⃣Diclofenac de sodium\n\nClofenal / Voltarene...\n\n▪️>15ans\n\n| Cp:       | 1cp/8h                        |\n| --------- | ----------------------------- |\n| ▪️Enfant: | 25mg 1cp 2\\_3/j 2\\_3mg/kg/j   |\n| ▪️Adulte: | 50mg 75mg Lp 100mg 1cp 2\\_3/j |"
+      "content": "AINS\n▪️Max: 5j au milieu de repas\n\n+ IPP 20mg\n\n⛔️CI: Ulcère, grossesse, allaitement, IR, IC,\n\nAsthme, Crohn, Antiagrégants, AVK\n\nInj CI chez les Cardiopathes ..\n\n# 1️⃣Diclofenac de sodium\n\nClofenal / Voltarene...\n\n▪️>15ans\n\n| Cp: | 1cp/8h |\n| --------- | ----------------------------- |\n| ▪️Enfant: | 25mg 1cp 2\\_3/j 2\\_3mg/kg/j |\n| ▪️Adulte: | 50mg 75mg Lp 100mg 1cp 2\\_3/j |"
     },
     {
       "page": 59,
@@ -242,7 +242,7 @@
     },
     {
       "page": 60,
-      "content": "# 3️⃣ Diclofenac de potassium\n\nRapidus..\n\n| Cp: 50mg                                   | 1cp 2/j |\n| ------------------------------------------ | ------- |\n| => Traumatisme, fracture, fissure, entorse |         |\n| Hypertendu                                 |         |\n\n# 4️⃣ Ibuprofène\n\nXydol...\n\n| => Cervicalgies..                       |       |\n| --------------------------------------- | ----- |\n| Sirop: Nrs Enfant                       |       |\n| ▪️1ddp/8h                               |       |\n| Cp: 200mg >8ans, 400mg >15ans et >30kg, | 600mg |\n| ▪️1cp/8h                                |       |"
+      "content": "# 3️⃣ Diclofenac de potassium\n\nRapidus..\n\n| Cp: 50mg | 1cp 2/j |\n| ------------------------------------------ | ------- |\n| => Traumatisme, fracture, fissure, entorse | |\n| Hypertendu | |\n\n# 4️⃣ Ibuprofène\n\nXydol...\n\n| => Cervicalgies.. | |\n| --------------------------------------- | ----- |\n| Sirop: Nrs Enfant | |\n| ▪️1ddp/8h | |\n| Cp: 200mg >8ans, 400mg >15ans et >30kg, | 600mg |\n| ▪️1cp/8h | |"
     },
     {
       "page": 61,
@@ -250,11 +250,11 @@
     },
     {
       "page": 62,
-      "content": "# Morniflumate\n\n# Celebrex\n\n| Dosage                                        | Fréquence      | Forme      | Notes                   |\n| --------------------------------------------- | -------------- | ---------- | ----------------------- |\n| 40mg/kg                                       | 1-3/j          | pdt 4j     | Max: 20mg/j             |\n| Gélules                                       | 100mg          | 200mg      | adulte 1gel 2-3/j       |\n| Suppo                                         | 1suppo le soir | Nrs: 200mg | Enfant: 400mg           |\n| Adulte                                        | 700mg          | Gel        | Adulte 1app le soir     |\n| Sujet âgé, hypertendu, cardiopath, diabétique |                |            | => Celebrex 100mg 200mg |"
+      "content": "# Morniflumate\n\n# Celebrex\n\n| Dosage | Fréquence | Forme | Notes |\n| --------------------------------------------- | -------------- | ---------- | ----------------------- |\n| 40mg/kg | 1-3/j | pdt 4j | Max: 20mg/j |\n| Gélules | 100mg | 200mg | adulte 1gel 2-3/j |\n| Suppo | 1suppo le soir | Nrs: 200mg | Enfant: 400mg |\n| Adulte | 700mg | Gel | Adulte 1app le soir |\n| Sujet âgé, hypertendu, cardiopath, diabétique | | | => Celebrex 100mg 200mg |"
     },
     {
       "page": 63,
-      "content": "# Nifluril\n\n| Suppo: | 6\\_30mois:     | 200mg      | 1suppo 2/j    |\n| ------ | -------------- | ---------- | ------------- |\n|        | 30mois\\_13ans: | 400mg/10kg | 1suppo 2\\_3/j |\n|        | Adulte:        | 700mg      |               |\n\n| Gel: | >13ans: | gélule 250mg | 1gel 2/j |\n| ---- | ------- | ------------ | -------- |\n\n# Ketoprofène: Puissant\n\nProfinid...\n| Sirop:   | Nrs/E     | 1ddp/8h       |                |\n| -------- | --------- | ------------- | -------------- |\n| Gélules: | 200mg Lp  |               |                |\n| Cp:      | 1cp 100mg | 2/j Adulte    |                |\n|          | 100mg     | 200mg Lp      |                |\n| Suppo:   | 100mg     | 1suppo Adulte | 1suppo le soir |"
+      "content": "# Nifluril\n\n| Suppo: | 6\\_30mois: | 200mg | 1suppo 2/j |\n| ------ | -------------- | ---------- | ------------- |\n| | 30mois\\_13ans: | 400mg/10kg | 1suppo 2\\_3/j |\n| | Adulte: | 700mg | |\n\n| Gel: | >13ans: | gélule 250mg | 1gel 2/j |\n| ---- | ------- | ------------ | -------- |\n\n# Ketoprofène: Puissant\n\nProfinid...\n| Sirop: | Nrs/E | 1ddp/8h | |\n| -------- | --------- | ------------- | -------------- |\n| Gélules: | 200mg Lp | | |\n| Cp: | 1cp 100mg | 2/j Adulte | |\n| | 100mg | 200mg Lp | |\n| Suppo: | 100mg | 1suppo Adulte | 1suppo le soir |"
     },
     {
       "page": 64,

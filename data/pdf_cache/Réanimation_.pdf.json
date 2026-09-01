@@ -42,11 +42,11 @@
     },
     {
       "page": 10,
-      "content": "# CTC : HHC 200mg en IVD\n\n- Ou Solumedrol 1mg/kg en IVD\n- Antihistaminique\n\n# Si dyspnée :\n\n- O2 6-8l/min\n- Nébulisation avec Salbutamol 5mg\n- Ou Adrénaline 2mg dans 3cc de SSI même dose que d’une crise d’asthme\n\n# Adrénaline :\n\n- 1cc dilué dans 10cc SGI Chaque 5min 0.1cc d’Adrénaline en Sc\n- 1cc dilué dans 10cc de SSI Puis 1cc de ce mélange dilué dans 10cc de SSI\n- 1amp 1mg diluée dans 10ml SG On injecté 1ou 2ml en bolus IV ou 0.1mg/min jusqu’à l’amélioration"
+      "content": "# CTC : HHC 200mg en IVD\n\n- Ou Solumedrol 1mg/kg en IVD\n- Antihistaminique\n\n# Si dyspnée :\n\n- O2 6-8l/min\n- Nébulisation avec Salbutamol 5mg\n- Ou Adrénaline 2mg dans 3cc de SSI même dose que d’une crise d’asthme\n\n# Adrénaline :\n\n- 1cc dilué dans 10cc SGI Chaque 5min 0.1cc d’Adrénaline en Sc\n- 1cc dilué dans 10cc de SSI Puis 1cc de ce mélange dilué dans 10cc de SSI\n- 1amp 1mg diluée dans 10ml SG On injecté 1ou 2ml en bolus IV ou 0.1mg/min jusqùà l’amélioration"
     },
     {
       "page": 11,
-      "content": "# Adrénaline\n\n# Enfant\n\n| < 15 kg  | 0.01 mg en Sc |\n| -------- | ------------- |\n| 15-30 kg | 0.15 mg en Sc |\n| > 30 kg  | 0.3 mg en Sc  |\n\n# Bilan\n\n- FNS\n- CRP/VS\n- Ionogramme sanguin\n- Lactatémie\n- Gaz du sang\n- Tryptase"
+      "content": "# Adrénaline\n\n# Enfant\n\n| < 15 kg | 0.01 mg en Sc |\n| -------- | ------------- |\n| 15-30 kg | 0.15 mg en Sc |\n| > 30 kg | 0.3 mg en Sc |\n\n# Bilan\n\n- FNS\n- CRP/VS\n- Ionogramme sanguin\n- Lactatémie\n- Gaz du sang\n- Tryptase"
     },
     {
       "page": 12,
@@ -70,7 +70,7 @@
     },
     {
       "page": 17,
-      "content": "# Classification clinique des Piqures et Envenimations scorpioniques\n\n| Type de la piqure        | Classe de la piqure | Manifestations cliniques                                                                                                                                | %     |\n| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |\n| Piqure blanche           | Classe 1            | Manifestations locales: Douleur, rougeur, sensation de brölure, Fourmillements                                                                          | 91.34 |\n| Piqure avec envenimation | Classe II           | Manifestations systemiques mineures: (ne mettant pas en jeu le pronostic vital) hypersudation, fievre, vomissements, priapisme, HTA, douleur abdominale | 8.76  |\n| Piqure avec envenimation | Classe III          | Manifestations systemiques majeures: (mettant en jeu le pronostic vital): Cardio-vasculaires, respiratoires et neurologiques                            | 8.76  |"
+      "content": "# Classification clinique des Piqures et Envenimations scorpioniques\n\n| Type de la piqure | Classe de la piqure | Manifestations cliniques | % |\n| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |\n| Piqure blanche | Classe 1 | Manifestations locales: Douleur, rougeur, sensation de brölure, Fourmillements | 91.34 |\n| Piqure avec envenimation | Classe II | Manifestations systemiques mineures: (ne mettant pas en jeu le pronostic vital) hypersudation, fievre, vomissements, priapisme, HTA, douleur abdominale | 8.76 |\n| Piqure avec envenimation | Classe III | Manifestations systemiques majeures: (mettant en jeu le pronostic vital): Cardio-vasculaires, respiratoires et neurologiques | 8.76 |"
     },
     {
       "page": 18,
@@ -86,7 +86,7 @@
     },
     {
       "page": 21,
-      "content": "# SCORE DE CUSHMAN\n\nConsignes: Afin de determiner la necessite de Iadjonction d'une benzodiazepine et sa posologle chez un patient en sevrage alcoolique, veuillez cochez les items correspondant à la situation du patient.\n\n| Items                  | 0 points  | 1 point                   | 2 points                 | 3 points                     |       |\n| ---------------------- | --------- | ------------------------- | ------------------------ | ---------------------------- | ----- |\n| Pouls (bpm/min)        | <80       | 81-100                    | 101-120                  | > 120                        |       |\n| PA systolique (mmHig)  | 18-30 ans | < 125                     | 126-135                  | 136-145                      | >145  |\n|                        | 31-50 ans | < 135                     | 136-145                  | 146-155                      | > 155 |\n|                        | > 50 ans  | < 145                     | 146-155                  | 156-165                      | > 165 |\n| Frequence respiratoire | <16       | 16-25                     | 26-35                    | >35                          |       |\n| Agitation              | Aucune    | Discrete                  | Generalisee/ Controlable | Generalisee/ Incontrolable   |       |\n| Sueurs                 | Aucune    | Paumes                    | Paumes et front          | Generalisees                 |       |\n| Troubles sensoriels    | Aucun     | Photo-phonophobie, prurit | Hallucinations"
+      "content": "# SCORE DE CUSHMAN\n\nConsignes: Afin de determiner la necessite de Iadjonction d'une benzodiazepine et sa posologle chez un patient en sevrage alcoolique, veuillez cochez les items correspondant à la situation du patient.\n\n| Items | 0 points | 1 point | 2 points | 3 points | |\n| ---------------------- | --------- | ------------------------- | ------------------------ | ---------------------------- | ----- |\n| Pouls (bpm/min) | <80 | 81-100 | 101-120 | > 120 | |\n| PA systolique (mmHig) | 18-30 ans | < 125 | 126-135 | 136-145 | >145 |\n| | 31-50 ans | < 135 | 136-145 | 146-155 | > 155 |\n| | > 50 ans | < 145 | 146-155 | 156-165 | > 165 |\n| Frequence respiratoire | <16 | 16-25 | 26-35 | >35 | |\n| Agitation | Aucune | Discrete | Generalisee/ Controlable | Generalisee/ Incontrolable | |\n| Sueurs | Aucune | Paumes | Paumes et front | Generalisees | |\n| Troubles sensoriels | Aucun | Photo-phonophobie, prurit | Hallucinations"
     },
     {
       "page": 22,
@@ -106,7 +106,7 @@
     },
     {
       "page": 26,
-      "content": "# Intoxication au CO\n\n# Clinique :\n\nVertiges, céphalées, asthénie, nausées, troubles digestifs..\n\nComa inaugurale réversible sous O2\n\n# CAT : but CO&#x3C;5%\n\n- Signes vitaux : FR, FC, TA, T°, SaO2\n- O2 thérapie jusqu’à la disparition des symptômes (confusion, vertiges, céphalées, nausées, dyspnée, troubles visuels..) &#x3C;3%\n- Gazométrie\n- ECG\n- TLT : OAP cardiogénique ou lésionnel"
+      "content": "# Intoxication au CO\n\n# Clinique :\n\nVertiges, céphalées, asthénie, nausées, troubles digestifs..\n\nComa inaugurale réversible sous O2\n\n# CAT : but CO&#x3C;5%\n\n- Signes vitaux : FR, FC, TA, T°, SaO2\n- O2 thérapie jusqùà la disparition des symptômes (confusion, vertiges, céphalées, nausées, dyspnée, troubles visuels..) &#x3C;3%\n- Gazométrie\n- ECG\n- TLT : OAP cardiogénique ou lésionnel"
     },
     {
       "page": 27,
@@ -122,7 +122,7 @@
     },
     {
       "page": 30,
-      "content": "# EVALUER LA GRAVITE DE LA NOYADE\n\n| AQUASTR  | Le sujet est conscient ; angoissé ; a froid                                         | Il est épuisé : N'a pas de détresse ventilatoire |\n| -------- | ----------------------------------------------------------------------------------- | ------------------------------------------------ |\n| PETIT    | sujet est conscient; angoissé : présente des signes de détresse ventilatoire, agité |                                                  |\n| GRAND    | sujet est inconscient ; présente des signes de détresse ou d'arrêt ventilatoire;    | Ne présente pas d'arrêt circulatoire             |\n| L'ANOXIQ | Le sujet est inconscient ; en arrêt cardio-ventilatoire                             |                                                  |\n\n# CONNAITRE LES PRINCIPES DE PRISE EN CHARGE\n\n# SAUVETAGE ET AQUASTR\n\n- réchauffer en couvrant la victime ;\n- Rassurer;\n- Libération des voies aériennes\n\n# PETIT\n\n- oxygène à 15 litres/mn ;\n- Couvrir la victime\n- Libération des voies aériennes\n\n# GRAND\n\n- Insufflation d'oxygène à 15 litres/mn\n- Surveillance des fonctions vitales\n- Libération des voies aériennes\n\n# ANOXIQU\n\n- Ventilation artificielle + massage cardiaque externe\n- Surveillance"
+      "content": "# EVALUER LA GRAVITE DE LA NOYADE\n\n| AQUASTR | Le sujet est conscient ; angoissé ; a froid | Il est épuisé : N'a pas de détresse ventilatoire |\n| -------- | ----------------------------------------------------------------------------------- | ------------------------------------------------ |\n| PETIT | sujet est conscient; angoissé : présente des signes de détresse ventilatoire, agité | |\n| GRAND | sujet est inconscient ; présente des signes de détresse ou d'arrêt ventilatoire; | Ne présente pas d'arrêt circulatoire |\n| L'ANOXIQ | Le sujet est inconscient ; en arrêt cardio-ventilatoire | |\n\n# CONNAITRE LES PRINCIPES DE PRISE EN CHARGE\n\n# SAUVETAGE ET AQUASTR\n\n- réchauffer en couvrant la victime ;\n- Rassurer;\n- Libération des voies aériennes\n\n# PETIT\n\n- oxygène à 15 litres/mn ;\n- Couvrir la victime\n- Libération des voies aériennes\n\n# GRAND\n\n- Insufflation d'oxygène à 15 litres/mn\n- Surveillance des fonctions vitales\n- Libération des voies aériennes\n\n# ANOXIQU\n\n- Ventilation artificielle + massage cardiaque externe\n- Surveillance"
     },
     {
       "page": 31,
@@ -162,7 +162,7 @@
     },
     {
       "page": 40,
-      "content": "# Surdosage Paracétamol\n\n# ✅️Hospitalisation:\n\n- Avis Toxicologie\n- Réhydratation\n- Lavage gastrique si &#x3C;2-4h\n- Charbon active\n- Surveillance de la fonction hépatique H0H4H8\n\n# Bilan hépatique:\n\n- ASAT/ALAT\n- Facteur V\n- TP\n\n- Antidote \"Fluimucil\" si la dose ingérée >150mg/kg\n- 20 sachets (une boite) dans une bouteille d'eau.\n- Traitement symptomatiques si signes digestifs"
+      "content": "# Surdosage Paracétamol\n\n# ✅️Hospitalisation:\n\n- Avis Toxicologie\n- Réhydratation\n- Lavage gastrique si &#x3C;2-4h\n- Charbon active\n- Surveillance de la fonction hépatique HoH4H8\n\n# Bilan hépatique:\n\n- ASAT/ALAT\n- Facteur V\n- TP\n\n- Antidote \"Fluimucil\" si la dose ingérée >150mg/kg\n- 20 sachets (une boite) dans une bouteille d'eau.\n- Traitement symptomatiques si signes digestifs"
     },
     {
       "page": 41,

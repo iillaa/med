@@ -18,15 +18,15 @@
     },
     {
       "page": 4,
-      "content": "# <font color=red>Abcès dentaire</font>\n\n- [1] Augmentin St 1g 1sac 3/j pdt 10j\n  Ou Amoxicilline 1g 1cp 3/j\n  + Flagyl cp 500 mg 1cp 3/j pdt 7j\n- [2] Doliprane cp 1g 1cp 2/j\n- [3] Bain de bouche Eludril BDB 1/j pdt 5j\n  Ou\n  - [1] Biorogyl cp 2cp 2/j pdt 10j\n  - [2] Dolyc 1000mg\n\nSoit Augmentin seul ou **Amoxicilline** + Flagyl\n\n⊖ AINS sont CI : Risque de cellulite\n\n- [→] Orientation vers un dentiste"
+      "content": "# <font color=red>Abcès dentaire</font>\n\n- [1] Augmentin St 1g 1sac 3/j pdt 10j\n Ou Amoxicilline 1g 1cp 3/j\n + Flagyl cp 500 mg 1cp 3/j pdt 7j\n- [2] Doliprane cp 1g 1cp 2/j\n- [3] Bain de bouche Eludril BDB 1/j pdt 5j\n Ou\n - [1] Biorogyl cp 2cp 2/j pdt 10j\n - [2] Dolyc 1000mg\n\nSoit Augmentin seul ou **Amoxicilline** + Flagyl\n\n⊖ AINS sont CI : Risque de cellulite\n\n- [→] Orientation vers un dentiste"
     },
     {
       "page": 5,
-      "content": "# <font color=red>Acouphènes</font>\n\n- ● Clinique:\n  - Bruits (sifflements, bourdonnements, grésillements.. que l'on entend dans une oreille..)\n  - Vasculaire: si oreille saine=> IRM\n  - Si triade: Acouphènes + hypoacousie + vertiges=> Maladie de Ménière\n  - Pulsatile=> IRM (Maladie d'Horton)\n  - Os de l'oreille=> TDM\n  - Bilatéral=> HTA\n\n- ☑ Traitement: symptomatique\nNeurovit"
+      "content": "# <font color=red>Acouphènes</font>\n\n- ● Clinique:\n - Bruits (sifflements, bourdonnements, grésillements.. que l'on entend dans une oreille..)\n - Vasculaire: si oreille saine=> IRM\n - Si triade: Acouphènes + hypoacousie + vertiges=> Maladie de Ménière\n - Pulsatile=> IRM (Maladie d'Horton)\n - Os de l'oreille=> TDM\n - Bilatéral=> HTA\n\n- ☑ Traitement: symptomatique\nNeurovit"
     },
     {
       "page": 6,
-      "content": "# <font color=red>Angines</font>\n\n**Clinique:**\n\n- Gonflement des amygdales, gorge rouge, fièvre\n- Erythémato pultacée=> pas toujours d'origine bactérienne\n- Fausse membranes=> MNI ou Diphtérie\n- Ulcéro nécrotique=> toujours unilatérale: Angine de Vincent\n\n- Angine érythémato pultacée\n  ➔ Virale/Strepto\n\n- Angine pseudo membraneuse:\n  ➔ Diphtérie/MNI\nPrélèvement de gorge"
+      "content": "# <font color=red>Angines</font>\n\n**Clinique:**\n\n- Gonflement des amygdales, gorge rouge, fièvre\n- Erythémato pultacée=> pas toujours d'origine bactérienne\n- Fausse membranes=> MNI ou Diphtérie\n- Ulcéro nécrotique=> toujours unilatérale: Angine de Vincent\n\n- Angine érythémato pultacée\n ➔ Virale/Strepto\n\n- Angine pseudo membraneuse:\n ➔ Diphtérie/MNI\nPrélèvement de gorge"
     },
     {
       "page": 7,
@@ -34,11 +34,11 @@
     },
     {
       "page": 8,
-      "content": "- **Enfant** 🤱\n- **<2ans:** viral que traitement symptomatique\n  => **Antipyrétique + désobstruction nasale**\n  Si non Amoxicilline 50mg/kg/j pdt 10j\n\n- **>2ans:** strepto\n- **1** Clamoxyl sirop 50mg/kg/j 1cam 2/j pdt 7j à 12h d'intervalle\n- Ou >30mois: 60mg/kg/j\n- **2** Paracétamol 60mg/kg\n\n- **Si Vomissements :**\nDomperidone >12ans sirop 1ddp 2/j 15min avant repas\n\n- **Si Diarrhées :**\nSmecta st 1st 2/j\n+ SRO St 1st dans 1l d'eau"
+      "content": "- **Enfant** 🤱\n- **<2ans:** viral que traitement symptomatique\n => **Antipyrétique + désobstruction nasale**\n Si non Amoxicilline 50mg/kg/j pdt 10j\n\n- **>2ans:** strepto\n- **1** Clamoxyl sirop 50mg/kg/j 1cam 2/j pdt 7j à 12h d'intervalle\n- Ou >30mois: 60mg/kg/j\n- **2** Paracétamol 60mg/kg\n\n- **Si Vomissements :**\nDomperidone >12ans sirop 1ddp 2/j 15min avant repas\n\n- **Si Diarrhées :**\nSmecta st 1st 2/j\n+ SRO St 1st dans 1l d'eau"
     },
     {
       "page": 9,
-      "content": "| Weight | Dose  |\n| ------ | ----- |\n| <30kg  | 0.6 M |\n| >30kg  | 1.2M  |"
+      "content": "| Weight | Dose |\n| ------ | ----- |\n| <30kg | 0.6 M |\n| >30kg | 1.2M |"
     },
     {
       "page": 10,
@@ -54,7 +54,7 @@
     },
     {
       "page": 13,
-      "content": "# <font color=red>**Aphtes**</font>\n\n- ● Clinique : Ulcère superficiel douloureux de la muqueuse buccale ou d'un autre organe.. à l'intérieur +++\n\n**Vérifier si y a pas des aphtes anales=> Maladie de Behçet.**\n\n- Rechercher une immunodépression :\n  - Maladie cœliaque\n  - Dosage de B12\n  - Carence en vit D\n  - Sérologie\n  - Diabète\n  - Behçet\n  - Stress.."
+      "content": "# <font color=red>**Aphtes**</font>\n\n- ● Clinique : Ulcère superficiel douloureux de la muqueuse buccale ou d'un autre organe.. à l'intérieur +++\n\n**Vérifier si y a pas des aphtes anales=> Maladie de Behçet.**\n\n- Rechercher une immunodépression :\n - Maladie cœliaque\n - Dosage de B12\n - Carence en vit D\n - Sérologie\n - Diabète\n - Behçet\n - Stress.."
     },
     {
       "page": 14,
@@ -78,7 +78,7 @@
     },
     {
       "page": 19,
-      "content": "- Rechercher une immunodépression :\n  - Bilan💧\n  - FNS\n  - Glycémie\n  - Sérologie\n  - CDU\n\n- Enfant : 👶\n  - Stériliser les biberons chaque jour\n  - Éviter les sucres\n  - Fungizone susp buv 1càc pour 10kg/j 2_3/j pdt 14_21j\n  1 flc=> NRS et enfants 50mg/kg/j\n  1cac dans un verre d'eau : Nettoyage par une compresse\n  Ou Daktren (Miconazole) 2% gel buc 1app 3/j\n  NRS >6mois\n  <6mois: Nystatine sirop 1cam 2/j"
+      "content": "- Rechercher une immunodépression :\n - Bilan💧\n - FNS\n - Glycémie\n - Sérologie\n - CDU\n\n- Enfant : 👶\n - Stériliser les biberons chaque jour\n - Éviter les sucres\n - Fungizone susp buv 1càc pour 10kg/j 2_3/j pdt 14_21j\n 1 flc=> NRS et enfants 50mg/kg/j\n 1cac dans un verre d'eau : Nettoyage par une compresse\n Ou Daktren (Miconazole) 2% gel buc 1app 3/j\n NRS >6mois\n <6mois: Nystatine sirop 1cam 2/j"
     },
     {
       "page": 20,
@@ -94,7 +94,7 @@
     },
     {
       "page": 23,
-      "content": "- [x] Traitement :\n  - ■ Petite abondance :\n    - [1] HEC pmd 1app 2/j\n    - [2] Mebo pmd 1app 2/j\n    - [3] Habermi pmd 1app 2/j\n  - ■ Grande abondance :\n    - [1] Dicynone cp 250mg 2cp 2/j Ou 1cp 3/j pour adulte\n    - [2] Dicynone inj 1inj le matin 1bte"
+      "content": "- [x] Traitement :\n - ■ Petite abondance :\n - [1] HEC pmd 1app 2/j\n - [2] Mebo pmd 1app 2/j\n - [3] Habermi pmd 1app 2/j\n - ■ Grande abondance :\n - [1] Dicynone cp 250mg 2cp 2/j Ou 1cp 3/j pour adulte\n - [2] Dicynone inj 1inj le matin 1bte"
     },
     {
       "page": 24,
@@ -110,7 +110,7 @@
     },
     {
       "page": 27,
-      "content": "- Nébulisation Adrénaline 1cc Dexa 2cc dans 3cc SSI 20min (jusqu'à 3 séance)\n\nAérosol d'Adrénaline : 5mg/10ml NaCl 9% 15min\n\n- Si réponse => Traitement de sortie\n\n- [x] Traitement de sortie :\n\n- [ ] 1 CTC per os pdt 5j le matin :\n<10Kg=> Celestene 10gtt/kg max 400gtt\n>10Kg=> Solupred cp 5mg 1mg/kg/j max : 40mg\nPredo sirop : poids/3= ?ml 1/j\n\nATB si : Laryngite sévère ou fébrile\n\n- [ ] 2 Augmentin sirop 1ddp 2/j pdt 7j 80mg/kg/j\n\n- [ ] 3 Paracétamol\n\n- [ ] 4 AH : Tifen ou Deslor sirop. Si NRS : Primalan\n\n- [ ] 5 SSI"
+      "content": "- Nébulisation Adrénaline 1cc Dexa 2cc dans 3cc SSI 20min (jusqùà 3 séance)\n\nAérosol d'Adrénaline : 5mg/10ml NaCl 9% 15min\n\n- Si réponse => Traitement de sortie\n\n- [x] Traitement de sortie :\n\n- [ ] 1 CTC per os pdt 5j le matin :\n<10Kg=> Celestene 10gtt/kg max 400gtt\n>10Kg=> Solupred cp 5mg 1mg/kg/j max : 40mg\nPredo sirop : poids/3= ?ml 1/j\n\nATB si : Laryngite sévère ou fébrile\n\n- [ ] 2 Augmentin sirop 1ddp 2/j pdt 7j 80mg/kg/j\n\n- [ ] 3 Paracétamol\n\n- [ ] 4 AH : Tifen ou Deslor sirop. Si NRS : Primalan\n\n- [ ] 5 SSI"
     },
     {
       "page": 28,
@@ -122,7 +122,7 @@
     },
     {
       "page": 30,
-      "content": "# <font color=red>Maladie de Behçet</font>\n\n## Clinique\n\nAphtose récidivante bipolaire buccale, génitale, articulaire, cutanée ( Folliculite, érythème nouveaux )...\n\n- **Forme bénigne :**\nAphtes buccales +/- génitales douloureux mais sans atteinte systémique (oculaire, neurologique, vasculaire..), absence des signes infectieux ni AEG\n\n  ⇒ Pas besoin d'hospitalisation\n\n- **Forme modérée à sévère :**\nAphtes très nombreux, fièvre, AEG, arthrite, singes neurologiques, digestifs, vasculaire..\n\n  ⇒ Hospitalisation (médecine interne)"
+      "content": "# <font color=red>Maladie de Behçet</font>\n\n## Clinique\n\nAphtose récidivante bipolaire buccale, génitale, articulaire, cutanée ( Folliculite, érythème nouveaux )...\n\n- **Forme bénigne :**\nAphtes buccales +/- génitales douloureux mais sans atteinte systémique (oculaire, neurologique, vasculaire..), absence des signes infectieux ni AEG\n\n ⇒ Pas besoin d'hospitalisation\n\n- **Forme modérée à sévère :**\nAphtes très nombreux, fièvre, AEG, arthrite, singes neurologiques, digestifs, vasculaire..\n\n ⇒ Hospitalisation (médecine interne)"
     },
     {
       "page": 31,
@@ -134,11 +134,11 @@
     },
     {
       "page": 33,
-      "content": "# <font color=red>**Otite externe aigue**</font>\n\n## 🟫 Clinique :\n\n- Inflammation aiguë de l'oreille et plus précisément, de la peau du conduit auditif externe, bactérienne++\n- Douleur lors de traction du pavillon ou appui sur le tragus\n- Pour différencier OMA : Tympan touché + vertiges\n\n## ☑ Traitement :\n\n- Tympan perforé ou non visualisé :\n  1 Otofa gtt pdt 7j\n  Adulte : 5gtt 2/j\n  Enfant : 3gtt 2/j"
+      "content": "# <font color=red>**Otite externe aigue**</font>\n\n## 🟫 Clinique :\n\n- Inflammation aiguë de l'oreille et plus précisément, de la peau du conduit auditif externe, bactérienne++\n- Douleur lors de traction du pavillon ou appui sur le tragus\n- Pour différencier OMA : Tympan touché + vertiges\n\n## ☑ Traitement :\n\n- Tympan perforé ou non visualisé :\n 1 Otofa gtt pdt 7j\n Adulte : 5gtt 2/j\n Enfant : 3gtt 2/j"
     },
     {
       "page": 34,
-      "content": "- Tympan non perforé :\n- [1] Otocine dosette pdt 10j à partir 2ans\n  Adulte 1 dosette 2/j\n  Enfant 1½ dosette 2/j\n- Ou Polydexa sol 1_5gtt 2/j pdt 10j\n- [2] Doliprane cp 1g 1cp 2/j\n\n- Si complications : Augmentin per os pdt 10j\n- Si Otite externe maligne ou ID :\nCiprolon cp 500mg 1cp 2/j pdt 10j\n\n- NRS : 🤧 rare\nPolydexa gtt si Tympan fermé"
+      "content": "- Tympan non perforé :\n- [1] Otocine dosette pdt 10j à partir 2ans\n Adulte 1 dosette 2/j\n Enfant 1½ dosette 2/j\n- Ou Polydexa sol 1_5gtt 2/j pdt 10j\n- [2] Doliprane cp 1g 1cp 2/j\n\n- Si complications : Augmentin per os pdt 10j\n- Si Otite externe maligne ou ID :\nCiprolon cp 500mg 1cp 2/j pdt 10j\n\n- NRS : 🤧 rare\nPolydexa gtt si Tympan fermé"
     },
     {
       "page": 35,
@@ -146,7 +146,7 @@
     },
     {
       "page": 36,
-      "content": "- Tympan perforé, avec Otorrhée purulente = otite perforée = contre indique le traitement local antiseptique\n\n- Tympan avec phlyctènes (citrin ou hématique) = myringite aiguë ➔ Orientation ORL\n\n⊖ ATB locaux sont CI dans les OMA\n\n☑ Traitement :\n\n- Éviter l'entrée de l'eau pdt 3mois pour que la perforation se ferme..\n\n- Paracétamol 15mg/kg pour l'enfant\n\n- Augmentin 80mg/kg/j >30mois 50mg/kg/j<30  \nEnfant : sirop 1ddp 3/j pdt 10j  \nAdulte : st 1st 3/j\n\n- Si Résistance à l'Augmentin : Macrolide\n\nSi chronique :"
+      "content": "- Tympan perforé, avec Otorrhée purulente = otite perforée = contre indique le traitement local antiseptique\n\n- Tympan avec phlyctènes (citrin ou hématique) = myringite aiguë ➔ Orientation ORL\n\n⊖ ATB locaux sont CI dans les OMA\n\n☑ Traitement :\n\n- Éviter l'entrée de l'eau pdt 3mois pour que la perforation se ferme..\n\n- Paracétamol 15mg/kg pour l'enfant\n\n- Augmentin 80mg/kg/j >30mois 50mg/kg/j<30 \nEnfant : sirop 1ddp 3/j pdt 10j \nAdulte : st 1st 3/j\n\n- Si Résistance à l'Augmentin : Macrolide\n\nSi chronique :"
     },
     {
       "page": 37,
@@ -154,7 +154,7 @@
     },
     {
       "page": 38,
-      "content": "# <font color=red>Otomycose</font>\n\n## Clinique :\nAtteinte unilatérale, acouphènes, sensation d'oreille bouchée et démangeaisons intenses.\n\n## ✅ Traitement :\n- Éviter le contact avec l'eau\n- Si récidive: Rechercher une ID (Diabète..)\n\n☑️ 1 Betadine sol ou H2O2 15min avant toute app du traitement:\n\n☑️ 2 Pevaryl lait gtt 3_5gtt 3/j pdt 15j  \nOu Auricularum gtt 3gtt 3/j pdt 15j  \nOu Exoderil crème 1app 2/j pdt 14j\n\n☑️ 3 Doliprane cp 1g 1cp 2/j\n\n☑️ 4 Telfast cp 120mg 1cp le soir si prurit"
+      "content": "# <font color=red>Otomycose</font>\n\n## Clinique :\nAtteinte unilatérale, acouphènes, sensation d'oreille bouchée et démangeaisons intenses.\n\n## ✅ Traitement :\n- Éviter le contact avec l'eau\n- Si récidive: Rechercher une ID (Diabète..)\n\n☑️ 1 Betadine sol ou H2O2 15min avant toute app du traitement:\n\n☑️ 2 Pevaryl lait gtt 3_5gtt 3/j pdt 15j \nOu Auricularum gtt 3gtt 3/j pdt 15j \nOu Exoderil crème 1app 2/j pdt 14j\n\n☑️ 3 Doliprane cp 1g 1cp 2/j\n\n☑️ 4 Telfast cp 120mg 1cp le soir si prurit"
     },
     {
       "page": 39,
@@ -162,7 +162,7 @@
     },
     {
       "page": 40,
-      "content": "# <font color=red> Périchondrite </font>\n\n## Clinique:\nInflammation du pavillon d'oreille suite à un traumatisme:\n- Douleur du pavillon +++\n- Rougeur respectant le lobule\n- Gonflement diffus efface progressivement les reliefs\n\n## ✅ Traitement:\n- Pas de douche ni couverture, pas de CTC ni pression\n- [1] Ciprolan cp 500mg 1cp 2/j pdt 10j  \n  ou Omnicef gel 300mg 1gel 2/j pdt 7j\n- [2] Antiseptique local\n- [3] Dolyc cp 1g 1cp 3/j"
+      "content": "# <font color=red> Périchondrite </font>\n\n## Clinique:\nInflammation du pavillon d'oreille suite à un traumatisme:\n- Douleur du pavillon +++\n- Rougeur respectant le lobule\n- Gonflement diffus efface progressivement les reliefs\n\n## ✅ Traitement:\n- Pas de douche ni couverture, pas de CTC ni pression\n- [1] Ciprolan cp 500mg 1cp 2/j pdt 10j \n ou Omnicef gel 300mg 1gel 2/j pdt 7j\n- [2] Antiseptique local\n- [3] Dolyc cp 1g 1cp 3/j"
     },
     {
       "page": 41,
@@ -190,7 +190,7 @@
     },
     {
       "page": 47,
-      "content": "# <font color=red>Rhinopharyngite</font>\n\n## Clinique :\nInfection virale, écoulement clair puis purulent et obstruction nasale, éternuements, perte de l'odorat et de goût, gorge rouge, +/- fièvre +/- toux.\n\n- [x] Traitement : symptomatique\n  - [1] Désobstruction nasale 4_6 installations/j SSI\n  - [2] Stérimer/Physiomer\n  - [3] Paracétamol 60mg/kg/j\n\n- ■ Pas ATB : sauf si aggravation des symptômes ou fièvre ↑\n- ■ Pas : CTC/AINS/Antitussifs"
+      "content": "# <font color=red>Rhinopharyngite</font>\n\n## Clinique :\nInfection virale, écoulement clair puis purulent et obstruction nasale, éternuements, perte de l'odorat et de goût, gorge rouge, +/- fièvre +/- toux.\n\n- [x] Traitement : symptomatique\n - [1] Désobstruction nasale 4_6 installations/j SSI\n - [2] Stérimer/Physiomer\n - [3] Paracétamol 60mg/kg/j\n\n- ■ Pas ATB : sauf si aggravation des symptômes ou fièvre ↑\n- ■ Pas : CTC/AINS/Antitussifs"
     },
     {
       "page": 48,

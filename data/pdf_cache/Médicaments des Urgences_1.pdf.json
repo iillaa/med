@@ -38,7 +38,7 @@
     },
     {
       "page": 9,
-      "content": "# Atropine\n\nAntagoniste compétitif de l'Ach\n\nEffet: tachycardisant, mydriatique, antispasmodique, antisécrétoire (salivaire, bronchique, gastrique, sudoripare)\n\n| 0.25mg           | 1mg/1ml |\n| ---------------- | ------- |\n| 10-15u/kg en IVL | 0.5min  |\n\n# Indications:\n\n- BAV\n- Bradycardie sinusale: 0.5-1mg en IVD\n- Douleur aiguë spasmodique (colique néphrétique, biliaire, digestive)\n- Intoxication par les anticholinestérasiques organophosphorés: 1-2mg/5mn en IVD"
+      "content": "# Atropine\n\nAntagoniste compétitif de l'Ach\n\nEffet: tachycardisant, mydriatique, antispasmodique, antisécrétoire (salivaire, bronchique, gastrique, sudoripare)\n\n| 0.25mg | 1mg/1ml |\n| ---------------- | ------- |\n| 10-15u/kg en IVL | 0.5min |\n\n# Indications:\n\n- BAV\n- Bradycardie sinusale: 0.5-1mg en IVD\n- Douleur aiguë spasmodique (colique néphrétique, biliaire, digestive)\n- Intoxication par les anticholinestérasiques organophosphorés: 1-2mg/5mn en IVD"
     },
     {
       "page": 10,
@@ -82,7 +82,7 @@
     },
     {
       "page": 20,
-      "content": "Flumazenil\n# Anexate\n\n- Amp 0.5mg/5ml et 1mg/1ml\n- 0.2-0.3/min en IV jusqu’à au réveil, max : 2mg\n- Relais au PSE 0.1-0.4mg/h\n\n# Indications :\n\n- Antidote dans les surdosages aux BZD\n\n# Contre indications :\n\n- Épilepsie\n- Intoxication polymédicamenteuse"
+      "content": "Flumazenil\n# Anexate\n\n- Amp 0.5mg/5ml et 1mg/1ml\n- 0.2-0.3/min en IV jusqùà au réveil, max : 2mg\n- Relais au PSE 0.1-0.4mg/h\n\n# Indications :\n\n- Antidote dans les surdosages aux BZD\n\n# Contre indications :\n\n- Épilepsie\n- Intoxication polymédicamenteuse"
     },
     {
       "page": 21,
@@ -138,7 +138,7 @@
     },
     {
       "page": 34,
-      "content": "Mopral\n\n# Omeprazole\n\n- 40mg, en perfusion IV\n- Si hémorragie active surtout d'origine ulcéreuse: bolus 80mg en IV puis 200mg/24h à la SAP\n- 5amp (200mg) ramenées jusqu'à 50cc SG5% en PSE\n\nDébit: 2cc/h (8mg/h)\n\n# Enfant\n\n- 1-2mg/kg/j diluée dans 250cc de SG5% ou SSI9%\n\n# Adulte\n\n- 1amp\n\n# Enfant\n\n- 1/2 amp"
+      "content": "Mopral\n\n# Omeprazole\n\n- 40mg, en perfusion IV\n- Si hémorragie active surtout d'origine ulcéreuse: bolus 80mg en IV puis 200mg/24h à la SAP\n- 5amp (200mg) ramenées jusqùà 50cc SG5% en PSE\n\nDébit: 2cc/h (8mg/h)\n\n# Enfant\n\n- 1-2mg/kg/j diluée dans 250cc de SG5% ou SSI9%\n\n# Adulte\n\n- 1amp\n\n# Enfant\n\n- 1/2 amp"
     },
     {
       "page": 35,
@@ -146,11 +146,11 @@
     },
     {
       "page": 36,
-      "content": "# Morphine\n\n- Amp 10mg/1ml\n- 0.1mg/kg S/c ou IV\n- Si insuffisant à compléter par bolus de 1mg/5 à 10mn jusqu’à l’amélioration\n\n# Indications :\n\n- Douleur résistante aux autres antalgiques\n\n# Contre indications :\n\n- TC grave en l’absence de ventilation contrôlée\n- IHC sévère"
+      "content": "# Morphine\n\n- Amp 10mg/1ml\n- 0.1mg/kg S/c ou IV\n- Si insuffisant à compléter par bolus de 1mg/5 à 10mn jusqùà l’amélioration\n\n# Indications :\n\n- Douleur résistante aux autres antalgiques\n\n# Contre indications :\n\n- TC grave en l’absence de ventilation contrôlée\n- IHC sévère"
     },
     {
       "page": 37,
-      "content": "# Noradrénaline\n\n| Amp      | 8mg/4ml        |\n| -------- | -------------- |\n| Dosage   | 0.5-3 u/kg/min |\n| Dilution | dans le SG     |\n\n# Indications :\n\n- États de choc"
+      "content": "# Noradrénaline\n\n| Amp | 8mg/4ml |\n| -------- | -------------- |\n| Dosage | 0.5-3 u/kg/min |\n| Dilution | dans le SG |\n\n# Indications :\n\n- États de choc"
     },
     {
       "page": 38,
@@ -166,7 +166,7 @@
     },
     {
       "page": 41,
-      "content": "# Propranolol\n\n# Alvocardyl\n\nAmp 5mg/5ml\n\n- 0.5-1mg en IVD chaque 2min jusqu’à effet, max : 10mg\n- Dilution dans SG ou physiologique\n- Injection trop rapide risque de bradycardie\n\n# Indications :\n\n- TDR supraventriculaire\n\n# Contre indications :\n\n- IC\n- BAV\n- Asthme\n- Maladie de l’oreillette\n- En association avec le Cordarone"
+      "content": "# Propranolol\n\n# Alvocardyl\n\nAmp 5mg/5ml\n\n- 0.5-1mg en IVD chaque 2min jusqùà effet, max : 10mg\n- Dilution dans SG ou physiologique\n- Injection trop rapide risque de bradycardie\n\n# Indications :\n\n- TDR supraventriculaire\n\n# Contre indications :\n\n- IC\n- BAV\n- Asthme\n- Maladie de l’oreillette\n- En association avec le Cordarone"
     },
     {
       "page": 42,

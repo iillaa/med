@@ -50,7 +50,7 @@
     },
     {
       "page": 12,
-      "content": "|                    | Enfant/Adulte |                                    |\n| ------------------ | ------------- | ---------------------------------- |\n| Activité           | Score         | Description                        |\n| Ouverture des yeux | 4             | Spontanée                          |\n|                    | 3             | A la demande                       |\n|                    | 2             | A la douleur                       |\n|                    | 1             | Aucune                             |\n| Réponse verbale    | 5             | Orientée                           |\n|                    | 4             | Confuse                            |\n|                    | 3             | Paroles inappropriées              |\n|                    | 2             | Sons incompréhensibles             |\n|                    | 1             | Aucune                             |\n|                    | 6             | Obéit aux commandes                |\n|                    | 5             | Localise à la douleur              |\n| Réponse motrice    | 4             | Retrait a la douleur               |\n|                    | 3             | Flexion anormale (décortication)   |\n|                    | 2             | Extension anormale (décérébration) |\n|                    | 1             | Aucune                             |"
+      "content": "| | Enfant/Adulte | |\n| ------------------ | ------------- | ---------------------------------- |\n| Activité | Score | Description |\n| Ouverture des yeux | 4 | Spontanée |\n| | 3 | A la demande |\n| | 2 | A la douleur |\n| | 1 | Aucune |\n| Réponse verbale | 5 | Orientée |\n| | 4 | Confuse |\n| | 3 | Paroles inappropriées |\n| | 2 | Sons incompréhensibles |\n| | 1 | Aucune |\n| | 6 | Obéit aux commandes |\n| | 5 | Localise à la douleur |\n| Réponse motrice | 4 | Retrait a la douleur |\n| | 3 | Flexion anormale (décortication) |\n| | 2 | Extension anormale (décérébration) |\n| | 1 | Aucune |"
     },
     {
       "page": 13,
@@ -102,11 +102,11 @@
     },
     {
       "page": 25,
-      "content": "# Fourmillements\n\n# Clinique:\n\nRechercher une prise des médicaments\n\nÉliminer un AVC, syndrome de canal carpien, arthrose ou hernie cervicale.\n\nCervicobrachialgies => Radio du rachis cervicale\n\n- Prise de TA\n\n# Bilan:\n\n- FNS\n- Gly à jeûn/HBA1C\n- Lipidique\n- Rénal\n- Ionogramme\n- TSH"
+      "content": "# Fourmillements\n\n# Clinique:\n\nRechercher une prise des médicaments\n\nÉliminer un AVC, syndrome de canal carpien, arthrose ou hernie cervicale.\n\nCervicobrachialgies => Radio du rachis cervicale\n\n- Prise de TA\n\n# Bilan:\n\n- FNS\n- Gly à jeûn/HBAlC\n- Lipidique\n- Rénal\n- Ionogramme\n- TSH"
     },
     {
       "page": 26,
-      "content": "# Current Page\n\n- Vit D\n- B12/B9\n- Mg\n- Ca\n- +/- Électrophorèse des protéines: Myélome\n- ENMG\n\n# CAT:\n\n- Neurovit B1B6 cp 2cp/j pdt 10j + Mg\n- Ou Polyvitamines"
+      "content": "# Current Page\n\n- Vit D\n- B12/B9\n- Mg\n- Ca\n- +/- Électrophorèse des protéines: Myélome\n- ENMG\n\n# CAT:\n\n- Neurovit BlB6 cp 2cp/j pdt 10j + Mg\n- Ou Polyvitamines"
     },
     {
       "page": 27,
@@ -138,7 +138,7 @@
     },
     {
       "page": 34,
-      "content": "# Neuropathie diabétique périphérique\n\n- Diagnostic clinique ++\n- Troubles sensitifs \"en chaussettes\" avec ↘️ des ROTS\n- ENMG\n- Echodoppler (éliminer une TVP)\n\n# CAT:\n\n- Confirmer le diagnostic\n- Optimiser le contrôle glycémique\n- Traiter les douleurs\n- Neurovit B1B6B12\n- Surveiller pour prévenir les complications"
+      "content": "# Neuropathie diabétique périphérique\n\n- Diagnostic clinique ++\n- Troubles sensitifs \"en chaussettes\" avec ↘️ des ROTS\n- ENMG\n- Echodoppler (éliminer une TVP)\n\n# CAT:\n\n- Confirmer le diagnostic\n- Optimiser le contrôle glycémique\n- Traiter les douleurs\n- Neurovit BlB6B12\n- Surveiller pour prévenir les complications"
     },
     {
       "page": 35,
@@ -150,7 +150,7 @@
     },
     {
       "page": 37,
-      "content": "# En urgence :\n\n- TA/T°/Dextro\n- Solumedrol 40mg en IVD Ou IM\n- Ou HHC 100mg en IVD\n- Ou Dexa 12mg en IM\n\n# ✅️Traitement de sortie :\n\n1. Solupred cp 20mg le matin pdt 10j 1mg/kg/j\n- 2cp/j pdt 5j puis 1cp/j pdt 5j\n2. Dacryosérum gtt 1gtt 2/j\n3. Siccafluid gtt 1gtt 3_4/j\n4. Neurovit B1B6 1cp 2/j\n5. Pansement oculaire 1/j + massage"
+      "content": "# En urgence :\n\n- TA/T°/Dextro\n- Solumedrol 40mg en IVD Ou IM\n- Ou HHC 100mg en IVD\n- Ou Dexa 12mg en IM\n\n# ✅️Traitement de sortie :\n\n1. Solupred cp 20mg le matin pdt 10j 1mg/kg/j\n- 2cp/j pdt 5j puis 1cp/j pdt 5j\n2. Dacryosérum gtt 1gtt 2/j\n3. Siccafluid gtt 1gtt 3_4/j\n4. Neurovit BlB6 1cp 2/j\n5. Pansement oculaire 1/j + massage"
     },
     {
       "page": 38,
@@ -170,7 +170,7 @@
     },
     {
       "page": 42,
-      "content": "# CAT:\n\n- O2/Dextro/TA/T°\n- Tanganil 1amp 500mg IVD ou en perfusion\n- 1amp de 500mg en 200cc de SG5% ou SSI en IVL 15-30min\n- 2amp/24h\n- Primperan 1amp diluée en IV ou IM\n\n- TA↗️ risque AVC => TDM\n- T° pas de foyer => TDM\n- Céphalée + => TDM\n\n# Bilan :\n\n- FNS/Gly/HbA1C\n- TSH/T4\n- Urée/Créat\n- Hépatique\n- CT/TG"
+      "content": "# CAT:\n\n- O2/Dextro/TA/T°\n- Tanganil 1amp 500mg IVD ou en perfusion\n- 1amp de 500mg en 200cc de SG5% ou SSI en IVL 15-30min\n- 2amp/24h\n- Primperan 1amp diluée en IV ou IM\n\n- TA↗️ risque AVC => TDM\n- T° pas de foyer => TDM\n- Céphalée + => TDM\n\n# Bilan :\n\n- FNS/Gly/HbAlC\n- TSH/T4\n- Urée/Créat\n- Hépatique\n- CT/TG"
     },
     {
       "page": 43,
