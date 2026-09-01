@@ -57,9 +57,18 @@ graph TD
 - **SERP Listing Shell Rejection**: Automatically discards empty search engine listing pages (`SearchResults?`, `search?q=`).
 - **Doctor Link Input**: Custom URL input field in Admin Lab (`#single-custom-urls`) that processes pasted links via **Jina Reader** (`r.jina.ai`) into clean markdown.
 
-### 6. 🔁 Self-Correcting 8-Layer Medical Validator (`lib/medical-validator.js`)
+### 6. 🧠 Semantic Vector RAG (`lib/semantic-rag.js`)
+- **Google `gemini-embedding-2` (3,072 dimensions)**: High-density vector semantic search comparing clinical subject meaning with PDF textbook passages.
+- **Local Disk Cache (`data/pdf_embeddings_cache.json`)**: Computed vectors are saved permanently for instant, zero-cost offline re-evaluations.
+- **Pure JavaScript Cosine Similarity**: Fast mathematical vector comparison without native C++ compilation.
+
+### 7. 📐 Native Gemini Structured Outputs (`lib/gemini-schemas.js`)
+- **OpenAPI Schema Constraints (`responseSchema`)**: Mathematically locks JSON tokens for Master CATs and Sub-CATs directly at Google AI Studio sampling level.
+
+### 8. 🔁 Self-Correcting 8-Layer Medical Validator & Pharma Double-Check (`lib/medical-validator.js`)
 - **Deterministic JavaScript & JSON Rules**: The AI never grades its own work. Codebase rules evaluate dosage limits, contraindications, and schema.
 - **Unit Typo Interceptor**: Detects lethal typing errors (e.g. `500g` or `1000g` of oral medications).
+- **Pharma Double-Check Loop**: Detects unreferenced DCIs and automatically prompts Gemini to verify or substitute standard DCIs on Attempt 2.
 - **Automated Feedback Loop**: If validation fails (e.g. Paracetamol > 4g/day or Aspirin in pediatric varicella), the exact rule error is injected into the next prompt for automatic self-correction (up to 3 attempts).
 
 ---

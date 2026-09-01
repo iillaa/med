@@ -96,16 +96,28 @@ Pour maintenir l'APK sous la barre des 50 Mo tout en conservant une lisibilité 
 
 ---
 
-## 🤖 5. Moteur de Simulation RAG & Score de Densité
+## 🤖 5. Moteur RAG Sémantique Vectoriel (`gemini-embedding-2`)
 
-Avant de générer une fiche clinique, le système évalue la qualité des sources disponibles via `/api/admin/rag-simulate` :
-- **Extraction des tokens médicaux** : Identification des DCIs, symptômes, examens biologiques.
-- **Calcul de similarité cosinus & densité** : Score d'adéquation entre la pathologie demandée et les passages extraits des PDFs.
-- **Seuil de confiance** : Si la densité d'information est insuffisante (< 65%), le système alerte l'administrateur pour ajouter des sources complémentaires dans le staging.
+Dr. CAT V3.6 intègre une recherche vectorielle sémantique de haute précision :
+- **Modèle d'Embedding Google `gemini-embedding-2`** : Calcul de vecteurs denses en 3 072 dimensions pour capturer les nuances cliniques (ex: relier *"douleur thoracique transfixiante"* à *"Dissection Aortique"*).
+- **Cache Disque Permanent (`data/pdf_embeddings_cache.json`)** : Les passages vectorisés sont stockés localement. Les recherches ultérieures sont instantanées (0 ms) et n'effectuent aucun appel réseau.
+- **Calcul de Similarité Cosinus Pure JavaScript** : Évite toute dépendance C++ lourde incompatible avec l'environnement Termux/Android.
+- **Bonus de Priorité Staging & Slices (+50 points)** : Les fiches découpées ou éditées manuellement par le médecin reçoivent automatiquement un bonus de 50 points de pertinence dans `pdf-extractor.js`.
+- **Filet de Sécurité Lexical** : Repli transparent instantané sur la recherche textuelle en cas de travail hors-ligne.
+
+---
+
+## 🧹 6. Nettoyeur & Synchroniseur de Masse (`scripts/sync_pdf_index.js`)
+
+Le script `scripts/sync_pdf_index.js` est intégré au cycle `npm run build` :
+- Nettoie en profondeur les 78 manuels de médecine (2 702 pages indexées).
+- Répare les coupures de mots en fin de ligne (`traite-\nment` $\rightarrow$ `traitement`).
+- Élimine les caractères de contrôle non imprimables et supprime les artéfacts OCR sur plus de 1 027 pages.
+- Garantit la parité stricte entre `pdf_index.json` (racine) et `public/data/pdf_index.json`.
 
 ---
 
 ## 🔗 Liens & Documents Associés
-- 🤖 [Moteur de Génération LLM V3.5](file:///data/data/com.termux/files/home/med/docs/01-architecture/llm-generation-engine.md)
+- 🤖 [Moteur de Génération LLM V3.6](file:///data/data/com.termux/files/home/med/docs/01-architecture/llm-generation-engine.md)
 - ✂️ [Guide Pratique du Slicing PDF](file:///data/data/com.termux/files/home/med/docs/02-guides/slicing-master-pdfs.md)
 - 📐 [Schéma de la Base de Données CATs](file:///data/data/com.termux/files/home/med/docs/03-reference/schema-cats-db.md)
