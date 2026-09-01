@@ -145,3 +145,16 @@ export function safeParseJSON(str, fallback = null) {
   }
 }
 
+export function safeGetJSON(key, fallback = null) {
+  const raw = safeGetItem(key);
+  return safeParseJSON(raw, fallback);
+}
+
+export function safeSetJSON(key, obj) {
+  try {
+    return safeSetItem(key, JSON.stringify(obj));
+  } catch (_) {
+    return false;
+  }
+}
+

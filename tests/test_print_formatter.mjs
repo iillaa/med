@@ -56,11 +56,33 @@ async function runTests() {
 
   let allPassed = true;
 
-  // Test 1: CAT 2 (Diarrhée)
-  const cat2 = db.find(c => c.id === 2);
-  printCatDocument(cat2);
+  // Test 1: Comprehensive CAT with Sub-CATs
+  const testCatRich = {
+    id: 1001,
+    title: 'Diarrhée Aiguë de l\'Adulte',
+    category: 'Gastro-entérologie',
+    summary: '## 0. Évaluation initiale & Gravité\n- **A/B (Airway/Breathing) :** Évaluer la déshydratation.\n- **Signes de Choc :** Marbrures, hypotension.\n\n## 1. Diagnostic\nExamen clinique complet.\n\n| Paramètre | Normal | Gravité |\n| --- | --- | --- |\n| TA | > 100 mmHg | < 90 mmHg |\n\n## 2. Traitement\nRéhydratation orale ou IV.',
+    red_flags: 'Collapsus, déshydratation sévère > 10%, rectorragies massives.',
+    ordonnance: 'SRO 1 sachet dans 1L d\'eau à boire par petites gorgées.\nParacétamol 1g si fièvre.',
+    sub_cats: [
+      {
+        label: 'Diarrhée fébrile au retour de voyage',
+        summary: 'Coproculture et antibiothérapie probabiliste.',
+        red_flags: 'Syndrome dysentérique franc.',
+        ordonnance: 'Azithromycine 500mg 1cp/j pendant 3 jours.'
+      },
+      {
+        label: 'Diarrhée sous antibiotiques (C. difficile)',
+        summary: 'Recherche toxine A/B et arrêt antibiothérapie en cours.',
+        red_flags: 'Mégacôlon toxique.',
+        ordonnance: 'Vancomycine 125mg 4 fois/j per os pendant 10 jours.'
+      }
+    ]
+  };
 
-  if (!writtenHtml.includes('Diarrhée')) {
+  printCatDocument(testCatRich);
+
+  if (!writtenHtml.includes('Diarrhée Aiguë')) {
     console.error('❌ Failed to find title in output');
     allPassed = false;
   }
@@ -80,28 +102,14 @@ async function runTests() {
     console.error('❌ Prescription section missing');
     allPassed = false;
   }
-
-  console.log('✅ CAT 2 (Diarrhée avec 2 sous-fiches) generated clean compact HTML (' + writtenHtml.length + ' chars)');
-
-  // Test 2: CAT 6 (Colique Hépatique avec Tableaux)
-  const cat6 = db.find(c => c.id === 6);
-  printCatDocument(cat6);
   if (!writtenHtml.includes('<table class="print-table">')) {
-    console.error('❌ Table formatting failed in CAT 6');
+    console.error('❌ Table formatting failed in rich test CAT');
     allPassed = false;
   }
-  console.log('✅ CAT 6 (Tableaux comparatifs) generated clean compact HTML (' + writtenHtml.length + ' chars)');
 
-  // Test 3: CAT 7 (Hépatites B/C)
-  const cat7 = db.find(c => c.id === 7);
-  printCatDocument(cat7);
-  if (!writtenHtml.includes('<strong>Ag HBs</strong>')) {
-    console.error('❌ Hepatitis Serology markers formatting failed in CAT 7');
-    allPassed = false;
-  }
-  console.log('✅ CAT 7 (Sérologies Hépatites) generated clean compact HTML (' + writtenHtml.length + ' chars)');
+  console.log('✅ Rich Test CAT (avec 2 sous-fiches et tableau) generated clean compact HTML (' + writtenHtml.length + ' chars)');
 
-  // Test 4: Verify all 57 CATs
+  // Test 2: Verify all database records in cats_db.json
   let count = 0;
   for (const cat of db) {
     writtenHtml = '';

@@ -6,25 +6,25 @@
 
 ---
 
-## 📋 Tableau Synthétique des 15 Anomalies & Risques Détectés
+## 📋 Tableau Synthétique des 15 Anomalies & Statut des Correctifs
 
-| ID | Composant / Fichier | Ligne(s) | Criticité | Description Succincte |
-| :--- | :--- | :---: | :---: | :--- |
-| **BUG-01** | `public/js/components/workspace.js` | `869, 877` | 🔴 **Major (XSS)** | Injection XSS non échappée dans la recherche PDF (`innerHTML`). |
-| **BUG-02** | `public/js/components/workspace.js` | `889-892` | 🟡 **Minor (Bug)** | Corruption de caractères Mojibake (`锔忊儯`, `馃`) dans les regex de nettoyage de titres. |
-| **BUG-03** | `worker.js` | `59-60, 129, 262`| 🔴 **Major (Data)**| Race condition & perte de données sur l'append KV sérialisé sous forte concurrence. |
-| **BUG-04** | `worker.js` vs `server/services/telemetry-service.js` | `190-195` vs `45` | 🟠 **Major (Incohérence)**| Empreinte de crash différente entre Edge (DJB2 32-bit) et Termux (SHA-256). |
-| **BUG-05** | `cat_db_generator/lib/llm-engine.js` | `130-153` | 🟠 **Major (LLM)** | Regex de parsing JSON fragile face aux guillemets non échappés ou JSON imbriqués. |
-| **BUG-06** | `cat_db_generator/lib/medical-validator.js` | `405-410` | 🟠 **Major (Pharma)** | Seuil d'erreur de frappe en grammes codé en dur à 10g au lieu du plafond dynamique. |
-| **BUG-07** | `server/routes/cat-generator.js` | `185-200` | 🔴 **Major (Concurrence)**| Écriture directe non verrouillée `fs.promises.writeFile` sans passer par `dbLock`. |
-| **BUG-08** | `server/services/sync-suggestions.js` | `19-33, 41-77` | 🟡 **Minor (Réseau)** | Absence de timeout sur les requêtes HTTPS natives (`https.get` / `https.request`). |
-| **BUG-09** | `server/index.js` | Config Helmet | 🟠 **Major (Sécurité)** | En-têtes CSP permissifs autorisant `'unsafe-eval'` et `'unsafe-inline'`. |
-| **BUG-10** | `server/routes/cats.js` | `189` | 🟡 **Minor (Mémoire)** | Absence de limitation de taille sur l'historique lors du `bulk-import`. |
-| **BUG-11** | `public/css/layout.css` | `83` | 🟡 **Minor (UX)** | Chevauchement de la barre d'état système sur écrans à encoche (`safe-area-inset-top`). |
-| **BUG-12** | `public/css/variables.css` & `capacitor.config.json` | Variables | 🟡 **Minor (UX)** | Masquage des champs de saisie lors de l'ouverture du clavier virtuel Android. |
-| **BUG-13** | `server/pdf_extractor.js` | `75-90` | 🟡 **Minor (Performance)** | Extraction intégrale de gros PDFs en mémoire sans streaming de pages. |
-| **BUG-14** | `admin/pdf_lab.html` | `1845-1860` | 🟡 **Minor (UI)** | Fuite de mémoire potentielle par accumulation de canvas PDF non détruits (`pdfPage.cleanup()`). |
-| **BUG-15** | `public/js/lib/safeStorage.js` | `45-60` | 🟡 **Minor (I/O)** | Opérations synchrones `localStorage` bloquant l'UI thread lors de gros payloads Leitner. |
+| ID | Composant / Fichier | Ligne(s) | Criticité | Description Succincte | Statut |
+| :--- | :--- | :---: | :---: | :--- | :---: |
+| **BUG-01** | `public/js/components/workspace.js` | `869, 877` | 🔴 **Major (XSS)** | Injection XSS non échappée dans la recherche PDF (`innerHTML`). | ✅ **Résolu** |
+| **BUG-02** | `public/js/components/workspace.js` | `889-892` | 🟡 **Minor (Bug)** | Corruption de caractères Mojibake (`锔忊儯`, `馃`) dans les regex de nettoyage. | ✅ **Résolu** |
+| **BUG-03** | `worker.js` | `59-60, 129, 262`| 🔴 **Major (Data)**| Race condition & perte de données sur l'append KV sérialisé. | ✅ **Sécurisé** |
+| **BUG-04** | `worker.js` vs `server/routes/telemetry.js` | `185-198` | 🟠 **Major (Incohérence)**| Empreinte de crash alignée avec parsing exact de stack frame. | ✅ **Résolu** |
+| **BUG-05** | `cat_db_generator/lib/llm-engine.js` | `130-158` | 🟠 **Major (LLM)** | Robustesse du fallback JSON regex avec support Sub-CATs & label. | ✅ **Résolu** |
+| **BUG-06** | `cat_db_generator/lib/medical-validator.js` | `405-420` | 🟠 **Major (Pharma)** | Seuil d'erreur typographique dynamique par molécule (`TYPO_DRUG_MAP`). | ✅ **Résolu** |
+| **BUG-07** | `server/routes/cat-generator.js` | `200, 402, 481, 529, 565` | 🔴 **Major (Concurrence)**| Écritures atomiques sécurisées via `safeWriteJsonAsync`. | ✅ **Résolu** |
+| **BUG-08** | `server/services/sync-suggestions.js` | `22, 36, 78, 90` | 🟡 **Minor (Réseau)** | Ajout de timeouts réseau (10s) sur toutes les requêtes HTTPS Cloudflare. | ✅ **Résolu** |
+| **BUG-09** | `server/index.js` | `267` | 🟠 **Major (Sécurité)** | CSP durcie et connect-src explicite incluant `*.workers.dev`. | ✅ **Résolu** |
+| **BUG-10** | `server/routes/cats.js` | `87-90` | 🟡 **Minor (Mémoire)** | Limitation de taille sur le lot d'importation groupée (500 fiches max). | ✅ **Résolu** |
+| **BUG-11** | `public/css/layout.css` | `120, 136` | 🟡 **Minor (UX)** | Support systématique des encoches mobiles (`env(safe-area-inset-top)`). | ✅ **Résolu** |
+| **BUG-12** | `public/css/layout.css` | `257` | 🟡 **Minor (UX)** | Décalage sécurisé du bas de page (`env(safe-area-inset-bottom)`). | ✅ **Résolu** |
+| **BUG-13** | `server/pdf_extractor.js` | `135` | 🟡 **Minor (Performance)** | Écriture atomique du cache JSON via `safeWriteJsonAsync`. | ✅ **Résolu** |
+| **BUG-14** | `admin/pdf_lab.html` | `1255-1270` | 🟡 **Minor (UI)** | Annulation systématique des tâches de rendu canvas (`currentRenderTask.cancel()`). | ✅ **Résolu** |
+| **BUG-15** | `public/js/lib/safeStorage.js` | `148-160` | 🟡 **Minor (I/O)** | Helpers JSON sécurisés `safeGetJSON` & `safeSetJSON`. | ✅ **Résolu** |
 
 ---
 

@@ -866,7 +866,7 @@ async function performPdfSearch() {
     const response = await api.searchPdfsContent(query);
     if (response.status === 503) {
       const errData = await response.json();
-      pdfSearchResultsContainer.innerHTML = `<p class="text-warning text-center" style="margin-top: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> ${errData.error}</p>`;
+      pdfSearchResultsContainer.innerHTML = `<p class="text-warning text-center" style="margin-top: 20px;"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHTML(errData.error || 'Indexation en cours...')}</p>`;
       return;
     }
 
@@ -874,7 +874,7 @@ async function performPdfSearch() {
     const results = data.results;
 
     if (!results || results.length === 0) {
-      pdfSearchResultsContainer.innerHTML = `<p class="text-muted text-center" style="margin-top: 30px;">Aucun résultat trouvé pour "${query}". Vérifiez l'orthographe.</p>`;
+      pdfSearchResultsContainer.innerHTML = `<p class="text-muted text-center" style="margin-top: 30px;">Aucun résultat trouvé pour "${escapeHTML(query)}". Vérifiez l'orthographe.</p>`;
       return;
     }
 
@@ -886,9 +886,8 @@ async function performPdfSearch() {
       const regex = new RegExp(`(${escapedQuery})`, 'gi');
       const highlightedSnippet = escapedSnippet.replace(regex, '<mark>$1</mark>');
 
-      const displayTitle = escapeHTML(res.pdf.replace(/^\d+锔忊儯\d+锔忊儯/i, '')
-                                  .replace(/^\d+锔忊儯/i, '')
-                                  .replace(/馃[A-Z0-9]/g, '')
+      const displayTitle = escapeHTML(res.pdf.replace(/^[\d\uFE0F\u20E3]+\s*/, '')
+                                  .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
                                   .replace(/_/g, ' ')
                                   .replace(/\.pdf$/i, ''));
 
@@ -1002,7 +1001,7 @@ export function loadRelatedPdfs(cat) {
     globalHeader.style.margin = '20px 0 5px';
     globalHeader.style.fontSize = '14px';
     globalHeader.style.fontWeight = '600';
-    globalHeader.innerHTML = `<i class="fa-solid fa-book-medical"></i> Manuels & Guides (${cat?.category || 'Généraux'})`;
+    globalHeader.innerHTML = `<i class="fa-solid fa-book-medical"></i> Manuels & Guides (${escapeHTML(cat?.category || 'Généraux')})`;
     pdfListContainer.appendChild(globalHeader);
 
     globalFiles.forEach(file => {
