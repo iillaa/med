@@ -167,9 +167,14 @@ export function initSidebar(onSelectCat, onFilterTriggered, onRefresh) {
   if (tabCats) {
     tabCats.addEventListener('click', () => {
       setSidebarTabActive(tabCats);
-      const welcome = document.getElementById('welcome-screen');
-      if (welcome && (!state.activeCat || welcome.style.display !== 'none')) {
-        // Show dashboard or active CAT
+      if (state.activeCat) {
+        onSelectCat(state.activeCat);
+      } else {
+        const brandLogo = document.getElementById('brand-logo');
+        if (brandLogo) brandLogo.click();
+      }
+      if (window.innerWidth <= 850 && sidebar) {
+        sidebar.classList.remove('open');
       }
     });
   }

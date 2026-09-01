@@ -313,8 +313,11 @@ export function initLibraryScreen(onReturnDashboard) {
     clearBtn.onclick = () => { resultsSection.style.display = 'none'; };
   }
 
+  let activeSearchRequestId = 0;
+
   async function executeLibrarySearch(query) {
     if (!query) return;
+    const reqId = ++activeSearchRequestId;
     if (resultsSection) resultsSection.style.display = 'block';
     if (loading) loading.style.display = 'block';
     if (resultsContainer) resultsContainer.innerHTML = '';
@@ -323,12 +326,14 @@ export function initLibraryScreen(onReturnDashboard) {
 
     try {
       const response = await api.searchPdfsContent(query);
+      if (reqId !== activeSearchRequestId) return; // Discard stale response
       if (loading) loading.style.display = 'none';
       if (!response.ok) {
         if (resultsContainer) resultsContainer.innerHTML = `<p class="text-warning" style="padding: 12px; text-align: center;">Service de recherche temporairement indisponible.</p>`;
         return;
       }
       const data = await response.json();
+      if (reqId !== activeSearchRequestId) return;
       currentSearchResults = data.results || [];
       if (resultsCount) resultsCount.textContent = `${currentSearchResults.length} passage(s) trouvé(s) pour "${query}"`;
 
