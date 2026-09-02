@@ -55,7 +55,7 @@ export async function handleStaticAliasRoute(request, env, url) {
   // 6. GET /api/version
   if (url.pathname === '/api/version') {
     return jsonResponse({
-      version: "1.20.0",
+      version: "1.21.0",
       minVersion: "1.0.0"
     });
   }

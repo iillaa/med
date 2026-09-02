@@ -63,6 +63,7 @@ graph TD
 * `header.js`: Global search bar, view mode switchers (Dashboard / Workspace / Leitner / Calculators), theme toggle.
 * `sidebar.js`: 78+ CAT list renderer utilizing CSS `content-visibility: auto; contain-intrinsic-size: auto 52px;` for 120 FPS list inertia.
 * `workspace.js`: Primary clinical reader rendering the 7-step collapsible protocol accordion, interactive DCI prescription tables, and red flags.
+  - `workspace/prescription.js`: Dual-View Prescription engine (⚡ Express pharmacy Rx format vs 📖 Detailed clinical guide & RHD) with `localStorage` sticky state persistence.
 * `dashboard.js`: Specialty grid navigation, clinical emergency shortcuts, and recent reading stats.
 * `leitner.js`: SM-2 Spaced Repetition flashcard system using 5 interval review boxes.
 * `calculators.js`: Medical formula engine (Cockcroft-Gault, Wells Score, Glasgow Coma Scale, BMI, Corrected Calcium).
