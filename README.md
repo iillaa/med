@@ -321,6 +321,7 @@ L'audit sécurité complet (13 vulnérabilités corrigées : clé API codée en 
 
 Consultez la documentation complète organisée selon le modèle Diátaxis :
 * 🗺️ **[Carte du Codebase (Living Codebase Map)](file:///data/data/com.termux/files/home/med/docs/01-architecture/codebase-map.md)** — Arborescence vivante, rôles des composants et flux de données.
+* 💡 **[Leçons Apprises & Manuel de Débogage](file:///data/data/com.termux/files/home/med/docs/02-guides/lessons-learned-and-debugging.md)** — Pièges évités, bugs complexes résolus et astuces techniques.
 * 🌐 **[Guide de Migration de Domaine](file:///data/data/com.termux/files/home/med/docs/02-guides/domain-migration-checklist.md)** — Checklist et automatisation `set:domain`.
 * ⚡ **[Déploiement Cloudflare Wrangler](file:///data/data/com.termux/files/home/med/docs/02-guides/cloudflare-wrangler-deploy.md)** — Guide de déploiement Edge 24/7.
 * 📱 **[Compilation Android APK](file:///data/data/com.termux/files/home/med/docs/02-guides/compiling-android-apk.md)** — Build Capacitor et hardening des assets.
