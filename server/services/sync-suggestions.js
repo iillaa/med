@@ -150,10 +150,30 @@ async function resetCloudflareActiveDevices() {
   });
 }
 
+async function purgeCloudflareTelemetry(id) {
+  if (!id || !process.env.SYNC_SECRET || process.env.NODE_ENV === 'test') return { success: false };
+  const base = getCloudflareBaseUrl();
+  const url = `${base}/api/admin/telemetry/${encodeURIComponent(id)}`;
+  return new Promise((resolve) => {
+    const req = https.request(url, {
+      method: 'DELETE',
+      headers: syncHeaders(),
+      timeout: 10000
+    }, (res) => {
+      resolve({ success: res.statusCode === 200 });
+    });
+    req.setTimeout(10000, () => { req.destroy(); resolve({ success: false }); });
+    req.on('error', () => resolve({ success: false }));
+    req.end();
+  });
+}
+
 async function syncCloudflareTelemetry() {
   if (!process.env.SYNC_SECRET || process.env.NODE_ENV === 'test') return;
+  const base = getCloudflareBaseUrl();
+  const url = `${base}/api/telemetry`;
   return new Promise((resolve) => {
-    const req = https.get(CLOUDFLARE_TELEMETRY_URL, { headers: syncHeaders(), timeout: 10000 }, (res) => {
+    const req = https.get(url, { headers: syncHeaders(), timeout: 10000 }, (res) => {
       let rawData = '';
       res.on('data', chunk => rawData += chunk);
       res.on('end', async () => {
@@ -193,6 +213,7 @@ module.exports = {
   purgeCloudflareSuggestion,
   ackCloudflareSuggestions,
   syncCloudflareTelemetry,
+  purgeCloudflareTelemetry,
   syncCloudflareActiveDevices,
   resetCloudflareActiveDevices
 };

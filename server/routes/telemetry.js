@@ -178,6 +178,15 @@ function registerTelemetryRoutes(app) {
       }
 
       await saveReports(reports);
+
+      // Purge from Cloudflare KV Edge to prevent background sync resurrection
+      try {
+        const { purgeCloudflareTelemetry } = require('../services/sync-suggestions');
+        await purgeCloudflareTelemetry(targetId);
+      } catch (cfErr) {
+        console.warn('[Telemetry] Cloudflare telemetry purge warning:', cfErr.message);
+      }
+
       return res.status(200).json({ success: true, message: 'Rapport supprimé.' });
     } catch (err) {
       console.error('[Telemetry DELETE Error]', err);

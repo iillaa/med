@@ -105,6 +105,18 @@ L'objectif est d'empêcher toute régression future en conservant la mémoire de
 
 ---
 
+### 8. Post-Mortem 8 : La Résurrection des Rapports "Zombie" lors de la Synchronisation Edge KV
+* **Date** : Septembre 2026 (v1.22.0)
+* **Symptôme** : Après avoir cliqué sur "Supprimer" ou "Tout effacer" dans le tableau de bord de télémétrie, les rapports supprimés réapparaissaient systématiquement quelques secondes plus tard (`[CloudSync] Synced N telemetry report(s) from Cloudflare KV`).
+* **Cause Profonde** :
+  - La suppression (`DELETE /api/admin/telemetry/:id`) ne purgeait que le fichier local `server/data/telemetry_reports.json`.
+  - Cloudflare KV conservait la copie cloud des incidents indéfiniment.
+  - La boucle de synchronisation périodique (`syncCloudflareTelemetry()`) téléchargeait les rapports depuis Cloudflare, constatait qu'ils n'existaient pas en local, et les ré-insérait en mémoire en boucle infinie.
+* **Leçon Apprise & Solution** :
+  - **Toute opération de suppression locale sur une ressource synchronisée avec le Cloud (Suggestions, Télémétrie, Appareils) DOIT impérativement émettre un appel de purge immédiat vers le Edge Worker (`purgeCloudflareTelemetry(id)` via `x-sync-secret`).**
+
+---
+
 ## 🔗 Documents Liés
 - 🛡️ [Architecture de Sécurité & Isolation](file:///data/data/com.termux/files/home/med/docs/01-architecture/security-isolation.md)
 - 🐛 [Grand Registre des Failles & Audits](file:///data/data/com.termux/files/home/med/docs/bugs-doc.md)
