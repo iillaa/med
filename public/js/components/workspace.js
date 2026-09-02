@@ -351,11 +351,12 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         textToCopy = wsPrescription.innerText;
       }
       navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalText = copyPrescriptionBtn.innerHTML;
-        copyPrescriptionBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copié !';
+        const originalHtml = copyPrescriptionBtn.innerHTML;
+        copyPrescriptionBtn.innerHTML = '<i class="fa-solid fa-check" style="color: var(--color-success);"></i>';
+        showToast("Ordonnance copiée dans le presse-papier !", "fa-check", 2000);
         setTimeout(() => {
-          copyPrescriptionBtn.innerHTML = originalText;
-        }, 2000);
+          copyPrescriptionBtn.innerHTML = originalHtml;
+        }, 1800);
       });
     });
   }

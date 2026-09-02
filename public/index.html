@@ -514,7 +514,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.21.0">
-  <meta name="app-build-version" content="2026.09.02.17.39">
+  <meta name="app-build-version" content="2026.09.02.17.52">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -599,14 +599,14 @@ body {
   <link rel="preload" href="data/cats_db.json" as="fetch" crossorigin>
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request, works fully offline -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2609021739">
+  <link rel="stylesheet" href="css/fonts.css?v=2609021752">
   <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2609021739">
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2609021752">
   <!-- Full app stylesheets -->
-  <link rel="stylesheet" href="style.css?v=2609021739">
-  <link rel="stylesheet" href="css/utilities.css?v=2609021739">
-  <link rel="stylesheet" href="css/update-modal.css?v=2609021739">
-  <script type="module" src="js/version-checker.js?v=2609021739"></script>
+  <link rel="stylesheet" href="style.css?v=2609021752">
+  <link rel="stylesheet" href="css/utilities.css?v=2609021752">
+  <link rel="stylesheet" href="css/update-modal.css?v=2609021752">
+  <script type="module" src="js/version-checker.js?v=2609021752"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1202,22 +1202,22 @@ body {
           <div class="tab-pane" id="tab-prescription" role="tabpanel">
             <div class="pane-header prescription-pane-header">
               <div class="prescription-header-left">
-                <h3><i class="fa-solid fa-file-prescription"></i> <span class="prescription-title-text">Ordonnance</span></h3>
+                <h3><i class="fa-solid fa-file-prescription"></i> <span>Ordonnance</span></h3>
                 <div class="ordo-mode-segmented" id="ordo-mode-segmented" role="group" aria-label="Format d'ordonnance">
                   <button type="button" class="ordo-mode-btn active" id="ordo-mode-detailed" data-mode="detailed" title="Protocole complet avec RHD et alternatives">
-                    <i class="fa-solid fa-book-medical"></i> <span>Détaillée</span>
+                    <i class="fa-solid fa-book-medical"></i>
                   </button>
                   <button type="button" class="ordo-mode-btn" id="ordo-mode-express" data-mode="express" title="Prescription standard de cabinet prête à rédiger">
-                    <i class="fa-solid fa-bolt"></i> <span>Express</span>
+                    <i class="fa-solid fa-bolt"></i>
                   </button>
                 </div>
               </div>
               <div class="prescription-header-actions">
-                <button class="action-btn" id="edit-prescription-btn" title="Modifier l'ordonnance" aria-label="Modifier l'ordonnance type">
-                  <i class="fa-solid fa-pen"></i> <span class="action-btn-text">Modifier</span>
+                <button class="action-btn icon-only-btn" id="edit-prescription-btn" title="Modifier l'ordonnance" aria-label="Modifier l'ordonnance type">
+                  <i class="fa-solid fa-pen"></i>
                 </button>
-                <button class="action-btn copy-prescription-btn" id="copy-prescription-btn" title="Copier dans le presse-papier" aria-label="Copier l'ordonnance dans le presse-papier">
-                  <i class="fa-regular fa-copy"></i> <span class="action-btn-text">Copier</span>
+                <button class="action-btn icon-only-btn copy-prescription-btn" id="copy-prescription-btn" title="Copier dans le presse-papier" aria-label="Copier l'ordonnance dans le presse-papier">
+                  <i class="fa-regular fa-copy"></i>
                 </button>
               </div>
             </div>
@@ -1710,7 +1710,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-YX7S77YN.js"></script>
+  <script type="module" src="dist/app-WWY5DF3T.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {

@@ -595,62 +595,70 @@
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
   padding: 3px;
-  gap: 3px;
+  gap: 2px;
 }
 
 .ordo-mode-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 11px;
+  justify-content: center;
+  padding: 5px 10px;
   border-radius: var(--radius-full);
   border: none;
-  font-size: 0.76rem;
-  font-weight: 600;
+  font-size: 0.84rem;
   color: var(--text-secondary);
   background: transparent;
   cursor: pointer;
   transition: all var(--motion-fast) var(--ease-standard);
   user-select: none;
   touch-action: manipulation;
+  min-width: 32px;
+  height: 26px;
 }
 
 .ordo-mode-btn i {
-  font-size: 0.74rem;
+  font-size: 0.82rem;
 }
 
 .ordo-mode-btn:hover:not(.active) {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .ordo-mode-btn.active {
   background: var(--color-primary);
   color: #ffffff;
-  font-weight: 700;
   box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35);
 }
 
 [data-theme="light"] .ordo-mode-btn:hover:not(.active),
 .light-theme .ordo-mode-btn:hover:not(.active) {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.action-btn.icon-only-btn {
+  padding: 6px 10px;
+  min-width: 34px;
+  height: 32px;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Mobile Compact Toolbar Optimization (< 600px) */
 @media (max-width: 600px) {
   .prescription-pane-header {
     flex-wrap: nowrap;
-    gap: 6px;
+    gap: 8px;
   }
   
   .prescription-header-left {
-    gap: 6px;
+    gap: 8px;
     flex-wrap: nowrap;
     min-width: 0;
   }
 
   .prescription-pane-header h3 {
-    font-size: 14px;
+    font-size: 15px;
     margin: 0;
     white-space: nowrap;
   }
@@ -661,36 +669,19 @@
   }
 
   .ordo-mode-btn {
-    padding: 3px 8px;
-    font-size: 0.72rem;
-    gap: 4px;
+    padding: 4px 8px;
+    min-width: 28px;
+    height: 24px;
   }
 
   .ordo-mode-btn i {
-    font-size: 0.70rem;
+    font-size: 0.78rem;
   }
 
-  .prescription-header-actions .action-btn {
+  .prescription-header-actions .action-btn.icon-only-btn {
     padding: 5px 8px;
-    font-size: 11.5px;
-    gap: 4px;
-  }
-}
-
-/* Ultra-Compact on Narrow Mobile Screens (< 440px) */
-@media (max-width: 440px) {
-  .prescription-pane-header h3 .prescription-title-text {
-    display: none; /* Hide 'Ordonnance' text, keep stethoscope/prescription icon */
-  }
-
-  .prescription-header-actions .action-btn-text {
-    display: none; /* Icon-only buttons for Modifier & Copier on narrow screens */
-  }
-
-  .prescription-header-actions .action-btn {
-    padding: 6px 9px;
-    min-width: 32px;
-    justify-content: center;
+    min-width: 30px;
+    height: 30px;
   }
 }
 

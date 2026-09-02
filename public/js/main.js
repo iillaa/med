@@ -1184,7 +1184,9 @@ export function updateEditButtonsVisibility() {
       editSummaryBtnEl.style.display = 'inline-flex';
     }
     if (editPrescriptionBtnEl) {
-      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i> Modifier ordonnance';
+      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen"></i>';
+      editPrescriptionBtnEl.title = "Modifier l'ordonnance";
+      editPrescriptionBtnEl.setAttribute('aria-label', "Modifier l'ordonnance");
       editPrescriptionBtnEl.style.display = 'inline-flex';
     }
     if (deleteBtn) {
@@ -1196,7 +1198,9 @@ export function updateEditButtonsVisibility() {
       editSummaryBtnEl.style.display = 'inline-flex';
     }
     if (editPrescriptionBtnEl) {
-      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i> Proposer ordonnance';
+      editPrescriptionBtnEl.innerHTML = '<i class="fa-solid fa-pen-fancy"></i>';
+      editPrescriptionBtnEl.title = "Proposer une modification de l'ordonnance";
+      editPrescriptionBtnEl.setAttribute('aria-label', "Proposer une modification de l'ordonnance");
       editPrescriptionBtnEl.style.display = 'inline-flex';
     }
     if (deleteBtn) deleteBtn.style.display = 'none';
