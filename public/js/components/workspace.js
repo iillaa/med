@@ -4,7 +4,7 @@ import { safeRemoveItem } from '../lib/safeStorage.js';
 import { parseSummaryMarkdown, escapeHTML, showToast, runSuggestionWithUI, setButtonLoading, triggerHaptic, prefersReducedMotion } from '../utils.js';
 import { buildPrintableText } from './workspace/state.js';
 import { renderSummary } from './workspace/summary.js';
-import { renderPrescription } from './workspace/prescription.js';
+import { renderPrescription, initOrdonnanceSegmentedControl } from './workspace/prescription.js';
 import { createPdfCardElement, renderAllPdfsList, filterAllPdfsList, initLibraryScreen } from './workspace/pdfs.js';
 import { saveAppStateBeforeNavigation, restoreAppState, printCatDocument } from './workspace/print.js';
 import { renderSubCatBar, setupGlobalSubProfileSwitcher, getSubCatIcon } from './workspace/subcats.js';
@@ -73,6 +73,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     const now = new Date();
     currentDateSpan.textContent = now.toLocaleDateString('fr-FR');
   }
+
+  initOrdonnanceSegmentedControl();
 
   const redFlagsBanner = document.getElementById('red-flags-banner');
   if (redFlagsBanner) {
