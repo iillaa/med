@@ -62,6 +62,7 @@ Comprendre le fonctionnement global, les flux de données et les choix de concep
 | 🤖 [**Moteur de Génération Médicale LLM V3.5**](file:///data/data/com.termux/files/home/med/docs/01-architecture/llm-generation-engine.md) | Découverte dynamique Gemini, GEMINI_BLOCKLIST, 5 flux RAG, Canaries & Golden Set. |
 | 🌳 [**Matrice Hiérarchique Master & Sub-CATs**](file:///data/data/com.termux/files/home/med/docs/01-architecture/hierarchical-subcats-engine.md) | Architecture taxonomique 2-tiers, deep-linking `#cat-12-sub_1` et recherche profonde. |
 | 🚨 [**Télémétrie & Crash Intelligence**](file:///data/data/com.termux/files/home/med/docs/01-architecture/telemetry-crash-intelligence.md) | Capture silencieuse, hachage SHA-256 déterministe, déduplication et escalade. |
+| 💡 [**Retours d'Expérience & Post-Mortems**](file:///data/data/com.termux/files/home/med/docs/01-architecture/lessons-learned-postmortems.md) | Historique des incidents critiques, leçons apprises et analyses de causes profondes. |
 
 ---
 

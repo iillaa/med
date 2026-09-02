@@ -159,3 +159,10 @@ interface AppState {
   };
 }
 ```
+
+---
+
+## 4. Historical Lessons Learned & Engineering Post-Mortems
+For in-depth analyses of past architectural decisions, critical bugs, and hardware constraints, consult:
+👉 [`docs/01-architecture/lessons-learned-postmortems.md`](file:///data/data/com.termux/files/home/med/docs/01-architecture/lessons-learned-postmortems.md)
+

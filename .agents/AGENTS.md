@@ -14,6 +14,20 @@
   - Autonomously complete all code edits, run automated builds, execute test suites, and verify end-to-end.
 - **Reporting**: Report back to the user with a concise summary of results and test evidence once all steps are fully completed.
 
+# Verification Discipline: Manual Review & Static Tracing Protocol
+
+## Mandatory Manual Code Review & Anti-Laziness Rule
+- **CRITICAL**: Automated test suites (`npm run test:suite`, `test_*.js`) are a **safety net for backend/API regressions, NOT a substitute for manual verification and static code analysis**.
+- **Automated Test Blind Spots**:
+  1. Automated tests run in headless Node.js, NOT in a real browser DOM / Capacitor WebView.
+  2. Automated tests execute isolated backend functions with mocked inputs; they DO NOT exercise client runtime scopes, lifecycle imports, or event-driven UI state in `public/js/`.
+  3. A 100% green test suite (`11/11 Passed`) does NOT guarantee that the frontend runtime is bug-free (e.g., missing variable declarations like `installId is not defined`).
+- **Mandatory Manual Checklist Before Declaring Any Task Done**:
+  1. **Variable Scope & Import Trace**: Manually inspect all modified functions line-by-line. Ensure every referenced identifier, parameter, imported symbol, and `localStorage` accessor is explicitly defined in scope.
+  2. **Mental Dry-Run & Runtime Simulation**: Mentally step through the call stack on both cold app startup (fresh install / empty storage) and warm re-entry (existing storage).
+  3. **Dual-Environment Validation**: Verify that platform-conditional branches correctly isolate `android_apk` (native Capacitor), `web_pwa` (`display-mode: standalone`), and `web_browser` (standard tab).
+  4. **No Premature Victory**: Never present a green automated test pass as proof that frontend UI code works without having completed the manual line-by-line review.
+
 # App Versioning & Mandatory Prompt Protocol
 
 ## Automatic Version Bump Proposal Requirement
@@ -32,6 +46,7 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
      > - *Would you like me to update `package.json` and stamp the build with `1.0.1` now?*
 3. **Server-Controlled Force Update Gate**:
    - App update enforcement is controlled via server configuration (`version.json` / Admin API).
+
 # Living Documentation & Codebase Map Protocol
 
 ## Mandatory Proactive Documentation Maintenance Rule
@@ -67,69 +82,35 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
 - **User-Facing UI Credit**: Display **`Dr. Kibeche Ali`** (in Dashboard footer, About modal, Legal/CGU disclaimer).
 - **Code & Legal Metadata**: Display **`Dr. Kibeche Ali Dia Eddine`** (in `package.json`, `LICENSE`, `server/index.js`, and `android/app/build.gradle`).
 
-# Cloudflare Wrangler & Termux Environment Protocol
+# Cloudflare Wrangler & Termux Invariants Protocol
 
-## SYNC_SECRET Parity Rule (CRITICAL — REMEMBER ACROSS SESSIONS)
-- **CRITICAL**: The Worker suggestion relay (`worker.js`) is gated behind a shared secret. `SYNC_SECRET` MUST remain IDENTICAL in BOTH locations:
+## SYNC_SECRET Parity Rule
+- **CRITICAL**: The Worker suggestion and active devices relay (`worker.js`) is gated behind a shared secret. `SYNC_SECRET` MUST remain IDENTICAL in BOTH locations:
   1. Local Termux: `.env` → `SYNC_SECRET=<hex>` (read by `server/services/sync-suggestions.js`)
   2. Cloudflare: Worker secret → `npx wrangler secret put SYNC_SECRET --name drcat`
-- If either side changes, KV suggestion sync fails with 403 (server logs `[CloudSync]` warning; client apps unaffected).
-- Verification: `curl -s -o /dev/null -w "%{http_code}" https://drcat.dr-cat.workers.dev/api/suggestions` → must be 403; with `-H "x-sync-secret: $(grep '^SYNC_SECRET=' .env | cut -d= -f2)"` → must be 200.
 
-## Termux workerd Shim Rule
-- **CRITICAL**: The `workerd` package has NO android-arm64 binary. Without a patch, EVERY wrangler command crashes (`Unsupported platform: android arm64 LE`) — even `wrangler --version`.
-- **AUTOMATIC SINCE v1.12.0**: `package.json` runs `"postinstall": "bash scripts/termux-wrangler-fix.sh"` after every install. The script is platform-guarded (only patches inside Termux/Android; CI/machines untouched) and never fails the install.
-- `wrangler` lives in `optionalDependencies` (NOT devDependencies) so its workerd build failure can never hard-crash `npm install` on this tablet.
-- Manual fallback if ever needed: `bash scripts/termux-wrangler-fix.sh`.
-- Only `wrangler dev` needs the real binary — it never worked on-device and is not required for `whoami`, `secret put`, or `deploy`.
+## Termux workerd Shim Guard
+- `wrangler` is located in `optionalDependencies` and patched automatically via `scripts/termux-wrangler-fix.sh` during `npm install` on Android ARM64 Termux.
 
 ## Wrangler Deploy & Version Rules
-- Deploy = `npx wrangler deploy` (uploads `worker.js` + `public/` assets together per `wrangler.jsonc`). OAuth token stored at `/root/.config/.wrangler/config/default.toml`.
-- Kill-switch lever = `minVersion` in `worker.js` `/api/version` response — bump deliberately only.
-- The `version` field is AUTO-STAMPED by `build.js` from `package.json` on every build. Never hand-edit it; never let the build fail silently if stamping breaks.
+- Deploy = `npx wrangler deploy` (uploads `worker.js` + `public/` assets together per `wrangler.jsonc`).
+- App and worker version numbers are auto-stamped by `build.js` from `package.json` on every build. Never hand-edit versions across split targets.
 
-## Audit Ledger Reference
-- Security audit fixes (v1.12.0, branch `0x-alpha`): verification ledger in `todo0xalpha.md`, technical detail in `docs/security-hardening-v1.12.0.md`.
+# Database Staging & LLM Safety Invariants
 
-# LLM Engine Safety Knobs (v1.12.0+)
+## Fixed Canonical Database Names
+- Canonical names are strictly immutable:
+  - Production: `cats_db.json` (auto-generated copy in `public/data/` for APK/web)
+  - Staging: `cat_db_generator/cats_db_staged.json` (MUST remain a pure JSON array)
+  - Metadata sidecar: `cat_db_generator/cats_db_staged.meta.json` (`schema_version: "3.5"`)
+- Never version database filenames (e.g. `cats_db_v2.json` is retired).
 
-## GEMINI_BLOCKLIST Rule
-- **Optional env var** `GEMINI_BLOCKLIST` (in `.env`, comma-separated substrings) filters out bad/experimental Google models BEFORE the "highest version wins" auto-sort picks them. Applied to dynamic discovery, fallback list, and per-request overrides.
-- Example: `GEMINI_BLOCKLIST=flash-preview, exp-model`
-- If filtering empties the model list, generation fails LOUDLY with a clear message — never silently.
-- Helper: `applyModelBlocklist(models)` exported from `cat_db_generator/lib/llm-engine.js`.
+## LLM Safety Knobs
+- **`GEMINI_BLOCKLIST`**: Optional environment variable in `.env` filtering out preview/experimental models before auto-sorting.
+- **DCI Warning Gate**: Unknown molecules in generated CATs produce informative `[DCI Non Référencée]` warnings for the physician without breaking execution.
 
-## Unknown-Molecule Validator Gate
-- `medical-validator.js` section 7f cross-checks every token written next to a dosage against BDPM + Algerian nomenclature + local safety rules + clinical ceilings.
-- Unknown molecules produce a `[DCI Non Référencée]` WARNING (never an error — doctor decides in Generator Lab). Administrative CATs exempt; sub-cat ordonnances scanned.
-- When adding new reference datasets later, extend `getKnownDrugTokens()` so the cross-check stays current.
+---
 
-# Staging DB Naming & Versioning Rule (v1.12.0+)
-
-## Fixed Names Forever — Version Lives in Data + UI
-- **CRITICAL**: NEVER version database FILENAMES. Filename-versioning (cats_db_v2 → v3) caused the original dead-path write bug.
-- Canonical names:
-  - Production: `cats_db.json` (stripped copy auto-generated to `public/data/` for APK/web)
-  - Staging: `cat_db_generator/cats_db_staged.json` — MUST remain a pure JSON **array** (all consumers parse it as an array)
-  - Version sidecar: `cat_db_generator/cats_db_staged.meta.json` (`schema_version`, `stagedAt`, `migratedFrom`)
-- Schema version is reported to the admin UI via `/api/admin/cat-generator/data` → `schema_version` field. Current: 3.5.
-- Safe migration/re-stamp tool: `node scripts/upgrade_db_schema.js [--clean] [--version X.Y]` (backs up to `backups/`, validates all entries, never blocks on legacy warnings).
-- Main CLI is now `cat_db_generator/generate_cat_db.js` (old `_v2` name retired). npm shortcut: `npm run generate`.
-- New quality tools:
-  - `npm run generate -- --canary` — dosage-parser self-test, runs automatically at the start of every `--rebuild-all`. If canaries fail, prompt-format ↔ validator parsing is broken.
-  - `npm run generate -- --golden [--limit N]` — re-generates 5 fixed clinical cases from `cat_db_generator/golden_set.json` and scores clinical expectations (catches silent QUALITY drift that schema validation cannot see).
-
-# Verification Discipline: Manual Review & Static Tracing Protocol
-
-## Mandatory Manual Code Review & Anti-Laziness Rule
-- **CRITICAL**: Automated test suites (`npm run test:suite`, `test_*.js`) are a **safety net for backend/API regressions, NOT a substitute for manual verification and static code analysis**.
-- **Automated Test Blind Spots**:
-  1. Automated tests run in headless Node.js, NOT in a real browser DOM / Capacitor WebView.
-  2. Automated tests execute isolated backend functions with mocked inputs; they DO NOT exercise client runtime scopes, lifecycle imports, or event-driven UI state in `public/js/`.
-  3. A 100% green test suite (`11/11 Passed`) does NOT guarantee that the frontend runtime is bug-free (e.g., missing variable declarations like `installId is not defined`).
-- **Mandatory Manual Checklist Before Declaring Any Task Done**:
-  1. **Variable Scope & Import Trace**: Manually inspect all modified functions line-by-line. Ensure every referenced identifier, parameter, imported symbol, and `localStorage` accessor is explicitly defined in scope.
-  2. **Mental Dry-Run & Runtime Simulation**: Mentally step through the call stack on both cold app startup (fresh install / empty storage) and warm re-entry (existing storage).
-  3. **Dual-Environment Validation**: Verify that platform-conditional branches correctly isolate `android_apk` (native Capacitor), `web_pwa` (`display-mode: standalone`), and `web_browser` (standard tab).
-  4. **No Premature Victory**: Never present a green automated test pass as proof that frontend UI code works without having completed the manual line-by-line review.
-
+# 📚 Historical Lessons Learned & Incident Post-Mortems
+For technical details, root cause analyses, past security audit ledgers, and architectural post-mortems, consult the living register:
+👉 [`docs/01-architecture/lessons-learned-postmortems.md`](file:///data/data/com.termux/files/home/med/docs/01-architecture/lessons-learned-postmortems.md)
