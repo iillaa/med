@@ -18,6 +18,7 @@ audit_output_new/
 # IDE & Tool configurations
 .antigravitycli/
 .gemini/
+.wrangler/
 .DS_Store
 .cat-med/reference-pdfs
 
