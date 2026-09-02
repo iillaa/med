@@ -45,12 +45,20 @@ jobs:
           REMOTE_SERVER_URL_SECRET: ${{ secrets.REMOTE_SERVER_URL }}
         run: |
           python3 -c '
-          import os, json
+          import os, json, re
           secret = os.environ.get("REMOTE_SERVER_URL_SECRET", "").strip()
-          primary_url = secret if secret else "https://rendition-duchess-dry.ngrok-free.dev"
-          urls = [primary_url, "https://drcat.is-an-app.workers.dev"]
+          custom_urls = [u.strip().rstrip("/") for u in re.split(r"[\n,]+", secret) if u.strip().startswith("http")]
+          cf_url = "https://drcat.is-an-app.workers.dev"
+          urls = []
+          for u in custom_urls:
+              if u not in urls:
+                  urls.append(u)
+          if cf_url not in urls:
+              urls.append(cf_url)
+          if not urls:
+              urls = ["https://rendition-duchess-dry.ngrok-free.dev", cf_url]
           with open("remote_server_config.json", "w") as f:
-              json.dump({"primaryProvider": "ngrok", "urls": urls}, f, indent=2)
+              json.dump({"primaryProvider": "cloudflare" if urls[0] == cf_url else "ngrok", "urls": urls}, f, indent=2)
           '
 
       - name: Copy Databases & Build Static Client Assets
