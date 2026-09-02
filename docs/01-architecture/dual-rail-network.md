@@ -40,7 +40,7 @@ flowchart TD
 ## 🛤️ 2. Définition des Rails
 
 ### ⚡ Rail 1 : Cloudflare Edge Worker (Public / Lecture / Haute Disponibilité)
-- **URL Publique** : `https://drcat.dr-cat.workers.dev` (ou domaine personnalisé).
+- **URL Publique** : `https://drcat.is-an-app.workers.dev` (ou domaine personnalisé).
 - **Rôle** : Servir 90% des requêtes utilisateurs avec une latence ultra-faible (< 30ms mondialement).
 - **Fonctionnalités prises en charge** :
   - Distribution des fiches cliniques (`GET /api/cats` via base statique `cats_db.json`).
