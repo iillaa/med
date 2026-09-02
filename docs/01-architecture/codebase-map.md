@@ -67,6 +67,7 @@ graph TD
 * `leitner.js`: SM-2 Spaced Repetition flashcard system using 5 interval review boxes.
 * `calculators.js`: Medical formula engine (Cockcroft-Gault, Wells Score, Glasgow Coma Scale, BMI, Corrected Calcium).
 * `modals.js`: Viewport-aware dialog manager (`100dvh`) handling Reading Mode, Suggestion Submission, and Legal disclaimers.
+* `douaa-toast.js`: Top-right non-intrusive spiritual reminder & Sadaqa Jariyah toast rotating 5 authentic Douas on a 20-minute real-time cooldown.
 * `native.js`: Capacitor native bridge handling Android Hardware Back Button stack, soft keyboard resizing, and lifecycle events.
 
 ---
