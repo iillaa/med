@@ -1,217 +1,144 @@
-# 🗺️ Carte Complète & Architecture Technique du Codebase Dr.CAT
+# Dr.CAT Architectural Blueprint & Codebase Map (codebase-map.md)
 
-> **Dernière mise à jour** : 2026-09-02 (v1.19.0)  
-> **Auteur & Concepteur** : Dr. Kibeche Ali Dia Eddine  
-> **Statut** : Document Maître de Référence Technique (Single Source of Truth)
+> **Document Type**: System Architecture Specification & Component Dependency Map  
+> **Target Audience**: Senior Software Engineers & Autonomous AI Agents  
+> **Status**: Production (v1.19.0+)
 
 ---
 
-## 🏛️ 1. Topologie Globale & Modèle Hybride Multi-Rail
+## 1. System Topology & Infrastructure Layering
 
-Dr.CAT est une application médicale conçue pour fonctionner avec une disponibilité de 100%, combinant un client mobile Android hors-ligne, un réseau Edge mondial Cloudflare et un serveur d'administration local sous Termux.
+Dr.CAT implements a **Dual-Rail Hybrid Architecture** providing zero-latency offline execution on mobile devices combined with an always-on Cloudflare Edge serverless layer and a local Node.js management daemon under Termux.
 
 ```mermaid
-flowchart TD
-    subgraph ClientLayer["📱 1. COUCHE CLIENT (PWA & APK ANDROID)"]
-        APK["📱 Android APK (Capacitor 7 / WebView 120Hz)"]
-        WebPWA["🌐 Client PWA Web (Navigateurs Desktop / Mobile)"]
-        LocalFS["💾 Base Locale cats_db.json (100% Hors-Ligne)"]
-        APK -->|Lecture Directe Instantanée 0ms| LocalFS
-        WebPWA -->|Lecture Assets & API| EdgeRouter
+graph TD
+    subgraph Layer1["1. Client Layer (Capacitor Native APK & PWA)"]
+        WebView["Chromium WebView / Browser Context"]
+        StateStore["Observable State Store (state.js)"]
+        RouterEngine["Client Routing & Modal Manager (modals.js)"]
+        LocalBundle["Pre-packaged DB (assets/public/data/cats_db.json)"]
+        WebView --> StateStore --> RouterEngine
+        WebView -->|0ms Instant Read| LocalBundle
     end
 
-    subgraph Rail1["☁️ 2. RAIL 1 : EDGE CLOUDFLARE 24/7 (Haute Disponibilité)"]
-        EdgeRouter["worker.js (Routeur Serverless)"]
-        KVStore["SUGGESTIONS_KV (Cloudflare KV Store)"]
-        CDNAssets["Assets Statiques (dist/app-*.js, CSS, DBs)"]
-        TelemetryIngest["Routeur Télémétrie Edge /api/telemetry"]
-        EdgeRouter --> KVStore
-        EdgeRouter --> CDNAssets
-        EdgeRouter --> TelemetryIngest
+    subgraph Layer2["2. Global Edge Layer (Cloudflare Serverless)"]
+        WorkerRouter["worker.js (Edge Handler)"]
+        KV["SUGGESTIONS_KV (Cloudflare KV Store)"]
+        StaticAssets["Edge CDN (dist/app-*.js, CSS, Fonts)"]
+        WorkerRouter --> KV
+        WorkerRouter --> StaticAssets
     end
 
-    subgraph Rail2["🏠 3. RAIL 2 : BACKEND LOCAL TERMUX / NODE.JS (Admin & IA)"]
-        NodeServer["server/index.js & server.js (Port 3000)"]
-        LLMEngine["cat_db_generator/ (Moteur IA Gemini & Validateur BDPM)"]
-        PDFLab["PDF Lab (Visual Slicer, Sommaire GPS & RAG Vectoriel)"]
-        AdminDashboard["Panneau Admin & Gestionnaire de Suggestions"]
-        DiskStore["data/ (PDF Masters, Caches OCR, Golden Set)"]
-        NodeServer --> LLMEngine
-        NodeServer --> PDFLab
-        NodeServer --> AdminDashboard
-        NodeServer --> DiskStore
+    subgraph Layer3["3. Backend Daemon Layer (Termux / Linux Node.js)"]
+        ExpressServer["server/index.js (Express 5 Daemon)"]
+        LLMOrchestrator["cat_db_generator/ (Gemini AI & Pharmacovigilance)"]
+        RAGProcessor["PDF Lab (Vector Slicer & Semantic Embeddings)"]
+        LocalDisk["Filesystem (data/pdf_masters/, nomenclature/)"]
+        ExpressServer --> LLMOrchestrator
+        ExpressServer --> RAGProcessor
+        ExpressServer --> LocalDisk
     end
 
-    APK -.->|Mises à jour & Télémétrie| EdgeRouter
-    NodeServer <==|Sync 2-Voies x-sync-secret| EdgeRouter
+    WebView -.->|HTTP / REST (api.js)| WorkerRouter
+    ExpressServer <==|Bidirectional Sync (SYNC_SECRET HMAC)| WorkerRouter
 ```
 
 ---
 
-## 📂 2. Arborescence Complète & Rôle Exhaustif des Modules
+## 2. Directory Structure & Module Contract Matrix
 
-### 📱 A. Couche Frontend & Assets (`public/`)
+### 2.1 Client Frontend Core (`public/`)
 
-```
-public/
-├── css/                              # Feuilles de styles modulaires
-│   ├── animations.css                # Keyframes GPU (pulse-glow, tapRipple, fadeIn)
-│   ├── dashboard.css                 # Vue d'accueil, grille des spécialités, cartes cliniques
-│   ├── fonts.css                     # Définition @font-face locale Outfit (WOFF2 offline)
-│   ├── layout.css                    # Grille responsive, header fixe, zone split-view
-│   ├── legal.css                     # Bannière de consentement et modale CGU/Mentions
-│   ├── modal.css                     # Modales 100dvh avec marges de respiration Chrome/Firefox
-│   ├── sidebar.css                   # Tiroir des CATs, content-visibility: auto (120 FPS)
-│   ├── update-modal.css              # Écran de verrouillage de sécurité et force-update
-│   ├── utilities.css                 # touch-action: manipulation (0ms tap), badges, pill-buttons
-│   ├── variables.css                 # Design tokens CSS, transitions de thème circulaires
-│   └── workspace.css                 # Zone de consultation, 7 étapes rétractables, ordonnances
-├── data/                             # Données de production minifiées pour le client
-│   ├── cats_db.json                  # Base finale des CATs (78+ fiches, métriques IA retirées)
-│   ├── pdf_index.json                # Index public des 78 thèses et livres médicaux
-│   ├── pdf_list.json                 # Liste épurée des fichiers PDF consultables
-│   └── quiz_db.json                  # Questions de révision médicale pour le mode Leitner
-├── dist/                             # Bundles de production générés par build.js
-│   ├── app-[HASH].js                 # Bundle JavaScript minifié et obfusqué
-│   └── chunk-[HASH].js               # Chunks de code scindés pour optimisation LCP
-├── fonts/                            # Polices typographiques hébergées localement
-│   └── outfit-latin.woff2            # Police sans-serif moderne, zéro requête externe
-├── js/                               # Code source JavaScript modulaire (ES Modules)
-│   ├── components/                   # Composants autonomes de l'interface
-│   │   ├── admin-modal.js            # Panneau de modération des suggestions et injection CAT
-│   │   ├── calculators.js            # Calculateurs médicaux (Cockcroft, Wells, IMC, Glasgow)
-│   │   ├── dashboard.js              # Rendu de la vue d'accueil et raccourcis d'urgences
-│   │   ├── header.js                 # Barre de recherche globale et bascule de thème
-│   │   ├── leitner.js                # Moteur de répétition espacée Leitner (5 boîtes SM-2)
-│   │   ├── modals.js                 # Gestionnaire universel des fenêtres modales
-│   │   ├── native.js                 # Pont natif Capacitor (BackButton, Keyboard, Lifecycle)
-│   │   ├── search.js                 # Moteur de recherche instantanée multi-critères
-│   │   ├── sidebar.js                # Gestion du tiroir latéral et des filtres de spécialité
-│   │   └── workspace.js              # Rendu clinique de la fiche, ordonnances et étapes
-│   ├── api.js                        # Client HTTP avec gestion multi-rail et timeouts
-│   ├── config.js                     # Clés de configuration de l'application cliente
-│   ├── debug-console.js              # Console de débogage flottante pour l'APK Android
-│   ├── main.js                       # Point d'entrée de l'application et cycle de démarrage
-│   ├── remote_config.js              # URLs des serveurs distants injectées par build.js
-│   ├── state.js                      # Store d'état réactif centralisé (Observable pattern)
-│   ├── utils.js                      # Formatteurs Markdown, sanitizers et helpers DOM
-│   └── version-checker.js            # Vérificateur de version au démarrage et Security Gate
-├── drcat_logo.webp                   # Logo officiel optimisé WebP pour le splash screen
-├── favicon.png                       # Icône de navigateur haute résolution
-├── icon-192.png / icon-512.png       # Icônes PWA et lanceur Android
-├── index.html                        # Page HTML unique (Critical CSS inlined + Splash étanche)
-├── manifest.json                     # Manifeste PWA pour installation sur écran d'accueil
-├── og-banner.png                     # Bannière officielle Open Graph 1200x630 HD
-├── robots.txt                        # Directives pour moteurs de recherche et IA
-├── sitemap.xml                       # Plan du site XML pour indexation SEO
-└── style.css                         # Point d'entrée des styles regroupant les modules CSS
-```
+| Module Path | Exports / Entry Point | Runtime Dependencies | Architectural Role |
+| :--- | :--- | :--- | :--- |
+| `public/index.html` | Entry HTML Document | Inline Critical CSS | Single Page Application entrypoint; contains Splash veil `#app-loading-overlay`. |
+| `public/js/main.js` | `initApp()` | `state.js`, `api.js`, `components/*` | Client bootstrap coordinator; initializes DOM event delegation and loads initial dataset. |
+| `public/js/state.js` | `state`, `subscribe()` | None | Reactive centralized store implementing the Observable pattern. |
+| `public/js/api.js` | `fetchCats()`, `getApiUrl()` | `remote_config.js` | HTTP transport layer handling multi-rail fallback, retries, and network headers. |
+| `public/js/version-checker.js`| `initVersionChecker()`| `api.js` | Boot-time update verification and non-destructive Security Lock Gate. |
+| `public/js/utils.js` | `sanitize()`, `parseMd()`| None | Markdown parser, XSS sanitizer, and DOM string manipulation utilities. |
+| `public/js/debug-console.js` | `initDebugConsole()` | `api.js` | On-screen diagnostics overlay for inspecting logs directly on Android devices. |
+
+#### UI Component Tree (`public/js/components/`)
+* `header.js`: Global search bar, view mode switchers (Dashboard / Workspace / Leitner / Calculators), theme toggle.
+* `sidebar.js`: 78+ CAT list renderer utilizing CSS `content-visibility: auto; contain-intrinsic-size: auto 52px;` for 120 FPS list inertia.
+* `workspace.js`: Primary clinical reader rendering the 7-step collapsible protocol accordion, interactive DCI prescription tables, and red flags.
+* `dashboard.js`: Specialty grid navigation, clinical emergency shortcuts, and recent reading stats.
+* `leitner.js`: SM-2 Spaced Repetition flashcard system using 5 interval review boxes.
+* `calculators.js`: Medical formula engine (Cockcroft-Gault, Wells Score, Glasgow Coma Scale, BMI, Corrected Calcium).
+* `modals.js`: Viewport-aware dialog manager (`100dvh`) handling Reading Mode, Suggestion Submission, and Legal disclaimers.
+* `native.js`: Capacitor native bridge handling Android Hardware Back Button stack, soft keyboard resizing, and lifecycle events.
 
 ---
 
-### 🧠 B. Moteur IA & Générateur Médical (`cat_db_generator/`)
+### 2.2 Medical AI Generation Engine (`cat_db_generator/`)
 
-```
-cat_db_generator/
-├── lib/
-│   ├── gemini-schemas.js             # Schémas OpenAPI stricts pour l'API Google Gemini
-│   ├── llm-engine.js                 # Orchestrateur Gemini (découverte, blocklist, retry)
-│   ├── medical-validator.js          # Validateur en 7 sections (DCI, BDPM, plafonds)
-│   ├── model-selector.js             # Sélecteur dynamique de modèles avec scoring
-│   ├── prompt-builder.js             # Constructeur de prompts cliniques structurés
-│   └── semantic-rag.js               # Moteur RAG dense avec gemini-embedding-2 (3072 dims)
-├── cats_db_staged.json               # Base de données de staging (Array JSON pur)
-├── cats_db_staged.meta.json          # Métadonnées et schéma version sidecar (v3.5)
-├── generate_cat_db.js                # CLI de génération principale (`npm run generate`)
-└── golden_set.json                   # 5 cas cliniques de référence pour le test golden
-```
-
----
-
-### 🏠 C. Backend Node.js Termux (`server/`)
-
-```
-server/
-├── routes/                           # Endpoints Express REST API
-│   ├── admin.js                      # Endpoints d'administration, staging, PDF Lab
-│   ├── cats.js                       # Endpoints publics de consultation des fiches
-│   ├── pdfs.js                       # Endpoints de streaming et de découpe PDF
-│   ├── search.js                     # Recherche sémantique locale sur les PDF
-│   ├── suggestions.js                # Réception et modération des suggestions
-│   └── telemetry.js                  # Collecte et agrégation des crashs mobiles
-├── services/                         # Services métier backend
-│   ├── auth.js                       # Authentification par token de session sécurisé
-│   ├── cache.js                      # Cache mémoire avec invalidation automatique
-│   ├── data-store.js                 # Écriture atomique sécurisée via fichiers .tmp
-│   ├── server-providers-config.js    # Gestion du registre de serveurs (remote_server_config)
-│   └── sync-suggestions.js           # Relais de synchronisation Cloudflare KV (SYNC_SECRET)
-└── index.js                          # Point d'entrée du serveur Express
-```
-
----
-
-### ☁️ D. Edge Cloudflare Worker (`worker/` & `worker.js`)
-
-```
-worker/
-├── routes/
-│   ├── static-alias.js               # Alias serveur pour /api/cats, /api/version, etc.
-│   ├── suggestions.js                # Routeur KV pour soumission et lecture protégée
-│   └── telemetry.js                  # Ingestion des rapports de crashs sur l'Edge
-├── cors.js                           # En-têtes CORS universels et preflights OPTIONS
-└── worker.js                         # Point d'entrée du Worker Cloudflare
-```
-
----
-
-## 🔄 3. Flux de Données & Protocoles Clés
-
-### 1. Cycle de Démarrage Client (Anti-FOUC & Vérification)
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as 👨‍⚕️ Médecin
-    participant Browser as 🌐 Navigateur / APK
-    participant Splash as 🛡️ Loading Splash (z:999999)
-    participant Checker as 🔍 version-checker.js
-    participant Edge as ☁️ Cloudflare Worker
-
-    User->>Browser: Ouvre Dr.CAT
-    Browser->>Splash: Affiche immédiatement le Splash (0ms)
-    Browser->>Checker: Exécute la vérification de version
-    Checker->>Edge: GET /api/version (Timeout 4s)
-    alt Version Valide
-        Edge-->>Checker: HTTP 200 { version: "1.19.0", minVersion: "1.0.0" }
-        Checker->>Splash: Déclenche le fondu de sortie (fade-out 320ms)
-        Splash-->>User: Révèle l'application prête et fluide
-    else Version Dépréciée (minVersion > Client)
-        Edge-->>Checker: HTTP 200 { minVersion: "2.0.0" }
-        Checker->>Splash: Verrouille l'écran (Lock Screen de mise à jour)
-    end
-```
-
-### 2. Protocole de Synchronisation Cloudflare KV (`SYNC_SECRET`)
-1. Un médecin propose une CAT via l'APK $\rightarrow$ `POST /api/suggestions` sur Cloudflare Edge.
-2. Le Worker valide la clé publique `x-app-key` et écrit dans `SUGGESTIONS_KV`.
-3. Lorsque le serveur Termux démarre $\rightarrow$ `GET /api/suggestions` avec `x-sync-secret`.
-4. Le Worker compare le secret par HMAC SHA-256 en temps constant et renvoie la file.
-5. Termux sauvegarde dans `suggestions.json` et envoie un accusé de réception `POST /api/suggestions/ack` pour purger la file du cloud.
-
----
-
-## 🛠️ 4. Matrice Complète des Scripts CLI
-
-| Commande | Fichier Script Source | Fonction Principale |
+| Module Path | Core Functionality | Input / Output Contract |
 | :--- | :--- | :--- |
-| `npm run set:domain -- <url>` | `scripts/update_domain.js` | Met à jour le domaine dans les 12 fichiers cibles, régénère la bannière et compile le build. |
-| `npm run build` | `build.js` | Inversion CSS critique, bundling ESbuild, minification et estampillage de version. |
-| `npm run test:suite` | `tests/run_all_tests.js` | Exécution des 11 suites de tests unitaires et d'intégration (0 échec toléré). |
-| `npm run generate` | `cat_db_generator/generate_cat_db.js` | Moteur de génération IA de conduites à tenir médicales. |
-| `npm run generate -- --canary` | `cat_db_generator/generate_cat_db.js` | Test canary du parseur posologique sur 15 formulations complexes. |
-| `npm run generate -- --golden` | `cat_db_generator/generate_cat_db.js` | Score de régression clinique sur les 5 cas du Golden Set. |
-| `npm run cap:sync` | `scripts/clean_android_assets.js` | Synchronisation Capacitor et dépouillement des sources JS brutes de l'APK. |
-| `npm run compress:pdfs` | `scripts/compress_pdfs.js` | Optimisation Ghostscript/Vectorielle des PDF masters pour l'APK. |
-| `npm run reindex` | `index_pdfs.js` | Réindexation OCR et vectorisation sémantique des 78 PDF masters. |
-| `npm run bump` | `scripts/bump_version.js` | Incrémentation sémantique de version et mise à jour de `package.json`. |
-| `npm run set:password` | `set_admin_password.js` | Définition du mot de passe administrateur sécurisé. |
-| `npm run set:provider` | `set_server_provider.js` | Configuration manuelle du registre de serveurs `remote_server_config.json`. |
+| `generate_cat_db.js` | CLI Generation Orchestrator | CLI flags (`--canary`, `--golden`, `--rebuild-all`) $\rightarrow$ updates `cats_db_staged.json`. |
+| `lib/llm-engine.js` | Google Gemini API Transport | Dynamic model discovery, `GEMINI_BLOCKLIST` filtering, and OpenAPI schema locking. |
+| `lib/gemini-schemas.js`| OpenAPI Schema Definitions | Strict JSON schemas enforced on LLM output via `responseSchema`. |
+| `lib/medical-validator.js`| 7-Gate Clinical Validator | Verifies drug tokens against BDPM & Algerian nomenclature; enforces dosage ceilings. |
+| `lib/semantic-rag.js` | Dense Vector Search | Vector cosine similarity search via `gemini-embedding-2` (3,072 dimensions). |
+| `lib/prompt-builder.js`| Clinical Prompt Synthesizer| Constructs structured markdown prompts under a 10,000 character budget. |
+| `golden_set.json` | 5 Reference Clinical Cases | Baseline test suite preventing clinical quality regression during prompt refactors. |
+
+---
+
+### 2.3 Backend Daemon Services (`server/`)
+
+| Module Path | Responsibilities | Security Constraints |
+| :--- | :--- | :--- |
+| `server/index.js` | Express 5 Application Setup | CORS preflights (`OPTIONS 204`), double-slash normalization, and route mounting. |
+| `server/routes/cats.js` | Public Data Endpoints (`/api/cats`) | Read-only; supports incremental sync via `?since=` timestamps. |
+| `server/routes/suggestions.js` | Suggestions Moderation | Public `POST` with `x-app-key`; Admin curation endpoints require session tokens. |
+| `server/routes/telemetry.js` | Crash Report Aggregator | Deduplicates crash reports via SHA-256 fingerprinting into `telemetry_reports.json`. |
+| `server/routes/admin.js` | Administrative Operations | Strictly gated behind Localhost Socket Verification + Bearer Token. |
+| `server/services/sync-suggestions.js` | Cloudflare KV Sync Relay | Gated behind `x-sync-secret` with constant-time SHA-256 HMAC comparisons. |
+| `server/services/data-store.js` | Atomic File System IO | Guarantees atomic file updates using temporary files and POSIX renames. |
+
+---
+
+### 2.4 Cloudflare Edge Infrastructure (`worker/` & `worker.js`)
+
+| File Path | Routing Contract | Persistence & Bindings |
+| :--- | :--- | :--- |
+| `worker.js` | Root edge request dispatcher. | Routes `/api/*` to worker handlers and falls back to `env.ASSETS` for static assets. |
+| `worker/routes/suggestions.js`| `POST /api/suggestions`, `GET /api/suggestions`, `POST /api/suggestions/ack`. | Bound to `env.SUGGESTIONS_KV`. Server reads require valid `x-sync-secret`. |
+| `worker/routes/telemetry.js` | `POST /api/telemetry`. | Edge crash ingestion and reporting endpoint. |
+| `worker/cors.js` | Universal CORS Headers. | Injects `Access-Control-Allow-Origin: *` and handles preflight `OPTIONS 204`. |
+
+---
+
+## 3. Client State Machine Architecture (`public/js/state.js`)
+
+The client application manages state via a single observable store:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initializing: App Boot
+    Initializing --> OfflineReady: Load Local cats_db.json (0ms)
+    OfflineReady --> Syncing: Online Detected (api.fetchCats)
+    Syncing --> OfflineReady: Delta Applied (drcat-data-updated)
+    OfflineReady --> Locked: minVersion > clientVersion
+    Locked --> [*]: User Upgrades App
+```
+
+### Observable Store Schema:
+```typescript
+interface AppState {
+  cats: Array<ClinicalCAT>;
+  activeCatId: number | null;
+  activeSpecialty: string;
+  searchQuery: string;
+  viewMode: 'dashboard' | 'workspace' | 'leitner' | 'calculators';
+  isOnline: boolean;
+  isAdmin: boolean;
+  theme: 'dark' | 'light';
+  leitner: {
+    cards: Array<LeitnerCard>;
+    activeBox: number;
+    streak: number;
+  };
+}
+```
