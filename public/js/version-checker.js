@@ -278,7 +278,7 @@
         if (typeof REMOTE_SERVER_URLS !== 'undefined' && Array.isArray(REMOTE_SERVER_URLS)) {
           return REMOTE_SERVER_URLS;
         }
-        return ['https://rendition-duchess-dry.ngrok-free.dev', 'https://drcat.dr-cat.workers.dev'];
+        return ['https://rendition-duchess-dry.ngrok-free.dev', 'https://drcat.is-an-app.workers.dev'];
       };
 
       const candidateUrls = getCandidateUrls();
