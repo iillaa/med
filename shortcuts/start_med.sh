@@ -88,7 +88,7 @@ if [[ "$ENABLE_NGROK" == "true" || "$HAS_CLOUDFLARED" == "true" ]]; then
     fi
     if [[ -z "$CF_URL" && "$HAS_CLOUDFLARED" == "true" ]]; then
       if [[ "$CF_NAMED_MODE" == "true" ]]; then
-        CF_URL="https://drcat.dr-cat.workers.dev"
+        CF_URL="https://drcat.is-an-app.workers.dev"
       else
         CF_URL=$(grep -o 'https://[a-zA-Z0-9-]*\.trycloudflare\.com' cloudflared.log 2>/dev/null | grep -v 'api\.trycloudflare\.com' | head -n 1 || true)
       fi
@@ -102,13 +102,13 @@ fi
 
 ACTIVE_URLS=()
 # Rail 1 (Priorité 1) : Cloudflare Worker permanent (Edge 24/7)
-ACTIVE_URLS+=("https://drcat.dr-cat.workers.dev")
+ACTIVE_URLS+=("https://drcat.is-an-app.workers.dev")
 
 # Rail 2 (Priorité 2) : Ngrok Termux (Admin / Serveur direct)
 if [[ -n "$URL" ]]; then ACTIVE_URLS+=("$URL"); fi
 
 # Rail 3 (Priorité 3) : Cloudflare tunnel temporaire (Backup Termux)
-if [[ -n "$CF_URL" && "$CF_URL" != "https://drcat.dr-cat.workers.dev" ]]; then ACTIVE_URLS+=("$CF_URL"); fi
+if [[ -n "$CF_URL" && "$CF_URL" != "https://drcat.is-an-app.workers.dev" ]]; then ACTIVE_URLS+=("$CF_URL"); fi
 
 URL_STRING=$(IFS=,; echo "${ACTIVE_URLS[*]}")
 echo "Mise à jour du registre des serveurs (remote_server_config.json)..."
@@ -120,11 +120,11 @@ echo "      CLINICAL CAT APP - SERVEUR EN LIGNE         "
 echo "=================================================="
 echo ""
 echo " 🏠 Accès Local (Termux)     : http://localhost:3000"
-echo " 🌐 Rail 1 (Cloudflare Edge) : https://drcat.dr-cat.workers.dev"
+echo " 🌐 Rail 1 (Cloudflare Edge) : https://drcat.is-an-app.workers.dev"
 if [[ -n "$URL" ]]; then
 echo " 🔒 Rail 2 (Tunnel Ngrok)    : $URL"
 fi
-if [[ -n "$CF_URL" && "$CF_URL" != "https://drcat.dr-cat.workers.dev" ]]; then
+if [[ -n "$CF_URL" && "$CF_URL" != "https://drcat.is-an-app.workers.dev" ]]; then
 echo " ⚡ Rail 3 (Tunnel CF Termux): $CF_URL"
 fi
 echo " 🛠️  Inspecteur Ngrok         : http://localhost:4040"
