@@ -4,6 +4,7 @@ import { initDebugConsole } from './debug-console.js';
 import * as sidebar from './components/sidebar.js';
 import * as workspace from './components/workspace.js';
 import * as dashboard from './components/dashboard.js';
+import { initDouaaToast } from './components/douaa-toast.js';
 import { setupHardwareBackButton } from './components/native.js';
 import { setupAppLifecycle } from './components/native.js';
 import { setupKeyboardHandling } from './components/native.js';
@@ -571,6 +572,9 @@ async function bootstrapApp() {
  
   // Fetch initial PDF indexing status
   workspace.updatePdfIndexStatus();
+
+  // Initialize Spiritual Douaa & Sadaqa Jariyah reminder
+  initDouaaToast();
 }
 
 if (document.readyState === 'loading') {
