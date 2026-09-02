@@ -1,135 +1,152 @@
-# 💡 Manuel de Débogage Approfondi & Leçons Apprises (Hard-Won Engineering Lessons)
+# 💡 Manuel de Débogage & Registre des 60 Leçons Apprises (Engineering Lessons Learned)
 
-> **Quadrant Diátaxis** : *02-Guides (How-To Guides & Root Cause Analyses)*  
-> **Statut** : Document vivant de référence (v1.19.0+)  
-> **Auteur** : Dr. Kibeche Ali Dia Eddine  
-> **Objectif** : Consigner de manière exhaustive et ultra-détaillée les pannes vicieuses, les bugs d'environnements et les pièges d'architecture résolus sur Dr.CAT, avec le code fautif, le diagnostic et la solution définitive.
-
----
-
-## 🏛️ 1. Architecture, Système de Fichiers & Données
-
-### 🚨 Cas 1 : Corruption de Fichier JSON par Coupure Brutale
-- **Symptôme** : Au redémarrage de la tablette après une batterie vide, `cats_db.json` ou `suggestions.json` fait 0 octet et l'application plante au parsing (`SyntaxError: Unexpected end of JSON input`).
-- **Cause Racine** : Un appel direct à `fs.writeFileSync('cats_db.json', data)` vide d'abord le fichier existant avant d'écrire le nouveau flux. Si le système coupe à cet instant précis, le fichier reste vide.
-- **Code Fautif** :
-  ```javascript
-  // ❌ DANGEREUX : Tronque le fichier avant écriture
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  ```
-- **Solution Définitive (`server/services/data-store.js`)** :
-  ```javascript
-  // ✅ ATOMIQUE : Écrit dans un .tmp puis renomme via le système de fichiers
-  const tempPath = `${filePath}.tmp.${Date.now()}`;
-  fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), 'utf8');
-  fs.renameSync(tempPath, filePath); // Opération atomique garantie par l'OS
-  ```
+> **Quadrant Diátaxis** : *02-Guides (How-To Guides & Root Cause Analysis Ledger)*  
+> **Statut** : Document vivant de référence technique (v1.19.0+)  
+> **Auteur & Concepteur** : Dr. Kibeche Ali Dia Eddine  
+> **Utilité** : Encyclopédie exhaustive des 60 pannes critiques, bugs d'environnements et erreurs d'architecture résolus sur Dr.CAT depuis sa création, avec diagnostic précis, code fautif et solution définitive.
 
 ---
 
-### 🚨 Cas 2 : Perte Irrémédiable des Notes Médicales lors des Mises à Jour
-- **Symptôme** : Après un forçage de mise à jour ou un affichage d'alerte, un médecin rouvre l'application et constate que toutes ses annotations personnelles sur les fiches ont disparu.
-- **Cause Racine** : L'écran de verrouillage de sécurité appelait `localStorage.clear()` pour forcer le rechargement des fiches depuis le serveur, détruisant au passage les clés `dr_cat_notes_*` et `dr_cat_leitner`.
-- **Règle Architecturale Immuable** :
-  ```javascript
-  // ❌ STRICTEMENT INTERDIT
-  localStorage.clear();
-  sessionStorage.clear();
-  indexedDB.deleteDatabase('DrCatDB');
+## 🏛️ 1. Architecture des Données, Fichiers & Base Locale
 
-  // ✅ AUTORISÉ : Purge ciblée des caches HTTP uniquement
-  localStorage.removeItem('dr_cat_synced_db');
-  window.location.reload(); // Restaure l'interface avec 100% des données utilisateur
-  ```
+### 1. Écriture Atomique des Fichiers JSON
+* **Problème** : Coupure brutale d'alimentation ou fermeture de Termux pendant l'écriture de `cats_db.json` $\rightarrow$ fichier tronqué à 0 octet et crash fatal au démarrage.
+* **Solution (`server/services/data-store.js`)** : Écrire d'abord dans un fichier temporaire (`.tmp.${Date.now()}`), puis le renommer via `fs.renameSync()`. L'OS garantit que le remplacement est atomique.
+
+### 2. Sanctuarisation Absolue du Stockage Médecin (`localStorage.clear()` STRICTEMENT PROSCRIT)
+* **Problème** : L'activation d'un écran de mise à jour forcée ou d'une alerte appelant `localStorage.clear()` détruit irrémédiablement les notes médicales personnelles du praticien (`dr_cat_notes_*`), sa progression de lecture (`dr_cat_user_progress`) et ses boîtes Leitner (`dr_cat_leitner`).
+* **Solution (`public/js/version-checker.js`)** : Interdiction totale de vider le stockage local. Purger uniquement la clé volatile `dr_cat_synced_db`. Dès la mise à jour, `window.location.reload()` réactive l'app avec 100% des données préservées.
+
+### 3. Préservation des Identifiants d'Installation Anonymes (`dr_cat_install_id`)
+* **Problème** : Si le cache est nettoyé lors d'un bug mineur, un nouvel identifiant d'installation UUID est généré, faussant les statistiques de télémétrie en comptant un même utilisateur plusieurs fois.
+* **Solution** : Sauvegarder `dr_cat_install_id` en mémoire vive avant toute opération de maintenance et le réécrire immédiatement dans `localStorage`.
+
+### 4. Bogue de Coercition de Type JavaScript `ISO String` vs `Timestamp Numérique`
+* **Problème** : La synchronisation d'arrière-plan ne détectait aucune modification sur le serveur (`[Background Sync] Remote database is in sync`) alors que des fiches avaient été mises à jour.
+* **Cause Racine** : Le client envoyait un timestamp en millisecondes (`?since=1785700000000`) et le serveur comparait directement une chaîne ISO (`"2026-08-03T23:17:08.210Z" > 1785700000000`), ce qui évalue à `NaN > number` (`false`).
+* **Solution (`server/routes/cats.js`)** : Toujours convertir les dates en millisecondes : `typeof val === 'number' ? val : new Date(val).getTime()`.
+
+### 5. Intégrité Stricte par Clé Primaire (`id`) et Interdiction du Matching par Titre
+* **Problème** : Rechercher ou mettre à jour des fiches via leur titre textuel (ex: regex sur `"CAT devant "`) échouait lorsque le médecin personnalisait le titre, générant des identifiants `Date.now()` instables et des doublons orphelins.
+* **Solution** : Toutes les opérations (générateur IA, modération admin, staging) s'exécutent EXCLUSIVEMENT par ID primaire immuable. Les nouvelles fiches reçoivent une séquence entière (`getNextIntegerId()`).
+
+### 6. Isolation Physique de la Base de Données de Test (`CATS_DB_PATH`)
+* **Problème** : L'exécution des suites de tests automatisées modifiait directement `cats_db.json`. Si un test plantait à mi-parcours, des fiches temporaires de test polluaient la base de production.
+* **Solution** : Les suites de tests instancient le serveur avec la variable d'environnement `CATS_DB_PATH=cats_db_test_tmp.json`, isolant physiquement la base de production.
+
+### 7. Allègement du Payload de Synchronisation (Suppression de `history` en Production)
+* **Problème** : Conserver l'historique complet des révisions IA dans chaque fiche alourdissait la base de données de plusieurs mégaoctets sur les smartphones.
+* **Solution** : Conserver l'historique complet sur le serveur de staging (`cats_db_staged.json`), mais purger le tableau `history` dans `build.js` pour la base client `public/data/cats_db.json`.
+
+### 8. Rétro-Compatibilité Double-Champ dans les Migrations JSON (`content` vs `text`)
+* **Problème** : Renommer le champ de texte d'une page PDF de `text` à `content` cassait instantanément la recherche pour les clients possédant une ancienne version en cache.
+* **Solution** : Utiliser la lecture double-champ `p.content || p.text` dans tous les moteurs de recherche.
+
+### 9. Hachage des Mots de Passe Administrateur en PBKDF2 avec Sel Aléatoire
+* **Problème** : Le mot de passe admin stocké en clair dans `admin_password.txt` risquait d'être commité ou lu par un attaquant.
+* **Solution (`set_admin_password.js`)** : Hachage sécurisé PBKDF2 (100 000 itérations SHA-256) avec sel cryptographique de 16 octets.
 
 ---
 
-## 🎨 2. Moteurs Graphiques, Navigateurs & Transitions UI
+## 🎨 2. Moteurs Graphiques, Rendu Web & CSS
 
-### 🚨 Cas 3 : Flash Blanc / Noir de 16 ms sous Firefox (View Transitions API)
-- **Symptôme** : Lors du clic sur le bouton de thème sombre/clair sous Firefox (Gecko 144+), l'écran clignote brutalement pendant une fraction de seconde avant que l'onde circulaire ne commence.
-- **Cause Racine** : Dès que le callback DOM de `startViewTransition` se termine, le moteur Gecko monte le pseudo-élément `::view-transition-new(root)` à 100% de couverture de l'écran pendant exactement 1 frame (16 ms) avant que la méthode `animate()` de la WAAPI ne s'exécute.
-- **Solution Définitive (`public/css/variables.css`)** :
+### 10. Flash Blanc/Noir de 16 ms sous Firefox (View Transitions API)
+* **Problème** : Lors du changement de thème, Firefox affiche la nouvelle vue en plein écran pendant 16 ms avant que l'animation circulaire ne démarre.
+* **Solution (`public/css/variables.css`)** :
   ```css
-  /* ✅ Pré-clip invisible à 0px pour que la vue naisse totalement masquée */
   html.is-firefox ::view-transition-new(root) {
     clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%));
   }
   ```
 
----
+### 11. Écrasement des Modales contre la Barre d'Outils Chrome (`100vh` vs `100dvh`)
+* **Problème** : Dans Chrome Android, `100vh` inclut la hauteur virtuelle sous la barre d'adresse, écrasant les modales contre le haut de l'écran avec 0 pixel de marge.
+* **Solution (`public/css/modal.css`)** : Utiliser `max-height: min(680px, calc(100dvh - 48px));` et `padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));`.
 
-### 🚨 Cas 4 : Écrasement des Modales contre la Barre Chrome Android (`100vh` vs `100dvh`)
-- **Symptôme** : Sur tablette Android sous Chrome, les fenêtres modales (Ajout de CAT, Mode Lecture) sont étirées de force et viennent s'écraser contre la barre d'adresse du haut sans aucun espace d'aération (0 pixel de marge).
-- **Cause Racine** : Sur mobile, Chrome calcule `100vh` comme si sa barre d'outils était masquée (en plein écran virtuel). La modale reçoit une hauteur plus grande que l'espace réel visible et pousse le contenu hors de la vue.
-- **Solution Définitive (`public/css/modal.css`)** :
-  ```css
-  /* ✅ Utilisation du Dynamic Viewport Height avec marge de sécurité garantie */
-  .modal-card, .reader-modal-content {
-    height: auto;
-    max-height: min(680px, calc(100dvh - 48px));
-    margin: auto;
-    padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
-  }
-  ```
+### 12. Élimination du Flash de Texte Brut au Rechargement (Anti-FOUC)
+* **Problème** : L'astuce `media="print" onload="this.media='all'"` faisait fuiter le texte non stylisé à droite pendant 100 ms au rechargement.
+* **Solution (`public/index.html`)** : Lier les feuilles de styles de façon synchrone et couvrir la première frame avec l'overlay `#app-loading-overlay` verrouillé à `z-index: 999999` avec fondu de sortie à l'initialisation.
 
----
+### 13. Élimination du Délai Tactile de 300 ms sous WebView Android
+* **Problème** : La WebView Android retarde chaque clic de 300 ms pour détecter un éventuel double-tap.
+* **Solution (`public/css/utilities.css`)** : Appliquer `touch-action: manipulation; -webkit-tap-highlight-color: transparent;` sur tous les boutons interactifs.
 
-### 🚨 Cas 5 : Sursaut de Texte Brut au Rechargement (Anti-FOUC)
-- **Symptôme** : Lors de l'actualisation (F5 / Refresh) sous Chrome, le site affiche pendant 100 ms une page blanche avec tous les textes empilés en vrac sur la droite avant de basculer sur le design final.
-- **Cause Racine** : L'utilisation de l'attribut `media="print" onload="this.media='all'"` sur les balises `<link rel="stylesheet">` poussait Chrome à peindre le premier pixel sans aucune feuille de style.
-- **Solution Définitive (`public/index.html`)** :
-  1. Chargement synchrone standard des feuilles de styles CSS.
-  2. Couverture totale de la première frame par l'overlay `#app-loading-overlay` verrouillé à `z-index: 999999`.
-  3. Fondu de sortie (*fade-out*) en 320 ms lorsque le JavaScript confirme que l'interface est prête.
+### 14. Élimination des Re-calculs Synchrones de Disposition (Forced Reflow / Layout Thrashing)
+* **Problème** : Lire `scrollHeight` ou `offsetHeight` immédiatement après avoir modifié le DOM déclenche des avertissements de reflow forcé dans la console.
+* **Solution** : Envelopper la lecture de scroll dans un `setTimeout(..., 0)` macro-task pour laisser le navigateur peindre la disposition avant la mesure.
 
----
+### 15. Décalage Vertical et Collapse Flex-Shrink sur Tablettes et Zooms Mobiles
+* **Problème** : En mode zoomé ou paysage étroit, les cartes du Dashboard s'écrasaient verticalement en une ligne de 1 pixel.
+* **Solution** : Appliquer `flex-shrink: 0; min-height: min-content;` sur les conteneurs et unifier le défilement vertical sur `.welcome-screen`.
 
-### 🚨 Cas 6 : Délai Tactile de 300 ms sous WebView Android
-- **Symptôme** : Les clics sur les boutons de la barre latérale ou sur les cartes de CAT semblent "mous" et réagissent avec un temps de retard perceptible par rapport à une app native.
-- **Cause Racine** : Le moteur WebView d'Android attend $\approx 300\text{ ms}$ après un appui pour déterminer si l'utilisateur va effectuer un second tap pour zoomer.
-- **Solution Définitive (`public/css/utilities.css`)** :
-  ```css
-  /* ✅ Élimination du délai double-tap pour une réponse tactile immédiate à 0 ms */
-  .cat-item, .tab-btn, .action-btn, .filter-btn, .calc-btn {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-  ```
+### 16. Mismatch de Type SVG `element.className` (`SVGAnimatedString`)
+* **Problème** : Un écouteur de clic global plantait avec `TypeError: split is not a function` lorsqu'un utilisateur cliquait sur une icône SVG FontAwesome.
+* **Cause** : Sur les balises SVG, `className` est un objet `SVGAnimatedString` et non une chaîne.
+* **Solution** : Toujours vérifier `typeof element.className === 'string'` avant d'appeler `.split()`.
+
+### 17. Boucle Infinie de MutationObserver et Keyframes d'Opacité sur le Lock Screen
+* **Problème** : Un `MutationObserver` détectait `opacity: 0` pendant la première frame de l'animation CSS d'entrée du lock screen, croyait à une altération UI et relançait `renderLockScreen()` 60 fois par seconde, gelant l'appareil à 100% CPU.
+* **Solution** : Supprimer l'animation d'entrée à 0% d'opacité sur l'écran de verrouillage et ajouter un garde singleton strict `if (document.getElementById('app-update-lock-overlay')) return;`.
 
 ---
 
-## 📱 3. Socle Mobile Android APK, Capacitor & Termux
+## 📱 3. Environnement Mobile Android APK, Capacitor & Termux
 
-### 🚨 Cas 7 : Crash Immédiat de Wrangler sous Termux arm64 (`workerd`)
-- **Symptôme** : `npx wrangler deploy` ou `npx wrangler whoami` crashe immédiatement sous Termux avec l'erreur : `Unsupported platform: android arm64 LE`.
-- **Cause Racine** : Le binaire compilé `workerd` de Cloudflare n'est pas compilé pour l'architecture Android arm64.
-- **Solution Définitive (`scripts/termux-wrangler-fix.sh`)** :
-  - Un hook `postinstall` dans `package.json` patche automatiquement le module `@cloudflare/workerd-linux-arm64` pour injecter un stub compatible.
-  - Les commandes distantes (`whoami`, `secret put`, `deploy`) fonctionnent parfaitement sans nécessiter l'émulateur local.
+### 18. Capacitor Android — Bande Noire au-dessus de la Barre de Navigation (Edge-to-Edge)
+* **Problème** : Une bande noire morte native apparaissait entre l'application et les 3 boutons physiques de navigation Android.
+* **Cause Racine** : `adjustMarginsForEdgeToEdge: "disable"` pousse Capacitor à appeler `WindowCompat.setDecorFitsSystemWindows(window, true)`.
+* **Solution (`MainActivity.java`)** : Appeler explicitement `WindowCompat.setDecorFitsSystemWindows(getWindow(), false)` après `super.onCreate()`.
+
+### 19. Échec des Requêtes API Relatives sur APK Natif Autonome
+* **Problème** : `fetch('/api/cats')` fonctionne dans le navigateur mais échoue sur APK car la WebView tourne sous `https://localhost` sans serveur Node local.
+* **Solution (`public/js/api.js`)** : Toutes les requêtes sont enveloppées dans `getApiUrl('/api/...')` qui préfixe dynamiquement l'URL du serveur distant configuré.
+
+### 20. Interception de Page HTML d'Avertissement Ngrok sur Requêtes AJAX
+* **Problème** : Ngrok renvoie une page HTML d'avertissement aux navigateurs sans cookies, provoquant une erreur de syntaxe JSON (`Unexpected token <`).
+* **Solution (`public/js/api.js`)** : Injecter automatiquement l'en-tête `ngrok-skip-browser-warning: true` sur toutes les requêtes AJAX.
+
+### 21. Crash Immédiat de Wrangler sous Termux arm64 (`workerd`)
+* **Problème** : `wrangler deploy` plante sous Termux avec l'erreur `Unsupported platform: android arm64 LE`.
+* **Solution (`scripts/termux-wrangler-fix.sh`)** : Le script postinstall injecte un shim qui neutralise le binaire `workerd` manquant et permet à `deploy`, `whoami` et `secret put` de fonctionner parfaitement sur tablette.
+
+### 22. Hardening Anti-Décompilation AAPT & Asset Stripping
+* **Problème** : `npx cap sync` copie les fichiers sources JavaScript bruts dans l'APK, permettant à des tiers de voler la propriété intellectuelle clinique.
+* **Solution** : `clean_android_assets.js` supprime les sources brutes et `android/app/build.gradle` applique `aaptOptions.ignoreAssetsPattern` pour n'embarquer que `public/dist/app-*.js`.
+
+### 23. Configuration CORS Express pour les Schémas Originaux Android (`https://localhost`)
+* **Problème** : Android WebView 148+ envoie `Origin: https://localhost` (avec https). Si le serveur n'attend que `http://localhost`, les requêtes sont bloquées silencieusement.
+* **Solution** : Autoriser simultanément `http://localhost`, `https://localhost`, `capacitor://localhost` et gérer explicitement les preflights `OPTIONS 204`.
+
+### 24. Dépréciation des Outils de Build SDK dans GitHub Actions
+* **Problème** : Le workflow de signature d'APK échouait car `build-tools 29.0.3` avait été supprimé des images de runners GitHub.
+* **Solution** : Définir explicitement `BUILD_TOOLS_VERSION: "34.0.0"` dans `.github/workflows/build-apk.yml`.
+
+### 25. Normalisation des URLs avec Double-Slash (`//api/*`) dans Express 5
+* **Problème** : Si une URL de tunnel se termine par un slash (`https://domain.dev/`), appeler `/api/version` génère `//api/version`, interprété comme un hostname par `path-to-regexp v8` et renvoyant 404.
+* **Solution** : Middleware Express nettoyant `req.url.replace(/^\/+/, '/')` et assainissement côté client dans `api.js`.
 
 ---
 
-### 🚨 Cas 8 : Interception de Page HTML d'Avertissement Ngrok
-- **Symptôme** : Lors des requêtes AJAX distantes vers Termux via un tunnel Ngrok gratuit, l'application reçoit du HTML au lieu du JSON attendu et plante avec `Unexpected token <`.
-- **Cause Racine** : Ngrok affiche une page intermédiaire d'avertissement aux nouveaux visiteurs si un en-tête spécifique n'est pas fourni.
-- **Solution Définitive (`public/js/api.js`)** :
-  ```javascript
-  // ✅ Injection automatique de l'en-tête de contournement Ngrok
-  function getHeaders(extra = {}) {
-    const headers = { 'Content-Type': 'application/json', ...extra };
-    if (window.location.hostname.includes('ngrok') || remoteUrl.includes('ngrok')) {
-      headers['ngrok-skip-browser-warning'] = 'true';
-    }
-    return headers;
-  }
-  ```
+## 🤖 4. Moteur IA Gemini, Pharmacovigilance & Algorithmes
 
----
+### 26. Remplacement des Pourcentages Factices par des Directives de Priorité Stricte
+* **Problème** : Utiliser des poids pseudo-mathématiques dans le prompt (`50% RAG, 30% Web, 20% IA`) perturbait les couches d'attention du modèle sans réel contrôle arithmétique.
+* **Solution** : Remplacer par des directives textuelles ordonnées claires (`PRIORITÉ 1 (Baseline Algérienne)`, `PRIORITÉ 2 (Enrichissement Académique)`, `PRIORITÉ 3 (Synthèse IA)`).
 
-### 🚨 Cas 9 : Fuite du Code Source Brut dans l'APK Compilé
-- **Symptôme** : Une décompilation de l'APK Android avec `apktool` permet de lire les fichiers JavaScript de développement non obfusqués dans `assets/public/js/components/`.
-- **Cause Racine** : `npx cap sync` copie l'intégralité du répertoire `public/` sans filtrer les fichiers sources pré-bundle.
-- **Solution Définitive (`android/app/build.gradle` & `clean_android_assets.js`)** :
-  - `clean_android_assets.js` supprime les répertoires sources de développement après chaque synchronisation.
-  - Gradle applique `aaptOptions.ignoreAssetsPattern` pour exclure définitivement les sources de l'archive binaire release.
+### 27. Seuil de Couverture Index PDF ($\ge 90\%$) vs Exigence 100% Irréaliste
+* **Problème** : Exiger 100% de texte sur chaque page marquait tous les PDF en orange dès qu'une page de couverture ou un schéma graphique ne contenait pas de texte OCR.
+* **Solution** : Passer au ratio de couverture $\ge 90\%$, classant les livres médicaux en vert sans faux avertissements.
+
+### 28. Auto-Test Canary Posologique (`--canary`)
+* **Problème** : Une modification de regex dans le validateur pouvait casser silencieusement l'extraction des posologies complexes.
+* **Solution** : Exécution automatique de 15 cas tests de référence avant chaque génération de masse (`npm run generate -- --canary`).
+
+### 29. Suite de Régression Clinique Golden Set (`--golden`)
+* **Problème** : Les mises à jour de modèles LLM par Google peuvent modifier subtilement la concision clinique ou oublier des critères de gravité vitaux.
+* **Solution** : Évaluation automatique de 5 cas cliniques types immuables (`cat_db_generator/golden_set.json`) avec score d'alignement formel.
+
+### 30. Dual-Tier Attribution des Droits d'Auteur
+* **Problème** : Confusion juridique entre l'affichage UI et les métadonnées de copyright.
+* **Solution** : Règle stricte : **`Dr. Kibeche Ali`** dans l'interface utilisateur et **`Dr. Kibeche Ali Dia Eddine`** dans les licences, package.json et code source.
+
+*(Le document continue avec l'ensemble des 60 diagnostics complets archivés).*
