@@ -1,84 +1,96 @@
-# 📚 Architecture Approfondie : Pipeline RAG Médical & Visual Slicer PDF
+# Semantic PDF RAG Pipeline & Visual Slicer Specification (pdf-rag-pipeline.md)
 
-> **Quadrant Diátaxis** : *01-Architecture (Explanations & Specifications)*  
-> **Statut** : Production (v1.19.0+)  
-> **Composants Clés** : `cat_db_generator/lib/semantic-rag.js`, `index_pdfs.js`, `scripts/compress_pdfs.js`, `server/routes/pdfs.js`, `server/routes/search.js`
+> **Document Type**: Technical Specification & Information Retrieval Engine Reference  
+> **Target Audience**: Senior Engineers, Machine Learning Practitioners & AI Agents  
+> **Status**: Production (v1.19.0+)
 
 ---
 
-## 🎯 1. Vue d'Ensemble & Gestion du Corpus Médical Réel
+## 1. Corpus Architecture & Indexing Topology
 
-La médecine moderne exige que chaque assertion clinique soit ancrée dans des sources médicales académiques de référence. Dr.CAT intègre un corpus de **78 livres, thèses et polycopiés hospitalo-universitaires originaux** représentant **2 702 pages de texte médical haute densité**.
+Dr.CAT indexes a foundational corpus of **78 master medical references** (textbooks, university theses, and national clinical protocols) comprising **2,702 high-density pages**.
 
 ```mermaid
 flowchart TD
-    subgraph RawCorpus["1. CORPUS SOURCE (data/pdf_masters/)"]
-        PDFs["78 PDF Masters Originaux (Ophthalmologie, Pneumo, Cardio, etc.)"]
+    subgraph RawCorpus["1. Raw Master Corpus (data/pdf_masters/)"]
+        PDF["78 Uncompressed Master PDFs"]
     end
 
-    subgraph Ingestion["2. INGESTION, OCR & VECTORISATION (index_pdfs.js)"]
-        OCR["Extraction de Texte & Nettoyage OCR"]
-        TOC["Génération de Sommaire GPS Vectoriel (save-pdf-toc)"]
-        Embeddings["Vectorisation Sémantique Dense (gemini-embedding-2 / 3072 dims)"]
-        DiskCache["Mise en Cache Permanente (data/pdf_embeddings_cache.json)"]
-        OCR --> TOC --> Embeddings --> DiskCache
+    subgraph Preprocessing["2. Preprocessing & OCR Ingestion (index_pdfs.js)"]
+        Extractor["Vector Text Extractor / OCR Engine"]
+        Sanitizer["Header/Footer Regex Noise Filter"]
+        TOC["TOC GPS Coordinate Mapper (save-pdf-toc)"]
+        Extractor --> Sanitizer --> TOC
     end
 
-    subgraph Slicer["3. PDF VISUAL SLICER (server/routes/pdfs.js)"]
-        VisualSelect["Sélection Visuelle de Pages dans le PDF Lab"]
-        Ghostscript["Compression & Extraction Vectorielle Ciblée"]
-        CleanOutput["Fiche Staging Markdown avec Extraits Certifiés"]
-        VisualSelect --> Ghostscript --> CleanOutput
+    subgraph Vectorization["3. Semantic Vectorization (cat_db_generator/lib/semantic-rag.js)"]
+        Chunker["Sliding Window Chunker (800 chars / 150 overlap)"]
+        Embedder["Google gemini-embedding-2 (3,072 Dimensions)"]
+        DiskCache["Persistent Cache (data/pdf_embeddings_cache.json)"]
+        Chunker --> Embedder --> DiskCache
     end
 
-    subgraph QueryEngine["4. MOTEUR DE RECHERCHE HYBRIDE (semantic-rag.js)"]
-        Query["Requête Médicale (ex: 'Traitement Blépharite Antérieure')"]
-        DenseSearch["Recherche Dense par Similarité Cosinus (Top 8 Chunks)"]
-        BM25["Recherche Lexicale Exacte BM25 (Termes & Posologies)"]
-        Fusion["Score de Pertinence Médicale Hybride (RRF)"]
-        Query --> DenseSearch & BM25 --> Fusion
+    subgraph QueryEngine["4. Hybrid Retrieval Engine (RRF Fusion)"]
+        Query["Clinical Search Query"]
+        DenseSearch["Dense Vector Cosine Similarity (Top 8)"]
+        BM25Search["BM25 Lexical Keyword Search (Top 8)"]
+        Fusion["Reciprocal Rank Fusion (RRF Engine)"]
+        Query --> DenseSearch & BM25Search --> Fusion
     end
 
-    RawCorpus --> Ingestion
-    Ingestion --> Slicer
-    Ingestion --> QueryEngine
+    RawCorpus --> Preprocessing
+    Preprocessing --> Vectorization
+    Vectorization --> QueryEngine
 ```
 
 ---
 
-## 🧠 2. Modèle Mathématique de Vectorisation & Recherche Dense
+## 2. Vectorization Mathematics & Embedding Space
 
-### 1. Espace Vectoriel Dense (`gemini-embedding-2`)
-- **Dimensions** : $D = 3\,072$ dimensions par bloc de texte.
-- **Taille de Fenêtre de Découpage (*Chunking*)** :
-  - Taille nominale : $800$ caractères avec recouvrement (*overlap*) de $150$ caractères pour préserver le contexte des phrases médicales complexes.
-  - Délimitation intelligente sur les sauts de paragraphes et les puces cliniques.
+### 2.1 Espace Vectoriel Dense (`gemini-embedding-2`)
+* **Vector Dimension**: $D = 3\,072$ floating-point dimensions per text chunk.
+* **Chunking Strategy**: 
+  - Maximum chunk size: $800$ characters.
+  - Chunk overlap: $150$ characters to maintain clause context across sentence boundaries.
+  - Boundary preservation: Splitting prioritizes markdown headers (`#`, `##`), bullet points, and period/newline delimiters.
 
-### 2. Formule de Similarité Cosinus
-La pertinence d'un passage $P$ par rapport à une requête $Q$ est calculée par le cosinus de l'angle entre leurs vecteurs :
-$$\text{Sim}(Q, P) = \frac{\mathbf{u}_Q \cdot \mathbf{v}_P}{\|\mathbf{u}_Q\|_2 \times \|\mathbf{v}_P\|_2} = \frac{\sum_{i=1}^{3072} u_i v_i}{\sqrt{\sum_{i=1}^{3072} u_i^2} \times \sqrt{\sum_{i=1}^{3072} v_i^2}}$$
+### 2.2 Cosine Similarity Formula
+The semantic affinity between user clinical query vector $\mathbf{u}_Q$ and indexed document passage vector $\mathbf{v}_P$ is given by:
+$$\text{Sim}_{\text{Cosine}}(\mathbf{u}_Q, \mathbf{v}_P) = \frac{\mathbf{u}_Q \cdot \mathbf{v}_P}{\|\mathbf{u}_Q\|_2 \, \|\mathbf{v}_P\|_2} = \frac{\sum_{i=1}^{3072} u_i v_i}{\sqrt{\sum_{i=1}^{3072} u_i^2} \times \sqrt{\sum_{i=1}^{3072} v_i^2}}$$
 
-### 3. Fusion Sémantique & Lexicale RRF (*Reciprocal Rank Fusion*)
-Pour éviter qu'une abréviation rare (ex: *AAG*, *DEP*, *SpO2*) soit masquée par la recherche dense, le moteur combine les rangs de recherche :
-$$\text{Score}_{\text{final}}(d) = \frac{1}{60 + \text{Rang}_{\text{Dense}}(d)} + \frac{1}{60 + \text{Rang}_{\text{BM25}}(d)}$$
-
----
-
-## ✂️ 3. Le Visual Slicer & Le Sommaire GPS
-
-Le module **PDF Lab** (`/admin` $\rightarrow$ PDF Lab) fournit des outils de manipulation chirurgicale des 78 documents :
-
-1. **Le Sommaire GPS (`save-pdf-toc`)** :
-   - Indexe les chapitres et sous-parties avec leurs numéros de page exacts dans `data/pdf_index.json`.
-   - Permet à l'utilisateur de sauter instantanément au bon chapitre dans le lecteur PDF intégré (`pdf.js`).
-2. **Le Découpeur de Pages (*Visual Slicer*)** :
-   - Permet à l'administrateur d'isoler une plage de pages (ex: pages 45 à 48 du cours de pneumologie).
-   - Extrait le texte vectoriel brut, applique un filtre anti-bruit OCR (suppression des en-têtes de page et numéros répétés), et injecte l'extrait dans le laboratoire de génération IA.
+### 2.3 Hybrid Reciprocal Rank Fusion (RRF)
+To prevent rare medical acronyms (e.g. *AAG*, *DEP*, *SpO2*) from being overshadowed by dense semantic vectors, the engine combines dense and sparse rankings:
+$$\text{Score}_{\text{RRF}}(d) = \frac{1}{k + \text{Rank}_{\text{Dense}}(d)} + \frac{1}{k + \text{Rank}_{\text{BM25}}(d)} \quad \text{where } k = 60$$
 
 ---
 
-## 💾 4. Cache Disque & Optimisation des Performances
+## 3. PDF Visual Slicer & Ghostscript Compression
 
-- **Indexation Hors-Ligne Permanente** : Les vecteurs de chaque page sont sauvegardés dans `data/pdf_embeddings_cache.json`.
-- **Réduction de Coût API & Vitesse** : Une page déjà vectorisée ne génère **aucun appel réseau vers Google AI** lors des sessions ultérieures. La recherche RAG locale répond en moins de **15 millisecondes**.
-- **Compression APK (`scripts/compress_pdfs.js`)** : Réduit le poids des 78 PDF originaux de plus de 60% sans dégradation de lisibilité pour permettre l'empaquetage dans l'application mobile.
+The **PDF Lab** module (`/admin` $\rightarrow$ PDF Lab) provides targeted visual page slicing and compression:
+
+### 3.1 Ghostscript Command Contract (`scripts/compress_pdfs.js`)
+To compact master PDF documents for local APK offline storage without visual degradation:
+```bash
+gs -sDEVICE=pdfwrite \
+   -dCompatibilityLevel=1.4 \
+   -dPDFSETTINGS=/ebook \
+   -dNOPAUSE \
+   -dQUIET \
+   -dBatch \
+   -sOutputFile="public/pdfs/output.pdf" \
+   "data/pdf_masters/input.pdf"
+```
+
+### 3.2 Page-Range Vector Text Slicing (`server/routes/pdfs.js`)
+* **Endpoint**: `POST /api/admin/slice-pdf`
+* **Input Schema**:
+```json
+{
+  "filename": "blepharite.pdf",
+  "mode": "page_range",
+  "startPage": 1,
+  "endPage": 2,
+  "targetTitle": "CAT Blépharite"
+}
+```
+* **Processing**: Extracts vector stream from designated page offsets $\rightarrow$ applies OCR sanitization regexes $\rightarrow$ writes normalized markdown snippet to `cat_db_generator/cats_db_staged.json`.

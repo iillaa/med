@@ -1,154 +1,170 @@
-# 🤖 Architecture Approfondie : Moteur de Génération Médicale IA V3.6
+# Medical AI Generation & Validation Engine (llm-generation-engine.md)
 
-> **Quadrant Diátaxis** : *01-Architecture (Explanations & Specifications)*  
-> **Statut** : Production (v1.19.0+)  
-> **Composants Clés** : `cat_db_generator/generate_cat_db.js`, `cat_db_generator/lib/llm-engine.js`, `cat_db_generator/lib/semantic-rag.js`, `cat_db_generator/lib/medical-validator.js`, `cat_db_generator/lib/gemini-schemas.js`
+> **Document Type**: Technical Specification & Algorithmic Design Document  
+> **Target Audience**: Senior Engineers, Clinical Informaticians & AI Agents  
+> **Status**: Production (v1.19.0+)
 
 ---
 
-## 🎯 1. Philosophie & Défis Cliniques de la Génération par IA
+## 1. Engine Overview & Safety Invariants
 
-La génération de Conduites à Tenir (CAT) médicales impose une **tolérance zéro aux hallucinations**. Un modèle de langage généraliste livré à lui-même peut inventer des posologies létales, inverser des contre-indications ou omettre des critères d'hospitalisation vitaux.
-
-Pour résoudre ce défi, le moteur **Dr.CAT LLM Engine V3.6** applique une architecture en entonnoir fermée :
+The Dr.CAT Medical Generation Engine (`cat_db_generator/`) synthesizes structured Clinical Decision Protocols (CATs) using Google Gemini LLMs while enforcing deterministic formatting and pharmacological safety constraints.
 
 ```mermaid
 flowchart TD
-    subgraph Sourcing["1. EXTRACTION DE CONNAISSANCES VALIDÉES"]
-        RAGDense["🧠 RAG Dense Vectoriel (gemini-embedding-2 / 3072 dims)"]
-        PDFCorpus["📚 Extraits Bruts OCR (78 PDF Masters / 2 702 pages)"]
-        BDPM["💊 Pharmacopée BDPM Française (4 474 DCI validées)"]
-        Nomenclature["🇩🇿 Nomenclature Officielle Algérienne (1 358 DCI)"]
+    subgraph Sourcing["1. Knowledge Ingestion"]
+        DenseRAG["Dense Vector RAG (gemini-embedding-2 / 3072 dims)"]
+        CorpusOCR["Corpus OCR Extractions (78 PDF Masters)"]
+        BDPM_DB["BDPM Drug Index (4,474 DCIs)"]
+        AlgNomenclature["Algerian Nomenclature (1,358 DCIs)"]
     end
 
-    subgraph LLMExecution["2. GÉNÉRATION STRUCTURÉE SOUS CONTRAINTE"]
-        PromptBuilder["Constructeur de Prompt avec Limite de 10 000 Caractères"]
-        GeminiDiscovery["Découverte Dynamique de Modèles (Gemini 2.5 Pro / Flash)"]
-        Blocklist["Filtre GEMINI_BLOCKLIST (Rejet des versions expérimentales)"]
-        SchemaConstraint["Verrouillage responseSchema OpenAPI (gemini-schemas.js)"]
+    subgraph Orchestration["2. LLM Execution & Constraints"]
+        Discovery["Dynamic Model Discovery (Gemini 2.5 Pro / Flash)"]
+        Filter["GEMINI_BLOCKLIST Filtering"]
+        OpenAPISchema["Strict responseSchema OpenAPI Lock"]
+        PromptSynth["Prompt Assembler (< 10,000 chars)"]
+        Discovery --> Filter --> OpenAPISchema --> PromptSynth
     end
 
-    subgraph SafetyGates["3. BARRIÈRES DE VALIDATION PHARMACOLOGIQUE (medical-validator.js)"]
-        Gate1["1. Conformité Structurelle & Markdown Canonique"]
-        Gate2["2. Analyseur Syntaxique de Posologie (Canary Test)"]
-        Gate3["3. Plafonds Posologiques Toxiques (81 Molécules Critiques)"]
-        Gate4["4. Gate DCI Non Référencée (Avertissement DCI Inconnue)"]
-        Gate5["5. Double-Check Loop (Auto-Correction immédiate si anomalie)"]
-        Gate6["6. Test de Régression Clinique Golden Set (5 Cas Fixes)"]
+    subgraph Validation["3. Deterministic Clinical Validation (medical-validator.js)"]
+        G1["Gate 1: OpenAPI Schema Conformance"]
+        G2["Gate 2: Dosage Syntax Parser (Canary Suite)"]
+        G3["Gate 3: Toxic Posology Ceilings (81 Critical Molecules)"]
+        G4["Gate 4: Unreferenced DCI Scanner"]
+        G5["Gate 5: Automated Double-Check Correction Loop"]
+        G6["Gate 6: Golden Set Clinical Regression Scorer"]
+        G1 --> G2 --> G3 --> G4 --> G5 --> G6
     end
 
-    subgraph Persistence["4. PERSISTANCE CANONIQUE"]
-        Staging["cat_db_generator/cats_db_staged.json (Array JSON)"]
-        Sidecar["cat_db_generator/cats_db_staged.meta.json (Schema v3.5)"]
-        Production["public/data/cats_db.json (Client Minifié)"]
-    end
-
-    Sourcing --> PromptBuilder
-    PromptBuilder --> GeminiDiscovery --> Blocklist --> SchemaConstraint
-    SchemaConstraint --> SafetyGates
-    SafetyGates --> Staging --> Production
+    Sourcing --> PromptSynth
+    PromptSynth --> Validation
+    Validation --> StagingDB["Persist to cat_db_generator/cats_db_staged.json"]
 ```
 
 ---
 
-## 📐 2. Schémas OpenAPI Stricts (`gemini-schemas.js`)
+## 2. OpenAPI Output Schema Contract (`gemini-schemas.js`)
 
-Le moteur n'autorise aucun texte libre en sortie : Gemini est contraint via `responseSchema` à renvoyer un JSON validé conforme au standard OpenAPI 3.0.
+The generation engine enforces strict JSON schema conformance at the API layer via Gemini `responseSchema`. Free-form conversational output is structurally prohibited.
 
-### Structure d'une Fiche Master CAT :
 ```json
 {
-  "id": "asthme_aigu_grave",
-  "title": "Crise d'Asthme Aiguë & Asthme Aigu Grave (AAG)",
-  "category": "Pneumologie / Urgences",
-  "specialty": "Pneumologie",
-  "summary": "# 1. Triage & Diagnostic Positif\n...",
-  "decision_tree": {
-    "nodes": [
-      { "id": "triage", "label": "DEP < 50% ou Signes de Lutte ?", "yes": "hospit_rea", "no": "traitement_amb" }
-    ]
-  },
-  "ordonnance": [
-    {
-      "dci": "Salbutamol",
-      "dosage": "5 mg",
-      "form": "Solution pour nébulisation",
-      "posology": "1 nébulisation de 5 mg toutes les 20 minutes pendant 1 heure",
-      "duration": "1 heure renouvelable",
-      "instructions": "Sous débit d'O2 de 6 à 8 L/min"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "title", "category", "specialty", "summary", "ordonnance", "red_flags"],
+  "properties": {
+    "id": { "type": "integer", "description": "Immutable sequential integer identifier" },
+    "title": { "type": "string", "description": "Clinical title of the condition" },
+    "category": { "type": "string", "description": "Medical specialty classification" },
+    "specialty": { "type": "string" },
+    "is_subcat": { "type": "boolean", "default": false },
+    "parent_id": { "type": "integer" },
+    "summary": {
+      "type": "string",
+      "description": "Structured 7-step clinical markdown string containing triage, diagnostic criteria, and management"
     },
-    {
-      "dci": "Bromure d'Ipratropium",
-      "dosage": "0.5 mg",
-      "form": "Solution pour nébulisation",
-      "posology": "0.5 mg associé au Salbutamol toutes les 8 heures",
-      "duration": "24 à 48 heures",
-      "instructions": "En cas de crise sévère ou réfractaire"
+    "ordonnance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["dci", "dosage", "form", "posology", "duration"],
+        "properties": {
+          "dci": { "type": "string", "description": "International Nonproprietary Name" },
+          "dosage": { "type": "string", "description": "Unit strength (e.g., 500 mg, 1 g)" },
+          "form": { "type": "string", "description": "Pharmaceutical dosage form (e.g., Comprimé, Solution injectable)" },
+          "posology": { "type": "string", "description": "Explicit administration instructions" },
+          "duration": { "type": "string", "description": "Treatment duration in days/weeks" },
+          "instructions": { "type": "string", "description": "Specific administration timing or food constraints" }
+        }
+      }
+    },
+    "red_flags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Critical emergency triggers requiring immediate escalation"
+    },
+    "sub_cats": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "description": "Child Sub-CAT IDs linked to this Master protocol"
     }
-  ],
-  "red_flags": [
-    "Silence auscultatoire (poumon silencieux)",
-    "Troubles de conscience, somnolence, épuisement respiratoire",
-    "Cyanose, SpO2 < 90% sous O2 fort débit",
-    "Pouls paradoxal, collapsus hémodynamique"
-  ],
-  "sub_cats": ["asthme_femme_enceinte", "asthme_enfant_nourrisson"]
+  }
 }
 ```
 
 ---
 
-## 🔍 3. Découverte Dynamique des Modèles & `GEMINI_BLOCKLIST`
+## 3. Dynamic Model Discovery & Blocklist Engine (`lib/llm-engine.js`)
 
-Le fichier `cat_db_generator/lib/llm-engine.js` interroge l'API Google AI pour sélectionner en temps réel le meilleur modèle disponible :
+```javascript
+/**
+ * Discovers and filters Gemini models based on dynamic capability inspection
+ * and environment blocklists.
+ */
+export async function selectOptimalGeminiModel(apiKey) {
+  const models = await fetchAvailableGoogleModels(apiKey);
+  const eligible = models.filter(m => 
+    m.supportedGenerationMethods.includes('generateContent') &&
+    !m.name.includes('vision')
+  );
 
-### Algorithme de Sélection & Tri Sémantique :
-1. **Appel `models.list`** : Récupération de tous les modèles autorisés pour la clé API.
-2. **Filtrage par Capacités** : Conservation exclusive des modèles supportant `generateContent` et `embeddings`.
-3. **Application du Filtre `GEMINI_BLOCKLIST`** :
-   ```javascript
-   function applyModelBlocklist(models) {
-     const blocklist = (process.env.GEMINI_BLOCKLIST || '')
-       .split(',')
-       .map(s => s.trim().toLowerCase())
-       .filter(Boolean);
-     
-     if (!blocklist.length) return models;
-     return models.filter(m => !blocklist.some(blocked => m.name.toLowerCase().includes(blocked)));
-   }
-   ```
-4. **Tri Sémantique par Version** : Classement par ordre décroissant de version (ex: `gemini-2.5-pro` > `gemini-2.5-flash` > `gemini-1.5-pro`).
-5. **Chaîne de Fallback** : Si le modèle primaire renvoie une erreur `429 Too Many Requests`, le système bascule automatiquement sur le modèle suivant sans interrompre le batch.
+  const blocklist = (process.env.GEMINI_BLOCKLIST || '')
+    .split(',')
+    .map(s => s.trim().toLowerCase())
+    .filter(Boolean);
 
----
+  const filtered = eligible.filter(m => 
+    !blocklist.some(blocked => m.name.toLowerCase().includes(blocked))
+  );
 
-## 🛡️ 4. Les 7 Barrières du Validateur Médical (`medical-validator.js`)
+  if (!filtered.length) {
+    throw new Error(`[LLM Engine] No models available after applying GEMINI_BLOCKLIST: "${process.env.GEMINI_BLOCKLIST}"`);
+  }
 
-Chaque fiche générée passe obligatoirement à travers 7 filtres stricts :
-
-| Barrière | Mécanisme de Contrôle | Action en Cas d'Erreur |
-| :--- | :--- | :--- |
-| **1. Structure & Sections** | Vérifie la présence des 7 étapes obligatoires dans `summary` et des tableaux d'ordonnance. | Rejet immédiat $\rightarrow$ regénération avec prompt de correction. |
-| **2. Test Canary de Posologie** | 15 formulations complexes testées (ex: *"50 mg/kg/j en 3 prises"*). Vérifie que le regex extrait la dose exacte. | Blocage total du processus si un seul canary échoue. |
-| **3. Plafonds Posologiques Toxiques** | Contrôle des doses maximales pour 81 molécules critiques (ex: Paracétamol > 4g/j adulte = DANGER). | **Erreur Fatale** : arrêt de la fiche et notification immédiate. |
-| **4. Gate DCI Non Référencée** | Scan de chaque mot clé contre les 5 832 DCI de la BDPM et de la nomenclature algérienne. | **Avertissement [DCI Non Référencée]** : fiche marquée pour révision humaine. |
-| **5. Détection de Contre-Indications** | Recherche des associations proscrites (ex: AINS sur ulcère évolutif ou insuffisance rénale sévère). | Correction obligatoire via boucle de double-check. |
-| **6. Format Markdown Canonique** | Validation des titres d'étapes au format standard `**X. Titre :**` (convertit `#` et `##`). | Normalisation automatique du texte sans perte d'information. |
-| **7. Suite Golden Set** | Comparaison de 5 cas fixes contre des attentes cliniques strictes (scores de fidélité $\ge 90\%$). | Alerte en cas de dérive de qualité clinique globale. |
+  // Sort by highest version number descending
+  return filtered.sort((a, b) => compareSemver(b.version, a.version))[0].name;
+}
+```
 
 ---
 
-## 🧪 5. Table des Canaries Posologiques
+## 4. Deterministic 7-Gate Clinical Validation (`lib/medical-validator.js`)
 
-Le tableau suivant liste les formulations cliniques testées à chaque lancement de `npm run generate -- --canary` :
+Every synthesized protocol undergoes automated static analysis prior to database inclusion:
 
-| ID | Formulation Posologique Testée | Dose Extraite Attendue | Fréquence / Modalité |
-| :-: | :--- | :--- | :--- |
-| `C1` | "1 g 3 fois par jour au milieu des repas" | `1 g` | 3x / jour |
-| `C2` | "500 mg toutes les 8 heures par voie orale" | `500 mg` | Toutes les 8h (3x/j) |
-| `C3` | "50 mg/kg/jour répartis en 3 prises" | `50 mg/kg/j` | 3 prises quotidiennes |
-| `C4` | "2 bouffées matin et soir avec chambre d'inhalation" | `2 bouffées` | 2x / jour |
-| `C5` | "1 nébulisation de 5 mg toutes les 20 minutes pendant 1 heure" | `5 mg` | Triage d'urgence |
-| `C6` | "0.5 mg/kg en dose unique le matin" | `0.5 mg/kg` | Dose unique |
-| `C7` | "100 UI/ml SC selon schéma basal-bolus" | `100 UI/ml` | Voie sous-cutanée |
-| `C8` | "2 sachets en prise unique au coucher" | `2 sachets` | Prise vespérale |
+### 4.1 Toxic Posology Ceilings Table (Sample Subset of 81 Checked Molecules)
+| Molecule (DCI) | Maximum Single Dose | Maximum 24h Daily Ceiling | Route | Action on Violation |
+| :--- | :--- | :--- | :--- | :--- |
+| **Paracétamol** | 1 000 mg | 4 000 mg (Adulte) / 60 mg/kg/j (Pédiatrique) | PO / IV | **FATAL ERROR**: Immediate generation abort. |
+| **Amoxicilline** | 1 000 mg (Standard) / 2 000 mg (Pneumo) | 3 000 mg (Standard) / 6 000 mg (Méningite) | PO / IV | **FATAL ERROR**: Re-prompt double check loop. |
+| **Kétoprofène** | 100 mg | 300 mg / 24h | PO / IV | **FATAL ERROR**: Re-prompt double check loop. |
+| **Morphine** | 10 mg (PO) / 2-3 mg (IV bolus titration) | Titration selon EVA (Échelle Visuelle Analogique) | IV / SC / PO | **WARNING**: Requires explicit monitoring note. |
+| **Métronidazole** | 500 mg | 1 500 mg / 24h | PO / IV | **FATAL ERROR**: Ceilings enforced. |
+
+---
+
+### 4.2 Unreferenced Molecule Cross-Check (Gate 4)
+* **Dataset Indexes**:
+  - French BDPM (Banque Publique des Médicaments): 4,474 verified DCI tokens.
+  - Algerian Official Drug Nomenclature: 1,358 registered commercial and generic names.
+* **Algorithm**: Extract prescription lines $\rightarrow$ tokenize words $\rightarrow$ compare against normalized drug dictionary $\rightarrow$ if non-matching and not an administrative vehicle (e.g. *NaCl 0.9%*, *G5%*), issue `[DCI Non Référencée]` warning flag for manual physician review in Staging Lab.
+
+---
+
+## 5. Canary Dosage Suite Contract (`--canary`)
+
+The dosage parser canary suite verifies regular expressions and numerical extraction logic across 15 standard clinical formulations:
+
+```json
+[
+  { "input": "1 g 3 fois par jour au milieu des repas", "expectedDose": "1 g", "expectedFreq": 3 },
+  { "input": "500 mg toutes les 8 heures par voie orale", "expectedDose": "500 mg", "expectedFreq": 3 },
+  { "input": "50 mg/kg/jour répartis en 3 prises", "expectedDose": "50 mg/kg/j", "expectedFreq": 3 },
+  { "input": "2 bouffées matin et soir avec chambre d'inhalation", "expectedDose": "2 bouffées", "expectedFreq": 2 },
+  { "input": "1 nébulisation de 5 mg toutes les 20 minutes pendant 1 heure", "expectedDose": "5 mg", "expectedFreq": "Urgence" },
+  { "input": "0.5 mg/kg en dose unique le matin", "expectedDose": "0.5 mg/kg", "expectedFreq": 1 },
+  { "input": "100 UI/ml SC selon schéma basal-bolus", "expectedDose": "100 UI/ml", "expectedFreq": "Variable" }
+]
+```
+* **Execution Constraint**: If any test in the canary table fails during `npm run generate -- --canary`, the build pipeline exits immediately with code `1`.
