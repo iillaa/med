@@ -1,6 +1,7 @@
 /* ==========================================================================
    Dr.CAT — Douaa & Sadaqa Jariyah Toast Notification Component
    Glassmorphism Emerald/Cyan Aesthetic with Arabic RTL Calligraphy
+   Theme-Adaptive (Dark / Light Mode compliant)
    ========================================================================== */
 
 .douaa-toast-container {
@@ -23,7 +24,7 @@
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Amiri', Tahoma, sans-serif;
   opacity: 0;
   transform: translateY(-16px) scale(0.97);
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s, border-color 0.3s;
   pointer-events: none;
   user-select: none;
 }
@@ -157,29 +158,60 @@
   pointer-events: none;
 }
 
-/* Light Theme Adaptations */
+/* ==========================================================================
+   Light Theme Adaptations (.light-theme & [data-theme="light"])
+   ========================================================================== */
+
+.light-theme .douaa-toast-container,
+body.light-theme .douaa-toast-container,
+html.light-theme .douaa-toast-container,
 [data-theme="light"] .douaa-toast-container {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(16, 185, 129, 0.45);
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(5, 150, 105, 0.35);
   color: #0f172a;
-  box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.15), 0 0 15px rgba(16, 185, 129, 0.12);
+  box-shadow: 0 14px 35px -5px rgba(15, 23, 42, 0.15), 0 0 15px rgba(16, 185, 129, 0.12);
 }
 
-[data-theme="light"] .douaa-verse {
+.light-theme .douaa-badge,
+body.light-theme .douaa-badge,
+[data-theme="light"] .douaa-badge {
+  background: rgba(5, 150, 105, 0.12);
   color: #047857;
+  border: 1px solid rgba(5, 150, 105, 0.25);
 }
 
+.light-theme .douaa-verse,
+body.light-theme .douaa-verse,
+[data-theme="light"] .douaa-verse {
+  color: #065f46;
+  text-shadow: none;
+}
+
+.light-theme .douaa-supplication,
+body.light-theme .douaa-supplication,
 [data-theme="light"] .douaa-supplication {
   color: #334155;
 }
 
+.light-theme .douaa-close-btn,
+body.light-theme .douaa-close-btn,
 [data-theme="light"] .douaa-close-btn {
   color: #64748b;
 }
 
+.light-theme .douaa-close-btn:hover,
+body.light-theme .douaa-close-btn:hover,
 [data-theme="light"] .douaa-close-btn:hover {
   color: #0f172a;
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.light-theme .douaa-btn-ameen.douaa-ameen-accepted,
+body.light-theme .douaa-btn-ameen.douaa-ameen-accepted,
+[data-theme="light"] .douaa-btn-ameen.douaa-ameen-accepted {
+  background: #047857;
+  color: #ffffff;
+  border-color: #065f46;
 }
 
 /* Animations */
