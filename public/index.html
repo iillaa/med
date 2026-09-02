@@ -514,7 +514,7 @@ body {
 }
 </style>
   <meta name="app-version" content="1.22.0">
-  <meta name="app-build-version" content="2026.09.02.23.40">
+  <meta name="app-build-version" content="2026.09.02.23.48">
   <title>Dr.CAT — Rappel Clinique &amp; Conduites à Tenir Médicales</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="description" content="Dr.CAT — Application médicale de Conduites à Tenir (CAT), fiches de rappel clinique, calculateurs et révision pour médecins généralistes et internes.">
@@ -599,14 +599,14 @@ body {
   <link rel="preload" href="data/cats_db.json" as="fetch" crossorigin>
   <!-- Self-hosted Outfit (Phase 5.5): local WOFF2, no third-party request, works fully offline -->
   <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css?v=2609022340">
+  <link rel="stylesheet" href="css/fonts.css?v=2609022348">
   <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="css/fa/all.min.css?v=2609022340">
+  <link rel="stylesheet" href="css/fa/all.min.css?v=2609022348">
   <!-- Full app stylesheets -->
-  <link rel="stylesheet" href="style.css?v=2609022340">
-  <link rel="stylesheet" href="css/utilities.css?v=2609022340">
-  <link rel="stylesheet" href="css/update-modal.css?v=2609022340">
-  <script type="module" src="js/version-checker.js?v=2609022340"></script>
+  <link rel="stylesheet" href="style.css?v=2609022348">
+  <link rel="stylesheet" href="css/utilities.css?v=2609022348">
+  <link rel="stylesheet" href="css/update-modal.css?v=2609022348">
+  <script type="module" src="js/version-checker.js?v=2609022348"></script>
 </head>
 <body>
   <!-- PERMANENT SECURITY LOCK ROOT - Attached to document.documentElement -->
@@ -1710,7 +1710,7 @@ body {
     </div>
   </div>
 
-  <script type="module" src="dist/app-VZEGJKTU.js"></script>
+  <script type="module" src="dist/app-NZAWDT74.js"></script>
   <script>
     window.__drCatBooted = false;
     (function() {
@@ -1891,6 +1891,51 @@ body {
       };
     })();
   </script>
+
+  <!-- Admin Login Modal with Full Autofill Support -->
+  <dialog class="modal-overlay" id="admin-login-modal" aria-labelledby="admin-login-modal-title" style="display: none;">
+    <div class="modal-card" style="max-width: 420px; border-top: 4px solid var(--color-primary); padding: 24px;">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 id="admin-login-modal-title" style="font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+          <i class="fa-solid fa-lock" style="color: var(--color-primary);"></i> Connexion Administrateur
+        </h3>
+        <button type="button" class="close-modal-btn" id="close-admin-login-modal-btn" aria-label="Fermer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="admin-login-form" autocomplete="on">
+          <!-- Hidden username for Google Password Manager identity -->
+          <input type="text" name="username" value="admin" autocomplete="username" style="display: none;" aria-hidden="true">
+          
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+            Accès réservé au <strong>Dr. Ali</strong> pour la gestion des outils d'administration et de publication.
+          </p>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="admin-login-password" style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">Mot de passe</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="admin-login-password" name="password" autocomplete="current-password" placeholder="Mot de passe administrateur" required style="width: 100%; padding: 10px 40px 10px 12px; background: var(--bg-app, #0f172a); border: 1px solid var(--border-color, #334155); border-radius: 8px; color: var(--text-primary, #f8fafc); font-size: 14px;">
+              <button type="button" id="toggle-admin-pw-visibility" aria-label="Afficher/Masquer le mot de passe" style="position: absolute; right: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;">
+                <i class="fa-solid fa-eye" id="toggle-admin-pw-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="admin-login-error" style="display: none; padding: 8px 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 6px; font-size: 12.5px; margin-bottom: 16px; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-circle-exclamation"></i> <span id="admin-login-error-text">Mot de passe incorrect.</span>
+          </div>
+
+          <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+            <button type="button" class="btn btn-secondary" id="cancel-admin-login-btn" style="padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer;">Annuler</button>
+            <button type="submit" id="submit-admin-login-btn" class="btn btn-primary" style="padding: 9px 18px; border-radius: 8px; border: none; background: var(--color-primary); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-key"></i> Déverrouiller
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </dialog>
 
   <!-- Legal Modal -->
   <dialog class="modal-overlay" id="legal-modal" style="display: none;">

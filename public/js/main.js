@@ -62,23 +62,11 @@ function applyThemeChrome(isLight) {
 // Global administrative error interceptor
 window.handleAdminError = async function(err) {
   if (err && (err.message === "403 Forbidden" || err.message === "401 Unauthorized")) {
-    const password = prompt("Action réservée aux administrateurs. Saisissez le mot de passe admin pour déverrouiller :");
-    if (password) {
-      try {
-        const res = await api.loginAdmin(password);
-        if (res.success && res.token) {
-          showToast("Connexion réussie ! L'action va être relancée.", "fa-circle-check", 3000);
-          location.reload();
-          return true;
-        } else {
-          showToast("Mot de passe incorrect.", "fa-circle-exclamation", 3000);
-        }
-      } catch (loginErr) {
-        console.error("Login failed:", loginErr);
-        showToast("Erreur lors de la connexion.", "fa-circle-exclamation", 4000);
-      }
+    if (typeof window.openAdminLoginModal === 'function') {
+      const res = await window.openAdminLoginModal();
+      return !!res;
     }
-    return true; // request handled
+    return true;
   }
   return false;
 };
@@ -408,20 +396,8 @@ async function bootstrapApp() {
           location.reload();
         }
       } else {
-        const password = prompt("Veuillez saisir le mot de passe administrateur :");
-        if (password) {
-          try {
-            const res = await api.loginAdmin(password);
-            if (res.success && res.token) {
-              showToast("Connexion réussie !", "fa-circle-check", 3000);
-              location.reload();
-            } else {
-              showToast(res.error || "Mot de passe incorrect.", "fa-circle-exclamation", 3000);
-            }
-          } catch (err) {
-            console.error("Login error:", err);
-            showToast("Erreur lors de la connexion.", "fa-circle-exclamation", 4000);
-          }
+        if (typeof window.openAdminLoginModal === 'function') {
+          window.openAdminLoginModal();
         }
       }
     });
@@ -518,6 +494,108 @@ async function bootstrapApp() {
     });
   }
 
+  // --- Admin Login Modal Controller (with Full Google Autofill Support) ---
+  const adminLoginModal = document.getElementById('admin-login-modal');
+  const adminLoginForm = document.getElementById('admin-login-form');
+  const adminLoginPasswordInput = document.getElementById('admin-login-password');
+  const adminLoginError = document.getElementById('admin-login-error');
+  const adminLoginErrorText = document.getElementById('admin-login-error-text');
+  const closeAdminLoginBtn = document.getElementById('close-admin-login-modal-btn');
+  const cancelAdminLoginBtn = document.getElementById('cancel-admin-login-btn');
+  const toggleAdminPwBtn = document.getElementById('toggle-admin-pw-visibility');
+  const toggleAdminPwIcon = document.getElementById('toggle-admin-pw-icon');
+
+  let adminLoginResolver = null;
+
+  window.openAdminLoginModal = function() {
+    return new Promise((resolve) => {
+      adminLoginResolver = resolve;
+      if (adminLoginError) adminLoginError.style.display = 'none';
+      if (adminLoginPasswordInput) {
+        adminLoginPasswordInput.value = '';
+        adminLoginPasswordInput.type = 'password';
+      }
+      if (toggleAdminPwIcon) {
+        toggleAdminPwIcon.className = 'fa-solid fa-eye';
+      }
+      if (adminLoginModal) {
+        adminLoginModal.style.display = 'flex';
+        adminLoginModal.classList.add('active');
+        setTimeout(() => adminLoginPasswordInput?.focus(), 150);
+      }
+    });
+  };
+
+  const closeAdminLoginModal = (success = false) => {
+    if (adminLoginModal) {
+      adminLoginModal.style.display = 'none';
+      adminLoginModal.classList.remove('active');
+    }
+    if (adminLoginResolver) {
+      adminLoginResolver(success);
+      adminLoginResolver = null;
+    }
+  };
+
+  if (closeAdminLoginBtn) closeAdminLoginBtn.addEventListener('click', () => closeAdminLoginModal(false));
+  if (cancelAdminLoginBtn) cancelAdminLoginBtn.addEventListener('click', () => closeAdminLoginModal(false));
+  if (adminLoginModal) {
+    adminLoginModal.addEventListener('click', (e) => {
+      if (e.target === adminLoginModal) closeAdminLoginModal(false);
+    });
+  }
+
+  if (toggleAdminPwBtn && adminLoginPasswordInput && toggleAdminPwIcon) {
+    toggleAdminPwBtn.addEventListener('click', () => {
+      const isPw = adminLoginPasswordInput.type === 'password';
+      adminLoginPasswordInput.type = isPw ? 'text' : 'password';
+      toggleAdminPwIcon.className = isPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    });
+  }
+
+  if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = adminLoginPasswordInput?.value?.trim() || '';
+      if (!password) return;
+
+      const submitBtn = document.getElementById('submit-admin-login-btn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Déverrouillage...';
+      }
+
+      try {
+        const res = await api.loginAdmin(password);
+        if (res && res.success && res.token) {
+          showToast("Connexion réussie !", "fa-circle-check", 3000);
+          closeAdminLoginModal(true);
+          location.reload();
+        } else {
+          if (adminLoginError && adminLoginErrorText) {
+            adminLoginErrorText.textContent = res?.error || "Mot de passe incorrect.";
+            adminLoginError.style.display = 'flex';
+          }
+          if (adminLoginPasswordInput) {
+            adminLoginPasswordInput.select();
+            adminLoginPasswordInput.focus();
+          }
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        if (adminLoginError && adminLoginErrorText) {
+          adminLoginErrorText.textContent = "Erreur lors de la connexion.";
+          adminLoginError.style.display = 'flex';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-key"></i> Déverrouiller';
+        }
+      }
+    });
+  }
+
   // Handle keyboard shortcuts
   window.addEventListener('keydown', (e) => {
     const isEditing = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
@@ -540,6 +618,10 @@ async function bootstrapApp() {
       const legalModalElem = document.getElementById('legal-modal');
       if (legalModalElem && (legalModalElem.classList.contains('active') || legalModalElem.style.display !== 'none')) {
         closeLegalModal();
+      }
+      const adminModalElem = document.getElementById('admin-login-modal');
+      if (adminModalElem && (adminModalElem.classList.contains('active') || adminModalElem.style.display !== 'none')) {
+        closeAdminLoginModal(false);
       }
     }
  
