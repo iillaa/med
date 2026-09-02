@@ -1,115 +1,107 @@
-# 🚨 Architecture : Télémétrie & Crash Intelligence (Sentry-Grade)
+# 🚨 Architecture Approfondie : Télémétrie Mobile & Crash Intelligence Sentry-Grade
 
-> **Quadrant Diátaxis** : *01-Architecture (Explanations)*  
-> **Statut** : Production (v1.17.0+)  
-> **Composants Clés** : `server/services/telemetry-service.js`, `server/routes/telemetry.js`, `public/js/debug-console.js`, `public/js/main.js`
+> **Quadrant Diátaxis** : *01-Architecture (Explanations & Specifications)*  
+> **Statut** : Production (v1.19.0+)  
+> **Composants Clés** : `public/js/version-checker.js`, `public/js/debug-console.js`, `server/routes/telemetry.js`, `worker/routes/telemetry.js`, `server/data/telemetry_reports.json`
 
 ---
 
-## 🎯 1. Vue d'Ensemble & Objectifs
+## 🎯 1. Philosophie & Objectifs de la Télémétrie Médicale
 
-Pour une application médicale critique utilisée en contexte d'urgence ou de consultation ambulatoire, les plantages silencieux, les blocages d'interface ou les erreurs de rendu peuvent avoir des conséquences graves.
+Une application médicale ne peut pas dépendre d'un tiers payant (comme Datadog ou Sentry SaaS) qui exposerait potentiellement des métadonnées de santé sensibles ou violerait le secret médical.
 
-Dr. CAT intègre un système complet de **Crash Intelligence & Télémétrie Auto-Hébergé** conçu selon les principes de plateformes professionnelles comme Sentry :
-- **Capture Automatique & Silencieuse** : Interception des erreurs de démarrage, rejets de promesses non gérés (`unhandledrejection`), et erreurs globales (`window.onerror`).
-- **Agrégation Intelligente par Empreinte SHA-256** : Évite le spamming en fusionnant des centaines de crashs identiques en un incident unique avec compteur d'occurrences.
-- **Escalade Automatique de Sévérité** : Bascule dynamique en statut critique (🔴 *Panne Globale*) lorsqu'un seuil de fréquence ou d'appareils impactés est franchi.
-- **Respect Absolu de la Vie Privée (Zéro Donnée de Santé)** : Anonymisation stricte des identifiants et neutralisation des contenus médicaux ou notes personnelles.
+Dr.CAT implémente son propre système de **Télémétrie Sentry-Grade Décentralisée** :
+- **Anonymisation Totale** : Zéro transmission de données patients ou de notes personnelles.
+- **Collecte Universelle** : Capture les erreurs JavaScript, les rejets de promesses non gérés (`unhandledrejection`) et les blocages réseau.
+- **Déduplication par Empreinte (*Fingerprinting*)** : 1 000 occurrences d'un même bug sur 100 appareils ne créent **qu'un seul rapport d'incident agrégé avec compteur dynamique**.
 
 ```mermaid
 flowchart TD
-    ClientApp["📱 Client App (Android / Web)"]
-    
-    subgraph CaptureLayer["1. Capture & Interception Client"]
-        GlobalError["window.onerror"]
-        PromiseRejection["window.onunhandledrejection"]
-        DebugConsole["Debug Console Export"]
-        GlobalError --> Packager["📦 Payload Packager"]
-        PromiseRejection --> Packager
-        DebugConsole --> Packager
+    subgraph ClientMobile["📱 CLIENT ANDROID / WEB"]
+        ErrorCapture["🚨 Interception window.onerror & unhandledrejection"]
+        Fingerprinter["🔑 Génération d'Empreinte (SHA-256 Message + Stack Trace)"]
+        DeviceInfo["📱 Extraction Anonyme : Modèle, OS, Résolution, Mémoire"]
+        PayloadBuilder["📦 Construction du Payload de Télémétrie"]
+        ErrorCapture --> Fingerprinter --> DeviceInfo --> PayloadBuilder
     end
 
-    subgraph TransportLayer["2. Acheminement Sécurisé"]
-        PublicEndpoint["📡 POST /api/telemetry (Public / Rate-Limited)"]
-        Packager --> PublicEndpoint
+    subgraph TransportLayer["🌐 COUCHE DE TRANSPORT MULTI-RAIL"]
+        WorkerTelemetry["☁️ Routeur Edge Cloudflare : POST /api/telemetry"]
+        TermuxTelemetry["🏠 Backend Local Termux : POST /api/telemetry"]
+        PayloadBuilder --> WorkerTelemetry & TermuxTelemetry
     end
 
-    subgraph ServiceEngine["3. Moteur de Télémétrie (telemetry-service.js)"]
-        Hasher["🔑 Hachage d'Empreinte SHA-256 (Stack + Message)"]
-        DedupEngine{"Empreinte Déjà Connue ?"}
-        NewIncident["📝 Créer Nouveau Rapport d'Incident"]
-        UpdateIncident["📈 Incrémenter Compteur & Horodatage"]
-        EscalateCheck{"Seuil Critique Atteint (ex: >20 crashs) ?"}
-        Escalate["🔴 Bascule Sévérité: CRITICAL"]
-        Store[("🗄️ server/data/telemetry_reports.json")]
-
-        PublicEndpoint --> Hasher --> DedupEngine
-        DedupEngine -->|Non| NewIncident --> Store
-        DedupEngine -->|Oui| UpdateIncident --> EscalateCheck
-        EscalateCheck -->|Oui| Escalate --> Store
-        EscalateCheck -->|Non| Store
+    subgraph Processing["🧠 TRAITEMENT & AGRÉGATION (telemetry.js)"]
+        Deduplicator["🔍 Recherche de l'Incident ID existant"]
+        Counter["⚡ Incrémentation du Compteur d'Occurrences (ex: 21x)"]
+        SeverityEscalator["🔴 Bascule Automatique de Sévérité (warning -> critical)"]
+        Storage["💾 Persistance dans server/data/telemetry_reports.json"]
+        WorkerTelemetry & TermuxTelemetry --> Deduplicator --> Counter --> SeverityEscalator --> Storage
     end
 
-    subgraph AdminView["4. Exploitation Administrateur"]
-        AdminDashboard["📊 GET /api/admin/telemetry"]
-        Store --> AdminDashboard
+    subgraph AdminUI["👨‍⚕️ CONSOLE DE PILOTAGE ADMIN"]
+        AdminView["Visualisation des Crashs par Modèle d'Appareil"]
+        ClearLogs["Vidage & Curation Sécurisée (DELETE /api/admin/telemetry)"]
+        Storage --> AdminView --> ClearLogs
     end
 ```
 
 ---
 
-## 🔑 2. Calcul d'Empreinte (Fingerprinting) & Déduplication
+## 🔑 2. Algorithme de Fingerprinting & Déduplication
 
-Pour empêcher la saturation des disques et faciliter le diagnostic :
+Pour éviter de saturer la base de données avec des milliers de logs redondants :
 
-1. **Extraction des Éléments Discriminants** :
-   - Type d'erreur (ex: `TypeError`, `NetworkError`, `ReferenceError`).
-   - Préfixe du message d'erreur (normalisé sans les identifiants dynamiques).
-   - Les 3 premières lignes de la pile d'exécution (*Stack Trace* normalisée).
-2. **Hachage SHA-256** :
-   ```javascript
-   const fingerprint = crypto
-     .createHash('sha256')
-     .update(`${errorType}|${cleanMessage}|${topStackFrames}`)
-     .digest('hex')
-     .substring(0, 16);
-   ```
-3. **Agrégation** :
-   - Si un millier d'utilisateurs subissent la même erreur, la base ne crée pas 1000 lignes : elle incrémente le compteur `occurrences: 1000` et met à jour `lastSeen` ainsi que la liste des appareils touchés (`deviceBreakdown`).
+### Formule de Calcul de l'Empreinte :
+$$\text{Fingerprint} = \text{SHA-256}\Big(\text{error.message} + \text{normalized}(\text{error.stack}) + \text{file.name} + \text{line.number}\Big)$$
+
+1. Les lignes de stack traces sont nettoyées de leurs variables dynamiques (adresses mémoire, timestamps).
+2. L'empreinte génère un identifiant unique stable (ex: `inc_a7b9c4...`).
+3. Si un incident avec cette empreinte existe déjà :
+   - Le champ `occurrences` est incrémenté ($N + 1$).
+   - Le dictionnaire `affected_devices[model]` est mis à jour (ex: `{"Xiaomi 12T Pro": 21, "Samsung Tab S9": 4}`).
+   - Le timestamp `last_seen` est rafraîchi à l'heure exacte.
 
 ---
 
-## 📈 3. Escalade Automatique de Sévérité
+## 🔴 3. Escalade Automatique de Sévérité
 
-Le moteur réévalue la criticité de chaque incident à chaque nouvelle occurrence :
+Le système classe automatiquement la criticité d'un incident selon son impact réel sur les utilisateurs :
 
-| Niveau | Critères de Déclenchement | Impact UI / Diagnostic |
+| Sévérité | Seuil de Déclenchement | Comportement & Alerte Admin |
 | :--- | :--- | :--- |
-| 🟡 **Warning** | 1 à 4 occurrences sur un seul type d'appareil | Incident isolé ou glitch réseau |
-| 🟠 **Error** | 5 à 19 occurrences ou plusieurs appareils distincts | Dysfonctionnement à investiguer |
-| 🔴 **Critical** | ≥ 20 occurrences OU impactant > 5 appareils distincts | Alerte rouge, anomalie bloquante |
+| 🟡 **Warning** | $1 \le \text{Occurrences} < 5$ sur un seul modèle d'appareil. | Incident consigné pour inspection de routine. |
+| 🟠 **Elevated** | $5 \le \text{Occurrences} < 15$ ou présent sur 2 modèles distincts. | Badge orange dans le panneau d'administration. |
+| 🔴 **Critical** | $\text{Occurrences} \ge 15$ ou touchant plus de 3 modèles différents. | **Alerte Rouge Panne Globale** : priorité de correction absolue. |
 
 ---
 
-## 🔒 4. Protection de la Confidentialité & Conformité Médicale
+## 🔒 4. Endpoints de l'API de Télémétrie
 
-Le rapport de télémétrie ne contient **JAMAIS** de données médicales nominatives ou de santé :
-- Les URLs sont nettoyées de tout paramètre de recherche clinique sensible.
-- Les adresses IP sont anonymisées côté serveur (seul un identifiant d'installation opaque `installId` anonyme est consigné).
-- Les textes de notes utilisateur ou de prescriptions personnalisées sont exclus du payload de crash.
+### 1. Ingestion Publique : `POST /api/telemetry`
+- **Authentification** : Publique (ouvert à tous les clients de l'application).
+- **Format du Payload** :
+```json
+{
+  "type": "uncaught_error",
+  "message": "TypeError: Cannot read properties of undefined (reading 'title')",
+  "stack": "TypeError: Cannot read properties of undefined...\n at renderWorkspace (app-E4JTYG42.js:45:12)",
+  "url": "https://drcat.is-an-app.workers.dev/index.html",
+  "device": {
+    "platform": "Android",
+    "model": "Lenovo Tab P12 Pro",
+    "screen": "2560x1600",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; ...)",
+    "appVersion": "1.19.0"
+  }
+}
+```
+- **Réponse** : `HTTP 200 { success: true, reportId: "inc_a7b9c4...", occurrences: 1 }`.
 
----
+### 2. Consultation Admin : `GET /api/admin/telemetry`
+- **Authentification** : `Bearer <ADMIN_TOKEN>` + Vérification Localhost.
+- **Réponse** : Liste complète des incidents triés par sévérité et date décroissante.
 
-## 🛠️ 5. Endpoints d'Exploitation & Administration
-
-- `POST /api/telemetry` : Endpoint public protégé par rate limiting (60 req/min).
-- `GET /api/admin/telemetry` : Consultation de la liste agrégée des incidents (Protégé par Token Admin + Localhost).
-- `DELETE /api/admin/telemetry/:id` : Acquittement et suppression d'un incident résolu.
-- `DELETE /api/admin/telemetry/all` : Vidage complet de l'historique des incidents.
-
----
-
-## 🔗 Liens & Documents Associés
-- 🛡️ [Sécurité & Isolation](file:///data/data/com.termux/files/home/med/docs/01-architecture/security-isolation.md)
-- 🛠️ [Guide de Dépannage & Runbook](file:///data/data/com.termux/files/home/med/docs/02-guides/troubleshooting-runbook.md)
-- 📜 [ADR-004 : Choix de la Télémétrie Auto-Hébergée](file:///data/data/com.termux/files/home/med/docs/04-decisions-adr/adr-004-sentry-grade-telemetry.md)
+### 3. Vidage Sécurisé : `DELETE /api/admin/telemetry/all`
+- **Authentification** : `Bearer <ADMIN_TOKEN>`.
+- **Action** : Purge intégrale des rapports résolus après déploiement d'un correctif.
