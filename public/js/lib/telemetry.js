@@ -214,6 +214,7 @@ export async function sendHeartbeatPing() {
 
   const device = collectDeviceInfo();
   const appVersion = getAppVersion();
+  const installId = getInstallId();
   const isCapacitor = !!window.Capacitor || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || navigator.userAgent.toLowerCase().includes('capacitor') || window.location.protocol === 'file:' || window.location.protocol.startsWith('capacitor');
   const isStandalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator?.standalone === true);
 
