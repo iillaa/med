@@ -13,5 +13,8 @@
       "binding": "SUGGESTIONS_KV",
       "id": "d569bf8299a545f182c9e6acedd4d6aa"
     }
-  ]
+  ],
+  "observability": {
+    "enabled": true
+  }
 }
