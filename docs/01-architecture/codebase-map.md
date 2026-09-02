@@ -112,6 +112,21 @@ graph TD
 
 ---
 
+### 2.5 Operational & Administration CLI Scripts (`scripts/` & Root)
+
+| CLI Entry / Script | Command Alias | Functional Scope |
+| :--- | :--- | :--- |
+| `set_admin_password.js` | `npm run set:password` | Sets/resets admin password with PBKDF2-SHA512 salted hashing. |
+| `scripts/update_domain.js`| `npm run set:domain -- <domain>` | Single-command domain migration across config, SEO & client. |
+| `set_server_provider.js` | `npm run set:provider` | Multi-gateway and fallback remote server priority configurator. |
+| `scripts/bump_version.js` | `npm run bump <version>` | Atomic version synchronizer (`package.json`, `gradle`, `version.json`, `worker.js`). |
+| `scripts/compress_pdfs.js`| `npm run compress:pdfs` | Ghostscript ultra-compression pipeline (96 DPI / JPEGQ 60). |
+| `index_pdfs.js` | `npm run reindex` | Master PDF indexing into `public/data/pdf_index.json`. |
+| `cat_db_generator/scripts/generate_quiz_cli.js` | CLI Docimology Generator | Multi-stage clinical quiz and MCQ vignette batch generation. |
+| Full Reference | [**CLI Commands Reference**](file:///data/data/com.termux/files/home/med/docs/03-reference/cli-commands-reference.md) | Exhaustive command ledger for all developer & admin operations. |
+
+---
+
 ## 3. Client State Machine Architecture (`public/js/state.js`)
 
 The client application manages state via a single observable store:

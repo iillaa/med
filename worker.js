@@ -4,6 +4,7 @@
 import { handleCorsPreflight } from './worker/cors.js';
 import { handleSuggestionsRoute } from './worker/routes/suggestions.js';
 import { handleTelemetryRoute } from './worker/routes/telemetry.js';
+import { handleActiveDevicesRoute } from './worker/routes/active-devices.js';
 import { handleStaticAliasRoute } from './worker/routes/static-alias.js';
 
 export default {
@@ -23,7 +24,11 @@ export default {
     const telemetryRes = await handleTelemetryRoute(request, env, url);
     if (telemetryRes) return telemetryRes;
 
-    // 4. Static Alias & Metadata Route Handler
+    // 4. Active Devices & Heartbeat Route Handler
+    const activeDevicesRes = await handleActiveDevicesRoute(request, env, url);
+    if (activeDevicesRes) return activeDevicesRes;
+
+    // 5. Static Alias & Metadata Route Handler
     const aliasRes = await handleStaticAliasRoute(request, env, url);
     if (aliasRes) return aliasRes;
 

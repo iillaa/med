@@ -575,6 +575,15 @@ async function bootstrapApp() {
 
   // Initialize Spiritual Douaa & Sadaqa Jariyah reminder
   initDouaaToast();
+
+  // Send non-blocking active device heartbeat & register 10-minute periodic keepalive
+  import('./lib/telemetry.js').then(m => {
+    if (m.sendHeartbeatPing) {
+      m.sendHeartbeatPing();
+      setInterval(() => m.sendHeartbeatPing(), 10 * 60 * 1000);
+      window.addEventListener('focus', () => m.sendHeartbeatPing());
+    }
+  }).catch(() => {});
 }
 
 if (document.readyState === 'loading') {

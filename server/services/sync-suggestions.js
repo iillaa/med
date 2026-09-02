@@ -96,6 +96,60 @@ async function purgeCloudflareSuggestion(id) {
 const CLOUDFLARE_TELEMETRY_URL = 'https://drcat.is-an-app.workers.dev/api/telemetry';
 const TELEMETRY_FILE = path.join(__dirname, '..', 'data', 'telemetry_reports.json');
 
+function getCloudflareBaseUrl() {
+  try {
+    const { getServers } = require('./server-providers-config');
+    const servers = getServers();
+    const cf = servers.find(s => s.provider === 'cloudflare') || servers.find(s => s.url && (s.url.includes('workers.dev') || s.url.includes('pages.dev')));
+    if (cf && cf.url) return cf.url.replace(/\/+$/, '');
+  } catch (_) {}
+  return 'https://drcat.is-an-app.workers.dev';
+}
+
+async function syncCloudflareActiveDevices() {
+  if (!process.env.SYNC_SECRET || process.env.NODE_ENV === 'test') return { success: false, synced: 0 };
+  const base = getCloudflareBaseUrl();
+  const url = `${base}/api/active-devices`;
+  return new Promise((resolve) => {
+    const req = https.get(url, { headers: syncHeaders(), timeout: 10000 }, (res) => {
+      let rawData = '';
+      res.on('data', chunk => rawData += chunk);
+      res.on('end', async () => {
+        try {
+          if (res.statusCode === 200) {
+            const parsed = JSON.parse(rawData);
+            const devices = parsed.devices || {};
+            const { recordExternalCloudDevices } = require('./active-devices');
+            const count = recordExternalCloudDevices(devices);
+            if (count > 0) {
+              console.log(`[CloudSync] Synced ${count} active device(s) from Cloudflare Edge KV.`);
+            }
+            resolve({ success: true, synced: count });
+            return;
+          }
+        } catch (_) {}
+        resolve({ success: false, synced: 0 });
+      });
+    });
+    req.setTimeout(10000, () => { req.destroy(); resolve({ success: false, synced: 0 }); });
+    req.on('error', () => resolve({ success: false, synced: 0 }));
+  });
+}
+
+async function resetCloudflareActiveDevices() {
+  if (!process.env.SYNC_SECRET) return { success: false };
+  const base = getCloudflareBaseUrl();
+  const url = `${base}/api/active-devices/reset`;
+  return new Promise((resolve) => {
+    const req = https.request(url, { method: 'POST', headers: syncHeaders(), timeout: 10000 }, (res) => {
+      resolve({ success: res.statusCode === 200 });
+    });
+    req.setTimeout(10000, () => { req.destroy(); resolve({ success: false }); });
+    req.on('error', () => resolve({ success: false }));
+    req.end();
+  });
+}
+
 async function syncCloudflareTelemetry() {
   if (!process.env.SYNC_SECRET || process.env.NODE_ENV === 'test') return;
   return new Promise((resolve) => {
@@ -138,5 +192,7 @@ module.exports = {
   syncCloudflareSuggestions,
   purgeCloudflareSuggestion,
   ackCloudflareSuggestions,
-  syncCloudflareTelemetry
+  syncCloudflareTelemetry,
+  syncCloudflareActiveDevices,
+  resetCloudflareActiveDevices
 };

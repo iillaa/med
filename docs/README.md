@@ -29,6 +29,7 @@ mindmap
       Runbook["🚒 Runbook de Dépannage & Incidents"]
     03-Reference["📐 03-Reference (Specifications)"]
       Schema["📄 Schéma JSON des Fiches (v3.5)"]
+      CLICommands["💻 Référence des Commandes CLI"]
       MatrixSpec["📊 Spécification 60 Master / 63 Sub-CATs"]
       APIMatrix["🌐 Matrice des Endpoints HTTP/REST"]
       Secrets["🔑 Inventaire des Secrets & .env"]
@@ -87,6 +88,7 @@ Fiches techniques exhaustives, contrats d'interface et dictionnaires de données
 | Référence | Contenu Détaillé |
 | :--- | :--- |
 | 📄 [**Schéma de Données des Fiches (v3.5)**](file:///data/data/com.termux/files/home/med/docs/03-reference/schema-cats-db.md) | Spécification JSON Schema formelle, champs requis, sous-fiches et historique. |
+| 💻 [**Référence des Commandes CLI**](file:///data/data/com.termux/files/home/med/docs/03-reference/cli-commands-reference.md) | Répertoire exhaustif des commandes CLI (mot de passe admin, PM2, IA, PDF Lab, tests, APK). |
 | 📊 [**Spécification Matrice 60-Master / 63-Sub-CAT**](file:///data/data/com.termux/files/home/med/docs/03-reference/master-subcats-matrix-spec.md) | Répartition par spécialité, identifiants normalisés et couverture médicale. |
 | 🌐 [**Matrice des Endpoints HTTP / REST**](file:///data/data/com.termux/files/home/med/docs/03-reference/api-endpoints-matrix.md) | Tableau exhaustif de toutes les routes, méthodes, charges utiles et statuts HTTP. |
 | 🔑 [**Inventaire des Variables & Secrets**](file:///data/data/com.termux/files/home/med/docs/03-reference/environment-secrets.md) | Variables `.env`, secrets Wrangler et constantes client avec niveau de criticité. |

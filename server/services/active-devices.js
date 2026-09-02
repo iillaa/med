@@ -82,9 +82,11 @@ function recordDeviceActivity(req) {
   
   // Explicit platform header from client takes precedence, otherwise fallback to UA
   const explicitPlat = req.headers['x-device-platform'] || req.headers['x-capacitor-platform'];
-  let platform = 'web_pwa';
+  let platform = 'web_browser';
   if (explicitPlat === 'android_apk' || explicitPlat === 'android' || ua.includes('capacitor')) {
     platform = 'android_apk';
+  } else if (explicitPlat === 'web_pwa') {
+    platform = 'web_pwa';
   }
 
   const isLocal = isLocalhostConnection(req);
@@ -118,6 +120,60 @@ function recordDeviceActivity(req) {
 }
 
 /**
+ * Merge external active devices synced from Cloudflare Worker KV into local store
+ */
+function recordExternalCloudDevices(cloudDevices = {}) {
+  if (!cloudDevices || typeof cloudDevices !== 'object') return 0;
+  let syncedCount = 0;
+
+  for (const [id, cDev] of Object.entries(cloudDevices)) {
+    if (!id || typeof id !== 'string' || !id.startsWith('drcat-inst-')) continue;
+
+    const existing = deviceMap.get(id);
+    if (!existing) {
+      deviceMap.set(id, {
+        installId: id,
+        firstSeen: cDev.firstSeen || new Date().toISOString(),
+        lastSeen: cDev.lastSeen || new Date().toISOString(),
+        appVersion: cDev.appVersion || '1.21.0',
+        platform: cDev.platform || 'web_pwa',
+        lastIp: cDev.lastIp || '',
+        country: cDev.country || 'DZ',
+        city: cDev.city || '',
+        screen: cDev.screen || '',
+        deviceModel: cDev.deviceModel || '',
+        requestCount: cDev.requestCount || 1,
+        isAdminDevice: false // External by default
+      });
+      syncedCount++;
+    } else {
+      // Merge newer fields from cloud
+      const cloudLastSeenTime = new Date(cDev.lastSeen).getTime() || 0;
+      const localLastSeenTime = new Date(existing.lastSeen).getTime() || 0;
+
+      if (cloudLastSeenTime > localLastSeenTime) {
+        existing.lastSeen = cDev.lastSeen;
+      }
+      if (cDev.appVersion) existing.appVersion = cDev.appVersion;
+      if (cDev.platform) existing.platform = cDev.platform;
+      if (cDev.country) existing.country = cDev.country;
+      if (cDev.city) existing.city = cDev.city;
+      if (cDev.screen) existing.screen = cDev.screen;
+      if (cDev.deviceModel) existing.deviceModel = cDev.deviceModel;
+      existing.requestCount = Math.max(existing.requestCount || 1, cDev.requestCount || 1);
+
+      deviceMap.set(id, existing);
+      syncedCount++;
+    }
+  }
+
+  if (syncedCount > 0) {
+    isDirty = true;
+  }
+  return syncedCount;
+}
+
+/**
  * Compute Active User Analytics (Real-Time Live, 1h Recent, DAU 24h, MAU 30j, Admin vs External)
  */
 function getDeviceAnalytics() {
@@ -145,6 +201,7 @@ function getDeviceAnalytics() {
 
   const versionDistribution = {};
   const platformDistribution = { android_apk: 0, web_pwa: 0 };
+  const countryDistribution = {};
   const deviceList = [];
 
   for (const [id, dev] of deviceMap.entries()) {
@@ -179,8 +236,12 @@ function getDeviceAnalytics() {
     const plat = dev.platform || 'web_pwa';
     platformDistribution[plat] = (platformDistribution[plat] || 0) + 1;
 
+    const country = dev.country || 'DZ';
+    countryDistribution[country] = (countryDistribution[country] || 0) + 1;
+
     deviceList.push({
       ...dev,
+      country,
       isLiveNow: diffMs <= FIVE_MIN_MS,
       isRecent1h: diffMs <= ONE_HOUR_MS
     });
@@ -203,7 +264,8 @@ function getDeviceAnalytics() {
     externalMau: externalMauCount,
     versionDistribution,
     platformDistribution,
-    recentDevices: deviceList.slice(0, 50),
+    countryDistribution,
+    recentDevices: deviceList.slice(0, 100),
     lastUpdated: new Date().toISOString()
   };
 }
@@ -242,6 +304,7 @@ function toggleAdminDevice(installId, isAdmin) {
 
 module.exports = {
   recordDeviceActivity,
+  recordExternalCloudDevices,
   getDeviceAnalytics,
   resetDeviceStore,
   toggleAdminDevice

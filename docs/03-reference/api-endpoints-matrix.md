@@ -68,7 +68,20 @@
 
 ---
 
+## 📊 6. Endpoints de Télémétrie Active & Appareils (Analytics Lab)
+
+| Méthode | Route | Rôle & Description | Authentification | Payload Requis | Réponse Type |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `POST`| `/api/active-devices/ping` | Heartbeat régulier d'un appareil (PWA / APK) | Public (`x-app-key`) | `{ installId, platform, appVersion, screen, deviceModel }` | `200 OK` (`{ success: true }`) |
+| `GET` | `/api/admin/active-devices` | Statistiques globales d'utilisation (DAU/MAU, pays, versions) | Localhost / Clé API | Aucun (Option: `?sync=true`) | `200 OK` (`{ analytics: { ... } }`) |
+| `POST`| `/api/admin/active-devices/sync-now` | Déclenche la synchronisation avec Cloudflare Edge KV | Localhost / Clé API | Aucun | `200 OK` (`{ syncedCount: N, analytics }`) |
+| `POST`| `/api/admin/active-devices/reset` | Réinitialise l'ensemble du registre local et Cloudflare | Localhost / Clé API | Aucun | `200 OK` (`{ success: true }`) |
+| `POST`| `/api/admin/active-devices/toggle-admin` | Bascule un appareil entre Développeur et Utilisateur Externe | Localhost / Clé API | `{ installId, isAdmin: boolean }` | `200 OK` (`{ success: true }`) |
+
+---
+
 ## 🔗 Liens & Documents Associés
 - 🛡️ [Architecture de Sécurité & Isolation](file:///data/data/com.termux/files/home/med/docs/01-architecture/security-isolation.md)
 - 🌐 [Architecture Réseau Dual-Rail](file:///data/data/com.termux/files/home/med/docs/01-architecture/dual-rail-network.md)
 - 📐 [Inventaire des Secrets & Environnements](file:///data/data/com.termux/files/home/med/docs/03-reference/environment-secrets.md)
+- 💻 [Référence Complète des Commandes CLI](file:///data/data/com.termux/files/home/med/docs/03-reference/cli-commands-reference.md)

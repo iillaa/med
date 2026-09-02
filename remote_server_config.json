@@ -10,6 +10,11 @@
       "url": "https://rendition-duchess-dry.ngrok-free.dev",
       "provider": "ngrok",
       "priority": 2
+    },
+    {
+      "url": "https://belief-specialist-bottles-universe.trycloudflare.com",
+      "provider": "cloudflare",
+      "priority": 3
     }
   ]
 }

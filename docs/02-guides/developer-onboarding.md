@@ -41,7 +41,17 @@ GEMINI_BLOCKLIST=preview,exp,experimental
 SYNC_SECRET=votre_cle_hex_identique_au_worker
 ```
 
-### Étape 3 : Installation des Dépendances
+### Étape 3 : Définition du Mot de Passe Administrateur
+Vous pouvez définir ou réinitialiser le mot de passe admin via la ligne de commande :
+```bash
+# Option A : Prompt interactif sécurisé
+npm run set:password
+
+# Option B : Définition directe en ligne de commande (hachage PBKDF2 automatique)
+node set_admin_password.js mon_mot_de_passe_123
+```
+
+### Étape 4 : Installation des Dépendances
 ```bash
 npm install
 ```
@@ -110,6 +120,7 @@ cd android && ./gradlew assembleRelease
 ---
 
 ## 🔗 Liens & Documents Associés
+- 💻 [Référence Complète des Commandes CLI](file:///data/data/com.termux/files/home/med/docs/03-reference/cli-commands-reference.md)
 - 🛡️ [Sécurité & Isolation Localhost](file:///data/data/com.termux/files/home/med/docs/01-architecture/security-isolation.md)
 - 📐 [Inventaire des Secrets & Variables d'Environnement](file:///data/data/com.termux/files/home/med/docs/03-reference/environment-secrets.md)
 - 📜 [Registre des Suites de Tests](file:///data/data/com.termux/files/home/med/docs/03-reference/test-suites-ledger.md)

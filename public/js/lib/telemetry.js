@@ -199,3 +199,78 @@ export function openMailtoFallback({ error, stack, logs, device, userNote }) {
     }
   }
 }
+
+let lastHeartbeatTimestamp = 0;
+
+/**
+ * Send lightweight non-blocking active device heartbeat
+ */
+export async function sendHeartbeatPing() {
+  if (typeof window === 'undefined') return;
+  const now = Date.now();
+  // Throttle to maximum once every 5 minutes
+  if (now - lastHeartbeatTimestamp < 5 * 60 * 1000) return;
+  lastHeartbeatTimestamp = now;
+
+  const device = collectDeviceInfo();
+  const appVersion = getAppVersion();
+  const isCapacitor = !!window.Capacitor || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || navigator.userAgent.toLowerCase().includes('capacitor') || window.location.protocol === 'file:' || window.location.protocol.startsWith('capacitor');
+  const isStandalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator?.standalone === true);
+
+  let platform = 'web_browser';
+  if (isCapacitor) {
+    platform = 'android_apk';
+  } else if (isStandalone) {
+    platform = 'web_pwa';
+  }
+
+  const payload = {
+    installId,
+    appVersion,
+    platform,
+    appMode: device.appMode,
+    screen: device.screen,
+    deviceModel: device.model,
+    timestamp: now
+  };
+
+  const endpoints = [];
+  if (window.api && typeof window.api.getConfiguredRemoteUrls === 'function') {
+    const list = window.api.getConfiguredRemoteUrls();
+    if (Array.isArray(list)) {
+      list.forEach(u => endpoints.push(`${u.replace(/\/+$/, '')}/api/active-devices/ping`));
+    }
+  }
+  if (window.REMOTE_SERVER_URLS && Array.isArray(window.REMOTE_SERVER_URLS)) {
+    window.REMOTE_SERVER_URLS.forEach(u => {
+      const pingUrl = `${u.replace(/\/+$/, '')}/api/active-devices/ping`;
+      if (!endpoints.includes(pingUrl)) endpoints.push(pingUrl);
+    });
+  }
+  endpoints.push('/api/active-devices/ping');
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-app-key': 'drcat_pub_2f7a91c4e8',
+          'x-install-id': installId,
+          'x-app-version': appVersion,
+          'x-device-platform': platform,
+          'ngrok-skip-browser-warning': 'true'
+        },
+        body: JSON.stringify(payload),
+        cache: 'no-store',
+        keepalive: true
+      });
+      if (res.ok) {
+        break;
+      }
+    } catch (_) {
+      // Gracefully continue to next endpoint
+    }
+  }
+}
+

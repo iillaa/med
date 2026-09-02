@@ -14,7 +14,7 @@
     * { box-sizing: border-box; }
     body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 16px; min-height: 100vh; }
     
-    .container { max-width: 1350px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
     
     /* Header Responsive Layout */
     .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; flex-wrap: wrap; gap: 12px; }
@@ -31,13 +31,17 @@
     .btn-outline:hover { color: var(--text); border-color: var(--primary); }
     .btn-success { background: var(--success); }
     .btn-danger { background: var(--danger); }
+    .btn-sync { background: linear-gradient(135deg, #06b6d4, #6366f1); color: white; }
 
     /* Key Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
     .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .stat-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
     .stat-val { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1; }
     .stat-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
+
+    /* Dual Grid for Panels */
+    .dual-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
     /* Panels */
     .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -51,7 +55,7 @@
 
     /* Mobile Table Scroll Container */
     .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); }
-    table { width: 100%; border-collapse: collapse; min-width: 750px; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
     th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 12px; white-space: nowrap; }
     th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; background: rgba(15,23,42,0.6); }
     tr:hover { background: rgba(255,255,255,0.02); }
@@ -60,7 +64,7 @@
     .badge-apk { background: rgba(61, 220, 132, 0.15); color: #3ddc84; border: 1px solid rgba(61, 220, 132, 0.3); }
     .badge-pwa { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
     
-    .install-id-code { font-family: monospace; font-size: 11px; color: var(--primary); background: rgba(6,182,212,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(6,182,212,0.2); max-width: 220px; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
+    .install-id-code { font-family: monospace; font-size: 11px; color: var(--primary); background: rgba(6,182,212,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(6,182,212,0.2); max-width: 200px; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle; }
 
     .progress-bar-container { background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px; overflow: hidden; margin-top: 6px; width: 100%; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--indigo)); border-radius: 3px; transition: width 0.4s ease; }
@@ -68,16 +72,17 @@
     /* Modal Inspection Dialog */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 16px; }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
-    .modal-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; max-width: 500px; width: 100%; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
+    .modal-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; max-width: 540px; width: 100%; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
 
-    /* Media Queries for Mobile Screens (< 600px) */
-    @media (max-width: 600px) {
+    /* Media Queries for Mobile Screens (< 768px) */
+    @media (max-width: 768px) {
       body { padding: 10px; }
       .header-title { font-size: 18px; }
       .header-actions { width: 100%; justify-content: space-between; }
       .btn { flex: 1; font-size: 11px; padding: 8px 10px; }
       .filter-input { flex: 1 1 100%; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .dual-panels { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -91,7 +96,7 @@
         <i class="fa-solid fa-chart-line"></i> Dr.CAT — Analytics Lab
       </h1>
       <div class="header-subtitle">
-        Télémétrie en temps réel des appareils installés (APK & PWA).
+        Télémétrie en temps réel des appareils installés (Cloudflare Edge, Android APK & Web PWA).
       </div>
     </div>
     
@@ -99,6 +104,10 @@
       <label style="font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;">
         <input type="checkbox" id="auto-refresh-check" onchange="toggleAutoRefresh(this.checked)"> Auto (10s)
       </label>
+
+      <button class="btn btn-sync" id="sync-edge-btn" onclick="syncCloudflareEdge()" title="Synchroniser avec le Cloudflare Worker KV">
+        <i class="fa-solid fa-cloud-arrow-down" id="sync-edge-icon"></i> Sync Edge KV
+      </button>
       
       <button class="btn btn-outline" onclick="loadAnalytics()">
         <i class="fa-solid fa-rotate"></i> Actualiser
@@ -136,9 +145,9 @@
         <i class="fa-solid fa-mobile-screen"></i>
       </div>
       <div>
-        <div class="stat-label">Utilisateurs Externe</div>
+        <div class="stat-label">Total Utilisateurs</div>
         <div class="stat-val" id="stat-total">0</div>
-        <div style="font-size: 10px; color: var(--text-muted);" id="stat-total-sub">0 dev / 0 total</div>
+        <div style="font-size: 10px; color: var(--text-muted);" id="stat-total-sub">0 externes / 0 total</div>
       </div>
     </div>
 
@@ -185,14 +194,28 @@
     </div>
   </div>
 
-  <!-- Version Distribution Panel -->
-  <div class="panel">
-    <div class="panel-header">
-      <h3 class="panel-title"><i class="fa-solid fa-code-branch"></i> Répartition des Versions</h3>
-      <span style="font-size: 11px; color: var(--text-muted);" id="version-dist-summary">--</span>
+  <!-- Dual Distribution Panels: Versions & Countries -->
+  <div class="dual-panels">
+    <!-- Version Distribution Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title"><i class="fa-solid fa-code-branch"></i> Répartition des Versions</h3>
+        <span style="font-size: 11px; color: var(--text-muted);" id="version-dist-summary">--</span>
+      </div>
+      <div id="version-dist-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+        <span style="color: var(--text-muted); font-size: 12px;">Chargement...</span>
+      </div>
     </div>
-    <div id="version-dist-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-      <span style="color: var(--text-muted); font-size: 12px;">Chargement...</span>
+
+    <!-- Country Distribution Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title"><i class="fa-solid fa-earth-africa"></i> Distribution Géographique (Pays)</h3>
+        <span style="font-size: 11px; color: var(--text-muted);" id="country-dist-summary">--</span>
+      </div>
+      <div id="country-dist-container" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <span style="color: var(--text-muted); font-size: 12px;">Chargement...</span>
+      </div>
     </div>
   </div>
 
@@ -205,37 +228,49 @@
 
     <!-- Filters Bar -->
     <div class="filter-bar">
-      <input type="text" id="search-input" class="filter-input" placeholder="🔍 Rechercher UUID, Version..." oninput="applyFilters()">
+      <input type="text" id="search-input" class="filter-input" placeholder="🔍 Rechercher UUID, Version, Pays..." oninput="applyFilters()">
       
       <select id="platform-filter" class="filter-input" onchange="applyFilters()">
         <option value="all">Toutes Plateformes</option>
         <option value="android_apk">Android APK 📱</option>
-        <option value="web_pwa">Web PWA 🌐</option>
+        <option value="web_pwa">PWA Installée 📲</option>
+        <option value="web_browser">Navigateur Web 🌐</option>
+      </select>
+
+      <select id="type-filter" class="filter-input" onchange="applyFilters()">
+        <option value="all">Tous Types</option>
+        <option value="external">Utilisateurs Externes 👤</option>
+        <option value="admin">Développeurs / Admin 👑</option>
       </select>
 
       <select id="activity-filter" class="filter-input" onchange="applyFilters()">
         <option value="all">Toutes Activités</option>
+        <option value="live">🟢 En Ligne (< 5 min)</option>
+        <option value="recent">⚡ Récent (< 1h)</option>
         <option value="dau">Actifs 24h (DAU)</option>
         <option value="mau">Actifs 30j (MAU)</option>
       </select>
     </div>
 
-    <!-- Responsive Scrollable Data Table -->
+    <!-- Responsive Scrollable Data Table with exact 10 columns -->
     <div class="table-responsive">
       <table id="device-table">
         <thead>
           <tr>
             <th>ID d'Installation (UUID)</th>
+            <th>Type</th>
+            <th>Statut</th>
             <th>Plateforme</th>
             <th>Version App</th>
+            <th>Pays / Origine</th>
             <th>Premier Accès</th>
             <th>Dernière Activité</th>
             <th>Requêtes</th>
-            <th>Inspecter</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="device-table-body">
-          <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Chargement du registre...</td></tr>
+          <tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Chargement du registre...</td></tr>
         </tbody>
       </table>
     </div>
@@ -272,7 +307,7 @@
 
     <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px;">
       Voulez-vous vraiment réinitialiser toutes les données d'appareils enregistrés et remettre les compteurs à zéro ?<br><br>
-      <strong style="color: var(--danger);">⚠️ Tous les enregistrements d'installations, DAU/MAU et compteurs de requêtes seront définitivement effacés.</strong>
+      <strong style="color: var(--danger);">⚠️ Tous les enregistrements d'installations locaux et Cloudflare Edge, DAU/MAU et compteurs de requêtes seront définitivement effacés.</strong>
     </div>
 
     <div style="display: flex; justify-content: flex-end; gap: 10px;">

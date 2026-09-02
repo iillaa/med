@@ -119,3 +119,43 @@ stateDiagram-v2
   }
 ]
 ```
+
+---
+
+## 5. Active Devices Telemetry & Analytics Lab Architecture
+
+Dr.CAT tracks active devices and audience adoption globally across Cloudflare Edge and local Termux instances without storing any PII.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as 📱 Android APK / 🌐 Web PWA
+    participant Worker as ⚡ Cloudflare Edge (worker.js)
+    participant KV as 🗄️ SUGGESTIONS_KV (active_devices)
+    participant Termux as 💻 Termux Server (active_devices.json)
+    actor Admin as 🩺 Dr. Ali (Analytics Lab)
+
+    Client->>Worker: POST /api/active-devices/ping (UUID, Version, Screen, Platform)
+    Worker->>KV: Update record + extract cf-ipcountry (e.g. DZ, FR)
+    Admin->>Termux: Access /admin/analytics_lab.html
+    Termux->>Worker: GET /api/active-devices (x-sync-secret)
+    Worker-->>Termux: Returns aggregated edge active devices
+    Termux->>Termux: Merge into local active_devices.json
+    Termux-->>Admin: Displays Live Users, DAU, MAU, Platform & Country distribution
+```
+
+### 5.1 Telemetry Ping Payload (`POST /api/active-devices/ping`)
+* **Headers**: `x-app-key`, `x-install-id`, `x-app-version`, `x-device-platform`
+* **Body**:
+```json
+{
+  "installId": "drcat-inst-f5f822b5-4c26-49c6-9e33-86a8a2fe8b1d",
+  "appVersion": "1.21.0",
+  "platform": "android_apk",
+  "screen": "1200x2000 (dpr: 2)",
+  "deviceModel": "Samsung Galaxy",
+  "timestamp": 1788375600000
+}
+```
+* **Edge Processing**: Cloudflare extracts `request.cf.country` (GeoIP) to populate country metrics (`🇩🇿 Algérie`, `🇫🇷 France`, etc.) without exposing client IP addresses.
+

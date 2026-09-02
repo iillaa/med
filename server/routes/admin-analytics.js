@@ -13,8 +13,23 @@ function isValidApiKey(provided) {
   }
 }
 
+const { syncCloudflareActiveDevices, resetCloudflareActiveDevices } = require('../services/sync-suggestions');
+
 function registerAdminAnalyticsRoutes(app, cache) {
-  app.get('/api/admin/active-devices', (req, res) => {
+  // Public Heartbeat Ping endpoint (Local / Tunnel fallback)
+  app.post(['/api/active-devices/ping', '/api/telemetry/heartbeat'], (req, res) => {
+    try {
+      const installId = req.body?.installId || req.headers['x-install-id'];
+      if (!installId || !installId.startsWith('drcat-inst-')) {
+        return res.status(400).json({ error: "Identifiant d'installation invalide." });
+      }
+      res.json({ success: true, message: 'Heartbeat enregistré.' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/admin/active-devices', async (req, res) => {
     const isApiKeyValid = isValidApiKey(req.headers['x-api-key']);
     const isLocal = isLocalhostConnection(req);
     const isAdmin = cache ? isAdminRequest(req, cache.activeTokens || new Set()) : false;
@@ -24,6 +39,11 @@ function registerAdminAnalyticsRoutes(app, cache) {
     }
 
     try {
+      // Auto-sync from Cloudflare KV if requested or in production mode
+      if (req.query.sync === 'true' || req.headers['x-sync-cloud'] === 'true') {
+        await syncCloudflareActiveDevices();
+      }
+
       const analytics = getDeviceAnalytics();
       res.json({
         success: true,
@@ -35,7 +55,31 @@ function registerAdminAnalyticsRoutes(app, cache) {
     }
   });
 
-  app.post('/api/admin/active-devices/reset', (req, res) => {
+  app.post('/api/admin/active-devices/sync-now', async (req, res) => {
+    const isApiKeyValid = isValidApiKey(req.headers['x-api-key']);
+    const isLocal = isLocalhostConnection(req);
+    const isAdmin = cache ? isAdminRequest(req, cache.activeTokens || new Set()) : false;
+
+    if (!isApiKeyValid && !isAdmin && !isLocal) {
+      return res.status(401).json({ error: 'Accès non autorisé. Clé API (x-api-key) ou session admin requise.' });
+    }
+
+    try {
+      const result = await syncCloudflareActiveDevices();
+      const analytics = getDeviceAnalytics();
+      res.json({
+        success: true,
+        syncedCount: result.synced || 0,
+        message: `Synchronisation réussie avec Cloudflare Edge (${result.synced || 0} appareils synchronisés).`,
+        analytics
+      });
+    } catch (err) {
+      console.error('[AdminAnalytics] Error syncing active devices from Cloudflare:', err);
+      res.status(500).json({ error: 'Erreur lors de la synchronisation avec Cloudflare.' });
+    }
+  });
+
+  app.post('/api/admin/active-devices/reset', async (req, res) => {
     const isApiKeyValid = isValidApiKey(req.headers['x-api-key']);
     const isLocal = isLocalhostConnection(req);
     const isAdmin = cache ? isAdminRequest(req, cache.activeTokens || new Set()) : false;
@@ -46,6 +90,7 @@ function registerAdminAnalyticsRoutes(app, cache) {
 
     try {
       const result = resetDeviceStore();
+      await resetCloudflareActiveDevices();
       res.json(result);
     } catch (err) {
       console.error('[AdminAnalytics] Error resetting device telemetry store:', err);

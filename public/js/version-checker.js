@@ -296,9 +296,13 @@
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 4000);
 
+          const installId = storageGet('dr_cat_install_id') || 'drcat-inst-boot-check';
           const res = await fetch(versionUrl, {
             headers: {
               'X-App-Version': CLIENT_VERSION,
+              'X-Install-ID': installId,
+              'x-install-id': installId,
+              'x-device-platform': isNativeApk ? 'android_apk' : 'web_pwa',
               'x-app-key': 'drcat_pub_2f7a91c4e8',
               'ngrok-skip-browser-warning': 'true'
             },
