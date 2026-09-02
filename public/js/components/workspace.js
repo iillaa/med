@@ -357,6 +357,8 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
         setTimeout(() => {
           copyPrescriptionBtn.innerHTML = originalHtml;
         }, 1800);
+      }).catch(err => {
+        showToast("Impossible de copier automatiquement dans le presse-papier.", "fa-triangle-exclamation", 2500);
       });
     });
   }
