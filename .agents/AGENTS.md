@@ -118,3 +118,18 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
 - New quality tools:
   - `npm run generate -- --canary` — dosage-parser self-test, runs automatically at the start of every `--rebuild-all`. If canaries fail, prompt-format ↔ validator parsing is broken.
   - `npm run generate -- --golden [--limit N]` — re-generates 5 fixed clinical cases from `cat_db_generator/golden_set.json` and scores clinical expectations (catches silent QUALITY drift that schema validation cannot see).
+
+# Verification Discipline: Manual Review & Static Tracing Protocol
+
+## Mandatory Manual Code Review & Anti-Laziness Rule
+- **CRITICAL**: Automated test suites (`npm run test:suite`, `test_*.js`) are a **safety net for backend/API regressions, NOT a substitute for manual verification and static code analysis**.
+- **Automated Test Blind Spots**:
+  1. Automated tests run in headless Node.js, NOT in a real browser DOM / Capacitor WebView.
+  2. Automated tests execute isolated backend functions with mocked inputs; they DO NOT exercise client runtime scopes, lifecycle imports, or event-driven UI state in `public/js/`.
+  3. A 100% green test suite (`11/11 Passed`) does NOT guarantee that the frontend runtime is bug-free (e.g., missing variable declarations like `installId is not defined`).
+- **Mandatory Manual Checklist Before Declaring Any Task Done**:
+  1. **Variable Scope & Import Trace**: Manually inspect all modified functions line-by-line. Ensure every referenced identifier, parameter, imported symbol, and `localStorage` accessor is explicitly defined in scope.
+  2. **Mental Dry-Run & Runtime Simulation**: Mentally step through the call stack on both cold app startup (fresh install / empty storage) and warm re-entry (existing storage).
+  3. **Dual-Environment Validation**: Verify that platform-conditional branches correctly isolate `android_apk` (native Capacitor), `web_pwa` (`display-mode: standalone`), and `web_browser` (standard tab).
+  4. **No Premature Victory**: Never present a green automated test pass as proof that frontend UI code works without having completed the manual line-by-line review.
+
