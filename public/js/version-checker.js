@@ -153,17 +153,17 @@
 
     const isOffline = !!options.offlineMode;
 
-    // Only allow http(s) URLs from the version config into href attributes
+    // Only allow http(s) or root-relative URLs from the version config into href attributes
     function safeUrl(url, fallback) {
       const value = typeof url === 'string' ? url.trim() : '';
-      return /^https?:\/\//i.test(value) ? escapeHTML(value) : fallback;
+      return (/^https?:\/\//i.test(value) || /^\//.test(value)) ? escapeHTML(value) : fallback;
     }
 
     const notesHtml = (Array.isArray(notes) ? notes : []).map(n => `<li>${escapeHTML(n)}</li>`).join('');
 
-    const storeUrl = safeUrl(links.storeUrl || links.apkpureUrl || links.uptodownUrl, 'https://apkpure.com/p/com.drcat.app');
+    const storeUrl = safeUrl(links.storeUrl || links.apkpureUrl || links.uptodownUrl, '/download.html');
     const telegramUrl = safeUrl(links.telegramUrl, 'https://t.me/DrCatOfficialApp');
-    const directUrl = safeUrl(links.directServerUrl, 'https://apkpure.com/p/com.drcat.app');
+    const directUrl = safeUrl(links.directServerUrl, '/download.html');
 
     const buttonsHtml = `
       <a href="${storeUrl}" target="_blank" rel="noopener" class="btn-update store" data-update-link="store" id="lock-btn-store">

@@ -3,10 +3,10 @@
     "drcat-inst-f5f822b5-4c26-49c6-9e33-86a8a2fe8b1d": {
       "installId": "drcat-inst-f5f822b5-4c26-49c6-9e33-86a8a2fe8b1d",
       "firstSeen": "2026-09-02T18:40:06.584Z",
-      "requestCount": 105,
+      "requestCount": 139,
       "appVersion": "1.22.0",
       "platform": "web_pwa",
-      "lastSeen": "2026-09-02T20:03:34.298Z",
+      "lastSeen": "2026-09-02T22:39:26.678Z",
       "lastIp": "::1",
       "isAdminDevice": true
     },
@@ -77,7 +77,21 @@
       "lastSeen": "2026-09-02T20:02:10.585Z",
       "lastIp": "154.121.138.146",
       "isAdminDevice": false
+    },
+    "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956": {
+      "installId": "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956",
+      "firstSeen": "2026-09-02T20:01:23.124Z",
+      "lastSeen": "2026-09-02T20:01:23.124Z",
+      "appVersion": "1.22.0",
+      "platform": "web_browser",
+      "lastIp": "",
+      "country": "DZ",
+      "city": "Ouargla",
+      "screen": "1385x731 (dpr: 2.125)",
+      "deviceModel": "Linux",
+      "requestCount": 1,
+      "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-09-02T20:03:36.695Z"
+  "lastUpdated": "2026-09-02T22:39:33.706Z"
 }

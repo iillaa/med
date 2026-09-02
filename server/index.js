@@ -297,6 +297,10 @@ app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'drcat_logo.png'));
 });
 
+app.get(['/download', '/app'], (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'download.html'));
+});
+
 // Simple x-app-key guard for static data files (cats_db.json, pdf_index.json, etc.)
 const { APP_DATA_KEY } = require('./config/constants');
 app.use('/data', (req, res, next) => {

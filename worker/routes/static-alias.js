@@ -60,5 +60,12 @@ export async function handleStaticAliasRoute(request, env, url) {
     });
   }
 
+  // 7. GET /download or /app -> Serves /download.html
+  if (url.pathname === '/download' || url.pathname === '/app') {
+    if (env && env.ASSETS) {
+      return env.ASSETS.fetch(new URL('/download.html', request.url));
+    }
+  }
+
   return null;
 }
