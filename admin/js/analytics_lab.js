@@ -69,8 +69,13 @@ async function loadAnalytics(autoSync = false) {
     document.getElementById('stat-mau').textContent = data.mau || 0;
     document.getElementById('stat-mau-sub').textContent = `${data.externalMau || 0} externes en 30j`;
     
-    document.getElementById('stat-apk').textContent = data.platformDistribution?.android_apk || 0;
-    document.getElementById('stat-pwa').textContent = data.platformDistribution?.web_pwa || 0;
+    const apkCount = data.platformDistribution?.android_apk || 0;
+    const pwaCount = data.platformDistribution?.web_pwa || 0;
+    const webCount = data.platformDistribution?.web_browser || 0;
+    document.getElementById('stat-apk').textContent = apkCount;
+    document.getElementById('stat-pwa').textContent = pwaCount + webCount;
+    const pwaSub = document.getElementById('stat-pwa-sub');
+    if (pwaSub) pwaSub.textContent = `${pwaCount} pwa / ${webCount} web`;
 
     rawDeviceList = data.recentDevices || [];
 
@@ -258,10 +263,17 @@ function inspectDevice(id) {
   if (!dev) return;
 
   const modalContent = document.getElementById('modal-content');
+  const platformLabels = {
+    'android_apk': 'Android APK (Application Native)',
+    'web_pwa': 'PWA Installée (Écran d\'accueil / Standalone)',
+    'web_browser': 'Navigateur Web (Onglet Chrome/Safari/Firefox)'
+  };
+  const platDesc = platformLabels[dev.platform] || 'Navigateur Web';
+
   modalContent.innerHTML = `
     <div><strong>Installation ID :</strong> <div class="install-id-code" style="max-width:100%; margin-top:4px; white-space:normal;">${dev.installId}</div></div>
     <div><strong>Type Appareil :</strong> ${dev.isAdminDevice ? '👑 Appareil Développeur / Admin' : '👤 Utilisateur Externe'}</div>
-    <div><strong>Plateforme :</strong> ${dev.platform === 'android_apk' ? 'Android APK (Application Native)' : 'Web PWA (Navigateur / Cloudflare CDN)'}</div>
+    <div><strong>Plateforme :</strong> ${platDesc}</div>
     <div><strong>Version Installée :</strong> v${dev.appVersion || '1.21.0'}</div>
     <div><strong>Pays & Région :</strong> ${getCountryBadge(dev.country)} ${dev.city ? `(${dev.city})` : ''}</div>
     <div><strong>Modèle / Appareil :</strong> ${dev.deviceModel || 'Standard Web Client'}</div>

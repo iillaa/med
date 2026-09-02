@@ -4,6 +4,7 @@
  */
 
 import { safeGetItem } from './safeStorage.js';
+import { getInstallId } from '../install-id.js';
 
 export const SUPPORT_EMAIL = 'airdrop257@gmail.com';
 
@@ -55,12 +56,7 @@ export function getAppVersion() {
   return meta ? meta.getAttribute('content') : '1.15.2';
 }
 
-/**
- * Get Install ID from safe storage
- */
-export function getInstallId() {
-  return safeGetItem('dr_cat_install_id') || 'unknown';
-}
+export { getInstallId };
 
 /**
  * Generate a deterministic fingerprint for an error

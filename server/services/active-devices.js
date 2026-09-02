@@ -200,7 +200,7 @@ function getDeviceAnalytics() {
   let externalMauCount = 0;
 
   const versionDistribution = {};
-  const platformDistribution = { android_apk: 0, web_pwa: 0 };
+  const platformDistribution = { android_apk: 0, web_pwa: 0, web_browser: 0 };
   const countryDistribution = {};
   const deviceList = [];
 

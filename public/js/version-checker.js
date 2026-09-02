@@ -297,12 +297,15 @@
           const timeoutId = setTimeout(() => controller.abort(), 4000);
 
           const installId = storageGet('dr_cat_install_id') || 'drcat-inst-boot-check';
+          const isStandalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator?.standalone === true);
+          const clientPlatform = isNativeApk ? 'android_apk' : (isStandalone ? 'web_pwa' : 'web_browser');
+
           const res = await fetch(versionUrl, {
             headers: {
               'X-App-Version': CLIENT_VERSION,
               'X-Install-ID': installId,
               'x-install-id': installId,
-              'x-device-platform': isNativeApk ? 'android_apk' : 'web_pwa',
+              'x-device-platform': clientPlatform,
               'x-app-key': 'drcat_pub_2f7a91c4e8',
               'ngrok-skip-browser-warning': 'true'
             },
