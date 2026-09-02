@@ -26,7 +26,7 @@
      ```bash
      curl -s -o /dev/null -w "%{http_code}\n" \
        -H "x-sync-secret: $(grep '^SYNC_SECRET=' .env | cut -d= -f2)" \
-       https://drcat.dr-cat.workers.dev/api/suggestions
+        https://drcat.is-an-app.workers.dev/api/suggestions
      # Doit retourner 200 OK
      ```
 

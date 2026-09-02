@@ -284,17 +284,17 @@ shortcuts/stop_med.sh     # Clean shutdown
 
 ---
 
-## ⚡ Architecture Serverless Cloudflare Edge & Protocole ACK (v1.12.0)
+## ⚡ Architecture Serverless Cloudflare Edge & Protocole ACK (v1.19.0)
 
 ### ☁️ Moteur Edge Cloudflare Workers (`worker.js` & `wrangler.jsonc`)
-- **Execution 24/7 sur Edge Cloudflare** : `https://drcat.dr-cat.workers.dev` exécute nativement les endpoints `/api/suggestions`, `/api/server-providers`, `/api/search-status`, et `/api/version` en ~90ms (**HTTP 200 OK**) sans nécessiter que le serveur Termux soit en ligne.
+- **Execution 24/7 sur Edge Cloudflare** : `https://drcat.is-an-app.workers.dev` exécute nativement les endpoints `/api/suggestions`, `/api/server-providers`, `/api/search-status`, et `/api/version` en ~90ms (**HTTP 200 OK**) sans nécessiter que le serveur Termux soit en ligne.
 - **Stockage Cloudflare KV (`SUGGESTIONS_KV`)** : Les suggestions soumises par les utilisateurs du monde entier sont enregistrées 24h/24 dans la base clé-valeur Cloudflare (`d569bf8299a545f182c9e6acedd4d6aa`).
 - **Serveurs Multi-Fournisseurs avec Basculement** :
-  - **Priorité 1 (Primaire)** : `https://rendition-duchess-dry.ngrok-free.dev` (Tunnel Ngrok Termux — serveur dynamique complet)
-  - **Priorité 2 (Secondaire)** : Tunnel `trycloudflare.com` (backup Termux)
-  - **Fallback statique** : `https://drcat.dr-cat.workers.dev` (Edge Cloudflare, toujours en ligne)
+  - **Priorité 1 (Primaire)** : `https://drcat.is-an-app.workers.dev` (Edge Cloudflare, permanent 24/7)
+  - **Priorité 2 (Secondaire)** : `https://rendition-duchess-dry.ngrok-free.dev` (Tunnel Ngrok Termux — serveur dynamique complet)
+  - **Priorité 3 (Tertiaire)** : Tunnel `trycloudflare.com` (backup Termux)
 - **Version Kill-Switch Auto-Timbrée** : `build.js` met automatiquement à jour le champ `version` de `/api/version` dans `worker.js` depuis `package.json` à chaque build. Le champ `minVersion` reste contrôlé manuellement (levier de mise à jour forcée).
-- **Passerelle Domaine Public & Redirection** : `http://www.drcat.qd.je` (et `http://drcat.qd.je`) redirige en mode cloqué vers `https://drcat.dr-cat.workers.dev` via FreeDNS / DigitalPlat (renouvellement gratuit annuel à effectuer avant le 25 août 2027, idéalement vers juillet 2027).
+- **Passerelle Domaine Public & Redirection** : `http://www.drcat.qd.je` (et `http://drcat.qd.je`) redirige en mode cloqué vers `https://drcat.is-an-app.workers.dev` via FreeDNS / DigitalPlat.
 
 ### 🔒 Sécurisation du Relay Cloudflare (v1.12.0 — Audit 0x-alpha)
 - **Routes serveur-à-serveur verrouillées** : `GET /api/suggestions`, `POST /api/suggestions/ack` et `DELETE /api/suggestions/:id` exigent l'en-tête `x-sync-secret` (comparaison timing-safe SHA-256). Sans lui → **403**.
@@ -317,10 +317,11 @@ L'audit sécurité complet (13 vulnérabilités corrigées : clé API codée en 
 
 ---
 
-## 📄 Documentation de Référence
+## 📄 Documentation de Référence & Architecture
 
-Consultez les fichiers suivants pour plus de détails techniques :
-* [Architecture Technique](file:///data/data/com.termux/files/home/med/docs/technical_architecture.md) — Choix techniques, sécurité et gestion des données hors-ligne.
-* [Guide du Développeur](file:///data/data/com.termux/files/home/med/docs/developer_guide.md) — Workflow Git, commandes CLI et configuration.
-* [Plan du Code (Codemap)](file:///data/data/com.termux/files/home/med/docs/codemap.md) — Organisation des fichiers et dossiers.
-* [Leçons Apprises](file:///data/data/com.termux/files/home/med/docs/lessons_learned.md) — Erreurs évitées et astuces techniques de débogage.
+Consultez la documentation complète organisée selon le modèle Diátaxis :
+* 🗺️ **[Carte du Codebase (Living Codebase Map)](file:///data/data/com.termux/files/home/med/docs/01-architecture/codebase-map.md)** — Arborescence vivante, rôles des composants et flux de données.
+* 🌐 **[Guide de Migration de Domaine](file:///data/data/com.termux/files/home/med/docs/02-guides/domain-migration-checklist.md)** — Checklist et automatisation `set:domain`.
+* ⚡ **[Déploiement Cloudflare Wrangler](file:///data/data/com.termux/files/home/med/docs/02-guides/cloudflare-wrangler-deploy.md)** — Guide de déploiement Edge 24/7.
+* 📱 **[Compilation Android APK](file:///data/data/com.termux/files/home/med/docs/02-guides/compiling-android-apk.md)** — Build Capacitor et hardening des assets.
+* 🩺 **[Génération & Validation des CATs](file:///data/data/com.termux/files/home/med/docs/02-guides/generating-validating-cats.md)** — Pipeline IA et canaries de posologie.

@@ -48,12 +48,13 @@ SYNC_SECRET=<MEME_CLE_HEXADECIMALE>
 ### 3. Test de Vérification de Parité
 ```bash
 # Sans secret : doit retourner 403 Forbidden
-curl -s -o /dev/null -w "%{http_code}\n" https://drcat.dr-cat.workers.dev/api/suggestions
+curl -s -o /dev/null -w "%{http_code}\n" https://drcat.is-an-app.workers.dev/api/suggestions
+# Doit renvoyer : 403
 
-# Avec le secret local : doit retourner 200 OK
-curl -s -o /dev/null -w "%{http_code}\n" \
-  -H "x-sync-secret: $(grep '^SYNC_SECRET=' .env | cut -d= -f2)" \
-  https://drcat.dr-cat.workers.dev/api/suggestions
+# 2. Test avec secret (doit réussir) :
+curl -s -H "x-sync-secret: $(grep '^SYNC_SECRET=' .env | cut -d= -f2)" \
+  https://drcat.is-an-app.workers.dev/api/suggestions
+# Doit renvoyer : 200 [] (ou la liste des suggestions)
 ```
 
 ---
@@ -75,7 +76,7 @@ La sortie confirme l'upload du worker et des assets statiques :
 ```text
 Uploaded drcat (1.23 sec)
 Deployed drcat triggers (0.15 sec)
-  https://drcat.dr-cat.workers.dev
+  https://drcat.is-an-app.workers.dev
 Current Version ID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 

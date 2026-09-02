@@ -32,7 +32,17 @@ Whenever completing work on code updates, bug fixes, performance improvements, o
      > - *Would you like me to update `package.json` and stamp the build with `1.0.1` now?*
 3. **Server-Controlled Force Update Gate**:
    - App update enforcement is controlled via server configuration (`version.json` / Admin API).
-   - When `forceUpdateActive` is set to `true` on the server and client version < `minVersion`, the server signals a mandatory app update to clients (Android APK & PWA).
+# Living Documentation & Codebase Map Protocol
+
+## Mandatory Proactive Documentation Maintenance Rule
+- **CRITICAL**: Code changes and documentation MUST NEVER drift apart.
+- **Trigger**: Whenever completing work on new architectural features, CLI scripts, UI components, database schemas, API endpoints, or infrastructure (Cloudflare / Android / CI):
+  1. **Proactive Documentation Sync**: Gemini MUST proactively identify and update the corresponding documentation files in `docs/`, `README.md`, `llms.txt`, and architecture diagrams without waiting for the user to remind it.
+  2. **Living Codebase Map**: Maintain [`docs/01-architecture/codebase-map.md`](file:///data/data/com.termux/files/home/med/docs/01-architecture/codebase-map.md) as the single source of truth for repository structure, module roles, CLI commands, and data flow.
+  3. **Mandatory Documentation Sync Status**: At the conclusion of every non-trivial task (alongside the App Version Proposal), Gemini MUST explicitly report documentation status:
+     > 📚 **Documentation Status**:
+     > - **Updated**: `README.md`, `docs/01-architecture/codebase-map.md` (Updated with new features / CLI scripts)
+     > - *All documentation is 100% in sync with the codebase.*
 
 # Security Lock Gate & User Storage Protection Protocol
 
