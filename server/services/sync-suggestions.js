@@ -5,7 +5,7 @@ const { state: cache } = require('./cache');
 const { safeWriteJsonAsync } = require('./data-store');
 
 const SUGGESTIONS_FILE = path.join(__dirname, '..', '..', 'suggestions.json');
-const CLOUDFLARE_URL = 'https://drcat.dr-cat.workers.dev/api/suggestions';
+const CLOUDFLARE_URL = 'https://drcat.is-an-app.workers.dev/api/suggestions';
 
 // Shared secret for worker server-to-server routes (set in .env AND Cloudflare Worker vars)
 function syncHeaders(extra = {}) {
@@ -93,7 +93,7 @@ async function purgeCloudflareSuggestion(id) {
   });
 }
 
-const CLOUDFLARE_TELEMETRY_URL = 'https://drcat.dr-cat.workers.dev/api/telemetry';
+const CLOUDFLARE_TELEMETRY_URL = 'https://drcat.is-an-app.workers.dev/api/telemetry';
 const TELEMETRY_FILE = path.join(__dirname, '..', 'data', 'telemetry_reports.json');
 
 async function syncCloudflareTelemetry() {

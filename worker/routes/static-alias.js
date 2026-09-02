@@ -37,7 +37,7 @@ export async function handleStaticAliasRoute(request, env, url) {
     return jsonResponse({
       primaryProvider: "cloudflare",
       servers: [
-        { url: "https://drcat.dr-cat.workers.dev", provider: "cloudflare", priority: 1 }
+        { url: "https://drcat.is-an-app.workers.dev", provider: "cloudflare", priority: 1 }
       ]
     });
   }

@@ -48,7 +48,7 @@ jobs:
           import os, json
           secret = os.environ.get("REMOTE_SERVER_URL_SECRET", "").strip()
           primary_url = secret if secret else "https://rendition-duchess-dry.ngrok-free.dev"
-          urls = [primary_url, "https://drcat.dr-cat.workers.dev"]
+          urls = [primary_url, "https://drcat.is-an-app.workers.dev"]
           with open("remote_server_config.json", "w") as f:
               json.dump({"primaryProvider": "ngrok", "urls": urls}, f, indent=2)
           '
@@ -174,7 +174,7 @@ jobs:
             - Téléchargez le fichier **`DrCAT-v${{ steps.artifact_path.outputs.version }}.apk`** ci-dessous pour l'installer directement sur votre smartphone Android.
 
             ### 🌐 Application Web Client
-            - Accessible 24h/24 via Cloudflare Edge : https://drcat.dr-cat.workers.dev
+            - Accessible 24h/24 via Cloudflare Edge : https://drcat.is-an-app.workers.dev
           files: ${{ steps.artifact_path.outputs.path }}
           make_latest: true
         env:

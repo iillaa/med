@@ -6,7 +6,7 @@
 Dr.CAT fournit des algorithmes décisionnels d'urgence, des fiches de conduite à tenir (CAT) structurées (symptômes, diagnostics différentiels, examens complémentaires, posologies et orientations), des calculateurs cliniques et un système de répétition espacée (Leitner) pour l'apprentissage continu.
 
 ## URL Principale
-- Site Web & PWA : https://drcat.dr-cat.workers.dev
+- Site Web & PWA : https://drcat.is-an-app.workers.dev
 - Dépôt de Référence : https://github.com/iillaa/med
 
 ## Fonctionnalités Clés

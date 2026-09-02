@@ -2,7 +2,7 @@
   "primaryProvider": "cloudflare",
   "servers": [
     {
-      "url": "https://drcat.dr-cat.workers.dev",
+      "url": "https://drcat.is-an-app.workers.dev",
       "provider": "cloudflare",
       "priority": 1
     },

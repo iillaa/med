@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/suggestions/ack
 
-Sitemap: https://drcat.dr-cat.workers.dev/sitemap.xml
+Sitemap: https://drcat.is-an-app.workers.dev/sitemap.xml
