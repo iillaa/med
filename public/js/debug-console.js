@@ -10,7 +10,21 @@ let originalConsole = {};
 // ── Capture Helpers ──────────────────────────────────────────
 function addLog(level, args, meta = {}) {
   const timestamp = new Date().toLocaleTimeString('fr-FR', { hour12: false });
-  const message = args.map(arg => {
+  // Strip %c format directives and trailing CSS style strings for clean mobile overlay rendering
+  let cleanArgs = args;
+  if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('%c')) {
+    cleanArgs = args
+      .map((arg, idx) => {
+        if (idx === 0 && typeof arg === 'string') return arg.replace(/%c/g, '');
+        if (typeof arg === 'string' && /^\s*(color|font|background|padding|border|margin):/i.test(arg.trim())) {
+          return null;
+        }
+        return arg;
+      })
+      .filter(a => a !== null);
+  }
+
+  const message = cleanArgs.map(arg => {
     if (arg instanceof Error) return arg.message + '\n' + arg.stack;
     if (typeof arg === 'object') {
       try { return JSON.stringify(arg); } catch (_) { return String(arg); }

@@ -57,6 +57,7 @@ graph TD
 | `public/js/api.js` | `fetchCats()`, `getApiUrl()` | `remote_config.js` | HTTP transport layer handling multi-rail fallback, retries, and network headers. |
 | `public/js/version-checker.js`| `initVersionChecker()`| `api.js` | Boot-time update verification and non-destructive Security Lock Gate. |
 | `public/js/utils.js` | `sanitize()`, `parseMd()`| None | Markdown parser, XSS sanitizer, and DOM string manipulation utilities. |
+| `public/js/lib/safeStorage.js` | `safeGetItem()`, `safeSetItem()` | `memoryStorage` | Protected localStorage wrapper with LRU eviction and AES-style XOR base64 obfuscation for offline database cache. |
 | `public/js/debug-console.js` | `initDebugConsole()` | `api.js` | On-screen diagnostics overlay for inspecting logs directly on Android devices. |
 
 #### UI Component Tree (`public/js/components/`)

@@ -650,6 +650,26 @@ async function bootstrapApp() {
       }
     }
   });
+
+  // ── Protection C : Attribution Automatique au Presse-Papier ──
+  document.addEventListener('copy', (e) => {
+    const selection = window.getSelection();
+    if (!selection) return;
+    const selectedText = selection.toString();
+    if (!selectedText || selectedText.trim().length <= 60) return;
+
+    // Preserve raw copy when inside input, textarea or contenteditable
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+      return;
+    }
+
+    const attribution = "\n\n— Source : Dr.CAT (Dr. Kibeche Ali Dia Eddine) | https://drcat.is-an-app.workers.dev";
+    if (e.clipboardData) {
+      e.clipboardData.setData('text/plain', selectedText + attribution);
+      e.preventDefault();
+    }
+  });
  
   // Load Initial App State
   await initApp();
@@ -685,8 +705,6 @@ async function initApp() {
   const loadingOverlay = document.getElementById('app-loading-overlay');
   const loadingBar = document.getElementById('app-loading-bar');
   if (loadingOverlay) loadingOverlay.classList.remove('hidden');
-  if (loadingBar) loadingBar.style.width = '5%';
-
   const setLoadingProgress = (pct) => {
     if (window.setLoaderProgress) {
       window.setLoaderProgress(pct);
@@ -694,6 +712,8 @@ async function initApp() {
       loadingBar.style.width = `${pct}%`;
     }
   };
+
+  setLoadingProgress(5);
 
   setLoadingProgress(10);
 

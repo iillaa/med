@@ -3,15 +3,15 @@
     "drcat-inst-e809e6a9-278c-487b-bab6-d002ed607e66": {
       "installId": "drcat-inst-e809e6a9-278c-487b-bab6-d002ed607e66",
       "firstSeen": "2026-09-03T19:13:49.686Z",
-      "lastSeen": "2026-09-03T19:13:53.113Z",
-      "appVersion": "1.22.0",
+      "lastSeen": "2026-09-03T22:24:35.809Z",
+      "appVersion": "1.22.2",
       "platform": "web_browser",
-      "lastIp": "",
+      "lastIp": "154.121.71.135",
       "country": "DZ",
       "city": "Ouargla",
       "screen": "406x765 (dpr: 3)",
       "deviceModel": "Android Device",
-      "requestCount": 2,
+      "requestCount": 5,
       "isAdminDevice": false
     },
     "drcat-inst-59ff7300-d458-493e-9a3e-6ac762f5e254": {
@@ -41,7 +41,27 @@
       "deviceModel": "TestDevice",
       "requestCount": 1,
       "isAdminDevice": false
+    },
+    "drcat-inst-f5f822b5-4c26-49c6-9e33-86a8a2fe8b1d": {
+      "installId": "drcat-inst-f5f822b5-4c26-49c6-9e33-86a8a2fe8b1d",
+      "firstSeen": "2026-09-03T22:13:18.380Z",
+      "requestCount": 43,
+      "appVersion": "1.22.2",
+      "platform": "web_pwa",
+      "lastSeen": "2026-09-03T22:24:15.492Z",
+      "lastIp": "::1",
+      "isAdminDevice": true
+    },
+    "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956": {
+      "installId": "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956",
+      "firstSeen": "2026-09-03T22:13:32.288Z",
+      "requestCount": 12,
+      "appVersion": "1.22.2",
+      "platform": "web_browser",
+      "lastSeen": "2026-09-03T22:16:53.147Z",
+      "lastIp": "154.121.71.135",
+      "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-09-03T19:21:40.613Z"
+  "lastUpdated": "2026-09-03T22:24:37.427Z"
 }

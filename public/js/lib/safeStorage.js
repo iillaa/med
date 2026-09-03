@@ -84,13 +84,60 @@ function evictTransientStorage() {
   }
 }
 
+const OBFUSCATION_PREFIX = '__drcat_enc_';
+
+/**
+ * Obfuscates sensitive cached payload before writing to localStorage
+ * to deter casual inspection and scraping.
+ */
+export function obfuscatePayload(str) {
+  if (!str || typeof str !== 'string') return str;
+  try {
+    if (typeof TextEncoder === 'undefined' || typeof btoa !== 'function') return str;
+    const utf8Bytes = new TextEncoder().encode(str);
+    let binary = '';
+    for (let i = 0; i < utf8Bytes.length; i++) {
+      binary += String.fromCharCode(utf8Bytes[i] ^ 0x5a);
+    }
+    return OBFUSCATION_PREFIX + btoa(binary);
+  } catch (_) {
+    return str;
+  }
+}
+
+/**
+ * Deobfuscates payload read from localStorage.
+ * Transparently falls back to plain JSON for backwards compatibility.
+ */
+export function deobfuscatePayload(str) {
+  if (!str || typeof str !== 'string') return str;
+  if (!str.startsWith(OBFUSCATION_PREFIX)) return str;
+  try {
+    if (typeof TextDecoder === 'undefined' || typeof atob !== 'function') return str;
+    const binary = atob(str.slice(OBFUSCATION_PREFIX.length));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i) ^ 0x5a;
+    }
+    return new TextDecoder().decode(bytes);
+  } catch (_) {
+    return str;
+  }
+}
+
 export function safeGetItem(key, fallback = null) {
   if (!checkStorageAvailability()) {
     return memoryStorage.has(key) ? memoryStorage.get(key) : fallback;
   }
   try {
-    const val = window.localStorage.getItem(key);
-    return val !== null ? val : (memoryStorage.has(key) ? memoryStorage.get(key) : fallback);
+    let val = window.localStorage.getItem(key);
+    if (val !== null) {
+      if (key && key.startsWith(SYNC_CACHE_KEY_PREFIX)) {
+        val = deobfuscatePayload(val);
+      }
+      return val;
+    }
+    return memoryStorage.has(key) ? memoryStorage.get(key) : fallback;
   } catch (_) {
     return memoryStorage.has(key) ? memoryStorage.get(key) : fallback;
   }
@@ -98,22 +145,25 @@ export function safeGetItem(key, fallback = null) {
 
 export function safeSetItem(key, value) {
   const strVal = String(value);
-  // Always mirror in memory for instantaneous zero-throw fallbacks
+  // Always mirror in memory (plain unencoded) for instantaneous zero-throw fallbacks
   memoryStorage.set(key, strVal);
 
   if (!checkStorageAvailability()) {
     return true;
   }
 
+  const isSyncDb = key && key.startsWith(SYNC_CACHE_KEY_PREFIX);
+  const storedVal = isSyncDb ? obfuscatePayload(strVal) : strVal;
+
   try {
-    window.localStorage.setItem(key, strVal);
+    window.localStorage.setItem(key, storedVal);
     return true;
   } catch (e) {
     if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.number === -2147024882)) {
       console.warn('[storage] Quota exceeded, executing protected LRU eviction for key:', key);
       evictTransientStorage();
       try {
-        window.localStorage.setItem(key, strVal);
+        window.localStorage.setItem(key, storedVal);
         return true;
       } catch (_) {
         return true; // Still preserved in memoryStorage

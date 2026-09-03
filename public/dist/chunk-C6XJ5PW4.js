@@ -1,0 +1,1 @@
+import{a as b,b as c,c as d,d as e,e as f,f as g,g as h}from"./chunk-KYR5U2RV.js";import{e as a}from"./chunk-TX2C5WW3.js";export{b as SUPPORT_EMAIL,c as collectDeviceInfo,e as generateErrorFingerprint,d as getAppVersion,a as getInstallId,g as openMailtoFallback,f as sendErrorReport,h as sendHeartbeatPing};

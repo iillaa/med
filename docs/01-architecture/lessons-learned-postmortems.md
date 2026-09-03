@@ -128,7 +128,19 @@ L'objectif est d'empêcher toute régression future en conservant la mémoire de
 
 ---
 
+### Incident 09 : Protection Anti-Scraping "Lazy Grab" & Obfuscation LocalStorage (v1.22.2)
+* **Date** : 03 Septembre 2026
+* **Composants** : `public/js/lib/safeStorage.js`, `public/js/main.js`
+* **Contexte** : Dans les PWA offline-first, la base de données clinique (`cats_db.json`) est mise en cache dans `localStorage`. Les utilisateurs curieux ouvrant DevTools (F12) pouvaient copier le JSON complet en clair en 1 clic dans l'onglet Application.
+* **Solution Intégrée** :
+  1. **Obfuscation Déterrente** : Masquage réversible UTF-8/XOR/Base64 (`__drcat_enc_...`) transparent dans `safeStorage.js` pour la clé `dr_cat_synced_database*`. La lecture directe dans DevTools ne montre plus de JSON lisible.
+  2. **Bannière Console de Dissuasion** : Message d'avertissement stylisé au démarrage rappelant la propriété intellectuelle et le droit d'auteur du Dr. Kibeche Ali Dia Eddine.
+  3. **Attribution Automatique** : Écouteur sur l'événement `copy` apposant automatiquement la citation de source (`— Source : Dr.CAT | Dr. Kibeche Ali`) sur les sélections cliniques substantielles (> 60 caractères).
+
+---
+
 ## 🔗 Documents Liés
 - 🛡️ [Architecture de Sécurité & Isolation](file:///data/data/com.termux/files/home/med/docs/01-architecture/security-isolation.md)
 - 🐛 [Grand Registre des Failles & Audits](file:///data/data/com.termux/files/home/med/docs/bugs-doc.md)
 - 📜 [Architecture Decision Records (ADRs)](file:///data/data/com.termux/files/home/med/docs/04-decisions-adr/)
+
