@@ -71,8 +71,10 @@ const devAdminIps = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
  * Record or update device activity from incoming HTTP request
  */
 function recordDeviceActivity(req) {
-  const installId = req.headers['x-install-id'];
-  if (!installId || typeof installId !== 'string' || !installId.startsWith('drcat-inst-')) {
+  const rawInstallId = req.headers['x-install-id'];
+  if (!rawInstallId || typeof rawInstallId !== 'string') return;
+  const installId = rawInstallId.split(',')[0].trim();
+  if (!installId.startsWith('drcat-inst-')) {
     return; // Ignore requests without valid installation ID
   }
 
@@ -126,8 +128,10 @@ function recordExternalCloudDevices(cloudDevices = {}) {
   if (!cloudDevices || typeof cloudDevices !== 'object') return 0;
   let syncedCount = 0;
 
-  for (const [id, cDev] of Object.entries(cloudDevices)) {
-    if (!id || typeof id !== 'string' || !id.startsWith('drcat-inst-')) continue;
+  for (let [rawId, cDev] of Object.entries(cloudDevices)) {
+    if (!rawId || typeof rawId !== 'string') continue;
+    const id = rawId.split(',')[0].trim();
+    if (!id.startsWith('drcat-inst-')) continue;
 
     const existing = deviceMap.get(id);
     if (!existing) {
@@ -147,23 +151,26 @@ function recordExternalCloudDevices(cloudDevices = {}) {
       });
       syncedCount++;
     } else {
-      // Merge newer fields from cloud
+      let changed = false;
       const cloudLastSeenTime = new Date(cDev.lastSeen).getTime() || 0;
       const localLastSeenTime = new Date(existing.lastSeen).getTime() || 0;
 
       if (cloudLastSeenTime > localLastSeenTime) {
         existing.lastSeen = cDev.lastSeen;
+        changed = true;
       }
-      if (cDev.appVersion) existing.appVersion = cDev.appVersion;
-      if (cDev.platform) existing.platform = cDev.platform;
-      if (cDev.country) existing.country = cDev.country;
-      if (cDev.city) existing.city = cDev.city;
-      if (cDev.screen) existing.screen = cDev.screen;
-      if (cDev.deviceModel) existing.deviceModel = cDev.deviceModel;
-      existing.requestCount = Math.max(existing.requestCount || 1, cDev.requestCount || 1);
+      if (cDev.appVersion && existing.appVersion !== cDev.appVersion) { existing.appVersion = cDev.appVersion; changed = true; }
+      if (cDev.platform && existing.platform !== cDev.platform) { existing.platform = cDev.platform; changed = true; }
+      if (cDev.country && existing.country !== cDev.country) { existing.country = cDev.country; changed = true; }
+      if (cDev.city && existing.city !== cDev.city) { existing.city = cDev.city; changed = true; }
+      if (cDev.screen && existing.screen !== cDev.screen) { existing.screen = cDev.screen; changed = true; }
+      if (cDev.deviceModel && existing.deviceModel !== cDev.deviceModel) { existing.deviceModel = cDev.deviceModel; changed = true; }
+      if (cDev.requestCount && cDev.requestCount > existing.requestCount) { existing.requestCount = cDev.requestCount; changed = true; }
 
-      deviceMap.set(id, existing);
-      syncedCount++;
+      if (changed) {
+        deviceMap.set(id, existing);
+        syncedCount++;
+      }
     }
   }
 

@@ -797,7 +797,7 @@ export async function fetchSearchStatus() {
 }
 
 export async function searchPdfsContent(query) {
-  const cleanQuery = query.trim().toLowerCase();
+  const cleanQuery = (query || '').trim().toLowerCase();
 
   if (!isOfflineApp) {
     try {

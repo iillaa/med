@@ -232,6 +232,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
       window._omniTimer = setTimeout(handleOmniSearch, 200);
     });
     omniInput.addEventListener('keydown', (e) => {
+      if (!e || typeof e.key !== 'string') return;
       if (e.key === 'Enter') handleOmniSearch();
       if (e.key === 'Escape') {
         if (omniResults) omniResults.style.display = 'none';
@@ -253,6 +254,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
 
   // Global Ctrl+K / Cmd+K shortcut to focus Omni-Search or Sidebar Search
   document.addEventListener('keydown', (e) => {
+    if (!e || typeof e.key !== 'string') return;
     if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
       e.preventDefault();
       const omni = document.getElementById('omni-search-input');
@@ -283,6 +285,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     };
     quickLibCard.onclick = handleOpenLib;
     quickLibCard.onkeydown = (e) => {
+      if (!e || typeof e.key !== 'string') return;
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleOpenLib();
@@ -298,6 +301,7 @@ export function initDashboard(onSelectCat, onSuggestionHandled) {
     };
     quickQuizCard.onclick = handleOpenQuiz;
     quickQuizCard.onkeydown = (e) => {
+      if (!e || typeof e.key !== 'string') return;
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleOpenQuiz();

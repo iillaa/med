@@ -19,7 +19,10 @@ function registerAdminAnalyticsRoutes(app, cache) {
   // Public Heartbeat Ping endpoint (Local / Tunnel fallback)
   app.post(['/api/active-devices/ping', '/api/telemetry/heartbeat'], (req, res) => {
     try {
-      const installId = req.body?.installId || req.headers['x-install-id'];
+      let installId = req.body?.installId || req.headers['x-install-id'];
+      if (typeof installId === 'string' && installId.includes(',')) {
+        installId = installId.split(',')[0].trim();
+      }
       if (!installId || !installId.startsWith('drcat-inst-')) {
         return res.status(400).json({ error: "Identifiant d'installation invalide." });
       }

@@ -270,6 +270,24 @@ function inspectDevice(id) {
   };
   const platDesc = platformLabels[dev.platform] || 'Navigateur Web';
 
+  let durationStr = 'Première session';
+  if (dev.firstSeen && dev.lastSeen) {
+    const diffMs = Math.max(0, new Date(dev.lastSeen).getTime() - new Date(dev.firstSeen).getTime());
+    const mins = Math.floor(diffMs / 60000);
+    const secs = Math.floor((diffMs % 60000) / 1000);
+    if (mins >= 60) {
+      const hours = Math.floor(mins / 60);
+      const remMins = mins % 60;
+      durationStr = `${hours}h ${remMins}min`;
+    } else if (mins > 0) {
+      durationStr = `${mins} min ${secs}s`;
+    } else if (secs > 0) {
+      durationStr = `${secs} secondes`;
+    } else {
+      durationStr = '< 1 seconde (Connexion initiale)';
+    }
+  }
+
   modalContent.innerHTML = `
     <div><strong>Installation ID :</strong> <div class="install-id-code" style="max-width:100%; margin-top:4px; white-space:normal;">${dev.installId}</div></div>
     <div><strong>Type Appareil :</strong> ${dev.isAdminDevice ? '👑 Appareil Développeur / Admin' : '👤 Utilisateur Externe'}</div>
@@ -281,6 +299,7 @@ function inspectDevice(id) {
     <div><strong>Dernière IP :</strong> ${dev.lastIp || 'N/A (Masquée Edge)'}</div>
     <div><strong>Premier Accès :</strong> ${dev.firstSeen ? new Date(dev.firstSeen).toLocaleString('fr-FR') : 'N/A'}</div>
     <div><strong>Dernière Activité :</strong> ${new Date(dev.lastSeen).toLocaleString('fr-FR')}</div>
+    <div><strong>Durée d'Utilisation :</strong> ⏱️ <span style="color: var(--color-primary); font-weight:600;">${durationStr}</span></div>
     <div><strong>Volume Total de Requêtes :</strong> ${dev.requestCount || 1}</div>
   `;
 

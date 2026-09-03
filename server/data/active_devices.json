@@ -1,97 +1,47 @@
 {
   "devices": {
-    "drcat-inst-f5f822b5-4c26-49c6-9e33-86a8a2fe8b1d": {
-      "installId": "drcat-inst-f5f822b5-4c26-49c6-9e33-86a8a2fe8b1d",
-      "firstSeen": "2026-09-02T18:40:06.584Z",
-      "requestCount": 172,
-      "appVersion": "1.22.0",
-      "platform": "web_pwa",
-      "lastSeen": "2026-09-02T22:45:50.566Z",
-      "lastIp": "::1",
-      "isAdminDevice": true
-    },
-    "drcat-inst-11111111-2222-3333-4444-555555555555": {
-      "installId": "drcat-inst-11111111-2222-3333-4444-555555555555",
-      "firstSeen": "2026-09-02T18:58:59.223Z",
-      "requestCount": 2,
-      "appVersion": "1.21.0",
-      "platform": "android_apk",
-      "lastSeen": "2026-09-02T19:07:15.045Z",
-      "lastIp": "",
-      "isAdminDevice": false
-    },
-    "drcat-inst-aaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": {
-      "installId": "drcat-inst-aaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-      "firstSeen": "2026-09-02T18:58:59.235Z",
-      "requestCount": 2,
-      "appVersion": "1.20.0",
-      "platform": "android_apk",
-      "lastSeen": "2026-09-02T19:07:15.049Z",
-      "lastIp": "",
-      "isAdminDevice": false
-    },
-    "drcat-inst-99999999-8888-7777-6666-555555555555": {
-      "installId": "drcat-inst-99999999-8888-7777-6666-555555555555",
-      "firstSeen": "2026-09-02T18:58:59.235Z",
-      "requestCount": 2,
-      "appVersion": "1.21.0",
-      "platform": "web_pwa",
-      "lastSeen": "2026-09-02T19:07:15.049Z",
-      "lastIp": "",
-      "isAdminDevice": false
-    },
-    "drcat-inst-cloud-algeria-1": {
-      "installId": "drcat-inst-cloud-algeria-1",
-      "firstSeen": "2026-09-02T17:58:59.235Z",
-      "lastSeen": "2026-09-02T19:07:15.049Z",
-      "appVersion": "1.21.0",
-      "platform": "android_apk",
-      "lastIp": "",
-      "country": "DZ",
-      "city": "Algiers",
-      "screen": "",
-      "deviceModel": "Samsung Galaxy S23",
-      "requestCount": 5,
-      "isAdminDevice": false
-    },
-    "drcat-inst-cloud-france-2": {
-      "installId": "drcat-inst-cloud-france-2",
-      "firstSeen": "2026-09-02T16:58:59.235Z",
-      "lastSeen": "2026-09-02T19:07:15.049Z",
-      "appVersion": "1.21.0",
-      "platform": "web_pwa",
-      "lastIp": "",
-      "country": "FR",
-      "city": "Paris",
-      "screen": "",
-      "deviceModel": "Macintosh",
-      "requestCount": 12,
-      "isAdminDevice": false
-    },
-    "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956, drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956": {
-      "installId": "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956, drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956",
-      "firstSeen": "2026-09-02T20:01:54.007Z",
-      "requestCount": 2,
-      "appVersion": "1.22.0",
-      "platform": "web_browser",
-      "lastSeen": "2026-09-02T20:02:10.585Z",
-      "lastIp": "154.121.138.146",
-      "isAdminDevice": false
-    },
-    "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956": {
-      "installId": "drcat-inst-2bd7b941-4a1c-4342-9de1-c2e9f2024956",
-      "firstSeen": "2026-09-02T20:01:23.124Z",
-      "lastSeen": "2026-09-02T20:01:23.124Z",
+    "drcat-inst-e809e6a9-278c-487b-bab6-d002ed607e66": {
+      "installId": "drcat-inst-e809e6a9-278c-487b-bab6-d002ed607e66",
+      "firstSeen": "2026-09-03T19:13:49.686Z",
+      "lastSeen": "2026-09-03T19:13:53.113Z",
       "appVersion": "1.22.0",
       "platform": "web_browser",
       "lastIp": "",
       "country": "DZ",
       "city": "Ouargla",
-      "screen": "1385x731 (dpr: 2.125)",
-      "deviceModel": "Linux",
+      "screen": "406x765 (dpr: 3)",
+      "deviceModel": "Android Device",
+      "requestCount": 2,
+      "isAdminDevice": false
+    },
+    "drcat-inst-59ff7300-d458-493e-9a3e-6ac762f5e254": {
+      "installId": "drcat-inst-59ff7300-d458-493e-9a3e-6ac762f5e254",
+      "firstSeen": "2026-09-03T19:13:58.652Z",
+      "lastSeen": "2026-09-03T19:13:58.652Z",
+      "appVersion": "1.22.0",
+      "platform": "web_browser",
+      "lastIp": "",
+      "country": "DZ",
+      "city": "Ouargla",
+      "screen": "406x765 (dpr: 3)",
+      "deviceModel": "Android Device",
+      "requestCount": 1,
+      "isAdminDevice": false
+    },
+    "drcat-inst-test-ping-1234": {
+      "installId": "drcat-inst-test-ping-1234",
+      "firstSeen": "2026-09-03T19:17:38.343Z",
+      "lastSeen": "2026-09-03T19:17:38.343Z",
+      "appVersion": "1.22.0",
+      "platform": "web_browser",
+      "lastIp": "",
+      "country": "DZ",
+      "city": "Ouargla",
+      "screen": "1000x1000",
+      "deviceModel": "TestDevice",
       "requestCount": 1,
       "isAdminDevice": false
     }
   },
-  "lastUpdated": "2026-09-02T22:45:59.218Z"
+  "lastUpdated": "2026-09-03T19:21:40.613Z"
 }

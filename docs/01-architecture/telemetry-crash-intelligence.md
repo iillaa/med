@@ -159,3 +159,8 @@ sequenceDiagram
 ```
 * **Edge Processing**: Cloudflare extracts `request.cf.country` (GeoIP) to populate country metrics (`🇩🇿 Algérie`, `🇫🇷 France`, etc.) without exposing client IP addresses.
 
+### 5.2 Metrics & Retention Lifecycle
+* **Session Duration**: Automatically computed as `lastSeen - firstSeen`, reflecting active user engagement time per device.
+* **Proxy Header Deduplication**: Edge and tunnel headers are strictly normalized (`installId.split(',')[0]`) to ensure exact 1-to-1 device mapping.
+* **90-Day Sliding Retention**: Inactive devices (> 90 days) are pruned automatically upon disk flush to prevent memory bloat and guarantee data minimization.
+

@@ -178,7 +178,7 @@ export function initLibraryScreen(onReturnDashboard) {
     const countEl = document.getElementById('lib-pdf-count');
     if (!container || !Array.isArray(state.allPdfs)) return;
 
-    const q = filterQuery.toLowerCase().trim();
+    const q = (filterQuery || '').toLowerCase().trim();
     const groups = {};
 
     state.allPdfs.forEach(file => {
@@ -380,7 +380,7 @@ export function initLibraryScreen(onReturnDashboard) {
 
   if (searchBtn && searchInput) {
     searchBtn.onclick = () => executeLibrarySearch(searchInput.value.trim());
-    searchInput.onkeydown = (e) => { if (e.key === 'Enter') executeLibrarySearch(searchInput.value.trim()); };
+    searchInput.onkeydown = (e) => { if (e && e.key === 'Enter') executeLibrarySearch(searchInput.value.trim()); };
   }
 
   // Global Opener Function for Library

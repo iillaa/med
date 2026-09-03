@@ -598,7 +598,9 @@ async function bootstrapApp() {
 
   // Handle keyboard shortcuts
   window.addEventListener('keydown', (e) => {
-    const isEditing = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+    if (!e || typeof e.key !== 'string') return;
+    const activeEl = document.activeElement;
+    const isEditing = !!(activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable));
     if (e.key.toLowerCase() === 's' && !isEditing) {
       e.preventDefault();
       const searchBox = document.getElementById('search-input');

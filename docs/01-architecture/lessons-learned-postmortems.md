@@ -115,6 +115,17 @@ L'objectif est d'empêcher toute régression future en conservant la mémoire de
 * **Leçon Apprise & Solution** :
   - **Toute opération de suppression locale sur une ressource synchronisée avec le Cloud (Suggestions, Télémétrie, Appareils) DOIT impérativement émettre un appel de purge immédiat vers le Edge Worker (`purgeCloudflareTelemetry(id)` via `x-sync-secret`).**
 
+### 9. Post-Mortem 9 : TypeErrors Clavier et Invariants d'Événements Synthétiques/IME (`#fp_dycqdt`)
+* **Date** : Septembre 2026 (v1.22.1)
+* **Symptôme** : Crash unhandled `TypeError: Cannot read properties of undefined (reading 'toLowerCase')` remonté par la télémétrie (`#fp_dycqdt`) peu après le démarrage sous Linux/Android.
+* **Cause Profonde** :
+  - Dans le gestionnaire global d'événements `keydown` (`public/js/main.js`), l'appel direct `e.key.toLowerCase()` supposait que `e.key` est toujours une chaîne.
+  - Les extensions, gestionnaires de mots de passe / autofill, ou claviers virtuels / IME mobiles émettent des événements synthétiques ou de composition où `e.key` est `undefined` (ou `keyCode: 229`).
+  - De plus, `document.activeElement` peut être `null` lors des pertes de focus fenêtre/iframe.
+* **Leçon Apprise & Solution** :
+  - Tout écouteur clavier global ou d'élément DOIT posséder un garde défensif strict en tête de fonction : `if (!e || typeof e.key !== 'string') return;`.
+  - Toute inspection de propriété sur `document.activeElement` ou `e.target` doit employer du chaining optionnel sécurisé : `const isEditing = !!(activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable));` et `(e.target?.tagName || '').toLowerCase()`.
+
 ---
 
 ## 🔗 Documents Liés

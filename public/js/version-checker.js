@@ -303,7 +303,6 @@
           const res = await fetch(versionUrl, {
             headers: {
               'X-App-Version': CLIENT_VERSION,
-              'X-Install-ID': installId,
               'x-install-id': installId,
               'x-device-platform': clientPlatform,
               'x-app-key': 'drcat_pub_2f7a91c4e8',

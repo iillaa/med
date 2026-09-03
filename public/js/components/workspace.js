@@ -589,6 +589,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
     });
   }
   document.addEventListener('keydown', (e) => {
+    if (!e || typeof e.key !== 'string') return;
     if (e.key === 'Escape' && summaryReaderModal && summaryReaderModal.style.display === 'flex') {
       closeReaderMode();
     }
@@ -601,6 +602,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
   }
   if (pdfContentSearchInput) {
     pdfContentSearchInput.addEventListener('keydown', (e) => {
+      if (!e || typeof e.key !== 'string') return;
       if (e.key === 'Enter') {
         performPdfSearch(pdfContentSearchBtn);
       }
@@ -638,7 +640,7 @@ export function initWorkspace(onStatusChange, onCatDeleted, onProgressReset) {
       // Prevent conflict when tapping sub-profile pills
       if (e.target.closest('#subcat-selector-bar') || e.target.closest('.subcat-pill')) return;
 
-      const tagName = e.target.tagName.toLowerCase();
+      const tagName = (e.target?.tagName || '').toLowerCase();
       const insideEditor = e.target.closest('#summary-editor') || e.target.closest('#notes-input');
       if (tagName === 'textarea' || tagName === 'input' || insideEditor) return;
 
